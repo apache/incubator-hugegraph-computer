@@ -27,5 +27,5 @@ public interface Writable {
 
     void write(DataOutput out) throws IOException;
 
-    void readFields(DataInput in) throws IOException;
+    void read(DataInput in) throws IOException;
 }

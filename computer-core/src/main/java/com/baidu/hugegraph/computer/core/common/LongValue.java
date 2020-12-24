@@ -41,7 +41,7 @@ public class LongValue implements Value {
     }
 
     @Override
-    public void readFields(DataInput in) throws IOException {
+    public void read(DataInput in) throws IOException {
         this.value = in.readLong();
     }
 

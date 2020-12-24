@@ -57,7 +57,7 @@ public class TestLongValue {
         ByteArrayInputStream bais = new ByteArrayInputStream(bos.toByteArray());
         DataInputStream dis = new DataInputStream(bais);
         LongValue newValue = new LongValue();
-        newValue.readFields(dis);
+        newValue.read(dis);
         assertEquals(Long.MAX_VALUE, newValue.value());
     }
 }
