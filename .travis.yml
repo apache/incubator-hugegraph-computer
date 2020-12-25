@@ -1,0 +1,22 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+dist: trusty
+
+sudo: required
+
+cache:
+  directories:
+    - $HOME/.m2
+    - $HOME/downloads
+
+branches:
+  only:
+    - master
+    - /^release-.*$/
+    - /^test-.*$/
+    - /^v[0-9]\..*$/
+
+install: mvn compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
