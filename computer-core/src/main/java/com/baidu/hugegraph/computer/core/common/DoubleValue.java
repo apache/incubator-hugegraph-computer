@@ -23,52 +23,51 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-public class LongValue implements Value {
+public class DoubleValue implements Value {
 
-    // Package private for LongId
-    long value;
+    private double value;
 
-    public LongValue() {
+    public DoubleValue() {
         this.value = 0;
     }
 
-    public LongValue(long value) {
+    public DoubleValue(double value) {
         this.value = value;
     }
 
     @Override
     public void write(DataOutput out) throws IOException {
-        out.writeLong(this.value);
+        out.writeDouble(this.value);
     }
 
     @Override
     public void read(DataInput in) throws IOException {
-        this.value = in.readLong();
+        this.value = in.readDouble();
     }
 
-    public long value() {
+    public double value() {
         return this.value;
     }
 
     /*
      * This method is reserved for performance, otherwise it will create a new
-     * LongValue object when change it's value.
+     * DoubleValue object when change it's value.
      */
-    public void value(long value) {
+    public void value(double value) {
         this.value = value;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof LongValue)) {
+        if (!(obj instanceof DoubleValue)) {
             return false;
         }
-        return ((LongValue) obj).value == this.value;
+        return ((DoubleValue) obj).value == this.value;
     }
 
     @Override
     public int hashCode() {
-        return Long.hashCode(this.value);
+        return Double.hashCode(this.value);
     }
 
     @Override
