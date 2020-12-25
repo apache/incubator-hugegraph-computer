@@ -19,8 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import static com.baidu.hugegraph.testutil.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
@@ -28,38 +29,44 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
-public class TestLongValue {
+public class TestTextId {
 
     @Test
     public void test() {
-        LongValue longValue1 = new LongValue();
-        assertEquals(0L, longValue1.value());
-        LongValue longValue2 = new LongValue(Long.MIN_VALUE);
-        assertEquals(Long.MIN_VALUE, longValue2.value());
-        longValue2.value(Long.MAX_VALUE);
-        assertEquals(Long.MAX_VALUE, longValue2.value());
-        assertEquals(Long.hashCode(Long.MAX_VALUE), longValue2.hashCode());
-        assertTrue(longValue2.equals(new LongValue(longValue2.value())));
-        assertFalse(longValue1.equals(longValue2));
+        TextId textId1 = new TextId();
+        assertTrue(Arrays.equals(new byte[0], textId1.getBytes()));
+        TextId textId2 = new TextId("abc");
+        assertEquals(3, textId2.getLength());
+        TextId textId3 = new TextId("abcd");
+        assertTrue(textId3.compareTo(textId2) > 0);
+        assertTrue(textId2.compareTo(textId3) < 0);
+        assertTrue(textId2.compareTo(textId2) == 0);
+        assertNotEquals(textId2.hashCode(), textId3.hashCode());
+        TextId textId4 = new TextId("abd");
+        assertTrue(textId2.compareTo(textId4) < 0);
+        assertTrue(textId4.compareTo(textId2) > 0);
+        TextId textId5 = new TextId("abc");
+        assertTrue(textId2.equals(textId5));
+        assertFalse(textId2.equals(textId4));
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        LongValue longValue = new LongValue(Long.MAX_VALUE);
-        assertEquals(Long.MAX_VALUE, longValue.value());
+        TextId textId = new TextId("abc");
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(bos);
-        longValue.write(dataOutput);
+        textId.write(dataOutput);
         bos.close();
         ByteArrayInputStream bais = new ByteArrayInputStream(bos.toByteArray());
         DataInputStream dis = new DataInputStream(bais);
-        LongValue newValue = new LongValue();
+        TextId newValue = new TextId();
         newValue.read(dis);
-        assertEquals(Long.MAX_VALUE, newValue.value());
+        assertEquals("abc", newValue.toString());
         bais.close();
     }
 }

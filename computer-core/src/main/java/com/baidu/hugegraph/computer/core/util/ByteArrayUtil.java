@@ -17,27 +17,18 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+public class ByteArrayUtil {
 
-import org.junit.Test;
+    public static int hashBytes(byte[] bytes, int length) {
+        return hashBytes(bytes, 0, length);
+    }
 
-public class TestLongId {
-
-    @Test
-    public void test() {
-        LongId longId1 = new LongId(-100L);
-        LongId longId2 = new LongId();
-        LongId longId3 = new LongId(-100L);
-        assertTrue(longId1.compareTo(longId2) < 0);
-        assertTrue(longId2.compareTo(longId1) > 0);
-        assertTrue(longId1.compareTo(longId3) == 0);
-
-        assertEquals(Long.hashCode(-100L), longId1.hashCode());
-        assertTrue(longId1.equals(new LongId(longId1.value())));
-        assertFalse(longId1.equals(longId2));
+    public static int hashBytes(byte[] bytes, int offset, int length) {
+        int hash = 1;
+        for (int i = offset; i < offset + length; i++)
+             hash = (31 * hash) + (int)bytes[i];
+        return hash;
     }
 }

@@ -25,7 +25,8 @@ import java.io.IOException;
 
 public class LongValue implements Value {
 
-    protected long value;
+    // Package private for LongId
+    long value;
 
     public LongValue() {
         this.value = 0;
@@ -37,7 +38,7 @@ public class LongValue implements Value {
 
     @Override
     public void write(DataOutput out) throws IOException {
-        out.writeLong(value);
+        out.writeLong(this.value);
     }
 
     @Override
@@ -46,7 +47,7 @@ public class LongValue implements Value {
     }
 
     public long value() {
-        return value;
+        return this.value;
     }
 
     public void value(long value) {
@@ -64,5 +65,10 @@ public class LongValue implements Value {
     @Override
     public int hashCode() {
         return Long.hashCode(this.value);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(this.value);
     }
 }
