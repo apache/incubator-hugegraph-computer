@@ -20,5 +20,4 @@
 package com.baidu.hugegraph.computer.core.common;
 
 public interface Id<T> extends Value, Comparable<T> {
-
 }

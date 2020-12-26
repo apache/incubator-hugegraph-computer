@@ -24,21 +24,16 @@ import com.google.common.base.Preconditions;
 
 public class PlainByteArrayComparator {
 
-    public static int compare(byte[] o1, byte[] o2) {
-        Preconditions.checkNotNull(o1);
-        Preconditions.checkNotNull(o2);
-        return compare(o1, 0, o1.length, o2, 0, o2.length);
+    public static int compare(byte[] bytes1, int length1,
+                              byte[] bytes2, int length2) {
+        return compare(bytes1, 0, length1, bytes2, 0, length2);
     }
 
-    public static int compare(byte[] o1, int length1, byte[] o2, int length2) {
-        Preconditions.checkNotNull(o1);
-        Preconditions.checkNotNull(o2);
-        return compare(o1, 0, length1, o2, 0, length2);
-    }
-
-    public static int compare(byte[] buffer1, int offset1, int length1,
-                              byte[] buffer2, int offset2, int length2) {
-        if (buffer1 == buffer2 && offset1 == offset2 && length1 == length2) {
+    public static int compare(byte[] bytes1, int offset1, int length1,
+                              byte[] bytes2, int offset2, int length2) {
+        Preconditions.checkNotNull(bytes1);
+        Preconditions.checkNotNull(bytes2);
+        if (bytes1 == bytes2 && offset1 == offset2 && length1 == length2) {
             return 0;
         }
         if (length1 != length2) {
@@ -48,8 +43,8 @@ public class PlainByteArrayComparator {
         int end1 = offset1 + length1;
         int end2 = offset2 + length2;
         for (int i = offset1, j = offset2; i < end1 && j < end2; i++, j++) {
-            int a = (buffer1[i] & 0xff);
-            int b = (buffer2[j] & 0xff);
+            int a = (bytes1[i] & 0xff);
+            int b = (bytes2[j] & 0xff);
             if (a != b) {
                 return a - b;
             }

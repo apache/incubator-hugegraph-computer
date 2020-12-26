@@ -19,13 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 public interface Writable {
 
     void write(DataOutput out) throws IOException;
-
-    void read(DataInput in) throws IOException;
 }

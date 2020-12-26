@@ -23,7 +23,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
 
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
@@ -41,13 +40,9 @@ public class TextId implements Id<TextId> {
     }
 
     public TextId(String value) {
-        try {
-            ByteBuffer bb = CoderUtil.encode(value);
-            this.bytes = bb.array();
-            this.length = bb.limit();
-        } catch (CharacterCodingException e) {
-            throw new RuntimeException("Should not happened.", e);
-        }
+        ByteBuffer bb = CoderUtil.encode(value);
+        this.bytes = bb.array();
+        this.length = bb.limit();
     }
 
     @Override
@@ -64,11 +59,11 @@ public class TextId implements Id<TextId> {
         this.length = len;
     }
 
-    public byte[] getBytes() {
+    public byte[] bytes() {
         return this.bytes;
     }
 
-    public int getLength() {
+    public int length() {
         return this.length;
     }
 
@@ -95,11 +90,7 @@ public class TextId implements Id<TextId> {
 
     @Override
     public String toString() {
-        try {
-            return CoderUtil.decode(this.bytes, 0, this.length);
-        } catch (CharacterCodingException e) {
-            throw new RuntimeException("Should not happened." , e);
-        }
+        return CoderUtil.decode(this.bytes, 0, this.length);
     }
 
     @Override

@@ -25,8 +25,7 @@ import java.io.IOException;
 
 public class LongValue implements Value {
 
-    // Package private for LongId
-    long value;
+    private long value;
 
     public LongValue() {
         this.value = 0;

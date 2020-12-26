@@ -22,36 +22,47 @@ package com.baidu.hugegraph.computer.core.util;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 
 public class CoderUtil {
 
     private static final ThreadLocal<CharsetEncoder> ENCODER_FACTORY =
-            ThreadLocal.withInitial(() -> Charset.forName("UTF-8").newEncoder()
+            ThreadLocal.withInitial(() -> StandardCharsets.UTF_8.newEncoder()
                        .onMalformedInput(CodingErrorAction.REPORT)
                        .onUnmappableCharacter(CodingErrorAction.REPORT));
 
     private static final ThreadLocal<CharsetDecoder> DECODER_FACTORY =
-            ThreadLocal.withInitial(() -> Charset.forName("UTF-8").newDecoder()
+            ThreadLocal.withInitial(() -> StandardCharsets.UTF_8.newDecoder()
                        .onMalformedInput(CodingErrorAction.REPORT)
                        .onUnmappableCharacter(CodingErrorAction.REPORT));
 
-    public static ByteBuffer encode(String str)
-           throws CharacterCodingException {
+    public static ByteBuffer encode(String str) {
         CharsetEncoder encoder = ENCODER_FACTORY.get();
-        return encoder.encode(CharBuffer.wrap(str.toCharArray()));
+        try {
+            return encoder.encode(CharBuffer.wrap(str.toCharArray()));
+        } catch (CharacterCodingException e) {
+            String message = String.format("Can not encode %s with UTF-8.",
+                                           str);
+            throw new RuntimeException(message, e);
+        }
     }
 
-    public static String decode(byte[] utf8, int start, int length)
-           throws CharacterCodingException {
-        return decode(ByteBuffer.wrap(utf8, start, length));
+    public static String decode(byte[] utf8, int start, int length) {
+        try {
+            return decode(ByteBuffer.wrap(utf8, start, length));
+        } catch (CharacterCodingException e) {
+            String message = String.format("Can not decode bytes, start=%d, " +
+                                           "length=%d with UTF-8.", start,
+                                           length);
+            throw new RuntimeException(message, e);
+        }
     }
 
-    public static String decode(ByteBuffer utf8)
-           throws CharacterCodingException {
+    private static String decode(ByteBuffer utf8)
+                                throws CharacterCodingException {
         CharsetDecoder decoder = DECODER_FACTORY.get();
         String str = decoder.decode(utf8).toString();
         return str;

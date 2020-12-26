@@ -46,11 +46,11 @@ public class LongId extends LongValue implements Id<LongId> {
         if (!(obj instanceof LongId)) {
             return false;
         }
-        return ((LongId) obj).value == this.value;
+        return ((LongId) obj).value() == this.value();
     }
 
     @Override
     public int hashCode() {
-        return Long.hashCode(this.value);
+        return Long.hashCode(this.value());
     }
 }

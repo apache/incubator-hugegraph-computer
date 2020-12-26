@@ -39,9 +39,9 @@ public class TestTextId {
     @Test
     public void test() {
         TextId textId1 = new TextId();
-        assertTrue(Arrays.equals(new byte[0], textId1.getBytes()));
+        assertTrue(Arrays.equals(new byte[0], textId1.bytes()));
         TextId textId2 = new TextId("abc");
-        assertEquals(3, textId2.getLength());
+        assertEquals(3, textId2.length());
         TextId textId3 = new TextId("abcd");
         assertTrue(textId3.compareTo(textId2) > 0);
         assertTrue(textId2.compareTo(textId3) < 0);

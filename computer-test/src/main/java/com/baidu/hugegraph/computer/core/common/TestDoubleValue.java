@@ -41,7 +41,8 @@ public class TestDoubleValue {
         assertTrue(Double.MIN_VALUE == doubleValue2.value());
         doubleValue2.value(Double.MAX_VALUE);
         assertTrue(Double.MAX_VALUE == doubleValue2.value());
-        assertEquals(Double.hashCode(Double.MAX_VALUE), doubleValue2.hashCode());
+        assertEquals(Double.hashCode(Double.MAX_VALUE),
+                     doubleValue2.hashCode());
         assertTrue(doubleValue2.equals(new DoubleValue(doubleValue2.value())));
         assertFalse(doubleValue1.equals(doubleValue2));
     }
