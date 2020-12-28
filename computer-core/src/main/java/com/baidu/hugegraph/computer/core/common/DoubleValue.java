@@ -74,4 +74,9 @@ public class DoubleValue implements Value {
     public String toString() {
         return String.valueOf(this.value);
     }
+
+    @Override
+    public ValueType type() {
+        return ValueType.LONG_ID;
+    }
 }

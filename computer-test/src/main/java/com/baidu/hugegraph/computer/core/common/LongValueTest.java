@@ -32,11 +32,12 @@ import java.io.IOException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
-public class TestLongValue {
+public class LongValueTest {
 
     @Test
     public void test() {
         LongValue longValue1 = new LongValue();
+        assertEquals(ValueType.LONG_VALUE, longValue1.type());
         assertEquals(0L, longValue1.value());
         LongValue longValue2 = new LongValue(Long.MIN_VALUE);
         assertEquals(Long.MIN_VALUE, longValue2.value());

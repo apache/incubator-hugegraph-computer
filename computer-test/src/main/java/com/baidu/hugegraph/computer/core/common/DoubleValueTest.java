@@ -32,10 +32,11 @@ import java.io.IOException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
-public class TestDoubleValue {
+public class DoubleValueTest {
     @Test
     public void test() {
         DoubleValue doubleValue1 = new DoubleValue();
+        assertEquals(ValueType.DOUBLE_VALUE, doubleValue1.type());
         assertTrue(0.0D == doubleValue1.value());
         DoubleValue doubleValue2 = new DoubleValue(Double.MIN_VALUE);
         assertTrue(Double.MIN_VALUE == doubleValue2.value());

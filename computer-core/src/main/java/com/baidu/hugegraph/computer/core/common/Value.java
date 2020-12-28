@@ -20,4 +20,6 @@
 package com.baidu.hugegraph.computer.core.common;
 
 public interface Value extends Writable, Readable {
+
+    ValueType type();
 }

@@ -36,6 +36,11 @@ public class LongValue implements Value {
     }
 
     @Override
+    public ValueType type() {
+        return ValueType.LONG_VALUE;
+    }
+
+    @Override
     public void write(DataOutput out) throws IOException {
         out.writeLong(this.value);
     }
@@ -74,4 +79,5 @@ public class LongValue implements Value {
     public String toString() {
         return String.valueOf(this.value);
     }
+
 }

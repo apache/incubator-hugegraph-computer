@@ -20,53 +20,41 @@
 package com.baidu.hugegraph.computer.core.common;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
-public class TestTextId {
+public class NullValueTest {
 
     @Test
     public void test() {
-        TextId textId1 = new TextId();
-        assertTrue(Arrays.equals(new byte[0], textId1.bytes()));
-        TextId textId2 = new TextId("abc");
-        assertEquals(3, textId2.length());
-        TextId textId3 = new TextId("abcd");
-        assertTrue(textId3.compareTo(textId2) > 0);
-        assertTrue(textId2.compareTo(textId3) < 0);
-        assertTrue(textId2.compareTo(textId2) == 0);
-        assertNotEquals(textId2.hashCode(), textId3.hashCode());
-        TextId textId4 = new TextId("abd");
-        assertTrue(textId2.compareTo(textId4) < 0);
-        assertTrue(textId4.compareTo(textId2) > 0);
-        TextId textId5 = new TextId("abc");
-        assertTrue(textId2.equals(textId5));
-        assertFalse(textId2.equals(textId4));
+        NullValue nullValue1 = NullValue.get();
+        NullValue nullValue2 = NullValue.get();
+        assertEquals(ValueType.NULL_VALUE, nullValue1.type());
+        assertEquals(NullValue.get(), nullValue1);
+        assertEquals(0, nullValue1.hashCode());
+        assertEquals("(null)", nullValue1.toString());
+        assertEquals(nullValue1, nullValue2);
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        TextId textId = new TextId("abc");
+        NullValue nullValue = NullValue.get();
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(bos);
-        textId.write(dataOutput);
+        nullValue.write(dataOutput);
         bos.close();
         ByteArrayInputStream bais = new ByteArrayInputStream(bos.toByteArray());
         DataInputStream dis = new DataInputStream(bais);
-        TextId newValue = new TextId();
+        NullValue newValue = NullValue.get();
         newValue.read(dis);
-        assertEquals("abc", newValue.toString());
+        assertEquals(nullValue, newValue);
         bais.close();
     }
 }

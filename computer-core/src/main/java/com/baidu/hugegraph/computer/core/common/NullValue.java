@@ -19,25 +19,50 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 
-import org.junit.Test;
+public class NullValue implements Value {
 
-public class TestLongId {
+    private static final NullValue INSTANCE = new NullValue();
 
-    @Test
-    public void test() {
-        LongId longId1 = new LongId(-100L);
-        LongId longId2 = new LongId();
-        LongId longId3 = new LongId(-100L);
-        assertTrue(longId1.compareTo(longId2) < 0);
-        assertTrue(longId2.compareTo(longId1) > 0);
-        assertTrue(longId1.compareTo(longId3) == 0);
+    private NullValue() {
 
-        assertEquals(Long.hashCode(-100L), longId1.hashCode());
-        assertTrue(longId1.equals(new LongId(longId1.value())));
-        assertFalse(longId1.equals(longId2));
+    }
+
+    /** Returns the single instance of this class. */
+    public static NullValue get() {
+        return INSTANCE;
+    }
+
+    @Override
+    public ValueType type() {
+        return ValueType.NULL_VALUE;
+    }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+        // Do nothing
+    }
+
+    @Override
+    public void read(DataInput in) throws IOException {
+        // Do nothing
+    }
+
+    @Override
+    public String toString() {
+        return "(null)";
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof NullValue;
     }
 }

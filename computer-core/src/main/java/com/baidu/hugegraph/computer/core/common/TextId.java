@@ -46,6 +46,11 @@ public class TextId implements Id<TextId> {
     }
 
     @Override
+    public ValueType type() {
+        return ValueType.TEXT_ID;
+    }
+
+    @Override
     public void write(DataOutput out) throws IOException {
         out.writeInt(this.length);
         out.write(this.bytes, 0, this.length);
@@ -74,6 +79,12 @@ public class TextId implements Id<TextId> {
     }
 
     @Override
+    public int compareTo(TextId o) {
+        return PlainByteArrayComparator.compare(this.bytes, this.length,
+                                                o.bytes, o.length);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof TextId)) {
             return false;
@@ -91,11 +102,5 @@ public class TextId implements Id<TextId> {
     @Override
     public String toString() {
         return CoderUtil.decode(this.bytes, 0, this.length);
-    }
-
-    @Override
-    public int compareTo(TextId o) {
-        return PlainByteArrayComparator.compare(this.bytes, this.length,
-                                                o.bytes, o.length);
     }
 }

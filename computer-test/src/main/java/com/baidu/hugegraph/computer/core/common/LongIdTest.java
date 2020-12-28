@@ -19,43 +19,27 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-public class LongId extends LongValue implements Id<LongId> {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-    public LongId() {
-        super();
-    }
+import org.junit.Test;
 
-    public LongId(long value) {
-        super(value);
-    }
+public class LongIdTest {
 
-    @Override
-    public ValueType type() {
-        return ValueType.LONG_ID;
-    }
+    @Test
+    public void test() {
+        LongId longId1 = new LongId(-100L);
+        LongId longId2 = new LongId();
+        LongId longId3 = new LongId(-100L);
 
-    @Override
-    public int compareTo(LongId o) {
-        long result = this.value() - o.value();
-        if (result > 0L) {
-            return 1;
-        } else if (result < 0L) {
-            return -1;
-        } else {
-            return 0;
-        }
-    }
+        assertEquals(ValueType.LONG_ID, longId1.type());
+        assertTrue(longId1.compareTo(longId2) < 0);
+        assertTrue(longId2.compareTo(longId1) > 0);
+        assertTrue(longId1.compareTo(longId3) == 0);
 
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof LongId)) {
-            return false;
-        }
-        return ((LongId) obj).value() == this.value();
-    }
-
-    @Override
-    public int hashCode() {
-        return Long.hashCode(this.value());
+        assertEquals(Long.hashCode(-100L), longId1.hashCode());
+        assertTrue(longId1.equals(new LongId(longId1.value())));
+        assertFalse(longId1.equals(longId2));
     }
 }
