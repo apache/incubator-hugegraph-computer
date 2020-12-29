@@ -28,18 +28,18 @@ import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.computer.core.util.PlainByteArrayComparator;
 
-public class TextId implements Id<TextId> {
+public class Utf8Id implements Id<Utf8Id> {
 
     public static final byte [] EMPTY_BYTES = new byte[0];
 
     private byte[] bytes;
     private int length;
 
-    public TextId() {
+    public Utf8Id() {
         this.bytes = EMPTY_BYTES;
     }
 
-    public TextId(String value) {
+    public Utf8Id(String value) {
         ByteBuffer bb = CoderUtil.encode(value);
         this.bytes = bb.array();
         this.length = bb.limit();
@@ -47,7 +47,7 @@ public class TextId implements Id<TextId> {
 
     @Override
     public ValueType type() {
-        return ValueType.TEXT_ID;
+        return ValueType.UTF8_ID;
     }
 
     @Override
@@ -79,17 +79,17 @@ public class TextId implements Id<TextId> {
     }
 
     @Override
-    public int compareTo(TextId o) {
+    public int compareTo(Utf8Id o) {
         return PlainByteArrayComparator.compare(this.bytes, this.length,
                                                 o.bytes, o.length);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof TextId)) {
+        if (!(obj instanceof Utf8Id)) {
             return false;
         }
-        TextId other = (TextId) obj;
+        Utf8Id other = (Utf8Id) obj;
         return PlainByteArrayComparator.compare(this.bytes, this.length,
                                                 other.bytes, other.length) == 0;
     }

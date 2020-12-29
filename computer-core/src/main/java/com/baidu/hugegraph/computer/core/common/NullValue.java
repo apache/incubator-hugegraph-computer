@@ -28,17 +28,18 @@ public class NullValue implements Value {
     private static final NullValue INSTANCE = new NullValue();
 
     private NullValue() {
-
     }
 
-    /** Returns the single instance of this class. */
+    /*
+     * Returns the single instance of this class.
+     */
     public static NullValue get() {
         return INSTANCE;
     }
 
     @Override
     public ValueType type() {
-        return ValueType.NULL_VALUE;
+        return ValueType.NULL;
     }
 
     @Override

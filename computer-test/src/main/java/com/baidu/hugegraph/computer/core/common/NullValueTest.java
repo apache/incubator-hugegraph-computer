@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -30,17 +28,19 @@ import java.io.IOException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
+import com.baidu.hugegraph.testutil.Assert;
+
 public class NullValueTest {
 
     @Test
     public void test() {
         NullValue nullValue1 = NullValue.get();
         NullValue nullValue2 = NullValue.get();
-        assertEquals(ValueType.NULL_VALUE, nullValue1.type());
-        assertEquals(NullValue.get(), nullValue1);
-        assertEquals(0, nullValue1.hashCode());
-        assertEquals("(null)", nullValue1.toString());
-        assertEquals(nullValue1, nullValue2);
+        Assert.assertEquals(ValueType.NULL, nullValue1.type());
+        Assert.assertEquals(NullValue.get(), nullValue1);
+        Assert.assertEquals(0, nullValue1.hashCode());
+        Assert.assertEquals("(null)", nullValue1.toString());
+        Assert.assertEquals(nullValue1, nullValue2);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class NullValueTest {
         DataInputStream dis = new DataInputStream(bais);
         NullValue newValue = NullValue.get();
         newValue.read(dis);
-        assertEquals(nullValue, newValue);
+        Assert.assertEquals(nullValue, newValue);
         bais.close();
     }
 }

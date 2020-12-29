@@ -20,45 +20,46 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import static com.baidu.hugegraph.testutil.Assert.assertEquals;
-
 import org.junit.Test;
+
+import com.baidu.hugegraph.testutil.Assert;
 
 public class ValueTypeTest {
 
     @Test
     public void test() {
-        assertEquals(0, ValueType.NULL_VALUE.byteSize());
-        assertEquals(8, ValueType.LONG_VALUE.byteSize());
-        assertEquals(8, ValueType.DOUBLE_VALUE.byteSize());
-        assertEquals(8, ValueType.LONG_ID.byteSize());
-        assertEquals(-1, ValueType.TEXT_ID.byteSize());
+        Assert.assertEquals(0, ValueType.NULL.byteSize());
+        Assert.assertEquals(8, ValueType.LONG.byteSize());
+        Assert.assertEquals(8, ValueType.DOUBLE.byteSize());
+        Assert.assertEquals(8, ValueType.LONG_ID.byteSize());
+        Assert.assertEquals(-1, ValueType.UTF8_ID.byteSize());
 
-        assertEquals(NullValue.get(),
-                     ValueType.createValue(ValueType.NULL_VALUE));
-        assertEquals(new LongValue(),
-                     ValueType.createValue(ValueType.LONG_VALUE));
-        assertEquals(new DoubleValue(),
-                     ValueType.createValue(ValueType.DOUBLE_VALUE));
-        assertEquals(new LongId(),
-                     ValueType.createValue(ValueType.LONG_ID));
-        assertEquals(new TextId(),
-                     ValueType.createValue(ValueType.TEXT_ID));
+        Assert.assertEquals(NullValue.get(),
+                            ValueType.createValue(ValueType.NULL));
+        Assert.assertEquals(new LongValue(),
+                            ValueType.createValue(ValueType.LONG));
+        Assert.assertEquals(new DoubleValue(),
+                            ValueType.createValue(ValueType.DOUBLE));
+        Assert.assertEquals(new LongId(),
+                            ValueType.createValue(ValueType.LONG_ID));
+        Assert.assertEquals(new Utf8Id(),
+                            ValueType.createValue(ValueType.UTF8_ID));
 
-        assertEquals(ValueType.NULL_VALUE,
-                     ValueType.fromOrdinal(ValueType.NULL_VALUE.ordinal()));
-        assertEquals(ValueType.LONG_VALUE,
-                     ValueType.fromOrdinal(ValueType.LONG_VALUE.ordinal()));
-        assertEquals(ValueType.DOUBLE_VALUE,
-                     ValueType.fromOrdinal(ValueType.DOUBLE_VALUE.ordinal()));
-        assertEquals(ValueType.LONG_ID,
-                     ValueType.fromOrdinal(ValueType.LONG_ID.ordinal()));
-        assertEquals(ValueType.TEXT_ID,
-                     ValueType.fromOrdinal(ValueType.TEXT_ID.ordinal()));
+        for (ValueType type : ValueType.values()) {
+            Assert.assertEquals(type, ValueType.fromCode(type.code()));
+        }
+
+        Assert.assertFalse(ValueType.NULL.isId());
+        Assert.assertFalse(ValueType.LONG.isId());
+        Assert.assertFalse(ValueType.DOUBLE.isId());
+        Assert.assertTrue(ValueType.LONG_ID.isId());
+        Assert.assertTrue(ValueType.UTF8_ID.isId());
     }
 
-    @Test(expected = ArrayIndexOutOfBoundsException.class)
+    @Test
     public void testException() {
-        ValueType type = ValueType.fromOrdinal(1024);
+        Assert.assertThrows(RuntimeException.class, () -> {
+            ValueType.fromCode((byte) -100);
+        });
     }
 }

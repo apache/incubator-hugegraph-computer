@@ -62,7 +62,7 @@ public class CoderUtil {
     }
 
     private static String decode(ByteBuffer utf8)
-                                throws CharacterCodingException {
+                                 throws CharacterCodingException {
         CharsetDecoder decoder = DECODER_FACTORY.get();
         String str = decoder.decode(utf8).toString();
         return str;

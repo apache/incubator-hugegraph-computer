@@ -19,11 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -34,40 +29,42 @@ import java.util.Arrays;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
-public class TextIdTest {
+import com.baidu.hugegraph.testutil.Assert;
+
+public class Utf8IdTest {
 
     @Test
     public void test() {
-        TextId textId1 = new TextId();
-        assertEquals(ValueType.TEXT_ID, textId1.type());
-        assertTrue(Arrays.equals(new byte[0], textId1.bytes()));
-        TextId textId2 = new TextId("abc");
-        assertEquals(3, textId2.length());
-        TextId textId3 = new TextId("abcd");
-        assertTrue(textId3.compareTo(textId2) > 0);
-        assertTrue(textId2.compareTo(textId3) < 0);
-        assertTrue(textId2.compareTo(textId2) == 0);
-        assertNotEquals(textId2.hashCode(), textId3.hashCode());
-        TextId textId4 = new TextId("abd");
-        assertTrue(textId2.compareTo(textId4) < 0);
-        assertTrue(textId4.compareTo(textId2) > 0);
-        TextId textId5 = new TextId("abc");
-        assertTrue(textId2.equals(textId5));
-        assertFalse(textId2.equals(textId4));
+        Utf8Id utf8Id1 = new Utf8Id();
+        Assert.assertEquals(ValueType.UTF8_ID, utf8Id1.type());
+        Assert.assertTrue(Arrays.equals(new byte[0], utf8Id1.bytes()));
+        Utf8Id utf8Id2 = new Utf8Id("abc");
+        Assert.assertEquals(3, utf8Id2.length());
+        Utf8Id utf8Id3 = new Utf8Id("abcd");
+        Assert.assertTrue(utf8Id3.compareTo(utf8Id2) > 0);
+        Assert.assertTrue(utf8Id2.compareTo(utf8Id3) < 0);
+        Assert.assertTrue(utf8Id2.compareTo(utf8Id2) == 0);
+        Assert.assertNotEquals(utf8Id2.hashCode(), utf8Id3.hashCode());
+        Utf8Id utf8Id4 = new Utf8Id("abd");
+        Assert.assertTrue(utf8Id2.compareTo(utf8Id4) < 0);
+        Assert.assertTrue(utf8Id4.compareTo(utf8Id2) > 0);
+        Utf8Id utf8Id5 = new Utf8Id("abc");
+        Assert.assertTrue(utf8Id2.equals(utf8Id5));
+        Assert.assertFalse(utf8Id2.equals(utf8Id4));
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        TextId textId = new TextId("abc");
+        Utf8Id utf8Id = new Utf8Id("abc");
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(bos);
-        textId.write(dataOutput);
+        utf8Id.write(dataOutput);
         bos.close();
         ByteArrayInputStream bais = new ByteArrayInputStream(bos.toByteArray());
         DataInputStream dis = new DataInputStream(bais);
-        TextId newValue = new TextId();
+        Utf8Id newValue = new Utf8Id();
         newValue.read(dis);
-        assertEquals("abc", newValue.toString());
+        Assert.assertEquals("abc", newValue.toString());
         bais.close();
     }
 }

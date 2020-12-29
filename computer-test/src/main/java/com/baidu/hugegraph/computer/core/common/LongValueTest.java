@@ -19,10 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import static com.baidu.hugegraph.testutil.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -32,26 +28,29 @@ import java.io.IOException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
+import com.baidu.hugegraph.testutil.Assert;
+
 public class LongValueTest {
 
     @Test
     public void test() {
         LongValue longValue1 = new LongValue();
-        assertEquals(ValueType.LONG_VALUE, longValue1.type());
-        assertEquals(0L, longValue1.value());
+        Assert.assertEquals(ValueType.LONG, longValue1.type());
+        Assert.assertEquals(0L, longValue1.value());
         LongValue longValue2 = new LongValue(Long.MIN_VALUE);
-        assertEquals(Long.MIN_VALUE, longValue2.value());
+        Assert.assertEquals(Long.MIN_VALUE, longValue2.value());
         longValue2.value(Long.MAX_VALUE);
-        assertEquals(Long.MAX_VALUE, longValue2.value());
-        assertEquals(Long.hashCode(Long.MAX_VALUE), longValue2.hashCode());
-        assertTrue(longValue2.equals(new LongValue(longValue2.value())));
-        assertFalse(longValue1.equals(longValue2));
+        Assert.assertEquals(Long.MAX_VALUE, longValue2.value());
+        Assert.assertEquals(Long.hashCode(Long.MAX_VALUE),
+                            longValue2.hashCode());
+        Assert.assertTrue(longValue2.equals(new LongValue(longValue2.value())));
+        Assert.assertFalse(longValue1.equals(longValue2));
     }
 
     @Test
     public void testReadWrite() throws IOException {
         LongValue longValue = new LongValue(Long.MAX_VALUE);
-        assertEquals(Long.MAX_VALUE, longValue.value());
+        Assert.assertEquals(Long.MAX_VALUE, longValue.value());
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(bos);
         longValue.write(dataOutput);
@@ -60,7 +59,7 @@ public class LongValueTest {
         DataInputStream dis = new DataInputStream(bais);
         LongValue newValue = new LongValue();
         newValue.read(dis);
-        assertEquals(Long.MAX_VALUE, newValue.value());
+        Assert.assertEquals(Long.MAX_VALUE, newValue.value());
         bais.close();
     }
 }

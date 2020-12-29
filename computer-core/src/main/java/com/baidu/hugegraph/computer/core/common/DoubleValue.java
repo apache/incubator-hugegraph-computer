@@ -77,6 +77,6 @@ public class DoubleValue implements Value {
 
     @Override
     public ValueType type() {
-        return ValueType.LONG_ID;
+        return ValueType.DOUBLE;
     }
 }

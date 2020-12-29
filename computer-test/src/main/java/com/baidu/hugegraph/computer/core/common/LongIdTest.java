@@ -19,11 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import com.baidu.hugegraph.testutil.Assert;
 
 public class LongIdTest {
 
@@ -33,13 +31,13 @@ public class LongIdTest {
         LongId longId2 = new LongId();
         LongId longId3 = new LongId(-100L);
 
-        assertEquals(ValueType.LONG_ID, longId1.type());
-        assertTrue(longId1.compareTo(longId2) < 0);
-        assertTrue(longId2.compareTo(longId1) > 0);
-        assertTrue(longId1.compareTo(longId3) == 0);
+        Assert.assertEquals(ValueType.LONG_ID, longId1.type());
+        Assert.assertTrue(longId1.compareTo(longId2) < 0);
+        Assert.assertTrue(longId2.compareTo(longId1) > 0);
+        Assert.assertTrue(longId1.compareTo(longId3) == 0);
 
-        assertEquals(Long.hashCode(-100L), longId1.hashCode());
-        assertTrue(longId1.equals(new LongId(longId1.value())));
-        assertFalse(longId1.equals(longId2));
+        Assert.assertEquals(Long.hashCode(-100L), longId1.hashCode());
+        Assert.assertTrue(longId1.equals(new LongId(longId1.value())));
+        Assert.assertFalse(longId1.equals(longId2));
     }
 }

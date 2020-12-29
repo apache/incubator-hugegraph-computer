@@ -37,7 +37,7 @@ public class LongValue implements Value {
 
     @Override
     public ValueType type() {
-        return ValueType.LONG_VALUE;
+        return ValueType.LONG;
     }
 
     @Override

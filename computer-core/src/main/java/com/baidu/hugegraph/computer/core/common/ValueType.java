@@ -20,35 +20,50 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum ValueType {
 
-    NULL_VALUE(0),
-    LONG_VALUE(8),
-    DOUBLE_VALUE(8),
-    LONG_ID(8),
-    TEXT_ID(-1);
+    NULL((byte) 1, 0),
+    LONG((byte) 2, 8),
+    DOUBLE((byte) 3, 8),
+    LONG_ID((byte) -1, 8),
+    UTF8_ID((byte) -2, -1);
 
-    private static ValueType[] values = ValueType.values();
+    private static Map<Byte, ValueType> values = new HashMap<>();
 
+    static {
+        for (ValueType valueType : ValueType.values()) {
+            values.put(valueType.code, valueType);
+        }
+    }
+
+    private byte code;
     // Is it a fixed value type, -1 means not fixed.
     private int byteSize;
 
-    ValueType(int byteSize) {
+    ValueType(byte code, int byteSize) {
+        this.code = code;
         this.byteSize = byteSize;
+    }
+
+    public boolean isId() {
+        return this.code < 0;
     }
 
     public static Value createValue(ValueType type) {
         switch (type) {
-            case NULL_VALUE:
+            case NULL:
                 return NullValue.get();
             case LONG_ID:
                 return new LongId();
-            case LONG_VALUE:
+            case LONG:
                 return new LongValue();
-            case DOUBLE_VALUE:
+            case DOUBLE:
                 return new DoubleValue();
-            case TEXT_ID:
-                return new TextId();
+            case UTF8_ID:
+                return new Utf8Id();
             default:
                 String message = String.format("Can not create Value for %s.",
                                                type.name());
@@ -56,8 +71,18 @@ public enum ValueType {
         }
     }
 
-    public static ValueType fromOrdinal(int ordinal) {
-        return values[ordinal];
+    public static ValueType fromCode(byte code) {
+        ValueType valueType = values.get(code);
+        if (valueType == null) {
+            String message = String.format("Can not find ValueType for code " +
+                                           "%s.", code);
+            throw new RuntimeException(message);
+        }
+        return valueType;
+    }
+
+    public byte code() {
+        return this.code;
     }
 
     public int byteSize() {

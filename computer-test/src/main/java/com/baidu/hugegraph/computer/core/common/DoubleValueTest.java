@@ -19,10 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -32,26 +28,30 @@ import java.io.IOException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
+import com.baidu.hugegraph.testutil.Assert;
+
 public class DoubleValueTest {
+
     @Test
     public void test() {
         DoubleValue doubleValue1 = new DoubleValue();
-        assertEquals(ValueType.DOUBLE_VALUE, doubleValue1.type());
-        assertTrue(0.0D == doubleValue1.value());
+        Assert.assertEquals(ValueType.DOUBLE, doubleValue1.type());
+        Assert.assertTrue(0.0D == doubleValue1.value());
         DoubleValue doubleValue2 = new DoubleValue(Double.MIN_VALUE);
-        assertTrue(Double.MIN_VALUE == doubleValue2.value());
+        Assert.assertTrue(Double.MIN_VALUE == doubleValue2.value());
         doubleValue2.value(Double.MAX_VALUE);
-        assertTrue(Double.MAX_VALUE == doubleValue2.value());
-        assertEquals(Double.hashCode(Double.MAX_VALUE),
-                     doubleValue2.hashCode());
-        assertTrue(doubleValue2.equals(new DoubleValue(doubleValue2.value())));
-        assertFalse(doubleValue1.equals(doubleValue2));
+        Assert.assertTrue(Double.MAX_VALUE == doubleValue2.value());
+        Assert.assertEquals(Double.hashCode(Double.MAX_VALUE),
+                            doubleValue2.hashCode());
+        Assert.assertEquals(doubleValue2,
+                            new DoubleValue(doubleValue2.value()));
+        Assert.assertFalse(doubleValue1.equals(doubleValue2));
     }
 
     @Test
     public void testReadWrite() throws IOException {
         DoubleValue doubleValue = new DoubleValue(Double.MAX_VALUE);
-        assertTrue(Double.MAX_VALUE == doubleValue.value());
+        Assert.assertTrue(Double.MAX_VALUE == doubleValue.value());
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(bos);
         doubleValue.write(dataOutput);
@@ -60,7 +60,7 @@ public class DoubleValueTest {
         DataInputStream dis = new DataInputStream(bais);
         DoubleValue newValue = new DoubleValue();
         newValue.read(dis);
-        assertTrue(Double.MAX_VALUE == newValue.value());
+        Assert.assertTrue(Double.MAX_VALUE == newValue.value());
         bais.close();
     }
 }
