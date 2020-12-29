@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.common;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class ValueTypeTest {
@@ -58,7 +59,7 @@ public class ValueTypeTest {
 
     @Test
     public void testException() {
-        Assert.assertThrows(RuntimeException.class, () -> {
+        Assert.assertThrows(ComputerException.class, () -> {
             ValueType.fromCode((byte) -100);
         });
     }

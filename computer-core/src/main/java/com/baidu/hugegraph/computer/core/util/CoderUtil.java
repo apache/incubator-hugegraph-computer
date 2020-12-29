@@ -27,6 +27,8 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
+import com.baidu.hugegraph.computer.exception.ComputerException;
+
 public class CoderUtil {
 
     private static final ThreadLocal<CharsetEncoder> ENCODER_FACTORY =
@@ -46,7 +48,7 @@ public class CoderUtil {
         } catch (CharacterCodingException e) {
             String message = String.format("Can not encode %s with UTF-8.",
                                            str);
-            throw new RuntimeException(message, e);
+            throw new ComputerException(message, e);
         }
     }
 
@@ -57,7 +59,7 @@ public class CoderUtil {
             String message = String.format("Can not decode bytes, start=%d, " +
                                            "length=%d with UTF-8.", start,
                                            length);
-            throw new RuntimeException(message, e);
+            throw new ComputerException(message, e);
         }
     }
 

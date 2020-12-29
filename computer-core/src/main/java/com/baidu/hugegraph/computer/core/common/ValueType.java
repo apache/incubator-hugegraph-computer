@@ -23,6 +23,8 @@ package com.baidu.hugegraph.computer.core.common;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.exception.ComputerException;
+
 public enum ValueType {
 
     NULL((byte) 1, 0),
@@ -76,7 +78,7 @@ public enum ValueType {
         if (valueType == null) {
             String message = String.format("Can not find ValueType for code " +
                                            "%s.", code);
-            throw new RuntimeException(message);
+            throw new ComputerException(message);
         }
         return valueType;
     }

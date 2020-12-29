@@ -104,7 +104,4 @@
             </resource>
         </resources>
     </build>
-=======
-    </dependencies>
->>>>>>> 62ac65e... add Id as base type of vertex id
 </project>

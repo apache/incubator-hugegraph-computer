@@ -23,12 +23,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
 import com.baidu.hugegraph.computer.core.exception.ExceptionTest;
 import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ExceptionTest.class
+    ExceptionTest.class,
+    CommonTestSuite.class
 })
 public class CoreTestSuite {
 
