@@ -79,9 +79,9 @@ public class Utf8Id implements Id<Utf8Id> {
     }
 
     @Override
-    public int compareTo(Utf8Id o) {
+    public int compareTo(Utf8Id obj) {
         return PlainByteArrayComparator.compare(this.bytes, this.length,
-                                                o.bytes, o.length);
+                                                obj.bytes, obj.length);
     }
 
     @Override

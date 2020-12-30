@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.util;
 
-
 import com.google.common.base.Preconditions;
 
 public class PlainByteArrayComparator {

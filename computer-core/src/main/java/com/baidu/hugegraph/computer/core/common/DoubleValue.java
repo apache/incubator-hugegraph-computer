@@ -28,7 +28,7 @@ public class DoubleValue implements Value {
     private double value;
 
     public DoubleValue() {
-        this.value = 0;
+        this.value = 0.0D;
     }
 
     public DoubleValue(double value) {
@@ -58,6 +58,11 @@ public class DoubleValue implements Value {
     }
 
     @Override
+    public ValueType type() {
+        return ValueType.DOUBLE;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof DoubleValue)) {
             return false;
@@ -73,10 +78,5 @@ public class DoubleValue implements Value {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public ValueType type() {
-        return ValueType.DOUBLE;
     }
 }

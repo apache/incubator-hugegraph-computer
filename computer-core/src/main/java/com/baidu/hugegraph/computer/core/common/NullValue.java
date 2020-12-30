@@ -53,8 +53,8 @@ public class NullValue implements Value {
     }
 
     @Override
-    public String toString() {
-        return "(null)";
+    public boolean equals(Object obj) {
+        return obj == INSTANCE || obj instanceof NullValue;
     }
 
     @Override
@@ -63,7 +63,7 @@ public class NullValue implements Value {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return other instanceof NullValue;
+    public String toString() {
+        return "<null>";
     }
 }

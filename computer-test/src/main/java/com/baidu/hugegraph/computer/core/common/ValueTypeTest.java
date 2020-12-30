@@ -60,7 +60,7 @@ public class ValueTypeTest {
     @Test
     public void testException() {
         Assert.assertThrows(ComputerException.class, () -> {
-            ValueType.fromCode((byte) -100);
+            ValueType.fromCode(-100);
         });
     }
 }

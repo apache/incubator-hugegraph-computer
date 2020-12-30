@@ -35,15 +35,8 @@ public class LongId extends LongValue implements Id<LongId> {
     }
 
     @Override
-    public int compareTo(LongId o) {
-        long result = this.value() - o.value();
-        if (result > 0L) {
-            return 1;
-        } else if (result < 0L) {
-            return -1;
-        } else {
-            return 0;
-        }
+    public int compareTo(LongId obj) {
+        return Long.compare(this.value(), obj.value());
     }
 
     @Override

@@ -27,13 +27,13 @@ import com.baidu.hugegraph.computer.exception.ComputerException;
 
 public enum ValueType {
 
-    NULL((byte) 1, 0),
-    LONG((byte) 2, 8),
-    DOUBLE((byte) 3, 8),
-    LONG_ID((byte) -1, 8),
-    UTF8_ID((byte) -2, -1);
+    NULL(1, 0),
+    LONG(2, 8),
+    DOUBLE(3, 8),
+    LONG_ID(128, 8),
+    UTF8_ID(129, -1);
 
-    private static Map<Byte, ValueType> values = new HashMap<>();
+    private static Map<Integer, ValueType> values = new HashMap<>();
 
     static {
         for (ValueType valueType : ValueType.values()) {
@@ -41,29 +41,29 @@ public enum ValueType {
         }
     }
 
-    private byte code;
+    private int code;
     // Is it a fixed value type, -1 means not fixed.
     private int byteSize;
 
-    ValueType(byte code, int byteSize) {
+    ValueType(int code, int byteSize) {
         this.code = code;
         this.byteSize = byteSize;
     }
 
     public boolean isId() {
-        return this.code < 0;
+        return this.code >= 128;
     }
 
     public static Value createValue(ValueType type) {
         switch (type) {
             case NULL:
                 return NullValue.get();
-            case LONG_ID:
-                return new LongId();
             case LONG:
                 return new LongValue();
             case DOUBLE:
                 return new DoubleValue();
+            case LONG_ID:
+                return new LongId();
             case UTF8_ID:
                 return new Utf8Id();
             default:
@@ -73,7 +73,7 @@ public enum ValueType {
         }
     }
 
-    public static ValueType fromCode(byte code) {
+    public static ValueType fromCode(int code) {
         ValueType valueType = values.get(code);
         if (valueType == null) {
             String message = String.format("Can not find ValueType for code " +
@@ -83,7 +83,7 @@ public enum ValueType {
         return valueType;
     }
 
-    public byte code() {
+    public int code() {
         return this.code;
     }
 

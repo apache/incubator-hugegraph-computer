@@ -28,7 +28,7 @@ public class LongValue implements Value {
     private long value;
 
     public LongValue() {
-        this.value = 0;
+        this.value = 0L;
     }
 
     public LongValue(long value) {

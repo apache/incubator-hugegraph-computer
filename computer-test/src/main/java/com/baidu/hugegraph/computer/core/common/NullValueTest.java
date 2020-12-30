@@ -39,7 +39,7 @@ public class NullValueTest {
         Assert.assertEquals(ValueType.NULL, nullValue1.type());
         Assert.assertEquals(NullValue.get(), nullValue1);
         Assert.assertEquals(0, nullValue1.hashCode());
-        Assert.assertEquals("(null)", nullValue1.toString());
+        Assert.assertEquals("<null>", nullValue1.toString());
         Assert.assertEquals(nullValue1, nullValue2);
     }
 
