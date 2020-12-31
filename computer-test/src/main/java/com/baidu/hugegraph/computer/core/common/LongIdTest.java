@@ -17,22 +17,27 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core;
+package com.baidu.hugegraph.computer.core.common;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.slf4j.Logger;
+import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
-import com.baidu.hugegraph.computer.core.exception.ExceptionTest;
-import com.baidu.hugegraph.util.Log;
+import com.baidu.hugegraph.testutil.Assert;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class,
-    CommonTestSuite.class
-})
-public class CoreTestSuite {
+public class LongIdTest {
 
-    private static final Logger LOG = Log.logger(CoreTestSuite.class);
+    @Test
+    public void test() {
+        LongId longId1 = new LongId(-100L);
+        LongId longId2 = new LongId();
+        LongId longId3 = new LongId(-100L);
+
+        Assert.assertEquals(ValueType.LONG_ID, longId1.type());
+        Assert.assertTrue(longId1.compareTo(longId2) < 0);
+        Assert.assertTrue(longId2.compareTo(longId1) > 0);
+        Assert.assertTrue(longId1.compareTo(longId3) == 0);
+
+        Assert.assertEquals(Long.hashCode(-100L), longId1.hashCode());
+        Assert.assertTrue(longId1.equals(new LongId(longId1.value())));
+        Assert.assertFalse(longId1.equals(longId2));
+    }
 }

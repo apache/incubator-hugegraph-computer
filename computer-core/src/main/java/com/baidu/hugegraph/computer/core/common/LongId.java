@@ -17,22 +17,43 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core;
+package com.baidu.hugegraph.computer.core.common;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.slf4j.Logger;
+public class LongId extends LongValue implements Id<LongId> {
 
-import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
-import com.baidu.hugegraph.computer.core.exception.ExceptionTest;
-import com.baidu.hugegraph.util.Log;
+    public LongId() {
+        super();
+    }
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class,
-    CommonTestSuite.class
-})
-public class CoreTestSuite {
+    public LongId(long value) {
+        super(value);
+    }
 
-    private static final Logger LOG = Log.logger(CoreTestSuite.class);
+    @Override
+    public ValueType type() {
+        return ValueType.LONG_ID;
+    }
+
+    @Override
+    public int compareTo(LongId obj) {
+        return Long.compare(this.value(), obj.value());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof LongId)) {
+            return false;
+        }
+        return ((LongId) obj).value() == this.value();
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(this.value());
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(this.value());
+    }
 }

@@ -17,22 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core;
+package com.baidu.hugegraph.computer.core.common;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.slf4j.Logger;
+import java.io.DataInput;
+import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
-import com.baidu.hugegraph.computer.core.exception.ExceptionTest;
-import com.baidu.hugegraph.util.Log;
+public interface Readable {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class,
-    CommonTestSuite.class
-})
-public class CoreTestSuite {
-
-    private static final Logger LOG = Log.logger(CoreTestSuite.class);
+    void read(DataInput in) throws IOException;
 }
