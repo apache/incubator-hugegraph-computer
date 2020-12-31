@@ -79,5 +79,4 @@ public class LongValue implements Value {
     public String toString() {
         return String.valueOf(this.value);
     }
-
 }

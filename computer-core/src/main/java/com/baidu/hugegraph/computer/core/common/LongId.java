@@ -51,4 +51,9 @@ public class LongId extends LongValue implements Id<LongId> {
     public int hashCode() {
         return Long.hashCode(this.value());
     }
+
+    @Override
+    public String toString() {
+        return String.valueOf(this.value());
+    }
 }

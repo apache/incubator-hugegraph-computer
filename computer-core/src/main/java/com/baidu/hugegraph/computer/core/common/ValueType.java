@@ -67,18 +67,16 @@ public enum ValueType {
             case UTF8_ID:
                 return new Utf8Id();
             default:
-                String message = String.format("Can not create Value for %s.",
-                                               type.name());
-                throw new RuntimeException(message);
+                String message = "Can not create Value for %s.";
+                throw new ComputerException(message, type.name());
         }
     }
 
     public static ValueType fromCode(int code) {
         ValueType valueType = values.get(code);
         if (valueType == null) {
-            String message = String.format("Can not find ValueType for code " +
-                                           "%s.", code);
-            throw new ComputerException(message);
+            String message = "Can not find ValueType for code %s.";
+            throw new ComputerException(message, code);
         }
         return valueType;
     }
