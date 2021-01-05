@@ -19,10 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import java.io.DataOutput;
-import java.io.IOException;
+public final class Constants {
 
-public interface Writable {
-
-    void write(DataOutput out) throws IOException;
+    public static final byte [] EMPTY_BYTES = new byte[0];
 }

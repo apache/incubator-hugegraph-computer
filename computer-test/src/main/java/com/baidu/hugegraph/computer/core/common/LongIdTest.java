@@ -21,6 +21,8 @@ package com.baidu.hugegraph.computer.core.common;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class LongIdTest {

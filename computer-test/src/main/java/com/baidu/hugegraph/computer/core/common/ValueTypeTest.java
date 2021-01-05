@@ -22,6 +22,12 @@ package com.baidu.hugegraph.computer.core.common;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.computer.core.graph.value.NullValue;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 

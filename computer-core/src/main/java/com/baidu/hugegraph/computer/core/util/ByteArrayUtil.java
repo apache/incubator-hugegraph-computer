@@ -19,7 +19,17 @@
 
 package com.baidu.hugegraph.computer.core.util;
 
+import com.google.common.base.Preconditions;
+
 public class ByteArrayUtil {
+
+    public static byte[] ensureCapacity(byte[] bytes, int length) {
+        if (bytes == null || bytes.length < length) {
+            return new byte[length];
+        } else {
+            return bytes;
+        }
+    }
 
     public static int hashBytes(byte[] bytes, int length) {
         return hashBytes(bytes, 0, length);
@@ -31,5 +41,33 @@ public class ByteArrayUtil {
             hash = (31 * hash) + (int) bytes[i];
         }
         return hash;
+    }
+
+    public static int compare(byte[] bytes1, int length1,
+                              byte[] bytes2, int length2) {
+        return compare(bytes1, 0, length1, bytes2, 0, length2);
+    }
+
+    public static int compare(byte[] bytes1, int offset1, int length1,
+                              byte[] bytes2, int offset2, int length2) {
+        Preconditions.checkNotNull(bytes1);
+        Preconditions.checkNotNull(bytes2);
+        if (bytes1 == bytes2 && offset1 == offset2 && length1 == length2) {
+            return 0;
+        }
+        if (length1 != length2) {
+            return length1 - length2;
+        }
+
+        int end1 = offset1 + length1;
+        int end2 = offset2 + length2;
+        for (int i = offset1, j = offset2; i < end1 && j < end2; i++, j++) {
+            int a = (bytes1[i] & 0xff);
+            int b = (bytes2[j] & 0xff);
+            if (a != b) {
+                return a - b;
+            }
+        }
+        return 0;
     }
 }

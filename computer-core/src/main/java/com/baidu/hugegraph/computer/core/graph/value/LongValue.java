@@ -17,11 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
+
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
 
 public class LongValue implements Value {
 
@@ -35,21 +36,6 @@ public class LongValue implements Value {
         this.value = value;
     }
 
-    @Override
-    public ValueType type() {
-        return ValueType.LONG;
-    }
-
-    @Override
-    public void write(DataOutput out) throws IOException {
-        out.writeLong(this.value);
-    }
-
-    @Override
-    public void read(DataInput in) throws IOException {
-        this.value = in.readLong();
-    }
-
     public long value() {
         return this.value;
     }
@@ -60,6 +46,21 @@ public class LongValue implements Value {
      */
     public void value(long value) {
         this.value = value;
+    }
+
+    @Override
+    public ValueType type() {
+        return ValueType.LONG;
+    }
+
+    @Override
+    public void write(GraphOutput out) throws IOException {
+        out.writeLong(this.value);
+    }
+
+    @Override
+    public void read(GraphInput in) throws IOException {
+        this.value = in.readLong();
     }
 
     @Override

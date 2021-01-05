@@ -17,53 +17,67 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
 
-import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 
-public class NullValue implements Value {
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
 
-    private static final NullValue INSTANCE = new NullValue();
+public class DoubleValue implements Value {
 
-    private NullValue() {
+    private double value;
+
+    public DoubleValue() {
+        this.value = 0.0D;
+    }
+
+    public DoubleValue(double value) {
+        this.value = value;
+    }
+
+    public double value() {
+        return this.value;
     }
 
     /*
-     * Returns the single instance of this class.
+     * This method is reserved for performance, otherwise it will create a new
+     * DoubleValue object when change it's value.
      */
-    public static NullValue get() {
-        return INSTANCE;
+    public void value(double value) {
+        this.value = value;
     }
 
     @Override
     public ValueType type() {
-        return ValueType.NULL;
+        return ValueType.DOUBLE;
     }
 
     @Override
-    public void write(DataOutput out) throws IOException {
-        // Do nothing
+    public void read(GraphInput in) throws IOException {
+        this.value = in.readDouble();
     }
 
     @Override
-    public void read(DataInput in) throws IOException {
-        // Do nothing
+    public void write(GraphOutput out) throws IOException {
+        out.writeDouble(this.value);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj == INSTANCE || obj instanceof NullValue;
+        if (!(obj instanceof DoubleValue)) {
+            return false;
+        }
+        return ((DoubleValue) obj).value == this.value;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Double.hashCode(this.value);
     }
 
     @Override
     public String toString() {
-        return "<null>";
+        return String.valueOf(this.value);
     }
 }

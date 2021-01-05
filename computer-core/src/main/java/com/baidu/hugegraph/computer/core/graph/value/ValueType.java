@@ -18,7 +18,7 @@
  *  under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,8 +30,7 @@ public enum ValueType {
     NULL(1, 0),
     LONG(2, 8),
     DOUBLE(3, 8),
-    LONG_ID(128, 8),
-    UTF8_ID(129, -1);
+    ID_VALUE(128, -1);
 
     private static Map<Integer, ValueType> values = new HashMap<>();
 
@@ -54,6 +53,11 @@ public enum ValueType {
         return this.code >= 128;
     }
 
+    public static Value createValue(byte code) {
+        ValueType type = fromCode(code);
+        return createValue(type);
+    }
+
     public static Value createValue(ValueType type) {
         switch (type) {
             case NULL:
@@ -62,12 +66,10 @@ public enum ValueType {
                 return new LongValue();
             case DOUBLE:
                 return new DoubleValue();
-            case LONG_ID:
-                return new LongId();
-            case UTF8_ID:
-                return new Utf8Id();
+            case ID_VALUE:
+                return new IdValue();
             default:
-                String message = "Can not create Value for %s.";
+                String message = "Can't create Value for %s.";
                 throw new ComputerException(message, type.name());
         }
     }
@@ -75,7 +77,7 @@ public enum ValueType {
     public static ValueType fromCode(int code) {
         ValueType valueType = values.get(code);
         if (valueType == null) {
-            String message = "Can not find ValueType for code %s.";
+            String message = "Can't find ValueType for code %s.";
             throw new ComputerException(message, code);
         }
         return valueType;

@@ -17,43 +17,9 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.io;
 
-public class LongId extends LongValue implements Id<LongId> {
+import java.io.DataInput;
 
-    public LongId() {
-        super();
-    }
-
-    public LongId(long value) {
-        super(value);
-    }
-
-    @Override
-    public ValueType type() {
-        return ValueType.LONG_ID;
-    }
-
-    @Override
-    public int compareTo(LongId obj) {
-        return Long.compare(this.value(), obj.value());
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof LongId)) {
-            return false;
-        }
-        return ((LongId) obj).value() == this.value();
-    }
-
-    @Override
-    public int hashCode() {
-        return Long.hashCode(this.value());
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(this.value());
-    }
+public interface GraphInput extends DataInput {
 }

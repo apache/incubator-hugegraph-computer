@@ -46,23 +46,27 @@ public class CoderUtil {
         try {
             return encoder.encode(CharBuffer.wrap(str.toCharArray()));
         } catch (CharacterCodingException e) {
-            String message = "Can not encode %s with UTF-8.";
+            String message = "Can't encode %s with UTF-8.";
             throw new ComputerException(message, e, str);
         }
+    }
+
+    public static String decode(byte[] utf8) {
+        return decode(utf8, 0, utf8.length);
     }
 
     public static String decode(byte[] utf8, int start, int length) {
         try {
             return decode(ByteBuffer.wrap(utf8, start, length));
         } catch (CharacterCodingException e) {
-            String message = "Can not decode bytes, start=%d, " +
+            String message = "Can't decode bytes, start=%d, " +
                              "length=%d with UTF-8.";
             throw new ComputerException(message, e, start, length);
         }
     }
 
-    private static String decode(ByteBuffer utf8)
-                                 throws CharacterCodingException {
+    public static String decode(ByteBuffer utf8)
+                                throws CharacterCodingException {
         CharsetDecoder decoder = DECODER_FACTORY.get();
         return decoder.decode(utf8).toString();
     }

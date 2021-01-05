@@ -29,6 +29,8 @@ import java.util.Arrays;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class Utf8IdTest {
