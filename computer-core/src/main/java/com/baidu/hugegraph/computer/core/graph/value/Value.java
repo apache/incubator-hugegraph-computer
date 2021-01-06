@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
-// FIXME: adajcent edges are all same type?
 public interface Value extends Writable, Readable {
 
     ValueType type();

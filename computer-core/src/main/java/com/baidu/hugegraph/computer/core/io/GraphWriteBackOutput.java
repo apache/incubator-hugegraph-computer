@@ -20,6 +20,4 @@
 package com.baidu.hugegraph.computer.core.io;
 
 public interface GraphWriteBackOutput extends GraphOutput {
-
-    void writeVertex();
 }

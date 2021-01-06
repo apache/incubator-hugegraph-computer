@@ -23,11 +23,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.exception.ComputerException;
 
 public class UuidId implements Id {
 
@@ -37,6 +37,11 @@ public class UuidId implements Id {
     public UuidId() {
         this.high = 0L;
         this.low = 0L;
+    }
+
+    public UuidId(UUID uuid) {
+        this.high = uuid.getMostSignificantBits();
+        this.low = uuid.getLeastSignificantBits();
     }
 
     @Override

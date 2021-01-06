@@ -18,17 +18,11 @@
  *  under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.core.graph.value.NullValue;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-import com.baidu.hugegraph.computer.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class ValueTypeTest {
@@ -38,8 +32,7 @@ public class ValueTypeTest {
         Assert.assertEquals(0, ValueType.NULL.byteSize());
         Assert.assertEquals(8, ValueType.LONG.byteSize());
         Assert.assertEquals(8, ValueType.DOUBLE.byteSize());
-        Assert.assertEquals(8, ValueType.LONG_ID.byteSize());
-        Assert.assertEquals(-1, ValueType.UTF8_ID.byteSize());
+        Assert.assertEquals(-1, ValueType.ID_VALUE.byteSize());
 
         Assert.assertEquals(NullValue.get(),
                             ValueType.createValue(ValueType.NULL));
@@ -47,26 +40,18 @@ public class ValueTypeTest {
                             ValueType.createValue(ValueType.LONG));
         Assert.assertEquals(new DoubleValue(),
                             ValueType.createValue(ValueType.DOUBLE));
-        Assert.assertEquals(new LongId(),
-                            ValueType.createValue(ValueType.LONG_ID));
-        Assert.assertEquals(new Utf8Id(),
-                            ValueType.createValue(ValueType.UTF8_ID));
+        Assert.assertEquals(new IdValue(),
+                            ValueType.createValue(ValueType.ID_VALUE));
 
         for (ValueType type : ValueType.values()) {
             Assert.assertEquals(type, ValueType.fromCode(type.code()));
         }
-
-        Assert.assertFalse(ValueType.NULL.isId());
-        Assert.assertFalse(ValueType.LONG.isId());
-        Assert.assertFalse(ValueType.DOUBLE.isId());
-        Assert.assertTrue(ValueType.LONG_ID.isId());
-        Assert.assertTrue(ValueType.UTF8_ID.isId());
     }
 
     @Test
     public void testException() {
         Assert.assertThrows(ComputerException.class, () -> {
-            ValueType.fromCode(-100);
+            ValueType.fromCode((byte) -100);
         });
     }
 }

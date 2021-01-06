@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 
 public class LongId implements Id {
 

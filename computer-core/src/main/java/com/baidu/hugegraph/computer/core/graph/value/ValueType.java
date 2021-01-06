@@ -23,7 +23,7 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.baidu.hugegraph.computer.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 
 public enum ValueType {
 
@@ -32,7 +32,7 @@ public enum ValueType {
     DOUBLE(3, 8),
     ID_VALUE(128, -1);
 
-    private static Map<Integer, ValueType> values = new HashMap<>();
+    private static Map<Byte, ValueType> values = new HashMap<>();
 
     static {
         for (ValueType valueType : ValueType.values()) {
@@ -40,17 +40,22 @@ public enum ValueType {
         }
     }
 
-    private int code;
+    private byte code;
     // Is it a fixed value type, -1 means not fixed.
     private int byteSize;
 
     ValueType(int code, int byteSize) {
-        this.code = code;
+        assert code < 256;
+        this.code = (byte) code;
         this.byteSize = byteSize;
     }
 
-    public boolean isId() {
-        return this.code >= 128;
+    public byte code() {
+        return this.code;
+    }
+
+    public int byteSize() {
+        return this.byteSize;
     }
 
     public static Value createValue(byte code) {
@@ -74,20 +79,12 @@ public enum ValueType {
         }
     }
 
-    public static ValueType fromCode(int code) {
+    public static ValueType fromCode(byte code) {
         ValueType valueType = values.get(code);
         if (valueType == null) {
             String message = "Can't find ValueType for code %s.";
             throw new ComputerException(message, code);
         }
         return valueType;
-    }
-
-    public int code() {
-        return this.code;
-    }
-
-    public int byteSize() {
-        return this.byteSize;
     }
 }

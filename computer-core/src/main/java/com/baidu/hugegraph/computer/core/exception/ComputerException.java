@@ -17,25 +17,40 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.exception;
+package com.baidu.hugegraph.computer.core.exception;
 
-public class WriteException extends ComputerException {
+/**
+ * The base class for all exception types
+ */
+public class ComputerException extends RuntimeException {
 
-    private static final long serialVersionUID = -1604886592292423750L;
+    private static final long serialVersionUID = 3621207523020113277L;
 
-    public WriteException(String message) {
+    public ComputerException(String message) {
         super(message);
     }
 
-    public WriteException(String message, Throwable cause) {
+    public ComputerException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public WriteException(String message, Object... args) {
-        super(message, args);
+    public ComputerException(String message, Object... args) {
+        super(String.format(message, args));
     }
 
-    public WriteException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
+    public ComputerException(String message, Throwable cause, Object... args) {
+        super(String.format(message, args), cause);
+    }
+
+    public Throwable rootCause() {
+        return rootCause(this);
+    }
+
+    public static Throwable rootCause(Throwable e) {
+        Throwable cause = e;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        return cause;
     }
 }

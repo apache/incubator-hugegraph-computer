@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
-import com.baidu.hugegraph.computer.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 
 public class IdValue implements Value, Comparable<IdValue> {
 
@@ -64,7 +64,7 @@ public class IdValue implements Value, Comparable<IdValue> {
     @Override
     public void read(GraphInput in) throws IOException {
         int len = in.readInt();
-        this.bytes = ByteArrayUtil.ensureCapacity(this.bytes, len);
+        this.bytes = ByteArrayUtil.ensureCapacityWithoutCopy(this.bytes, len);
         in.readFully(this.bytes, 0, length);
         this.length = len;
     }

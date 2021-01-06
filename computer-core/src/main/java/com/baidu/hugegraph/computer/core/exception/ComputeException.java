@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.exception;
+package com.baidu.hugegraph.computer.core.exception;
 
 public class ComputeException extends ComputerException {
 

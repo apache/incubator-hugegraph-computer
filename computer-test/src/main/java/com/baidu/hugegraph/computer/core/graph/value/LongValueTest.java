@@ -17,51 +17,36 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.BaseCoreTest;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class LongValueTest {
+public class LongValueTest extends BaseCoreTest {
 
     @Test
     public void test() {
         LongValue longValue1 = new LongValue();
+        LongValue longValue2 = new LongValue(Long.MIN_VALUE);
+
         Assert.assertEquals(ValueType.LONG, longValue1.type());
         Assert.assertEquals(0L, longValue1.value());
-        LongValue longValue2 = new LongValue(Long.MIN_VALUE);
         Assert.assertEquals(Long.MIN_VALUE, longValue2.value());
+
         longValue2.value(Long.MAX_VALUE);
         Assert.assertEquals(Long.MAX_VALUE, longValue2.value());
+        Assert.assertEquals(longValue2, new LongValue(longValue2.value()));
+        Assert.assertNotEquals(longValue1, longValue2);
         Assert.assertEquals(Long.hashCode(Long.MAX_VALUE),
                             longValue2.hashCode());
-        Assert.assertTrue(longValue2.equals(new LongValue(longValue2.value())));
-        Assert.assertFalse(longValue1.equals(longValue2));
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        LongValue longValue = new LongValue(Long.MAX_VALUE);
-        Assert.assertEquals(Long.MAX_VALUE, longValue.value());
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        DataOutput dataOutput = new DataOutputStream(bos);
-        longValue.write(dataOutput);
-        bos.close();
-        ByteArrayInputStream bais = new ByteArrayInputStream(bos.toByteArray());
-        DataInputStream dis = new DataInputStream(bais);
-        LongValue newValue = new LongValue();
-        newValue.read(dis);
-        Assert.assertEquals(Long.MAX_VALUE, newValue.value());
-        bais.close();
+        testReadWrite(new LongValue(Long.MAX_VALUE), new LongValue());
     }
 }

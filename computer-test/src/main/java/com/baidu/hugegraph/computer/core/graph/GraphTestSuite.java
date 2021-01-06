@@ -18,19 +18,30 @@
  *  under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.core.graph.id.IdTypeTest;
+import com.baidu.hugegraph.computer.core.graph.id.LongIdTest;
+import com.baidu.hugegraph.computer.core.graph.id.Utf8IdTest;
+import com.baidu.hugegraph.computer.core.graph.id.UuidIdTest;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValueTest;
+import com.baidu.hugegraph.computer.core.graph.value.LongValueTest;
+import com.baidu.hugegraph.computer.core.graph.value.NullValueTest;
+import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
+
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    DoubleValueTest.class,
     LongIdTest.class,
-    LongValueTest.class,
-    NullValueTest.class,
     Utf8IdTest.class,
+    UuidIdTest.class,
+    IdTypeTest.class,
+    NullValueTest.class,
+    LongValueTest.class,
+    DoubleValueTest.class,
     ValueTypeTest.class
 })
-public class CommonTestSuite {
+public class GraphTestSuite {
 }

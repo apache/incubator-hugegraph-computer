@@ -23,7 +23,7 @@ import com.google.common.base.Preconditions;
 
 public class ByteArrayUtil {
 
-    public static byte[] ensureCapacity(byte[] bytes, int length) {
+    public static byte[] ensureCapacityWithoutCopy(byte[] bytes, int length) {
         if (bytes == null || bytes.length < length) {
             return new byte[length];
         } else {
@@ -48,6 +48,7 @@ public class ByteArrayUtil {
         return compare(bytes1, 0, length1, bytes2, 0, length2);
     }
 
+    // TODO: use google comparator(unsafe) to improve perf
     public static int compare(byte[] bytes1, int offset1, int length1,
                               byte[] bytes2, int offset2, int length2) {
         Preconditions.checkNotNull(bytes1);

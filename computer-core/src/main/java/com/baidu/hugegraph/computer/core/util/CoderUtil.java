@@ -27,7 +27,7 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 
-import com.baidu.hugegraph.computer.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 
 public class CoderUtil {
 

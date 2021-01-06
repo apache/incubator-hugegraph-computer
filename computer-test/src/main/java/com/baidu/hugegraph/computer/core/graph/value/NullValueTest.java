@@ -17,29 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
+
+import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.BaseCoreTest;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class LongIdTest {
+public class NullValueTest extends BaseCoreTest {
 
     @Test
     public void test() {
-        LongId longId1 = new LongId(-100L);
-        LongId longId2 = new LongId();
-        LongId longId3 = new LongId(-100L);
+        NullValue nullValue1 = NullValue.get();
+        NullValue nullValue2 = NullValue.get();
+        Assert.assertEquals(ValueType.NULL, nullValue1.type());
+        Assert.assertEquals(nullValue1, NullValue.get());
+        Assert.assertEquals(nullValue1, nullValue2);
+        Assert.assertEquals(0, nullValue1.hashCode());
+        Assert.assertEquals("<null>", nullValue1.toString());
+    }
 
-        Assert.assertEquals(ValueType.LONG_ID, longId1.type());
-        Assert.assertTrue(longId1.compareTo(longId2) < 0);
-        Assert.assertTrue(longId2.compareTo(longId1) > 0);
-        Assert.assertTrue(longId1.compareTo(longId3) == 0);
-
-        Assert.assertEquals(Long.hashCode(-100L), longId1.hashCode());
-        Assert.assertTrue(longId1.equals(new LongId(longId1.value())));
-        Assert.assertFalse(longId1.equals(longId2));
+    @Test
+    public void testReadWrite() throws IOException {
+        testReadWrite(NullValue.get(), NullValue.get());
     }
 }

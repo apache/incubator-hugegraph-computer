@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.graph.id;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.baidu.hugegraph.computer.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 
 public enum IdType {
 

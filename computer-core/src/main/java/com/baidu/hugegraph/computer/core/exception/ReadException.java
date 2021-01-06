@@ -17,29 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.exception;
+package com.baidu.hugegraph.computer.core.exception;
 
-/**
- * A wrapper class for IllegalArgumentException
- */
-public class IllegalArgException extends IllegalArgumentException {
+public class ReadException extends ComputerException {
 
-    private static final long serialVersionUID = 3031687162799359544L;
+    private static final long serialVersionUID = 8073034531965759161L;
 
-    public IllegalArgException(String message) {
+    public ReadException(String message) {
         super(message);
     }
 
-    public IllegalArgException(String message, Throwable cause) {
+    public ReadException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public IllegalArgException(String message, Object... args) {
-        super(String.format(message, args));
+    public ReadException(String message, Object... args) {
+        super(message, args);
     }
 
-    public IllegalArgException(String message, Throwable cause,
-                               Object... args) {
-        super(String.format(message, args), cause);
+    public ReadException(String message, Throwable cause, Object... args) {
+        super(message, cause, args);
     }
 }
