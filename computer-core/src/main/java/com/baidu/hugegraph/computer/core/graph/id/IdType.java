@@ -41,7 +41,7 @@ public enum IdType {
     private final byte code;
 
     IdType(int code) {
-        assert code < 256;
+        assert code >= -128 && code <= 127;
         this.code = (byte) code;
     }
 

@@ -76,18 +76,18 @@ public class StreamGraphOutputInputTest {
 
     @Test
     public void testWriteReadVLong() throws IOException {
-        testBytesStreamWriteReadVLong(new byte[]{0}, 0);
-        testBytesStreamWriteReadVLong(new byte[]{1}, 1);
-        testBytesStreamWriteReadVLong(new byte[]{(byte) 0x7f}, 127);
-        testBytesStreamWriteReadVLong(new byte[]{(byte) 0x81, 0}, 128);
+        testBytesStreamWriteReadVLong(new byte[]{0}, 0L);
+        testBytesStreamWriteReadVLong(new byte[]{1}, 1L);
+        testBytesStreamWriteReadVLong(new byte[]{(byte) 0x7f}, 127L);
+        testBytesStreamWriteReadVLong(new byte[]{(byte) 0x81, 0}, 128L);
         testBytesStreamWriteReadVLong(new byte[]{(byte) 0xff, (byte) 0x7f},
-                                      16383);
+                                      16383L);
         testBytesStreamWriteReadVLong(new byte[]{(byte) 0x81, (byte) 0x80, 0},
-                                      16384);
+                                      16384L);
         testBytesStreamWriteReadVLong(new byte[]{(byte) 0x81, (byte) 0x80, 1},
-                                      16385);
+                                      16385L);
         testBytesStreamWriteReadVLong(new byte[]{-127, -1, -1, -1, -1,
-                                                 -1, -1, -1, -1, 127}, -1);
+                                                 -1, -1, -1, -1, 127}, -1L);
         testBytesStreamWriteReadVLong(new byte[]{-121, -1, -1, -1, 127},
                                       Integer.MAX_VALUE);
         testBytesStreamWriteReadVLong(new byte[]{-127, -1, -1, -1, -1,
@@ -118,7 +118,7 @@ public class StreamGraphOutputInputTest {
 
     public static void testBytesStreamWriteReadVLong(byte[] bytes, long value)
                                                      throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(5);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(9);
              StreamGraphOutput output = new StreamGraphOutput(baos)) {
             output.writeVLong(value);
             Assert.assertArrayEquals(bytes, baos.toByteArray());

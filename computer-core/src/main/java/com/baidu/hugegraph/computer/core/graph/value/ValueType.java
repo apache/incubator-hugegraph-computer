@@ -30,7 +30,7 @@ public enum ValueType {
     NULL(1, 0),
     LONG(2, 8),
     DOUBLE(3, 8),
-    ID_VALUE(128, -1);
+    ID_VALUE(127, -1);
 
     private static Map<Byte, ValueType> values = new HashMap<>();
 
@@ -45,7 +45,7 @@ public enum ValueType {
     private int byteSize;
 
     ValueType(int code, int byteSize) {
-        assert code < 256;
+        assert code >= -128 && code <= 127;
         this.code = (byte) code;
         this.byteSize = byteSize;
     }

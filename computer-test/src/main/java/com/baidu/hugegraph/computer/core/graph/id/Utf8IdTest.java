@@ -49,7 +49,7 @@ public class Utf8IdTest extends BaseCoreTest {
         });
 
         Assert.assertEquals("100", utf8Id6.asObject());
-        Assert.assertEquals(100, utf8Id6.asLong());
+        Assert.assertEquals(100L, utf8Id6.asLong());
 
         Assert.assertTrue(utf8Id3.compareTo(utf8Id2) > 0);
         Assert.assertTrue(utf8Id2.compareTo(utf8Id3) < 0);

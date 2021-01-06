@@ -34,11 +34,11 @@ public class DoubleValueTest extends BaseCoreTest {
         DoubleValue doubleValue2 = new DoubleValue(Double.MIN_VALUE);
 
         Assert.assertEquals(ValueType.DOUBLE, doubleValue1.type());
-        Assert.assertEquals(0.0D, doubleValue1.value(), 0.0);
-        Assert.assertEquals(Double.MIN_VALUE, doubleValue2.value(), 0.0);
+        Assert.assertEquals(0.0D, doubleValue1.value(), 0.0D);
+        Assert.assertEquals(Double.MIN_VALUE, doubleValue2.value(), 0.0D);
 
         doubleValue2.value(Double.MAX_VALUE);
-        Assert.assertEquals(Double.MAX_VALUE, doubleValue2.value(), 0.0);
+        Assert.assertEquals(Double.MAX_VALUE, doubleValue2.value(), 0.0D);
         Assert.assertNotEquals(doubleValue1, doubleValue2);
         Assert.assertEquals(doubleValue2,
                             new DoubleValue(doubleValue2.value()));
