@@ -58,32 +58,11 @@ public enum ValueType {
         return this.byteSize;
     }
 
-    public static Value createValue(byte code) {
-        ValueType type = fromCode(code);
-        return createValue(type);
-    }
-
-    public static Value createValue(ValueType type) {
-        switch (type) {
-            case NULL:
-                return NullValue.get();
-            case LONG:
-                return new LongValue();
-            case DOUBLE:
-                return new DoubleValue();
-            case ID_VALUE:
-                return new IdValue();
-            default:
-                String message = "Can't create Value for %s.";
-                throw new ComputerException(message, type.name());
-        }
-    }
-
     public static ValueType fromCode(byte code) {
         ValueType valueType = values.get(code);
         if (valueType == null) {
-            String message = "Can't find ValueType for code %s.";
-            throw new ComputerException(message, code);
+            throw new ComputerException("Can't find ValueType for code %s",
+                                        code);
         }
         return valueType;
     }

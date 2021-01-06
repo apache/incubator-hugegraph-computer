@@ -23,6 +23,7 @@ package com.baidu.hugegraph.computer.core.graph;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.core.graph.id.IdFactoryTest;
 import com.baidu.hugegraph.computer.core.graph.id.IdTypeTest;
 import com.baidu.hugegraph.computer.core.graph.id.LongIdTest;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8IdTest;
@@ -30,6 +31,7 @@ import com.baidu.hugegraph.computer.core.graph.id.UuidIdTest;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.LongValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.NullValueTest;
+import com.baidu.hugegraph.computer.core.graph.value.ValueFactoryTest;
 import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
 
 @RunWith(Suite.class)
@@ -38,10 +40,12 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
     Utf8IdTest.class,
     UuidIdTest.class,
     IdTypeTest.class,
+    IdFactoryTest.class,
     NullValueTest.class,
     LongValueTest.class,
     DoubleValueTest.class,
-    ValueTypeTest.class
+    ValueTypeTest.class,
+    ValueFactoryTest.class
 })
 public class GraphTestSuite {
 }

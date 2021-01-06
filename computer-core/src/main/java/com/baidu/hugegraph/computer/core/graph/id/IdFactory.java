@@ -17,9 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.id;
 
-public final class Constants {
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 
-    public static final byte[] EMPTY_BYTES = new byte[0];
+public final class IdFactory {
+
+    // Maybe can reuse Id
+    public static Id createID(byte code) {
+        IdType type = IdType.fromCode(code);
+        return createID(type);
+    }
+
+    public static Id createID(IdType type) {
+        switch (type) {
+            case LONG:
+                return new LongId();
+            case UTF8:
+                return new Utf8Id();
+            case UUID:
+                return new UuidId();
+            default:
+                throw new ComputerException("Can't create Id for %s",
+                                            type.name());
+        }
+    }
 }

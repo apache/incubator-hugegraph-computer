@@ -35,13 +35,13 @@ public class ValueTypeTest {
         Assert.assertEquals(-1, ValueType.ID_VALUE.byteSize());
 
         Assert.assertEquals(NullValue.get(),
-                            ValueType.createValue(ValueType.NULL));
+                            ValueFactory.createValue(ValueType.NULL));
         Assert.assertEquals(new LongValue(),
-                            ValueType.createValue(ValueType.LONG));
+                            ValueFactory.createValue(ValueType.LONG));
         Assert.assertEquals(new DoubleValue(),
-                            ValueType.createValue(ValueType.DOUBLE));
+                            ValueFactory.createValue(ValueType.DOUBLE));
         Assert.assertEquals(new IdValue(),
-                            ValueType.createValue(ValueType.ID_VALUE));
+                            ValueFactory.createValue(ValueType.ID_VALUE));
 
         for (ValueType type : ValueType.values()) {
             Assert.assertEquals(type, ValueType.fromCode(type.code()));

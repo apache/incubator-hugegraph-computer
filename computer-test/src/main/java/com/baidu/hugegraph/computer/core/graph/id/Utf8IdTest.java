@@ -24,6 +24,8 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class Utf8IdTest extends BaseCoreTest {
@@ -40,6 +42,11 @@ public class Utf8IdTest extends BaseCoreTest {
         Assert.assertEquals(IdType.UTF8, utf8Id1.type());
         Assert.assertArrayEquals(new byte[0], utf8Id1.bytes());
         Assert.assertEquals(3, utf8Id2.length());
+
+        Assert.assertEquals(IdType.UTF8, utf8Id2.type());
+        IdValue idValue = utf8Id2.idValue();
+        Assert.assertEquals(ValueType.ID_VALUE, idValue.type());
+        Assert.assertEquals(utf8Id2, idValue.id());
 
         Assert.assertEquals("abc", utf8Id2.asObject());
         Assert.assertThrows(NumberFormatException.class, () -> {

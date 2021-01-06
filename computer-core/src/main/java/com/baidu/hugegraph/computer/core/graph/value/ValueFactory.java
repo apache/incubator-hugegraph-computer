@@ -17,9 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
 
-public final class Constants {
+import com.baidu.hugegraph.computer.core.exception.ComputerException;
 
-    public static final byte[] EMPTY_BYTES = new byte[0];
+public final class ValueFactory {
+
+    public static Value createValue(byte code) {
+        ValueType type = ValueType.fromCode(code);
+        return createValue(type);
+    }
+
+    public static Value createValue(ValueType type) {
+        switch (type) {
+            case NULL:
+                return NullValue.get();
+            case LONG:
+                return new LongValue();
+            case DOUBLE:
+                return new DoubleValue();
+            case ID_VALUE:
+                return new IdValue();
+            default:
+                throw new ComputerException("Can't create Value for %s",
+                                            type.name());
+        }
+    }
 }

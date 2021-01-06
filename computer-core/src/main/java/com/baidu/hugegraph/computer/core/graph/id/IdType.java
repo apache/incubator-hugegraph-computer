@@ -49,32 +49,12 @@ public enum IdType {
         return this.code;
     }
 
-    // Maybe can reuse Id
-    public static Id createID(byte code) {
-        IdType type = fromCode(code);
-        return createID(type);
-    }
-
-    public static Id createID(IdType type) {
-        switch (type) {
-            case LONG:
-                return new LongId();
-            case UTF8:
-                return new Utf8Id();
-            case UUID:
-                return new UuidId();
-            default:
-                throw new ComputerException("Can't create Id for %s.",
-                                            type.name());
-        }
-    }
-
     public static IdType fromCode(byte code) {
-        IdType valueType = values.get(code);
-        if (valueType == null) {
-            throw new ComputerException("Can't find IdType for code %s.",
+        IdType idType = values.get(code);
+        if (idType == null) {
+            throw new ComputerException("Can't find IdType for code %s",
                                         code);
         }
-        return valueType;
+        return idType;
     }
 }

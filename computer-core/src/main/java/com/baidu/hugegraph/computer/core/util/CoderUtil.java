@@ -46,8 +46,7 @@ public class CoderUtil {
         try {
             return encoder.encode(CharBuffer.wrap(str.toCharArray()));
         } catch (CharacterCodingException e) {
-            String message = "Can't encode %s with UTF-8.";
-            throw new ComputerException(message, e, str);
+            throw new ComputerException("Can't encode %s with UTF-8", e, str);
         }
     }
 
@@ -59,9 +58,9 @@ public class CoderUtil {
         try {
             return decode(ByteBuffer.wrap(utf8, start, length));
         } catch (CharacterCodingException e) {
-            String message = "Can't decode bytes, start=%d, " +
-                             "length=%d with UTF-8.";
-            throw new ComputerException(message, e, start, length);
+            throw new ComputerException("Can't decode bytes, start=%d, " +
+                                        "length=%d with UTF-8",
+                                        e, start, length);
         }
     }
 

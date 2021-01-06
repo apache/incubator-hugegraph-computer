@@ -22,26 +22,24 @@ package com.baidu.hugegraph.computer.core.graph.id;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class IdTypeTest {
+public class IdFactoryTest {
 
     @Test
-    public void test() {
-        Assert.assertEquals(new LongId(), IdFactory.createID(IdType.LONG));
-        Assert.assertEquals(new Utf8Id(), IdFactory.createID(IdType.UTF8));
-        Assert.assertEquals(new UuidId(), IdFactory.createID(IdType.UUID));
+    public void testCreateId() {
+        Assert.assertEquals(IdType.LONG,
+                            IdFactory.createID(IdType.LONG.code()).type());
+        Assert.assertEquals(IdType.UTF8,
+                            IdFactory.createID(IdType.UTF8.code()).type());
+        Assert.assertEquals(IdType.UUID,
+                            IdFactory.createID(IdType.UUID.code()).type());
 
-        for (IdType type : IdType.values()) {
-            Assert.assertEquals(type, IdType.fromCode(type.code()));
-        }
-    }
-
-    @Test
-    public void testException() {
-        Assert.assertThrows(ComputerException.class, () -> {
-            IdType.fromCode((byte) -100);
-        });
+        Assert.assertEquals(IdType.LONG,
+                            IdFactory.createID(IdType.LONG).type());
+        Assert.assertEquals(IdType.UTF8,
+                            IdFactory.createID(IdType.UTF8).type());
+        Assert.assertEquals(IdType.UUID,
+                            IdFactory.createID(IdType.UUID).type());
     }
 }
