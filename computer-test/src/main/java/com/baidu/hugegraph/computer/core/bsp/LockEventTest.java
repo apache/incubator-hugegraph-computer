@@ -20,7 +20,6 @@
 
 package com.baidu.hugegraph.computer.core.bsp;
 
-
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.exception.ComputerException;
@@ -31,13 +30,13 @@ public class LockEventTest {
     @Test
     public void testWaitMillis() {
         LockEvent lockEvent = new LockEvent();
-        boolean signaled = lockEvent.waitMillis(1);
+        boolean signaled = lockEvent.waitMillis(1L);
         Assert.assertFalse(signaled);
         lockEvent.signal();
-        signaled = lockEvent.waitMillis(1);
+        signaled = lockEvent.waitMillis(1L);
         Assert.assertTrue(signaled);
         lockEvent.reset();
-        signaled = lockEvent.waitMillis(1);
+        signaled = lockEvent.waitMillis(1L);
         Assert.assertFalse(signaled);
     }
 
@@ -45,9 +44,9 @@ public class LockEventTest {
     public void testWaitOrFail() {
         LockEvent lockEvent = new LockEvent();
         Assert.assertThrows(ComputerException.class, () -> {
-            lockEvent.waitOrFail(1);
+            lockEvent.waitOrFail(1L);
         });
         lockEvent.signal();
-        lockEvent.waitOrFail(1);
+        lockEvent.waitOrFail(0L);
     }
 }

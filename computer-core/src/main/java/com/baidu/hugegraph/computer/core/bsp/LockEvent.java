@@ -70,8 +70,8 @@ public class LockEvent implements BspEvent {
                 }
             }
         } catch (InterruptedException e) {
-            throw new ComputerException( "Interrupted while waiting %d. ", e,
-                                         time);
+            throw new ComputerException("Interrupted while waiting '%d' ms.",
+                                        e, time);
         } finally {
             this.lock.unlock();
         }
@@ -80,12 +80,12 @@ public class LockEvent implements BspEvent {
 
     @Override
     public void waitOrFail(long time) {
-        E.checkArgument(time >= 0L, "The time must be >= 0, but got %d.",
+        E.checkArgument(time >= 0L, "The time must be >= 0, but got '%d'.",
                         time);
         long deadline = System.currentTimeMillis() + time;
         while (!this.waitMillis(time)) {
             if (System.currentTimeMillis() > deadline) {
-                throw new ComputerException("Timeout waiting, time = '%d'.",
+                throw new ComputerException("Timeout waiting, time='%d' ms.",
                                             time);
             }
         }
