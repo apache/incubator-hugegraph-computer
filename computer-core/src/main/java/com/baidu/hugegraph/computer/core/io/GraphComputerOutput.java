@@ -19,15 +19,5 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.IOException;
-
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-
 public interface GraphComputerOutput extends GraphOutput {
-
-    void writeId(Id id) throws IOException;
-
-    void writeVInt(int value) throws IOException;
-
-    void writeVLong(long value) throws IOException;
 }

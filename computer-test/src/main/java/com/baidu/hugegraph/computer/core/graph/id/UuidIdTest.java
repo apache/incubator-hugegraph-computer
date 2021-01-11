@@ -25,7 +25,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.BaseCoreTest;
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
@@ -65,6 +65,6 @@ public class UuidIdTest extends BaseCoreTest {
 
     @Test
     public void testReadWrite() throws IOException {
-        testReadWrite(new UuidId(UUID.randomUUID()), new UuidId());
+        assertIdEqualAfterWriteAndRead(new UuidId(UUID.randomUUID()));
     }
 }

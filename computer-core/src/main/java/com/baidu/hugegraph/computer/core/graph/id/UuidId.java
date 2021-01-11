@@ -21,9 +21,10 @@ package com.baidu.hugegraph.computer.core.graph.id;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
@@ -51,8 +52,8 @@ public class UuidId implements Id {
 
     @Override
     public IdValue idValue() {
-        int len = Byte.BYTES + Long.BYTES + Long.BYTES;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(len)) {
+        // len = Byte.BYTES + Long.BYTES + Long.BYTES;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(17)) {
             StreamGraphOutput output = new StreamGraphOutput(baos);
             output.writeId(this);
             return new IdValue(baos.toByteArray());
@@ -70,6 +71,14 @@ public class UuidId implements Id {
     @Override
     public long asLong() {
         throw new ComputerException("Can't convert UuidId to long");
+    }
+
+    @Override
+    public byte[] asBytes() {
+        ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.putLong(this.high);
+        buffer.putLong(this.low);
+        return buffer.array();
     }
 
     @Override

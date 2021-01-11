@@ -17,30 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.common.exception;
 
-import java.io.IOException;
+public class ComputeException extends ComputerException {
 
-import org.junit.Test;
+    private static final long serialVersionUID = 185790114205374242L;
 
-import com.baidu.hugegraph.computer.core.BaseCoreTest;
-import com.baidu.hugegraph.testutil.Assert;
-
-public class NullValueTest extends BaseCoreTest {
-
-    @Test
-    public void test() {
-        NullValue nullValue1 = NullValue.get();
-        NullValue nullValue2 = NullValue.get();
-        Assert.assertEquals(ValueType.NULL, nullValue1.type());
-        Assert.assertEquals(nullValue1, NullValue.get());
-        Assert.assertEquals(nullValue1, nullValue2);
-        Assert.assertEquals(0, nullValue1.hashCode());
-        Assert.assertEquals("<null>", nullValue1.toString());
+    public ComputeException(String message) {
+        super(message);
     }
 
-    @Test
-    public void testReadWrite() throws IOException {
-        assertValueEqualAfterWriteAndRead(NullValue.get());
+    public ComputeException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ComputeException(String message, Object... args) {
+        super(message, args);
+    }
+
+    public ComputeException(String message, Throwable cause, Object... args) {
+        super(message, cause, args);
     }
 }

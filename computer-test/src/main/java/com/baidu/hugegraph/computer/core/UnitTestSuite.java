@@ -17,25 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.exception;
+package com.baidu.hugegraph.computer.core;
 
-public class ReadException extends ComputerException {
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.slf4j.Logger;
 
-    private static final long serialVersionUID = 8073034531965759161L;
+import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
+import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
+import com.baidu.hugegraph.computer.core.io.IOTestSuite;
+import com.baidu.hugegraph.util.Log;
 
-    public ReadException(String message) {
-        super(message);
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    CommonTestSuite.class,
+    GraphTestSuite.class,
+    IOTestSuite.class,
+})
+public class UnitTestSuite {
 
-    public ReadException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ReadException(String message, Object... args) {
-        super(message, args);
-    }
-
-    public ReadException(String message, Throwable cause, Object... args) {
-        super(message, cause, args);
-    }
+    private static final Logger LOG = Log.logger(UnitTestSuite.class);
 }

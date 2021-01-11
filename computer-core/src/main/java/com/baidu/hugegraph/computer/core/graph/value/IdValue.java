@@ -25,12 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
 
 public class IdValue implements Value, Comparable<IdValue> {
 
@@ -48,12 +48,18 @@ public class IdValue implements Value, Comparable<IdValue> {
     }
 
     public Id id() {
-        try (InputStream bais = new ByteArrayInputStream(this.bytes)) {
+        try (InputStream bais = new ByteArrayInputStream(this.bytes, 0,
+                                                         this.length)) {
             StreamGraphInput input = new StreamGraphInput(bais);
             return input.readId();
         } catch (IOException e) {
             throw new ComputerException("Failed to read Id", e);
         }
+    }
+
+    @Override
+    public Cardinality cardinality() {
+        return Cardinality.SINGLE;
     }
 
     @Override
@@ -65,7 +71,7 @@ public class IdValue implements Value, Comparable<IdValue> {
     public void read(GraphInput in) throws IOException {
         int len = in.readInt();
         this.bytes = ByteArrayUtil.ensureCapacityWithoutCopy(this.bytes, len);
-        in.readFully(this.bytes, 0, length);
+        in.readFully(this.bytes, 0, len);
         this.length = len;
     }
 

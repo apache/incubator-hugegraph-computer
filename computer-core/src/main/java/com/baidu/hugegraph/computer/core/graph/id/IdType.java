@@ -19,23 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.graph.id;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.baidu.hugegraph.computer.core.common.SerialEnum;
 
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
-
-public enum IdType {
+public enum IdType implements SerialEnum {
 
     LONG(1),
     UTF8(2),
     UUID(3);
 
-    private static Map<Byte, IdType> values = new HashMap<>();
-
     static {
-        for (IdType valueType : IdType.values()) {
-            values.put(valueType.code, valueType);
-        }
+        SerialEnum.register(IdType.class);
     }
 
     private final byte code;
@@ -47,14 +40,5 @@ public enum IdType {
 
     public byte code() {
         return this.code;
-    }
-
-    public static IdType fromCode(byte code) {
-        IdType idType = values.get(code);
-        if (idType == null) {
-            throw new ComputerException("Can't find IdType for code %s",
-                                        code);
-        }
-        return idType;
     }
 }

@@ -73,6 +73,6 @@ public class Utf8IdTest extends BaseCoreTest {
 
     @Test
     public void testReadWrite() throws IOException {
-        testReadWrite(new Utf8Id("abc"), new Utf8Id());
+        assertIdEqualAfterWriteAndRead(new Utf8Id("abc"));
     }
 }

@@ -22,15 +22,16 @@ package com.baidu.hugegraph.computer.core.graph.id;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
 import com.baidu.hugegraph.util.E;
 
 public class Utf8Id implements Id {
@@ -87,8 +88,17 @@ public class Utf8Id implements Id {
     }
 
     @Override
+    public byte[] asBytes() {
+        if (this.bytes.length == this.length) {
+            return this.bytes;
+        } else {
+            return Arrays.copyOfRange(this.bytes, 0, this.length);
+        }
+    }
+
+    @Override
     public void read(GraphInput in) throws IOException {
-        int len = in.readInt();
+        int len = in.readVInt();
         this.bytes = ByteArrayUtil.ensureCapacityWithoutCopy(this.bytes, len);
         in.readFully(this.bytes, 0, len);
         this.length = len;
@@ -96,13 +106,13 @@ public class Utf8Id implements Id {
 
     @Override
     public void write(GraphOutput out) throws IOException {
-        out.writeInt(this.length);
+        out.writeVInt(this.length);
         out.write(this.bytes, 0, this.length);
     }
 
     @Override
     public int compareTo(Id obj) {
-        int cmp =  this.type().code() - obj.type().code();
+        int cmp = this.type().code() - obj.type().code();
         if (cmp != 0) {
             return cmp;
         }

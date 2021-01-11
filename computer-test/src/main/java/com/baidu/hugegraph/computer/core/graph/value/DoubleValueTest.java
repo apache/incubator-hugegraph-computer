@@ -48,6 +48,6 @@ public class DoubleValueTest extends BaseCoreTest {
 
     @Test
     public void testReadWrite() throws IOException {
-        testReadWrite(new DoubleValue(Double.MAX_VALUE), new DoubleValue());
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MAX_VALUE));
     }
 }

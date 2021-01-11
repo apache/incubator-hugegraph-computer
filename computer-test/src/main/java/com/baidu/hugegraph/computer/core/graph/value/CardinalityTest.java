@@ -26,27 +26,21 @@ import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class ValueTypeTest {
+public class CardinalityTest {
 
     @Test
     public void test() {
-        Assert.assertEquals(0, ValueType.NULL.byteSize());
-        Assert.assertEquals(4, ValueType.INT.byteSize());
-        Assert.assertEquals(8, ValueType.LONG.byteSize());
-        Assert.assertEquals(4, ValueType.FLOAT.byteSize());
-        Assert.assertEquals(8, ValueType.DOUBLE.byteSize());
-        Assert.assertEquals(-1, ValueType.ID_VALUE.byteSize());
-
-        for (ValueType type : ValueType.values()) {
-            Assert.assertEquals(type, SerialEnum.fromCode(ValueType.class,
-                                                          type.code()));
+        for (Cardinality cardinality : Cardinality.values()) {
+            Assert.assertEquals(cardinality,
+                                SerialEnum.fromCode(Cardinality.class,
+                                                    cardinality.code()));
         }
     }
 
     @Test
     public void testException() {
         Assert.assertThrows(ComputerException.class, () -> {
-            SerialEnum.fromCode(ValueType.class, (byte) -100);
+            SerialEnum.fromCode(Cardinality.class, (byte) -100);
         });
     }
 }

@@ -26,21 +26,27 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.BaseCoreTest;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class NullValueTest extends BaseCoreTest {
+public class FloatValueTest extends BaseCoreTest {
 
     @Test
     public void test() {
-        NullValue nullValue1 = NullValue.get();
-        NullValue nullValue2 = NullValue.get();
-        Assert.assertEquals(ValueType.NULL, nullValue1.type());
-        Assert.assertEquals(nullValue1, NullValue.get());
-        Assert.assertEquals(nullValue1, nullValue2);
-        Assert.assertEquals(0, nullValue1.hashCode());
-        Assert.assertEquals("<null>", nullValue1.toString());
+        FloatValue floatValue1 = new FloatValue();
+        FloatValue floatValue2 = new FloatValue(Float.MIN_VALUE);
+
+        Assert.assertEquals(ValueType.FLOAT, floatValue1.type());
+        Assert.assertEquals(0.0F, floatValue1.value(), 0.0F);
+        Assert.assertEquals(Float.MIN_VALUE, floatValue2.value(), 0.0D);
+
+        floatValue2.value(Float.MAX_VALUE);
+        Assert.assertEquals(Float.MAX_VALUE, floatValue2.value(), 0.0D);
+        Assert.assertNotEquals(floatValue1, floatValue2);
+        Assert.assertEquals(floatValue2, new FloatValue(floatValue2.value()));
+        Assert.assertEquals(Float.hashCode(Float.MAX_VALUE),
+                            floatValue2.hashCode());
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        assertValueEqualAfterWriteAndRead(NullValue.get());
+        assertValueEqualAfterWriteAndRead(new FloatValue(Float.MAX_VALUE));
     }
 }

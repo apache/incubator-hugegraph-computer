@@ -24,19 +24,19 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 
-public class DoubleValue implements Value {
+public class FloatValue implements Value {
 
-    private double value;
+    private float value;
 
-    public DoubleValue() {
-        this.value = 0.0D;
+    public FloatValue() {
+        this.value = 0.0F;
     }
 
-    public DoubleValue(double value) {
+    public FloatValue(float value) {
         this.value = value;
     }
 
-    public double value() {
+    public float value() {
         return this.value;
     }
 
@@ -44,7 +44,7 @@ public class DoubleValue implements Value {
      * This method is reserved for performance, otherwise it will create a new
      * DoubleValue object when change it's value.
      */
-    public void value(double value) {
+    public void value(float value) {
         this.value = value;
     }
 
@@ -55,30 +55,30 @@ public class DoubleValue implements Value {
 
     @Override
     public ValueType type() {
-        return ValueType.DOUBLE;
+        return ValueType.FLOAT;
     }
 
     @Override
     public void read(GraphInput in) throws IOException {
-        this.value = in.readDouble();
+        this.value = in.readFloat();
     }
 
     @Override
     public void write(GraphOutput out) throws IOException {
-        out.writeDouble(this.value);
+        out.writeFloat(this.value);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof DoubleValue)) {
+        if (!(obj instanceof FloatValue)) {
             return false;
         }
-        return ((DoubleValue) obj).value == this.value;
+        return ((FloatValue) obj).value == this.value;
     }
 
     @Override
     public int hashCode() {
-        return Double.hashCode(this.value);
+        return Float.hashCode(this.value);
     }
 
     @Override

@@ -19,21 +19,31 @@
 
 package com.baidu.hugegraph.computer.core.graph.value;
 
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.common.SerialEnum;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
 public final class ValueFactory {
 
-    public static Value createValue(byte code) {
-        ValueType type = ValueType.fromCode(code);
-        return createValue(type);
+    public static Value createValue(byte cardinalityCode, byte typeCode) {
+        Cardinality cardinality = SerialEnum.fromCode(Cardinality.class,
+                                                      cardinalityCode);
+        ValueType type = SerialEnum.fromCode(ValueType.class, typeCode);
+        return createValue(cardinality, type);
     }
 
-    public static Value createValue(ValueType type) {
+    public static Value createValue(Cardinality cardinality, ValueType type) {
+        if (cardinality == Cardinality.LIST) {
+            return new ListValue(type);
+        }
         switch (type) {
             case NULL:
                 return NullValue.get();
+            case INT:
+                return new IntValue();
             case LONG:
                 return new LongValue();
+            case FLOAT:
+                return new FloatValue();
             case DOUBLE:
                 return new DoubleValue();
             case ID_VALUE:

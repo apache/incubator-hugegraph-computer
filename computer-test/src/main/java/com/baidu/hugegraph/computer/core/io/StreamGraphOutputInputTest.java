@@ -22,13 +22,19 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.value.Cardinality;
+import com.baidu.hugegraph.computer.core.graph.value.ListValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
+import com.google.common.collect.Lists;
 
 public class StreamGraphOutputInputTest {
 
@@ -42,8 +48,7 @@ public class StreamGraphOutputInputTest {
             bytes = baos.toByteArray();
         }
 
-        byte[] expect = new byte[]{IdType.LONG.code(),
-                                   0, 0, 0, 0, 0, 0, 0, 100};
+        byte[] expect = new byte[]{IdType.LONG.code(), 100};
         Assert.assertArrayEquals(expect, bytes);
 
         Id longId2 = new LongId();
@@ -53,6 +58,52 @@ public class StreamGraphOutputInputTest {
             longId2 = input.readId();
         }
         Assert.assertEquals(100L, longId2.asLong());
+    }
+
+    @Test
+    public void testWriteReadValue() throws IOException {
+        LongValue longValue1 = new LongValue(100L);
+        byte[] bytes;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             StreamGraphOutput output = new StreamGraphOutput(baos)) {
+            output.writeValue(longValue1);
+            bytes = baos.toByteArray();
+        }
+
+        byte[] expect = new byte[]{Cardinality.SINGLE.code(),
+                                   ValueType.LONG.code(), 100};
+        Assert.assertArrayEquals(expect, bytes);
+
+        LongValue longValue2;
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+             StreamGraphInput input = new StreamGraphInput(bais)) {
+            longValue2 = (LongValue) input.readValue();
+        }
+        Assert.assertEquals(100L, longValue2.value());
+
+        // Test ListValue
+        ListValue listValue1 = new ListValue(ValueType.LONG);
+        listValue1.add(new LongValue(100L));
+        listValue1.add(new LongValue(200L));
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             StreamGraphOutput output = new StreamGraphOutput(baos)) {
+            output.writeValue(listValue1);
+            bytes = baos.toByteArray();
+        }
+
+        expect = new byte[]{Cardinality.LIST.code(), ValueType.LONG.code(),
+                            2, 100, -127, 72};
+        Assert.assertArrayEquals(expect, bytes);
+
+        ListValue listValue2;
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+             StreamGraphInput input = new StreamGraphInput(bais)) {
+            listValue2 = (ListValue) input.readValue();
+        }
+        Assert.assertTrue(ListUtils.isEqualList(
+                          Lists.newArrayList(new LongValue(100L),
+                                             new LongValue(200L)),
+                          listValue2.values()));
     }
 
     @Test

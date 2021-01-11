@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class StreamGraphOutput extends DataOutputStream
                                implements GraphComputerOutput {
@@ -36,6 +37,13 @@ public class StreamGraphOutput extends DataOutputStream
     public void writeId(Id id) throws IOException {
         this.writeByte(id.type().code());
         id.write(this);
+    }
+
+    @Override
+    public void writeValue(Value value) throws IOException {
+        this.writeByte(value.cardinality().code());
+        this.writeByte(value.type().code());
+        value.write(this);
     }
 
     @Override

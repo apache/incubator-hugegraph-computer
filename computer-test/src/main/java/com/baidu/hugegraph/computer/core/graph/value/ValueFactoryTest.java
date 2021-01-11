@@ -27,28 +27,37 @@ import com.baidu.hugegraph.testutil.Assert;
 public class ValueFactoryTest {
 
     @Test
-    public void testCreateId() {
+    public void testCreateValue() {
+        byte singleCode = Cardinality.SINGLE.code();
         Assert.assertEquals(ValueType.NULL,
-                            ValueFactory.createValue(ValueType.NULL.code())
+                            ValueFactory.createValue(singleCode,
+                                                     ValueType.NULL.code())
                                         .type());
         Assert.assertEquals(ValueType.LONG,
-                            ValueFactory.createValue(ValueType.LONG.code())
+                            ValueFactory.createValue(singleCode,
+                                                     ValueType.LONG.code())
                                         .type());
         Assert.assertEquals(ValueType.DOUBLE,
-                            ValueFactory.createValue(ValueType.DOUBLE.code())
+                            ValueFactory.createValue(singleCode,
+                                                     ValueType.DOUBLE.code())
                                         .type());
         Assert.assertEquals(ValueType.ID_VALUE,
-                            ValueFactory.createValue(ValueType.ID_VALUE.code())
+                            ValueFactory.createValue(singleCode,
+                                                     ValueType.ID_VALUE.code())
                                         .type());
 
         Assert.assertEquals(ValueType.NULL,
-                            ValueFactory.createValue(ValueType.NULL).type());
+                            ValueFactory.createValue(Cardinality.SINGLE,
+                                                     ValueType.NULL).type());
         Assert.assertEquals(ValueType.LONG,
-                            ValueFactory.createValue(ValueType.LONG).type());
+                            ValueFactory.createValue(Cardinality.SINGLE,
+                                                     ValueType.LONG).type());
         Assert.assertEquals(ValueType.DOUBLE,
-                            ValueFactory.createValue(ValueType.DOUBLE).type());
+                            ValueFactory.createValue(Cardinality.SINGLE,
+                                                     ValueType.DOUBLE).type());
         Assert.assertEquals(ValueType.ID_VALUE,
-                            ValueFactory.createValue(ValueType.ID_VALUE)
+                            ValueFactory.createValue(Cardinality.SINGLE,
+                                                     ValueType.ID_VALUE)
                                         .type());
     }
 }

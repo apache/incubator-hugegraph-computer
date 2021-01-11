@@ -24,27 +24,27 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 
-public class DoubleValue implements Value {
+public class IntValue implements Value {
 
-    private double value;
+    private int value;
 
-    public DoubleValue() {
-        this.value = 0.0D;
+    public IntValue() {
+        this.value = 0;
     }
 
-    public DoubleValue(double value) {
+    public IntValue(int value) {
         this.value = value;
     }
 
-    public double value() {
+    public int value() {
         return this.value;
     }
 
     /*
      * This method is reserved for performance, otherwise it will create a new
-     * DoubleValue object when change it's value.
+     * IntValue object when change it's value.
      */
-    public void value(double value) {
+    public void value(int value) {
         this.value = value;
     }
 
@@ -55,30 +55,30 @@ public class DoubleValue implements Value {
 
     @Override
     public ValueType type() {
-        return ValueType.DOUBLE;
+        return ValueType.INT;
     }
 
     @Override
     public void read(GraphInput in) throws IOException {
-        this.value = in.readDouble();
+        this.value = in.readVInt();
     }
 
     @Override
     public void write(GraphOutput out) throws IOException {
-        out.writeDouble(this.value);
+        out.writeVInt(this.value);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof DoubleValue)) {
+        if (!(obj instanceof IntValue)) {
             return false;
         }
-        return ((DoubleValue) obj).value == this.value;
+        return ((IntValue) obj).value == this.value;
     }
 
     @Override
     public int hashCode() {
-        return Double.hashCode(this.value);
+        return Integer.hashCode(this.value);
     }
 
     @Override

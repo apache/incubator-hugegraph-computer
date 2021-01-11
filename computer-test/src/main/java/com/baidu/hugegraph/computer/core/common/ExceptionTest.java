@@ -17,13 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.exception;
+package com.baidu.hugegraph.computer.core.common;
 
 import java.io.IOException;
 import java.nio.charset.IllegalCharsetNameException;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class ExceptionTest {

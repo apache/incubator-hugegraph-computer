@@ -25,7 +25,9 @@ import java.io.IOException;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
@@ -34,7 +36,8 @@ import com.baidu.hugegraph.testutil.Assert;
 
 public class BaseCoreTest {
 
-    public static void testReadWrite(Id oldId, Id newId) throws IOException {
+    public static void assertIdEqualAfterWriteAndRead(Id oldId)
+                                                      throws IOException {
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             GraphOutput output = new StreamGraphOutput(baos);
@@ -42,6 +45,7 @@ public class BaseCoreTest {
             bytes = baos.toByteArray();
         }
 
+        Id newId = IdFactory.createID(oldId.type());
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             GraphInput input = new StreamGraphInput(bais);
             newId.read(input);
@@ -49,8 +53,8 @@ public class BaseCoreTest {
         }
     }
 
-    public static void testReadWrite(Value oldValue, Value newValue)
-                                     throws IOException {
+    public static void assertValueEqualAfterWriteAndRead(Value oldValue)
+                                                         throws IOException {
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             GraphOutput output = new StreamGraphOutput(baos);
@@ -58,6 +62,8 @@ public class BaseCoreTest {
             bytes = baos.toByteArray();
         }
 
+        Value newValue = ValueFactory.createValue(oldValue.cardinality(),
+                                                  oldValue.type());
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             GraphInput input = new StreamGraphInput(bais);
             newValue.read(input);

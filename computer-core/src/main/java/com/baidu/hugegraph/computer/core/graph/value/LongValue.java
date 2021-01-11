@@ -49,18 +49,23 @@ public class LongValue implements Value {
     }
 
     @Override
+    public Cardinality cardinality() {
+        return Cardinality.SINGLE;
+    }
+
+    @Override
     public ValueType type() {
         return ValueType.LONG;
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
-        out.writeLong(this.value);
+    public void read(GraphInput in) throws IOException {
+        this.value = in.readVLong();
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
-        this.value = in.readLong();
+    public void write(GraphOutput out) throws IOException {
+        out.writeVLong(this.value);
     }
 
     @Override

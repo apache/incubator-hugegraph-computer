@@ -39,6 +39,11 @@ public class NullValue implements Value {
     }
 
     @Override
+    public Cardinality cardinality() {
+        return Cardinality.SINGLE;
+    }
+
+    @Override
     public ValueType type() {
         return ValueType.NULL;
     }

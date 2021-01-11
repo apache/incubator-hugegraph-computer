@@ -22,7 +22,8 @@ package com.baidu.hugegraph.computer.core.graph.id;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.common.SerialEnum;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class IdTypeTest {
@@ -34,14 +35,15 @@ public class IdTypeTest {
         Assert.assertEquals(new UuidId(), IdFactory.createID(IdType.UUID));
 
         for (IdType type : IdType.values()) {
-            Assert.assertEquals(type, IdType.fromCode(type.code()));
+            Assert.assertEquals(type, SerialEnum.fromCode(IdType.class,
+                                                          type.code()));
         }
     }
 
     @Test
     public void testException() {
         Assert.assertThrows(ComputerException.class, () -> {
-            IdType.fromCode((byte) -100);
+            SerialEnum.fromCode(IdType.class, (byte) -100);
         });
     }
 }

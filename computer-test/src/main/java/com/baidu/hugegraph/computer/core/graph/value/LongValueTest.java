@@ -47,6 +47,6 @@ public class LongValueTest extends BaseCoreTest {
 
     @Test
     public void testReadWrite() throws IOException {
-        testReadWrite(new LongValue(Long.MAX_VALUE), new LongValue());
+        assertValueEqualAfterWriteAndRead(new LongValue(Long.MAX_VALUE));
     }
 }

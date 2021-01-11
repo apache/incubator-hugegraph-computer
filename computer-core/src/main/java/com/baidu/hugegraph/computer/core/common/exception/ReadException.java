@@ -17,25 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.exception;
+package com.baidu.hugegraph.computer.core.common.exception;
 
-public class ComputeException extends ComputerException {
+public class ReadException extends ComputerException {
 
-    private static final long serialVersionUID = 185790114205374242L;
+    private static final long serialVersionUID = 8073034531965759161L;
 
-    public ComputeException(String message) {
+    public ReadException(String message) {
         super(message);
     }
 
-    public ComputeException(String message, Throwable cause) {
+    public ReadException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public ComputeException(String message, Object... args) {
+    public ReadException(String message, Object... args) {
         super(message, args);
     }
 
-    public ComputeException(String message, Throwable cause, Object... args) {
+    public ReadException(String message, Throwable cause, Object... args) {
         super(message, cause, args);
     }
 }

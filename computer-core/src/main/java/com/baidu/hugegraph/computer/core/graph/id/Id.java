@@ -32,4 +32,6 @@ public interface Id extends Readable, Writable, Comparable<Id> {
     Object asObject();
 
     long asLong();
+
+    byte[] asBytes();
 }

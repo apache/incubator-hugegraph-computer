@@ -19,13 +19,14 @@
 
 package com.baidu.hugegraph.computer.core.graph.id;
 
-import com.baidu.hugegraph.computer.core.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.common.SerialEnum;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
 public final class IdFactory {
 
     // Maybe can reuse Id
     public static Id createID(byte code) {
-        IdType type = IdType.fromCode(code);
+        IdType type = SerialEnum.fromCode(IdType.class, code);
         return createID(type);
     }
 

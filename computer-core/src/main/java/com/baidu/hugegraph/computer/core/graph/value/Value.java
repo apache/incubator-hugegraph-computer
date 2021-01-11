@@ -24,5 +24,7 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 
 public interface Value extends Writable, Readable {
 
+    Cardinality cardinality();
+
     ValueType type();
 }

@@ -25,6 +25,8 @@ import java.io.InputStream;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
 
@@ -41,6 +43,15 @@ public class StreamGraphInput extends DataInputStream
         Id id = IdFactory.createID(type);
         id.read(this);
         return id;
+    }
+
+    @Override
+    public Value readValue() throws IOException {
+        byte cardinality = this.readByte();
+        byte type = this.readByte();
+        Value value = ValueFactory.createValue(cardinality, type);
+        value.read(this);
+        return value;
     }
 
     @Override

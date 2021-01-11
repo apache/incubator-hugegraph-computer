@@ -56,6 +56,6 @@ public class LongIdTest extends BaseCoreTest {
 
     @Test
     public void testReadWrite() throws IOException {
-        testReadWrite(new LongId(100L), new LongId());
+        assertIdEqualAfterWriteAndRead(new LongId(100L));
     }
 }

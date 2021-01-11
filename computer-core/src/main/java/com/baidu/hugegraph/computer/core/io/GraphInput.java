@@ -20,6 +20,18 @@
 package com.baidu.hugegraph.computer.core.io;
 
 import java.io.DataInput;
+import java.io.IOException;
+
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public interface GraphInput extends DataInput {
+
+    Id readId() throws IOException;
+
+    Value readValue() throws IOException;
+
+    int readVInt() throws IOException;
+
+    long readVLong() throws IOException;
 }

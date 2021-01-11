@@ -19,15 +19,5 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.IOException;
-
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-
 public interface GraphComputerInput extends GraphInput {
-
-    Id readId() throws IOException;
-
-    int readVInt() throws IOException;
-
-    long readVLong() throws IOException;
 }

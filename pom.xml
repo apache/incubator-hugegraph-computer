@@ -119,7 +119,7 @@
 
     <profiles>
         <profile>
-            <id>core-test</id>
+            <id>unit-test</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -131,7 +131,7 @@
                         <version>2.20</version>
                         <executions>
                             <execution>
-                                <id>core-test</id>
+                                <id>unit-test</id>
                                 <goals>
                                     <goal>test</goal>
                                 </goals>
