@@ -33,6 +33,7 @@
         <compiler.source>1.8</compiler.source>
         <compiler.target>1.8</compiler.target>
         <shell-executable>bash</shell-executable>
+        <etcd.version>0.5.4</etcd.version>
     </properties>
 
     <modules>
@@ -56,6 +57,11 @@
                 <groupId>com.baidu.hugegraph</groupId>
                 <artifactId>hugegraph-client</artifactId>
                 <version>1.9.1</version>
+            </dependency>
+            <dependency>
+                <groupId>io.etcd</groupId>
+                <artifactId>jetcd-core</artifactId>
+                <version>${etcd.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
