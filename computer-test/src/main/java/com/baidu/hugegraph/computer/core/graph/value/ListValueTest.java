@@ -40,6 +40,8 @@ public class ListValueTest extends BaseCoreTest {
 
         Assert.assertEquals(ValueType.LIST_VALUE, listValue1.type());
         Assert.assertEquals(ValueType.INT, listValue1.elemType());
+        Assert.assertEquals(new IntValue(100), listValue1.get(0));
+        Assert.assertEquals(1, listValue1.size());
         Assert.assertTrue(ListUtils.isEqualList(
                           Lists.newArrayList(new IntValue(100)),
                           listValue1.values()));
@@ -59,6 +61,8 @@ public class ListValueTest extends BaseCoreTest {
     @Test
     public void testReadWrite() throws IOException {
         ListValue<IntValue> oldValue = new ListValue<>(ValueType.INT);
+        assertValueEqualAfterWriteAndRead(oldValue);
+
         oldValue.add(new IntValue(100));
         oldValue.add(new IntValue(200));
         assertValueEqualAfterWriteAndRead(oldValue);

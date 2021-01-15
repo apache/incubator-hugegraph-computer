@@ -20,8 +20,8 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.collections.ListUtils;
@@ -42,18 +42,32 @@ public class ListValue<T extends Value> implements Value {
 
     public ListValue(ValueType elemType) {
         this.elemType = elemType;
-        this.values = new LinkedList<>();
+        this.values = new ArrayList<>();
     }
 
     public void add(T value) {
-        E.checkArgument(value != null && this.elemType == value.type(),
-                        "The value to be added can't be null and type " +
-                        "should be %s, actual is %s", this.elemType, value);
+        E.checkArgument(value != null, "The value to be added can't be null");
+        if (this.elemType != ValueType.UNKNOWN) {
+            E.checkArgument(this.elemType == value.type(),
+                            "The value to be added can't be null and type " +
+                            "should be %s, actual is %s",
+                            this.elemType, value);
+        } else {
+            this.elemType = value.type();
+        }
         this.values.add(value);
+    }
+
+    public T get(int index) {
+        return this.values.get(index);
     }
 
     public List<T> values() {
         return Collections.unmodifiableList(this.values);
+    }
+
+    public int size() {
+        return this.values.size();
     }
 
     @Override
@@ -72,12 +86,12 @@ public class ListValue<T extends Value> implements Value {
 
     protected void read(GraphInput in, boolean readElemType)
                         throws IOException {
+        int size = in.readInt();
         if (readElemType) {
             this.elemType = SerialEnum.fromCode(ValueType.class,
                                                 in.readByte());
         }
-        int size = in.readInt();
-        this.values = new LinkedList<>();
+        this.values = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
             T value = (T) ValueFactory.createValue(this.elemType);
@@ -93,10 +107,10 @@ public class ListValue<T extends Value> implements Value {
 
     protected void write(GraphOutput out, boolean writeElemType)
                          throws IOException {
+        out.writeInt(this.values.size());
         if (writeElemType) {
             out.writeByte(this.elemType.code());
         }
-        out.writeInt(this.values.size());
         for (T value : this.values) {
             value.write(out);
         }
