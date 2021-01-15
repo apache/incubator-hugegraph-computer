@@ -27,8 +27,10 @@ import java.io.InputStream;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
 
 public class IdValue implements Value, Comparable<IdValue> {
@@ -49,7 +51,7 @@ public class IdValue implements Value, Comparable<IdValue> {
     public Id id() {
         try (InputStream bais = new ByteArrayInputStream(this.bytes, 0,
                                                          this.length)) {
-            StreamGraphInput input = new StreamGraphInput(bais);
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             return input.readId();
         } catch (IOException e) {
             throw new ComputerException("Failed to read Id", e);
@@ -62,7 +64,7 @@ public class IdValue implements Value, Comparable<IdValue> {
     }
 
     @Override
-    public void read(StreamGraphInput in) throws IOException {
+    public void read(GraphInput in) throws IOException {
         int len = in.readInt();
         this.bytes = ByteArrayUtil.ensureCapacityWithoutCopy(this.bytes, len);
         in.readFully(this.bytes, 0, len);
@@ -70,7 +72,7 @@ public class IdValue implements Value, Comparable<IdValue> {
     }
 
     @Override
-    public void write(StreamGraphOutput out) throws IOException {
+    public void write(GraphOutput out) throws IOException {
         out.writeInt(this.length);
         out.write(this.bytes, 0, this.length);
     }

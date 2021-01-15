@@ -28,6 +28,8 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
+import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
+import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.testutil.Assert;
@@ -38,14 +40,14 @@ public class BaseCoreTest {
                                                       throws IOException {
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new StreamGraphOutput(baos);
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
             oldId.write(output);
             bytes = baos.toByteArray();
         }
 
         Id newId = IdFactory.createID(oldId.type());
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new StreamGraphInput(bais);
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             newId.read(input);
             Assert.assertEquals(oldId, newId);
         }
@@ -55,14 +57,14 @@ public class BaseCoreTest {
                                                          throws IOException {
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new StreamGraphOutput(baos);
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
             oldValue.write(output);
             bytes = baos.toByteArray();
         }
 
         Value newValue = ValueFactory.createValue(oldValue.type());
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new StreamGraphInput(bais);
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             newValue.read(input);
             Assert.assertEquals(oldValue, newValue);
         }

@@ -17,31 +17,31 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.io;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public class IdValueList extends ListValue<IdValue> {
+public abstract class StructGraphOutput implements GraphOutput {
 
-    public IdValueList() {
-        super(ValueType.ID_VALUE);
+    protected DataOutputStream out;
+
+    public StructGraphOutput(DataOutputStream out) {
+        this.out = out;
     }
 
     @Override
-    public ValueType type() {
-        return ValueType.ID_VALUE_LIST;
+    public void writeId(Id id) throws IOException {
+        this.writeByte(id.type().code());
+        id.write(this);
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
-        this.read(in, false);
-    }
-
-    @Override
-    public void write(GraphOutput out) throws IOException {
-        this.write(out, false);
+    public void writeValue(Value value) throws IOException {
+        this.writeByte(value.type().code());
+        value.write(this);
     }
 }

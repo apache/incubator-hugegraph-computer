@@ -27,6 +27,8 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public interface GraphOutput extends DataOutput {
 
+    // void writeVertex(Vertex vertex) throws IOException;
+
     void writeId(Id id) throws IOException;
 
     void writeValue(Value value) throws IOException;

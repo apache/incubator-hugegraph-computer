@@ -26,14 +26,19 @@ import java.util.List;
 
 import org.apache.commons.collections.ListUtils;
 
-import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
+import com.baidu.hugegraph.computer.core.common.SerialEnum;
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.util.E;
 
-public abstract class ListValue<T extends Value> implements Value {
+public class ListValue<T extends Value> implements Value {
 
     private ValueType elemType;
     private List<T> values;
+
+    public ListValue() {
+        this(ValueType.UNKNOWN);
+    }
 
     public ListValue(ValueType elemType) {
         this.elemType = elemType;
@@ -51,13 +56,27 @@ public abstract class ListValue<T extends Value> implements Value {
         return Collections.unmodifiableList(this.values);
     }
 
+    @Override
+    public ValueType type() {
+        return ValueType.LIST_VALUE;
+    }
+
     public ValueType elemType() {
         return this.elemType;
     }
 
     @Override
-    public void read(StreamGraphInput in) throws IOException {
-        int size = in.readVInt();
+    public void read(GraphInput in) throws IOException {
+        this.read(in, true);
+    }
+
+    protected void read(GraphInput in, boolean readElemType)
+                        throws IOException {
+        if (readElemType) {
+            this.elemType = SerialEnum.fromCode(ValueType.class,
+                                                in.readByte());
+        }
+        int size = in.readInt();
         this.values = new LinkedList<>();
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
@@ -68,8 +87,16 @@ public abstract class ListValue<T extends Value> implements Value {
     }
 
     @Override
-    public void write(StreamGraphOutput out) throws IOException {
-        out.writeVInt(this.values.size());
+    public void write(GraphOutput out) throws IOException {
+        this.write(out, true);
+    }
+
+    protected void write(GraphOutput out, boolean writeElemType)
+                         throws IOException {
+        if (writeElemType) {
+            out.writeByte(this.elemType.code());
+        }
+        out.writeInt(this.values.size());
         for (T value : this.values) {
             value.write(out);
         }

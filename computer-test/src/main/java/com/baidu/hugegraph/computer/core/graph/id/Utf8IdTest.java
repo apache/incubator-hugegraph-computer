@@ -28,7 +28,6 @@ import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.NumericUtil;
 
 public class Utf8IdTest extends BaseCoreTest {
 

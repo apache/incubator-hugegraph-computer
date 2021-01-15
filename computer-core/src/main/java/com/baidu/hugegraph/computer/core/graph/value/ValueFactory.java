@@ -47,6 +47,8 @@ public final class ValueFactory {
                 return new IdValueList();
             case ID_VALUE_LIST_LIST:
                 return new IdValueListList();
+            case LIST_VALUE:
+                return new ListValue<>();
             default:
                 throw new ComputerException("Can't create Value for %s",
                                             type.name());

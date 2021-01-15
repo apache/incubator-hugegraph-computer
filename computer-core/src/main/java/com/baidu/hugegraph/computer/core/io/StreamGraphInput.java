@@ -30,10 +30,16 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
 
-public class StreamGraphInput extends DataInputStream implements GraphInput {
+public class StreamGraphInput implements GraphInput {
+
+    private final DataInputStream in;
 
     public StreamGraphInput(InputStream in) {
-        super(in);
+        this(new DataInputStream(in));
+    }
+
+    public StreamGraphInput(DataInputStream in) {
+        this.in = in;
     }
 
     @Override
@@ -52,7 +58,6 @@ public class StreamGraphInput extends DataInputStream implements GraphInput {
         return value;
     }
 
-    @Override
     public int readVInt() throws IOException {
         byte leading = this.readByte();
         E.checkArgument(leading != 0x80,
@@ -84,7 +89,6 @@ public class StreamGraphInput extends DataInputStream implements GraphInput {
         return value;
     }
 
-    @Override
     public long readVLong() throws IOException {
         byte leading = this.readByte();
         E.checkArgument(leading != 0x80,
@@ -114,5 +118,92 @@ public class StreamGraphInput extends DataInputStream implements GraphInput {
                         "Unexpected varlong %s with leading byte '0x%s'",
                         value, Bytes.toHex(leading));
         return value;
+    }
+
+    public int readUInt8() throws IOException {
+        return this.readByte() & 0x000000ff;
+    }
+
+    public int readUInt16() throws IOException {
+        return this.readShort() & 0x0000ffff;
+    }
+
+    public long readUInt32() throws IOException {
+        return this.readInt() & 0xffffffffL;
+    }
+
+    @Override
+    public void readFully(byte[] b) throws IOException {
+        this.in.readFully(b);
+    }
+
+    @Override
+    public void readFully(byte[] b, int off, int len) throws IOException {
+        this.in.readFully(b, off, len);
+    }
+
+    @Override
+    public int skipBytes(int n) throws IOException {
+        return this.in.skipBytes(n);
+    }
+
+    @Override
+    public boolean readBoolean() throws IOException {
+        return this.in.readBoolean();
+    }
+
+    @Override
+    public byte readByte() throws IOException {
+        return this.in.readByte();
+    }
+
+    @Override
+    public int readUnsignedByte() throws IOException {
+        return this.in.readUnsignedByte();
+    }
+
+    @Override
+    public short readShort() throws IOException {
+        return this.in.readShort();
+    }
+
+    @Override
+    public int readUnsignedShort() throws IOException {
+        return this.in.readUnsignedShort();
+    }
+
+    @Override
+    public char readChar() throws IOException {
+        return this.in.readChar();
+    }
+
+    @Override
+    public int readInt() throws IOException {
+        return this.in.readInt();
+    }
+
+    @Override
+    public long readLong() throws IOException {
+        return this.in.readLong();
+    }
+
+    @Override
+    public float readFloat() throws IOException {
+        return this.in.readFloat();
+    }
+
+    @Override
+    public double readDouble() throws IOException {
+        return this.in.readDouble();
+    }
+
+    @Override
+    public String readLine() throws IOException {
+        return this.in.readLine();
+    }
+
+    @Override
+    public String readUTF() throws IOException {
+        return this.in.readUTF();
     }
 }

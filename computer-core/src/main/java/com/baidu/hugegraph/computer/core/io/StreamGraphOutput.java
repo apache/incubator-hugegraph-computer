@@ -23,14 +23,20 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public class StreamGraphOutput extends DataOutputStream
-                               implements GraphOutput {
+public class StreamGraphOutput implements GraphOutput {
+
+    private final DataOutputStream out;
 
     public StreamGraphOutput(OutputStream out) {
-        super(out);
+        this(new DataOutputStream(out));
+    }
+
+    public StreamGraphOutput(DataOutputStream out) {
+        this.out = out;
     }
 
     @Override
@@ -91,5 +97,90 @@ public class StreamGraphOutput extends DataOutputStream
             this.writeByte(0x80 | ((int) (value >>> 7) & 0x7f));
         }
         this.write((int) value & 0x7f);
+    }
+
+    public void writeUInt8(int val) throws IOException {
+        assert val <= Constants.UINT8_MAX;
+        this.write(val);
+    }
+
+    public void writeUInt16(int val) throws IOException {
+        assert val <= Constants.UINT16_MAX;
+        this.writeShort(val);
+    }
+
+    public void writeUInt32(long val) throws IOException {
+        assert val <= Constants.UINT32_MAX;
+        this.writeInt((int) val);
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        this.out.write(b);
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+        this.out.write(b);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        this.out.write(b, off, len);
+    }
+
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+        this.out.writeBoolean(v);
+    }
+
+    @Override
+    public void writeByte(int v) throws IOException {
+        this.out.writeByte(v);
+    }
+
+    @Override
+    public void writeShort(int v) throws IOException {
+        this.out.writeShort(v);
+    }
+
+    @Override
+    public void writeChar(int v) throws IOException {
+        this.out.writeChar(v);
+    }
+
+    @Override
+    public void writeInt(int v) throws IOException {
+        this.out.writeInt(v);
+    }
+
+    @Override
+    public void writeLong(long v) throws IOException {
+        this.out.writeLong(v);
+    }
+
+    @Override
+    public void writeFloat(float v) throws IOException {
+        this.out.writeFloat(v);
+    }
+
+    @Override
+    public void writeDouble(double v) throws IOException {
+        this.out.writeDouble(v);
+    }
+
+    @Override
+    public void writeBytes(String s) throws IOException {
+        this.out.writeBytes(s);
+    }
+
+    @Override
+    public void writeChars(String s) throws IOException {
+        this.out.writeChars(s);
+    }
+
+    @Override
+    public void writeUTF(String s) throws IOException {
+        this.out.writeUTF(s);
     }
 }

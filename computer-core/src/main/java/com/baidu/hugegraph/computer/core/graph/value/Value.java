@@ -19,17 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.graph.value;
 
-import java.io.IOException;
-
 import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
 public interface Value extends Writable, Readable {
 
     ValueType type();
-
-    default void writeType(StreamGraphOutput out) throws IOException {
-        out.writeByte(this.type().code());
-    }
 }

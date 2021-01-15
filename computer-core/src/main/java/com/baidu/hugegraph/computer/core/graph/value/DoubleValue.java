@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
 
 public class DoubleValue implements Value {
 
@@ -54,12 +54,12 @@ public class DoubleValue implements Value {
     }
 
     @Override
-    public void read(StreamGraphInput in) throws IOException {
+    public void read(GraphInput in) throws IOException {
         this.value = in.readDouble();
     }
 
     @Override
-    public void write(StreamGraphOutput out) throws IOException {
+    public void write(GraphOutput out) throws IOException {
         out.writeDouble(this.value);
     }
 
