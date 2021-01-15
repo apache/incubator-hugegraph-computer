@@ -4,5 +4,5 @@ set -ev
 
 TRAVIS_DIR=`dirname $0`
 
-sh start-etcd.sh
+sh ${TRAVIS_DIR}/start-etcd.sh
 echo "Installing requirments..."
