@@ -30,8 +30,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
 
-public class StreamGraphInput extends DataInputStream
-                              implements GraphComputerInput {
+public class StreamGraphInput extends DataInputStream implements GraphInput {
 
     public StreamGraphInput(InputStream in) {
         super(in);
@@ -47,9 +46,8 @@ public class StreamGraphInput extends DataInputStream
 
     @Override
     public Value readValue() throws IOException {
-        byte cardinality = this.readByte();
-        byte type = this.readByte();
-        Value value = ValueFactory.createValue(cardinality, type);
+        byte typeCode = this.readByte();
+        Value value = ValueFactory.createValue(typeCode);
         value.read(this);
         return value;
     }

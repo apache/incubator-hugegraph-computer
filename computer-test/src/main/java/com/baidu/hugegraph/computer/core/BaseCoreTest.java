@@ -28,8 +28,6 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.testutil.Assert;
@@ -40,14 +38,14 @@ public class BaseCoreTest {
                                                       throws IOException {
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            GraphOutput output = new StreamGraphOutput(baos);
+            StreamGraphOutput output = new StreamGraphOutput(baos);
             oldId.write(output);
             bytes = baos.toByteArray();
         }
 
         Id newId = IdFactory.createID(oldId.type());
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            GraphInput input = new StreamGraphInput(bais);
+            StreamGraphInput input = new StreamGraphInput(bais);
             newId.read(input);
             Assert.assertEquals(oldId, newId);
         }
@@ -57,15 +55,14 @@ public class BaseCoreTest {
                                                          throws IOException {
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            GraphOutput output = new StreamGraphOutput(baos);
+            StreamGraphOutput output = new StreamGraphOutput(baos);
             oldValue.write(output);
             bytes = baos.toByteArray();
         }
 
-        Value newValue = ValueFactory.createValue(oldValue.cardinality(),
-                                                  oldValue.type());
+        Value newValue = ValueFactory.createValue(oldValue.type());
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            GraphInput input = new StreamGraphInput(bais);
+            StreamGraphInput input = new StreamGraphInput(bais);
             newValue.read(input);
             Assert.assertEquals(oldValue, newValue);
         }

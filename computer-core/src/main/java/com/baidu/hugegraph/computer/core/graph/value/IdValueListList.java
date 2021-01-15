@@ -17,7 +17,16 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.graph.value;
 
-public interface GraphWriteBackOutput extends GraphOutput {
+public class IdValueListList extends ListValue<IdValueList> {
+
+    public IdValueListList() {
+        super(ValueType.ID_VALUE_LIST);
+    }
+
+    @Override
+    public ValueType type() {
+        return ValueType.ID_VALUE_LIST_LIST;
+    }
 }

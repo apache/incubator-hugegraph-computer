@@ -23,5 +23,5 @@ import java.io.IOException;
 
 public interface Writable {
 
-    void write(GraphOutput out) throws IOException;
+    void write(StreamGraphOutput out) throws IOException;
 }

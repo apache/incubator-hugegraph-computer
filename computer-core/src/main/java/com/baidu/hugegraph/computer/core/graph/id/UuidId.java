@@ -26,8 +26,7 @@ import java.util.UUID;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 
 public class UuidId implements Id {
@@ -82,13 +81,13 @@ public class UuidId implements Id {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(StreamGraphInput in) throws IOException {
         this.high = in.readLong();
         this.low = in.readLong();
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(StreamGraphOutput out) throws IOException {
         out.writeLong(this.high);
         out.writeLong(this.low);
     }

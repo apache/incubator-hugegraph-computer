@@ -27,8 +27,7 @@ import java.util.Arrays;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
@@ -97,7 +96,7 @@ public class Utf8Id implements Id {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(StreamGraphInput in) throws IOException {
         int len = in.readVInt();
         this.bytes = ByteArrayUtil.ensureCapacityWithoutCopy(this.bytes, len);
         in.readFully(this.bytes, 0, len);
@@ -105,7 +104,7 @@ public class Utf8Id implements Id {
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(StreamGraphOutput out) throws IOException {
         out.writeVInt(this.length);
         out.write(this.bytes, 0, this.length);
     }

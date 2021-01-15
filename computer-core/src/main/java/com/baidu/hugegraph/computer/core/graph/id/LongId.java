@@ -24,8 +24,7 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.util.NumericUtil;
 
@@ -48,8 +47,8 @@ public class LongId implements Id {
 
     @Override
     public IdValue idValue() {
-        // len = Byte.BYTES + Long.BYTES;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(9)) {
+        // len = id type(1 byte) + long data(1 ~ 10 bytes)
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(11)) {
             StreamGraphOutput output = new StreamGraphOutput(baos);
             output.writeId(this);
             return new IdValue(baos.toByteArray());
@@ -75,12 +74,12 @@ public class LongId implements Id {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(StreamGraphInput in) throws IOException {
         this.id = in.readVLong();
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(StreamGraphOutput out) throws IOException {
         out.writeVLong(this.id);
     }
 

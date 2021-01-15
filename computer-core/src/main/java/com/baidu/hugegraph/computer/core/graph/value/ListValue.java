@@ -26,57 +26,51 @@ import java.util.List;
 
 import org.apache.commons.collections.ListUtils;
 
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.util.E;
 
-public class ListValue implements Value {
+public abstract class ListValue<T extends Value> implements Value {
 
-    private ValueType valueType;
-    private List<Value> values;
+    private ValueType elemType;
+    private List<T> values;
 
-    public ListValue(ValueType valueType) {
-        this.valueType = valueType;
+    public ListValue(ValueType elemType) {
+        this.elemType = elemType;
         this.values = new LinkedList<>();
     }
 
-    public void add(Value value) {
-        E.checkArgument(value != null && this.valueType == value.type(),
+    public void add(T value) {
+        E.checkArgument(value != null && this.elemType == value.type(),
                         "The value to be added can't be null and type " +
-                        "should be %s, actual is %s", this.valueType, value);
+                        "should be %s, actual is %s", this.elemType, value);
         this.values.add(value);
     }
 
-    public List<Value> values() {
+    public List<T> values() {
         return Collections.unmodifiableList(this.values);
     }
 
-    @Override
-    public Cardinality cardinality() {
-        return Cardinality.LIST;
+    public ValueType elemType() {
+        return this.elemType;
     }
 
     @Override
-    public ValueType type() {
-        return this.valueType;
-    }
-
-    @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(StreamGraphInput in) throws IOException {
         int size = in.readVInt();
         this.values = new LinkedList<>();
         for (int i = 0; i < size; i++) {
-            Value value = ValueFactory.createValue(Cardinality.SINGLE,
-                                                   this.valueType);
+            @SuppressWarnings("unchecked")
+            T value = (T) ValueFactory.createValue(this.elemType);
             value.read(in);
             this.values.add(value);
         }
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(StreamGraphOutput out) throws IOException {
         out.writeVInt(this.values.size());
-        for (Value value : this.values) {
+        for (T value : this.values) {
             value.write(out);
         }
     }
@@ -87,7 +81,7 @@ public class ListValue implements Value {
             return false;
         }
         ListValue other = (ListValue) obj;
-        if (this.valueType != other.valueType) {
+        if (this.elemType != other.elemType) {
             return false;
         }
         return ListUtils.isEqualList(this.values, other.values);
@@ -100,7 +94,7 @@ public class ListValue implements Value {
 
     @Override
     public String toString() {
-        return "ListValue{valueType=" + this.valueType +
-                ", size=" + this.values.size() + "}";
+        return String.format("ListValue{elemType=%s" + ", size=%s}",
+                             this.elemType, this.values.size());
     }
 }

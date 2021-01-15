@@ -30,8 +30,4 @@ public interface GraphOutput extends DataOutput {
     void writeId(Id id) throws IOException;
 
     void writeValue(Value value) throws IOException;
-
-    void writeVInt(int value) throws IOException;
-
-    void writeVLong(long value) throws IOException;
 }

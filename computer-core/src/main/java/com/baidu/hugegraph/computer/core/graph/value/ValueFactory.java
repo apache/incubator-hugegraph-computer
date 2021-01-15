@@ -24,17 +24,12 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
 public final class ValueFactory {
 
-    public static Value createValue(byte cardinalityCode, byte typeCode) {
-        Cardinality cardinality = SerialEnum.fromCode(Cardinality.class,
-                                                      cardinalityCode);
-        ValueType type = SerialEnum.fromCode(ValueType.class, typeCode);
-        return createValue(cardinality, type);
+    public static Value createValue(byte code) {
+        ValueType type = SerialEnum.fromCode(ValueType.class, code);
+        return createValue(type);
     }
 
-    public static Value createValue(Cardinality cardinality, ValueType type) {
-        if (cardinality == Cardinality.LIST) {
-            return new ListValue(type);
-        }
+    public static Value createValue(ValueType type) {
         switch (type) {
             case NULL:
                 return NullValue.get();
@@ -48,6 +43,10 @@ public final class ValueFactory {
                 return new DoubleValue();
             case ID_VALUE:
                 return new IdValue();
+            case ID_VALUE_LIST:
+                return new IdValueList();
+            case ID_VALUE_LIST_LIST:
+                return new IdValueListList();
             default:
                 throw new ComputerException("Can't create Value for %s",
                                             type.name());

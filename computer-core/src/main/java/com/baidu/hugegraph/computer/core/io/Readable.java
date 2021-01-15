@@ -23,5 +23,5 @@ import java.io.IOException;
 
 public interface Readable {
 
-    void read(GraphInput in) throws IOException;
+    void read(StreamGraphInput in) throws IOException;
 }

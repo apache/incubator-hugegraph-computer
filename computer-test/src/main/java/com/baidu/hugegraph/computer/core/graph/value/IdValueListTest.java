@@ -25,41 +25,47 @@ import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.Lists;
 
-public class ListValueTest extends BaseCoreTest {
+public class IdValueListTest extends BaseCoreTest {
 
     @Test
     public void test() {
-        ListValue listValue1 = new ListValue(ValueType.INT);
-        ListValue listValue2 = new ListValue(ValueType.INT);
+        LongId longId1 = new LongId(100L);
+        LongId longId2 = new LongId(200L);
+        IdValueList listValue1 = new IdValueList();
+        IdValueList listValue2 = new IdValueList();
 
-        listValue1.add(new IntValue(100));
-        listValue2.add(new IntValue(100));
+        listValue1.add(longId1.idValue());
+        listValue2.add(longId1.idValue());
 
-        Assert.assertEquals(Cardinality.LIST, listValue1.cardinality());
-        Assert.assertEquals(ValueType.INT, listValue1.type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST, listValue1.type());
+        Assert.assertEquals(ValueType.ID_VALUE, listValue1.elemType());
         Assert.assertTrue(ListUtils.isEqualList(
-                          Lists.newArrayList(new IntValue(100)),
+                          Lists.newArrayList(longId1.idValue()),
                           listValue1.values()));
         Assert.assertEquals(listValue1, listValue2);
 
-        listValue2.add(new IntValue(200));
+        listValue2.add(longId2.idValue());
         Assert.assertTrue(ListUtils.isEqualList(
-                          Lists.newArrayList(new IntValue(100),
-                                             new IntValue(200)),
+                          Lists.newArrayList(longId1.idValue(),
+                                             longId2.idValue()),
                           listValue2.values()));
         Assert.assertNotEquals(listValue1, listValue2);
         Assert.assertEquals(ListUtils.hashCodeForList(
-                            Lists.newArrayList(new IntValue(100))),
+                            Lists.newArrayList(longId1.idValue())),
                             listValue1.hashCode());
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        ListValue oldValue = new ListValue(ValueType.INT);
-        oldValue.add(new IntValue(Integer.MAX_VALUE));
+        LongId longId1 = new LongId(100L);
+        LongId longId2 = new LongId(200L);
+        IdValueList oldValue = new IdValueList();
+        oldValue.add(longId1.idValue());
+        oldValue.add(longId2.idValue());
         assertValueEqualAfterWriteAndRead(oldValue);
     }
 }

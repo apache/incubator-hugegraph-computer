@@ -48,6 +48,37 @@ public class DoubleValueTest extends BaseCoreTest {
 
     @Test
     public void testReadWrite() throws IOException {
+        assertValueEqualAfterWriteAndRead(new DoubleValue(0.0D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-0.0D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(0.1D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-0.1D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(1.1D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-1.1D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(1.123456789D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-1.123456789D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(
+                                          987654321.123456789D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(
+                                          -987654321.123456789D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(127D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-127D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(128D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-128D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(256D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-256D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(32767D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-32767D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(32768D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-32768D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(65536D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-65535D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Integer.MIN_VALUE));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Integer.MAX_VALUE));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Long.MIN_VALUE));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Long.MAX_VALUE));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Float.MIN_VALUE));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Float.MAX_VALUE));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MIN_VALUE));
         assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MAX_VALUE));
     }
 }

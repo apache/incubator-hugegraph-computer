@@ -29,8 +29,7 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.value.Cardinality;
-import com.baidu.hugegraph.computer.core.graph.value.ListValue;
+import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
@@ -70,8 +69,7 @@ public class StreamGraphOutputInputTest {
             bytes = baos.toByteArray();
         }
 
-        byte[] expect = new byte[]{Cardinality.SINGLE.code(),
-                                   ValueType.LONG.code(), 100};
+        byte[] expect = new byte[]{ValueType.LONG.code(), 100};
         Assert.assertArrayEquals(expect, bytes);
 
         LongValue longValue2;
@@ -82,28 +80,31 @@ public class StreamGraphOutputInputTest {
         Assert.assertEquals(100L, longValue2.value());
 
         // Test ListValue
-        ListValue listValue1 = new ListValue(ValueType.LONG);
-        listValue1.add(new LongValue(100L));
-        listValue1.add(new LongValue(200L));
+        LongId longId1 = new LongId(100L);
+        LongId longId2 = new LongId(200L);
+        IdValueList idValueList1 = new IdValueList();
+        idValueList1.add(longId1.idValue());
+        idValueList1.add(longId2.idValue());
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              StreamGraphOutput output = new StreamGraphOutput(baos)) {
-            output.writeValue(listValue1);
+            output.writeValue(idValueList1);
             bytes = baos.toByteArray();
         }
 
-        expect = new byte[]{Cardinality.LIST.code(), ValueType.LONG.code(),
-                            2, 100, -127, 72};
+        expect = new byte[]{ValueType.ID_VALUE_LIST.code(), 2,
+                            0, 0, 0, 2, 1, 100,
+                            0, 0, 0, 3, 1, -127, 72};
         Assert.assertArrayEquals(expect, bytes);
 
-        ListValue listValue2;
+        IdValueList idValueList2;
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
              StreamGraphInput input = new StreamGraphInput(bais)) {
-            listValue2 = (ListValue) input.readValue();
+            idValueList2 = (IdValueList) input.readValue();
         }
         Assert.assertTrue(ListUtils.isEqualList(
-                          Lists.newArrayList(new LongValue(100L),
-                                             new LongValue(200L)),
-                          listValue2.values()));
+                          Lists.newArrayList(longId1.idValue(),
+                                             longId2.idValue()),
+                          idValueList2.values()));
     }
 
     @Test

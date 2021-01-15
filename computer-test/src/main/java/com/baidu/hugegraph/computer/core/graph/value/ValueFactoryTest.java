@@ -28,36 +28,42 @@ public class ValueFactoryTest {
 
     @Test
     public void testCreateValue() {
-        byte singleCode = Cardinality.SINGLE.code();
         Assert.assertEquals(ValueType.NULL,
-                            ValueFactory.createValue(singleCode,
-                                                     ValueType.NULL.code())
+                            ValueFactory.createValue(ValueType.NULL.code())
                                         .type());
         Assert.assertEquals(ValueType.LONG,
-                            ValueFactory.createValue(singleCode,
-                                                     ValueType.LONG.code())
+                            ValueFactory.createValue(ValueType.LONG.code())
                                         .type());
         Assert.assertEquals(ValueType.DOUBLE,
-                            ValueFactory.createValue(singleCode,
-                                                     ValueType.DOUBLE.code())
+                            ValueFactory.createValue(ValueType.DOUBLE.code())
                                         .type());
         Assert.assertEquals(ValueType.ID_VALUE,
-                            ValueFactory.createValue(singleCode,
-                                                     ValueType.ID_VALUE.code())
+                            ValueFactory.createValue(ValueType.ID_VALUE.code())
+                                        .type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST,
+                            ValueFactory.createValue(
+                                         ValueType.ID_VALUE_LIST.code())
+                                        .type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
+                            ValueFactory.createValue(
+                                         ValueType.ID_VALUE_LIST_LIST.code())
                                         .type());
 
         Assert.assertEquals(ValueType.NULL,
-                            ValueFactory.createValue(Cardinality.SINGLE,
-                                                     ValueType.NULL).type());
+                            ValueFactory.createValue(ValueType.NULL).type());
         Assert.assertEquals(ValueType.LONG,
-                            ValueFactory.createValue(Cardinality.SINGLE,
-                                                     ValueType.LONG).type());
+                            ValueFactory.createValue(ValueType.LONG).type());
         Assert.assertEquals(ValueType.DOUBLE,
-                            ValueFactory.createValue(Cardinality.SINGLE,
-                                                     ValueType.DOUBLE).type());
+                            ValueFactory.createValue(ValueType.DOUBLE).type());
         Assert.assertEquals(ValueType.ID_VALUE,
-                            ValueFactory.createValue(Cardinality.SINGLE,
-                                                     ValueType.ID_VALUE)
+                            ValueFactory.createValue(ValueType.ID_VALUE)
+                                        .type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST,
+                            ValueFactory.createValue(ValueType.ID_VALUE_LIST)
+                                        .type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
+                            ValueFactory.createValue(
+                                         ValueType.ID_VALUE_LIST_LIST)
                                         .type());
     }
 }

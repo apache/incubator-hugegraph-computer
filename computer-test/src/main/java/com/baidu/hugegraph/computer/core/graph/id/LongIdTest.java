@@ -27,6 +27,7 @@ import com.baidu.hugegraph.computer.core.BaseCoreTest;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.util.NumericUtil;
 
 public class LongIdTest extends BaseCoreTest {
 
@@ -43,6 +44,8 @@ public class LongIdTest extends BaseCoreTest {
 
         Assert.assertEquals(new Long(-100L), longId1.asObject());
         Assert.assertEquals(-100L, longId1.asLong());
+        Assert.assertArrayEquals(NumericUtil.longToBytes(-100L),
+                                 longId1.asBytes());
 
         Assert.assertTrue(longId1.compareTo(longId2) < 0);
         Assert.assertTrue(longId2.compareTo(longId1) > 0);

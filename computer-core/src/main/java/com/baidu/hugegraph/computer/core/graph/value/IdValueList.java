@@ -17,7 +17,16 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.graph.value;
 
-public interface GraphComputerInput extends GraphInput {
+public class IdValueList extends ListValue<IdValue> {
+
+    public IdValueList() {
+        super(ValueType.ID_VALUE);
+    }
+
+    @Override
+    public ValueType type() {
+        return ValueType.ID_VALUE_LIST;
+    }
 }

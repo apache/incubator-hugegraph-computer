@@ -27,19 +27,26 @@ import com.baidu.hugegraph.testutil.Assert;
 public class IdFactoryTest {
 
     @Test
-    public void testCreateId() {
+    public void testCreateIdFromCode() {
         Assert.assertEquals(IdType.LONG,
                             IdFactory.createID(IdType.LONG.code()).type());
         Assert.assertEquals(IdType.UTF8,
                             IdFactory.createID(IdType.UTF8.code()).type());
         Assert.assertEquals(IdType.UUID,
                             IdFactory.createID(IdType.UUID.code()).type());
+    }
 
+    @Test
+    public void testCreateIdFromType() {
         Assert.assertEquals(IdType.LONG,
                             IdFactory.createID(IdType.LONG).type());
         Assert.assertEquals(IdType.UTF8,
                             IdFactory.createID(IdType.UTF8).type());
         Assert.assertEquals(IdType.UUID,
                             IdFactory.createID(IdType.UUID).type());
+
+        Assert.assertEquals(new LongId(), IdFactory.createID(IdType.LONG));
+        Assert.assertEquals(new Utf8Id(), IdFactory.createID(IdType.UTF8));
+        Assert.assertEquals(new UuidId(), IdFactory.createID(IdType.UUID));
     }
 }

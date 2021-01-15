@@ -29,11 +29,14 @@ import com.baidu.hugegraph.testutil.Assert;
 public class IdTypeTest {
 
     @Test
-    public void test() {
-        Assert.assertEquals(new LongId(), IdFactory.createID(IdType.LONG));
-        Assert.assertEquals(new Utf8Id(), IdFactory.createID(IdType.UTF8));
-        Assert.assertEquals(new UuidId(), IdFactory.createID(IdType.UUID));
+    public void testCode() {
+        Assert.assertEquals(1, IdType.LONG.code());
+        Assert.assertEquals(2, IdType.UTF8.code());
+        Assert.assertEquals(3, IdType.UUID.code());
+    }
 
+    @Test
+    public void testFromCode() {
         for (IdType type : IdType.values()) {
             Assert.assertEquals(type, SerialEnum.fromCode(IdType.class,
                                                           type.code()));

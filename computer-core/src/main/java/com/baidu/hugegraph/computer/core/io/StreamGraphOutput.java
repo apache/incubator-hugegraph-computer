@@ -27,7 +27,7 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class StreamGraphOutput extends DataOutputStream
-                               implements GraphComputerOutput {
+                               implements GraphOutput {
 
     public StreamGraphOutput(OutputStream out) {
         super(out);
@@ -41,12 +41,10 @@ public class StreamGraphOutput extends DataOutputStream
 
     @Override
     public void writeValue(Value value) throws IOException {
-        this.writeByte(value.cardinality().code());
         this.writeByte(value.type().code());
         value.write(this);
     }
 
-    @Override
     public void writeVInt(int value) throws IOException {
         // NOTE: negative numbers are not compressed
         if (value > 0x0fffffff || value < 0) {
@@ -64,7 +62,6 @@ public class StreamGraphOutput extends DataOutputStream
         this.writeByte(value & 0x7f);
     }
 
-    @Override
     public void writeVLong(long value) throws IOException {
         if (value < 0) {
             this.writeByte((byte) 0x81);

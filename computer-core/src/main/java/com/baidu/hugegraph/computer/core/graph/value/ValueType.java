@@ -29,7 +29,9 @@ public enum ValueType implements SerialEnum {
     LONG(3, 8),
     FLOAT(4, 4),
     DOUBLE(5, 8),
-    ID_VALUE(127, -1);
+    ID_VALUE(20, -1),
+    ID_VALUE_LIST(50, -1),
+    ID_VALUE_LIST_LIST(60, -1);
 
     private byte code;
     // Is it a fixed value type, -1 means not fixed.
@@ -40,7 +42,7 @@ public enum ValueType implements SerialEnum {
     }
 
     ValueType(int code, int byteSize) {
-        assert code >= -128 && code <= 127;
+        assert code >= 0 && code <= 127;
         this.code = (byte) code;
         this.byteSize = byteSize;
     }

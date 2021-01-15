@@ -29,14 +29,24 @@ import com.baidu.hugegraph.testutil.Assert;
 public class ValueTypeTest {
 
     @Test
-    public void test() {
+    public void testCodeAndByteSize() {
+        Assert.assertEquals(1, ValueType.NULL.code());
+        Assert.assertEquals(2, ValueType.INT.code());
+        Assert.assertEquals(3, ValueType.LONG.code());
+        Assert.assertEquals(4, ValueType.FLOAT.code());
+        Assert.assertEquals(5, ValueType.DOUBLE.code());
+        Assert.assertEquals(20, ValueType.ID_VALUE.code());
+
         Assert.assertEquals(0, ValueType.NULL.byteSize());
         Assert.assertEquals(4, ValueType.INT.byteSize());
         Assert.assertEquals(8, ValueType.LONG.byteSize());
         Assert.assertEquals(4, ValueType.FLOAT.byteSize());
         Assert.assertEquals(8, ValueType.DOUBLE.byteSize());
         Assert.assertEquals(-1, ValueType.ID_VALUE.byteSize());
+    }
 
+    @Test
+    public void testFromCode() {
         for (ValueType type : ValueType.values()) {
             Assert.assertEquals(type, SerialEnum.fromCode(ValueType.class,
                                                           type.code()));

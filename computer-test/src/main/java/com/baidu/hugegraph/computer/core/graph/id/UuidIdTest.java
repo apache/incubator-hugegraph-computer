@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.graph.id;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -52,6 +53,10 @@ public class UuidIdTest extends BaseCoreTest {
             Assert.assertTrue(e.getMessage().contains(
                               "Can't convert UuidId to long"));
         });
+        ByteBuffer buffer = ByteBuffer.allocate(16);
+        buffer.putLong(uuid1.getMostSignificantBits());
+        buffer.putLong(uuid1.getLeastSignificantBits());
+        Assert.assertArrayEquals(buffer.array(), uuidId1.asBytes());
 
         Assert.assertTrue(uuidId1.compareTo(uuidId2) < 0);
         Assert.assertTrue(uuidId2.compareTo(uuidId1) > 0);
