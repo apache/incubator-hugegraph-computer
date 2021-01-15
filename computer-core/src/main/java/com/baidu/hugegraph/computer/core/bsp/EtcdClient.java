@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright 2017 HugeGraph Authors
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
@@ -31,12 +30,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.exception.ComputerException;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
 
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
@@ -53,7 +49,6 @@ import io.etcd.jetcd.watch.WatchResponse;
 
 public class EtcdClient {
 
-    private static final Logger LOG = Log.logger(EtcdClient.class);
     private static WatchEvent.EventType PUT = WatchEvent.EventType.PUT;
 
     private final Client client;
@@ -261,7 +256,8 @@ public class EtcdClient {
      * @param prefix the key prefix
      * @param count the expected count of values to be get
      * @param timeout the max wait time
-     * @throwException whether throwException when time is out and not enough
+     * @param throwException whether throwException when time is out and not
+     * enough
      * kvs found.
      * @return the list of values which key with specified prefix
      */
