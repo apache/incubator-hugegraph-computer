@@ -47,7 +47,7 @@ public class EtcdClientTest {
     private EtcdClient client;
 
     @Before
-    public void connect() {
+    public void setup() {
         this.client = new EtcdClient(ENDPOINTS, NAMESPACE);
     }
 
@@ -70,7 +70,7 @@ public class EtcdClientTest {
     }
 
     @Test
-    public void testGetWithThrowException() {
+    public void testGetByNotExistKey() {
         this.client.put(KEY1, VALUE1);
         byte[] bytes1 = this.client.get(KEY1, true);
         Assert.assertArrayEquals(VALUE1, bytes1);
@@ -207,7 +207,7 @@ public class EtcdClientTest {
     }
 
     @After
-    public void close() {
+    public void tearDown() {
         this.client.close();
     }
 }

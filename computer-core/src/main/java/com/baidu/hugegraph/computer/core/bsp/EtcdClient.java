@@ -56,8 +56,10 @@ public class EtcdClient {
     private final KV kv;
 
     public EtcdClient(String endpoints, String namespace) {
-        E.checkArgumentNotNull(endpoints, "endpoints can't be null.");
-        E.checkArgumentNotNull(endpoints, "namespace can't be null.");
+        E.checkArgumentNotNull(endpoints,
+                               "Parameter endpoints can't be null.");
+        E.checkArgumentNotNull(endpoints,
+                               "Parameter namespace can't be null.");
         ByteSequence namespaceBs = ByteSequence.from(namespace.getBytes(UTF_8));
         this.client = Client.builder().endpoints(endpoints)
                             .namespace(namespaceBs).build();
@@ -72,16 +74,19 @@ public class EtcdClient {
      * @param value value to be associated with the specified key
      */
     public void put(String key, byte[] value) {
-        E.checkArgument(key != null, "Key can't be null.");
-        E.checkArgument(value != null, "value can't be null.");
+        E.checkArgument(key != null,
+                        "Parameter key can't be null.");
+        E.checkArgument(value != null,
+                        "Parameter value can't be null.");
         try {
             this.kv.put(ByteSequence.from(key, UTF_8),
                         ByteSequence.from(value)).get();
         } catch (InterruptedException e) {
-            String message = "Thread is interrupted in put key='%s'.";
-            throw new ComputerException(message, e, key);
+            throw new ComputerException("Thread is interrupted while putting " +
+                                        "with key='%s'.", e, key);
         } catch (ExecutionException e) {
-            String message = "ExecutionException is throw in put key='%s'.";
+            String message = "ExecutionException is thrown while putting " +
+                             "with key='%s'.";
             throw new ComputerException(message, e, key);
         }
     }
@@ -104,24 +109,25 @@ public class EtcdClient {
      * @throws ComputerException if not found and throwException is set true
      */
     public byte[] get(String key, boolean throwException) {
-        E.checkArgumentNotNull(key, "Key can't be null.");
+        E.checkArgumentNotNull(key, "Parameter key can't be null.");
         try {
-            ByteSequence keyBs = ByteSequence.from(key, UTF_8);
-            GetResponse response = this.kv.get(keyBs).get();
+            ByteSequence keySeq = ByteSequence.from(key, UTF_8);
+            GetResponse response = this.kv.get(keySeq).get();
             if (response.getCount() > 0) {
                 List<KeyValue> kvs = response.getKvs();
                 return kvs.get(0).getValue().getBytes();
             } else if (throwException) {
-                 String message = "Can't find value for key='%s'.";
-                 throw new ComputerException(message, key);
+                 throw new ComputerException("Can't find value for key='%s'.",
+                                             key);
             }
             return null;
         } catch (InterruptedException e) {
-            String message = "Thread is interrupted in get key='%s'.";
-            throw new ComputerException(message, e, key);
+            throw new ComputerException("Thread is interrupted while getting " +
+                                        "with key='%s'.", e, key);
         } catch (ExecutionException e) {
-            String message = "ExecutionException is throw in get key='%s'.";
-            throw new ComputerException(message, e, key);
+            throw new ComputerException("ExecutionException is thrown while " +
+                                        "getting with key='%s'.",
+                                        e, key);
         }
     }
 
@@ -137,12 +143,13 @@ public class EtcdClient {
      * mapped.
      */
     public byte[] get(String key, long timeout, boolean throwException) {
-        E.checkArgumentNotNull(key, "Key can't be null.");
-        E.checkArgument(timeout > 0L, "Timeout must be bigger than 0.");
+        E.checkArgumentNotNull(key, "Parameter key can't be null.");
+        E.checkArgument(timeout > 0L,
+                        "Parameter timeout must be positive.");
         long deadline = System.currentTimeMillis() + timeout;
-        ByteSequence keyBs = ByteSequence.from(key, UTF_8);
+        ByteSequence keySeq = ByteSequence.from(key, UTF_8);
         try {
-            GetResponse response = this.kv.get(keyBs).get();
+            GetResponse response = this.kv.get(keySeq).get();
             if (response.getCount() > 0) {
                 List<KeyValue> kvs = response.getKvs();
                 return kvs.get(0).getValue().getBytes();
@@ -161,7 +168,7 @@ public class EtcdClient {
                         }
                     }
                 };
-                Watch.Watcher watcher = this.watch.watch(keyBs, watchOption,
+                Watch.Watcher watcher = this.watch.watch(keySeq, watchOption,
                                                          consumer);
                 timeout = deadline - System.currentTimeMillis();
                 if (timeout > 0) {
@@ -171,11 +178,11 @@ public class EtcdClient {
                 return this.get(key, throwException);
             }
         } catch (InterruptedException e) {
-            String message = "Thread is interrupted while get '%s'.";
-            throw new ComputerException(message, e, key);
+            throw new ComputerException("Thread is interrupted while getting " +
+                                        "with key='%s'.", e, key);
         } catch (ExecutionException e) {
-            String message = "ExecutionException is throw while get '%s'.";
-            throw new ComputerException(message, e, key);
+            throw new ComputerException("ExecutionException is thrown while " +
+                                        "getting with key='%s'.", e, key);
         }
     }
 
@@ -184,12 +191,13 @@ public class EtcdClient {
      * If no key found, return empty list.
      */
     public List<byte[]> getWithPrefix(String prefix) {
-        E.checkArgumentNotNull(prefix, "Prefix can't be null.");
+        E.checkArgumentNotNull(prefix,
+                               "Parameter prefix can't be null.");
         try {
-            ByteSequence prefixBs = ByteSequence.from(prefix, UTF_8);
-            GetOption getOption = GetOption.newBuilder().withPrefix(prefixBs)
+            ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
+            GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
                                            .withSortOrder(ASCEND).build();
-            GetResponse response = this.kv.get(prefixBs, getOption).get();
+            GetResponse response = this.kv.get(prefixSeq, getOption).get();
             if (response.getCount() > 0) {
                 List<KeyValue> kvs = response.getKvs();
                 List<byte[]> result = new ArrayList<>(kvs.size());
@@ -201,12 +209,11 @@ public class EtcdClient {
                 return Collections.emptyList();
             }
         } catch (InterruptedException e) {
-            String message = "Thread is interrupted in getBytesList '%s'.";
-            throw new ComputerException(message, e, prefix);
+            throw new ComputerException("Thread is interrupted while " +
+                                        "getting with prefix='%s'.", e, prefix);
         } catch (ExecutionException e) {
-            String message = "ExecutionException is throw in getBytesList " +
-                             "'%s'.";
-            throw new ComputerException(message, e, prefix);
+            throw new ComputerException("ExecutionException is thrown while " +
+                                        "getting with prefix='%s'.", e, prefix);
         }
     }
 
@@ -217,15 +224,16 @@ public class EtcdClient {
      */
     public List<byte[]> getWithPrefix(String prefix, int count,
                                       boolean throwException) {
-        E.checkArgumentNotNull(prefix, "Prefix can't be null.");
+        E.checkArgumentNotNull(prefix,
+                               "Parameter prefix can't be null.");
         E.checkArgument(count >= 0,
-                        "ExpectedCount must be bigger or equals 0.");
+                        "Parameter count must be non-negative.");
         try {
-            ByteSequence prefixBs = ByteSequence.from(prefix, UTF_8);
-            GetOption getOption = GetOption.newBuilder().withPrefix(prefixBs)
+            ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
+            GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
                                            .withLimit(count)
                                            .withSortOrder(ASCEND).build();
-            GetResponse response = this.kv.get(prefixBs, getOption).get();
+            GetResponse response = this.kv.get(prefixSeq, getOption).get();
             if (response.getCount() == count || !throwException) {
                 List<KeyValue> kvs = response.getKvs();
                 List<byte[]> result = new ArrayList<>(kvs.size());
@@ -234,19 +242,19 @@ public class EtcdClient {
                 }
                 return result;
             } else {
-                String message = "There are no '%d' elements, only find " +
-                                 "'%d' elements with prefix='%s'.";
-                throw new ComputerException(message, count,
+                throw new ComputerException("There are no '%d' elements, " +
+                                            "only find '%d' elements with " +
+                                            "prefix='%s'.", count,
                                             response.getCount(), prefix);
             }
         } catch (InterruptedException e) {
-            String message = "Thread is interrupted in getBytesList " +
-                             "prefix='%s', count='%d'.";
-            throw new ComputerException(message, e, prefix, count);
+            throw new ComputerException("Thread is interrupted while " +
+                                        "getting with prefix='%s', count='%d'.",
+                                        e, prefix, count);
         } catch (ExecutionException e) {
-            String message = "ExecutionException is throw in getBytesList " +
-                             "with prefix='%s', count='%d.";
-            throw new ComputerException(message, e, prefix, count);
+            throw new ComputerException("ExecutionException is thrown while " +
+                                        "getting with prefix='%s', " +
+                                        "count='%d'.", e, prefix, count);
         }
     }
 
@@ -263,18 +271,19 @@ public class EtcdClient {
      */
     public List<byte[]> getWithPrefix(String prefix, int count,
                                       long timeout, boolean throwException) {
-        E.checkArgumentNotNull(prefix, "Prefix can't be null.");
+        E.checkArgumentNotNull(prefix,
+                               "Parameter prefix can't be null.");
         E.checkArgument(count >= 0,
-                        "Count must be bigger or equals 0.");
+                        "Parameter count must be non-negative.");
         long deadline = System.currentTimeMillis() + timeout;
         List<byte[]> result = new ArrayList<>(count);
-        ByteSequence prefixBs = ByteSequence.from(prefix, UTF_8);
-        GetOption getOption = GetOption.newBuilder().withPrefix(prefixBs)
+        ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
+        GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
                                        .withSortOrder(ASCEND).withLimit(count)
                                        .build();
         while (System.currentTimeMillis() < deadline) {
             try {
-                GetResponse response = this.kv.get(prefixBs, getOption).get();
+                GetResponse response = this.kv.get(prefixSeq, getOption).get();
                 if (response.getCount() == count) {
                     List<KeyValue> kvs = response.getKvs();
                     for (KeyValue kv : kvs) {
@@ -286,7 +295,7 @@ public class EtcdClient {
                     int diff = (int) (count - response.getCount());
                     CountDownLatch countDownLatch = new CountDownLatch(diff);
                     WatchOption watchOption = WatchOption.newBuilder()
-                                                         .withPrefix(prefixBs)
+                                                         .withPrefix(prefixSeq)
                                                          .withRevision(revision)
                                                          .withNoDelete(true)
                                                          .build();
@@ -302,7 +311,7 @@ public class EtcdClient {
                             }
                         }
                     };
-                    Watch.Watcher watcher = this.watch.watch(prefixBs,
+                    Watch.Watcher watcher = this.watch.watch(prefixSeq,
                                                              watchOption,
                                                              consumer);
                     timeout = deadline - System.currentTimeMillis();
@@ -312,60 +321,62 @@ public class EtcdClient {
                     watcher.close();
                 }
             } catch (InterruptedException e) {
-                String message = "Thread is interrupted in " +
-                                 "getBytesListWithTimeout with prefix='%s', " +
-                                 "count='%d', timeout='%d'.";
-                throw new ComputerException(message, e, prefix, timeout);
+                throw new ComputerException("Thread is interrupted while " +
+                                            "getting with prefix='%s', " +
+                                            "count='%d', timeout='%d'.",
+                                            e, prefix, count, timeout);
             } catch (ExecutionException e) {
-                String message = "ExecutionException is throw in " +
-                                 "getBytesListWithTimeoutwith prefix='%s'," +
-                                 "count='%d', timeout='%d'.";
-                throw new ComputerException(message, e, prefix, timeout);
+                throw new ComputerException("ExecutionException is thrown " +
+                                            "while getting with prefix='%s', " +
+                                            "count='%d', timeout='%d'.",
+                                            e, prefix, count, timeout);
             }
         }
         return this.getWithPrefix(prefix, count, throwException);
     }
 
     public long delete(String key) {
-        E.checkArgumentNotNull(key, "Key can't be null.");
-        ByteSequence keyBs = ByteSequence.from(key, UTF_8);
+        E.checkArgumentNotNull(key, "Parameter key can't be null.");
+        ByteSequence keySeq = ByteSequence.from(key, UTF_8);
         try {
-            DeleteResponse response = this.client.getKVClient().delete(keyBs)
+            DeleteResponse response = this.client.getKVClient().delete(keySeq)
                                                  .get();
             return response.getDeleted();
         } catch (InterruptedException e) {
-            String message = "Thread is interrupted while delete '%s'.";
-            throw new ComputerException(message, e, key);
+            throw new ComputerException("Thread is interrupted while " +
+                                        "deleting '%s'.", e, key);
         } catch (ExecutionException e) {
-            String message = "ExecutionException is throw while delete '%s'.";
-            throw new ComputerException(message, e, key);
+            throw new ComputerException("ExecutionException is thrown while " +
+                                        "deleting '%s'.", e, key);
         }
     }
 
     public long deleteWithPrefix(String prefix) {
-        E.checkArgumentNotNull(prefix, "Prefix can't be null.");
-        ByteSequence prefixBs = ByteSequence.from(prefix, UTF_8);
+        E.checkArgumentNotNull(prefix, "Parameter prefix can't be null.");
+        ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
         DeleteOption deleteOption = DeleteOption.newBuilder()
-                                                .withPrefix(prefixBs).build();
+                                                .withPrefix(prefixSeq).build();
         try {
             DeleteResponse response = this.client.getKVClient()
-                                                 .delete(prefixBs, deleteOption)
-                                                 .get();
+                                                 .delete(prefixSeq,
+                                                         deleteOption).get();
             return response.getDeleted();
         } catch (InterruptedException e) {
-            String message = "Thread is interrupted in deleteWithPrefix '%s'.";
-            throw new ComputerException(message, e, prefix);
+            throw new ComputerException("Thread is interrupted while " +
+                                        "deleting with prefix '%s'.", e,
+                                        prefix);
         } catch (ExecutionException e) {
-            String message = "ExecutionException is throw.";
-            throw new ComputerException(message, e);
+            throw new ComputerException("ExecutionException is thrown while " +
+                                        "deleting with prefix '%s'.", e,
+                                        prefix);
         }
     }
 
     public long deleteAllKvsInNamespace() {
-        return deleteWithPrefix("");
+        return this.deleteWithPrefix("");
     }
 
     public void close() {
-        client.close();
+        this.client.close();
     }
 }
