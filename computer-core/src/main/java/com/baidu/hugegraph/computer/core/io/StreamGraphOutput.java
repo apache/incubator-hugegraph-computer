@@ -47,6 +47,7 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeValue(Value value) throws IOException {
+        // TODO: doesn't need write type, fetch value type from config
         this.writeByte(value.type().code());
         value.write(this);
     }
