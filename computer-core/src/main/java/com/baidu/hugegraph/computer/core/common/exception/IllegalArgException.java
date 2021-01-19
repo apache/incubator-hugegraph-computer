@@ -17,14 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.common.exception;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+/**
+ * A wrapper class for IllegalArgumentException
+ */
+public class IllegalArgException extends IllegalArgumentException {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+    private static final long serialVersionUID = 3031687162799359544L;
+
+    public IllegalArgException(String message) {
+        super(message);
+    }
+
+    public IllegalArgException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public IllegalArgException(String message, Object... args) {
+        super(String.format(message, args));
+    }
+
+    public IllegalArgException(String message, Throwable cause,
+                               Object... args) {
+        super(String.format(message, args), cause);
+    }
 }

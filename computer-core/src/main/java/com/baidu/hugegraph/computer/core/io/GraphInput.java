@@ -17,14 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.io;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.DataInput;
+import java.io.IOException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+
+public interface GraphInput extends DataInput {
+
+    Id readId() throws IOException;
+
+    Value readValue() throws IOException;
 }

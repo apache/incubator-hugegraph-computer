@@ -17,14 +17,21 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.id;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.io.Readable;
+import com.baidu.hugegraph.computer.core.io.Writable;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+public interface Id extends Readable, Writable, Comparable<Id> {
+
+    IdType type();
+
+    IdValue idValue();
+
+    Object asObject();
+
+    long asLong();
+
+    byte[] asBytes();
 }

@@ -17,14 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.common.exception;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+public class WriteException extends ComputerException {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+    private static final long serialVersionUID = -1604886592292423750L;
+
+    public WriteException(String message) {
+        super(message);
+    }
+
+    public WriteException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public WriteException(String message, Object... args) {
+        super(message, args);
+    }
+
+    public WriteException(String message, Throwable cause, Object... args) {
+        super(message, cause, args);
+    }
 }

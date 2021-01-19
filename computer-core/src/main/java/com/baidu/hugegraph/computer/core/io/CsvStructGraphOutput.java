@@ -17,14 +17,37 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.io;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+public class CsvStructGraphOutput extends StructGraphOutput {
+
+    public CsvStructGraphOutput(DataOutputStream out) {
+        super(out);
+    }
+
+    @Override
+    public void writeObjectStart() throws IOException {
+        // pass
+    }
+
+    @Override
+    public void writeObjectEnd() throws IOException {
+        this.writeRawString(System.lineSeparator());
+    }
+
+    public void writeKey(String key) throws IOException {
+        // pass
+    }
+
+    @Override
+    public void writeJoiner() throws IOException {
+        // pass
+    }
+
+    public void writeSplitter() throws IOException {
+        this.writeRawString(",");
+    }
 }

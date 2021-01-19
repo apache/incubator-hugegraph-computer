@@ -17,14 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.common.exception;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+public class ReadException extends ComputerException {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+    private static final long serialVersionUID = 8073034531965759161L;
+
+    public ReadException(String message) {
+        super(message);
+    }
+
+    public ReadException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ReadException(String message, Object... args) {
+        super(message, args);
+    }
+
+    public ReadException(String message, Throwable cause, Object... args) {
+        super(message, cause, args);
+    }
 }

@@ -17,14 +17,28 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.id;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.common.SerialEnum;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+public enum IdType implements SerialEnum {
+
+    LONG(1),
+    UTF8(2),
+    UUID(3);
+
+    static {
+        SerialEnum.register(IdType.class);
+    }
+
+    private final byte code;
+
+    IdType(int code) {
+        assert code >= -128 && code <= 127;
+        this.code = (byte) code;
+    }
+
+    public byte code() {
+        return this.code;
+    }
 }

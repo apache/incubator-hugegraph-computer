@@ -17,14 +17,31 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.IOException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
+
+public class IdValueListList extends ListValue<IdValueList> {
+
+    public IdValueListList() {
+        super(ValueType.ID_VALUE_LIST);
+    }
+
+    @Override
+    public ValueType type() {
+        return ValueType.ID_VALUE_LIST_LIST;
+    }
+
+    @Override
+    public void read(GraphInput in) throws IOException {
+        this.read(in, false);
+    }
+
+    @Override
+    public void write(GraphOutput out) throws IOException {
+        this.write(out, false);
+    }
 }

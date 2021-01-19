@@ -17,14 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.id;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.common.SerialEnum;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+public final class IdFactory {
+
+    // Maybe can reuse Id
+    public static Id createID(byte code) {
+        IdType type = SerialEnum.fromCode(IdType.class, code);
+        return createID(type);
+    }
+
+    public static Id createID(IdType type) {
+        switch (type) {
+            case LONG:
+                return new LongId();
+            case UTF8:
+                return new Utf8Id();
+            case UUID:
+                return new UuidId();
+            default:
+                throw new ComputerException("Can't create Id for %s",
+                                            type.name());
+        }
+    }
 }

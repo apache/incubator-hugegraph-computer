@@ -17,14 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.value;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.IOException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+import org.junit.Test;
+
+import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.testutil.Assert;
+
+public class NullValueTest extends BaseCoreTest {
+
+    @Test
+    public void test() {
+        NullValue nullValue1 = NullValue.get();
+        NullValue nullValue2 = NullValue.get();
+        Assert.assertEquals(ValueType.NULL, nullValue1.type());
+        Assert.assertEquals(nullValue1, NullValue.get());
+        Assert.assertEquals(nullValue1, nullValue2);
+        Assert.assertEquals(0, nullValue1.hashCode());
+        Assert.assertEquals("<null>", nullValue1.toString());
+    }
+
+    @Test
+    public void testReadWrite() throws IOException {
+        assertValueEqualAfterWriteAndRead(NullValue.get());
+    }
 }

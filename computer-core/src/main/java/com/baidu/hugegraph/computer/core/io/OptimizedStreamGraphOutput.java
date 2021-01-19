@@ -17,14 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.io;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class
-})
-public class CommonTestSuite {
+public class OptimizedStreamGraphOutput extends StreamGraphOutput {
+
+    public OptimizedStreamGraphOutput(OutputStream out) {
+        super(out);
+    }
+
+    public OptimizedStreamGraphOutput(DataOutputStream out) {
+        super(out);
+    }
+
+    @Override
+    public void writeInt(int v) throws IOException {
+        this.writeVInt(v);
+    }
+
+    @Override
+    public void writeLong(long v) throws IOException {
+        this.writeVLong(v);
+    }
 }

@@ -17,14 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
+import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
+import com.baidu.hugegraph.computer.core.io.IOTestSuite;
+import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ExceptionTest.class
+    CommonTestSuite.class,
+    GraphTestSuite.class,
+    IOTestSuite.class,
 })
-public class CommonTestSuite {
+public class UnitTestSuite {
+
+    private static final Logger LOG = Log.logger(UnitTestSuite.class);
 }
