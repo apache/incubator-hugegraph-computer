@@ -51,6 +51,11 @@ public class EtcdClientTest {
         this.client = new EtcdClient(ENDPOINTS, NAMESPACE);
     }
 
+    @After
+    public void tearDown() {
+        this.client.close();
+    }
+    
     @Test
     public void testPut() {
         this.client.put(KEY1, VALUE1);
@@ -204,10 +209,5 @@ public class EtcdClientTest {
         Assert.assertEquals(2L, deleteCount1);
         long deleteCount2 = this.client.delete(KEY1);
         Assert.assertEquals(0L, deleteCount2);
-    }
-
-    @After
-    public void tearDown() {
-        this.client.close();
     }
 }
