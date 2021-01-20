@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.bsp;
 
 import static io.etcd.jetcd.options.GetOption.SortOrder.ASCEND;
+import static io.etcd.jetcd.watch.WatchEvent.EventType.PUT;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
@@ -28,11 +29,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.util.E;
+import com.google.common.annotations.VisibleForTesting;
 
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
@@ -48,8 +51,6 @@ import io.etcd.jetcd.watch.WatchEvent;
 import io.etcd.jetcd.watch.WatchResponse;
 
 public class EtcdClient {
-
-    private static WatchEvent.EventType PUT = WatchEvent.EventType.PUT;
 
     private final Client client;
     private final Watch watch;
@@ -86,8 +87,8 @@ public class EtcdClient {
             throw new ComputerException(
                       "Interrupted while putting with key='%s'", e, key);
         } catch (ExecutionException e) {
-            throw new ComputerException("Error while putting with key='%s'", e,
-                                        key);
+            throw new ComputerException("Error while putting with key='%s'",
+                                        e, key);
         }
     }
 
@@ -125,8 +126,8 @@ public class EtcdClient {
             throw new ComputerException(
                       "Interrupted while getting with key='%s'", e, key);
         } catch (ExecutionException e) {
-            throw new ComputerException("Error while getting with key='%s'", e,
-                                        key);
+            throw new ComputerException("Error while getting with key='%s'",
+                                        e, key);
         }
     }
 
@@ -153,35 +154,85 @@ public class EtcdClient {
                 List<KeyValue> kvs = response.getKvs();
                 return kvs.get(0).getValue().getBytes();
             } else {
-                long revision = response.getHeader().getRevision();
-                final BarrierEvent barrierEvent = new BarrierEvent();
-                WatchOption watchOption = WatchOption.newBuilder()
-                                                     .withRevision(revision)
-                                                     .withNoDelete(true)
-                                                     .build();
-                Consumer<WatchResponse> consumer = watchResponse -> {
-                    List<WatchEvent> events = watchResponse.getEvents();
-                    for (WatchEvent event : events) {
-                        if (event.getEventType().equals(PUT)) {
-                            barrierEvent.signalAll();
-                        }
-                    }
-                };
-                Watch.Watcher watcher = this.watch.watch(keySeq, watchOption,
-                                                         consumer);
                 timeout = deadline - System.currentTimeMillis();
                 if (timeout > 0) {
-                    barrierEvent.await(timeout);
+                    long revision = response.getHeader().getRevision();
+                    return this.waitAndPrefixGetFromPutEvent(keySeq, revision,
+                                                             timeout,
+                                                             throwException);
+                } else if (throwException) {
+                    throw new ComputerException("Can't find value for key='%s'",
+                                                key);
+                } else {
+                    return null;
                 }
-                watcher.close();
-                return this.get(key, throwException);
             }
         } catch (InterruptedException e) {
             throw new ComputerException(
-                      "Interrupted while getting with key='%s'", e, key);
+                      "Interrupted while getting with key='%s'",
+                      e, key);
         } catch (ExecutionException e) {
-            throw new ComputerException("Error while getting with key='%s'", e,
-                                        key);
+            throw new ComputerException("Error while getting with key='%s'",
+                                        e, key);
+        }
+    }
+
+    /**
+     * Wait put event.
+     * Return the value from event if event triggered in timeout.
+     * Return null if event not triggered in timeout and throwException is
+     * set false.
+     * @throws ComputerException if no event triggered in timeout and
+     * throwException is set true
+     */
+    private byte[] waitAndPrefixGetFromPutEvent(ByteSequence keySeq,
+                                                long revision, long timeout,
+                                                boolean throwException)
+                                                throws InterruptedException {
+        AtomicReference<byte[]> eventValue = new AtomicReference<>();
+        final BarrierEvent barrierEvent = new BarrierEvent();
+        WatchOption watchOption = WatchOption.newBuilder()
+                                             .withRevision(revision)
+                                             .withNoDelete(true)
+                                             .build();
+        Consumer<WatchResponse> consumer = watchResponse -> {
+            List<WatchEvent> events = watchResponse.getEvents();
+            for (WatchEvent event : events) {
+                if (PUT.equals(event.getEventType())) {
+                    KeyValue keyValue = event.getKeyValue();
+                    if (keySeq.equals(keyValue.getKey())) {
+                        eventValue.set(event.getKeyValue().getValue()
+                                            .getBytes());
+                        barrierEvent.signalAll();
+                        return;
+                    } else {
+                        assert false;
+                        throw new ComputerException(
+                                  "Expect event key '%s', found '%s'",
+                                  keySeq.toString(UTF_8),
+                                  keyValue.getKey().toString(UTF_8));
+                    }
+                } else {
+                    assert false;
+                    throw new ComputerException(
+                              "Unexpected event type '%s'",
+                              event.getEventType());
+                }
+            }
+        };
+        Watch.Watcher watcher = this.watch.watch(keySeq,
+                                                 watchOption,
+                                                 consumer);
+        barrierEvent.await(timeout);
+        watcher.close();
+        byte[] value = eventValue.get();
+        if (value != null) {
+            return value;
+        } else if (throwException) {
+            throw new ComputerException("Can't find value for key='%s'",
+                                        keySeq.toString(UTF_8));
+        } else {
+            return null;
         }
     }
 
@@ -242,7 +293,7 @@ public class EtcdClient {
                 return result;
             } else {
                 throw new ComputerException(
-                          "Expected %s elements, only find %s elements with " +
+                          "Expect %s elements, only find %s elements with " +
                           "prefix='%s'", count, response.getCount(), prefix);
             }
         } catch (InterruptedException e) {
@@ -289,34 +340,15 @@ public class EtcdClient {
                     }
                     return result;
                 } else {
-                    long revision = response.getHeader().getRevision();
-                    int diff = (int) (count - response.getCount());
-                    CountDownLatch countDownLatch = new CountDownLatch(diff);
-                    WatchOption watchOption = WatchOption.newBuilder()
-                                                         .withPrefix(prefixSeq)
-                                                         .withRevision(revision)
-                                                         .withNoDelete(true)
-                                                         .build();
-                    Consumer<WatchResponse> consumer = watchResponse -> {
-                        List<WatchEvent> events = watchResponse.getEvents();
-                        for (WatchEvent event : events) {
-                            /*
-                             * This event may not accurate, it may put the
-                             * same key multiple times.
-                             */
-                            if (event.getEventType().equals(PUT)) {
-                                countDownLatch.countDown();
-                            }
-                        }
-                    };
-                    Watch.Watcher watcher = this.watch.watch(prefixSeq,
-                                                             watchOption,
-                                                             consumer);
                     timeout = deadline - System.currentTimeMillis();
                     if (timeout > 0) {
-                        countDownLatch.await(timeout, MILLISECONDS);
+                        long revision = response.getHeader().getRevision();
+                        int diff = (int) (count - response.getCount());
+                        this.waitPrefixPutEvent(prefixSeq, diff, revision,
+                                                timeout);
+                    } else {
+                        break;
                     }
-                    watcher.close();
                 }
             } catch (InterruptedException e) {
                 throw new ComputerException(
@@ -331,6 +363,49 @@ public class EtcdClient {
         return this.getWithPrefix(prefix, count, throwException);
     }
 
+    /**
+     * Wait at most expected eventCount events triggered in timeout ms.
+     * This method wait at most timeout ms regardless whether expected
+     * eventCount events triggered.
+     */
+    private void waitPrefixPutEvent(ByteSequence prefixSeq, int eventCount,
+                                    long revision, long timeout)
+                                    throws InterruptedException {
+        CountDownLatch countDownLatch = new CountDownLatch(eventCount);
+        WatchOption watchOption = WatchOption.newBuilder()
+                                             .withPrefix(prefixSeq)
+                                             .withRevision(revision)
+                                             .withNoDelete(true)
+                                             .build();
+        Consumer<WatchResponse> consumer = watchResponse -> {
+            List<WatchEvent> events = watchResponse.getEvents();
+            for (WatchEvent event : events) {
+                /*
+                 * This event may not accurate, it may put the
+                 * same key multiple times.
+                 */
+                if (PUT.equals(event.getEventType())) {
+                    countDownLatch.countDown();
+                } else {
+                    throw new ComputerException("Unexpected event type '%s'",
+                                                event.getEventType());
+                }
+            }
+        };
+        Watch.Watcher watcher = this.watch.watch(prefixSeq,
+                                                 watchOption,
+                                                 consumer);
+        countDownLatch.await(timeout, MILLISECONDS);
+        watcher.close();
+    }
+
+    /**
+     * @return 1 if deleted specified key, 0 if not found specified key
+     * The deleted data can be get through revision, if revision is compacted,
+     * throw exception "etcdserver: mvcc: required revision has been compacted".
+     * @see <a href="https://etcd.io/docs/v3.4.0/op-guide/maintenance/">
+     *      Maintenance</a>
+     */
     public long delete(String key) {
         E.checkArgumentNotNull(key, "The key can't be null");
         ByteSequence keySeq = ByteSequence.from(key, UTF_8);
@@ -346,6 +421,9 @@ public class EtcdClient {
         }
     }
 
+    /**
+     * @return the number of keys deleted
+     */
     public long deleteWithPrefix(String prefix) {
         E.checkArgumentNotNull(prefix, "The prefix can't be null");
         ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
@@ -373,5 +451,10 @@ public class EtcdClient {
 
     public void close() {
         this.client.close();
+    }
+
+    @VisibleForTesting
+    protected KV getKv() {
+        return this.kv;
     }
 }

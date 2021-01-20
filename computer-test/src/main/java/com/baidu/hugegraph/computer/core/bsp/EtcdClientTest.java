@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.bsp;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,12 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
+
+import io.etcd.jetcd.ByteSequence;
+import io.etcd.jetcd.KV;
+import io.etcd.jetcd.kv.GetResponse;
+import io.etcd.jetcd.kv.PutResponse;
+import io.etcd.jetcd.options.GetOption;
 
 public class EtcdClientTest {
 
@@ -53,6 +60,7 @@ public class EtcdClientTest {
 
     @After
     public void tearDown() {
+        this.client.deleteAllKvsInNamespace();
         this.client.close();
     }
     
@@ -82,7 +90,7 @@ public class EtcdClientTest {
         byte[] bytes2 = this.client.get(NO_SUCH_KEY, false);
         Assert.assertNull(bytes2);
         Assert.assertThrows(ComputerException.class, () -> {
-            client.get(NO_SUCH_KEY, true);
+            this.client.get(NO_SUCH_KEY, true);
         });
         this.client.delete(KEY1);
     }
@@ -114,6 +122,46 @@ public class EtcdClientTest {
     }
 
     @Test
+    public void testGetWithTimeout2() throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        Runnable putThread = () -> {
+            try {
+                TimeUnit.MILLISECONDS.sleep(1000L);
+            } catch (InterruptedException e) {
+                // Do nothing.
+            }
+            this.client.put(KEY1, VALUE1);
+        };
+        executorService.submit(putThread);
+        byte[] bytes1 = this.client.get(KEY1, 50L, false);
+        executorService.shutdown();
+        executorService.awaitTermination(1L, TimeUnit.SECONDS);
+        Assert.assertNull(bytes1);
+        long deleteCount = this.client.delete(KEY1);
+        Assert.assertEquals(1L, deleteCount);
+    }
+
+    @Test
+    public void testGetWithTimeout3() throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        Runnable putThread = () -> {
+            try {
+                TimeUnit.MILLISECONDS.sleep(100L);
+            } catch (InterruptedException e) {
+                // Do nothing.
+            }
+            // Should ignore event prefix with KEY1
+            this.client.put(KEY1 + "abc", VALUE2);
+            this.client.put(KEY1, VALUE1);
+        };
+        executorService.submit(putThread);
+        byte[] bytes1 = this.client.get(KEY1, 1000L, true);
+        executorService.shutdown();
+        executorService.awaitTermination(1L, TimeUnit.SECONDS);
+        Assert.assertArrayEquals(VALUE1, bytes1);
+    }
+
+    @Test
     public void testGetWithPrefix() {
         this.client.put(KEY1, VALUE1);
         this.client.put(KEY2, VALUE2);
@@ -126,7 +174,7 @@ public class EtcdClientTest {
     }
 
     @Test
-    public void testGetWithPrefixAndCount() throws InterruptedException {
+    public void testGetWithPrefixAndCount() {
         this.client.put(KEY2, VALUE2);
         this.client.put(KEY1, VALUE1);
         List<byte[]> valueList1 = this.client.getWithPrefix(KEY_PREFIX, 2,
@@ -182,12 +230,42 @@ public class EtcdClientTest {
     }
 
     @Test
+    public void testGetWithRevision()
+                throws ExecutionException, InterruptedException {
+        KV kv = this.client.getKv();
+        ByteSequence key1Seq = ByteSequence.from(KEY1, UTF_8);
+        ByteSequence value1Seq = ByteSequence.from(VALUE1);
+        ByteSequence value2Seq = ByteSequence.from(VALUE2);
+        PutResponse putResponse1 = kv.put(key1Seq, value1Seq).get();
+        long revision1 = putResponse1.getHeader().getRevision();
+        PutResponse putResponse2 = kv.put(key1Seq, value2Seq).get();
+        long revision2 = putResponse2.getHeader().getRevision();
+        long deleteCount1 = kv.delete(ByteSequence.from(KEY1, UTF_8)).get()
+                              .getDeleted();
+        Assert.assertEquals(1, deleteCount1);
+        GetOption getOption1 = GetOption.newBuilder().withRevision(revision1)
+                                        .build();
+        GetResponse getResponse1 = kv.get(key1Seq, getOption1).get();
+        Assert.assertEquals(value1Seq,
+                            getResponse1.getKvs().get(0).getValue());
+        GetOption getOption2 = GetOption.newBuilder().withRevision(revision2)
+                                        .build();
+        GetResponse getResponse2 = kv.get(key1Seq, getOption2).get();
+        Assert.assertEquals(value2Seq,
+                            getResponse2.getKvs().get(0).getValue());
+    }
+
+    @Test
     public void testDelete() {
         this.client.put(KEY1, VALUE1);
         long deleteCount1 = this.client.delete(KEY1);
         Assert.assertEquals(1L, deleteCount1);
-        long deleteCount2 = this.client.delete(NO_SUCH_KEY);
+        long deleteCount2 = this.client.delete(KEY1);
         Assert.assertEquals(0L, deleteCount2);
+        byte[] value = this.client.get(KEY1);
+        Assert.assertNull(value);
+        long deleteCount3 = this.client.delete(NO_SUCH_KEY);
+        Assert.assertEquals(0L, deleteCount3);
     }
 
     @Test
