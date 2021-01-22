@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.bsp;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +54,7 @@ import io.etcd.jetcd.watch.WatchResponse;
 
 public class EtcdClient {
 
+    private static final Charset ENCODING = StandardCharsets.UTF_8;
     private final Client client;
     private final Watch watch;
     private final KV kv;
@@ -62,10 +64,10 @@ public class EtcdClient {
                                "The endpoints can't be null");
         E.checkArgumentNotNull(endpoints,
                                "The namespace can't be null");
-        ByteSequence namespaceBs = ByteSequence.from(namespace.getBytes(
-                                                     StandardCharsets.UTF_8));
+        ByteSequence namespaceSeq = ByteSequence.from(namespace.getBytes(
+                                                                ENCODING));
         this.client = Client.builder().endpoints(endpoints)
-                            .namespace(namespaceBs).build();
+                            .namespace(namespaceSeq).build();
         this.watch = this.client.getWatchClient();
         this.kv = this.client.getKVClient();
     }
@@ -82,7 +84,7 @@ public class EtcdClient {
         E.checkArgument(value != null,
                         "The value can't be null.");
         try {
-            this.kv.put(ByteSequence.from(key, StandardCharsets.UTF_8),
+            this.kv.put(ByteSequence.from(key, ENCODING),
                         ByteSequence.from(value))
                    .get();
         } catch (InterruptedException e) {
@@ -114,8 +116,7 @@ public class EtcdClient {
     public byte[] get(String key, boolean throwException) {
         E.checkArgumentNotNull(key, "The key can't be null");
         try {
-            ByteSequence keySeq = ByteSequence.from(key,
-                                                    StandardCharsets.UTF_8);
+            ByteSequence keySeq = ByteSequence.from(key, ENCODING);
             GetResponse response = this.kv.get(keySeq).get();
             if (response.getCount() > 0) {
                 List<KeyValue> kvs = response.getKvs();
@@ -152,7 +153,7 @@ public class EtcdClient {
         E.checkArgument(timeout > 0L,
                         "The timeout must be > 0, but got: %s", timeout);
         long deadline = System.currentTimeMillis() + timeout;
-        ByteSequence keySeq = ByteSequence.from(key, StandardCharsets.UTF_8);
+        ByteSequence keySeq = ByteSequence.from(key, ENCODING);
         try {
             GetResponse response = this.kv.get(keySeq).get();
             if (response.getCount() > 0) {
@@ -212,9 +213,8 @@ public class EtcdClient {
                         assert false;
                         throw new ComputerException(
                                   "Expect event key '%s', found '%s'",
-                                  keySeq.toString(StandardCharsets.UTF_8),
-                                  keyValue.getKey().toString(
-                                                    StandardCharsets.UTF_8));
+                                  keySeq.toString(ENCODING),
+                                  keyValue.getKey().toString(ENCODING));
                     }
                 } else {
                     assert false;
@@ -234,8 +234,7 @@ public class EtcdClient {
             return value;
         } else if (throwException) {
             throw new ComputerException("Can't find value for key='%s'",
-                                        keySeq.toString(
-                                               StandardCharsets.UTF_8));
+                                        keySeq.toString(ENCODING));
         } else {
             return null;
         }
@@ -249,8 +248,7 @@ public class EtcdClient {
         E.checkArgumentNotNull(prefix,
                                "The prefix can't be null");
         try {
-            ByteSequence prefixSeq = ByteSequence.from(prefix,
-                                                       StandardCharsets.UTF_8);
+            ByteSequence prefixSeq = ByteSequence.from(prefix, ENCODING);
             GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
                                            .withSortOrder(SortOrder.ASCEND)
                                            .build();
@@ -286,8 +284,7 @@ public class EtcdClient {
         E.checkArgument(count >= 0,
                         "The count must be >= 0, but got: %s", count);
         try {
-            ByteSequence prefixSeq = ByteSequence.from(prefix,
-                                                       StandardCharsets.UTF_8);
+            ByteSequence prefixSeq = ByteSequence.from(prefix, ENCODING);
             GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
                                            .withLimit(count)
                                            .withSortOrder(SortOrder.ASCEND)
@@ -335,8 +332,7 @@ public class EtcdClient {
                         "The count must be >= 0, but got: %s", count);
         long deadline = System.currentTimeMillis() + timeout;
         List<byte[]> result = new ArrayList<>(count);
-        ByteSequence prefixSeq = ByteSequence.from(prefix,
-                                                   StandardCharsets.UTF_8);
+        ByteSequence prefixSeq = ByteSequence.from(prefix, ENCODING);
         GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
                                        .withSortOrder(SortOrder.ASCEND)
                                        .withLimit(count)
@@ -420,7 +416,7 @@ public class EtcdClient {
      */
     public long delete(String key) {
         E.checkArgumentNotNull(key, "The key can't be null");
-        ByteSequence keySeq = ByteSequence.from(key, StandardCharsets.UTF_8);
+        ByteSequence keySeq = ByteSequence.from(key, ENCODING);
         try {
             DeleteResponse response = this.client.getKVClient().delete(keySeq)
                                                  .get();
@@ -438,8 +434,7 @@ public class EtcdClient {
      */
     public long deleteWithPrefix(String prefix) {
         E.checkArgumentNotNull(prefix, "The prefix can't be null");
-        ByteSequence prefixSeq = ByteSequence.from(prefix,
-                                                   StandardCharsets.UTF_8);
+        ByteSequence prefixSeq = ByteSequence.from(prefix, ENCODING);
         DeleteOption deleteOption = DeleteOption.newBuilder()
                                                 .withPrefix(prefixSeq).build();
         try {
