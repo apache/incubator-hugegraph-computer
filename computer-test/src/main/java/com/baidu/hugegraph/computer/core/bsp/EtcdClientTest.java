@@ -19,8 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.bsp;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -48,8 +47,8 @@ public class EtcdClientTest {
     private static String KEY1 = "/key1";
     private static String KEY2 = "/key2";
     private static String NO_SUCH_KEY = "/no-such-key";
-    private static byte[] VALUE1 = "value1".getBytes(UTF_8);
-    private static byte[] VALUE2 = "value2".getBytes(UTF_8);
+    private static byte[] VALUE1 = "value1".getBytes(StandardCharsets.UTF_8);
+    private static byte[] VALUE2 = "value2".getBytes(StandardCharsets.UTF_8);
 
     private EtcdClient client;
 
@@ -233,15 +232,16 @@ public class EtcdClientTest {
     public void testGetWithRevision()
                 throws ExecutionException, InterruptedException {
         KV kv = this.client.getKv();
-        ByteSequence key1Seq = ByteSequence.from(KEY1, UTF_8);
+        ByteSequence key1Seq = ByteSequence.from(KEY1, StandardCharsets.UTF_8);
         ByteSequence value1Seq = ByteSequence.from(VALUE1);
         ByteSequence value2Seq = ByteSequence.from(VALUE2);
         PutResponse putResponse1 = kv.put(key1Seq, value1Seq).get();
         long revision1 = putResponse1.getHeader().getRevision();
         PutResponse putResponse2 = kv.put(key1Seq, value2Seq).get();
         long revision2 = putResponse2.getHeader().getRevision();
-        long deleteCount1 = kv.delete(ByteSequence.from(KEY1, UTF_8)).get()
-                              .getDeleted();
+        long deleteCount1 = kv.delete(ByteSequence.from(KEY1,
+                                                        StandardCharsets.UTF_8))
+                              .get().getDeleted();
         Assert.assertEquals(1, deleteCount1);
         GetOption getOption1 = GetOption.newBuilder().withRevision(revision1)
                                         .build();

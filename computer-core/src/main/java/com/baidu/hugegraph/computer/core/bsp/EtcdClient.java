@@ -19,16 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.bsp;
 
-import static io.etcd.jetcd.options.GetOption.SortOrder.ASCEND;
-import static io.etcd.jetcd.watch.WatchEvent.EventType.PUT;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -46,9 +43,13 @@ import io.etcd.jetcd.kv.DeleteResponse;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
+import io.etcd.jetcd.options.GetOption.SortOrder;
 import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchEvent;
+import io.etcd.jetcd.watch.WatchEvent.EventType;
+
 import io.etcd.jetcd.watch.WatchResponse;
+
 
 public class EtcdClient {
 
@@ -61,7 +62,8 @@ public class EtcdClient {
                                "The endpoints can't be null");
         E.checkArgumentNotNull(endpoints,
                                "The namespace can't be null");
-        ByteSequence namespaceBs = ByteSequence.from(namespace.getBytes(UTF_8));
+        ByteSequence namespaceBs = ByteSequence.from(namespace.getBytes(
+                                                     StandardCharsets.UTF_8));
         this.client = Client.builder().endpoints(endpoints)
                             .namespace(namespaceBs).build();
         this.watch = this.client.getWatchClient();
@@ -80,7 +82,7 @@ public class EtcdClient {
         E.checkArgument(value != null,
                         "The value can't be null.");
         try {
-            this.kv.put(ByteSequence.from(key, UTF_8),
+            this.kv.put(ByteSequence.from(key, StandardCharsets.UTF_8),
                         ByteSequence.from(value))
                    .get();
         } catch (InterruptedException e) {
@@ -112,16 +114,19 @@ public class EtcdClient {
     public byte[] get(String key, boolean throwException) {
         E.checkArgumentNotNull(key, "The key can't be null");
         try {
-            ByteSequence keySeq = ByteSequence.from(key, UTF_8);
+            ByteSequence keySeq = ByteSequence.from(key,
+                                                    StandardCharsets.UTF_8);
             GetResponse response = this.kv.get(keySeq).get();
             if (response.getCount() > 0) {
                 List<KeyValue> kvs = response.getKvs();
+                assert kvs.size() == 1;
                 return kvs.get(0).getValue().getBytes();
             } else if (throwException) {
                  throw new ComputerException("Can't find value for key='%s'",
                                              key);
+            } else {
+                return null;
             }
-            return null;
         } catch (InterruptedException e) {
             throw new ComputerException(
                       "Interrupted while getting with key='%s'", e, key);
@@ -147,7 +152,7 @@ public class EtcdClient {
         E.checkArgument(timeout > 0L,
                         "The timeout must be > 0, but got: %s", timeout);
         long deadline = System.currentTimeMillis() + timeout;
-        ByteSequence keySeq = ByteSequence.from(key, UTF_8);
+        ByteSequence keySeq = ByteSequence.from(key, StandardCharsets.UTF_8);
         try {
             GetResponse response = this.kv.get(keySeq).get();
             if (response.getCount() > 0) {
@@ -157,9 +162,8 @@ public class EtcdClient {
                 timeout = deadline - System.currentTimeMillis();
                 if (timeout > 0) {
                     long revision = response.getHeader().getRevision();
-                    return this.waitAndPrefixGetFromPutEvent(keySeq, revision,
-                                                             timeout,
-                                                             throwException);
+                    return this.waitAndGetFromPutEvent(keySeq, revision,
+                                                       timeout, throwException);
                 } else if (throwException) {
                     throw new ComputerException("Can't find value for key='%s'",
                                                 key);
@@ -185,10 +189,9 @@ public class EtcdClient {
      * @throws ComputerException if no event triggered in timeout and
      * throwException is set true
      */
-    private byte[] waitAndPrefixGetFromPutEvent(ByteSequence keySeq,
-                                                long revision, long timeout,
-                                                boolean throwException)
-                                                throws InterruptedException {
+    private byte[] waitAndGetFromPutEvent(ByteSequence keySeq, long revision,
+                                          long timeout, boolean throwException)
+                                          throws InterruptedException {
         AtomicReference<byte[]> eventValue = new AtomicReference<>();
         final BarrierEvent barrierEvent = new BarrierEvent();
         WatchOption watchOption = WatchOption.newBuilder()
@@ -198,7 +201,7 @@ public class EtcdClient {
         Consumer<WatchResponse> consumer = watchResponse -> {
             List<WatchEvent> events = watchResponse.getEvents();
             for (WatchEvent event : events) {
-                if (PUT.equals(event.getEventType())) {
+                if (EventType.PUT.equals(event.getEventType())) {
                     KeyValue keyValue = event.getKeyValue();
                     if (keySeq.equals(keyValue.getKey())) {
                         eventValue.set(event.getKeyValue().getValue()
@@ -209,8 +212,9 @@ public class EtcdClient {
                         assert false;
                         throw new ComputerException(
                                   "Expect event key '%s', found '%s'",
-                                  keySeq.toString(UTF_8),
-                                  keyValue.getKey().toString(UTF_8));
+                                  keySeq.toString(StandardCharsets.UTF_8),
+                                  keyValue.getKey().toString(
+                                                    StandardCharsets.UTF_8));
                     }
                 } else {
                     assert false;
@@ -230,7 +234,8 @@ public class EtcdClient {
             return value;
         } else if (throwException) {
             throw new ComputerException("Can't find value for key='%s'",
-                                        keySeq.toString(UTF_8));
+                                        keySeq.toString(
+                                               StandardCharsets.UTF_8));
         } else {
             return null;
         }
@@ -244,9 +249,11 @@ public class EtcdClient {
         E.checkArgumentNotNull(prefix,
                                "The prefix can't be null");
         try {
-            ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
+            ByteSequence prefixSeq = ByteSequence.from(prefix,
+                                                       StandardCharsets.UTF_8);
             GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
-                                           .withSortOrder(ASCEND).build();
+                                           .withSortOrder(SortOrder.ASCEND)
+                                           .build();
             GetResponse response = this.kv.get(prefixSeq, getOption).get();
             if (response.getCount() > 0) {
                 List<KeyValue> kvs = response.getKvs();
@@ -279,10 +286,12 @@ public class EtcdClient {
         E.checkArgument(count >= 0,
                         "The count must be >= 0, but got: %s", count);
         try {
-            ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
+            ByteSequence prefixSeq = ByteSequence.from(prefix,
+                                                       StandardCharsets.UTF_8);
             GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
                                            .withLimit(count)
-                                           .withSortOrder(ASCEND).build();
+                                           .withSortOrder(SortOrder.ASCEND)
+                                           .build();
             GetResponse response = this.kv.get(prefixSeq, getOption).get();
             if (response.getCount() == count || !throwException) {
                 List<KeyValue> kvs = response.getKvs();
@@ -326,9 +335,11 @@ public class EtcdClient {
                         "The count must be >= 0, but got: %s", count);
         long deadline = System.currentTimeMillis() + timeout;
         List<byte[]> result = new ArrayList<>(count);
-        ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
+        ByteSequence prefixSeq = ByteSequence.from(prefix,
+                                                   StandardCharsets.UTF_8);
         GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
-                                       .withSortOrder(ASCEND).withLimit(count)
+                                       .withSortOrder(SortOrder.ASCEND)
+                                       .withLimit(count)
                                        .build();
         while (System.currentTimeMillis() < deadline) {
             try {
@@ -344,8 +355,8 @@ public class EtcdClient {
                     if (timeout > 0) {
                         long revision = response.getHeader().getRevision();
                         int diff = (int) (count - response.getCount());
-                        this.waitPrefixPutEvent(prefixSeq, diff, revision,
-                                                timeout);
+                        this.waitAndPrefixGetFromPutEvent(prefixSeq, diff,
+                                                          revision, timeout);
                     } else {
                         break;
                     }
@@ -368,9 +379,10 @@ public class EtcdClient {
      * This method wait at most timeout ms regardless whether expected
      * eventCount events triggered.
      */
-    private void waitPrefixPutEvent(ByteSequence prefixSeq, int eventCount,
-                                    long revision, long timeout)
-                                    throws InterruptedException {
+    private void waitAndPrefixGetFromPutEvent(ByteSequence prefixSeq,
+                                              int eventCount, long revision,
+                                              long timeout)
+                                              throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(eventCount);
         WatchOption watchOption = WatchOption.newBuilder()
                                              .withPrefix(prefixSeq)
@@ -384,7 +396,7 @@ public class EtcdClient {
                  * This event may not accurate, it may put the
                  * same key multiple times.
                  */
-                if (PUT.equals(event.getEventType())) {
+                if (EventType.PUT.equals(event.getEventType())) {
                     countDownLatch.countDown();
                 } else {
                     throw new ComputerException("Unexpected event type '%s'",
@@ -395,7 +407,7 @@ public class EtcdClient {
         Watch.Watcher watcher = this.watch.watch(prefixSeq,
                                                  watchOption,
                                                  consumer);
-        countDownLatch.await(timeout, MILLISECONDS);
+        countDownLatch.await(timeout, TimeUnit.MILLISECONDS);
         watcher.close();
     }
 
@@ -408,14 +420,14 @@ public class EtcdClient {
      */
     public long delete(String key) {
         E.checkArgumentNotNull(key, "The key can't be null");
-        ByteSequence keySeq = ByteSequence.from(key, UTF_8);
+        ByteSequence keySeq = ByteSequence.from(key, StandardCharsets.UTF_8);
         try {
             DeleteResponse response = this.client.getKVClient().delete(keySeq)
                                                  .get();
             return response.getDeleted();
         } catch (InterruptedException e) {
-            throw new ComputerException("Interrupted while deleting '%s'", e,
-                                        key);
+            throw new ComputerException("Interrupted while deleting '%s'",
+                                        e, key);
         } catch (ExecutionException e) {
             throw new ComputerException("Error while deleting '%s'", e, key);
         }
@@ -426,7 +438,8 @@ public class EtcdClient {
      */
     public long deleteWithPrefix(String prefix) {
         E.checkArgumentNotNull(prefix, "The prefix can't be null");
-        ByteSequence prefixSeq = ByteSequence.from(prefix, UTF_8);
+        ByteSequence prefixSeq = ByteSequence.from(prefix,
+                                                   StandardCharsets.UTF_8);
         DeleteOption deleteOption = DeleteOption.newBuilder()
                                                 .withPrefix(prefixSeq).build();
         try {
