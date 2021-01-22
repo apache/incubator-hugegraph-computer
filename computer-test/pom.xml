@@ -68,7 +68,7 @@
                                 ${basedir}/target/classes/
                             </testClassesDirectory>
                             <includes>
-                                <include>**/CoreTestSuite.java</include>
+                                <include>**/UnitTestSuite.java</include>
                             </includes>
                         </configuration>
                     </execution>
