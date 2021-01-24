@@ -48,13 +48,13 @@ import io.etcd.jetcd.options.GetOption.SortOrder;
 import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchEvent;
 import io.etcd.jetcd.watch.WatchEvent.EventType;
-
 import io.etcd.jetcd.watch.WatchResponse;
 
 
 public class EtcdClient {
 
     private static final Charset ENCODING = StandardCharsets.UTF_8;
+
     private final Client client;
     private final Watch watch;
     private final KV kv;
@@ -62,7 +62,7 @@ public class EtcdClient {
     public EtcdClient(String endpoints, String namespace) {
         E.checkArgumentNotNull(endpoints,
                                "The endpoints can't be null");
-        E.checkArgumentNotNull(endpoints,
+        E.checkArgumentNotNull(namespace,
                                "The namespace can't be null");
         ByteSequence namespaceSeq = ByteSequence.from(namespace.getBytes(
                                                                 ENCODING));
@@ -241,7 +241,7 @@ public class EtcdClient {
     }
 
     /**
-     * Get the count of values of keys with the specified prefix.
+     * Get the values of keys with the specified prefix.
      * If no key found, return empty list.
      */
     public List<byte[]> getWithPrefix(String prefix) {
@@ -273,7 +273,7 @@ public class EtcdClient {
     }
 
     /**
-     * Get the count of values of keys with the specified prefix.
+     * Get the expected count of values of keys with the specified prefix.
      * Throws ComputerException if there are no enough object and throwException
      * is set true.
      */
