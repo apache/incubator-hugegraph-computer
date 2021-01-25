@@ -23,7 +23,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.bsp.BspTestSuite;
 import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
+import com.baidu.hugegraph.computer.core.common.ExceptionTest;
 import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
 import com.baidu.hugegraph.computer.core.io.IOTestSuite;
 import com.baidu.hugegraph.util.Log;
@@ -33,6 +35,8 @@ import com.baidu.hugegraph.util.Log;
     CommonTestSuite.class,
     GraphTestSuite.class,
     IOTestSuite.class,
+    ExceptionTest.class,
+    BspTestSuite.class
 })
 public class UnitTestSuite {
 

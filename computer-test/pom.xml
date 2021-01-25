@@ -43,6 +43,12 @@
             <artifactId>computer-k8s</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -62,7 +68,7 @@
                                 ${basedir}/target/classes/
                             </testClassesDirectory>
                             <includes>
-                                <include>**/CoreTestSuite.java</include>
+                                <include>**/UnitTestSuite.java</include>
                             </includes>
                         </configuration>
                     </execution>
