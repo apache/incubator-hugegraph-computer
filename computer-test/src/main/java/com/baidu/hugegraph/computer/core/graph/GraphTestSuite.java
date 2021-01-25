@@ -23,12 +23,14 @@ package com.baidu.hugegraph.computer.core.graph;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.core.common.ContainerInfoTest;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactoryTest;
 import com.baidu.hugegraph.computer.core.graph.id.IdTypeTest;
 import com.baidu.hugegraph.computer.core.graph.id.LongIdTest;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8IdTest;
 import com.baidu.hugegraph.computer.core.graph.id.UuidIdTest;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValueTest;
+import com.baidu.hugegraph.computer.core.graph.partition.PartitionStatTest;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueListListTest;
@@ -57,7 +59,10 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
     IdValueListListTest.class,
     ListValueTest.class,
     ValueTypeTest.class,
-    ValueFactoryTest.class
+    ValueFactoryTest.class,
+    ContainerInfoTest.class,
+    PartitionStatTest.class,
+    GraphStatTest.class
 })
 public class GraphTestSuite {
 }

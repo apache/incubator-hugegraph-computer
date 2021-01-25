@@ -23,6 +23,7 @@ public final class Constants {
 
     public static final byte[] EMPTY_BYTES = new byte[0];
 
+    public static final int BOOLEAN_LEN = 1;
     public static final int BYTE_LEN = Byte.BYTES;
     public static final int SHORT_LEN = Short.BYTES;
     public static final int INT_LEN = Integer.BYTES;
@@ -35,4 +36,19 @@ public final class Constants {
     public static final int UINT8_MAX = ((byte) -1) & 0xff;
     public static final int UINT16_MAX = ((short) -1) & 0xffff;
     public static final long UINT32_MAX = (-1) & 0xffffffffL;
+
+    // The WORKER or MASTER after "BSP_" indicates who set the flag.
+    public static final String BSP_MASTER_REGISTER_PATH = "/master";
+    public static final String BSP_WORKER_REGISTER_PATH = "/worker";
+    public static final String BSP_MASTER_FIRST_SUPER_STEP_PATH =
+                               "/first-super-step";
+    public static final String BSP_WORKER_READ_DONE_PATH = "/worker-read-done";
+    public static final String BSP_WORKER_SUPER_STEP_DONE_PATH =
+                               "/super-step-worker-done";
+    public static final String BSP_MASTER_SUPER_STEP_DONE_PATH =
+                               "/super-step-master-done";
+    public static final String BSP_WORKER_PREPARE_SUPER_STEP_DONE_PATH =
+                               "/super-step-worker-prepare-done";
+    public static final String BSP_WORKER_SAVE_DONE_PATH =
+                               "/worker-save-done";
 }

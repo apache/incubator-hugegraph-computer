@@ -34,9 +34,11 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.config.ConfigOption;
+import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
 
@@ -94,5 +96,22 @@ public class UnitTestBase {
             map.put(((ConfigOption) key).name(), (String) value);
         }
         ComputerContext.updateOptions(map);
+    }
+
+    public static void assertEqualAfterWriteAndRead(Writable writeObj,
+                                                    Readable readObj)
+                                                    throws IOException {
+        byte[] bytes;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+            writeObj.write(output);
+            bytes = baos.toByteArray();
+        }
+
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+            readObj.read(input);
+            Assert.assertEquals(writeObj, readObj);
+        }
     }
 }

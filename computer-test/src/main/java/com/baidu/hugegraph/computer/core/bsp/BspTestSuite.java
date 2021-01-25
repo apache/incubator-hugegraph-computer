@@ -24,6 +24,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    EtcdBspTest.class,
     EtcdClientTest.class
 })
 public class BspTestSuite {

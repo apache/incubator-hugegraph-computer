@@ -17,15 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.worker;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ExceptionTest.class,
-    ContainerInfoTest.class
+    WorkerStatTest.class
 })
-public class CommonTestSuite {
+public class WorkerTestSuite {
 }
