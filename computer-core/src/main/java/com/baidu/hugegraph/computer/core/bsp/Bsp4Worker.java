@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 public interface Bsp4Worker {
 
     // Do initialization operation, like connect to etcd cluster.
-    void init();
+    public void init();
 
     /**
      * Register this worker, worker's information is passed by constructor of
@@ -37,7 +37,7 @@ public interface Bsp4Worker {
     public void registerWorker();
 
     /**
-     * Wait master registered, get master's  information includes hostname
+     * Wait master registered, get master's information includes hostname
      * and port.
      */
     public ContainerInfo waitMasterRegistered();
@@ -52,7 +52,7 @@ public interface Bsp4Worker {
      * The master set this signal to let workers knows the first superStep to
      * start with.
      */
-    public int waitFirstSuperStep();
+    public int waitFirstSuperstep();
 
     /**
      * Set read done signal after read input splits, and send all vertices and
@@ -70,26 +70,26 @@ public interface Bsp4Worker {
      * Worker set this signal after sent all messages to corresponding
      * workers and sent aggregates to master.
      */
-    public void superStepDone(int superStepId, WorkerStat statList);
+    public void superstepDone(int superStepId, WorkerStat statList);
 
     /**
      * The master set this signal after all workers signaled superStepDone,
      * and master computes MasterComputation, and broadcast all aggregates to
      * works.
      */
-    public GraphStat waitMasterSuperStepDone(int superStepId);
+    public GraphStat waitMasterSuperstepDone(int superStepId);
 
     /**
      * Worker set this flag to indicate the worker is ready to receive
      * messages from other workers.
      */
-    public void prepareSuperStepDone(int superStep);
+    public void prepareSuperstepDone(int superStep);
 
     /**
      * After all workers prepared, the worker can execute and send messages
      * to other workers.
      */
-    public void waitWorkersPrepareSuperStepDone(int superStep);
+    public void waitWorkersPrepareSuperstepDone(int superStep);
 
     /**
      * Set this flag indicates a worker has save the result. It can
@@ -98,5 +98,5 @@ public interface Bsp4Worker {
     public void saveDone();
 
     // Contrary to init. Could not do any bsp operation after close is called.
-    void close();
+    public void close();
 }

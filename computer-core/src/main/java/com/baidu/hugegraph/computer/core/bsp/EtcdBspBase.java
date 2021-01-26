@@ -38,7 +38,7 @@ public abstract class EtcdBspBase {
     protected int workerCount;
     protected long registerTimeout;
     protected long barrierOnMasterTimeout;
-    protected long barrierOnWorkerTimeout;
+    protected long barrierOnWorkersTimeout;
     protected long logInterval;
 
     public EtcdBspBase(HugeConfig config) {
@@ -49,10 +49,10 @@ public abstract class EtcdBspBase {
         String endpoints = this.config.get(ComputerOptions.ETCD_ENDPOINTS);
         String job_id = config.get(ComputerOptions.JOB_ID);
         this.etcdClient = new EtcdClient(endpoints, job_id);
-        this.workerCount = this.config.get(ComputerOptions.WORKER_COUNT);
+        this.workerCount = this.config.get(ComputerOptions.WORKERS_COUNT);
         this.registerTimeout = this.config.get(
                                ComputerOptions.BSP_REGISTER_TIMEOUT);
-        this.barrierOnWorkerTimeout = this.config.get(
+        this.barrierOnWorkersTimeout = this.config.get(
              ComputerOptions.BSP_BARRIER_ON_WORKERS_TIMEOUT);
         this.barrierOnMasterTimeout = this.config.get(
              ComputerOptions.BSP_BARRIER_ON_MASTER_TIMEOUT);

@@ -63,42 +63,43 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
     }
 
     @Override
-    public void firstSuperStep(int superStep) {
+    public void firstSuperstep(int superstep) {
         String path = constructPath(Constants.BSP_MASTER_FIRST_SUPER_STEP_PATH);
-        IntValue superStepWritable = new IntValue(superStep);
-        this.etcdClient.put(path, ReadWriteUtil.toByteArray(superStepWritable));
-        LOG.info("First super step {}", superStep);
+        IntValue superstepWritable = new IntValue(superstep);
+        this.etcdClient.put(path, ReadWriteUtil.toByteArray(superstepWritable));
+        LOG.info("First super step {}", superstep);
     }
 
     @Override
-    public List<WorkerStat> waitWorkerSuperStepDone(int superStep) {
+    public List<WorkerStat> waitWorkersSuperstepDone(int superstep) {
         String path = constructPath(Constants.BSP_WORKER_SUPER_STEP_DONE_PATH,
-                                    superStep);
-        List<byte[]> list = barrierOnWorkers(path, this.barrierOnWorkerTimeout);
+                                    superstep);
+        List<byte[]> list = barrierOnWorkers(path,
+                                             this.barrierOnWorkersTimeout);
         List<WorkerStat> result = new ArrayList<>(this.workerCount);
         for (byte[] bytes : list) {
             WorkerStat workerStat = new WorkerStat();
             ReadWriteUtil.readFrom(bytes, workerStat);
             result.add(workerStat);
         }
-        LOG.info("Workers super step {} done, workers stat:{}", superStep,
+        LOG.info("Workers super step {} done, workers stat:{}", superstep,
                  result);
         return result;
     }
 
     @Override
-    public void masterSuperStepDone(int superStep, GraphStat graphStat) {
+    public void masterSuperstepDone(int superstep, GraphStat graphStat) {
         String path = constructPath(Constants.BSP_MASTER_SUPER_STEP_DONE_PATH,
-                                    superStep);
+                                    superstep);
         this.etcdClient.put(path, ReadWriteUtil.toByteArray(graphStat));
         LOG.info("Master super step {} done, graph stat:{}",
-                 superStep, graphStat);
+                 superstep, graphStat);
     }
 
     @Override
     public void waitWorkersSaveDone() {
         String path = constructPath(Constants.BSP_WORKER_SAVE_DONE_PATH);
-        barrierOnWorkers(path, this.barrierOnWorkerTimeout);
+        barrierOnWorkers(path, this.barrierOnWorkersTimeout);
         LOG.info("Workers save done");
     }
 

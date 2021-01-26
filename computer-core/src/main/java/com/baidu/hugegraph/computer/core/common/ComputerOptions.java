@@ -60,10 +60,10 @@ public class ComputerOptions extends OptionHolder {
                     "local_0001"
             );
 
-    public static final ConfigOption<Integer> WORKER_COUNT =
+    public static final ConfigOption<Integer> WORKERS_COUNT =
             new ConfigOption<>(
-                    "computer.worker_count",
-                    "The worker count of the algorithm.",
+                    "computer.workers_count",
+                    "The workers count of the algorithm.",
                     positiveInt(),
                     1
             );

@@ -28,21 +28,21 @@ import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 public interface Bsp4Master {
 
     // Do initialization operation, like connect to etcd cluster.
-    void init();
+    public void init();
 
     public void registerMaster(ContainerInfo masterInfo);
 
     // Wait workers registered.
     public List<ContainerInfo> waitWorkersRegistered();
 
-    // The first superStep to execute.
-    public void firstSuperStep(int superStep);
+    // The first superstep to execute.
+    public void firstSuperstep(int superstep);
 
     // Wait workers finish specified super step.
-    public List<WorkerStat> waitWorkerSuperStepDone(int superStepId);
+    public List<WorkerStat> waitWorkersSuperstepDone(int superstep);
 
     // Master set super step done.
-    public void masterSuperStepDone(int superStep, GraphStat graphStat);
+    public void masterSuperstepDone(int superstep, GraphStat graphStat);
 
     // Wait workers have saved the vertices.
     public void waitWorkersSaveDone();
@@ -51,5 +51,5 @@ public interface Bsp4Master {
     public void cleanBspData();
 
     // Could not do any bsp operation after close is called.
-    void close();
+    public void close();
 }

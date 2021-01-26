@@ -58,7 +58,7 @@ public class EtcdBspTest {
         Map<String, Object> map = new HashMap<>();
         String job_id = "local_001";
         map.put(ComputerOptions.JOB_ID.name(), job_id);
-        map.put(ComputerOptions.WORKER_COUNT.name(), 1);
+        map.put(ComputerOptions.WORKERS_COUNT.name(), 1);
         map.put(ComputerOptions.BSP_LOG_INTERVAL.name(), 200L);
         map.put(ComputerOptions.MAX_SUPER_STEP.name(), 2);
         MapConfiguration configuration = new MapConfiguration(map);
@@ -113,19 +113,19 @@ public class EtcdBspTest {
         workerStat.add(new PartitionStat(0, 200, 300));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
-            this.bsp4Master.firstSuperStep(-1);
+            this.bsp4Master.firstSuperstep(-1);
             List<WorkerStat> list = this.bsp4Master
-                                               .waitWorkerSuperStepDone(-1);
+                                        .waitWorkersSuperstepDone(-1);
             Assert.assertEquals(workerStat, list.get(0));
             countDownLatch.countDown();
 
         });
         this.executorService.submit(() -> {
-            int firstSuperStep = this.bsp4Worker.waitFirstSuperStep();
+            int firstSuperStep = this.bsp4Worker.waitFirstSuperstep();
             Assert.assertEquals(-1, firstSuperStep);
             this.bsp4Worker.readDone();
             this.bsp4Worker.waitWorkersReadDone();
-            this.bsp4Worker.superStepDone(-1, workerStat);
+            this.bsp4Worker.superstepDone(-1, workerStat);
             countDownLatch.countDown();
         });
         countDownLatch.await();
@@ -141,7 +141,7 @@ public class EtcdBspTest {
         this.executorService.submit(() -> {
             for (int i = -1; i < this.maxSuperStep; i++) {
                 List<WorkerStat> list = this.bsp4Master
-                                                   .waitWorkerSuperStepDone(i);
+                                                   .waitWorkersSuperstepDone(i);
                 GraphStat graphStat = new GraphStat();
                 for (WorkerStat workerStat1 : list) {
                     graphStat.increase(workerStat1);
@@ -149,7 +149,7 @@ public class EtcdBspTest {
                 if (i == this.maxSuperStep - 1) {
                     graphStat.halt(true);
                 }
-                this.bsp4Master.masterSuperStepDone(i, graphStat);
+                this.bsp4Master.masterSuperstepDone(i, graphStat);
 
             }
             countDownLatch.countDown();
@@ -157,14 +157,14 @@ public class EtcdBspTest {
         });
         this.executorService.submit(() -> {
             int superStep = -1;
-            this.bsp4Worker.superStepDone(superStep, workerStat);
+            this.bsp4Worker.superstepDone(superStep, workerStat);
 
             GraphStat graphStat = this.bsp4Worker
-                                      .waitMasterSuperStepDone(superStep);
+                                      .waitMasterSuperstepDone(superStep);
             while (!graphStat.halt()) {
                 superStep++;
-                this.bsp4Worker.prepareSuperStepDone(superStep);
-                this.bsp4Worker.waitWorkersPrepareSuperStepDone(superStep);
+                this.bsp4Worker.prepareSuperstepDone(superStep);
+                this.bsp4Worker.waitWorkersPrepareSuperstepDone(superStep);
                 PartitionStat stat1 = new PartitionStat(0, 100, 200, 50, 60,
                                                         70);
                 PartitionStat stat2 = new PartitionStat(0, 200, 300, 80, 90,
@@ -178,8 +178,8 @@ public class EtcdBspTest {
                 } catch (InterruptedException e) {
                     // Do nothing
                 }
-                this.bsp4Worker.superStepDone(superStep, superStepworkerStat);
-                graphStat = this.bsp4Worker.waitMasterSuperStepDone(superStep);
+                this.bsp4Worker.superstepDone(superStep, superStepworkerStat);
+                graphStat = this.bsp4Worker.waitMasterSuperstepDone(superStep);
             }
             countDownLatch.countDown();
         });

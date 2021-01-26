@@ -78,13 +78,13 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
     }
 
     @Override
-    public int waitFirstSuperStep() {
+    public int waitFirstSuperstep() {
         String path = constructPath(Constants.BSP_MASTER_FIRST_SUPER_STEP_PATH);
         byte[] bytes = this.etcdClient.get(path, barrierOnMasterTimeout, true);
-        IntValue superStepReadable = new IntValue();
-        ReadWriteUtil.readFrom(bytes, superStepReadable);
-        LOG.info("First superStep {}", superStepReadable.value());
-        return superStepReadable.value();
+        IntValue superstepReadable = new IntValue();
+        ReadWriteUtil.readFrom(bytes, superstepReadable);
+        LOG.info("First superstep {}", superstepReadable.value());
+        return superstepReadable.value();
     }
 
     @Override
@@ -98,48 +98,48 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
     @Override
     public void waitWorkersReadDone() {
         String path = constructPath(Constants.BSP_WORKER_READ_DONE_PATH);
-        this.barrierOnWorkers(path, this.barrierOnWorkerTimeout);
+        this.barrierOnWorkers(path, this.barrierOnWorkersTimeout);
         LOG.info("Workers read done");
     }
 
     @Override
-    public void superStepDone(int superStepId, WorkerStat workerStat) {
+    public void superstepDone(int superstepId, WorkerStat workerStat) {
         String path = constructPath(Constants.BSP_WORKER_SUPER_STEP_DONE_PATH,
-                                    superStepId, this.workerInfo.id());
+                                    superstepId, this.workerInfo.id());
         this.etcdClient.put(path, ReadWriteUtil.toByteArray(workerStat));
-        LOG.info("Super step {} done, worker stat:{}", superStepId, workerStat);
+        LOG.info("Super step {} done, worker stat:{}", superstepId, workerStat);
     }
 
     @Override
-    public GraphStat waitMasterSuperStepDone(int superStep) {
+    public GraphStat waitMasterSuperstepDone(int superstep) {
         String path = constructPath(Constants.BSP_MASTER_SUPER_STEP_DONE_PATH,
-                                    superStep);
+                                    superstep);
         byte[] bytes = this.etcdClient.get(path, this.barrierOnMasterTimeout,
                                            true);
         GraphStat graphStat = new GraphStat();
         ReadWriteUtil.readFrom(bytes, graphStat);
-        LOG.info("Master super step {} done, graph stat:{}", superStep,
+        LOG.info("Master super step {} done, graph stat:{}", superstep,
                  graphStat);
         return graphStat;
     }
 
     @Override
-    public void prepareSuperStepDone(int superStep) {
+    public void prepareSuperstepDone(int superstep) {
         String path = constructPath(
                       Constants.BSP_WORKER_PREPARE_SUPER_STEP_DONE_PATH,
-                      superStep, this.workerInfo.id());
+                      superstep, this.workerInfo.id());
         this.etcdClient.put(path, Constants.EMPTY_BYTES);
         LOG.info("Worker {} prepared super step {} done",
-                 this.workerInfo.id(), superStep);
+                 this.workerInfo.id(), superstep);
     }
 
     @Override
-    public void waitWorkersPrepareSuperStepDone(int superStep) {
+    public void waitWorkersPrepareSuperstepDone(int superstep) {
         String path = constructPath(
                       Constants.BSP_WORKER_PREPARE_SUPER_STEP_DONE_PATH,
-                      superStep);
-        this.barrierOnWorkers(path, this.barrierOnWorkerTimeout);
-        LOG.info("Workers prepared super step {} done", superStep);
+                      superstep);
+        this.barrierOnWorkers(path, this.barrierOnWorkersTimeout);
+        LOG.info("Workers prepared super step {} done", superstep);
     }
 
     @Override
