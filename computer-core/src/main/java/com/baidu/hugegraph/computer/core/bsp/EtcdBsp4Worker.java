@@ -62,7 +62,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         return masterInfo;
     }
 
-    public List<ContainerInfo> waitWorkerRegistered() {
+    public List<ContainerInfo> waitWorkersRegistered() {
         String path = constructPath(Constants.BSP_WORKER_REGISTER_PATH);
         List<byte[]> serializedContainers = this.etcdClient.getWithPrefix(
                                                  path, this.workerCount,
@@ -81,10 +81,10 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
     public int waitFirstSuperstep() {
         String path = constructPath(Constants.BSP_MASTER_FIRST_SUPER_STEP_PATH);
         byte[] bytes = this.etcdClient.get(path, barrierOnMasterTimeout, true);
-        IntValue superstepReadable = new IntValue();
-        ReadWriteUtil.readFrom(bytes, superstepReadable);
-        LOG.info("First superstep {}", superstepReadable.value());
-        return superstepReadable.value();
+        IntValue superstep = new IntValue();
+        ReadWriteUtil.readFrom(bytes, superstep);
+        LOG.info("First superstep {}", superstep.value());
+        return superstep.value();
     }
 
     @Override
@@ -103,11 +103,11 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
     }
 
     @Override
-    public void superstepDone(int superstepId, WorkerStat workerStat) {
+    public void superstepDone(int superstep, WorkerStat workerStat) {
         String path = constructPath(Constants.BSP_WORKER_SUPER_STEP_DONE_PATH,
-                                    superstepId, this.workerInfo.id());
+                                    superstep, this.workerInfo.id());
         this.etcdClient.put(path, ReadWriteUtil.toByteArray(workerStat));
-        LOG.info("Super step {} done, worker stat:{}", superstepId, workerStat);
+        LOG.info("Superstep {} done, worker stat:{}", superstep, workerStat);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
                                            true);
         GraphStat graphStat = new GraphStat();
         ReadWriteUtil.readFrom(bytes, graphStat);
-        LOG.info("Master super step {} done, graph stat:{}", superstep,
+        LOG.info("Master superstep {} done, graph stat:{}", superstep,
                  graphStat);
         return graphStat;
     }
@@ -129,7 +129,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
                       Constants.BSP_WORKER_PREPARE_SUPER_STEP_DONE_PATH,
                       superstep, this.workerInfo.id());
         this.etcdClient.put(path, Constants.EMPTY_BYTES);
-        LOG.info("Worker {} prepared super step {} done",
+        LOG.info("Worker {} prepared superstep {} done",
                  this.workerInfo.id(), superstep);
     }
 
@@ -139,7 +139,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
                       Constants.BSP_WORKER_PREPARE_SUPER_STEP_DONE_PATH,
                       superstep);
         this.barrierOnWorkers(path, this.barrierOnWorkersTimeout);
-        LOG.info("Workers prepared super step {} done", superstep);
+        LOG.info("Workers prepared superstep {} done", superstep);
     }
 
     @Override

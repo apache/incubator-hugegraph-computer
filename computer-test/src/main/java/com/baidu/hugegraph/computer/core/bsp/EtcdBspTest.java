@@ -97,7 +97,7 @@ public class EtcdBspTest {
             ContainerInfo master = this.bsp4Worker.waitMasterRegistered();
             Assert.assertEquals(this.masterInfo, master);
             List<ContainerInfo> workers = this.bsp4Worker
-                                              .waitWorkerRegistered();
+                                              .waitWorkersRegistered();
             Assert.assertEquals(1, workers.size());
             Assert.assertEquals(this.workerInfo, workers.get(0));
             countDownLatch.countDown();
@@ -141,7 +141,7 @@ public class EtcdBspTest {
         this.executorService.submit(() -> {
             for (int i = -1; i < this.maxSuperStep; i++) {
                 List<WorkerStat> list = this.bsp4Master
-                                                   .waitWorkersSuperstepDone(i);
+                                            .waitWorkersSuperstepDone(i);
                 GraphStat graphStat = new GraphStat();
                 for (WorkerStat workerStat1 : list) {
                     graphStat.increase(workerStat1);

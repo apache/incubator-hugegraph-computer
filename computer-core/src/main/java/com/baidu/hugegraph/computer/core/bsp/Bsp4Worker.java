@@ -46,7 +46,7 @@ public interface Bsp4Worker {
      * Get all workers information includes hostname and port the workers
      * listen on.
      */
-    public List<ContainerInfo> waitWorkerRegistered();
+    public List<ContainerInfo> waitWorkersRegistered();
 
     /**
      * The master set this signal to let workers knows the first superStep to
@@ -70,14 +70,14 @@ public interface Bsp4Worker {
      * Worker set this signal after sent all messages to corresponding
      * workers and sent aggregates to master.
      */
-    public void superstepDone(int superStepId, WorkerStat statList);
+    public void superstepDone(int superstep, WorkerStat statList);
 
     /**
      * The master set this signal after all workers signaled superStepDone,
      * and master computes MasterComputation, and broadcast all aggregates to
      * works.
      */
-    public GraphStat waitMasterSuperstepDone(int superStepId);
+    public GraphStat waitMasterSuperstepDone(int superstep);
 
     /**
      * Worker set this flag to indicate the worker is ready to receive

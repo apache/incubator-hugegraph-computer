@@ -67,7 +67,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
         String path = constructPath(Constants.BSP_MASTER_FIRST_SUPER_STEP_PATH);
         IntValue superstepWritable = new IntValue(superstep);
         this.etcdClient.put(path, ReadWriteUtil.toByteArray(superstepWritable));
-        LOG.info("First super step {}", superstep);
+        LOG.info("First superstep {}", superstep);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
             ReadWriteUtil.readFrom(bytes, workerStat);
             result.add(workerStat);
         }
-        LOG.info("Workers super step {} done, workers stat:{}", superstep,
+        LOG.info("Workers superstep {} done, workers stat:{}", superstep,
                  result);
         return result;
     }
@@ -92,7 +92,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
         String path = constructPath(Constants.BSP_MASTER_SUPER_STEP_DONE_PATH,
                                     superstep);
         this.etcdClient.put(path, ReadWriteUtil.toByteArray(graphStat));
-        LOG.info("Master super step {} done, graph stat:{}",
+        LOG.info("Master superstep {} done, graph stat:{}",
                  superstep, graphStat);
     }
 
