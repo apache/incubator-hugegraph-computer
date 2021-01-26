@@ -64,7 +64,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
 
     @Override
     public void firstSuperstep(int superstep) {
-        String path = constructPath(Constants.BSP_MASTER_FIRST_SUPER_STEP_PATH);
+        String path = constructPath(Constants.BSP_MASTER_FIRST_SUPERSTEP_PATH);
         IntValue superstepWritable = new IntValue(superstep);
         this.etcdClient.put(path, ReadWriteUtil.toByteArray(superstepWritable));
         LOG.info("First superstep {}", superstep);
@@ -72,7 +72,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
 
     @Override
     public List<WorkerStat> waitWorkersSuperstepDone(int superstep) {
-        String path = constructPath(Constants.BSP_WORKER_SUPER_STEP_DONE_PATH,
+        String path = constructPath(Constants.BSP_WORKER_SUPERSTEP_DONE_PATH,
                                     superstep);
         List<byte[]> list = barrierOnWorkers(path,
                                              this.barrierOnWorkersTimeout);
@@ -89,7 +89,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
 
     @Override
     public void masterSuperstepDone(int superstep, GraphStat graphStat) {
-        String path = constructPath(Constants.BSP_MASTER_SUPER_STEP_DONE_PATH,
+        String path = constructPath(Constants.BSP_MASTER_SUPERSTEP_DONE_PATH,
                                     superstep);
         this.etcdClient.put(path, ReadWriteUtil.toByteArray(graphStat));
         LOG.info("Master superstep {} done, graph stat:{}",

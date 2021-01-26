@@ -90,7 +90,6 @@ public class EtcdBspTest {
             Assert.assertEquals(1, workers.size());
             Assert.assertEquals(this.workerInfo, workers.get(0));
             countDownLatch.countDown();
-
         });
         this.executorService.submit(() -> {
             this.bsp4Worker.registerWorker();
@@ -109,16 +108,16 @@ public class EtcdBspTest {
     public void testInput() throws InterruptedException {
         // If both two threads reach countDown, it means no exception is thrown.
         WorkerStat workerStat = new WorkerStat();
-        workerStat.add(new PartitionStat(0, 100, 200));
-        workerStat.add(new PartitionStat(0, 200, 300));
+        workerStat.add(new PartitionStat(0, 100L, 200L));
+        workerStat.add(new PartitionStat(1, 200L, 300L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
             this.bsp4Master.firstSuperstep(-1);
-            List<WorkerStat> list = this.bsp4Master
-                                        .waitWorkersSuperstepDone(-1);
-            Assert.assertEquals(workerStat, list.get(0));
+            List<WorkerStat> workerStats = this.bsp4Master
+                                               .waitWorkersSuperstepDone(-1);
+            Assert.assertEquals(1, workerStats.size());
+            Assert.assertEquals(workerStat, workerStats.get(0));
             countDownLatch.countDown();
-
         });
         this.executorService.submit(() -> {
             int firstSuperStep = this.bsp4Worker.waitFirstSuperstep();
@@ -135,8 +134,8 @@ public class EtcdBspTest {
     public void testIterate() throws InterruptedException {
         // If both two threads reach countDown, it means no exception is thrown.
         WorkerStat workerStat = new WorkerStat();
-        workerStat.add(new PartitionStat(0, 100, 200));
-        workerStat.add(new PartitionStat(0, 200, 300));
+        workerStat.add(new PartitionStat(0, 100L, 200L));
+        workerStat.add(new PartitionStat(1, 200L, 300L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
             for (int i = -1; i < this.maxSuperStep; i++) {
@@ -150,36 +149,34 @@ public class EtcdBspTest {
                     graphStat.halt(true);
                 }
                 this.bsp4Master.masterSuperstepDone(i, graphStat);
-
             }
             countDownLatch.countDown();
 
         });
         this.executorService.submit(() -> {
-            int superStep = -1;
-            this.bsp4Worker.superstepDone(superStep, workerStat);
-
+            int superstep = -1;
+            this.bsp4Worker.superstepDone(superstep, workerStat);
             GraphStat graphStat = this.bsp4Worker
-                                      .waitMasterSuperstepDone(superStep);
+                                      .waitMasterSuperstepDone(superstep);
             while (!graphStat.halt()) {
-                superStep++;
-                this.bsp4Worker.prepareSuperstepDone(superStep);
-                this.bsp4Worker.waitWorkersPrepareSuperstepDone(superStep);
-                PartitionStat stat1 = new PartitionStat(0, 100, 200, 50, 60,
-                                                        70);
-                PartitionStat stat2 = new PartitionStat(0, 200, 300, 80, 90,
-                                                        100);
-                WorkerStat superStepworkerStat = new WorkerStat();
-                superStepworkerStat.add(stat1);
-                superStepworkerStat.add(stat2);
+                superstep++;
+                this.bsp4Worker.prepareSuperstepDone(superstep);
+                this.bsp4Worker.waitWorkersPrepareSuperstepDone(superstep);
+                PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
+                                                        50L, 60L, 70L);
+                PartitionStat stat2 = new PartitionStat(1, 200L, 300L,
+                                                        80L, 90L, 100);
+                WorkerStat workerStatInSuperstep = new WorkerStat();
+                workerStatInSuperstep.add(stat1);
+                workerStatInSuperstep.add(stat2);
                 // Sleep some time to simulate the worker do computation.
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
                     // Do nothing
                 }
-                this.bsp4Worker.superstepDone(superStep, superStepworkerStat);
-                graphStat = this.bsp4Worker.waitMasterSuperstepDone(superStep);
+                this.bsp4Worker.superstepDone(superstep, workerStatInSuperstep);
+                graphStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
             }
             countDownLatch.countDown();
         });

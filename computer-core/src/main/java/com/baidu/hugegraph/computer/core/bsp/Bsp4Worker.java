@@ -49,51 +49,51 @@ public interface Bsp4Worker {
     public List<ContainerInfo> waitWorkersRegistered();
 
     /**
-     * The master set this signal to let workers knows the first superStep to
+     * The master set this signal to let workers knows the first superstep to
      * start with.
      */
     public int waitFirstSuperstep();
 
     /**
      * Set read done signal after read input splits, and send all vertices and
-     * edges to correspond
-     *  workers.
+     * edges to correspond workers.
      */
     public void readDone();
 
     /**
-     * Wait all workers read vertex and edge from input.
+     * Wait all workers read vertex and edge from input. After this, worker
+     * can merge the vertices and edges.
      */
     public void waitWorkersReadDone();
 
     /**
      * Worker set this signal after sent all messages to corresponding
-     * workers and sent aggregates to master.
+     * workers and sent aggregators to master.
      */
-    public void superstepDone(int superstep, WorkerStat statList);
+    public void superstepDone(int superstep, WorkerStat workerStat);
 
     /**
-     * The master set this signal after all workers signaled superStepDone,
+     * The master set this signal after all workers signaled superstepDone,
      * and master computes MasterComputation, and broadcast all aggregates to
      * works.
      */
     public GraphStat waitMasterSuperstepDone(int superstep);
 
     /**
-     * Worker set this flag to indicate the worker is ready to receive
+     * Worker set this signal to indicate the worker is ready to receive
      * messages from other workers.
      */
-    public void prepareSuperstepDone(int superStep);
+    public void prepareSuperstepDone(int superstep);
 
     /**
      * After all workers prepared, the worker can execute and send messages
      * to other workers.
      */
-    public void waitWorkersPrepareSuperstepDone(int superStep);
+    public void waitWorkersPrepareSuperstepDone(int superstep);
 
     /**
-     * Set this flag indicates a worker has save the result. It can
-     * successfully exit.
+     * Worker set this signal to indicate the worker has saved the result.
+     * It can successfully exit.
      */
     public void saveDone();
 

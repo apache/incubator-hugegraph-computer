@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.worker;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,7 +34,7 @@ import com.baidu.hugegraph.util.E;
 public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
 
     private int workerId;
-    private List<PartitionStat> stats = new ArrayList<>();
+    private List<PartitionStat> partitionStats = new ArrayList<>();
 
     public WorkerStat() {
     }
@@ -50,34 +49,34 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
 
     public void add(PartitionStat stat) {
         E.checkArgumentNotNull(stat, "The stat can't be null");
-        this.stats.add(stat);
+        this.partitionStats.add(stat);
     }
 
     public PartitionStat get(int index) {
-        return this.stats.get(index);
+        return this.partitionStats.get(index);
     }
 
     public int size() {
-        return this.stats.size();
+        return this.partitionStats.size();
     }
 
     @Override
     public void read(GraphInput in) throws IOException {
         this.workerId = in.readInt();
-        this.stats = new ArrayList<>();
         int size = in.readInt();
+        this.partitionStats = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             PartitionStat stat = new PartitionStat();
             stat.read(in);
-            this.stats.add(stat);
+            this.partitionStats.add(stat);
         }
     }
 
     @Override
     public void write(GraphOutput out) throws IOException {
         out.writeInt(this.workerId);
-        out.writeInt(this.stats.size());
-        for (PartitionStat stat : this.stats) {
+        out.writeInt(this.partitionStats.size());
+        for (PartitionStat stat : this.partitionStats) {
             stat.write(out);
         }
     }
@@ -89,17 +88,12 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
         }
         WorkerStat other = (WorkerStat) obj;
         return this.workerId == other.workerId &&
-               Arrays.equals(this.stats.toArray(), other.stats.toArray());
+               this.partitionStats.equals(other.partitionStats);
     }
 
     @Override
     public int hashCode() {
-        int code = Integer.hashCode(this.workerId);
-        code += Integer.hashCode(this.stats.size());
-        for (PartitionStat stat : this.stats) {
-            code += stat.hashCode();
-        }
-        return code;
+        return Integer.hashCode(this.workerId);
     }
 
     @Override
@@ -107,10 +101,10 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
         StringBuilder sb = new StringBuilder();
         sb.append("WorkerStat{").append("workerId=").append(this.workerId)
           .append(", partitionStats=[");
-        for (int i = 0; i < this.stats.size(); i++) {
-            sb.append(this.stats.get(i).toString());
-            if (i != this.stats.size() - 1) {
-                sb.append(",");
+        for (int i = 0; i < this.partitionStats.size(); i++) {
+            sb.append(this.partitionStats.get(i).toString());
+            if (i != this.partitionStats.size() - 1) {
+                sb.append(", ");
             }
         }
         sb.append("]}");
@@ -119,6 +113,6 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
 
     @Override
     public Iterator<PartitionStat> iterator() {
-        return this.stats.iterator();
+        return this.partitionStats.iterator();
     }
 }

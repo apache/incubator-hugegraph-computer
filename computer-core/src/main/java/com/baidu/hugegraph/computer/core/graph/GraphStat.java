@@ -44,18 +44,19 @@ public class GraphStat implements Readable, Writable {
     public GraphStat() {
     }
 
-    public void increase(PartitionStat obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        this.vertexCount += obj.vertexCount();
-        this.edgeCount += obj.edgeCount();
-        this.finishedVertexCount += obj.finishedVertexCount();
-        this.messageCount += obj.messageCount();
-        this.messageBytes += obj.messageBytes();
+    public void increase(PartitionStat partitionStat) {
+        E.checkArgumentNotNull(partitionStat,
+                               "The partitionStat can't be null");
+        this.vertexCount += partitionStat.vertexCount();
+        this.edgeCount += partitionStat.edgeCount();
+        this.finishedVertexCount += partitionStat.finishedVertexCount();
+        this.messageCount += partitionStat.messageCount();
+        this.messageBytes += partitionStat.messageBytes();
     }
 
-    public void increase(WorkerStat statList) {
-        E.checkArgumentNotNull(statList, "The statList can't be null");
-        for (PartitionStat partitionStat : statList) {
+    public void increase(WorkerStat workerStat) {
+        E.checkArgumentNotNull(workerStat, "The workerStat can't be null");
+        for (PartitionStat partitionStat : workerStat) {
             this.increase(partitionStat);
         }
     }

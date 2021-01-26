@@ -78,15 +78,15 @@ public class WorkerStatTest {
     public void testHashCode() {
         PartitionStat stat1 = new PartitionStat(0, 1L, 2L);
         PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
-        WorkerStat workerStat1 = new WorkerStat();
+        WorkerStat workerStat1 = new WorkerStat(1);
         workerStat1.add(stat1);
         workerStat1.add(stat2);
 
-        WorkerStat workerStat2 = new WorkerStat();
+        WorkerStat workerStat2 = new WorkerStat(1);
         workerStat2.add(stat1);
         workerStat2.add(stat2);
 
-        WorkerStat workerStat3 = new WorkerStat();
+        WorkerStat workerStat3 = new WorkerStat(2);
 
         Assert.assertEquals(workerStat1.hashCode(), workerStat2.hashCode());
         Assert.assertNotEquals(workerStat1.hashCode(), workerStat3.hashCode());
@@ -105,11 +105,10 @@ public class WorkerStatTest {
         for (int i = 0; i < workerStat.size(); i++) {
             sb.append(workerStat.get(i).toString());
             if (i != workerStat.size() - 1) {
-                sb.append(",");
+                sb.append(", ");
             }
         }
         sb.append("]}");
-
         Assert.assertEquals(sb.toString(), workerStat.toString());
     }
 }
