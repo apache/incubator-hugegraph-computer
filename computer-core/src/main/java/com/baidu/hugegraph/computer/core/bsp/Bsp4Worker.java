@@ -30,6 +30,9 @@ public interface Bsp4Worker {
     // Do initialization operation, like connect to etcd cluster.
     public void init();
 
+    // Contrary to init. Could not do any bsp operation after close is called.
+    public void close();
+
     /**
      * Register this worker, worker's information is passed by constructor of
      * subclass.
@@ -52,25 +55,25 @@ public interface Bsp4Worker {
      * The master set this signal to let workers knows the first superstep to
      * start with.
      */
-    public int waitFirstSuperstep();
+    public int waitMasterResumeSuperstep();
 
     /**
      * Set read done signal after read input splits, and send all vertices and
      * edges to correspond workers.
      */
-    public void readDone();
+    public void workerInputDone();
 
     /**
-     * Wait all workers read vertex and edge from input. After this, worker
+     * Wait master signal that all workers input done. After this, worker
      * can merge the vertices and edges.
      */
-    public void waitWorkersReadDone();
+    public void waitMasterInputDone();
 
     /**
      * Worker set this signal after sent all messages to corresponding
      * workers and sent aggregators to master.
      */
-    public void superstepDone(int superstep, WorkerStat workerStat);
+    public void workerSuperstepDone(int superstep, WorkerStat workerStat);
 
     /**
      * The master set this signal after all workers signaled superstepDone,
@@ -89,14 +92,11 @@ public interface Bsp4Worker {
      * After all workers prepared, the worker can execute and send messages
      * to other workers.
      */
-    public void waitWorkersPrepareSuperstepDone(int superstep);
+    public void waitMasterPrepareSuperstepDone(int superstep);
 
     /**
      * Worker set this signal to indicate the worker has saved the result.
      * It can successfully exit.
      */
-    public void saveDone();
-
-    // Contrary to init. Could not do any bsp operation after close is called.
-    public void close();
+    public void workerOutputDone();
 }

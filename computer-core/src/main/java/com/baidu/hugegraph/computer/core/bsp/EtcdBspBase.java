@@ -19,14 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.bsp;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerOptions;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 public abstract class EtcdBspBase {
@@ -59,25 +55,6 @@ public abstract class EtcdBspBase {
         this.logInterval = this.config.get(ComputerOptions.BSP_LOG_INTERVAL);
     }
 
-    protected List<byte[]> barrierOnWorkers(String prefix, long timeout) {
-        long deadLine = System.currentTimeMillis() + timeout;
-        List<byte[]> result;
-        while (System.currentTimeMillis() < deadLine) {
-            result = this.etcdClient.getWithPrefix(prefix, this.workerCount,
-                                                   this.logInterval, false);
-            if (result.size() == this.workerCount) {
-                return result;
-            } else if (result.size() < this.workerCount) {
-                LOG.info("Only {} out of {} workers finished", result.size(),
-                         this.workerCount);
-            } else {
-                assert false;
-                throw new ComputerException("Expected %s result, but got %s",
-                                            this.workerCount, result.size());
-            }
-        }
-        throw new ComputerException("Workers not finished in %s ms", timeout);
-    }
 
     /**
      * Close the connection to etcd.
@@ -90,9 +67,9 @@ public abstract class EtcdBspBase {
      * This method is used to generate the key saved in etcd. We can add
      * attempt id in the path for further checkpoint based implementation.
      */
-    protected String constructPath(String parent, Object... paths) {
-        E.checkArgumentNotNull(parent, "The parent can't be null");
-        StringBuilder sb = new StringBuilder(parent);
+    protected String constructPath(BspEvent event, Object... paths) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(event.code());
         for (Object path : paths) {
             sb.append("/").append(path.toString());
         }

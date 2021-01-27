@@ -30,26 +30,49 @@ public interface Bsp4Master {
     // Do initialization operation, like connect to etcd cluster.
     public void init();
 
+    // Contrary to init. Could not do any bsp operation after close is called.
+    public void close();
+
     public void registerMaster(ContainerInfo masterInfo);
 
     // Wait workers registered.
     public List<ContainerInfo> waitWorkersRegistered();
 
-    // The first superstep to execute.
-    public void firstSuperstep(int superstep);
+    // The master determines which superstep to start from
+    public void masterResumeSuperstep(int superstep);
+
+    /**
+     * Wait all workers read input splits, and send all vertices and
+     * edges to correspond workers. After this, master call masterInputDone.
+     */
+    public void waitWorkersInputDone();
+
+    /**
+     * @see Bsp4Master#waitWorkersInputDone
+     */
+    public void masterInputDone();
 
     // Wait workers finish specified super step.
     public List<WorkerStat> waitWorkersSuperstepDone(int superstep);
 
+    /**
+     * After all workers prepared superstep, master prepare superstep, and
+     * call masterPrepareSuperstepDone to let the workers know that master is
+     * prepared done.
+     */
+    public void waitWorkersPrepareSuperstepDone(int superstep);
+
+    /**
+     * @see Bsp4Master#waitWorkersPrepareSuperstepDone
+     */
+    public void masterPrepareSuperstepDone(int superstep);
+
     // Master set super step done.
     public void masterSuperstepDone(int superstep, GraphStat graphStat);
 
-    // Wait workers have saved the vertices.
-    public void waitWorkersSaveDone();
+    // Wait workers output the vertices.
+    public void waitWorkersOutputDone();
 
     // It's master's responsibility to clean the bsp data.
-    public void cleanBspData();
-
-    // Could not do any bsp operation after close is called.
-    public void close();
+    public void clean();
 }

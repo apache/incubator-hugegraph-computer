@@ -75,7 +75,7 @@ public class EtcdBspTest {
     @After
     public void tearDown() {
         this.bsp4Worker.close();
-        this.bsp4Master.cleanBspData();
+        this.bsp4Master.clean();
         this.bsp4Master.close();
     }
 
@@ -112,7 +112,9 @@ public class EtcdBspTest {
         workerStat.add(new PartitionStat(1, 200L, 300L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
-            this.bsp4Master.firstSuperstep(-1);
+            this.bsp4Master.masterResumeSuperstep(-1);
+            this.bsp4Master.waitWorkersInputDone();
+            this.bsp4Master.masterInputDone();
             List<WorkerStat> workerStats = this.bsp4Master
                                                .waitWorkersSuperstepDone(-1);
             Assert.assertEquals(1, workerStats.size());
@@ -120,11 +122,11 @@ public class EtcdBspTest {
             countDownLatch.countDown();
         });
         this.executorService.submit(() -> {
-            int firstSuperStep = this.bsp4Worker.waitFirstSuperstep();
+            int firstSuperStep = this.bsp4Worker.waitMasterResumeSuperstep();
             Assert.assertEquals(-1, firstSuperStep);
-            this.bsp4Worker.readDone();
-            this.bsp4Worker.waitWorkersReadDone();
-            this.bsp4Worker.superstepDone(-1, workerStat);
+            this.bsp4Worker.workerInputDone();
+            this.bsp4Worker.waitMasterInputDone();
+            this.bsp4Worker.workerSuperstepDone(-1, workerStat);
             countDownLatch.countDown();
         });
         countDownLatch.await();
@@ -138,7 +140,9 @@ public class EtcdBspTest {
         workerStat.add(new PartitionStat(1, 200L, 300L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
-            for (int i = -1; i < this.maxSuperStep; i++) {
+            for (int i = 0; i < this.maxSuperStep; i++) {
+                this.bsp4Master.waitWorkersPrepareSuperstepDone(i);
+                this.bsp4Master.masterPrepareSuperstepDone(i);
                 List<WorkerStat> list = this.bsp4Master
                                             .waitWorkersSuperstepDone(i);
                 GraphStat graphStat = new GraphStat();
@@ -155,13 +159,11 @@ public class EtcdBspTest {
         });
         this.executorService.submit(() -> {
             int superstep = -1;
-            this.bsp4Worker.superstepDone(superstep, workerStat);
-            GraphStat graphStat = this.bsp4Worker
-                                      .waitMasterSuperstepDone(superstep);
-            while (!graphStat.halt()) {
+            GraphStat graphStat = null;
+            while (graphStat == null || !graphStat.halt()) {
                 superstep++;
                 this.bsp4Worker.prepareSuperstepDone(superstep);
-                this.bsp4Worker.waitWorkersPrepareSuperstepDone(superstep);
+                this.bsp4Worker.waitMasterPrepareSuperstepDone(superstep);
                 PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
                                                         50L, 60L, 70L);
                 PartitionStat stat2 = new PartitionStat(1, 200L, 300L,
@@ -175,7 +177,8 @@ public class EtcdBspTest {
                 } catch (InterruptedException e) {
                     // Do nothing
                 }
-                this.bsp4Worker.superstepDone(superstep, workerStatInSuperstep);
+                this.bsp4Worker.workerSuperstepDone(superstep,
+                                                    workerStatInSuperstep);
                 graphStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
             }
             countDownLatch.countDown();
@@ -187,13 +190,13 @@ public class EtcdBspTest {
     public void testSave() throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
-            this.bsp4Master.waitWorkersSaveDone();
-            this.bsp4Master.cleanBspData();
+            this.bsp4Master.waitWorkersOutputDone();
+            this.bsp4Master.clean();
             countDownLatch.countDown();
 
         });
         this.executorService.submit(() -> {
-            this.bsp4Worker.saveDone();
+            this.bsp4Worker.workerOutputDone();
             countDownLatch.countDown();
         });
         countDownLatch.await();
