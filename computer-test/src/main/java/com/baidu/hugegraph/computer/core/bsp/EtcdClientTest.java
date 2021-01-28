@@ -84,9 +84,9 @@ public class EtcdClientTest {
     @Test
     public void testGetByNotExistKey() {
         this.client.put(KEY1, VALUE1);
-        byte[] bytes1 = this.client.get(KEY1, true);
+        byte[] bytes1 = this.client.get(KEY1);
         Assert.assertArrayEquals(VALUE1, bytes1);
-        byte[] bytes2 = this.client.get(NO_SUCH_KEY, false);
+        byte[] bytes2 = this.client.get(NO_SUCH_KEY);
         Assert.assertNull(bytes2);
         Assert.assertThrows(ComputerException.class, () -> {
             this.client.get(NO_SUCH_KEY, true);
@@ -119,15 +119,15 @@ public class EtcdClientTest {
     }
 
     @Test
-    public void testGetWithTimeout2() throws InterruptedException {
+    public void testGetTimeoutThrowException() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-        try {
-            TimeUnit.MILLISECONDS.sleep(1000L);
-        } catch (InterruptedException e) {
-            // Do nothing.
-        }
-        this.client.put(KEY1, VALUE1);
+            try {
+                TimeUnit.MILLISECONDS.sleep(1000L);
+            } catch (InterruptedException e) {
+                // Do nothing.
+            }
+            this.client.put(KEY1, VALUE1);
         };
         executorService.submit(putThread);
         Assert.assertThrows(ComputerException.class, () -> {

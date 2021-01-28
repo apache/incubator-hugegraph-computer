@@ -29,7 +29,7 @@ import com.baidu.hugegraph.testutil.Assert;
 public class BspEventTest {
 
     @Test
-    public void test() {
+    public void testUniqueCodeAndKey() {
         Map<Byte, String> codeMap = new HashMap();
         Map<String, Byte> keyMap = new HashMap();
         BspEvent[] events = BspEvent.values();

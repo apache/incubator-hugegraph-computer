@@ -23,10 +23,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -220,9 +220,11 @@ public class EtcdClient {
                 }
             }
         };
-        Watch.Watcher watcher = this.watch.watch(keySeq, watchOption, consumer);
-        barrierEvent.await(timeout);
-        watcher.close();
+
+        try (Watch.Watcher watcher = this.watch.watch(keySeq, watchOption,
+                                                      consumer)) {
+            barrierEvent.await(timeout);
+        }
         byte[] value = eventValue.get();
         if (value != null) {
             return value;
@@ -297,8 +299,8 @@ public class EtcdClient {
                       e, prefix, count);
         } catch (ExecutionException e) {
             throw new ComputerException(
-                      "Error while getting with prefix='%s', count=%s", e,
-                      prefix, count);
+                      "Error while getting with prefix='%s', count=%s",
+                      e, prefix, count);
         }
     }
 
@@ -323,38 +325,42 @@ public class EtcdClient {
                                        .withSortOrder(SortOrder.ASCEND)
                                        .withLimit(count)
                                        .build();
-        while (System.currentTimeMillis() < deadline) {
-            try {
-                GetResponse response = this.kv.get(prefixSeq, getOption).get();
-                if (response.getCount() == count) {
-                    List<KeyValue> kvs = response.getKvs();
-                    for (KeyValue kv : kvs) {
-                        result.add(kv.getValue().getBytes());
-                    }
-                    return result;
-                } else {
-                    timeout = deadline - System.currentTimeMillis();
-                    if (timeout > 0) {
-                        long revision = response.getHeader().getRevision();
-                        int diff = (int) (count - response.getCount());
-                        this.waitAndPrefixGetFromPutEvent(prefixSeq, count,
-                                                          diff, revision,
-                                                          timeout, logInterval);
-                    } else {
-                        break;
-                    }
+        try {
+            GetResponse response = this.kv.get(prefixSeq, getOption).get();
+            if (response.getCount() == count) {
+                List<KeyValue> kvs = response.getKvs();
+                for (KeyValue kv : kvs) {
+                    result.add(kv.getValue().getBytes());
                 }
-            } catch (InterruptedException e) {
-                throw new ComputerException(
-                          "Interrupted while getting with prefix='%s', " +
-                          "count=%s, timeout=%s", e, prefix, count, timeout);
-            } catch (ExecutionException e) {
-                throw new ComputerException(
-                          "Error while getting with prefix='%s', count=%s, " +
-                          "timeout=%s", e, prefix, count, timeout);
+                return result;
+            } else {
+                Map<ByteSequence, ByteSequence> keyValues = new HashMap<>();
+                List<KeyValue> kvs = response.getKvs();
+                for (KeyValue kv : kvs) {
+                    keyValues.put(kv.getKey(), kv.getValue());
+                }
+                timeout = deadline - System.currentTimeMillis();
+                if (timeout > 0) {
+                    long revision = response.getHeader().getRevision();
+                    return this.waitAndPrefixGetFromPutEvent(
+                                prefixSeq, count, keyValues, revision,
+                                deadline, logInterval);
+                } else {
+                    throw new ComputerException(
+                              "Expect %s elements, only find %s elements " +
+                              "with prefix='%s'", count, response.getCount(),
+                              prefix);
+                }
             }
+        } catch (InterruptedException e) {
+            throw new ComputerException(
+                      "Interrupted while getting with prefix='%s', " +
+                      "count=%s, timeout=%s", e, prefix, count, timeout);
+        } catch (ExecutionException e) {
+            throw new ComputerException(
+                      "Error while getting with prefix='%s', count=%s, " +
+                      "timeout=%s", e, prefix, count, timeout);
         }
-        return this.getWithPrefix(prefix, count);
     }
 
     /**
@@ -362,16 +368,15 @@ public class EtcdClient {
      * This method wait at most timeout ms regardless whether expected
      * eventCount events triggered.
      */
-    private void waitAndPrefixGetFromPutEvent(ByteSequence prefixSeq, int count,
-                                              int eventCount, long revision,
-                                              long timeout, long logInterval)
-                                              throws InterruptedException {
-        long deadline = System.currentTimeMillis() + timeout;
-        CountDownLatch countDownLatch = new CountDownLatch(eventCount);
+    private List<byte[]> waitAndPrefixGetFromPutEvent(
+                         ByteSequence prefixSeq, int count,
+                         Map<ByteSequence, ByteSequence> keyValues,
+                         long revision, long deadline, long logInterval)
+                         throws InterruptedException {
+        BarrierEvent barrierEvent = new BarrierEvent();
         WatchOption watchOption = WatchOption.newBuilder()
                                              .withPrefix(prefixSeq)
                                              .withRevision(revision)
-                                             .withNoDelete(true)
                                              .build();
         Consumer<WatchResponse> consumer = watchResponse -> {
             List<WatchEvent> events = watchResponse.getEvents();
@@ -381,28 +386,43 @@ public class EtcdClient {
                  * same key multiple times.
                  */
                 if (EventType.PUT.equals(event.getEventType())) {
-                    countDownLatch.countDown();
+                    KeyValue keyValue = event.getKeyValue();
+                    keyValues.put(keyValue.getKey(), keyValue.getValue());
+                    if (keyValues.size() == count) {
+                        barrierEvent.signalAll();
+                    }
+                } else if (EventType.DELETE.equals(event.getEventType())) {
+                    keyValues.remove(event.getKeyValue().getKey());
                 } else {
                     throw new ComputerException("Unexpected event type '%s'",
                                                 event.getEventType());
                 }
             }
         };
-        Watch.Watcher watcher = this.watch.watch(prefixSeq,
-                                                 watchOption,
-                                                 consumer);
-        long timeRemaining = deadline - System.currentTimeMillis();
-        while (timeRemaining > 0) {
-            logInterval = Math.max(timeRemaining, logInterval);
-            if (countDownLatch.await(logInterval, TimeUnit.MILLISECONDS)) {
-                break;
-            } else {
-                LOG.info("Only {} out of {} sub-nodes created",
-                         count - countDownLatch.getCount(), count);
+        try (Watch.Watcher watcher = this.watch.watch(prefixSeq,
+                                                      watchOption,
+                                                      consumer)) {
+            long timeRemaining = deadline - System.currentTimeMillis();
+            while (timeRemaining > 0) {
+                logInterval = Math.max(timeRemaining, logInterval);
+                if (barrierEvent.await(logInterval)) {
+                    assert keyValues.size() == count;
+                    List<byte[]> result = new ArrayList<>(count);
+                    for (ByteSequence byteSequence : keyValues.values()) {
+                        result.add(byteSequence.getBytes());
+                    }
+                    return result;
+                } else {
+                    LOG.info("Only {} out of {} elements found",
+                             count - keyValues.size(), count);
+                }
+                timeRemaining = deadline - System.currentTimeMillis();
             }
-            timeRemaining = deadline - System.currentTimeMillis();
+            throw new ComputerException(
+                      "Expect %s elements, only find %s elements with " +
+                      "prefix='%s'", count, keyValues.size(),
+                      prefixSeq.toString(ENCODING));
         }
-        watcher.close();
     }
 
     /**
