@@ -23,9 +23,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -334,7 +334,8 @@ public class EtcdClient {
                 }
                 return result;
             } else {
-                Map<ByteSequence, ByteSequence> keyValues = new HashMap<>();
+                Map<ByteSequence, ByteSequence> keyValues =
+                                                new ConcurrentHashMap<>();
                 List<KeyValue> kvs = response.getKvs();
                 for (KeyValue kv : kvs) {
                     keyValues.put(kv.getKey(), kv.getValue());
