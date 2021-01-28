@@ -112,7 +112,7 @@ public class EtcdBspTest {
         workerStat.add(new PartitionStat(1, 200L, 300L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
-            this.bsp4Master.masterResumeSuperstep(-1);
+            this.bsp4Master.masterSuperstepResume(-1);
             this.bsp4Master.waitWorkersInputDone();
             this.bsp4Master.masterInputDone();
             List<WorkerStat> workerStats = this.bsp4Master
@@ -122,7 +122,7 @@ public class EtcdBspTest {
             countDownLatch.countDown();
         });
         this.executorService.submit(() -> {
-            int firstSuperStep = this.bsp4Worker.waitMasterResumeSuperstep();
+            int firstSuperStep = this.bsp4Worker.waitMasterSuperstepResume();
             Assert.assertEquals(-1, firstSuperStep);
             this.bsp4Worker.workerInputDone();
             this.bsp4Worker.waitMasterInputDone();
@@ -141,8 +141,8 @@ public class EtcdBspTest {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
             for (int i = 0; i < this.maxSuperStep; i++) {
-                this.bsp4Master.waitWorkersPrepareSuperstepDone(i);
-                this.bsp4Master.masterPrepareSuperstepDone(i);
+                this.bsp4Master.waitWorkersSuperstepPrepared(i);
+                this.bsp4Master.masterSuperstepPrepared(i);
                 List<WorkerStat> list = this.bsp4Master
                                             .waitWorkersSuperstepDone(i);
                 GraphStat graphStat = new GraphStat();
@@ -162,8 +162,8 @@ public class EtcdBspTest {
             GraphStat graphStat = null;
             while (graphStat == null || !graphStat.halt()) {
                 superstep++;
-                this.bsp4Worker.prepareSuperstepDone(superstep);
-                this.bsp4Worker.waitMasterPrepareSuperstepDone(superstep);
+                this.bsp4Worker.workerSuperstepPrepared(superstep);
+                this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
                 PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
                                                         50L, 60L, 70L);
                 PartitionStat stat2 = new PartitionStat(1, 200L, 300L,

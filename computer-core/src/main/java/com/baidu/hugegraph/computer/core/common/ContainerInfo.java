@@ -29,7 +29,10 @@ import com.baidu.hugegraph.util.E;
 
 public class ContainerInfo implements Readable, Writable {
 
-    // The id of master is no use, the id of workers start from 0.
+    /*
+     * There is only 1 master, so the id of master is no use.
+     * The id of workers start from 0. The id is used to identify a worker.
+     */
     private int id;
     private String hostname;
     private int rpcPort;

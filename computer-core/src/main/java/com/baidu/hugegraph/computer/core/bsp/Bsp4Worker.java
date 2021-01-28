@@ -55,7 +55,7 @@ public interface Bsp4Worker {
      * The master set this signal to let workers knows the first superstep to
      * start with.
      */
-    public int waitMasterResumeSuperstep();
+    public int waitMasterSuperstepResume();
 
     /**
      * Set read done signal after read input splits, and send all vertices and
@@ -86,13 +86,13 @@ public interface Bsp4Worker {
      * Worker set this signal to indicate the worker is ready to receive
      * messages from other workers.
      */
-    public void prepareSuperstepDone(int superstep);
+    public void workerSuperstepPrepared(int superstep);
 
     /**
      * After all workers prepared, the worker can execute and send messages
      * to other workers.
      */
-    public void waitMasterPrepareSuperstepDone(int superstep);
+    public void waitMasterSuperstepPrepared(int superstep);
 
     /**
      * Worker set this signal to indicate the worker has saved the result.

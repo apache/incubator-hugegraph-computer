@@ -39,7 +39,7 @@ public interface Bsp4Master {
     public List<ContainerInfo> waitWorkersRegistered();
 
     // The master determines which superstep to start from
-    public void masterResumeSuperstep(int superstep);
+    public void masterSuperstepResume(int superstep);
 
     /**
      * Wait all workers read input splits, and send all vertices and
@@ -60,12 +60,12 @@ public interface Bsp4Master {
      * call masterPrepareSuperstepDone to let the workers know that master is
      * prepared done.
      */
-    public void waitWorkersPrepareSuperstepDone(int superstep);
+    public void waitWorkersSuperstepPrepared(int superstep);
 
     /**
-     * @see Bsp4Master#waitWorkersPrepareSuperstepDone
+     * @see Bsp4Master#waitWorkersSuperstepPrepared
      */
-    public void masterPrepareSuperstepDone(int superstep);
+    public void masterSuperstepPrepared(int superstep);
 
     // Master set super step done.
     public void masterSuperstepDone(int superstep, GraphStat graphStat);

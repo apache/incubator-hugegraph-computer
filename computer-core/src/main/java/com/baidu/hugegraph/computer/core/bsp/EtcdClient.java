@@ -247,12 +247,7 @@ public class EtcdClient {
                                            .build();
             GetResponse response = this.kv.get(prefixSeq, getOption).get();
             if (response.getCount() > 0) {
-                List<KeyValue> kvs = response.getKvs();
-                List<byte[]> result = new ArrayList<>(kvs.size());
-                for (KeyValue kv : kvs) {
-                    result.add(kv.getValue().getBytes());
-                }
-                return result;
+                return getResponseValues(response);
             } else {
                 return Collections.emptyList();
             }
@@ -282,12 +277,7 @@ public class EtcdClient {
                                            .build();
             GetResponse response = this.kv.get(prefixSeq, getOption).get();
             if (response.getCount() == count) {
-                List<KeyValue> kvs = response.getKvs();
-                List<byte[]> result = new ArrayList<>(kvs.size());
-                for (KeyValue kv : kvs) {
-                    result.add(kv.getValue().getBytes());
-                }
-                return result;
+                return getResponseValues(response);
             } else {
                 throw new ComputerException(
                           "Expect %s elements, only find %s elements with " +
@@ -319,7 +309,6 @@ public class EtcdClient {
         E.checkArgument(count >= 0,
                         "The count must be >= 0, but got: %s", count);
         long deadline = System.currentTimeMillis() + timeout;
-        List<byte[]> result = new ArrayList<>(count);
         ByteSequence prefixSeq = ByteSequence.from(prefix, ENCODING);
         GetOption getOption = GetOption.newBuilder().withPrefix(prefixSeq)
                                        .withSortOrder(SortOrder.ASCEND)
@@ -328,23 +317,13 @@ public class EtcdClient {
         try {
             GetResponse response = this.kv.get(prefixSeq, getOption).get();
             if (response.getCount() == count) {
-                List<KeyValue> kvs = response.getKvs();
-                for (KeyValue kv : kvs) {
-                    result.add(kv.getValue().getBytes());
-                }
-                return result;
+                return getResponseValues(response);
             } else {
-                Map<ByteSequence, ByteSequence> keyValues =
-                                                new ConcurrentHashMap<>();
-                List<KeyValue> kvs = response.getKvs();
-                for (KeyValue kv : kvs) {
-                    keyValues.put(kv.getKey(), kv.getValue());
-                }
                 timeout = deadline - System.currentTimeMillis();
                 if (timeout > 0) {
                     long revision = response.getHeader().getRevision();
                     return this.waitAndPrefixGetFromPutEvent(
-                                prefixSeq, count, keyValues, revision,
+                                prefixSeq, count, response.getKvs(), revision,
                                 deadline, logInterval);
                 } else {
                     throw new ComputerException(
@@ -368,12 +347,17 @@ public class EtcdClient {
      * Wait at most expected eventCount events triggered in timeout ms.
      * This method wait at most timeout ms regardless whether expected
      * eventCount events triggered.
+     * @param existedKeyValues readonly
      */
     private List<byte[]> waitAndPrefixGetFromPutEvent(
                          ByteSequence prefixSeq, int count,
-                         Map<ByteSequence, ByteSequence> keyValues,
+                         List<KeyValue> existedKeyValues,
                          long revision, long deadline, long logInterval)
                          throws InterruptedException {
+        Map<ByteSequence, ByteSequence> keyValues = new ConcurrentHashMap<>();
+        for (KeyValue kv : existedKeyValues) {
+            keyValues.put(kv.getKey(), kv.getValue());
+        }
         BarrierEvent barrierEvent = new BarrierEvent();
         WatchOption watchOption = WatchOption.newBuilder()
                                              .withPrefix(prefixSeq)
@@ -483,5 +467,13 @@ public class EtcdClient {
     @VisibleForTesting
     protected KV getKv() {
         return this.kv;
+    }
+
+    private List<byte[]> getResponseValues(GetResponse response) {
+        List<byte[]> values = new ArrayList((int) response.getCount());
+        for (KeyValue kv : response.getKvs()) {
+            values.add(kv.getValue().getBytes());
+        }
+        return values;
     }
 }

@@ -55,7 +55,6 @@ public abstract class EtcdBspBase {
         this.logInterval = this.config.get(ComputerOptions.BSP_LOG_INTERVAL);
     }
 
-
     /**
      * Close the connection to etcd.
      */

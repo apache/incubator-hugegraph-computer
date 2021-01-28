@@ -24,13 +24,13 @@ public enum BspEvent {
     // The WORKER or MASTER after "BSP_" indicates who set the flag.
     BSP_MASTER_REGISTERED(1, "/master"),
     BSP_WORKER_REGISTERED(2, "/worker"),
-    BSP_MASTER_RESUME_SUPERSTEP_PATH(3, "/master/resume_superstep"),
+    BSP_MASTER_SUPERSTEP_RESUME(3, "/master/superstep_resume"),
     BSP_WORKER_INPUT_DONE(4, "/worker/input_done"),
     BSP_MASTER_INPUT_DONE(5, "/master/input_done"),
-    BSP_WORKER_SUPERSTEP_DONE(6, "/worker/superstep_done"),
-    BSP_MASTER_SUPERSTEP_DONE(7, "/master/superstep_done"),
-    BSP_WORKER_PREPARE_SUPERSTEP_DONE(8, "/worker/superstep_prepare_done"),
-    BSP_MASTER_PREPARE_SUPERSTEP_DONE(9, "/master/superstep_prepare_done"),
+    BSP_WORKER_SUPERSTEP_PREPARED(6, "/worker/superstep_prepared"),
+    BSP_MASTER_SUPERSTEP_PREPARED(7, "/master/superstep_prepared"),
+    BSP_WORKER_SUPERSTEP_DONE(8, "/worker/superstep_done"),
+    BSP_MASTER_SUPERSTEP_DONE(9, "/master/superstep_done"),
     BSP_WORKER_OUTPUT_DONE(10, "/worker/output_done");
 
     private byte code;
