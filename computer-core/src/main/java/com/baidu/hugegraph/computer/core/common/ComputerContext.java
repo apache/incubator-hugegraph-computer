@@ -17,29 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.common;
 
-import java.io.DataInput;
-import java.io.IOException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.config.HugeConfig;
 
-import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+public class ComputerContext {
 
-public interface GraphInput extends DataInput {
+    private static final ComputerContext INSTANCE = new ComputerContext();
 
-    Vertex readVertex() throws IOException;
+    private final HugeConfig config;
 
-    OutEdges readOutEdges() throws IOException;
+    private ComputerContext() {
+        this.config = null;
+    }
 
-    Edge readEdge() throws IOException;
+    public static ComputerContext instance() {
+        return INSTANCE;
+    }
 
-    Properties readProperties() throws IOException;
-
-    Id readId() throws IOException;
-
-    Value readValue() throws IOException;
 }

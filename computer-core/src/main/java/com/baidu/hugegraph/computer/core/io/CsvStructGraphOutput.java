@@ -21,11 +21,82 @@ package com.baidu.hugegraph.computer.core.io;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Map;
+
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class CsvStructGraphOutput extends StructGraphOutput {
 
     public CsvStructGraphOutput(DataOutputStream out) {
         super(out);
+    }
+
+    @Override
+    public void writeVertex(Vertex vertex) throws IOException {
+        this.writeObjectStart();
+
+        this.writeId(vertex.id());
+        this.writeSplitter();
+
+        this.writeValue(vertex.value());
+
+        if (this.config.outputVertexOutEdges()) {
+            this.writeSplitter();
+            this.writeOutEdges(vertex.edges());
+        }
+        if (this.config.outputVertexProperties()) {
+            this.writeSplitter();
+            this.writeProperties(vertex.properties());
+        }
+        this.writeObjectEnd();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void writeOutEdges(OutEdges edges) throws IOException {
+        this.writeArrayStart();
+        int size = edges.size();
+        int i = 0;
+        for (Edge<?> edge : (Iterable<Edge>) edges) {
+            this.writeEdge(edge);
+            if (++i < size) {
+                this.writeSplitter();
+            }
+        }
+        this.writeArrayEnd();
+    }
+
+    @Override
+    public void writeEdge(Edge edge) throws IOException {
+        this.writeObjectStart();
+
+        this.writeId(edge.targetId());
+        this.writeSplitter();
+
+        this.writeValue(edge.value());
+        if (this.config.outputEdgeProperties()) {
+            this.writeSplitter();
+            this.writeProperties(edge.properties());
+        }
+        this.writeObjectEnd();
+    }
+
+    @Override
+    public void writeProperties(Properties properties) throws IOException {
+        this.writeObjectStart();
+        int size = properties.get().size();
+        int i = 0;
+        for (Map.Entry<String, Value> entry : properties.get().entrySet()) {
+            this.writeValue(entry.getValue());
+            if (++i < size) {
+                this.writeSplitter();
+            }
+        }
+        this.writeObjectEnd();
     }
 
     @Override
@@ -38,6 +109,16 @@ public class CsvStructGraphOutput extends StructGraphOutput {
         this.writeRawString(System.lineSeparator());
     }
 
+    @Override
+    public void writeArrayStart() throws IOException {
+        this.writeRawString("[");
+    }
+
+    @Override
+    public void writeArrayEnd() throws IOException {
+        this.writeRawString("]");
+    }
+
     public void writeKey(String key) throws IOException {
         // pass
     }
@@ -47,6 +128,7 @@ public class CsvStructGraphOutput extends StructGraphOutput {
         // pass
     }
 
+    @Override
     public void writeSplitter() throws IOException {
         this.writeRawString(",");
     }

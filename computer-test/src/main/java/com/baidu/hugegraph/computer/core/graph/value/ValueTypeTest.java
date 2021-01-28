@@ -31,13 +31,15 @@ public class ValueTypeTest {
     @Test
     public void testCodeAndByteSize() {
         Assert.assertEquals(1, ValueType.NULL.code());
-        Assert.assertEquals(2, ValueType.INT.code());
-        Assert.assertEquals(3, ValueType.LONG.code());
-        Assert.assertEquals(4, ValueType.FLOAT.code());
-        Assert.assertEquals(5, ValueType.DOUBLE.code());
+        Assert.assertEquals(2, ValueType.BOOLEAN.code());
+        Assert.assertEquals(3, ValueType.INT.code());
+        Assert.assertEquals(4, ValueType.LONG.code());
+        Assert.assertEquals(5, ValueType.FLOAT.code());
+        Assert.assertEquals(6, ValueType.DOUBLE.code());
         Assert.assertEquals(20, ValueType.ID_VALUE.code());
 
         Assert.assertEquals(0, ValueType.NULL.byteSize());
+        Assert.assertEquals(1, ValueType.BOOLEAN.byteSize());
         Assert.assertEquals(4, ValueType.INT.byteSize());
         Assert.assertEquals(8, ValueType.LONG.byteSize());
         Assert.assertEquals(4, ValueType.FLOAT.byteSize());

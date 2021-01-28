@@ -24,21 +24,33 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
+import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 
 public abstract class StructGraphOutput implements GraphOutput {
 
     protected final DataOutputStream out;
+    protected final Config config;
 
     public StructGraphOutput(DataOutputStream out) {
         this.out = out;
+        this.config = Config.instance();
     }
 
     public abstract void writeObjectStart() throws IOException;
 
     public abstract void writeObjectEnd() throws IOException;
+
+    public abstract void writeArrayStart() throws IOException;
+
+    public abstract void writeArrayEnd() throws IOException;
 
     public abstract void writeKey(String key) throws IOException;
 
@@ -48,21 +60,66 @@ public abstract class StructGraphOutput implements GraphOutput {
 
     @Override
     public void writeId(Id id) throws IOException {
-        this.writeKey("id");
-        this.writeJoiner();
         id.write(this);
-        this.writeSplitter();
     }
 
     @Override
     public void writeValue(Value value) throws IOException {
-        // String key = config.get(RankKey);
-        // TODO: read key from config
-        this.writeKey("rank");
-        this.writeJoiner();
-        value.write(this);
-        // TODO: The splitter maybe doesn't need if no properties need write
-        this.writeSplitter();
+        if (value.type() == ValueType.ID_VALUE) {
+            this.writeIdValue((IdValue) value);
+        } else if (value.type() == ValueType.ID_VALUE_LIST) {
+            this.writeIdValueList((IdValueList) value);
+        } else if (value.type() == ValueType.ID_VALUE_LIST_LIST) {
+            this.writeIdValueListList((IdValueListList) value);
+        } else if (value.type() == ValueType.LIST_VALUE) {
+            this.writeListValue((ListValue<?>) value);
+        } else {
+            value.write(this);
+        }
+    }
+
+    private void writeIdValue(IdValue idValue) throws IOException {
+        this.writeId(idValue.id());
+    }
+
+    private void writeIdValueList(IdValueList idValueList) throws IOException {
+        this.writeArrayStart();
+        int size = idValueList.size();
+        int i = 0;
+        for (IdValue idValue : idValueList.values()) {
+            this.writeIdValue(idValue);
+            if (++i < size) {
+                this.writeSplitter();
+            }
+        }
+        this.writeArrayEnd();
+    }
+
+    private void writeIdValueListList(IdValueListList idValueListList)
+                                      throws IOException {
+        this.writeArrayStart();
+        int size = idValueListList.size();
+        int i = 0;
+        for (IdValueList idValueList : idValueListList.values()) {
+            this.writeIdValueList(idValueList);
+            if (++i < size) {
+                this.writeSplitter();
+            }
+        }
+        this.writeArrayEnd();
+    }
+
+    private void writeListValue(ListValue<?> listValue) throws IOException {
+        this.writeArrayStart();
+        int size = listValue.size();
+        int i = 0;
+        for (Value value : listValue.values()) {
+            this.writeValue(value);
+            if (++i < size) {
+                this.writeSplitter();
+            }
+        }
+        this.writeArrayEnd();
     }
 
     @Override
@@ -138,14 +195,14 @@ public abstract class StructGraphOutput implements GraphOutput {
     }
 
     protected void writeNumber(Number number) throws IOException {
-        this.out.writeUTF(number.toString());
+        this.out.writeBytes(number.toString());
     }
 
     protected void writeRawString(String s) throws IOException {
-        this.out.writeUTF(s);
+        this.out.writeBytes(s);
     }
 
     protected void writeString(String s) throws IOException {
-        this.out.writeUTF("\"" + StringEscapeUtils.escapeJson(s) + "\"");
+        this.out.writeBytes("\"" + StringEscapeUtils.escapeJson(s) + "\"");
     }
 }

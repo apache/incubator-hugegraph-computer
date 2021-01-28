@@ -22,20 +22,136 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultOutEdges;
+import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.Lists;
 
 public class StreamGraphOutputInputTest {
+
+    @Test
+    public void testWriteReadVertex() throws IOException {
+        Config.parseOptions(ComputerOptions.ALGORITHM_NAME.name(), "test",
+                            ComputerOptions.VALUE_TYPE.name(), "LONG",
+                            ComputerOptions.VERTEX_VALUE_NAME.name(), "value",
+                            ComputerOptions.EDGE_VALUE_NAME.name(), "value");
+
+        LongId longId = new LongId(100L);
+        LongValue longValue = new LongValue(999L);
+        Vertex<LongValue, LongValue> vertex1 = new DefaultVertex<>(longId,
+                                                                   longValue);
+        byte[] bytes;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+            output.writeVertex(vertex1);
+            bytes = baos.toByteArray();
+        }
+
+        Vertex<LongValue, LongValue> vertex2;
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+            vertex2 = input.readVertex();
+        }
+        Assert.assertEquals(vertex1, vertex2);
+    }
+
+    @Test
+    public void testWriteReadOutEdges() throws IOException {
+        Config.parseOptions(ComputerOptions.ALGORITHM_NAME.name(), "test",
+                            ComputerOptions.VALUE_TYPE.name(), "LONG",
+                            ComputerOptions.VERTEX_VALUE_NAME.name(), "value",
+                            ComputerOptions.EDGE_VALUE_NAME.name(), "value");
+
+        OutEdges<LongValue> edges1 = new DefaultOutEdges<>();
+        edges1.initialize(3);
+        edges1.add(new DefaultEdge<>(new LongId(100), new LongValue(1)));
+        edges1.add(new DefaultEdge<>(new LongId(200), new LongValue(2)));
+        edges1.add(new DefaultEdge<>(new LongId(300), new LongValue(-1)));
+
+        byte[] bytes;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+            output.writeOutEdges(edges1);
+            bytes = baos.toByteArray();
+        }
+
+        OutEdges<LongValue> edges2;
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+            edges2 = input.readOutEdges();
+        }
+        Assert.assertEquals(edges1, edges2);
+    }
+
+    @Test
+    public void testWriteReadProperties() throws IOException {
+        Config.parseOptions(ComputerOptions.ALGORITHM_NAME.name(), "test",
+                            ComputerOptions.VALUE_TYPE.name(), "LONG",
+                            ComputerOptions.VERTEX_VALUE_NAME.name(), "value",
+                            ComputerOptions.EDGE_VALUE_NAME.name(), "value");
+
+        /*
+         * Config is global singleton instance, so the ValueType should be same
+         * in one Properties, it seems unreasonable
+         */
+        Properties properties1 = new DefaultProperties();
+        properties1.put("age", new LongValue(18L));
+        properties1.put("salary", new LongValue(20000L));
+
+        byte[] bytes;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+            output.writeProperties(properties1);
+            bytes = baos.toByteArray();
+        }
+
+        Properties properties2;
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+            properties2 = input.readProperties();
+        }
+        Assert.assertEquals(properties1, properties2);
+
+        // Let ValueType as ID_VALUE
+        Config.parseOptions(ComputerOptions.ALGORITHM_NAME.name(), "test",
+                            ComputerOptions.VALUE_TYPE.name(), "ID_VALUE",
+                            ComputerOptions.VERTEX_VALUE_NAME.name(), "value",
+                            ComputerOptions.EDGE_VALUE_NAME.name(), "value");
+
+        properties1 = new DefaultProperties();
+        properties1.put("name", new Utf8Id("marko").idValue());
+        properties1.put("city", new Utf8Id("Beijing").idValue());
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+            output.writeProperties(properties1);
+            bytes = baos.toByteArray();
+        }
+
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+            properties2 = input.readProperties();
+        }
+        Assert.assertEquals(properties1, properties2);
+    }
 
     @Test
     public void testWriteReadId() throws IOException {
@@ -61,6 +177,11 @@ public class StreamGraphOutputInputTest {
 
     @Test
     public void testWriteReadValue() throws IOException {
+        Config.parseOptions(ComputerOptions.ALGORITHM_NAME.name(), "test",
+                            ComputerOptions.VALUE_TYPE.name(), "LONG",
+                            ComputerOptions.VERTEX_VALUE_NAME.name(), "value",
+                            ComputerOptions.EDGE_VALUE_NAME.name(), "value");
+
         LongValue longValue1 = new LongValue(100L);
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -69,7 +190,7 @@ public class StreamGraphOutputInputTest {
             bytes = baos.toByteArray();
         }
 
-        byte[] expect = new byte[]{ValueType.LONG.code(), 100};
+        byte[] expect = new byte[]{100};
         Assert.assertArrayEquals(expect, bytes);
 
         LongValue longValue2;
@@ -79,7 +200,12 @@ public class StreamGraphOutputInputTest {
         }
         Assert.assertEquals(100L, longValue2.value());
 
-        // Test ListValue
+        // Test IdValueList
+        Config.parseOptions(ComputerOptions.ALGORITHM_NAME.name(), "test",
+                            ComputerOptions.VALUE_TYPE.name(), "ID_VALUE_LIST",
+                            ComputerOptions.VERTEX_VALUE_NAME.name(), "value",
+                            ComputerOptions.EDGE_VALUE_NAME.name(), "value");
+
         LongId longId1 = new LongId(100L);
         LongId longId2 = new LongId(200L);
         IdValueList idValueList1 = new IdValueList();
@@ -91,8 +217,7 @@ public class StreamGraphOutputInputTest {
             bytes = baos.toByteArray();
         }
 
-        expect = new byte[]{ValueType.ID_VALUE_LIST.code(), 2,
-                            2, 1, 100, 3, 1, -127, 72};
+        expect = new byte[]{2, 2, 1, 100, 3, 1, -127, 72};
         Assert.assertArrayEquals(expect, bytes);
 
         IdValueList idValueList2;
@@ -152,6 +277,15 @@ public class StreamGraphOutputInputTest {
                                       Long.MIN_VALUE);
     }
 
+    @Test
+    public void testWriteReadString() throws IOException {
+        testBytesStreamWriteReadString(new byte[]{0}, "");
+        testBytesStreamWriteReadString(new byte[]{1, 49}, "1");
+        testBytesStreamWriteReadString(new byte[]{3, 55, 56, 57}, "789");
+        testBytesStreamWriteReadString(new byte[]{5, 65, 66, 67, 68, 69},
+                                       "ABCDE");
+    }
+
     public static void testBytesStreamWriteReadVInt(byte[] bytes, int value)
                                                     throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream(5)) {
@@ -178,6 +312,22 @@ public class StreamGraphOutputInputTest {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             long readValue = input.readVLong();
+            Assert.assertEquals(value, readValue);
+        }
+    }
+
+    public static void testBytesStreamWriteReadString(byte[] bytes,
+                                                      String value)
+                                                      throws IOException {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+            output.writeString(value);
+            Assert.assertArrayEquals(bytes, baos.toByteArray());
+        }
+
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+            String readValue = input.readString();
             Assert.assertEquals(value, readValue);
         }
     }

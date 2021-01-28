@@ -43,14 +43,12 @@ import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public class JsonStructGraphOutputTest {
+// TODO: Let it pass
+public class CsvStructGraphOutputTest {
 
     @Test
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
         Config.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VERTEX_VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGE_VALUE_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
         ComputerOptions.OUTPUT_VERTEX_OUT_EDGES.name(), "false",
         ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "false",
@@ -60,17 +58,17 @@ public class JsonStructGraphOutputTest {
         IdValue idValue = new LongId(999L).idValue();
         Vertex<IdValue, IdValue> vertex = new DefaultVertex<>(longId, idValue);
 
-        String fileName = "output.json";
+        String fileName = "output.csv";
         File file = new File(fileName);
         try (FileOutputStream fos = new FileOutputStream(file);
              DataOutputStream dos = new DataOutputStream(fos)) {
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos);
+                                       OutputFormat.CSV, dos);
             output.writeVertex(vertex);
 
-            String json = FileUtils.readFileToString(file);
-            Assert.assertEquals("{\"id\":100,\"rank\":999}", json);
+            String text = FileUtils.readFileToString(file);
+            Assert.assertEquals("100,999" + System.lineSeparator(), text);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -79,9 +77,6 @@ public class JsonStructGraphOutputTest {
     @Test
     public void testWriteReadVertexWithOutEdges() throws IOException {
         Config.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VERTEX_VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGE_VALUE_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
         ComputerOptions.OUTPUT_VERTEX_OUT_EDGES.name(), "true",
         ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "false",
@@ -96,17 +91,17 @@ public class JsonStructGraphOutputTest {
         vertex.addEdge(new DefaultEdge<>(new LongId(200), new LongValue(1)));
         vertex.addEdge(new DefaultEdge<>(new LongId(300), new LongValue(-1)));
 
-        String fileName = "output.json";
+        String fileName = "output2.csv";
         File file = new File(fileName);
         try (FileOutputStream fos = new FileOutputStream(file);
              DataOutputStream dos = new DataOutputStream(fos)) {
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos);
+                                       OutputFormat.CSV, dos);
             output.writeVertex(vertex);
 
             String json = FileUtils.readFileToString(file);
-            Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
+            Assert.assertEquals("{\"id\":100,\"page_rank\":[998,999]," +
                                 "\"out_edges\":[{\"target_id\":200," +
                                 "\"value\":1},{\"target_id\":300," +
                                 "\"value\":-1}]}", json);
@@ -118,9 +113,6 @@ public class JsonStructGraphOutputTest {
     @Test
     public void testWriteReadVertexWithProperties() throws IOException {
         Config.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VERTEX_VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGE_VALUE_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
         ComputerOptions.OUTPUT_VERTEX_OUT_EDGES.name(), "false",
         ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "true",
@@ -147,17 +139,17 @@ public class JsonStructGraphOutputTest {
         vertex.properties().put("double", new DoubleValue(-0.01D));
         vertex.properties().put("idvalue", longId.idValue());
 
-        String fileName = "output.json";
+        String fileName = "output3.csv";
         File file = new File(fileName);
         try (FileOutputStream fos = new FileOutputStream(file);
              DataOutputStream dos = new DataOutputStream(fos)) {
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos);
+                                       OutputFormat.CSV, dos);
             output.writeVertex(vertex);
 
             String json = FileUtils.readFileToString(file);
-            Assert.assertEquals("{\"id\":100,\"rank\":[[66],[998,999]]," +
+            Assert.assertEquals("{\"id\":100,\"page_rank\":[[66],[998,999]]," +
                                 "\"properties\":{\"boolean\":true," +
                                 "\"byte\":127,\"double\":-0.01," +
                                 "\"short\":16383,\"idvalue\":100," +

@@ -21,11 +21,100 @@ package com.baidu.hugegraph.computer.core.io;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Map;
+
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class JsonStructGraphOutput extends StructGraphOutput {
 
     public JsonStructGraphOutput(DataOutputStream out) {
         super(out);
+    }
+
+    @Override
+    public void writeVertex(Vertex vertex) throws IOException {
+        this.writeObjectStart();
+
+        this.writeKey("id");
+        this.writeJoiner();
+        this.writeId(vertex.id());
+        this.writeSplitter();
+
+        String valueName = this.config.vertexValueName();
+        this.writeKey(valueName);
+        this.writeJoiner();
+        this.writeValue(vertex.value());
+
+        if (this.config.outputVertexOutEdges()) {
+            this.writeSplitter();
+            this.writeKey("out_edges");
+            this.writeJoiner();
+            this.writeOutEdges(vertex.edges());
+        }
+        if (this.config.outputVertexProperties()) {
+            this.writeSplitter();
+            this.writeKey("properties");
+            this.writeJoiner();
+            this.writeProperties(vertex.properties());
+        }
+        this.writeObjectEnd();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void writeOutEdges(OutEdges edges) throws IOException {
+        this.writeArrayStart();
+        int size = edges.size();
+        int i = 0;
+        for (Edge<?> edge : (Iterable<Edge>) edges) {
+            this.writeEdge(edge);
+            if (++i < size) {
+                this.writeSplitter();
+            }
+        }
+        this.writeArrayEnd();
+    }
+
+    @Override
+    public void writeEdge(Edge edge) throws IOException {
+        this.writeObjectStart();
+
+        this.writeKey("target_id");
+        this.writeJoiner();
+        this.writeId(edge.targetId());
+        this.writeSplitter();
+
+        String valueName = this.config.edgeValueName();
+        this.writeKey(valueName);
+        this.writeJoiner();
+        this.writeValue(edge.value());
+        if (this.config.outputEdgeProperties()) {
+            this.writeSplitter();
+            this.writeKey("properties");
+            this.writeJoiner();
+            this.writeProperties(edge.properties());
+        }
+        this.writeObjectEnd();
+    }
+
+    @Override
+    public void writeProperties(Properties properties) throws IOException {
+        this.writeObjectStart();
+        int size = properties.get().size();
+        int i = 0;
+        for (Map.Entry<String, Value> entry : properties.get().entrySet()) {
+            this.writeKey(entry.getKey());
+            this.writeJoiner();
+            this.writeValue(entry.getValue());
+            if (++i < size) {
+                this.writeSplitter();
+            }
+        }
+        this.writeObjectEnd();
     }
 
     @Override
@@ -38,6 +127,17 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeRawString("}");
     }
 
+    @Override
+    public void writeArrayStart() throws IOException {
+        this.writeRawString("[");
+    }
+
+    @Override
+    public void writeArrayEnd() throws IOException {
+        this.writeRawString("]");
+    }
+
+    @Override
     public void writeKey(String key) throws IOException {
         this.writeString(key);
     }
@@ -47,6 +147,7 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeRawString(":");
     }
 
+    @Override
     public void writeSplitter() throws IOException {
         this.writeRawString(",");
     }

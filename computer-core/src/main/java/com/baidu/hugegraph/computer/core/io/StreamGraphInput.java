@@ -22,17 +22,30 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultOutEdges;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
+import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
 
 public class StreamGraphInput implements GraphInput {
 
     private final DataInputStream in;
+    private final Config config;
 
     public StreamGraphInput(InputStream in) {
         this(new DataInputStream(in));
@@ -40,6 +53,62 @@ public class StreamGraphInput implements GraphInput {
 
     public StreamGraphInput(DataInputStream in) {
         this.in = in;
+        this.config = Config.instance();
+    }
+
+    @Override
+    public Vertex readVertex() throws IOException {
+        Id id = this.readId();
+        Value value = this.readValue();
+        Vertex vertex = new DefaultVertex<>(id, value);
+
+        if (this.config.outputVertexOutEdges()) {
+            OutEdges outEdges = this.readOutEdges();
+            vertex.edges(outEdges);
+        }
+        if (this.config.outputVertexProperties()) {
+            Properties properties = this.readProperties();
+            vertex.properties(properties);
+        }
+        return vertex;
+    }
+
+    @Override
+    public OutEdges readOutEdges() throws IOException {
+        int numEdges = this.readInt();
+        OutEdges outEdges = new DefaultOutEdges();
+        outEdges.initialize(numEdges);
+        for (int i = 0; i < numEdges; ++i) {
+            Edge edge = this.readEdge();
+            outEdges.add(edge);
+        }
+        return outEdges;
+    }
+
+    @Override
+    public Edge readEdge() throws IOException {
+        // Write necessary
+        Id targetId = this.readId();
+        Value value = this.readValue();
+        Edge edge = new DefaultEdge<>(targetId, value);
+
+        if (this.config.outputEdgeProperties()) {
+            Properties properties = this.readProperties();
+            edge.properties(properties);
+        }
+        return edge;
+    }
+
+    @Override
+    public Properties readProperties() throws IOException {
+        Properties properties = new DefaultProperties();
+        int size = this.readInt();
+        for (int i = 0; i < size; i++) {
+            String key = this.readString();
+            Value value = this.readValue();
+            properties.put(key, value);
+        }
+        return properties;
     }
 
     @Override
@@ -52,8 +121,8 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Value readValue() throws IOException {
-        byte typeCode = this.readByte();
-        Value value = ValueFactory.createValue(typeCode);
+        ValueType valueType = Config.instance().valueType();
+        Value value = ValueFactory.createValue(valueType);
         value.read(this);
         return value;
     }
@@ -130,6 +199,18 @@ public class StreamGraphInput implements GraphInput {
 
     public long readUInt32() throws IOException {
         return this.readInt() & 0xffffffffL;
+    }
+
+    public String readString() throws IOException {
+        return CoderUtil.decode(this.readBytes());
+    }
+
+    public byte[] readBytes() throws IOException {
+        int length = this.readVInt();
+        assert length >= 0;
+        byte[] bytes = new byte[length];
+        this.readFully(bytes, 0, length);
+        return bytes;
     }
 
     @Override

@@ -26,6 +26,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     StreamGraphOutputInputTest.class,
+    JsonStructGraphOutputTest.class,
+//    CsvStructGraphOutputTest.class,
 })
 public class IOTestSuite {
 }
