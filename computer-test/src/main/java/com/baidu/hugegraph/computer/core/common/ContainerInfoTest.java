@@ -66,12 +66,8 @@ public class ContainerInfoTest {
     @Test
     public void testToString() {
         ContainerInfo container = new ContainerInfo(0, HOST1, 8001, 8002);
-        StringBuilder sb = new StringBuilder();
-        sb.append("ContainerInfo{id=").append(container.id())
-          .append(", hostname=").append(container.hostname())
-          .append(", rpcPort=").append(container.rpcPort())
-          .append(", dataPort=").append(container.dataPort())
-          .append("}");
-        Assert.assertEquals(sb.toString(), container.toString());
+        String str = "{\"id\":0,\"hostname\":\"localhost\"," +
+                     "\"rpcPort\":8001,\"dataPort\":8002}";
+        Assert.assertEquals(str, container.toString());
     }
 }

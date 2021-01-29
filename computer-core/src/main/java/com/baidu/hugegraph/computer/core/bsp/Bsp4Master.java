@@ -27,18 +27,29 @@ import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 
 public interface Bsp4Master {
 
-    // Do initialization operation, like connect to etcd cluster.
+    /**
+     * Do initialization operation, like connect to etcd cluster.
+     */
     public void init();
 
-    // Contrary to init. Could not do any bsp operation after close is called.
+    /**
+     * Contrary to init. Could not do any bsp operation after close is called.
+     */
     public void close();
 
+    /**
+     * Register Master, workers can get master information.
+     */
     public void registerMaster(ContainerInfo masterInfo);
 
-    // Wait workers registered.
+    /**
+     * Wait workers registered.
+     */
     public List<ContainerInfo> waitWorkersRegistered();
 
-    // The master determines which superstep to start from
+    /**
+     * The master determines which superstep to start from
+     */
     public void masterSuperstepResume(int superstep);
 
     /**
@@ -77,7 +88,6 @@ public interface Bsp4Master {
      * Master signals the workers that superstep done. The workers read
      * GraphStat and determines whether to continue iteration.
      */
-
     public void masterSuperstepDone(int superstep, GraphStat graphStat);
 
     /**

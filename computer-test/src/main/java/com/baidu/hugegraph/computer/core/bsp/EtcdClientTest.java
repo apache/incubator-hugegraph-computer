@@ -30,6 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -39,7 +40,7 @@ import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.kv.PutResponse;
 import io.etcd.jetcd.options.GetOption;
 
-public class EtcdClientTest {
+public class EtcdClientTest extends UnitTestBase {
 
     private static String ENDPOINTS = "http://localhost:2379";
     private static String NAMESPACE = "test_job_0001";
@@ -98,11 +99,7 @@ public class EtcdClientTest {
     public void testGetWithTimeout() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100L);
-            } catch (InterruptedException e) {
-                // Do nothing.
-            }
+            sleep(100L);
             this.client.put(KEY2, VALUE2);
             this.client.put(KEY1, VALUE1);
         };
@@ -122,11 +119,7 @@ public class EtcdClientTest {
     public void testGetTimeoutThrowException() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(1000L);
-            } catch (InterruptedException e) {
-                // Do nothing.
-            }
+            sleep(1000L);
             this.client.put(KEY1, VALUE1);
         };
         executorService.submit(putThread);
@@ -140,14 +133,10 @@ public class EtcdClientTest {
     }
 
     @Test
-    public void testGetWithTimeout3() throws InterruptedException {
+    public void testGetWithTimeoutAndDisturbKey() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100L);
-            } catch (InterruptedException e) {
-                // Do nothing.
-            }
+            sleep(100L);
             // Should ignore event prefix with KEY1
             this.client.put(KEY1 + "abc", VALUE2);
             this.client.put(KEY1, VALUE1);
@@ -192,11 +181,7 @@ public class EtcdClientTest {
     public void testGetWithPrefixAndTimeout() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100L);
-            } catch (InterruptedException e) {
-                // Do nothing.
-            }
+            sleep(100L);
             this.client.put(KEY1, VALUE1);
             this.client.put(KEY1, VALUE1);
             this.client.put(KEY2, VALUE2);

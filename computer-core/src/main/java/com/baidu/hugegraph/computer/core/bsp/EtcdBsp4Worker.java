@@ -108,8 +108,8 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         String path = constructPath(BspEvent.BSP_WORKER_SUPERSTEP_DONE,
                                     superstep, this.workerInfo.id());
         this.etcdClient.put(path, ReadWriteUtil.toBytes(workerStat));
-        LOG.info("Worker superstep {} done, worker stat:{}", superstep,
-                 workerStat);
+        LOG.info("Worker superstep {} done, worker stat: {}",
+                 superstep, workerStat);
     }
 
     @Override
@@ -119,8 +119,8 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         byte[] bytes = this.etcdClient.get(path, this.barrierOnMasterTimeout);
         GraphStat graphStat = new GraphStat();
         ReadWriteUtil.readFrom(bytes, graphStat);
-        LOG.info("Master superstep {} done, graph stat:{}", superstep,
-                 graphStat);
+        LOG.info("Master superstep {} done, graph stat: {}",
+                 superstep, graphStat);
         return graphStat;
     }
 
@@ -146,7 +146,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         String path = constructPath(BspEvent.BSP_WORKER_OUTPUT_DONE,
                                     this.workerInfo.id());
         this.etcdClient.put(path, Constants.EMPTY_BYTES);
-        LOG.info("Worker {} save done", this.workerInfo.id());
+        LOG.info("Worker {} output done", this.workerInfo.id());
     }
 
     @Override

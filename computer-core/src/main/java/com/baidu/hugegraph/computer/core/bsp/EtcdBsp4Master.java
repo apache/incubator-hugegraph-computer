@@ -44,7 +44,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
     public void registerMaster(ContainerInfo masterInfo) {
         String path = constructPath(BspEvent.BSP_MASTER_REGISTERED);
         this.etcdClient.put(path, ReadWriteUtil.toBytes(masterInfo));
-        LOG.info("Master registered, masterInfo:{}", masterInfo);
+        LOG.info("Master registered, masterInfo: {}", masterInfo);
     }
 
     public List<ContainerInfo> waitWorkersRegistered() {
@@ -58,7 +58,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
             ReadWriteUtil.readFrom(serializedContainer, container);
             containers.add(container);
         }
-        LOG.info("All workers registered, workers:{}", containers);
+        LOG.info("All workers registered, workers: {}", containers);
         return containers;
     }
 
@@ -96,7 +96,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
             ReadWriteUtil.readFrom(bytes, workerStat);
             result.add(workerStat);
         }
-        LOG.info("Workers superstep {} done, workers stat:{}",
+        LOG.info("Workers superstep {} done, workers stat: {}",
                  superstep, result);
         return result;
     }
@@ -123,7 +123,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
         String path = constructPath(BspEvent.BSP_MASTER_SUPERSTEP_DONE,
                                     superstep);
         this.etcdClient.put(path, ReadWriteUtil.toBytes(graphStat));
-        LOG.info("Master superstep {} done, graph stat:{}",
+        LOG.info("Master superstep {} done, graph stat: {}",
                  superstep, graphStat);
     }
 

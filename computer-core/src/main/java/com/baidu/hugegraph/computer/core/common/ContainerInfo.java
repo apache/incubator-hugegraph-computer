@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.util.JsonUtil;
 import com.baidu.hugegraph.util.E;
 
 public class ContainerInfo implements Readable, Writable {
@@ -101,12 +102,6 @@ public class ContainerInfo implements Readable, Writable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ContainerInfo{id=").append(this.id)
-          .append(", hostname=").append(this.hostname)
-          .append(", rpcPort=").append(this.rpcPort)
-          .append(", dataPort=").append(this.dataPort)
-          .append("}");
-        return sb.toString();
+        return JsonUtil.toJson(this);
     }
 }

@@ -44,14 +44,6 @@ public class ComputerOptions extends OptionHolder {
         return instance;
     }
 
-    public static final ConfigOption<String> BSP_ETCD_ENDPOINTS =
-            new ConfigOption<>(
-                    "bsp.etcd_endpoints",
-                    "The end points to access etcd.",
-                    disallowEmpty(),
-                    "http://localhost:2379"
-            );
-
     public static final ConfigOption<String> JOB_ID =
             new ConfigOption<>(
                     "job.id",
@@ -74,6 +66,14 @@ public class ComputerOptions extends OptionHolder {
                     "The max super step of the algorithm.",
                     positiveInt(),
                     10
+            );
+
+    public static final ConfigOption<String> BSP_ETCD_ENDPOINTS =
+            new ConfigOption<>(
+                    "bsp.etcd_endpoints",
+                    "The end points to access etcd.",
+                    disallowEmpty(),
+                    "http://localhost:2379"
             );
 
     public static final ConfigOption<Long> BSP_REGISTER_TIMEOUT =

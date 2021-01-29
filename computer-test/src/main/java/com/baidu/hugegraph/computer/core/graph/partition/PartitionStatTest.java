@@ -25,7 +25,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.BaseCoreTest;
-import com.baidu.hugegraph.computer.core.util.JsonUtil;
 
 public class PartitionStatTest {
 
@@ -78,6 +77,9 @@ public class PartitionStatTest {
     @Test
     public void testToString() {
         PartitionStat stat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
-        Assert.assertEquals(JsonUtil.toJson(stat), stat.toString());
+        String str = "{\"partitionId\":1,\"vertexCount\":4,\"edgeCount\":3,\"" +
+                     "finishedVertexCount\":2,\"messageCount\":5,\"" +
+                     "messageBytes\":6}";
+        Assert.assertEquals(str, stat.toString());
     }
 }

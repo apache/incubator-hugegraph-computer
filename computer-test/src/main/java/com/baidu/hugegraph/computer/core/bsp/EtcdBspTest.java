@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerOptions;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
+import com.baidu.hugegraph.computer.core.common.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.GraphStat;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
@@ -41,7 +42,7 @@ import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
-public class EtcdBspTest {
+public class EtcdBspTest extends UnitTestBase {
 
     private static final Logger LOG = Log.logger(EtcdBspTest.class);
 
@@ -182,7 +183,7 @@ public class EtcdBspTest {
     }
 
     @Test
-    public void testSave() throws InterruptedException {
+    public void testOutput() throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
             this.bsp4Master.waitWorkersOutputDone();
@@ -195,13 +196,5 @@ public class EtcdBspTest {
             countDownLatch.countDown();
         });
         countDownLatch.await();
-    }
-
-    private static void sleep(long ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException ignored) {
-            // Ignore InterruptedException
-        }
     }
 }
