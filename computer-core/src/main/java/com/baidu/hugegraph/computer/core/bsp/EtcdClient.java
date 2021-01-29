@@ -469,7 +469,7 @@ public class EtcdClient {
         return this.kv;
     }
 
-    private List<byte[]> getResponseValues(GetResponse response) {
+    private static List<byte[]> getResponseValues(GetResponse response) {
         List<byte[]> values = new ArrayList((int) response.getCount());
         for (KeyValue kv : response.getKvs()) {
             values.add(kv.getValue().getBytes());

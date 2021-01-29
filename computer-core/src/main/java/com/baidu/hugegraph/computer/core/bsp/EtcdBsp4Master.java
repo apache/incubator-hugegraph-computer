@@ -96,8 +96,8 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
             ReadWriteUtil.readFrom(bytes, workerStat);
             result.add(workerStat);
         }
-        LOG.info("Workers superstep {} done, workers stat:{}", superstep,
-                 result);
+        LOG.info("Workers superstep {} done, workers stat:{}",
+                 superstep, result);
         return result;
     }
 
