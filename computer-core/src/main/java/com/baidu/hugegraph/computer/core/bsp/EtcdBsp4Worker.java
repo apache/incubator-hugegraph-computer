@@ -37,7 +37,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
 
     private static final Logger LOG = Log.logger(EtcdBsp4Worker.class);
 
-    private ContainerInfo workerInfo;
+    private final ContainerInfo workerInfo;
 
     public EtcdBsp4Worker(HugeConfig config, ContainerInfo workerInfo) {
         super(config);
@@ -48,7 +48,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
     public void registerWorker() {
         String path = constructPath(BspEvent.BSP_WORKER_REGISTERED,
                                     this.workerInfo.id());
-        this.etcdClient.put(path, ReadWriteUtil.toByteArray(this.workerInfo));
+        this.etcdClient.put(path, ReadWriteUtil.toBytes(this.workerInfo));
         LOG.info("Worker {} registered", this.workerInfo);
     }
 
@@ -84,7 +84,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         byte[] bytes = this.etcdClient.get(path, this.barrierOnMasterTimeout);
         IntValue superstep = new IntValue();
         ReadWriteUtil.readFrom(bytes, superstep);
-        LOG.info("Resume superstep {}", superstep.value());
+        LOG.info("Resume from superstep {}", superstep.value());
         return superstep.value();
     }
 
@@ -107,7 +107,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
     public void workerSuperstepDone(int superstep, WorkerStat workerStat) {
         String path = constructPath(BspEvent.BSP_WORKER_SUPERSTEP_DONE,
                                     superstep, this.workerInfo.id());
-        this.etcdClient.put(path, ReadWriteUtil.toByteArray(workerStat));
+        this.etcdClient.put(path, ReadWriteUtil.toBytes(workerStat));
         LOG.info("Worker superstep {} done, worker stat:{}", superstep,
                  workerStat);
     }

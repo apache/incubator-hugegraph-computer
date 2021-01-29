@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.BaseCoreTest;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
+import com.baidu.hugegraph.computer.core.util.JsonUtil;
 
 public class WorkerStatTest {
 
@@ -99,16 +100,6 @@ public class WorkerStatTest {
         WorkerStat workerStat = new WorkerStat();
         workerStat.add(stat1);
         workerStat.add(stat2);
-        StringBuilder sb = new StringBuilder();
-        sb.append("WorkerStat{").append("workerId=")
-          .append(workerStat.workerId()).append(", partitionStats=[");
-        for (int i = 0; i < workerStat.size(); i++) {
-            sb.append(workerStat.get(i).toString());
-            if (i != workerStat.size() - 1) {
-                sb.append(", ");
-            }
-        }
-        sb.append("]}");
-        Assert.assertEquals(sb.toString(), workerStat.toString());
+        Assert.assertEquals(JsonUtil.toJson(workerStat), workerStat.toString());
     }
 }

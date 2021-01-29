@@ -27,10 +27,14 @@ import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 
 public interface Bsp4Worker {
 
-    // Do initialization operation, like connect to etcd cluster.
+    /**
+     * Do initialization operation, like connect to etcd cluster.
+     */
     public void init();
 
-    // Contrary to init. Could not do any bsp operation after close is called.
+    /**
+     * Contrary to init. Could not do any bsp operation after close is called.
+     */
     public void close();
 
     /**

@@ -63,16 +63,24 @@ public interface Bsp4Master {
     public void waitWorkersSuperstepPrepared(int superstep);
 
     /**
-     * @see Bsp4Master#waitWorkersSuperstepPrepared
+     * Master signals the workers that the master superstep prepared.
      */
     public void masterSuperstepPrepared(int superstep);
 
-    // Master set super step done.
+    /**
+     * Master signals the workers that superstep done. The workers read
+     * GraphStat and determines whether to continue iteration.
+     */
+
     public void masterSuperstepDone(int superstep, GraphStat graphStat);
 
-    // Wait workers output the vertices.
+    /**
+     * Wait workers output the vertices.
+     */
     public void waitWorkersOutputDone();
 
-    // It's master's responsibility to clean the bsp data.
+    /**
+     * It's master's responsibility to clean the bsp data.
+     */
     public void clean();
 }

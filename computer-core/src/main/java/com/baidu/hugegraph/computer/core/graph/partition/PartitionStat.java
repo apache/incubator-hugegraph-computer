@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.util.JsonUtil;
 
 public class PartitionStat implements Readable, Writable {
 
@@ -122,14 +123,6 @@ public class PartitionStat implements Readable, Writable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("PartitionStat{partitionId=").append(this.partitionId)
-          .append(", vertexCount=").append(this.vertexCount)
-          .append(", edgeCount=").append(this.edgeCount)
-          .append(", finishedVertexCount=").append(this.finishedVertexCount)
-          .append(", messageCount=").append(this.messageCount)
-          .append(", messageBytes=").append(this.messageBytes)
-          .append("}");
-        return sb.toString();
+        return JsonUtil.toJson(this);
     }
 }

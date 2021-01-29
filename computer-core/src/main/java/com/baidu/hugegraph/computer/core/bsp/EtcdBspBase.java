@@ -42,10 +42,10 @@ public abstract class EtcdBspBase {
     }
 
     public void init() {
-        String endpoints = this.config.get(ComputerOptions.ETCD_ENDPOINTS);
+        String endpoints = this.config.get(ComputerOptions.BSP_ETCD_ENDPOINTS);
         String job_id = config.get(ComputerOptions.JOB_ID);
         this.etcdClient = new EtcdClient(endpoints, job_id);
-        this.workerCount = this.config.get(ComputerOptions.WORKERS_COUNT);
+        this.workerCount = this.config.get(ComputerOptions.JOB_WORKERS_COUNT);
         this.registerTimeout = this.config.get(
                                ComputerOptions.BSP_REGISTER_TIMEOUT);
         this.barrierOnWorkersTimeout = this.config.get(

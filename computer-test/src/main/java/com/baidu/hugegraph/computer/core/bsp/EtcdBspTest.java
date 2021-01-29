@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.After;
@@ -58,9 +57,9 @@ public class EtcdBspTest {
         Map<String, Object> map = new HashMap<>();
         String job_id = "local_001";
         map.put(ComputerOptions.JOB_ID.name(), job_id);
-        map.put(ComputerOptions.WORKERS_COUNT.name(), 1);
+        map.put(ComputerOptions.JOB_WORKERS_COUNT.name(), 1);
         map.put(ComputerOptions.BSP_LOG_INTERVAL.name(), 200L);
-        map.put(ComputerOptions.MAX_SUPER_STEP.name(), 2);
+        map.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), 2);
         MapConfiguration configuration = new MapConfiguration(map);
         HugeConfig config = new HugeConfig(configuration);
         this.bsp4Master = new EtcdBsp4Master(config);
@@ -69,7 +68,7 @@ public class EtcdBspTest {
         this.workerInfo = new ContainerInfo(0, "localhost", 8003, 8004);
         this.bsp4Worker = new EtcdBsp4Worker(config, this.workerInfo);
         this.bsp4Worker.init();
-        this.maxSuperStep = config.get(ComputerOptions.MAX_SUPER_STEP);
+        this.maxSuperStep = config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
     }
 
     @After
@@ -172,11 +171,7 @@ public class EtcdBspTest {
                 workerStatInSuperstep.add(stat1);
                 workerStatInSuperstep.add(stat2);
                 // Sleep some time to simulate the worker do computation.
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                    // Do nothing
-                }
+                sleep(1000L);
                 this.bsp4Worker.workerSuperstepDone(superstep,
                                                     workerStatInSuperstep);
                 graphStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
@@ -200,5 +195,13 @@ public class EtcdBspTest {
             countDownLatch.countDown();
         });
         countDownLatch.await();
+    }
+
+    private static void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignored) {
+            // Ignore InterruptedException
+        }
     }
 }

@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 
 public class ReadWriteUtil {
 
-    public static byte[] toByteArray(Writable obj) {
+    public static byte[] toBytes(Writable obj) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
             obj.write(output);

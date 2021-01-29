@@ -29,18 +29,21 @@ import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.util.JsonUtil;
 import com.baidu.hugegraph.util.E;
 
 public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
 
     private int workerId;
-    private List<PartitionStat> partitionStats = new ArrayList<>();
+    private List<PartitionStat> partitionStats;
 
     public WorkerStat() {
+        this(0);
     }
 
     public WorkerStat(int workerId) {
         this.workerId = workerId;
+        this.partitionStats = new ArrayList<>();
     }
 
     public int workerId() {
@@ -98,17 +101,7 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("WorkerStat{").append("workerId=").append(this.workerId)
-          .append(", partitionStats=[");
-        for (int i = 0; i < this.partitionStats.size(); i++) {
-            sb.append(this.partitionStats.get(i).toString());
-            if (i != this.partitionStats.size() - 1) {
-                sb.append(", ");
-            }
-        }
-        sb.append("]}");
-        return sb.toString();
+        return JsonUtil.toJson(this);
     }
 
     @Override

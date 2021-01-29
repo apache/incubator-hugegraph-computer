@@ -44,9 +44,9 @@ public class ComputerOptions extends OptionHolder {
         return instance;
     }
 
-    public static final ConfigOption<String> ETCD_ENDPOINTS =
+    public static final ConfigOption<String> BSP_ETCD_ENDPOINTS =
             new ConfigOption<>(
-                    "computer.etcd_endpoints",
+                    "bsp.etcd_endpoints",
                     "The end points to access etcd.",
                     disallowEmpty(),
                     "http://localhost:2379"
@@ -54,23 +54,23 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<String> JOB_ID =
             new ConfigOption<>(
-                    "computer.job_id",
+                    "job.id",
                     "The job id.",
                     disallowEmpty(),
                     "local_0001"
             );
 
-    public static final ConfigOption<Integer> WORKERS_COUNT =
+    public static final ConfigOption<Integer> JOB_WORKERS_COUNT =
             new ConfigOption<>(
-                    "computer.workers_count",
+                    "job.workers_count",
                     "The workers count of the algorithm.",
                     positiveInt(),
                     1
             );
 
-    public static final ConfigOption<Integer> MAX_SUPER_STEP =
+    public static final ConfigOption<Integer> BSP_MAX_SUPER_STEP =
             new ConfigOption<>(
-                    "computer.max_super_step",
+                    "bsp.max_super_step",
                     "The max super step of the algorithm.",
                     positiveInt(),
                     10
@@ -78,7 +78,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Long> BSP_REGISTER_TIMEOUT =
             new ConfigOption<>(
-                    "computer.bsp_register_timeout",
+                    "bsp.register_timeout",
                     "The max timeout to wait for master and works to register.",
                     positiveInt(),
                     TimeUnit.MINUTES.toMillis(5L)
@@ -86,7 +86,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Long> BSP_BARRIER_ON_WORKERS_TIMEOUT =
             new ConfigOption<>(
-                    "computer.bsp_barrier_workers_timeout",
+                    "bsp.barrier_workers_timeout",
                     "The max timeout to wait for workers to sent bsp event.",
                     positiveInt(),
                     TimeUnit.HOURS.toMillis(24L)
@@ -94,7 +94,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Long> BSP_BARRIER_ON_MASTER_TIMEOUT =
             new ConfigOption<>(
-                    "computer.bsp_barrier_master_timeout",
+                    "bsp.barrier_master_timeout",
                     "The max timeout(in ms) to wait for master to sent bsp " +
                     "event.",
                     positiveInt(),
@@ -103,7 +103,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Long> BSP_LOG_INTERVAL =
             new ConfigOption<>(
-                    "computer.bsp_log_interval",
+                    "bsp.log_interval",
                     "The max timeout to wait master to sent bsp event.",
                     positiveInt(),
                     TimeUnit.SECONDS.toMillis(30L)

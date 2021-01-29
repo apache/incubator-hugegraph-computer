@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.graph;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
+import com.baidu.hugegraph.computer.core.util.JsonUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
@@ -137,14 +138,6 @@ public class GraphStat implements Readable, Writable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("GraphStat{vertexCount=").append(this.vertexCount)
-          .append(", edgeCount=").append(this.edgeCount)
-          .append(", finishedVertexCount=").append(this.finishedVertexCount)
-          .append(", messageCount=").append(this.messageCount)
-          .append(", messageBytes=").append(this.messageBytes)
-          .append(", halt=").append(this.halt)
-          .append("}");
-        return sb.toString();
+        return JsonUtil.toJson(this);
     }
 }
