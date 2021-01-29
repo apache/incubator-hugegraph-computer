@@ -48,11 +48,17 @@ public interface Bsp4Master {
     public void waitWorkersInputDone();
 
     /**
-     * @see Bsp4Master#waitWorkersInputDone
+     * The master signal workers the master input done, the workers can merge
+     * vertices and edges after receive this signal.
      */
     public void masterInputDone();
 
-    // Wait workers finish specified super step.
+    /**
+     * Wait workers finish specified superstep. The master receives the
+     * worker stat from all workers, calls algorithm's master computation,
+     * check the max iteration count, and then calls masterSuperstepDone to
+     * synchronize superstep result.
+     */
     public List<WorkerStat> waitWorkersSuperstepDone(int superstep);
 
     /**
