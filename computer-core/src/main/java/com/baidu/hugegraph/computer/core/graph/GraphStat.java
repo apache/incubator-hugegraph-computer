@@ -126,13 +126,13 @@ public class GraphStat implements Readable, Writable {
 
     @Override
     public int hashCode() {
-        return Long.hashCode(this.vertexCount) +
-               Long.hashCode(this.edgeCount) +
-               Long.hashCode(this.messageCount) +
-               Long.hashCode(this.edgeCount) +
-               Long.hashCode(this.finishedVertexCount) +
-               Long.hashCode(this.messageCount) +
-               Long.hashCode(this.messageBytes) +
+        return (Long.hashCode(this.vertexCount) >>> 56) ^
+               (Long.hashCode(this.edgeCount) >>> 48) ^
+               (Long.hashCode(this.messageCount) >>> 40) ^
+               (Long.hashCode(this.edgeCount) >>> 32) ^
+               (Long.hashCode(this.finishedVertexCount) >>> 24) ^
+               (Long.hashCode(this.messageCount) >>> 16) ^
+               (Long.hashCode(this.messageBytes) >>> 8) ^
                Boolean.hashCode(this.halt);
     }
 

@@ -55,7 +55,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
         List<ContainerInfo> containers = new ArrayList<>(this.workerCount);
         for (byte[] serializedContainer : serializedContainers) {
             ContainerInfo container = new ContainerInfo();
-            ReadWriteUtil.readFrom(serializedContainer, container);
+            ReadWriteUtil.fromBytes(serializedContainer, container);
             containers.add(container);
         }
         LOG.info("All workers registered, workers: {}", containers);
@@ -93,7 +93,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
         List<WorkerStat> result = new ArrayList<>(this.workerCount);
         for (byte[] bytes : list) {
             WorkerStat workerStat = new WorkerStat();
-            ReadWriteUtil.readFrom(bytes, workerStat);
+            ReadWriteUtil.fromBytes(bytes, workerStat);
             result.add(workerStat);
         }
         LOG.info("Workers superstep {} done, workers stat: {}",

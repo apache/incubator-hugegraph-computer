@@ -45,7 +45,7 @@ public class ReadWriteUtil {
         }
     }
 
-    public static void readFrom(byte[] bytes, Readable obj) {
+    public static void fromBytes(byte[] bytes, Readable obj) {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             obj.read(input);

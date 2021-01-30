@@ -57,7 +57,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         String path = constructPath(BspEvent.BSP_MASTER_REGISTERED);
         byte[] bytes = this.etcdClient.get(path, this.registerTimeout);
         ContainerInfo masterInfo = new ContainerInfo();
-        ReadWriteUtil.readFrom(bytes, masterInfo);
+        ReadWriteUtil.fromBytes(bytes, masterInfo);
         LOG.info("Master {} registered", masterInfo);
         return masterInfo;
     }
@@ -71,7 +71,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         List<ContainerInfo> containers = new ArrayList<>(this.workerCount);
         for (byte[] serializedContainer : serializedContainers) {
             ContainerInfo container = new ContainerInfo();
-            ReadWriteUtil.readFrom(serializedContainer, container);
+            ReadWriteUtil.fromBytes(serializedContainer, container);
             containers.add(container);
         }
         LOG.info("All workers registered, workers:{}", containers);
@@ -83,7 +83,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         String path = constructPath(BspEvent.BSP_MASTER_SUPERSTEP_RESUME);
         byte[] bytes = this.etcdClient.get(path, this.barrierOnMasterTimeout);
         IntValue superstep = new IntValue();
-        ReadWriteUtil.readFrom(bytes, superstep);
+        ReadWriteUtil.fromBytes(bytes, superstep);
         LOG.info("Resume from superstep {}", superstep.value());
         return superstep.value();
     }
@@ -118,7 +118,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
                                     superstep);
         byte[] bytes = this.etcdClient.get(path, this.barrierOnMasterTimeout);
         GraphStat graphStat = new GraphStat();
-        ReadWriteUtil.readFrom(bytes, graphStat);
+        ReadWriteUtil.fromBytes(bytes, graphStat);
         LOG.info("Master superstep {} done, graph stat: {}",
                  superstep, graphStat);
         return graphStat;
