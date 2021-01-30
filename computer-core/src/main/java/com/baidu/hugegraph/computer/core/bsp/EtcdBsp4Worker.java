@@ -148,10 +148,4 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
         this.etcdClient.put(path, Constants.EMPTY_BYTES);
         LOG.info("Worker {} output done", this.workerInfo.id());
     }
-
-    @Override
-    public void close() {
-        this.etcdClient.close();
-        LOG.info("Worker {} closed etcd client", this.workerInfo.id());
-    }
 }
