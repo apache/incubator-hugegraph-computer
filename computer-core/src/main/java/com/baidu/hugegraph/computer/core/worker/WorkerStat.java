@@ -101,7 +101,7 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
 
     @Override
     public String toString() {
-        return JsonUtil.toJson(this);
+        return JsonUtil.toJsonWithClass(this);
     }
 
     @Override

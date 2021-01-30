@@ -74,6 +74,18 @@ public interface Bsp4Worker {
     public void waitMasterInputDone();
 
     /**
+     * Worker set this signal to indicate the worker is ready to receive
+     * messages from other workers.
+     */
+    public void workerSuperstepPrepared(int superstep);
+
+    /**
+     * After all workers prepared, the worker can execute and send messages
+     * to other workers.
+     */
+    public void waitMasterSuperstepPrepared(int superstep);
+
+    /**
      * Worker set this signal after sent all messages to corresponding
      * workers and sent aggregators to master.
      */
@@ -85,18 +97,6 @@ public interface Bsp4Worker {
      * works.
      */
     public GraphStat waitMasterSuperstepDone(int superstep);
-
-    /**
-     * Worker set this signal to indicate the worker is ready to receive
-     * messages from other workers.
-     */
-    public void workerSuperstepPrepared(int superstep);
-
-    /**
-     * After all workers prepared, the worker can execute and send messages
-     * to other workers.
-     */
-    public void waitMasterSuperstepPrepared(int superstep);
 
     /**
      * Worker set this signal to indicate the worker has saved the result.

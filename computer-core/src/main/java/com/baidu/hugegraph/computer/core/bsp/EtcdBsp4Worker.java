@@ -74,7 +74,7 @@ public class EtcdBsp4Worker extends EtcdBspBase implements Bsp4Worker {
             ReadWriteUtil.fromBytes(serializedContainer, container);
             containers.add(container);
         }
-        LOG.info("All workers registered, workers:{}", containers);
+        LOG.info("All workers registered, workers: {}", containers);
         return containers;
     }
 

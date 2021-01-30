@@ -102,6 +102,6 @@ public class ContainerInfo implements Readable, Writable {
 
     @Override
     public String toString() {
-        return JsonUtil.toJson(this);
+        return JsonUtil.toJsonWithClass(this);
     }
 }

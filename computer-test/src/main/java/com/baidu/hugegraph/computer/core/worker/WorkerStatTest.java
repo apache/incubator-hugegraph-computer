@@ -99,7 +99,8 @@ public class WorkerStatTest {
         WorkerStat workerStat = new WorkerStat();
         workerStat.add(stat1);
         workerStat.add(stat2);
-        String str = "{\"workerId\":0,\"partitionStats\":[{\"partitionId\":0," +
+        String str = "WorkerStat{\"workerId\":0," +
+                     "\"partitionStats\":[{\"partitionId\":0," +
                      "\"vertexCount\":1,\"edgeCount\":2,\"" +
                      "finishedVertexCount\":0,\"messageCount\":0,\"" +
                      "messageBytes\":0},{\"partitionId\":1,\"vertexCount\":4," +

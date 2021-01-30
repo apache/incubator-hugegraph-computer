@@ -66,7 +66,7 @@ public class ContainerInfoTest {
     @Test
     public void testToString() {
         ContainerInfo container = new ContainerInfo(0, HOST1, 8001, 8002);
-        String str = "{\"id\":0,\"hostname\":\"localhost\"," +
+        String str = "ContainerInfo{\"id\":0,\"hostname\":\"localhost\"," +
                      "\"rpcPort\":8001,\"dataPort\":8002}";
         Assert.assertEquals(str, container.toString());
     }

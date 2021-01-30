@@ -119,7 +119,7 @@ public class GraphStatTest {
         GraphStat stat = new GraphStat();
         PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         stat.increase(partitionStat);
-        String str = "{\"vertexCount\":4,\"edgeCount\":3,\"" +
+        String str = "GraphStat{\"vertexCount\":4,\"edgeCount\":3,\"" +
                      "finishedVertexCount\":2,\"messageCount\":5,\"" +
                      "messageBytes\":6,\"halt\":false}";
         Assert.assertEquals(str, stat.toString());

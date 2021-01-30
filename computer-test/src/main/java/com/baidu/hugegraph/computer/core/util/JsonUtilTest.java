@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.util;
 
+import java.math.BigInteger;
+
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -29,11 +31,10 @@ public class JsonUtilTest {
 
     @Test
     public void testJson() {
-        PartitionStat partitionStat = new PartitionStat();
-        String json = JsonUtil.toJson(partitionStat);
-        PartitionStat partitionStat1 = JsonUtil.fromJson(
-                                                json, PartitionStat.class);
-        Assert.assertEquals(partitionStat, partitionStat1);
+        BigInteger integer = BigInteger.valueOf(127L);
+        String json = JsonUtil.toJson(integer);
+        Object integer1 = JsonUtil.fromJson(json, BigInteger.class);
+        Assert.assertEquals(integer, integer1);
     }
 
     @Test
