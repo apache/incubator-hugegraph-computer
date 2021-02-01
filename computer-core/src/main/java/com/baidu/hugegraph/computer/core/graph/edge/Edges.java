@@ -17,39 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.vertex;
+package com.baidu.hugegraph.computer.core.graph.edge;
 
-import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public interface Vertex<V extends Value, E extends Value> {
+public interface Edges<E extends Value> extends Iterable<Edge<E>> {
 
-    Id id();
+    int size();
 
-    void id(Id id);
-
-    V value();
-
-    void value(V value);
-
-    int numEdges();
-
-    Edges<E> edges();
-
-    void edges(Edges<E> edges);
-
-    void addEdge(Edge<E> edge);
-
-    Properties properties();
-
-    void properties(Properties properties);
-
-    boolean active();
-
-    void inactivate();
-
-    void reactivate();
+    void add(Edge<E> edge);
 }

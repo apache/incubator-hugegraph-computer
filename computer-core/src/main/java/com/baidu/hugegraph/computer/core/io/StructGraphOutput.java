@@ -24,24 +24,19 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 
 public abstract class StructGraphOutput implements GraphOutput {
 
     protected final DataOutputStream out;
-    protected final Config config;
 
     public StructGraphOutput(DataOutputStream out) {
         this.out = out;
-        this.config = Config.instance();
     }
 
     public abstract void writeObjectStart() throws IOException;
@@ -65,48 +60,32 @@ public abstract class StructGraphOutput implements GraphOutput {
 
     @Override
     public void writeValue(Value value) throws IOException {
-        if (value.type() == ValueType.ID_VALUE) {
-            this.writeIdValue((IdValue) value);
-        } else if (value.type() == ValueType.ID_VALUE_LIST) {
-            this.writeIdValueList((IdValueList) value);
-        } else if (value.type() == ValueType.ID_VALUE_LIST_LIST) {
-            this.writeIdValueListList((IdValueListList) value);
-        } else if (value.type() == ValueType.LIST_VALUE) {
-            this.writeListValue((ListValue<?>) value);
-        } else {
-            value.write(this);
+        switch (value.type()) {
+            case ID_VALUE:
+                this.writeIdValue((IdValue) value);
+                break;
+            case ID_VALUE_LIST:
+            case ID_VALUE_LIST_LIST:
+            case LIST_VALUE:
+                this.writeListValue((ListValue<?>) value);
+                break;
+            case NULL:
+            case BOOLEAN:
+            case INT:
+            case LONG:
+            case FLOAT:
+            case DOUBLE:
+                value.write(this);
+                break;
+            default:
+                throw new ComputerException("Unexpected value type %s",
+                                            value.type());
         }
     }
 
     private void writeIdValue(IdValue idValue) throws IOException {
+        // The idValue is shown as bytes in computation, and as id when output
         this.writeId(idValue.id());
-    }
-
-    private void writeIdValueList(IdValueList idValueList) throws IOException {
-        this.writeArrayStart();
-        int size = idValueList.size();
-        int i = 0;
-        for (IdValue idValue : idValueList.values()) {
-            this.writeIdValue(idValue);
-            if (++i < size) {
-                this.writeSplitter();
-            }
-        }
-        this.writeArrayEnd();
-    }
-
-    private void writeIdValueListList(IdValueListList idValueListList)
-                                      throws IOException {
-        this.writeArrayStart();
-        int size = idValueListList.size();
-        int i = 0;
-        for (IdValueList idValueList : idValueListList.values()) {
-            this.writeIdValueList(idValueList);
-            if (++i < size) {
-                this.writeSplitter();
-            }
-        }
-        this.writeArrayEnd();
     }
 
     private void writeListValue(ListValue<?> listValue) throws IOException {

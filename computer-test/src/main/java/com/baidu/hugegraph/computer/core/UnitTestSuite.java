@@ -24,11 +24,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.allocator.AllocatorTestSuite;
 import com.baidu.hugegraph.computer.core.bsp.BspTestSuite;
 import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.ExceptionTest;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
 import com.baidu.hugegraph.computer.core.io.IOTestSuite;
 import com.baidu.hugegraph.config.OptionSpace;
@@ -36,6 +37,7 @@ import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    AllocatorTestSuite.class,
     CommonTestSuite.class,
     GraphTestSuite.class,
     IOTestSuite.class,
@@ -47,14 +49,14 @@ public class UnitTestSuite {
     private static final Logger LOG = Log.logger(UnitTestSuite.class);
 
     @BeforeClass
-    public static void setUp() {
+    public static void setup() {
         // Don't forget to register options
         OptionSpace.register("computer", ComputerOptions.instance());
 
-        Config.parseOptions(
+        ComputerContext.parseOptions(
         ComputerOptions.ALGORITHM_NAME.name(), "test",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.VERTEX_VALUE_NAME.name(), "value",
-        ComputerOptions.EDGE_VALUE_NAME.name(), "value");
+        ComputerOptions.VALUE_NAME.name(), "value",
+        ComputerOptions.EDGES_NAME.name(), "value");
     }
 }

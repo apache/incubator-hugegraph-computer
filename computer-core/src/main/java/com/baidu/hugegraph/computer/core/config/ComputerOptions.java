@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.config;
 
 import static com.baidu.hugegraph.config.OptionChecker.allowValues;
 import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
+import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 
 import java.util.Set;
 
@@ -47,40 +48,40 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<String> ALGORITHM_NAME =
             new ConfigOption<>(
-                    "computer.algorithm.name",
+                    "algorithm.name",
                     "The name of current algorithm",
                     disallowEmpty(),
-                    "page_rank"
+                    "unknown"
             );
 
     public static final ConfigOption<String> VALUE_TYPE =
             new ConfigOption<>(
-                    "computer.value.type",
+                    "algorithm.value_type",
                     "The value type of current algorithm",
                     disallowEmpty(),
                     "NULL"
             );
 
-    public static final ConfigOption<String> VERTEX_VALUE_NAME =
+    public static final ConfigOption<String> VALUE_NAME =
             new ConfigOption<>(
-                    "computer.vertex.value.name",
-                    "The output value name of vertex",
-                    disallowEmpty(),
-                    "rank"
-            );
-
-    public static final ConfigOption<String> EDGE_VALUE_NAME =
-            new ConfigOption<>(
-                    "computer.edge.value.name",
-                    "The output value name of edge",
+                    "algorithm.value_name",
+                    "The algorithm value name of vertex",
                     disallowEmpty(),
                     "value"
             );
 
-    public static final ConfigOption<Boolean> OUTPUT_VERTEX_OUT_EDGES =
+    public static final ConfigOption<String> EDGES_NAME =
             new ConfigOption<>(
-                    "computer.output.vertex.out_edges",
-                    "Output the edges of the vertex or not",
+                    "algorithm.edges_name",
+                    "The algorithm value name of edges",
+                    disallowEmpty(),
+                    "value"
+            );
+
+    public static final ConfigOption<Boolean> OUTPUT_VERTEX_ADJACENT_EDGES =
+            new ConfigOption<>(
+                    "computer.output.vertex.adjacent_edges",
+                    "Output the adjacent edges of the vertex or not",
                     allowValues(true, false),
                     false
             );
@@ -101,10 +102,28 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
+    public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
+            new ConfigOption<>(
+                    "computer.vertex.average_degree",
+                    "The average degree of a vertex",
+                    positiveInt(),
+                    10
+            );
+
+    public static final ConfigOption<Integer>
+            PARALLEL_PROCESS_VERTICES_PER_THREAD =
+            new ConfigOption<>(
+                    "computer.parallel_process.vertices.per_thread",
+                    "Maximum number of vertices per thread processed " +
+                    "in parallel",
+                    positiveInt(),
+                    10000
+            );
+
     public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
             ALGORITHM_NAME.name(),
             VALUE_TYPE.name(),
-            VERTEX_VALUE_NAME.name(),
-            EDGE_VALUE_NAME.name()
+            VALUE_NAME.name(),
+            EDGES_NAME.name()
     );
 }

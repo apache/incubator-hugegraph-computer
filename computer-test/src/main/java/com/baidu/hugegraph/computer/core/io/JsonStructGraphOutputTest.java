@@ -28,8 +28,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
@@ -47,12 +47,12 @@ public class JsonStructGraphOutputTest {
 
     @Test
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
-        Config.parseOptions(
+        ComputerContext.parseOptions(
         ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VERTEX_VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGE_VALUE_NAME.name(), "value",
+        ComputerOptions.VALUE_NAME.name(), "rank",
+        ComputerOptions.EDGES_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_VERTEX_OUT_EDGES.name(), "false",
+        ComputerOptions.OUTPUT_VERTEX_ADJACENT_EDGES.name(), "false",
         ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "false",
         ComputerOptions.OUTPUT_EDGE_PROPERTIES.name(), "false");
 
@@ -78,12 +78,12 @@ public class JsonStructGraphOutputTest {
 
     @Test
     public void testWriteReadVertexWithOutEdges() throws IOException {
-        Config.parseOptions(
+        ComputerContext.parseOptions(
         ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VERTEX_VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGE_VALUE_NAME.name(), "value",
+        ComputerOptions.VALUE_NAME.name(), "rank",
+        ComputerOptions.EDGES_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_VERTEX_OUT_EDGES.name(), "true",
+        ComputerOptions.OUTPUT_VERTEX_ADJACENT_EDGES.name(), "true",
         ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "false",
         ComputerOptions.OUTPUT_EDGE_PROPERTIES.name(), "false");
 
@@ -107,7 +107,7 @@ public class JsonStructGraphOutputTest {
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
-                                "\"out_edges\":[{\"target_id\":200," +
+                                "\"adjacent_edges\":[{\"target_id\":200," +
                                 "\"value\":1},{\"target_id\":300," +
                                 "\"value\":-1}]}", json);
         } finally {
@@ -117,12 +117,12 @@ public class JsonStructGraphOutputTest {
 
     @Test
     public void testWriteReadVertexWithProperties() throws IOException {
-        Config.parseOptions(
+        ComputerContext.parseOptions(
         ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VERTEX_VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGE_VALUE_NAME.name(), "value",
+        ComputerOptions.VALUE_NAME.name(), "rank",
+        ComputerOptions.EDGES_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_VERTEX_OUT_EDGES.name(), "false",
+        ComputerOptions.OUTPUT_VERTEX_ADJACENT_EDGES.name(), "false",
         ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "true",
         ComputerOptions.OUTPUT_EDGE_PROPERTIES.name(), "false");
 

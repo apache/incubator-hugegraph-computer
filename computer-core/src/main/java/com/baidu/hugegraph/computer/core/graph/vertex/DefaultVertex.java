@@ -21,9 +21,11 @@ package com.baidu.hugegraph.computer.core.graph.vertex;
 
 import java.util.Objects;
 
-import com.baidu.hugegraph.computer.core.graph.edge.DefaultOutEdges;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
@@ -34,16 +36,20 @@ public class DefaultVertex<V extends Value, E extends Value>
 
     private Id id;
     private V value;
-    private OutEdges<E> edges;
+    private Edges<E> edges;
     private Properties properties;
     private boolean active;
+
+    public DefaultVertex() {
+        this(null, null);
+    }
 
     public DefaultVertex(Id id, V value) {
         this.id = id;
         this.value = value;
-        this.edges = new DefaultOutEdges<>();
-        // TODO: so tedious, remove it
-        this.edges.initialize(10);
+        int averageDegree = ComputerContext.instance().config().get(
+                            ComputerOptions.VERTEX_AVERAGE_DEGREE);
+        this.edges = new DefaultEdges<>(averageDegree);
         this.properties = new DefaultProperties();
         this.active = true;
     }
@@ -51,6 +57,11 @@ public class DefaultVertex<V extends Value, E extends Value>
     @Override
     public Id id() {
         return this.id;
+    }
+
+    @Override
+    public void id(Id id) {
+        this.id = id;
     }
 
     @Override
@@ -69,12 +80,12 @@ public class DefaultVertex<V extends Value, E extends Value>
     }
 
     @Override
-    public OutEdges<E> edges() {
+    public Edges<E> edges() {
         return this.edges;
     }
 
     @Override
-    public void edges(OutEdges<E> edges) {
+    public void edges(Edges<E> edges) {
         this.edges = edges;
     }
 

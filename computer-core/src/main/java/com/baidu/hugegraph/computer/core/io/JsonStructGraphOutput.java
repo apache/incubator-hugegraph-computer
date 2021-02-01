@@ -23,8 +23,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -37,6 +38,8 @@ public class JsonStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
+        ComputerContext context = ComputerContext.instance();
+
         this.writeObjectStart();
 
         this.writeKey("id");
@@ -44,18 +47,18 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeId(vertex.id());
         this.writeSplitter();
 
-        String valueName = this.config.vertexValueName();
+        String valueName = context.config().vertexValueName();
         this.writeKey(valueName);
         this.writeJoiner();
         this.writeValue(vertex.value());
 
-        if (this.config.outputVertexOutEdges()) {
+        if (context.config().outputVertexAdjacentEdges()) {
             this.writeSplitter();
-            this.writeKey("out_edges");
+            this.writeKey("adjacent_edges");
             this.writeJoiner();
             this.writeOutEdges(vertex.edges());
         }
-        if (this.config.outputVertexProperties()) {
+        if (context.config().outputVertexProperties()) {
             this.writeSplitter();
             this.writeKey("properties");
             this.writeJoiner();
@@ -66,7 +69,7 @@ public class JsonStructGraphOutput extends StructGraphOutput {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void writeOutEdges(OutEdges edges) throws IOException {
+    public void writeOutEdges(Edges edges) throws IOException {
         this.writeArrayStart();
         int size = edges.size();
         int i = 0;
@@ -81,6 +84,8 @@ public class JsonStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
+        ComputerContext context = ComputerContext.instance();
+
         this.writeObjectStart();
 
         this.writeKey("target_id");
@@ -88,11 +93,11 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeId(edge.targetId());
         this.writeSplitter();
 
-        String valueName = this.config.edgeValueName();
+        String valueName = context.config().edgeValueName();
         this.writeKey(valueName);
         this.writeJoiner();
         this.writeValue(edge.value());
-        if (this.config.outputEdgeProperties()) {
+        if (context.config().outputEdgeProperties()) {
             this.writeSplitter();
             this.writeKey("properties");
             this.writeJoiner();

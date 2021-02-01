@@ -17,15 +17,9 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.edge;
+package com.baidu.hugegraph.computer.core.graph.vertex;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+public interface VertexFactory {
 
-public interface OutEdges<E extends Value> extends Iterable<Edge<E>> {
-
-    void initialize(int capacity);
-
-    int size();
-
-    void add(Edge<E> edge);
+    Vertex createVertex();
 }

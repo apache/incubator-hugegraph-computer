@@ -23,8 +23,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -37,6 +38,8 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
+        ComputerContext context = ComputerContext.instance();
+
         this.writeObjectStart();
 
         this.writeId(vertex.id());
@@ -44,11 +47,11 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
         this.writeValue(vertex.value());
 
-        if (this.config.outputVertexOutEdges()) {
+        if (context.config().outputVertexAdjacentEdges()) {
             this.writeSplitter();
             this.writeOutEdges(vertex.edges());
         }
-        if (this.config.outputVertexProperties()) {
+        if (context.config().outputVertexProperties()) {
             this.writeSplitter();
             this.writeProperties(vertex.properties());
         }
@@ -57,7 +60,7 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void writeOutEdges(OutEdges edges) throws IOException {
+    public void writeOutEdges(Edges edges) throws IOException {
         this.writeArrayStart();
         int size = edges.size();
         int i = 0;
@@ -72,13 +75,15 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
+        ComputerContext context = ComputerContext.instance();
+
         this.writeObjectStart();
 
         this.writeId(edge.targetId());
         this.writeSplitter();
 
         this.writeValue(edge.value());
-        if (this.config.outputEdgeProperties()) {
+        if (context.config().outputEdgeProperties()) {
             this.writeSplitter();
             this.writeProperties(edge.properties());
         }

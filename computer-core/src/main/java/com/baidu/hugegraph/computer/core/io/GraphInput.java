@@ -23,7 +23,7 @@ import java.io.DataInput;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -33,7 +33,7 @@ public interface GraphInput extends DataInput {
 
     Vertex readVertex() throws IOException;
 
-    OutEdges readOutEdges() throws IOException;
+    Edges readOutEdges() throws IOException;
 
     Edge readEdge() throws IOException;
 

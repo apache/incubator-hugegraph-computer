@@ -25,12 +25,11 @@ import java.util.Objects;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public class DefaultOutEdges<E extends Value> implements OutEdges<E> {
+public class DefaultEdges<E extends Value> implements Edges<E> {
 
     private ArrayList<Edge<E>> edges;
 
-    @Override
-    public void initialize(int capacity) {
+    public DefaultEdges(int capacity) {
         this.edges = new ArrayList<>(capacity);
     }
 
@@ -54,10 +53,10 @@ public class DefaultOutEdges<E extends Value> implements OutEdges<E> {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof DefaultOutEdges)) {
+        if (!(obj instanceof DefaultEdges)) {
             return false;
         }
-        DefaultOutEdges<?> other = (DefaultOutEdges<?>) obj;
+        DefaultEdges<?> other = (DefaultEdges<?>) obj;
         return this.edges.equals(other.edges);
     }
 

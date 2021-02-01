@@ -17,39 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.vertex;
+package com.baidu.hugegraph.computer.core.allocator;
 
-import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public interface Vertex<V extends Value, E extends Value> {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    RecyclersTest.class
+})
+public class AllocatorTestSuite {
 
-    Id id();
-
-    void id(Id id);
-
-    V value();
-
-    void value(V value);
-
-    int numEdges();
-
-    Edges<E> edges();
-
-    void edges(Edges<E> edges);
-
-    void addEdge(Edge<E> edge);
-
-    Properties properties();
-
-    void properties(Properties properties);
-
-    boolean active();
-
-    void inactivate();
-
-    void reactivate();
 }

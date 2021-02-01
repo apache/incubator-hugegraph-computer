@@ -17,37 +17,33 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.allocator;
 
-import com.baidu.hugegraph.computer.core.allocator.Allocator;
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.graph.vertex.VertexFactory;
 
-public final class ComputerContext {
+import io.netty.util.Recycler;
 
-    private static volatile ComputerContext INSTANCE;
+public class VertexRecycler {
 
-    private final Config config;
-    private final Allocator allocator;
+    private final Recycler<Vertex> recycler;
+    private Recycler.Handle<Vertex> handle;
 
-    private ComputerContext(Config config) {
-        this.config = config;
-        this.allocator = new Allocator(config);
+    public VertexRecycler(VertexFactory factory, int maxCapacityPerThread) {
+        this.recycler = new Recycler<Vertex>(maxCapacityPerThread) {
+            @Override
+            protected Vertex newObject(Handle<Vertex> handle) {
+                VertexRecycler.this.handle = handle;
+                return factory.createVertex();
+            }
+        };
     }
 
-    public static synchronized void parseOptions(String... options) {
-        Config config = new Config(options);
-        INSTANCE = new ComputerContext(config);
+    public Vertex get() {
+        return this.recycler.get();
     }
 
-    public static ComputerContext instance() {
-        return INSTANCE;
-    }
-
-    public Config config() {
-        return this.config;
-    }
-
-    public Allocator allocator() {
-        return this.allocator;
+    public void recycle(Vertex vertex) {
+        this.handle.recycle(vertex);
     }
 }

@@ -17,37 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.graph.vertex;
 
-import com.baidu.hugegraph.computer.core.allocator.Allocator;
-import com.baidu.hugegraph.computer.core.config.Config;
+public class VertexFactoryImpl implements VertexFactory {
 
-public final class ComputerContext {
-
-    private static volatile ComputerContext INSTANCE;
-
-    private final Config config;
-    private final Allocator allocator;
-
-    private ComputerContext(Config config) {
-        this.config = config;
-        this.allocator = new Allocator(config);
-    }
-
-    public static synchronized void parseOptions(String... options) {
-        Config config = new Config(options);
-        INSTANCE = new ComputerContext(config);
-    }
-
-    public static ComputerContext instance() {
-        return INSTANCE;
-    }
-
-    public Config config() {
-        return this.config;
-    }
-
-    public Allocator allocator() {
-        return this.allocator;
+    public Vertex createVertex() {
+        return new DefaultVertex();
     }
 }

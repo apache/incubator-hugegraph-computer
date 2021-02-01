@@ -24,13 +24,12 @@ import static com.baidu.hugegraph.computer.core.common.Constants.UINT16_MAX;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.OutEdges;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -41,7 +40,6 @@ import com.baidu.hugegraph.util.E;
 public class StreamGraphOutput implements GraphOutput {
 
     private final DataOutputStream out;
-    private final Config config;
 
     public StreamGraphOutput(OutputStream out) {
         this(new DataOutputStream(out));
@@ -49,26 +47,26 @@ public class StreamGraphOutput implements GraphOutput {
 
     public StreamGraphOutput(DataOutputStream out) {
         this.out = out;
-        this.config = Config.instance();
     }
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
+        ComputerContext context = ComputerContext.instance();
         // Write necessary
         this.writeId(vertex.id());
         this.writeValue(vertex.value());
 
-        if (this.config.outputVertexOutEdges()) {
+        if (context.config().outputVertexAdjacentEdges()) {
             this.writeOutEdges(vertex.edges());
         }
-        if (this.config.outputVertexProperties()) {
+        if (context.config().outputVertexProperties()) {
             this.writeProperties(vertex.properties());
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void writeOutEdges(OutEdges edges) throws IOException {
+    public void writeOutEdges(Edges edges) throws IOException {
         this.writeInt(edges.size());
         for (Edge<?> edge : (Iterable<Edge>) edges) {
             this.writeEdge(edge);
@@ -77,11 +75,12 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
+        ComputerContext context = ComputerContext.instance();
         // Write necessary
         this.writeId(edge.targetId());
         this.writeValue(edge.value());
 
-        if (this.config.outputEdgeProperties()) {
+        if (context.config().outputEdgeProperties()) {
             this.writeProperties(edge.properties());
         }
     }
