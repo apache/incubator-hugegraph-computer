@@ -132,7 +132,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
     public void waitWorkersOutputDone() {
         LOG.info("Master is waiting workers output done");
         String path = constructPath(BspEvent.BSP_WORKER_OUTPUT_DONE);
-        waitOnWorkersEvent(path, super.barrierOnWorkersTimeou());
+        waitOnWorkersEvent(path, super.barrierOnWorkersTimeout());
     }
 
     @Override
