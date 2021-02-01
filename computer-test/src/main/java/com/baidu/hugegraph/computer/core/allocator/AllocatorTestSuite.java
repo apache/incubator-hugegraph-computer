@@ -24,7 +24,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    RecyclersTest.class
+    RecyclersTest.class,
+    AllocatorTest.class
 })
 public class AllocatorTestSuite {
 

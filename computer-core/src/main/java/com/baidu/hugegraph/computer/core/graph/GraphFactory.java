@@ -17,11 +17,20 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.vertex;
+package com.baidu.hugegraph.computer.core.graph;
 
-public class VertexFactoryImpl implements VertexFactory {
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+
+public final class GraphFactory {
 
     public Vertex createVertex() {
         return new DefaultVertex();
+    }
+
+    public Edge createEdge() {
+        return new DefaultEdge<>();
     }
 }

@@ -19,13 +19,14 @@
 
 package com.baidu.hugegraph.computer.core.graph.vertex;
 
+import com.baidu.hugegraph.computer.core.allocator.Recyclable;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public interface Vertex<V extends Value, E extends Value> {
+public interface Vertex<V extends Value, E extends Value> extends Recyclable {
 
     Id id();
 

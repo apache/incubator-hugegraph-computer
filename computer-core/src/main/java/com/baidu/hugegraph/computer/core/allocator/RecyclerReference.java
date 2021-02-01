@@ -17,9 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.vertex;
+package com.baidu.hugegraph.computer.core.allocator;
 
-public interface VertexFactory {
+import java.lang.ref.SoftReference;
 
-    Vertex createVertex();
+import io.netty.util.Recycler;
+
+public class RecyclerReference<T extends Recyclable> extends SoftReference<T>
+       implements AutoCloseable {
+
+    private final Recycler.Handle<RecyclerReference> handle;
+
+    public RecyclerReference(T referent,
+                             Recycler.Handle<RecyclerReference> handle) {
+        super(referent);
+        this.handle = handle;
+    }
+
+    @Override
+    public void close() {
+        this.handle.recycle(this);
+    }
 }

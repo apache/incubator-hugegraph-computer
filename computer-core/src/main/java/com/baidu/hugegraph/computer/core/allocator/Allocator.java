@@ -19,27 +19,62 @@
 
 package com.baidu.hugegraph.computer.core.allocator;
 
+import java.util.function.Supplier;
+
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.graph.vertex.VertexFactoryImpl;
 
-public class Allocator {
+import io.netty.util.Recycler;
 
-    private final VertexRecycler vertexRecycler;
+public final class Allocator {
+
+    private final GraphFactory factory;
+    private final Recycler<RecyclerReference> vertexRecycler;
+    private final Recycler<RecyclerReference> edgeRecycler;
 
     public Allocator(Config config) {
+        this.factory = new GraphFactory();
+
         int capacityPerThread =
         config.get(ComputerOptions.PARALLEL_PROCESS_VERTICES_PER_THREAD);
-        this.vertexRecycler = new VertexRecycler(new VertexFactoryImpl(),
-                                                 capacityPerThread);
+        this.vertexRecycler = this.newRecycler(capacityPerThread,
+                                               factory::createVertex);
+        this.edgeRecycler = this.newRecycler(capacityPerThread,
+                                             factory::createEdge);
     }
 
-    public Vertex newVertex() {
+    private Recycler<RecyclerReference> newRecycler(
+                                        int capacityPerThread,
+                                        Supplier<Recyclable> supplier) {
+        // TODO: Add more params for Recycler
+        return new Recycler<RecyclerReference>(capacityPerThread) {
+            @Override
+            protected RecyclerReference newObject(
+                      Recycler.Handle<RecyclerReference> handle) {
+                Recyclable recyclable = supplier.get();
+                return new RecyclerReference<>(recyclable, handle);
+            }
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    public RecyclerReference<Vertex> newVertex() {
         return this.vertexRecycler.get();
     }
 
-    public void freeVertex(Vertex vertex) {
-        this.vertexRecycler.recycle(vertex);
+    public void freeVertex(RecyclerReference<Vertex> reference) {
+        reference.close();
+    }
+
+    @SuppressWarnings("unchecked")
+    public RecyclerReference<Edge> newEdge() {
+        return this.edgeRecycler.get();
+    }
+
+    public void freeEdge(RecyclerReference<Edge> reference) {
+        reference.close();
     }
 }

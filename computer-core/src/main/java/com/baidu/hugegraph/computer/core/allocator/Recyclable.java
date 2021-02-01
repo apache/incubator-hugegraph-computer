@@ -19,31 +19,5 @@
 
 package com.baidu.hugegraph.computer.core.allocator;
 
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.graph.vertex.VertexFactory;
-
-import io.netty.util.Recycler;
-
-public class VertexRecycler {
-
-    private final Recycler<Vertex> recycler;
-    private Recycler.Handle<Vertex> handle;
-
-    public VertexRecycler(VertexFactory factory, int maxCapacityPerThread) {
-        this.recycler = new Recycler<Vertex>(maxCapacityPerThread) {
-            @Override
-            protected Vertex newObject(Handle<Vertex> handle) {
-                VertexRecycler.this.handle = handle;
-                return factory.createVertex();
-            }
-        };
-    }
-
-    public Vertex get() {
-        return this.recycler.get();
-    }
-
-    public void recycle(Vertex vertex) {
-        this.handle.recycle(vertex);
-    }
+public interface Recyclable {
 }

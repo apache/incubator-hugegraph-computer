@@ -32,6 +32,10 @@ public class DefaultEdge<E extends Value> implements Edge<E> {
     private E value;
     private Properties properties;
 
+    public DefaultEdge() {
+        this(null, null);
+    }
+
     public DefaultEdge(Id targetId, E value) {
         this.targetId = targetId;
         this.value = value;
@@ -41,6 +45,11 @@ public class DefaultEdge<E extends Value> implements Edge<E> {
     @Override
     public Id targetId() {
         return this.targetId;
+    }
+
+    @Override
+    public void targetId(Id targetId) {
+        this.targetId = targetId;
     }
 
     @Override

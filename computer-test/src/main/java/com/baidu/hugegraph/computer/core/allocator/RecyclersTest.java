@@ -34,6 +34,7 @@ import io.netty.util.Recycler;
 public class RecyclersTest {
 
     private static final Method threadLocalCapacityMethod;
+    private static final Method threadLocalSizeMethod;
 
     static {
         try {
@@ -43,6 +44,15 @@ public class RecyclersTest {
             threadLocalCapacityMethod = method;
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("No method 'threadLocalCapacity'");
+        }
+
+        try {
+            Method method = Recycler.class
+                                    .getDeclaredMethod("threadLocalSize");
+            method.setAccessible(true);
+            threadLocalSizeMethod = method;
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("No method 'threadLocalSize'");
         }
     }
 
@@ -140,14 +150,23 @@ public class RecyclersTest {
             objects[i] = recycler.get();
         }
 
+        int threadLocalCapacity = (Integer) threadLocalCapacityMethod.invoke(
+                                            recycler);
+        Assert.assertTrue(maxCapacity >= threadLocalCapacity);
+        int threadLocalSize = (Integer) threadLocalSizeMethod.invoke(recycler);
+        Assert.assertEquals(0, threadLocalSize);
+
         for (int i = 0; i < objects.length; i++) {
             objects[i].handle.recycle(objects[i]);
             objects[i] = null;
         }
 
-        int threadLocalCapacity = (Integer) threadLocalCapacityMethod.invoke(
-                                            recycler);
+        threadLocalCapacity = (Integer) threadLocalCapacityMethod.invoke(
+                                        recycler);
         Assert.assertTrue(maxCapacity >= threadLocalCapacity);
+        threadLocalSize = (Integer) threadLocalSizeMethod.invoke(recycler);
+        Assert.assertTrue(maxCapacity >= threadLocalSize);
+        Assert.assertTrue(threadLocalSize > 0);
     }
 
     private static final class RecyclableObject {
