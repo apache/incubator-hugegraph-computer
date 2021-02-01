@@ -43,7 +43,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
 
     public void registerMaster(ContainerInfo masterInfo) {
         String path = constructPath(BspEvent.BSP_MASTER_REGISTERED);
-        this.etcdClient.put(path, ReadWriteUtil.toBytes(masterInfo));
+        super.etcdClient().put(path, ReadWriteUtil.toBytes(masterInfo));
         LOG.info("Master registered, masterInfo: {}", masterInfo);
     }
 
@@ -51,8 +51,8 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
         LOG.info("Master is waiting workers registered");
         String path = constructPath(BspEvent.BSP_WORKER_REGISTERED);
         List<byte[]> serializedContainers = this.waitOnWorkersEvent(
-                                            path, this.registerTimeout);
-        List<ContainerInfo> containers = new ArrayList<>(this.workerCount);
+                                            path, super.registerTimeout());
+        List<ContainerInfo> containers = new ArrayList<>(super.workerCount());
         for (byte[] serializedContainer : serializedContainers) {
             ContainerInfo container = new ContainerInfo();
             ReadWriteUtil.fromBytes(serializedContainer, container);
@@ -66,7 +66,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
     public void masterSuperstepResume(int superstep) {
         String path = constructPath(BspEvent.BSP_MASTER_SUPERSTEP_RESUME);
         IntValue superstepWritable = new IntValue(superstep);
-        this.etcdClient.put(path, ReadWriteUtil.toBytes(superstepWritable));
+        super.etcdClient().put(path, ReadWriteUtil.toBytes(superstepWritable));
         LOG.info("Master resume superstep {}", superstep);
     }
 
@@ -74,13 +74,13 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
     public void waitWorkersInputDone() {
         LOG.info("Master is waiting workers input done");
         String path = constructPath(BspEvent.BSP_WORKER_INPUT_DONE);
-        waitOnWorkersEvent(path, this.barrierOnWorkersTimeout);
+        waitOnWorkersEvent(path, super.barrierOnWorkersTimeout());
     }
 
     @Override
     public void masterInputDone() {
         String path = constructPath(BspEvent.BSP_MASTER_INPUT_DONE);
-        this.etcdClient.put(path, Constants.EMPTY_BYTES);
+        super.etcdClient().put(path, Constants.EMPTY_BYTES);
         LOG.info("Master input done");
     }
 
@@ -90,8 +90,8 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
         String path = constructPath(BspEvent.BSP_WORKER_SUPERSTEP_DONE,
                                     superstep);
         List<byte[]> list = waitOnWorkersEvent(path,
-                                               this.barrierOnWorkersTimeout);
-        List<WorkerStat> result = new ArrayList<>(this.workerCount);
+                                               super.barrierOnWorkersTimeout());
+        List<WorkerStat> result = new ArrayList<>(super.workerCount());
         for (byte[] bytes : list) {
             WorkerStat workerStat = new WorkerStat();
             ReadWriteUtil.fromBytes(bytes, workerStat);
@@ -108,14 +108,14 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
                  superstep);
         String path = constructPath(BspEvent.BSP_WORKER_SUPERSTEP_PREPARED,
                                     superstep);
-        waitOnWorkersEvent(path, this.barrierOnWorkersTimeout);
+        waitOnWorkersEvent(path, super.barrierOnWorkersTimeout());
     }
 
     @Override
     public void masterSuperstepPrepared(int superstep) {
         String path = constructPath(BspEvent.BSP_MASTER_SUPERSTEP_PREPARED,
                                     superstep);
-        this.etcdClient.put(path, Constants.EMPTY_BYTES);
+        super.etcdClient().put(path, Constants.EMPTY_BYTES);
         LOG.info("Master prepare superstep {} done", superstep);
     }
 
@@ -123,7 +123,7 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
     public void masterSuperstepDone(int superstep, GraphStat graphStat) {
         String path = constructPath(BspEvent.BSP_MASTER_SUPERSTEP_DONE,
                                     superstep);
-        this.etcdClient.put(path, ReadWriteUtil.toBytes(graphStat));
+        super.etcdClient().put(path, ReadWriteUtil.toBytes(graphStat));
         LOG.info("Master superstep {} done, graph stat: {}",
                  superstep, graphStat);
     }
@@ -132,17 +132,17 @@ public class EtcdBsp4Master extends EtcdBspBase implements Bsp4Master {
     public void waitWorkersOutputDone() {
         LOG.info("Master is waiting workers output done");
         String path = constructPath(BspEvent.BSP_WORKER_OUTPUT_DONE);
-        waitOnWorkersEvent(path, this.barrierOnWorkersTimeout);
+        waitOnWorkersEvent(path, super.barrierOnWorkersTimeou());
     }
 
     @Override
     public void clean() {
-        this.etcdClient.deleteAllKvsInNamespace();
+        super.etcdClient().deleteAllKvsInNamespace();
         LOG.info("Clean bsp data done");
     }
 
     private List<byte[]> waitOnWorkersEvent(String prefix, long timeout) {
-        return this.etcdClient.getWithPrefix(prefix, this.workerCount,
-                                             timeout, this.logInterval);
+        return super.etcdClient().getWithPrefix(prefix, super.workerCount(),
+                                                timeout, super.logInterval());
     }
 }

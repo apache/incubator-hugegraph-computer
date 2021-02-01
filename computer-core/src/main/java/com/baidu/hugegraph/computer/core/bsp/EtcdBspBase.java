@@ -29,13 +29,13 @@ public abstract class EtcdBspBase {
 
     private static final Logger LOG = Log.logger(EtcdBspBase.class);
 
-    protected HugeConfig config;
-    protected EtcdClient etcdClient;
-    protected int workerCount;
-    protected long registerTimeout;
-    protected long barrierOnMasterTimeout;
-    protected long barrierOnWorkersTimeout;
-    protected long logInterval;
+    private HugeConfig config;
+    private EtcdClient etcdClient;
+    private int workerCount;
+    private long registerTimeout;
+    private long barrierOnMasterTimeout;
+    private long barrierOnWorkersTimeout;
+    private long logInterval;
 
     public EtcdBspBase(HugeConfig config) {
         this.config = config;
@@ -60,6 +60,30 @@ public abstract class EtcdBspBase {
      */
     public void close() {
         this.etcdClient.close();
+    }
+
+    public EtcdClient etcdClient() {
+        return this.etcdClient;
+    }
+
+    public int workerCount() {
+        return this.workerCount;
+    }
+
+    public long registerTimeout() {
+        return this.registerTimeout;
+    }
+
+    public long barrierOnMasterTimeout() {
+        return this.barrierOnMasterTimeout;
+    }
+
+    public long barrierOnWorkersTimeout() {
+        return this.barrierOnWorkersTimeout;
+    }
+
+    public long logInterval() {
+        return this.logInterval;
     }
 
     /**
