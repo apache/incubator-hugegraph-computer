@@ -54,26 +54,26 @@ public class EtcdBspTest extends UnitTestBase {
     private int maxSuperStep;
 
     @Before
-    public void init() {
+    public void setup() {
         Map<String, Object> map = new HashMap<>();
-        String job_id = "local_001";
-        map.put(ComputerOptions.JOB_ID.name(), job_id);
+        String jobId = "local_001";
+        map.put(ComputerOptions.JOB_ID.name(), jobId);
         map.put(ComputerOptions.JOB_WORKERS_COUNT.name(), 1);
         map.put(ComputerOptions.BSP_LOG_INTERVAL.name(), 200L);
         map.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), 2);
         MapConfiguration configuration = new MapConfiguration(map);
         HugeConfig config = new HugeConfig(configuration);
-        this.bsp4Master = new EtcdBsp4Master(config);
-        this.bsp4Master.init();
+        this.bsp4Master = new Bsp4Master(config);
+        this.bsp4Master.setup();
         this.masterInfo = new ContainerInfo(-1, "localhost", 8001, 8002);
         this.workerInfo = new ContainerInfo(0, "localhost", 8003, 8004);
-        this.bsp4Worker = new EtcdBsp4Worker(config, this.workerInfo);
-        this.bsp4Worker.init();
+        this.bsp4Worker = new Bsp4Worker(config, this.workerInfo);
+        this.bsp4Worker.setup();
         this.maxSuperStep = config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
     }
 
     @After
-    public void tearDown() {
+    public void teardown() {
         this.bsp4Worker.close();
         this.bsp4Master.clean();
         this.bsp4Master.close();

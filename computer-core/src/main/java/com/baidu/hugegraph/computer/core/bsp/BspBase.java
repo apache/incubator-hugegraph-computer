@@ -25,26 +25,28 @@ import com.baidu.hugegraph.computer.core.common.ComputerOptions;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.Log;
 
-public abstract class EtcdBspBase {
+public abstract class BspBase {
 
-    private static final Logger LOG = Log.logger(EtcdBspBase.class);
+    private static final Logger LOG = Log.logger(BspBase.class);
 
     private HugeConfig config;
-    private EtcdClient etcdClient;
+    private BspClient bspClient;
     private int workerCount;
     private long registerTimeout;
     private long barrierOnMasterTimeout;
     private long barrierOnWorkersTimeout;
     private long logInterval;
 
-    public EtcdBspBase(HugeConfig config) {
+    public BspBase(HugeConfig config) {
         this.config = config;
     }
 
-    public void init() {
-        String endpoints = this.config.get(ComputerOptions.BSP_ETCD_ENDPOINTS);
-        String job_id = config.get(ComputerOptions.JOB_ID);
-        this.etcdClient = new EtcdClient(endpoints, job_id);
+    /**
+     * Do initialization operation, like connect to etcd cluster.
+     */
+    public void setup() {
+        this.bspClient = createBspClient();
+        this.bspClient.setup();
         this.workerCount = this.config.get(ComputerOptions.JOB_WORKERS_COUNT);
         this.registerTimeout = this.config.get(
                                ComputerOptions.BSP_REGISTER_TIMEOUT);
@@ -56,33 +58,38 @@ public abstract class EtcdBspBase {
     }
 
     /**
-     * Close the connection to etcd.
+     * Contrary to init. Could not do any bsp operation after close is called.
      */
     public void close() {
-        this.etcdClient.close();
+        this.bspClient.close();
     }
 
-    public EtcdClient etcdClient() {
-        return this.etcdClient;
+    private BspClient createBspClient() {
+        // TODO: the type of bsp client can be get from config
+        return new EtcdBspClient(this.config);
     }
 
-    public int workerCount() {
+    public BspClient bspClient() {
+        return this.bspClient;
+    }
+
+    public final int workerCount() {
         return this.workerCount;
     }
 
-    public long registerTimeout() {
+    public final long registerTimeout() {
         return this.registerTimeout;
     }
 
-    public long barrierOnMasterTimeout() {
+    public final long barrierOnMasterTimeout() {
         return this.barrierOnMasterTimeout;
     }
 
-    public long barrierOnWorkersTimeout() {
+    public final long barrierOnWorkersTimeout() {
         return this.barrierOnWorkersTimeout;
     }
 
-    public long logInterval() {
+    public final long logInterval() {
         return this.logInterval;
     }
 
