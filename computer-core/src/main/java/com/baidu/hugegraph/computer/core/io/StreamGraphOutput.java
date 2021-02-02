@@ -57,7 +57,7 @@ public class StreamGraphOutput implements GraphOutput {
         this.writeValue(vertex.value());
 
         if (context.config().outputVertexAdjacentEdges()) {
-            this.writeOutEdges(vertex.edges());
+            this.writeEdges(vertex.edges());
         }
         if (context.config().outputVertexProperties()) {
             this.writeProperties(vertex.properties());
@@ -66,7 +66,7 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void writeOutEdges(Edges edges) throws IOException {
+    public void writeEdges(Edges edges) throws IOException {
         this.writeInt(edges.size());
         for (Edge<?> edge : (Iterable<Edge>) edges) {
             this.writeEdge(edge);

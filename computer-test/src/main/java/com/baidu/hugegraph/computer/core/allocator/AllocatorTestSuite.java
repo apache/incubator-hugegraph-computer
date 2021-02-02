@@ -28,5 +28,4 @@ import org.junit.runners.Suite;
     AllocatorTest.class
 })
 public class AllocatorTestSuite {
-
 }

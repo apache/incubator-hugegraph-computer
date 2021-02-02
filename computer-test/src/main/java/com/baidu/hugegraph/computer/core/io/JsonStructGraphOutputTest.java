@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
@@ -40,7 +40,6 @@ import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class JsonStructGraphOutputTest {
@@ -52,13 +51,15 @@ public class JsonStructGraphOutputTest {
         ComputerOptions.VALUE_NAME.name(), "rank",
         ComputerOptions.EDGES_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_VERTEX_ADJACENT_EDGES.name(), "false",
-        ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "false",
-        ComputerOptions.OUTPUT_EDGE_PROPERTIES.name(), "false");
+        ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "false",
+        ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "false",
+        ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
+        GraphFactory factory = ComputerContext.instance().factory();
 
         LongId longId = new LongId(100L);
         IdValue idValue = new LongId(999L).idValue();
-        Vertex<IdValue, IdValue> vertex = new DefaultVertex<>(longId, idValue);
+        Vertex<IdValue, IdValue> vertex = factory.createVertex(longId,
+                                                               idValue);
 
         String fileName = "output.json";
         File file = new File(fileName);
@@ -70,31 +71,33 @@ public class JsonStructGraphOutputTest {
             output.writeVertex(vertex);
 
             String json = FileUtils.readFileToString(file);
-            Assert.assertEquals("{\"id\":100,\"rank\":999}", json);
+            Assert.assertEquals("{\"id\":100,\"rank\":999}" +
+                                System.lineSeparator(), json);
         } finally {
             FileUtils.deleteQuietly(file);
         }
     }
 
     @Test
-    public void testWriteReadVertexWithOutEdges() throws IOException {
+    public void testWriteReadVertexWithEdges() throws IOException {
         ComputerContext.parseOptions(
         ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
         ComputerOptions.VALUE_NAME.name(), "rank",
         ComputerOptions.EDGES_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_VERTEX_ADJACENT_EDGES.name(), "true",
-        ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "false",
-        ComputerOptions.OUTPUT_EDGE_PROPERTIES.name(), "false");
+        ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "true",
+        ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "false",
+        ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
+        GraphFactory factory = ComputerContext.instance().factory();
 
         LongId longId = new LongId(100L);
         IdValueList idValueList = new IdValueList();
         idValueList.add(new LongId(998L).idValue());
         idValueList.add(new LongId(999L).idValue());
-        Vertex<IdValueList, LongValue> vertex = new DefaultVertex<>(
+        Vertex<IdValueList, LongValue> vertex = factory.createVertex(
                                                 longId, idValueList);
-        vertex.addEdge(new DefaultEdge<>(new LongId(200), new LongValue(1)));
-        vertex.addEdge(new DefaultEdge<>(new LongId(300), new LongValue(-1)));
+        vertex.addEdge(factory.createEdge(new LongId(200), new LongValue(1)));
+        vertex.addEdge(factory.createEdge(new LongId(300), new LongValue(-1)));
 
         String fileName = "output.json";
         File file = new File(fileName);
@@ -109,7 +112,8 @@ public class JsonStructGraphOutputTest {
             Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
                                 "\"adjacent_edges\":[{\"target_id\":200," +
                                 "\"value\":1},{\"target_id\":300," +
-                                "\"value\":-1}]}", json);
+                                "\"value\":-1}]}" + System.lineSeparator(),
+                                json);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -122,9 +126,10 @@ public class JsonStructGraphOutputTest {
         ComputerOptions.VALUE_NAME.name(), "rank",
         ComputerOptions.EDGES_NAME.name(), "value",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_VERTEX_ADJACENT_EDGES.name(), "false",
-        ComputerOptions.OUTPUT_VERTEX_PROPERTIES.name(), "true",
-        ComputerOptions.OUTPUT_EDGE_PROPERTIES.name(), "false");
+        ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "false",
+        ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "true",
+        ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
+        GraphFactory factory = ComputerContext.instance().factory();
 
         LongId longId = new LongId(100L);
         IdValueListList idValueListList = new IdValueListList();
@@ -136,7 +141,7 @@ public class JsonStructGraphOutputTest {
         idValueListList.add(idValueList1);
         idValueListList.add(idValueList2);
 
-        Vertex<IdValueListList, LongValue> vertex = new DefaultVertex<>(
+        Vertex<IdValueListList, LongValue> vertex = factory.createVertex(
                                                     longId, idValueListList);
         vertex.properties().put("boolean", new BooleanValue(true));
         vertex.properties().put("byte", new IntValue(127));
@@ -162,7 +167,8 @@ public class JsonStructGraphOutputTest {
                                 "\"byte\":127,\"double\":-0.01," +
                                 "\"short\":16383,\"idvalue\":100," +
                                 "\"float\":0.1,\"int\":1000000," +
-                                "\"long\":10000000000}}", json);
+                                "\"long\":10000000000}}" +
+                                System.lineSeparator(), json);
         } finally {
             FileUtils.deleteQuietly(file);
         }

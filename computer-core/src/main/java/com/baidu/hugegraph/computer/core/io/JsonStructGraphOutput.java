@@ -40,6 +40,7 @@ public class JsonStructGraphOutput extends StructGraphOutput {
     public void writeVertex(Vertex vertex) throws IOException {
         ComputerContext context = ComputerContext.instance();
 
+        this.writeLineStart();
         this.writeObjectStart();
 
         this.writeKey("id");
@@ -56,7 +57,7 @@ public class JsonStructGraphOutput extends StructGraphOutput {
             this.writeSplitter();
             this.writeKey("adjacent_edges");
             this.writeJoiner();
-            this.writeOutEdges(vertex.edges());
+            this.writeEdges(vertex.edges());
         }
         if (context.config().outputVertexProperties()) {
             this.writeSplitter();
@@ -65,11 +66,12 @@ public class JsonStructGraphOutput extends StructGraphOutput {
             this.writeProperties(vertex.properties());
         }
         this.writeObjectEnd();
+        this.writeLineEnd();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void writeOutEdges(Edges edges) throws IOException {
+    public void writeEdges(Edges edges) throws IOException {
         this.writeArrayStart();
         int size = edges.size();
         int i = 0;

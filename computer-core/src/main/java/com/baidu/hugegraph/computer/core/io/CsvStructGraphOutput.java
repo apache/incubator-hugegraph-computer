@@ -40,7 +40,7 @@ public class CsvStructGraphOutput extends StructGraphOutput {
     public void writeVertex(Vertex vertex) throws IOException {
         ComputerContext context = ComputerContext.instance();
 
-        this.writeObjectStart();
+        this.writeLineStart();
 
         this.writeId(vertex.id());
         this.writeSplitter();
@@ -49,18 +49,18 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
         if (context.config().outputVertexAdjacentEdges()) {
             this.writeSplitter();
-            this.writeOutEdges(vertex.edges());
+            this.writeEdges(vertex.edges());
         }
         if (context.config().outputVertexProperties()) {
             this.writeSplitter();
             this.writeProperties(vertex.properties());
         }
-        this.writeObjectEnd();
+        this.writeLineEnd();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void writeOutEdges(Edges edges) throws IOException {
+    public void writeEdges(Edges edges) throws IOException {
         this.writeArrayStart();
         int size = edges.size();
         int i = 0;
@@ -106,12 +106,12 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeObjectStart() throws IOException {
-        // pass
+        this.writeRawString("{");
     }
 
     @Override
     public void writeObjectEnd() throws IOException {
-        this.writeRawString(System.lineSeparator());
+        this.writeRawString("}");
     }
 
     @Override

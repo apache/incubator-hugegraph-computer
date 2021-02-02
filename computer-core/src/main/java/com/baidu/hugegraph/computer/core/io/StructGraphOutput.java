@@ -53,6 +53,14 @@ public abstract class StructGraphOutput implements GraphOutput {
 
     public abstract void writeSplitter() throws IOException;
 
+    public void writeLineStart() throws IOException {
+        // pass
+    }
+
+    public void writeLineEnd() throws IOException {
+        this.writeRawString(System.lineSeparator());
+    }
+
     @Override
     public void writeId(Id id) throws IOException {
         id.write(this);
@@ -84,7 +92,10 @@ public abstract class StructGraphOutput implements GraphOutput {
     }
 
     private void writeIdValue(IdValue idValue) throws IOException {
-        // The idValue is shown as bytes in computation, and as id when output
+        /*
+         * The idValue is shown as bytes in computation,
+         * but it's as id when output
+         */
         this.writeId(idValue.id());
     }
 

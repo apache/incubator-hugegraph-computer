@@ -19,18 +19,42 @@
 
 package com.baidu.hugegraph.computer.core.graph;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public final class GraphFactory {
 
-    public Vertex createVertex() {
-        return new DefaultVertex();
+    public <V extends Value, E extends Value> Vertex<V, E> createVertex() {
+        return new DefaultVertex<>();
     }
 
-    public Edge createEdge() {
+    public <V extends Value, E extends Value>
+           Vertex<V, E> createVertex(Id id, V value) {
+        return new DefaultVertex<>(id, value);
+    }
+
+    public <E extends Value> Edges<E> createEdges(int capacity) {
+        return new DefaultEdges<>(capacity);
+    }
+
+    public <E extends Value> Edge<E> createEdge() {
         return new DefaultEdge<>();
+    }
+
+    public <E extends Value> Edge<E> createEdge(Id targetId, E value) {
+        return new DefaultEdge<>(targetId, value);
+    }
+
+    public <K, V> Map<K, V> createMap() {
+        return new HashMap<>();
     }
 }

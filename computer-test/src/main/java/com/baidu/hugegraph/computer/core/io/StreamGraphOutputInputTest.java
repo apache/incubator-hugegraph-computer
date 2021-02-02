@@ -28,8 +28,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
-import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
@@ -39,7 +38,6 @@ import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.Lists;
@@ -53,11 +51,12 @@ public class StreamGraphOutputInputTest {
         ComputerOptions.VALUE_TYPE.name(), "LONG",
         ComputerOptions.VALUE_NAME.name(), "value",
         ComputerOptions.EDGES_NAME.name(), "value");
+        GraphFactory factory = ComputerContext.instance().factory();
 
         LongId longId = new LongId(100L);
         LongValue longValue = new LongValue(999L);
-        Vertex<LongValue, LongValue> vertex1 = new DefaultVertex<>(longId,
-                                                                   longValue);
+        Vertex<LongValue, LongValue> vertex1 = factory.createVertex(longId,
+                                                                    longValue);
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
@@ -74,29 +73,30 @@ public class StreamGraphOutputInputTest {
     }
 
     @Test
-    public void testWriteReadOutEdges() throws IOException {
+    public void testWriteReadEdges() throws IOException {
         ComputerContext.parseOptions(
         ComputerOptions.ALGORITHM_NAME.name(), "test",
         ComputerOptions.VALUE_TYPE.name(), "LONG",
         ComputerOptions.VALUE_NAME.name(), "value",
         ComputerOptions.EDGES_NAME.name(), "value");
+        GraphFactory factory = ComputerContext.instance().factory();
 
-        Edges<LongValue> edges1 = new DefaultEdges<>(3);
-        edges1.add(new DefaultEdge<>(new LongId(100), new LongValue(1)));
-        edges1.add(new DefaultEdge<>(new LongId(200), new LongValue(2)));
-        edges1.add(new DefaultEdge<>(new LongId(300), new LongValue(-1)));
+        Edges<LongValue> edges1 = factory.createEdges(3);
+        edges1.add(factory.createEdge(new LongId(100), new LongValue(1)));
+        edges1.add(factory.createEdge(new LongId(200), new LongValue(2)));
+        edges1.add(factory.createEdge(new LongId(300), new LongValue(-1)));
 
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
-            output.writeOutEdges(edges1);
+            output.writeEdges(edges1);
             bytes = baos.toByteArray();
         }
 
         Edges<LongValue> edges2;
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bais);
-            edges2 = input.readOutEdges();
+            edges2 = input.readEdges();
         }
         Assert.assertEquals(edges1, edges2);
     }

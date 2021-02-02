@@ -33,7 +33,7 @@ public interface GraphInput extends DataInput {
 
     Vertex readVertex() throws IOException;
 
-    Edges readOutEdges() throws IOException;
+    Edges readEdges() throws IOException;
 
     Edge readEdge() throws IOException;
 

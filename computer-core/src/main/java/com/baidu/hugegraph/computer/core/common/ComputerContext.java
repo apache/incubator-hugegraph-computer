@@ -21,16 +21,19 @@ package com.baidu.hugegraph.computer.core.common;
 
 import com.baidu.hugegraph.computer.core.allocator.Allocator;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 
 public final class ComputerContext {
 
     private static volatile ComputerContext INSTANCE;
 
     private final Config config;
+    private final GraphFactory factory;
     private final Allocator allocator;
 
     private ComputerContext(Config config) {
         this.config = config;
+        this.factory = new GraphFactory();
         this.allocator = new Allocator(config);
     }
 
@@ -45,6 +48,10 @@ public final class ComputerContext {
 
     public Config config() {
         return this.config;
+    }
+
+    public GraphFactory factory() {
+        return this.factory;
     }
 
     public Allocator allocator() {

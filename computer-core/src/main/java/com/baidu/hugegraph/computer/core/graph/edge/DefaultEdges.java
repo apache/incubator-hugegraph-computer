@@ -67,6 +67,6 @@ public class DefaultEdges<E extends Value> implements Edges<E> {
 
     @Override
     public String toString() {
-        return String.format("DefaultOutEdges{numEdges=%s}", this.edges);
+        return String.format("DefaultEdges{numEdges=%s}", this.edges);
     }
 }

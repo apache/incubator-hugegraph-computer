@@ -133,7 +133,7 @@ public class AllocatorTest {
         ComputerOptions.VALUE_TYPE.name(), "LONG",
         ComputerOptions.VALUE_NAME.name(), "value",
         ComputerOptions.EDGES_NAME.name(), "value",
-        ComputerOptions.PARALLEL_PROCESS_VERTICES_PER_THREAD.name(),
+        ComputerOptions.MAX_VERTICES_PER_THREAD.name(),
         capacityValue);
 
         Allocator allocator = ComputerContext.instance().allocator();

@@ -78,25 +78,25 @@ public class ComputerOptions extends OptionHolder {
                     "value"
             );
 
-    public static final ConfigOption<Boolean> OUTPUT_VERTEX_ADJACENT_EDGES =
+    public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =
             new ConfigOption<>(
-                    "computer.output.vertex.adjacent_edges",
+                    "computer.output.with_adjacent_edges",
                     "Output the adjacent edges of the vertex or not",
                     allowValues(true, false),
                     false
             );
 
-    public static final ConfigOption<Boolean> OUTPUT_VERTEX_PROPERTIES =
+    public static final ConfigOption<Boolean> OUTPUT_WITH_VERTEX_PROPERTIES =
             new ConfigOption<>(
-                    "computer.output.vertex.properties",
+                    "computer.output.with_vertex_properties",
                     "Output the properties of the vertex or not",
                     allowValues(true, false),
                     false
             );
 
-    public static final ConfigOption<Boolean> OUTPUT_EDGE_PROPERTIES =
+    public static final ConfigOption<Boolean> OUTPUT_WITH_EDGE_PROPERTIES =
             new ConfigOption<>(
-                    "computer.output.edge.properties",
+                    "computer.output.with_edge_properties",
                     "Output the properties of the edge or not",
                     allowValues(true, false),
                     false
@@ -104,16 +104,16 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
             new ConfigOption<>(
-                    "computer.vertex.average_degree",
-                    "The average degree of a vertex",
+                    "computer.vertex_average_degree",
+                    "The average degree of a vertex, it represents the " +
+                    "average number of adjacent edges per vertex",
                     positiveInt(),
                     10
             );
 
-    public static final ConfigOption<Integer>
-            PARALLEL_PROCESS_VERTICES_PER_THREAD =
+    public static final ConfigOption<Integer> MAX_VERTICES_PER_THREAD =
             new ConfigOption<>(
-                    "computer.parallel_process.vertices.per_thread",
+                    "allocator.max_vertices_per_thread",
                     "Maximum number of vertices per thread processed " +
                     "in parallel",
                     positiveInt(),

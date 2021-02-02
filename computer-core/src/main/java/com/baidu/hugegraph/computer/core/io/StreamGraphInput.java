@@ -24,8 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
-import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -35,7 +34,6 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.Bytes;
@@ -56,6 +54,7 @@ public class StreamGraphInput implements GraphInput {
     @Override
     public Vertex readVertex() throws IOException {
         ComputerContext context = ComputerContext.instance();
+        GraphFactory factory = ComputerContext.instance().factory();
 
         Id id = this.readId();
         Value value = this.readValue();
@@ -64,10 +63,10 @@ public class StreamGraphInput implements GraphInput {
          * 1. ObjectPool(Recycler), need consider safely free object
          * 2. Precreate Vertex Object outside then fill fields here
          */
-        Vertex vertex = new DefaultVertex<>(id, value);
+        Vertex vertex = factory.createVertex(id, value);
 
         if (context.config().outputVertexAdjacentEdges()) {
-            Edges edges = this.readOutEdges();
+            Edges edges = this.readEdges();
             vertex.edges(edges);
         }
         if (context.config().outputVertexProperties()) {
@@ -78,9 +77,12 @@ public class StreamGraphInput implements GraphInput {
     }
 
     @Override
-    public Edges readOutEdges() throws IOException {
+    public Edges readEdges() throws IOException {
+        ComputerContext context = ComputerContext.instance();
+        GraphFactory factory = context.factory();
+
         int numEdges = this.readInt();
-        Edges edges = new DefaultEdges(numEdges);
+        Edges edges = factory.createEdges(numEdges);
         for (int i = 0; i < numEdges; ++i) {
             Edge edge = this.readEdge();
             edges.add(edge);
@@ -91,10 +93,12 @@ public class StreamGraphInput implements GraphInput {
     @Override
     public Edge readEdge() throws IOException {
         ComputerContext context = ComputerContext.instance();
+        GraphFactory factory = ComputerContext.instance().factory();
+
         // Write necessary
         Id targetId = this.readId();
         Value value = this.readValue();
-        Edge edge = new DefaultEdge<>(targetId, value);
+        Edge edge = factory.createEdge(targetId, value);
 
         if (context.config().outputEdgeProperties()) {
             Properties properties = this.readProperties();

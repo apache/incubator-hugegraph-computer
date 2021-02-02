@@ -19,10 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.graph.properties;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultProperties implements Properties {
@@ -30,7 +30,8 @@ public class DefaultProperties implements Properties {
     private Map<String, Value> keyValues;
 
     public DefaultProperties() {
-        this.keyValues = new HashMap<>();
+        ComputerContext context = ComputerContext.instance();
+        this.keyValues = context.factory().createMap();
     }
 
     public DefaultProperties(Map<String, Value> keyValues) {

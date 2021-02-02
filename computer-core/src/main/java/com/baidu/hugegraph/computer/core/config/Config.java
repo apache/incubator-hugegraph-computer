@@ -73,12 +73,12 @@ public final class Config {
         hotConfig.valueType(ValueType.valueOf(
                   allConfig.get(ComputerOptions.VALUE_TYPE)));
 
-        hotConfig.outputVertexOutEdges(
-                  allConfig.get(ComputerOptions.OUTPUT_VERTEX_ADJACENT_EDGES));
+        hotConfig.outputVertexAdjacentEdges(
+                  allConfig.get(ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES));
         hotConfig.outputVertexProperties(
-                  allConfig.get(ComputerOptions.OUTPUT_VERTEX_PROPERTIES));
+                  allConfig.get(ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES));
         hotConfig.outputEdgeProperties(
-                  allConfig.get(ComputerOptions.OUTPUT_EDGE_PROPERTIES));
+                  allConfig.get(ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES));
         return hotConfig;
     }
 
@@ -103,7 +103,7 @@ public final class Config {
     }
 
     public Boolean outputVertexAdjacentEdges() {
-        return this.hotConfig.outputVertexOutEdges();
+        return this.hotConfig.outputVertexAdjacentEdges();
     }
 
     public Boolean outputVertexProperties() {

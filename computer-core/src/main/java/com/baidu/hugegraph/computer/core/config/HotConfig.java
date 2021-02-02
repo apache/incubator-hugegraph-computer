@@ -28,7 +28,7 @@ public final class HotConfig {
     private String edgeValueName;
     private ValueType valueType;
 
-    private boolean outputVertexOutEdges;
+    private boolean outputVertexAdjacentEdges;
     private boolean outputVertexProperties;
     private boolean outputEdgeProperties;
 
@@ -64,12 +64,12 @@ public final class HotConfig {
         this.valueType = valueType;
     }
 
-    public boolean outputVertexOutEdges() {
-        return this.outputVertexOutEdges;
+    public boolean outputVertexAdjacentEdges() {
+        return this.outputVertexAdjacentEdges;
     }
 
-    public void outputVertexOutEdges(boolean outputVertexOutEdges) {
-        this.outputVertexOutEdges = outputVertexOutEdges;
+    public void outputVertexAdjacentEdges(boolean outputVertexAdjacentEdges) {
+        this.outputVertexAdjacentEdges = outputVertexAdjacentEdges;
     }
 
     public boolean outputVertexProperties() {
