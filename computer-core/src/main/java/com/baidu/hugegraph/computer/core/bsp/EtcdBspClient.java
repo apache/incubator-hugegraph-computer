@@ -29,12 +29,12 @@ public final class EtcdBspClient implements BspClient {
     private HugeConfig config;
     private EtcdClient etcdClient;
 
-    public EtcdBspClient(HugeConfig hugeConfig) {
-        this.config = hugeConfig;
+    public EtcdBspClient(HugeConfig config) {
+        this.config = config;
     }
 
     @Override
-    public void setup() {
+    public void init() {
         String endpoints = this.config.get(ComputerOptions.BSP_ETCD_ENDPOINTS);
         String jobId = this.config.get(ComputerOptions.JOB_ID);
         this.etcdClient = new EtcdClient(endpoints, jobId);
@@ -67,10 +67,8 @@ public final class EtcdBspClient implements BspClient {
 
     @Override
     public List<byte[]> getChildren(String prefix, int expectedCount,
-                                    long timeout,
-                                    long logInterval) {
-        return this.etcdClient.getWithPrefix(prefix, expectedCount, timeout,
-                                             logInterval);
-
+                                    long timeout, long logInterval) {
+        return this.etcdClient.getWithPrefix(prefix, expectedCount,
+                                             timeout, logInterval);
     }
 }

@@ -45,8 +45,8 @@ public class Bsp4Master extends BspBase {
      * Register Master, workers can get master information.
      */
     public void registerMaster(ContainerInfo masterInfo) {
-        String path = constructPath(BspEvent.BSP_MASTER_REGISTERED);
-        bspClient().put(path, ReadWriteUtil.toBytes(masterInfo));
+        String path = this.constructPath(BspEvent.BSP_MASTER_REGISTERED);
+        this.bspClient().put(path, ReadWriteUtil.toBytes(masterInfo));
         LOG.info("Master registered, masterInfo: {}", masterInfo);
     }
 
@@ -55,10 +55,10 @@ public class Bsp4Master extends BspBase {
      */
     public List<ContainerInfo> waitWorkersRegistered() {
         LOG.info("Master is waiting workers registered");
-        String path = constructPath(BspEvent.BSP_WORKER_REGISTERED);
+        String path = this.constructPath(BspEvent.BSP_WORKER_REGISTERED);
         List<byte[]> serializedContainers = this.waitOnWorkersEvent(
-                                            path, registerTimeout());
-        List<ContainerInfo> containers = new ArrayList<>(workerCount());
+                                            path, this.registerTimeout());
+        List<ContainerInfo> containers = new ArrayList<>(this.workerCount());
         for (byte[] serializedContainer : serializedContainers) {
             ContainerInfo container = new ContainerInfo();
             ReadWriteUtil.fromBytes(serializedContainer, container);
@@ -72,9 +72,9 @@ public class Bsp4Master extends BspBase {
      * The master determines which superstep to start from
      */
     public void masterSuperstepResume(int superstep) {
-        String path = constructPath(BspEvent.BSP_MASTER_SUPERSTEP_RESUME);
+        String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_RESUME);
         IntValue superstepWritable = new IntValue(superstep);
-        bspClient().put(path, ReadWriteUtil.toBytes(superstepWritable));
+        this.bspClient().put(path, ReadWriteUtil.toBytes(superstepWritable));
         LOG.info("Master resume superstep {}", superstep);
     }
 
@@ -84,8 +84,8 @@ public class Bsp4Master extends BspBase {
      */
     public void waitWorkersInputDone() {
         LOG.info("Master is waiting workers input done");
-        String path = constructPath(BspEvent.BSP_WORKER_INPUT_DONE);
-        waitOnWorkersEvent(path, barrierOnWorkersTimeout());
+        String path = this.constructPath(BspEvent.BSP_WORKER_INPUT_DONE);
+        this.waitOnWorkersEvent(path, this.barrierOnWorkersTimeout());
     }
 
     /**
@@ -93,8 +93,8 @@ public class Bsp4Master extends BspBase {
      * vertices and edges after receive this signal.
      */
     public void masterInputDone() {
-        String path = constructPath(BspEvent.BSP_MASTER_INPUT_DONE);
-        bspClient().put(path, Constants.EMPTY_BYTES);
+        String path = this.constructPath(BspEvent.BSP_MASTER_INPUT_DONE);
+        this.bspClient().put(path, Constants.EMPTY_BYTES);
         LOG.info("Master input done");
     }
 
@@ -106,10 +106,11 @@ public class Bsp4Master extends BspBase {
      */
     public List<WorkerStat> waitWorkersSuperstepDone(int superstep) {
         LOG.info("Master is waiting workers superstep {} done", superstep);
-        String path = constructPath(BspEvent.BSP_WORKER_SUPERSTEP_DONE,
-                                    superstep);
-        List<byte[]> list = waitOnWorkersEvent(path, barrierOnWorkersTimeout());
-        List<WorkerStat> result = new ArrayList<>(workerCount());
+        String path = this.constructPath(BspEvent.BSP_WORKER_SUPERSTEP_DONE,
+                                         superstep);
+        List<byte[]> list = this.waitOnWorkersEvent(path,
+                            this.barrierOnWorkersTimeout());
+        List<WorkerStat> result = new ArrayList<>(this.workerCount());
         for (byte[] bytes : list) {
             WorkerStat workerStat = new WorkerStat();
             ReadWriteUtil.fromBytes(bytes, workerStat);
@@ -128,18 +129,18 @@ public class Bsp4Master extends BspBase {
     public void waitWorkersSuperstepPrepared(int superstep) {
         LOG.info("Master is waiting workers prepare superstep {} done",
                  superstep);
-        String path = constructPath(BspEvent.BSP_WORKER_SUPERSTEP_PREPARED,
-                                    superstep);
-        waitOnWorkersEvent(path, barrierOnWorkersTimeout());
+        String path = this.constructPath(BspEvent.BSP_WORKER_SUPERSTEP_PREPARED,
+                                         superstep);
+        this.waitOnWorkersEvent(path, this.barrierOnWorkersTimeout());
     }
 
     /**
      * Master signals the workers that the master superstep prepared.
      */
     public void masterSuperstepPrepared(int superstep) {
-        String path = constructPath(BspEvent.BSP_MASTER_SUPERSTEP_PREPARED,
-                                    superstep);
-        bspClient().put(path, Constants.EMPTY_BYTES);
+        String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_PREPARED,
+                                         superstep);
+        this.bspClient().put(path, Constants.EMPTY_BYTES);
         LOG.info("Master prepare superstep {} done", superstep);
     }
 
@@ -148,9 +149,9 @@ public class Bsp4Master extends BspBase {
      * GraphStat and determines whether to continue iteration.
      */
     public void masterSuperstepDone(int superstep, GraphStat graphStat) {
-        String path = constructPath(BspEvent.BSP_MASTER_SUPERSTEP_DONE,
-                                    superstep);
-        bspClient().put(path, ReadWriteUtil.toBytes(graphStat));
+        String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_DONE,
+                                         superstep);
+        this.bspClient().put(path, ReadWriteUtil.toBytes(graphStat));
         LOG.info("Master superstep {} done, graph stat: {}",
                  superstep, graphStat);
     }
@@ -160,17 +161,17 @@ public class Bsp4Master extends BspBase {
      */
     public void waitWorkersOutputDone() {
         LOG.info("Master is waiting workers output done");
-        String path = constructPath(BspEvent.BSP_WORKER_OUTPUT_DONE);
-        waitOnWorkersEvent(path, barrierOnWorkersTimeout());
+        String path = this.constructPath(BspEvent.BSP_WORKER_OUTPUT_DONE);
+        this.waitOnWorkersEvent(path, this.barrierOnWorkersTimeout());
     }
 
     public void clean() {
-        bspClient().clean();
+        this.bspClient().clean();
         LOG.info("Clean bsp data done");
     }
 
     private List<byte[]> waitOnWorkersEvent(String prefix, long timeout) {
-        return bspClient().getChildren(prefix, workerCount(), timeout,
-                                       logInterval());
+        return this.bspClient().getChildren(prefix, this.workerCount(),
+                                            timeout, this.logInterval());
     }
 }

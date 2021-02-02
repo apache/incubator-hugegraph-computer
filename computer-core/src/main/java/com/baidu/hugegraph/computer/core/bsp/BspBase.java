@@ -42,11 +42,11 @@ public abstract class BspBase {
     }
 
     /**
-     * Do initialization operation, like connect to etcd cluster.
+     * Do initialization operation, like connect to etcd or ZooKeeper cluster.
      */
-    public void setup() {
-        this.bspClient = createBspClient();
-        this.bspClient.setup();
+    public void init() {
+        this.bspClient = this.createBspClient();
+        this.bspClient.init();
         this.workerCount = this.config.get(ComputerOptions.JOB_WORKERS_COUNT);
         this.registerTimeout = this.config.get(
                                ComputerOptions.BSP_REGISTER_TIMEOUT);
@@ -58,7 +58,8 @@ public abstract class BspBase {
     }
 
     /**
-     * Contrary to init. Could not do any bsp operation after close is called.
+     * Close the connection to etcd or Zookeeper. Contrary to init.
+     * Could not do any bsp operation after close is called.
      */
     public void close() {
         this.bspClient.close();
@@ -69,7 +70,7 @@ public abstract class BspBase {
         return new EtcdBspClient(this.config);
     }
 
-    public BspClient bspClient() {
+    protected final BspClient bspClient() {
         return this.bspClient;
     }
 

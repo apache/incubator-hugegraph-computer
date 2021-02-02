@@ -26,7 +26,7 @@ interface BspClient {
     /**
      * Do initialization operation, like connect to etcd cluster.
      */
-    void setup();
+    void init();
 
     /**
      * Contrary to init. Could not do any bsp operation after close is called.

@@ -64,11 +64,11 @@ public class EtcdBspTest extends UnitTestBase {
         MapConfiguration configuration = new MapConfiguration(map);
         HugeConfig config = new HugeConfig(configuration);
         this.bsp4Master = new Bsp4Master(config);
-        this.bsp4Master.setup();
+        this.bsp4Master.init();
         this.masterInfo = new ContainerInfo(-1, "localhost", 8001, 8002);
         this.workerInfo = new ContainerInfo(0, "localhost", 8003, 8004);
         this.bsp4Worker = new Bsp4Worker(config, this.workerInfo);
-        this.bsp4Worker.setup();
+        this.bsp4Worker.init();
         this.maxSuperStep = config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
     }
 
