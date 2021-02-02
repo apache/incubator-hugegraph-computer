@@ -23,6 +23,7 @@ public final class Constants {
 
     public static final byte[] EMPTY_BYTES = new byte[0];
 
+    public static final int BOOLEAN_LEN = 1;
     public static final int BYTE_LEN = Byte.BYTES;
     public static final int SHORT_LEN = Short.BYTES;
     public static final int INT_LEN = Integer.BYTES;
