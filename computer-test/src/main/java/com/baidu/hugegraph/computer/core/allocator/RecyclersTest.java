@@ -33,15 +33,15 @@ import io.netty.util.Recycler;
 
 public class RecyclersTest {
 
-    private static final Method threadLocalCapacityMethod;
-    private static final Method threadLocalSizeMethod;
+    private final Method threadLocalCapacityMethod;
+    private final Method threadLocalSizeMethod;
 
-    static {
+    public RecyclersTest() {
         try {
             Method method = Recycler.class
                                     .getDeclaredMethod("threadLocalCapacity");
             method.setAccessible(true);
-            threadLocalCapacityMethod = method;
+            this.threadLocalCapacityMethod = method;
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("No method 'threadLocalCapacity'");
         }
@@ -50,7 +50,7 @@ public class RecyclersTest {
             Method method = Recycler.class
                                     .getDeclaredMethod("threadLocalSize");
             method.setAccessible(true);
-            threadLocalSizeMethod = method;
+            this.threadLocalSizeMethod = method;
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("No method 'threadLocalSize'");
         }
@@ -142,7 +142,7 @@ public class RecyclersTest {
         }
     }
 
-    private static void testMaxCapacity(final int maxCapacity)
+    private void testMaxCapacity(final int maxCapacity)
             throws InvocationTargetException, IllegalAccessException {
         Recycler<RecyclableObject> recycler = newRecycler(maxCapacity);
         RecyclableObject[] objects = new RecyclableObject[maxCapacity * 3];

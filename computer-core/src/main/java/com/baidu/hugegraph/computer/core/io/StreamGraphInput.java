@@ -23,9 +23,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.baidu.hugegraph.computer.core.allocator.RecyclerReference;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
@@ -36,6 +35,7 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.Bytes;
@@ -59,25 +59,22 @@ public class StreamGraphInput implements GraphInput {
 
         Id id = this.readId();
         Value value = this.readValue();
-        RecyclerReference<Vertex> reference = context.allocator().newVertex();
-        try {
-            Vertex vertex = reference.get();
-            vertex.id(id);
-            vertex.value(value);
+        /*
+         * TODO: Reuse Vertex has two ways
+         * 1. ObjectPool(Recycler), need consider safely free object
+         * 2. Precreate Vertex Object outside then fill fields here
+         */
+        Vertex vertex = new DefaultVertex<>(id, value);
 
-            if (context.config().outputVertexAdjacentEdges()) {
-                Edges edges = this.readOutEdges();
-                vertex.edges(edges);
-            }
-            if (context.config().outputVertexProperties()) {
-                Properties properties = this.readProperties();
-                vertex.properties(properties);
-            }
-            return vertex;
-        } catch (Exception e) {
-            context.allocator().freeVertex(reference);
-            throw new ComputerException("Failed to read vertex", e);
+        if (context.config().outputVertexAdjacentEdges()) {
+            Edges edges = this.readOutEdges();
+            vertex.edges(edges);
         }
+        if (context.config().outputVertexProperties()) {
+            Properties properties = this.readProperties();
+            vertex.properties(properties);
+        }
+        return vertex;
     }
 
     @Override
@@ -97,21 +94,13 @@ public class StreamGraphInput implements GraphInput {
         // Write necessary
         Id targetId = this.readId();
         Value value = this.readValue();
-        RecyclerReference<Edge> reference = context.allocator().newEdge();
-        try {
-            Edge edge = reference.get();
-            edge.targetId(targetId);
-            edge.value(value);
+        Edge edge = new DefaultEdge<>(targetId, value);
 
-            if (context.config().outputEdgeProperties()) {
-                Properties properties = this.readProperties();
-                edge.properties(properties);
-            }
-            return edge;
-        } catch (Exception e) {
-            context.allocator().freeEdge(reference);
-            throw new ComputerException("Failed to read edge", e);
+        if (context.config().outputEdgeProperties()) {
+            Properties properties = this.readProperties();
+            edge.properties(properties);
         }
+        return edge;
     }
 
     @Override
