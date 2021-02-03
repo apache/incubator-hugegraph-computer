@@ -28,6 +28,7 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.util.CoderUtil;
 
 import sun.misc.Unsafe;
 
@@ -207,57 +208,49 @@ public class UnsafeByteArrayGraphOutput implements GraphOutput {
 
     @Override
     public void writeUTF(String s) throws IOException {
-        // Note that this code is mostly copied from DataOutputStream
-        int strLen = s.length();
-        int utfLen = 0;
-        char c;
-        int count = 0;
-
-        /* use charAt instead of copying String to char array */
-        for (int i = 0; i < strLen; i++) {
-            c = s.charAt(i);
-            if ((c >= 0x0001) && (c <= 0x007F)) {
-                utfLen++;
-            } else if (c > 0x07FF) {
-                utfLen += 3;
-            } else {
-                utfLen += 2;
-            }
-        }
-
-        if (utfLen > 65535)
+        byte[] bytes = CoderUtil.encode(s);
+        if (bytes.length > 65535) {
             throw new UTFDataFormatException(
-                      "Encoded string too long: " + utfLen + " bytes");
-
-        byte[] bytes = new byte[utfLen];
-
-        int i;
-        for (i = 0; i < strLen; i++) {
-            c = s.charAt(i);
-            if (!((c >= 0x0001) && (c <= 0x007F))) {
-                break;
-            } else {
-                bytes[count++] = (byte) c;
-            }
+                      "Encoded string too long: " + bytes.length + " bytes");
         }
-
-        for (;i < strLen; i++) {
-            c = s.charAt(i);
-            if ((c >= 0x0001) && (c <= 0x007F)) {
-                bytes[count++] = (byte) c;
-            } else if (c > 0x07FF) {
-                bytes[count++] = (byte) (0xE0 | ((c >> 12) & 0x0F));
-                bytes[count++] = (byte) (0x80 | ((c >> 6) & 0x3F));
-                bytes[count++] = (byte) (0x80 | (c & 0x3F));
-            } else {
-                bytes[count++] = (byte) (0xC0 | ((c >> 6) & 0x1F));
-                bytes[count++] = (byte) (0x80 | (c & 0x3F));
-            }
-        }
-        this.writeShort(utfLen);
-        this.require(utfLen);
+        this.writeShort(bytes.length);
+        this.require(bytes.length);
         System.arraycopy(bytes, 0, this.buffer, this.position, bytes.length);
         this.position += bytes.length;
+    }
+
+    public int position() {
+        return this.position;
+    }
+
+    /**
+     * If you write some thing, and you need to write the serialized byte size
+     * first. If the byte size is unknown when write, you can skip 4 bytes
+     * （size of int）first, after write out the content, get the serialized
+     * byte size and calls writeInt(int position, int v) to write the int at
+     * skipped position. The serialized byte size can be get by
+     * the difference of {@link #position()} before and after write the content.
+     * @returns the position before skip.
+     */
+    public int skipBytes(int bytesToSkip) {
+        this.require(bytesToSkip);
+        int positionBeforeSkip = this.position;
+        this.position +=  bytesToSkip;
+        return positionBeforeSkip;
+    }
+
+    /**
+     * @return the internal byte array, can't modify the returned byte array
+     */
+    public byte[] buffer() {
+        return this.buffer;
+    }
+
+    /**
+     * @return Copied byte array.
+     */
+    public byte[] toByteArray() {
+        return Arrays.copyOf(this.buffer, this.position);
     }
 
     private void require(int size) {
@@ -267,28 +260,5 @@ public class UnsafeByteArrayGraphOutput implements GraphOutput {
             this.buffer = newBuf;
             this.capacity = this.buffer.length;
         }
-    }
-
-    public int position() {
-        return this.position;
-    }
-
-    public void skipBytes(int bytesToSkip) {
-        this.require(bytesToSkip);
-        this.position +=  bytesToSkip;
-    }
-
-    /**
-     * @return the internal byte array, can't modify the returned byte array
-     */
-    public byte[] getByteArray() {
-        return this.buffer;
-    }
-
-    /**
-     * @return Copied byte array.
-     */
-    public byte[] toByteArray() {
-        return Arrays.copyOf(this.buffer, this.position);
     }
 }

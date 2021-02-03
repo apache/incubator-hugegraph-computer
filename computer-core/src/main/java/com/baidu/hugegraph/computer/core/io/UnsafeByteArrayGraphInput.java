@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
-import java.io.UTFDataFormatException;
 import java.lang.reflect.Field;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -29,6 +28,7 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
+import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
 
 import sun.misc.Unsafe;
@@ -37,8 +37,8 @@ public class UnsafeByteArrayGraphInput implements GraphInput {
 
     private static final sun.misc.Unsafe UNSAFE;
 
-    private byte[] buffer;
-    private int limit;
+    private final byte[] buffer;
+    private final int limit;
     private int position;
 
     static {
@@ -205,88 +205,18 @@ public class UnsafeByteArrayGraphInput implements GraphInput {
 
     @Override
     public String readUTF() throws IOException {
-        // Note that this code is mostly copied from DataInputStream
         int len = readUnsignedShort();
-
         byte[] bytes = new byte[len];
-        char[] chars = new char[len];
-        int c;
-        int char2;
-        int char3;
-        int count = 0;
-        int charIndex = 0;
-
         this.readFully(bytes, 0, len);
-
-        while (count < len) {
-            c = (int) bytes[count] & 0xff;
-            if (c > 127) {
-                break;
-            }
-            count++;
-            chars[charIndex++] = (char) c;
-        }
-
-        while (count < len) {
-            c = (int) bytes[count] & 0xff;
-            switch (c >> 4) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                    /* 0xxxxxxx */
-                    count++;
-                    chars[charIndex++] = (char) c;
-                    break;
-                case 12:
-                case 13:
-                    /* 110x xxxx   10xx xxxx*/
-                    count += 2;
-                    if (count > len) {
-                        throw new UTFDataFormatException(
-                                  "Malformed input: partial character at end");
-                    }
-                    char2 = (int) bytes[count - 1];
-                    if ((char2 & 0xC0) != 0x80) {
-                        throw new UTFDataFormatException(
-                                  "Malformed input around byte " + count);
-                    }
-                    chars[charIndex++] = (char) (((c & 0x1F) << 6) |
-                                                (char2 & 0x3F));
-                    break;
-                case 14:
-                    /* 1110 xxxx  10xx xxxx  10xx xxxx */
-                    count += 3;
-                    if (count > len) {
-                        throw new UTFDataFormatException(
-                                  "Malformed input: partial character at end");
-                    }
-                    char2 = bytes[count - 2];
-                    char3 = bytes[count - 1];
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
-                        throw new UTFDataFormatException(
-                                  "Malformed input around byte " + (count - 1));
-                    }
-                    chars[charIndex++] = (char) (((c & 0x0F) << 12) |
-                                                ((char2 & 0x3F) << 6) |
-                                                ((char3 & 0x3F) << 0));
-                    break;
-                default:
-                    /* 10xx xxxx,  1111 xxxx */
-                    throw new UTFDataFormatException(
-                              "Malformed input around byte " + count);
-            }
-        }
-        // The number of chars produced may be less than len
-        return new String(chars, 0, charIndex);
+        return CoderUtil.decode(bytes);
     }
 
     public int position() {
         return this.position;
+    }
+
+    public int remaining() {
+        return this.limit - this.position;
     }
 
     private void require(int size) {
@@ -295,9 +225,5 @@ public class UnsafeByteArrayGraphInput implements GraphInput {
                       "Only %s bytes available, trying to read %s bytes",
                       this.limit - this.position, size);
         }
-    }
-
-    public int remaining() {
-        return this.limit - this.position;
     }
 }
