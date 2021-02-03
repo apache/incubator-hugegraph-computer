@@ -55,11 +55,15 @@ public final class GraphFactory {
         return new DefaultEdge(targetId, value);
     }
 
-    public <V> List<V> createArrayList(int capacity) {
+    public <V> List<V> createList() {
+        return new ArrayList<>();
+    }
+
+    public <V> List<V> createList(int capacity) {
         return new ArrayList<>(capacity);
     }
 
-    public <K, V> Map<K, V> createHashMap() {
+    public <K, V> Map<K, V> createMap() {
         return new HashMap<>();
     }
 }

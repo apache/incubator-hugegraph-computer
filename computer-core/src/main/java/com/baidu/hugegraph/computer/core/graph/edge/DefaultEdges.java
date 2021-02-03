@@ -31,7 +31,7 @@ public class DefaultEdges implements Edges {
 
     public DefaultEdges(int capacity) {
         this.edges = ComputerContext.instance().graphFactory()
-                                               .createArrayList(capacity);
+                                               .createList(capacity);
     }
 
     @Override

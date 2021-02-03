@@ -27,11 +27,10 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultProperties implements Properties {
 
-    private Map<String, Value> keyValues;
+    private final Map<String, Value> keyValues;
 
     public DefaultProperties() {
-        ComputerContext context = ComputerContext.instance();
-        this.keyValues = context.graphFactory().createHashMap();
+        this(ComputerContext.instance().graphFactory().createMap());
     }
 
     public DefaultProperties(Map<String, Value> keyValues) {
