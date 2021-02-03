@@ -112,11 +112,11 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static final ConfigOption<Integer>
-            ALLOCATOR_MAX_VERTICES_PER_THREAD =
+           ALLOCATOR_MAX_VERTICES_PER_THREAD =
             new ConfigOption<>(
                     "allocator.max_vertices_per_thread",
                     "Maximum number of vertices per thread processed " +
-                    "in parallel",
+                    "in each memory allocator",
                     positiveInt(),
                     10000
             );

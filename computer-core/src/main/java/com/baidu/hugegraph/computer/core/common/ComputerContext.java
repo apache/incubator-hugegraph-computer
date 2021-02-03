@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.common;
 import com.baidu.hugegraph.computer.core.allocator.Allocator;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.util.E;
 
 public final class ComputerContext {
 
@@ -43,6 +44,7 @@ public final class ComputerContext {
     }
 
     public static ComputerContext instance() {
+        E.checkNotNull(INSTANCE, "ComputerContext INSTANCE");
         return INSTANCE;
     }
 
