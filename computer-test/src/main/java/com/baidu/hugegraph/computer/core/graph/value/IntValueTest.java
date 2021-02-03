@@ -49,4 +49,14 @@ public class IntValueTest extends UnitTestBase {
     public void testReadWrite() throws IOException {
         assertValueEqualAfterWriteAndRead(new IntValue(Integer.MAX_VALUE));
     }
+
+    @Test
+    public void testCompare() {
+        IntValue value1 = new IntValue(123);
+        IntValue value2 = new IntValue(123);
+        IntValue value3 = new IntValue(321);
+        Assert.assertEquals(0, value1.compareTo(value2));
+        Assert.assertTrue(value1.compareTo(value3) < 0);
+        Assert.assertTrue(value3.compareTo(value1) > 0);
+    }
 }

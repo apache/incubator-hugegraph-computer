@@ -50,4 +50,14 @@ public class BooleanValueTest extends UnitTestBase {
     public void testReadWrite() throws IOException {
         assertValueEqualAfterWriteAndRead(new BooleanValue(true));
     }
+
+    @Test
+    public void testCompare() {
+        BooleanValue value1 = BooleanValue.FALSE;
+        BooleanValue value2 = BooleanValue.FALSE;
+        BooleanValue value3 = BooleanValue.TRUE;
+        Assert.assertEquals(0, value1.compareTo(value2));
+        Assert.assertTrue(value1.compareTo(value3) < 0);
+        Assert.assertTrue(value3.compareTo(value1) > 0);
+    }
 }

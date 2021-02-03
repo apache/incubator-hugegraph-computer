@@ -23,8 +23,9 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.util.E;
 
-public class LongValue implements Value {
+public class LongValue implements Value<LongValue> {
 
     private long value;
 
@@ -79,5 +80,11 @@ public class LongValue implements Value {
     @Override
     public String toString() {
         return String.valueOf(this.value);
+    }
+
+    @Override
+    public int compareTo(LongValue obj) {
+        E.checkArgumentNotNull(obj, "The obj can't be null");
+        return Long.compare(this.value, obj.value);
     }
 }

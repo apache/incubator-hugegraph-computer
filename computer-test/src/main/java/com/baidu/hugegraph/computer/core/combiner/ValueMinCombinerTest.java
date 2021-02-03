@@ -21,21 +21,19 @@ package com.baidu.hugegraph.computer.core.combiner;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class IdValueMinimumCombinerTest {
+public class ValueMinCombinerTest {
 
     @Test
     public void test() {
-        LongId longId = new LongId(0);
-        IdValue min = longId.idValue();
-        IdValueMinimumCombiner combiner = new IdValueMinimumCombiner();
-        for (int i = 1; i <= 10; i++) {
-            IdValue value = new LongId(i).idValue();
+        LongValue min = new LongValue(0L);
+        ValueMinCombiner<LongValue> combiner = new ValueMinCombiner();
+        for (long i = 1; i <= 10; i++) {
+            LongValue value = new LongValue(i);
             min = combiner.combine(min, value);
         }
-        Assert.assertEquals(longId.idValue(), min);
+        Assert.assertEquals(new LongValue(0L), min);
     }
 }

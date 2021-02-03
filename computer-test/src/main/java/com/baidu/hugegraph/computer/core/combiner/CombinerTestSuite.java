@@ -25,8 +25,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
      DoubleValueSumCombinerTest.class,
-     IdValueMinimumCombinerTest.class,
-     LongValueSumCombinerTest.class
+     LongValueSumCombinerTest.class,
+     ValueMinCombinerTest.class,
+     ValueMaxCombinerTest.class
 })
 public class CombinerTestSuite {
 }

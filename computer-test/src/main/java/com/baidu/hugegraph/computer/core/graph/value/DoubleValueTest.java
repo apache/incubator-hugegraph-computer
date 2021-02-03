@@ -81,4 +81,14 @@ public class DoubleValueTest extends UnitTestBase {
         assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MIN_VALUE));
         assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MAX_VALUE));
     }
+
+    @Test
+    public void testCompare() {
+        DoubleValue value1 = new DoubleValue(123.0D);
+        DoubleValue value2 = new DoubleValue(123.0D);
+        DoubleValue value3 = new DoubleValue(321.0D);
+        Assert.assertEquals(0, value1.compareTo(value2));
+        Assert.assertTrue(value1.compareTo(value3) < 0);
+        Assert.assertTrue(value3.compareTo(value1) > 0);
+    }
 }

@@ -43,4 +43,11 @@ public class NullValueTest extends UnitTestBase {
     public void testReadWrite() throws IOException {
         assertValueEqualAfterWriteAndRead(NullValue.get());
     }
+
+    @Test
+    public void testCompare() {
+        NullValue value1 = NullValue.get();
+        NullValue value2 = NullValue.get();
+        Assert.assertEquals(0, value1.compareTo(value2));
+    }
 }

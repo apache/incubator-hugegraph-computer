@@ -19,13 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public class IdValueMinimumCombiner implements Combiner<IdValue> {
+public class ValueMaxCombiner <T extends Value> implements Combiner<T> {
 
     @Override
-    public IdValue combine(IdValue v1, IdValue v2) {
-        if (v1.compareTo(v2) <= 0) {
+    public T combine(T v1, T v2) {
+        if (v1.compareTo(v2) >= 0) {
             return v1;
         } else {
             return v2;
