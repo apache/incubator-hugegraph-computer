@@ -24,6 +24,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -128,16 +129,18 @@ public class AllocatorTest {
     private static void testMaxCapacity(final int maxCapacity)
             throws InvocationTargetException, IllegalAccessException {
         String capacityValue = String.valueOf(maxCapacity);
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "test",
-        ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.VALUE_NAME.name(), "value",
-        ComputerOptions.EDGES_NAME.name(), "value",
-        ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD.name(),
-        capacityValue);
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "test",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.EDGES_NAME, "value",
+            ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD, capacityValue
+        );
 
         Allocator allocator = ComputerContext.instance().allocator();
-        RecyclerReference[] references = new RecyclerReference[maxCapacity * 3];
+        @SuppressWarnings("unchecked")
+        RecyclerReference<Vertex>[] references =
+                                    new RecyclerReference[maxCapacity * 3];
         for (int i = 0; i < references.length; i++) {
             references[i] = allocator.newVertex();
         }

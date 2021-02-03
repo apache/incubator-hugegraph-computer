@@ -19,11 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.graph.edge;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-
-public interface Edges<E extends Value> extends Iterable<Edge<E>> {
+public interface Edges extends Iterable<Edge> {
 
     int size();
 
-    void add(Edge<E> edge);
+    void add(Edge edge);
 }

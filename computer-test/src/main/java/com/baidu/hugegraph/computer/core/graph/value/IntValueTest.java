@@ -23,10 +23,10 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class IntValueTest extends BaseCoreTest {
+public class IntValueTest extends UnitTestBase {
 
     @Test
     public void test() {

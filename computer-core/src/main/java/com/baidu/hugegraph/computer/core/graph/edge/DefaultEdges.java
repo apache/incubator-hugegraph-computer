@@ -23,11 +23,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+public class DefaultEdges implements Edges {
 
-public class DefaultEdges<E extends Value> implements Edges<E> {
-
-    private ArrayList<Edge<E>> edges;
+    private ArrayList<Edge> edges;
 
     public DefaultEdges(int capacity) {
         this.edges = new ArrayList<>(capacity);
@@ -39,12 +37,12 @@ public class DefaultEdges<E extends Value> implements Edges<E> {
     }
 
     @Override
-    public void add(Edge<E> edge) {
+    public void add(Edge edge) {
         this.edges.add(edge);
     }
 
     @Override
-    public Iterator<Edge<E>> iterator() {
+    public Iterator<Edge> iterator() {
         return this.edges.iterator();
     }
 
@@ -56,7 +54,7 @@ public class DefaultEdges<E extends Value> implements Edges<E> {
         if (!(obj instanceof DefaultEdges)) {
             return false;
         }
-        DefaultEdges<?> other = (DefaultEdges<?>) obj;
+        DefaultEdges other = (DefaultEdges) obj;
         return this.edges.equals(other.edges);
     }
 

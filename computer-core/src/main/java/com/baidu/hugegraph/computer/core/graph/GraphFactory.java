@@ -33,25 +33,24 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public final class GraphFactory {
 
-    public <V extends Value, E extends Value> Vertex<V, E> createVertex() {
-        return new DefaultVertex<>();
+    public Vertex createVertex() {
+        return new DefaultVertex();
     }
 
-    public <V extends Value, E extends Value>
-           Vertex<V, E> createVertex(Id id, V value) {
-        return new DefaultVertex<>(id, value);
+    public <V extends Value> Vertex createVertex(Id id, V value) {
+        return new DefaultVertex(id, value);
     }
 
-    public <E extends Value> Edges<E> createEdges(int capacity) {
-        return new DefaultEdges<>(capacity);
+    public Edges createEdges(int capacity) {
+        return new DefaultEdges(capacity);
     }
 
-    public <E extends Value> Edge<E> createEdge() {
-        return new DefaultEdge<>();
+    public Edge createEdge() {
+        return new DefaultEdge();
     }
 
-    public <E extends Value> Edge<E> createEdge(Id targetId, E value) {
-        return new DefaultEdge<>(targetId, value);
+    public <V extends Value> Edge createEdge(Id targetId, V value) {
+        return new DefaultEdge(targetId, value);
     }
 
     public <K, V> Map<K, V> createMap() {

@@ -26,6 +26,7 @@ import java.io.IOException;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
@@ -46,17 +47,17 @@ public class StreamGraphOutputInputTest {
 
     @Test
     public void testWriteReadVertex() throws IOException {
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "test",
-        ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.VALUE_NAME.name(), "value",
-        ComputerOptions.EDGES_NAME.name(), "value");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "test",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.EDGES_NAME, "value"
+        );
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
         LongValue longValue = new LongValue(999L);
-        Vertex<LongValue, LongValue> vertex1 = factory.createVertex(longId,
-                                                                    longValue);
+        Vertex vertex1 = factory.createVertex(longId, longValue);
         byte[] bytes;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
@@ -64,7 +65,7 @@ public class StreamGraphOutputInputTest {
             bytes = baos.toByteArray();
         }
 
-        Vertex<LongValue, LongValue> vertex2;
+        Vertex vertex2;
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             vertex2 = input.readVertex();
@@ -74,14 +75,15 @@ public class StreamGraphOutputInputTest {
 
     @Test
     public void testWriteReadEdges() throws IOException {
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "test",
-        ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.VALUE_NAME.name(), "value",
-        ComputerOptions.EDGES_NAME.name(), "value");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "test",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.EDGES_NAME, "value"
+        );
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
-        Edges<LongValue> edges1 = factory.createEdges(3);
+        Edges edges1 = factory.createEdges(3);
         edges1.add(factory.createEdge(new LongId(100), new LongValue(1)));
         edges1.add(factory.createEdge(new LongId(200), new LongValue(2)));
         edges1.add(factory.createEdge(new LongId(300), new LongValue(-1)));
@@ -93,7 +95,7 @@ public class StreamGraphOutputInputTest {
             bytes = baos.toByteArray();
         }
 
-        Edges<LongValue> edges2;
+        Edges edges2;
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             edges2 = input.readEdges();
@@ -103,11 +105,12 @@ public class StreamGraphOutputInputTest {
 
     @Test
     public void testWriteReadProperties() throws IOException {
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "test",
-        ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.VALUE_NAME.name(), "value",
-        ComputerOptions.EDGES_NAME.name(), "value");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "test",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.EDGES_NAME, "value"
+        );
 
         /*
          * Config is global singleton instance, so the ValueType should be same
@@ -132,11 +135,12 @@ public class StreamGraphOutputInputTest {
         Assert.assertEquals(properties1, properties2);
 
         // Let ValueType as ID_VALUE
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "test",
-        ComputerOptions.VALUE_TYPE.name(), "ID_VALUE",
-        ComputerOptions.VALUE_NAME.name(), "value",
-        ComputerOptions.EDGES_NAME.name(), "value");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "test",
+            ComputerOptions.VALUE_TYPE, "ID_VALUE",
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.EDGES_NAME, "value"
+        );
 
         properties1 = new DefaultProperties();
         properties1.put("name", new Utf8Id("marko").idValue());
@@ -179,11 +183,12 @@ public class StreamGraphOutputInputTest {
 
     @Test
     public void testWriteReadValue() throws IOException {
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "test",
-        ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.VALUE_NAME.name(), "value",
-        ComputerOptions.EDGES_NAME.name(), "value");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "test",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.EDGES_NAME, "value"
+        );
 
         LongValue longValue1 = new LongValue(100L);
         byte[] bytes;
@@ -204,11 +209,12 @@ public class StreamGraphOutputInputTest {
         Assert.assertEquals(100L, longValue2.value());
 
         // Test IdValueList
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "test",
-        ComputerOptions.VALUE_TYPE.name(), "ID_VALUE_LIST",
-        ComputerOptions.VALUE_NAME.name(), "value",
-        ComputerOptions.EDGES_NAME.name(), "value");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "test",
+            ComputerOptions.VALUE_TYPE, "ID_VALUE_LIST",
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.EDGES_NAME, "value"
+        );
 
         LongId longId1 = new LongId(100L);
         LongId longId2 = new LongId(200L);

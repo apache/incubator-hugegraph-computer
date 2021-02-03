@@ -26,23 +26,23 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public interface Vertex<V extends Value, E extends Value> extends Recyclable {
+public interface Vertex extends Recyclable {
 
     Id id();
 
     void id(Id id);
 
-    V value();
+    <V extends Value> V value();
 
-    void value(V value);
+    <V extends Value> void value(V value);
 
     int numEdges();
 
-    Edges<E> edges();
+    Edges edges();
 
-    void edges(Edges<E> edges);
+    void edges(Edges edges);
 
-    void addEdge(Edge<E> edge);
+    void addEdge(Edge edge);
 
     Properties properties();
 

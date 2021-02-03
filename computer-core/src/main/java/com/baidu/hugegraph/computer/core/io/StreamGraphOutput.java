@@ -65,10 +65,9 @@ public class StreamGraphOutput implements GraphOutput {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void writeEdges(Edges edges) throws IOException {
         this.writeInt(edges.size());
-        for (Edge<?> edge : (Iterable<Edge>) edges) {
+        for (Edge edge : edges) {
             this.writeEdge(edge);
         }
     }

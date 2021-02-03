@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
+import java.util.Map;
+
 import com.baidu.hugegraph.computer.core.allocator.Allocator;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
@@ -38,7 +40,8 @@ public final class ComputerContext {
         this.allocator = new Allocator(config);
     }
 
-    public static synchronized void parseOptions(String... options) {
+    public static synchronized void updateOptions(
+                                    Map<String, String> options) {
         Config config = new Config(options);
         INSTANCE = new ComputerContext(config);
     }

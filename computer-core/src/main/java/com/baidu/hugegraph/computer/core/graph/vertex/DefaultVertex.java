@@ -31,12 +31,11 @@ import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public class DefaultVertex<V extends Value, E extends Value>
-       implements Vertex<V, E> {
+public class DefaultVertex implements Vertex {
 
     private Id id;
-    private V value;
-    private Edges<E> edges;
+    private Value value;
+    private Edges edges;
     private Properties properties;
     private boolean active;
 
@@ -44,12 +43,12 @@ public class DefaultVertex<V extends Value, E extends Value>
         this(null, null);
     }
 
-    public DefaultVertex(Id id, V value) {
+    public DefaultVertex(Id id, Value value) {
         this.id = id;
         this.value = value;
         int averageDegree = ComputerContext.instance().config().get(
                             ComputerOptions.VERTEX_AVERAGE_DEGREE);
-        this.edges = new DefaultEdges<>(averageDegree);
+        this.edges = new DefaultEdges(averageDegree);
         this.properties = new DefaultProperties();
         this.active = true;
     }
@@ -65,12 +64,13 @@ public class DefaultVertex<V extends Value, E extends Value>
     }
 
     @Override
-    public V value() {
-        return this.value;
+    @SuppressWarnings("unchecked")
+    public <V extends Value> V value() {
+        return (V) this.value;
     }
 
     @Override
-    public void value(V value) {
+    public <V extends Value> void value(V value) {
         this.value = value;
     }
 
@@ -80,17 +80,17 @@ public class DefaultVertex<V extends Value, E extends Value>
     }
 
     @Override
-    public Edges<E> edges() {
+    public Edges edges() {
         return this.edges;
     }
 
     @Override
-    public void edges(Edges<E> edges) {
+    public void edges(Edges edges) {
         this.edges = edges;
     }
 
     @Override
-    public void addEdge(Edge<E> edge) {
+    public void addEdge(Edge edge) {
         this.edges.add(edge);
     }
 
@@ -127,7 +127,7 @@ public class DefaultVertex<V extends Value, E extends Value>
         if (!(obj instanceof DefaultVertex)) {
             return false;
         }
-        DefaultVertex<?, ?> other = (DefaultVertex<?, ?>) obj;
+        DefaultVertex other = (DefaultVertex) obj;
         return this.active == other.active &&
                this.id.equals(other.id) &&
                this.value.equals(other.value) &&

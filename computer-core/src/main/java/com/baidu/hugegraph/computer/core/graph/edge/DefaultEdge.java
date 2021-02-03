@@ -26,17 +26,17 @@ import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public class DefaultEdge<E extends Value> implements Edge<E> {
+public class DefaultEdge implements Edge {
 
     private Id targetId;
-    private E value;
+    private Value value;
     private Properties properties;
 
     public DefaultEdge() {
         this(null, null);
     }
 
-    public DefaultEdge(Id targetId, E value) {
+    public DefaultEdge(Id targetId, Value value) {
         this.targetId = targetId;
         this.value = value;
         this.properties = new DefaultProperties();
@@ -53,12 +53,13 @@ public class DefaultEdge<E extends Value> implements Edge<E> {
     }
 
     @Override
-    public E value() {
-        return this.value;
+    @SuppressWarnings("unchecked")
+    public <V extends Value> V value() {
+        return (V) this.value;
     }
 
     @Override
-    public void value(E value) {
+    public <V extends Value> void value(V value) {
         this.value = value;
     }
 
@@ -80,7 +81,7 @@ public class DefaultEdge<E extends Value> implements Edge<E> {
         if (!(obj instanceof DefaultEdge)) {
             return false;
         }
-        DefaultEdge<?> other = (DefaultEdge<?>) obj;
+        DefaultEdge other = (DefaultEdge) obj;
         return this.targetId.equals(other.targetId) &&
                this.value.equals(other.value) &&
                this.properties.equals(other.properties);

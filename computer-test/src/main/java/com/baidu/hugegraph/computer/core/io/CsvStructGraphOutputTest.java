@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
@@ -46,20 +47,20 @@ public class CsvStructGraphOutputTest {
 
     @Test
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGES_NAME.name(), "value",
-        ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "false",
-        ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "false",
-        ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "page_rank",
+            ComputerOptions.VALUE_NAME, "rank",
+            ComputerOptions.EDGES_NAME, "value",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
+            ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
+            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
+        );
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
         IdValue idValue = new LongId(999L).idValue();
-        Vertex<IdValue, IdValue> vertex = factory.createVertex(longId,
-                                                               idValue);
+        Vertex vertex = factory.createVertex(longId, idValue);
 
         String fileName = "output.csv";
         File file = new File(fileName);
@@ -79,22 +80,22 @@ public class CsvStructGraphOutputTest {
 
     @Test
     public void testWriteReadVertexWithEdges() throws IOException {
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGES_NAME.name(), "value",
-        ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "true",
-        ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "false",
-        ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "page_rank",
+            ComputerOptions.VALUE_NAME, "rank",
+            ComputerOptions.EDGES_NAME, "value",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "true",
+            ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
+            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
+        );
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
         IdValueList idValueList = new IdValueList();
         idValueList.add(new LongId(998L).idValue());
         idValueList.add(new LongId(999L).idValue());
-        Vertex<IdValueList, LongValue> vertex = factory.createVertex(
-                                                longId, idValueList);
+        Vertex vertex = factory.createVertex(longId, idValueList);
         vertex.addEdge(factory.createEdge(new LongId(200), new LongValue(1)));
         vertex.addEdge(factory.createEdge(new LongId(300), new LongValue(-1)));
 
@@ -117,14 +118,15 @@ public class CsvStructGraphOutputTest {
 
     @Test
     public void testWriteReadVertexWithProperties() throws IOException {
-        ComputerContext.parseOptions(
-        ComputerOptions.ALGORITHM_NAME.name(), "page_rank",
-        ComputerOptions.VALUE_NAME.name(), "rank",
-        ComputerOptions.EDGES_NAME.name(), "value",
-        ComputerOptions.VALUE_TYPE.name(), "LONG",
-        ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "false",
-        ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "true",
-        ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
+        UnitTestBase.updateOptions(
+            ComputerOptions.ALGORITHM_NAME, "page_rank",
+            ComputerOptions.VALUE_NAME, "rank",
+            ComputerOptions.EDGES_NAME, "value",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
+            ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",
+            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
+        );
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
@@ -137,8 +139,7 @@ public class CsvStructGraphOutputTest {
         idValueListList.add(idValueList1);
         idValueListList.add(idValueList2);
 
-        Vertex<IdValueListList, LongValue> vertex = factory.createVertex(
-                                                    longId, idValueListList);
+        Vertex vertex = factory.createVertex(longId, idValueListList);
         vertex.properties().put("boolean", new BooleanValue(true));
         vertex.properties().put("byte", new IntValue(127));
         vertex.properties().put("short", new IntValue(16383));

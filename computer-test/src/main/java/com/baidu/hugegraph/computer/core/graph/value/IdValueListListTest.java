@@ -24,12 +24,12 @@ import java.io.IOException;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.Lists;
 
-public class IdValueListListTest extends BaseCoreTest {
+public class IdValueListListTest extends UnitTestBase {
 
     @Test
     public void test() {

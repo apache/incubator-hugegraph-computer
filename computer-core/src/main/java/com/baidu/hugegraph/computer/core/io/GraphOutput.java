@@ -33,7 +33,7 @@ public interface GraphOutput extends DataOutput {
 
     void writeVertex(Vertex vertex) throws IOException;
 
-    void writeEdges(Edges<?> edges) throws IOException;
+    void writeEdges(Edges edges) throws IOException;
 
     void writeEdge(Edge edge) throws IOException;
 

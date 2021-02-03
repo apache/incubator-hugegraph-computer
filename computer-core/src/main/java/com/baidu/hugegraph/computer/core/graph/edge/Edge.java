@@ -24,15 +24,15 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public interface Edge<E extends Value> extends Recyclable {
+public interface Edge extends Recyclable {
 
     Id targetId();
 
     void targetId(Id targetId);
 
-    E value();
+    <V extends Value> V value();
 
-    void value(E value);
+    <V extends Value> void value(V value);
 
     Properties properties();
 

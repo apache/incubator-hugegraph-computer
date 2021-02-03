@@ -70,12 +70,11 @@ public class JsonStructGraphOutput extends StructGraphOutput {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void writeEdges(Edges edges) throws IOException {
         this.writeArrayStart();
         int size = edges.size();
         int i = 0;
-        for (Edge<?> edge : (Iterable<Edge>) edges) {
+        for (Edge edge : edges) {
             this.writeEdge(edge);
             if (++i < size) {
                 this.writeSplitter();
