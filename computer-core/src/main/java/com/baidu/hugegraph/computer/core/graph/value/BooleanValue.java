@@ -26,6 +26,9 @@ import com.baidu.hugegraph.computer.core.io.GraphOutput;
 
 public class BooleanValue implements Value {
 
+    public static final BooleanValue TRUE = new BooleanValue(true);
+    public static final BooleanValue FALSE = new BooleanValue(false);
+
     private boolean value;
 
     public BooleanValue() {

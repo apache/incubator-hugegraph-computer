@@ -80,7 +80,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =
             new ConfigOption<>(
-                    "computer.output.with_adjacent_edges",
+                    "output.with_adjacent_edges",
                     "Output the adjacent edges of the vertex or not",
                     allowValues(true, false),
                     false
@@ -88,7 +88,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Boolean> OUTPUT_WITH_VERTEX_PROPERTIES =
             new ConfigOption<>(
-                    "computer.output.with_vertex_properties",
+                    "output.with_vertex_properties",
                     "Output the properties of the vertex or not",
                     allowValues(true, false),
                     false
@@ -96,7 +96,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Boolean> OUTPUT_WITH_EDGE_PROPERTIES =
             new ConfigOption<>(
-                    "computer.output.with_edge_properties",
+                    "output.with_edge_properties",
                     "Output the properties of the edge or not",
                     allowValues(true, false),
                     false
