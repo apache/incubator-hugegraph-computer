@@ -26,10 +26,10 @@ import io.netty.util.Recycler;
 public class RecyclerReference<T extends Recyclable> extends SoftReference<T>
        implements AutoCloseable {
 
-    private final Recycler.Handle<RecyclerReference> handle;
+    private final Recycler.Handle<RecyclerReference<T>> handle;
 
     public RecyclerReference(T referent,
-                             Recycler.Handle<RecyclerReference> handle) {
+                             Recycler.Handle<RecyclerReference<T>> handle) {
         super(referent);
         this.handle = handle;
     }

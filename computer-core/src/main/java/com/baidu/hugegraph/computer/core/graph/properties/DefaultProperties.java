@@ -31,7 +31,7 @@ public class DefaultProperties implements Properties {
 
     public DefaultProperties() {
         ComputerContext context = ComputerContext.instance();
-        this.keyValues = context.graphFactory().createMap();
+        this.keyValues = context.graphFactory().createHashMap();
     }
 
     public DefaultProperties(Map<String, Value> keyValues) {

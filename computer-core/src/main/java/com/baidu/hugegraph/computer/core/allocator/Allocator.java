@@ -32,8 +32,8 @@ import io.netty.util.Recycler;
 public final class Allocator {
 
     private final GraphFactory factory;
-    private final Recycler<RecyclerReference> vertexRecycler;
-    private final Recycler<RecyclerReference> edgeRecycler;
+    private final Recycler<RecyclerReference<Vertex>> vertexRecycler;
+    private final Recycler<RecyclerReference<Edge>> edgeRecycler;
 
     public Allocator(Config config) {
         this.factory = new GraphFactory();
@@ -46,21 +46,20 @@ public final class Allocator {
                                              factory::createEdge);
     }
 
-    private Recycler<RecyclerReference> newRecycler(
-                                        int capacityPerThread,
-                                        Supplier<Recyclable> supplier) {
+    private <T extends Recyclable> Recycler<RecyclerReference<T>>
+                                   newRecycler(int capacityPerThread,
+                                               Supplier<T> supplier) {
         // TODO: Add more params for Recycler
-        return new Recycler<RecyclerReference>(capacityPerThread) {
+        return new Recycler<RecyclerReference<T>>(capacityPerThread) {
             @Override
-            protected RecyclerReference newObject(
-                      Recycler.Handle<RecyclerReference> handle) {
-                Recyclable recyclable = supplier.get();
-                return new RecyclerReference<>(recyclable, handle);
+            protected RecyclerReference<T> newObject(
+                      Recycler.Handle<RecyclerReference<T>> handle) {
+                T recyclable = supplier.get();
+                return new RecyclerReference<T>(recyclable, handle);
             }
         };
     }
 
-    @SuppressWarnings("unchecked")
     public RecyclerReference<Vertex> newVertex() {
         return this.vertexRecycler.get();
     }
@@ -69,7 +68,6 @@ public final class Allocator {
         reference.close();
     }
 
-    @SuppressWarnings("unchecked")
     public RecyclerReference<Edge> newEdge() {
         return this.edgeRecycler.get();
     }

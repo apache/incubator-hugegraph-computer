@@ -19,7 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.graph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
@@ -53,7 +55,11 @@ public final class GraphFactory {
         return new DefaultEdge(targetId, value);
     }
 
-    public <K, V> Map<K, V> createMap() {
+    public <V> List<V> createArrayList(int capacity) {
+        return new ArrayList<>(capacity);
+    }
+
+    public <K, V> Map<K, V> createHashMap() {
         return new HashMap<>();
     }
 }

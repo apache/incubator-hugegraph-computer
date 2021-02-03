@@ -19,16 +19,19 @@
 
 package com.baidu.hugegraph.computer.core.graph.edge;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
+
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 
 public class DefaultEdges implements Edges {
 
-    private ArrayList<Edge> edges;
+    private final List<Edge> edges;
 
     public DefaultEdges(int capacity) {
-        this.edges = new ArrayList<>(capacity);
+        this.edges = ComputerContext.instance().graphFactory()
+                                               .createArrayList(capacity);
     }
 
     @Override

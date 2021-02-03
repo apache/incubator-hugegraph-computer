@@ -91,7 +91,7 @@ public class ListValue<T extends Value> implements Value {
             this.elemType = SerialEnum.fromCode(ValueType.class,
                                                 in.readByte());
         }
-        this.values = new ArrayList<>();
+        this.values = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
             T value = (T) ValueFactory.createValue(this.elemType);

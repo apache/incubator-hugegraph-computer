@@ -143,8 +143,8 @@ public class DefaultVertex implements Vertex {
 
     @Override
     public String toString() {
-        return String.format("DefaultVertex{id=%s, value=%s, edges=%s, " +
-                             "active=%s}", this.id, this.value, this.edges,
-                             this.active);
+        return String.format("DefaultVertex{id=%s, value=%s, edges.size=%s, " +
+                             "active=%s}", this.id, this.value,
+                             this.edges.size(), this.active);
     }
 }
