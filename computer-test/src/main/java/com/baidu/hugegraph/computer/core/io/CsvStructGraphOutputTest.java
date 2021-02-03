@@ -54,7 +54,7 @@ public class CsvStructGraphOutputTest {
         ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "false",
         ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "false",
         ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
-        GraphFactory factory = ComputerContext.instance().factory();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
         IdValue idValue = new LongId(999L).idValue();
@@ -87,7 +87,7 @@ public class CsvStructGraphOutputTest {
         ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "true",
         ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "false",
         ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
-        GraphFactory factory = ComputerContext.instance().factory();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
         IdValueList idValueList = new IdValueList();
@@ -125,7 +125,7 @@ public class CsvStructGraphOutputTest {
         ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "false",
         ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(), "true",
         ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES.name(), "false");
-        GraphFactory factory = ComputerContext.instance().factory();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
         IdValueListList idValueListList = new IdValueListList();

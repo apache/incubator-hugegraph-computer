@@ -51,7 +51,7 @@ public class StreamGraphOutputInputTest {
         ComputerOptions.VALUE_TYPE.name(), "LONG",
         ComputerOptions.VALUE_NAME.name(), "value",
         ComputerOptions.EDGES_NAME.name(), "value");
-        GraphFactory factory = ComputerContext.instance().factory();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
         LongValue longValue = new LongValue(999L);
@@ -79,7 +79,7 @@ public class StreamGraphOutputInputTest {
         ComputerOptions.VALUE_TYPE.name(), "LONG",
         ComputerOptions.VALUE_NAME.name(), "value",
         ComputerOptions.EDGES_NAME.name(), "value");
-        GraphFactory factory = ComputerContext.instance().factory();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
 
         Edges<LongValue> edges1 = factory.createEdges(3);
         edges1.add(factory.createEdge(new LongId(100), new LongValue(1)));

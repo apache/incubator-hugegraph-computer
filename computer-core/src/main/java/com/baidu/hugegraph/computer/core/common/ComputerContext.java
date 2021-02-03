@@ -50,7 +50,7 @@ public final class ComputerContext {
         return this.config;
     }
 
-    public GraphFactory factory() {
+    public GraphFactory graphFactory() {
         return this.factory;
     }
 

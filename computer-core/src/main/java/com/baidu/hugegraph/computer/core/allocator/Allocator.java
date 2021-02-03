@@ -39,7 +39,7 @@ public final class Allocator {
         this.factory = new GraphFactory();
 
         int capacityPerThread =
-        config.get(ComputerOptions.MAX_VERTICES_PER_THREAD);
+        config.get(ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD);
         this.vertexRecycler = this.newRecycler(capacityPerThread,
                                                factory::createVertex);
         this.edgeRecycler = this.newRecycler(capacityPerThread,

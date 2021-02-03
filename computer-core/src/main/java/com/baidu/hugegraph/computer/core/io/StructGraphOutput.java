@@ -193,6 +193,8 @@ public abstract class StructGraphOutput implements GraphOutput {
     }
 
     protected void writeString(String s) throws IOException {
-        this.out.writeBytes("\"" + StringEscapeUtils.escapeJson(s) + "\"");
+        this.out.writeBytes("\"");
+        this.out.writeBytes(StringEscapeUtils.escapeJson(s));
+        this.out.writeBytes("\"");
     }
 }

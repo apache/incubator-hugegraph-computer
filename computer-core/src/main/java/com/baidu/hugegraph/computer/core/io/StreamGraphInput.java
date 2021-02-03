@@ -54,7 +54,7 @@ public class StreamGraphInput implements GraphInput {
     @Override
     public Vertex readVertex() throws IOException {
         ComputerContext context = ComputerContext.instance();
-        GraphFactory factory = ComputerContext.instance().factory();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
 
         Id id = this.readId();
         Value value = this.readValue();
@@ -79,7 +79,7 @@ public class StreamGraphInput implements GraphInput {
     @Override
     public Edges readEdges() throws IOException {
         ComputerContext context = ComputerContext.instance();
-        GraphFactory factory = context.factory();
+        GraphFactory factory = context.graphFactory();
 
         int numEdges = this.readInt();
         Edges edges = factory.createEdges(numEdges);
@@ -93,7 +93,7 @@ public class StreamGraphInput implements GraphInput {
     @Override
     public Edge readEdge() throws IOException {
         ComputerContext context = ComputerContext.instance();
-        GraphFactory factory = ComputerContext.instance().factory();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
 
         // Write necessary
         Id targetId = this.readId();
