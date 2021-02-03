@@ -369,7 +369,7 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testGetByteArray() throws IOException {
+    public void testBuffer() throws IOException {
         UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
         output.writeInt(Integer.MAX_VALUE);
         UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(

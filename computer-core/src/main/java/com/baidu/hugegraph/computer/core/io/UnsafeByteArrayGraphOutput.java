@@ -235,7 +235,7 @@ public class UnsafeByteArrayGraphOutput implements GraphOutput {
     public int skipBytes(int bytesToSkip) {
         this.require(bytesToSkip);
         int positionBeforeSkip = this.position;
-        this.position +=  bytesToSkip;
+        this.position += bytesToSkip;
         return positionBeforeSkip;
     }
 
