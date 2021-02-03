@@ -26,12 +26,6 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
-import com.baidu.hugegraph.computer.core.graph.id.IdType;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
@@ -41,36 +35,36 @@ public class UnsafeByteArrayTest {
 
     @Test
     public void testConstructor() {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         Assert.assertEquals(0, output.position());
 
-        UnsafeByteArrayGraphOutput output2 = new UnsafeByteArrayGraphOutput(16);
+        UnsafeByteArrayOutput output2 = new UnsafeByteArrayOutput(16);
         Assert.assertEquals(0, output2.position());
 
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.buffer());
         Assert.assertEquals(0, input.position());
     }
 
     @Test
-    public void testBoolean() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testBoolean() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.writeBoolean(true);
         output.writeBoolean(false);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         Assert.assertTrue(input.readBoolean());
         Assert.assertFalse(input.readBoolean());
     }
 
     @Test
-    public void testByte() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testByte() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (int i = -128; i <= 127; i++) {
             output.write(i);
         }
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
-                                          output.toByteArray());
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
+                                              output.toByteArray());
         for (int i = -128; i <= 127; i++) {
             int value = input.readByte();
             Assert.assertEquals(i, value);
@@ -78,12 +72,12 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testUnsignedByte() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testUnsignedByte() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (int i = 0; i <= 255; i++) {
             output.write(i);
         }
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (int i = 0; i <= 255; i++) {
             int value = input.readUnsignedByte();
@@ -92,14 +86,14 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testShort() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testShort() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (short i = -128; i <= 127; i++) {
             output.writeShort(i);
         }
         output.writeShort(Short.MAX_VALUE);
         output.writeShort(Short.MIN_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (int i = -128; i <= 127; i++) {
             Assert.assertEquals(i, input.readShort());
@@ -109,14 +103,14 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testUnsignedShort() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testUnsignedShort() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (short i = 0; i <= 255; i++) {
             output.writeShort(i);
         }
         output.writeShort(Short.MAX_VALUE);
         output.writeShort(Short.MIN_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (int i = 0; i <= 255; i++) {
             Assert.assertEquals(i, input.readUnsignedShort());
@@ -127,25 +121,25 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testShortWithPosition() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testShortWithPosition() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         int position = output.skipBytes(Constants.SHORT_LEN);
         output.writeShort(2);
         output.writeShort(position, 1);
 
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         Assert.assertEquals(1, input.readShort());
         Assert.assertEquals(2, input.readShort());
     }
 
     @Test
-    public void testChar() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testChar() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (char i = 'a'; i <= 'z'; i++) {
             output.writeChar(i);
         }
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (char i = 'a'; i <= 'z'; i++) {
             char value = input.readChar();
@@ -154,14 +148,14 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testInt() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testInt() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (int i = -128; i <= 127; i++) {
             output.writeInt(i);
         }
         output.writeInt(Integer.MAX_VALUE);
         output.writeInt(Integer.MIN_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (int i = -128; i <= 127; i++) {
             Assert.assertEquals(i, input.readInt());
@@ -171,27 +165,27 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testWriteIntWithPosition() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testWriteIntWithPosition() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         int position = output.skipBytes(Constants.INT_LEN);
         output.writeInt(2);
         output.writeInt(position, 1);
 
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         Assert.assertEquals(1, input.readInt());
         Assert.assertEquals(2, input.readInt());
     }
 
     @Test
-    public void testLong() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testLong() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (long i = -128; i <= 127; i++) {
             output.writeLong(i);
         }
         output.writeLong(Long.MAX_VALUE);
         output.writeLong(Long.MIN_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (long i = -128; i <= 127; i++) {
             Assert.assertEquals(i, input.readLong());
@@ -201,14 +195,14 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testFloat() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testFloat() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (int i = -128; i <= 127; i++) {
             output.writeFloat((float) i);
         }
         output.writeFloat(Float.MAX_VALUE);
         output.writeFloat(Float.MIN_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (int i = -128; i <= 127; i++) {
             Assert.assertEquals((float) i, input.readFloat(), 0.0D);
@@ -218,14 +212,14 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testDouble() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testDouble() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (int i = -128; i <= 127; i++) {
             output.writeDouble(i);
         }
         output.writeDouble(Double.MAX_VALUE);
         output.writeDouble(Double.MIN_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (int i = -128; i <= 127; i++) {
             Assert.assertEquals(i, input.readDouble(), 0.0D);
@@ -235,24 +229,24 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testByteArray() throws IOException {
+    public void testByteArray() {
         byte[] bytes = "testByteArray".getBytes();
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.write(bytes);
         byte[] bytesRead = new byte[bytes.length];
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         input.readFully(bytesRead);
         Assert.assertArrayEquals(bytes, bytesRead);
     }
 
     @Test
-    public void testWritePartByteArray() throws IOException {
+    public void testWritePartByteArray() {
         byte[] bytes = "testByteArray".getBytes();
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.write(bytes, 1, bytes.length - 1);
         byte[] bytesRead = new byte[bytes.length];
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         input.readFully(bytesRead, 1, bytes.length - 1);
         bytesRead[0] = bytes[0];
@@ -260,11 +254,11 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testWriteChars() throws IOException {
+    public void testWriteChars() {
         String chars = "testByteArray";
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.writeChars(chars);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         for (int i = 0; i < chars.length(); i++) {
             char c = input.readChar();
@@ -275,7 +269,7 @@ public class UnsafeByteArrayTest {
 
     @Test
     public void testReadLine() {
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               Constants.EMPTY_BYTES);
         Assert.assertThrows(ComputerException.class, () -> {
             input.readLine();
@@ -285,9 +279,9 @@ public class UnsafeByteArrayTest {
     @Test
     public void testUTFWithChineseCharacters() throws IOException {
         String s = "带汉字的字符串";
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.writeUTF(s);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         String value = input.readUTF();
         Assert.assertEquals(s, value);
@@ -296,11 +290,11 @@ public class UnsafeByteArrayTest {
     @Test
     public void testUTF() throws IOException {
         String prefix = "random string";
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (int i = -128; i <= 127; i++) {
             output.writeUTF(prefix + i);
         }
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.buffer());
         for (int i = -128; i <= 127; i++) {
             String value = input.readUTF();
@@ -309,57 +303,11 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testWriteId() throws IOException {
-        IdType[] types = IdType.values();
-        Id[] ids = new Id[types.length];
-
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
-        for (int i = 0; i < ids.length; i++) {
-                ids[i] = IdFactory.createID(types[i].code());
-                output.writeId(ids[i]);
-        }
-
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
-                                              output.toByteArray());
-        for (int i = 0; i < ids.length; i++) {
-            Id id = input.readId();
-            Assert.assertEquals(ids[i], id);
-        }
-    }
-
-    @Test
-    public void testWriteValue() throws IOException {
-        Value[] values = new Value[ValueType.values().length];
-        ValueType[] types = ValueType.values();
-
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
-        for (int i = 0; i < values.length; i++) {
-            if (ValueType.UNKNOWN != types[i]) {
-                values[i] = ValueFactory.createValue(types[i].code());
-                output.writeValue(values[i]);
-            } else {
-                // Omit ValueType.UNKNOWN
-            }
-        }
-
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
-                                              output.toByteArray());
-        for (int i = 0; i < values.length; i++) {
-            if (ValueType.UNKNOWN != types[i]) {
-                Value value = input.readValue();
-                Assert.assertEquals(values[i], value);
-            } else {
-                // Omitted ValueType.UNKNOWN
-            }
-        }
-    }
-
-    @Test
-    public void testSkipBytes() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testSkipBytes() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.skipBytes(4);
         output.writeInt(Integer.MAX_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.toByteArray());
         input.skipBytes(4);
         Assert.assertEquals(4, input.remaining());
@@ -369,20 +317,20 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
-    public void testBuffer() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testBuffer() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.writeInt(Integer.MAX_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.buffer(),
                                               output.position());
         Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
     }
 
     @Test
-    public void testOverRead() throws IOException {
-        UnsafeByteArrayGraphOutput output = new UnsafeByteArrayGraphOutput();
+    public void testOverRead() {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.writeInt(Integer.MAX_VALUE);
-        UnsafeByteArrayGraphInput input = new UnsafeByteArrayGraphInput(
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                               output.buffer(),
                                               output.position());
         Assert.assertEquals(Integer.MAX_VALUE, input.readInt());

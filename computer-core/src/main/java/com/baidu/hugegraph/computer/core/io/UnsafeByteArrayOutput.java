@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.lang.reflect.Field;
@@ -26,19 +27,16 @@ import java.util.Arrays;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 
 import sun.misc.Unsafe;
 
-public class UnsafeByteArrayGraphOutput implements GraphOutput {
+public final class UnsafeByteArrayOutput implements DataOutput {
 
     private static final sun.misc.Unsafe UNSAFE;
     private static final int DEFAULT_SIZE = 32;
 
     private byte[] buffer;
-    private int capacity;
     private int position;
 
     static {
@@ -51,136 +49,98 @@ public class UnsafeByteArrayGraphOutput implements GraphOutput {
         }
     }
 
-    public UnsafeByteArrayGraphOutput() {
+    public UnsafeByteArrayOutput() {
         this(DEFAULT_SIZE);
     }
 
-    public UnsafeByteArrayGraphOutput(int size) {
+    public UnsafeByteArrayOutput(int size) {
         this.buffer = new byte[size];
-        this.capacity = size;
         this.position = 0;
     }
 
     @Override
-    public void writeId(Id id) throws IOException {
-        // For code only
-        this.require(1);
-        this.writeByte(id.type().code());
-        id.write(this);
-    }
-
-    @Override
-    public void writeValue(Value value) throws IOException {
-        // TODO: doesn't need write type, fetch value type from config
-        // For code only
-        this.require(1);
-        this.writeByte(value.type().code());
-        value.write(this);
-    }
-
-    @Override
-    public void write(int b) throws IOException {
+    public void write(int b) {
         this.require(Constants.BYTE_LEN);
         this.buffer[this.position] = (byte) b;
         this.position += Constants.BYTE_LEN;
     }
 
     @Override
-    public void write(byte[] b) throws IOException {
+    public void write(byte[] b) {
         this.require(b.length);
         System.arraycopy(b, 0, this.buffer, this.position, b.length);
         this.position += b.length;
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) {
         this.require(len);
         System.arraycopy(b, off, this.buffer, this.position, len);
         this.position += len;
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public void writeBoolean(boolean v) {
         this.require(Constants.BOOLEAN_LEN);
-        UNSAFE.putBoolean(buffer,
-                          Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position, v);
+        UNSAFE.putBoolean(buffer, this.offset(), v);
         this.position += Constants.BOOLEAN_LEN;
     }
 
     @Override
     public void writeByte(int v) {
         this.require(Constants.BYTE_LEN);
-        this.buffer[position] = (byte) v;
+        this.buffer[this.position] = (byte) v;
         this.position += Constants.BYTE_LEN;
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public void writeShort(int v) {
         this.require(Constants.SHORT_LEN);
-        UNSAFE.putShort(buffer,
-                          Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position,
-                          (short) v);
+        UNSAFE.putShort(buffer, this.offset(), (short) v);
         this.position += Constants.SHORT_LEN;
     }
 
-    @SuppressWarnings("deprecated")
     public void writeShort(int position, int v) {
-        UNSAFE.putShort(buffer,
-                        Unsafe.ARRAY_BYTE_BASE_OFFSET + position, (short) v);
+        UNSAFE.putShort(buffer, offset(position), (short) v);
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public void writeChar(int v) {
         this.require(Constants.CHAR_LEN);
-        UNSAFE.putChar(buffer,
-                        Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position,
-                        (char) v);
+        UNSAFE.putChar(buffer, this.offset(), (char) v);
         this.position += Constants.CHAR_LEN;
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public void writeInt(int v) {
         this.require(Constants.INT_LEN);
-        UNSAFE.putInt(buffer,
-                      Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position, v);
+        UNSAFE.putInt(buffer, this.offset(), v);
         this.position += Constants.INT_LEN;
     }
 
-    @SuppressWarnings("deprecated")
     public void writeInt(int position, int v) {
         this.require(Constants.INT_LEN);
-        UNSAFE.putInt(buffer,
-                      Unsafe.ARRAY_BYTE_BASE_OFFSET + position, v);
+        UNSAFE.putInt(buffer, offset(position), v);
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public void writeLong(long v) {
         this.require(Constants.LONG_LEN);
-        UNSAFE.putLong(buffer,
-                      Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position, v);
+        UNSAFE.putLong(buffer, this.offset(), v);
         this.position += Constants.LONG_LEN;
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public void writeFloat(float v) {
         this.require(Constants.FLOAT_LEN);
-        UNSAFE.putFloat(buffer,
-                        Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position, v);
+        UNSAFE.putFloat(buffer, this.offset(), v);
         this.position += Constants.FLOAT_LEN;
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public void writeDouble(double v) {
         this.require(Constants.DOUBLE_LEN);
-        UNSAFE.putDouble(buffer,
-                         Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position, v);
+        UNSAFE.putDouble(buffer, this.offset(), v);
         this.position += Constants.DOUBLE_LEN;
     }
 
@@ -189,20 +149,19 @@ public class UnsafeByteArrayGraphOutput implements GraphOutput {
         int len = s.length();
         this.require(len);
         for (int i = 0; i < len; i++) {
-            this.buffer[position] = (byte) s.charAt(i);
+            this.buffer[this.position] = (byte) s.charAt(i);
             this.position++;
         }
     }
 
     @Override
-    @SuppressWarnings("deprecated")
     public void writeChars(String s) {
         int len = s.length();
         this.require(len * Constants.CHAR_LEN);
         for (int i = 0; i < len; i++) {
             char v = s.charAt(i);
-            UNSAFE.putChar(buffer, Unsafe.ARRAY_BYTE_BASE_OFFSET + position, v);
-            position += Constants.CHAR_LEN;
+            UNSAFE.putChar(this.buffer, this.offset(), v);
+            this.position += Constants.CHAR_LEN;
         }
     }
 
@@ -254,11 +213,18 @@ public class UnsafeByteArrayGraphOutput implements GraphOutput {
     }
 
     private void require(int size) {
-        if (this.position + size > this.capacity) {
+        if (this.position + size > this.buffer.length) {
             byte[] newBuf = new byte[(this.buffer.length + size) << 1];
             System.arraycopy(this.buffer, 0, newBuf, 0, this.position);
             this.buffer = newBuf;
-            this.capacity = this.buffer.length;
         }
+    }
+
+    private int offset() {
+        return Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position;
+    }
+
+    private int offset(int position) {
+        return Unsafe.ARRAY_BYTE_BASE_OFFSET + position;
     }
 }
