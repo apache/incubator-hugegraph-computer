@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.ComputerOptions;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
 import com.baidu.hugegraph.computer.core.common.UnitTestBase;
-import com.baidu.hugegraph.computer.core.graph.GraphStat;
+import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.config.HugeConfig;
@@ -145,22 +145,22 @@ public class EtcdBspTest extends UnitTestBase {
                 this.bsp4Master.masterSuperstepPrepared(i);
                 List<WorkerStat> list = this.bsp4Master
                                             .waitWorkersSuperstepDone(i);
-                GraphStat graphStat = new GraphStat();
+                SuperstepStat superstepStat = new SuperstepStat();
                 for (WorkerStat workerStat1 : list) {
-                    graphStat.increase(workerStat1);
+                    superstepStat.increase(workerStat1);
                 }
                 if (i == this.maxSuperStep - 1) {
-                    graphStat.halt(true);
+                    superstepStat.halt(true);
                 }
-                this.bsp4Master.masterSuperstepDone(i, graphStat);
+                this.bsp4Master.masterSuperstepDone(i, superstepStat);
             }
             countDownLatch.countDown();
 
         });
         this.executorService.submit(() -> {
             int superstep = -1;
-            GraphStat graphStat = null;
-            while (graphStat == null || !graphStat.halt()) {
+            SuperstepStat superstepStat = null;
+            while (superstepStat == null || !superstepStat.halt()) {
                 superstep++;
                 this.bsp4Worker.workerSuperstepPrepared(superstep);
                 this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
@@ -175,7 +175,7 @@ public class EtcdBspTest extends UnitTestBase {
                 sleep(1000L);
                 this.bsp4Worker.workerSuperstepDone(superstep,
                                                     workerStatInSuperstep);
-                graphStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
+                superstepStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
             }
             countDownLatch.countDown();
         });

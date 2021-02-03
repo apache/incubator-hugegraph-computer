@@ -33,7 +33,7 @@ import com.baidu.hugegraph.util.E;
 /**
  * It is sent from master to workers.
  */
-public class GraphStat implements Readable, Writable {
+public class SuperstepStat implements Readable, Writable {
 
     private long vertexCount;
     private long edgeCount;
@@ -42,7 +42,7 @@ public class GraphStat implements Readable, Writable {
     private long messageBytes;
     private boolean halt;
 
-    public GraphStat() {
+    public SuperstepStat() {
     }
 
     public void increase(PartitionStat partitionStat) {
@@ -112,10 +112,10 @@ public class GraphStat implements Readable, Writable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof GraphStat)) {
+        if (!(obj instanceof SuperstepStat)) {
             return false;
         }
-        GraphStat other = (GraphStat) obj;
+        SuperstepStat other = (SuperstepStat) obj;
         return this.vertexCount == other.vertexCount &&
                this.edgeCount == other.edgeCount &&
                this.finishedVertexCount == other.finishedVertexCount &&

@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
-import com.baidu.hugegraph.computer.core.graph.GraphStat;
+import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.util.ReadWriteUtil;
@@ -162,16 +162,16 @@ public class Bsp4Worker extends BspBase {
      * and master computes MasterComputation, and broadcast all aggregators to
      * works.
      */
-    public GraphStat waitMasterSuperstepDone(int superstep) {
+    public SuperstepStat waitMasterSuperstepDone(int superstep) {
         String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_DONE,
                                          superstep);
         byte[] bytes = this.bspClient().get(path,
                                             this.barrierOnMasterTimeout());
-        GraphStat graphStat = new GraphStat();
-        ReadWriteUtil.fromBytes(bytes, graphStat);
+        SuperstepStat superstepStat = new SuperstepStat();
+        ReadWriteUtil.fromBytes(bytes, superstepStat);
         LOG.info("Master superstep {} done, graph stat: {}",
-                 superstep, graphStat);
-        return graphStat;
+                 superstep, superstepStat);
+        return superstepStat;
     }
 
     /**

@@ -28,11 +28,11 @@ import com.baidu.hugegraph.computer.core.BaseCoreTest;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 
-public class GraphStatTest {
+public class SuperstepStatTest {
     
     @Test
     public void testIncreasePartitionStat() {
-        GraphStat stat = new GraphStat();
+        SuperstepStat stat = new SuperstepStat();
         PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         stat.increase(partitionStat);
         stat.increase(partitionStat);
@@ -51,7 +51,7 @@ public class GraphStatTest {
 
     @Test
     public void testIncreasePartitionworkerStat() {
-        GraphStat stat = new GraphStat();
+        SuperstepStat stat = new SuperstepStat();
         PartitionStat partitionStat1 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         PartitionStat partitionStat2 = new PartitionStat(2, 4L, 3L, 2L, 5L, 6L);
         WorkerStat workerStat = new WorkerStat();
@@ -73,24 +73,24 @@ public class GraphStatTest {
 
     @Test
     public void testReadWrite() throws IOException {
-        GraphStat stat1 = new GraphStat();
+        SuperstepStat stat1 = new SuperstepStat();
         PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         stat1.increase(partitionStat);
         stat1.increase(partitionStat);
-        GraphStat stat1ReadObj = new GraphStat();
+        SuperstepStat stat1ReadObj = new SuperstepStat();
         BaseCoreTest.assertEqualAfterWriteAndRead(stat1, stat1ReadObj);
     }
 
     @Test
     public void testEquals() {
-        GraphStat stat1 = new GraphStat();
+        SuperstepStat stat1 = new SuperstepStat();
         PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         stat1.increase(partitionStat);
         stat1.increase(partitionStat);
-        GraphStat stat2 = new GraphStat();
+        SuperstepStat stat2 = new SuperstepStat();
         stat2.increase(partitionStat);
         stat2.increase(partitionStat);
-        GraphStat stat3 = new GraphStat();
+        SuperstepStat stat3 = new SuperstepStat();
 
         Assert.assertEquals(stat1, stat2);
         Assert.assertNotEquals(stat1, stat3);
@@ -102,21 +102,21 @@ public class GraphStatTest {
 
     @Test
     public void testHashCode() {
-        GraphStat stat1 = new GraphStat();
+        SuperstepStat stat1 = new SuperstepStat();
         PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         stat1.increase(partitionStat);
         stat1.increase(partitionStat);
-        GraphStat stat2 = new GraphStat();
+        SuperstepStat stat2 = new SuperstepStat();
         stat2.increase(partitionStat);
         stat2.increase(partitionStat);
-        GraphStat stat3 = new GraphStat();
+        SuperstepStat stat3 = new SuperstepStat();
         Assert.assertEquals(stat1.hashCode(), stat2.hashCode());
         Assert.assertNotEquals(stat1.hashCode(), stat3.hashCode());
     }
 
     @Test
     public void testToString() {
-        GraphStat stat = new GraphStat();
+        SuperstepStat stat = new SuperstepStat();
         PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         stat.increase(partitionStat);
         String str = "GraphStat{\"vertexCount\":4,\"edgeCount\":3,\"" +

@@ -62,7 +62,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
     ValueFactoryTest.class,
     ContainerInfoTest.class,
     PartitionStatTest.class,
-    GraphStatTest.class
+    SuperstepStatTest.class
 })
 public class GraphTestSuite {
 }
