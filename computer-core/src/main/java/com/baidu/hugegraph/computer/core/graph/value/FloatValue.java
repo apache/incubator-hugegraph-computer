@@ -65,6 +65,12 @@ public class FloatValue implements Value<FloatValue> {
     }
 
     @Override
+    public int compareTo(FloatValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return Float.compare(this.value, obj.value);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof FloatValue)) {
             return false;
@@ -80,11 +86,5 @@ public class FloatValue implements Value<FloatValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public int compareTo(FloatValue obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        return Float.compare(this.value, obj.value);
     }
 }

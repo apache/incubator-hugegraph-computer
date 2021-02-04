@@ -32,7 +32,7 @@ public class IdValueTest {
         IdValue value2 = new LongId(123L).idValue();
         IdValue value3 = new LongId(321L).idValue();
         Assert.assertEquals(0, value1.compareTo(value2));
-        Assert.assertTrue(value2.compareTo(value3) < 0);
-        Assert.assertTrue(value3.compareTo(value1) > 0);
+        Assert.assertLt(0, value2.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
     }
 }

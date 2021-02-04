@@ -65,6 +65,12 @@ public class LongValue implements Value<LongValue> {
     }
 
     @Override
+    public int compareTo(LongValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return Long.compare(this.value, obj.value);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof LongValue)) {
             return false;
@@ -80,11 +86,5 @@ public class LongValue implements Value<LongValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public int compareTo(LongValue obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        return Long.compare(this.value, obj.value);
     }
 }

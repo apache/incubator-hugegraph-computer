@@ -96,7 +96,7 @@ public class IdValueListListTest extends UnitTestBase {
         value3.add(listValue);
 
         Assert.assertEquals(0, value1.compareTo(value2));
-        Assert.assertTrue(value1.compareTo(value3) < 0);
-        Assert.assertTrue(value3.compareTo(value1) > 0);
+        Assert.assertLt(0, value1.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
     }
 }

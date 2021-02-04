@@ -118,6 +118,25 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
     }
 
     @Override
+    public int compareTo(ListValue<T> obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        int cmp = this.size() - obj.size();
+        if (cmp != 0) {
+            return cmp;
+        } else {
+            for (int i = 0; i < this.size(); i++) {
+                cmp = this.values.get(i).compareTo(obj.values.get(i));
+                if (cmp != 0) {
+                    return cmp;
+                } else {
+                    // Continue compare next element until to end
+                }
+            }
+        }
+        return 0;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof ListValue)) {
             return false;
@@ -138,24 +157,5 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
     public String toString() {
         return String.format("ListValue{elemType=%s" + ", size=%s}",
                              this.elemType, this.values.size());
-    }
-
-    @Override
-    public int compareTo(ListValue<T> obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        int cmp = this.size() - obj.size();
-        if (cmp != 0) {
-            return cmp;
-        } else {
-            for (int i = 0; i < this.size(); i++) {
-                cmp = this.values.get(i).compareTo(obj.values.get(i));
-                if (cmp != 0) {
-                    return cmp;
-                } else {
-                    // Continue compare next element until to end
-                }
-            }
-        }
-        return 0;
     }
 }

@@ -55,6 +55,12 @@ public class NullValue implements Value<NullValue> {
     }
 
     @Override
+    public int compareTo(NullValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return 0;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return obj == INSTANCE || obj instanceof NullValue;
     }
@@ -67,11 +73,5 @@ public class NullValue implements Value<NullValue> {
     @Override
     public String toString() {
         return "<null>";
-    }
-
-    @Override
-    public int compareTo(NullValue obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        return 0;
     }
 }

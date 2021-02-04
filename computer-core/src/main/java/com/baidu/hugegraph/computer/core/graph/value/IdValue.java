@@ -80,7 +80,7 @@ public class IdValue implements Value<IdValue> {
 
     @Override
     public int compareTo(IdValue obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
         return ByteArrayUtil.compare(this.bytes, this.length,
                                      obj.bytes, obj.length);
     }

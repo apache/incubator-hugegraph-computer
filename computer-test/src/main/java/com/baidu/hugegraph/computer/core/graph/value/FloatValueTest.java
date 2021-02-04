@@ -56,7 +56,7 @@ public class FloatValueTest extends UnitTestBase {
         FloatValue value2 = new FloatValue(123.0F);
         FloatValue value3 = new FloatValue(321.0F);
         Assert.assertEquals(0, value1.compareTo(value2));
-        Assert.assertTrue(value1.compareTo(value3) < 0);
-        Assert.assertTrue(value3.compareTo(value1) > 0);
+        Assert.assertLt(0, value1.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
     }
 }

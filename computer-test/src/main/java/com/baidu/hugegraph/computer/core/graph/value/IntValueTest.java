@@ -56,7 +56,7 @@ public class IntValueTest extends UnitTestBase {
         IntValue value2 = new IntValue(123);
         IntValue value3 = new IntValue(321);
         Assert.assertEquals(0, value1.compareTo(value2));
-        Assert.assertTrue(value1.compareTo(value3) < 0);
-        Assert.assertTrue(value3.compareTo(value1) > 0);
+        Assert.assertLt(0, value1.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
     }
 }

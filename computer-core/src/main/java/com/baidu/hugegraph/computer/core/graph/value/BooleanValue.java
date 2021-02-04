@@ -68,6 +68,12 @@ public class BooleanValue implements Value<BooleanValue> {
     }
 
     @Override
+    public int compareTo(BooleanValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return Boolean.compare(this.value, obj.value);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof BooleanValue)) {
             return false;
@@ -83,11 +89,5 @@ public class BooleanValue implements Value<BooleanValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public int compareTo(BooleanValue obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        return Boolean.compare(this.value, obj.value);
     }
 }

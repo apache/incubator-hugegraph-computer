@@ -65,6 +65,12 @@ public class DoubleValue implements Value<DoubleValue> {
     }
 
     @Override
+    public int compareTo(DoubleValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return Double.compare(this.value, obj.value);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof DoubleValue)) {
             return false;
@@ -80,11 +86,5 @@ public class DoubleValue implements Value<DoubleValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public int compareTo(DoubleValue obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        return Double.compare(this.value, obj.value);
     }
 }

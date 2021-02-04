@@ -65,6 +65,12 @@ public class IntValue implements Value<IntValue> {
     }
 
     @Override
+    public int compareTo(IntValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return Integer.compare(this.value, obj.value);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof IntValue)) {
             return false;
@@ -80,11 +86,5 @@ public class IntValue implements Value<IntValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public int compareTo(IntValue obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        return Integer.compare(this.value, obj.value);
     }
 }
