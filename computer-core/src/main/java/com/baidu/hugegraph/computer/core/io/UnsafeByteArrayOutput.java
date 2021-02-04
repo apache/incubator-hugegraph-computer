@@ -101,6 +101,7 @@ public final class UnsafeByteArrayOutput implements DataOutput {
     }
 
     public void writeShort(int position, int v) {
+        this.require(position, Constants.SHORT_LEN);
         UNSAFE.putShort(this.buffer, this.offset(position), (short) v);
     }
 
@@ -119,7 +120,7 @@ public final class UnsafeByteArrayOutput implements DataOutput {
     }
 
     public void writeInt(int position, int v) {
-        this.require(Constants.INT_LEN);
+        this.require(position, Constants.INT_LEN);
         UNSAFE.putInt(this.buffer, this.offset(position), v);
     }
 
@@ -217,6 +218,14 @@ public final class UnsafeByteArrayOutput implements DataOutput {
             byte[] newBuf = new byte[(this.buffer.length + size) << 1];
             System.arraycopy(this.buffer, 0, newBuf, 0, this.position);
             this.buffer = newBuf;
+        }
+    }
+
+    private void require(int position, int size) {
+        if (position + size > this.buffer.length) {
+            throw new ComputerException(
+                      "Unable to write %s bytes at position %s",
+                      size, position);
         }
     }
 

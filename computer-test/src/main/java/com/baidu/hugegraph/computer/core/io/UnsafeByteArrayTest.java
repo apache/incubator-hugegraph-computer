@@ -178,6 +178,39 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
+    public void testOverWriteWithPosition() {
+        Assert.assertThrows(ComputerException.class, () -> {
+            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput(2);
+            output.writeShort(1, 100);
+        });
+
+        Assert.assertThrows(ComputerException.class, () -> {
+            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput(2);
+            output.writeShort(2, 100);
+        });
+
+        Assert.assertThrows(ComputerException.class, () -> {
+            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput(4);
+            output.writeInt(1, 100);
+        });
+
+        Assert.assertThrows(ComputerException.class, () -> {
+            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput(4);
+            output.writeInt(2, 100);
+        });
+
+        Assert.assertThrows(ComputerException.class, () -> {
+            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput(4);
+            output.writeInt(3, 100);
+        });
+
+        Assert.assertThrows(ComputerException.class, () -> {
+            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput(4);
+            output.writeInt(4, 100);
+        });
+    }
+
+    @Test
     public void testLong() {
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (long i = -128; i <= 127; i++) {
