@@ -169,7 +169,7 @@ public class StreamGraphOutput implements GraphOutput {
     }
 
     public void writeString(String val) throws IOException {
-        this.writeBytes(CoderUtil.encode(val).array());
+        this.writeBytes(CoderUtil.encode(val));
     }
 
     public void writeBytes(byte[] bytes) throws IOException {

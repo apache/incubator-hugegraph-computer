@@ -58,9 +58,7 @@ public class Utf8IdTest extends UnitTestBase {
 
         Assert.assertEquals("100", utf8Id6.asObject());
         Assert.assertEquals(100L, utf8Id6.asLong());
-        Assert.assertArrayEquals(CoderUtil.encode("100").array(),
-                                 utf8Id6.asBytes());
-
+        Assert.assertArrayEquals(CoderUtil.encode("100"), utf8Id6.asBytes());
         Assert.assertTrue(utf8Id3.compareTo(utf8Id2) > 0);
         Assert.assertTrue(utf8Id2.compareTo(utf8Id3) < 0);
         Assert.assertTrue(utf8Id2.compareTo(utf8Id2) == 0);

@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.graph.id;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -47,9 +46,8 @@ public class Utf8Id implements Id {
 
     public Utf8Id(String value) {
         E.checkArgument(value != null, "Value can't be null");
-        ByteBuffer bb = CoderUtil.encode(value);
-        this.bytes = bb.array();
-        this.length = bb.limit();
+        this.bytes = CoderUtil.encode(value);
+        this.length = bytes.length;
     }
 
     public byte[] bytes() {
