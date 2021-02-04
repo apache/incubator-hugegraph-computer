@@ -30,6 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -84,9 +85,9 @@ public class EtcdClientTest {
     @Test
     public void testGetByNotExistKey() {
         this.client.put(KEY1, VALUE1);
-        byte[] bytes1 = this.client.get(KEY1, true);
+        byte[] bytes1 = this.client.get(KEY1);
         Assert.assertArrayEquals(VALUE1, bytes1);
-        byte[] bytes2 = this.client.get(NO_SUCH_KEY, false);
+        byte[] bytes2 = this.client.get(NO_SUCH_KEY);
         Assert.assertNull(bytes2);
         Assert.assertThrows(ComputerException.class, () -> {
             this.client.get(NO_SUCH_KEY, true);
@@ -98,63 +99,50 @@ public class EtcdClientTest {
     public void testGetWithTimeout() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100L);
-            } catch (InterruptedException e) {
-                // Do nothing.
-            }
+            UnitTestBase.sleep(100L);
             this.client.put(KEY2, VALUE2);
             this.client.put(KEY1, VALUE1);
         };
         executorService.submit(putThread);
-        byte[] bytes1 = this.client.get(KEY1, 1000L, true);
+        byte[] bytes1 = this.client.get(KEY1, 1000L, 500L);
         executorService.shutdown();
         executorService.awaitTermination(1L, TimeUnit.SECONDS);
         Assert.assertArrayEquals(VALUE1, bytes1);
         Assert.assertThrows(ComputerException.class, () -> {
-            this.client.get(NO_SUCH_KEY, 1000L, true);
+            this.client.get(NO_SUCH_KEY, 1000L, 500L);
         });
-        byte[] bytes2 = this.client.get(NO_SUCH_KEY, 1000L, false);
-        Assert.assertTrue(bytes2 == null);
         this.client.delete(KEY1);
         this.client.delete(KEY2);
     }
 
     @Test
-    public void testGetWithTimeout2() throws InterruptedException {
+    public void testGetTimeoutThrowException() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(1000L);
-            } catch (InterruptedException e) {
-                // Do nothing.
-            }
+            UnitTestBase.sleep(1000L);
             this.client.put(KEY1, VALUE1);
         };
         executorService.submit(putThread);
-        byte[] bytes1 = this.client.get(KEY1, 50L, false);
+        Assert.assertThrows(ComputerException.class, () -> {
+            this.client.get(KEY1, 50L, 50L);
+        });
         executorService.shutdown();
         executorService.awaitTermination(1L, TimeUnit.SECONDS);
-        Assert.assertNull(bytes1);
         long deleteCount = this.client.delete(KEY1);
         Assert.assertEquals(1L, deleteCount);
     }
 
     @Test
-    public void testGetWithTimeout3() throws InterruptedException {
+    public void testGetWithTimeoutAndDisturbKey() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100L);
-            } catch (InterruptedException e) {
-                // Do nothing.
-            }
+            UnitTestBase.sleep(100L);
             // Should ignore event prefix with KEY1
             this.client.put(KEY1 + "abc", VALUE2);
             this.client.put(KEY1, VALUE1);
         };
         executorService.submit(putThread);
-        byte[] bytes1 = this.client.get(KEY1, 1000L, true);
+        byte[] bytes1 = this.client.get(KEY1, 1000L, 500L);
         executorService.shutdown();
         executorService.awaitTermination(1L, TimeUnit.SECONDS);
         Assert.assertArrayEquals(VALUE1, bytes1);
@@ -176,18 +164,15 @@ public class EtcdClientTest {
     public void testGetWithPrefixAndCount() {
         this.client.put(KEY2, VALUE2);
         this.client.put(KEY1, VALUE1);
-        List<byte[]> valueList1 = this.client.getWithPrefix(KEY_PREFIX, 2,
-                                                            true);
+        List<byte[]> valueList1 = this.client.getWithPrefix(KEY_PREFIX, 2);
         Assert.assertEquals(2, valueList1.size());
         Assert.assertArrayEquals(VALUE1, valueList1.get(0));
         Assert.assertArrayEquals(VALUE2, valueList1.get(1));
 
         Assert.assertThrows(ComputerException.class, () -> {
-            this.client.getWithPrefix(NO_SUCH_KEY, 1, true);
+            this.client.getWithPrefix(NO_SUCH_KEY, 1);
         });
 
-        List<byte[]> values = this.client.getWithPrefix(NO_SUCH_KEY, 1, false);
-        Assert.assertEquals(0, values.size());
         this.client.delete(KEY1);
         this.client.delete(KEY2);
     }
@@ -196,34 +181,26 @@ public class EtcdClientTest {
     public void testGetWithPrefixAndTimeout() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            try {
-                TimeUnit.MILLISECONDS.sleep(100L);
-            } catch (InterruptedException e) {
-                // Do nothing.
-            }
+            UnitTestBase.sleep(100L);
             this.client.put(KEY1, VALUE1);
             this.client.put(KEY1, VALUE1);
             this.client.put(KEY2, VALUE2);
         };
         executorService.submit(putThread);
         List<byte[]> valueList1 = this.client.getWithPrefix(KEY_PREFIX, 2,
-                                                            1000L, true);
+                                                            1000L, 200L);
         executorService.shutdown();
         executorService.awaitTermination(1L, TimeUnit.SECONDS);
         Assert.assertEquals(2, valueList1.size());
         Assert.assertArrayEquals(VALUE1, valueList1.get(0));
         Assert.assertArrayEquals(VALUE2, valueList1.get(1));
 
-        List<byte[]> values2 = this.client.getWithPrefix(KEY_PREFIX, 3,
-                                                         1000L, false);
-        Assert.assertEquals(2, values2.size());
         Assert.assertThrows(ComputerException.class, () -> {
-            this.client.getWithPrefix(NO_SUCH_KEY, 1, 1000L, true);
+            this.client.getWithPrefix(KEY_PREFIX, 3, 1000L, 200L);
         });
-
-        List<byte[]> values3 = this.client.getWithPrefix(NO_SUCH_KEY, 1, 1000L,
-                                                         false);
-        Assert.assertEquals(0, values3.size());
+        Assert.assertThrows(ComputerException.class, () -> {
+            this.client.getWithPrefix(NO_SUCH_KEY, 1, 1000L, 200L);
+        });
         this.client.delete(KEY1);
         this.client.delete(KEY2);
     }

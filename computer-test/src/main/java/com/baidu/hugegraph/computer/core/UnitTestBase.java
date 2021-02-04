@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,15 +29,18 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.config.ConfigOption;
+import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
 
@@ -94,5 +98,45 @@ public class UnitTestBase {
             map.put(((ConfigOption) key).name(), (String) value);
         }
         ComputerContext.updateOptions(map);
+    }
+
+    public static void updateWithRequiredOptions(Object... options) {
+        Object[] requiredOptions = new Object[] {
+            ComputerOptions.ALGORITHM_NAME, "page_rank",
+            ComputerOptions.VALUE_NAME, "rank",
+            ComputerOptions.EDGES_NAME, "value",
+            ComputerOptions.VALUE_TYPE, "LONG"};
+        Object[] allOptions = new Object[requiredOptions.length +
+                                         options.length];
+        System.arraycopy(requiredOptions, 0, allOptions, 0,
+                         requiredOptions.length);
+        System.arraycopy(options, 0, allOptions,
+                         requiredOptions.length, options.length);
+        UnitTestBase.updateOptions(allOptions);
+    }
+
+    public static void assertEqualAfterWriteAndRead(Writable writeObj,
+                                                    Readable readObj)
+                                                    throws IOException {
+        byte[] bytes;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+            writeObj.write(output);
+            bytes = baos.toByteArray();
+        }
+
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+            readObj.read(input);
+            Assert.assertEquals(writeObj, readObj);
+        }
+    }
+
+    public static void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignored) {
+            // Ignore InterruptedException
+        }
     }
 }
