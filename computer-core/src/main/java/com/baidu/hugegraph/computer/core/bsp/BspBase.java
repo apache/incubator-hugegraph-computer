@@ -51,9 +51,9 @@ public abstract class BspBase {
         this.registerTimeout = this.config.get(
                                ComputerOptions.BSP_REGISTER_TIMEOUT);
         this.barrierOnWorkersTimeout = this.config.get(
-             ComputerOptions.BSP_BARRIER_ON_WORKERS_TIMEOUT);
+             ComputerOptions.BSP_WAIT_WORKERS_TIMEOUT);
         this.barrierOnMasterTimeout = this.config.get(
-             ComputerOptions.BSP_BARRIER_ON_MASTER_TIMEOUT);
+             ComputerOptions.BSP_WAIT_MASTER_TIMEOUT);
         this.logInterval = this.config.get(ComputerOptions.BSP_LOG_INTERVAL);
     }
 

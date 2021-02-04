@@ -40,9 +40,10 @@ public class SuperstepStat implements Readable, Writable {
     private long finishedVertexCount;
     private long messageCount;
     private long messageBytes;
-    private boolean active = true;
+    private boolean active;
 
     public SuperstepStat() {
+        this.active = true;
     }
 
     public void increase(PartitionStat partitionStat) {

@@ -462,7 +462,7 @@ public class EtcdClient {
         }
 
         public V await(long timeout, long logInterval, Runnable logFunc)
-                throws InterruptedException {
+                       throws InterruptedException {
             long remaining = timeout;
             long deadline = timeout + System.currentTimeMillis();
             while (remaining > 0) {

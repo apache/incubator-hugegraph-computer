@@ -132,7 +132,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> JOB_ID =
             new ConfigOption<>(
                     "job.id",
-                    "The job id.",
+                    "The job id on Yarn cluster or K8s cluster.",
                     disallowEmpty(),
                     "local_0001"
             );
@@ -140,7 +140,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> JOB_WORKERS_COUNT =
             new ConfigOption<>(
                     "job.workers_count",
-                    "The workers count of the algorithm.",
+                    "The workers count for computing one graph " +
+                    "algorithm job.",
                     positiveInt(),
                     1
             );
@@ -169,17 +170,17 @@ public class ComputerOptions extends OptionHolder {
                     TimeUnit.MINUTES.toMillis(5L)
             );
 
-    public static final ConfigOption<Long> BSP_BARRIER_ON_WORKERS_TIMEOUT =
+    public static final ConfigOption<Long> BSP_WAIT_WORKERS_TIMEOUT =
             new ConfigOption<>(
-                    "bsp.barrier_workers_timeout",
+                    "bsp.wait_workers_timeout",
                     "The max timeout to wait for workers to sent bsp event.",
                     positiveInt(),
                     TimeUnit.HOURS.toMillis(24L)
             );
 
-    public static final ConfigOption<Long> BSP_BARRIER_ON_MASTER_TIMEOUT =
+    public static final ConfigOption<Long> BSP_WAIT_MASTER_TIMEOUT =
             new ConfigOption<>(
-                    "bsp.barrier_master_timeout",
+                    "bsp.wait_master_timeout",
                     "The max timeout(in ms) to wait for master to sent bsp " +
                     "event.",
                     positiveInt(),
@@ -189,7 +190,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> BSP_LOG_INTERVAL =
             new ConfigOption<>(
                     "bsp.log_interval",
-                    "The max timeout to wait master to sent bsp event.",
+                    "The log interval(in ms) to print the log while " +
+                    "waiting bsp event.",
                     positiveInt(),
                     TimeUnit.SECONDS.toMillis(30L)
             );
