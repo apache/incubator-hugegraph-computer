@@ -29,10 +29,13 @@ public final class ValueFactory {
         return createValue(type);
     }
 
+    // Can reuse Value
     public static Value createValue(ValueType type) {
         switch (type) {
             case NULL:
                 return NullValue.get();
+            case BOOLEAN:
+                return new BooleanValue();
             case INT:
                 return new IntValue();
             case LONG:

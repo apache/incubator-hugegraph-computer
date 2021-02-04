@@ -17,29 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.allocator;
 
-import java.io.DataInput;
-import java.io.IOException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-
-public interface GraphInput extends DataInput {
-
-    Vertex readVertex() throws IOException;
-
-    Edges readEdges() throws IOException;
-
-    Edge readEdge() throws IOException;
-
-    Properties readProperties() throws IOException;
-
-    Id readId() throws IOException;
-
-    Value readValue() throws IOException;
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    RecyclersTest.class,
+    AllocatorTest.class
+})
+public class AllocatorTestSuite {
 }

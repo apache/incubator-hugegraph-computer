@@ -23,10 +23,19 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
+import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
 
@@ -43,6 +52,74 @@ public class StreamGraphInput implements GraphInput {
     }
 
     @Override
+    public Vertex readVertex() throws IOException {
+        ComputerContext context = ComputerContext.instance();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
+
+        Id id = this.readId();
+        Value value = this.readValue();
+        /*
+         * TODO: Reuse Vertex has two ways
+         * 1. ObjectPool(Recycler), need consider safely free object
+         * 2. Precreate Vertex Object outside then fill fields here
+         */
+        Vertex vertex = factory.createVertex(id, value);
+
+        if (context.config().outputVertexAdjacentEdges()) {
+            Edges edges = this.readEdges();
+            vertex.edges(edges);
+        }
+        if (context.config().outputVertexProperties()) {
+            Properties properties = this.readProperties();
+            vertex.properties(properties);
+        }
+        return vertex;
+    }
+
+    @Override
+    public Edges readEdges() throws IOException {
+        ComputerContext context = ComputerContext.instance();
+        GraphFactory factory = context.graphFactory();
+
+        int numEdges = this.readInt();
+        Edges edges = factory.createEdges(numEdges);
+        for (int i = 0; i < numEdges; ++i) {
+            Edge edge = this.readEdge();
+            edges.add(edge);
+        }
+        return edges;
+    }
+
+    @Override
+    public Edge readEdge() throws IOException {
+        ComputerContext context = ComputerContext.instance();
+        GraphFactory factory = ComputerContext.instance().graphFactory();
+
+        // Write necessary
+        Id targetId = this.readId();
+        Value value = this.readValue();
+        Edge edge = factory.createEdge(targetId, value);
+
+        if (context.config().outputEdgeProperties()) {
+            Properties properties = this.readProperties();
+            edge.properties(properties);
+        }
+        return edge;
+    }
+
+    @Override
+    public Properties readProperties() throws IOException {
+        Properties properties = new DefaultProperties();
+        int size = this.readInt();
+        for (int i = 0; i < size; i++) {
+            String key = this.readString();
+            Value value = this.readValue();
+            properties.put(key, value);
+        }
+        return properties;
+    }
+
+    @Override
     public Id readId() throws IOException {
         byte type = this.readByte();
         Id id = IdFactory.createID(type);
@@ -52,8 +129,9 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Value readValue() throws IOException {
-        byte typeCode = this.readByte();
-        Value value = ValueFactory.createValue(typeCode);
+        ComputerContext context = ComputerContext.instance();
+        ValueType valueType = context.config().valueType();
+        Value value = ValueFactory.createValue(valueType);
         value.read(this);
         return value;
     }
@@ -130,6 +208,18 @@ public class StreamGraphInput implements GraphInput {
 
     public long readUInt32() throws IOException {
         return this.readInt() & 0xffffffffL;
+    }
+
+    public String readString() throws IOException {
+        return CoderUtil.decode(this.readBytes());
+    }
+
+    public byte[] readBytes() throws IOException {
+        int length = this.readVInt();
+        assert length >= 0;
+        byte[] bytes = new byte[length];
+        this.readFully(bytes, 0, length);
+        return bytes;
     }
 
     @Override

@@ -17,29 +17,53 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.graph;
 
-import java.io.DataInput;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
+import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public interface GraphInput extends DataInput {
+public final class GraphFactory {
 
-    Vertex readVertex() throws IOException;
+    public Vertex createVertex() {
+        return new DefaultVertex();
+    }
 
-    Edges readEdges() throws IOException;
+    public <V extends Value> Vertex createVertex(Id id, V value) {
+        return new DefaultVertex(id, value);
+    }
 
-    Edge readEdge() throws IOException;
+    public Edges createEdges(int capacity) {
+        return new DefaultEdges(capacity);
+    }
 
-    Properties readProperties() throws IOException;
+    public Edge createEdge() {
+        return new DefaultEdge();
+    }
 
-    Id readId() throws IOException;
+    public <V extends Value> Edge createEdge(Id targetId, V value) {
+        return new DefaultEdge(targetId, value);
+    }
 
-    Value readValue() throws IOException;
+    public <V> List<V> createList() {
+        return new ArrayList<>();
+    }
+
+    public <V> List<V> createList(int capacity) {
+        return new ArrayList<>(capacity);
+    }
+
+    public <K, V> Map<K, V> createMap() {
+        return new HashMap<>();
+    }
 }

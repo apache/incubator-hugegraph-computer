@@ -26,27 +26,28 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class IntValueTest extends UnitTestBase {
+public class BooleanValueTest extends UnitTestBase {
 
     @Test
     public void test() {
-        IntValue intValue1 = new IntValue();
-        IntValue intValue2 = new IntValue(Integer.MIN_VALUE);
+        BooleanValue booleanValue1 = new BooleanValue();
+        BooleanValue booleanValue2 = new BooleanValue(true);
 
-        Assert.assertEquals(ValueType.INT, intValue1.type());
-        Assert.assertEquals(0, intValue1.value());
-        Assert.assertEquals(Integer.MIN_VALUE, intValue2.value());
+        Assert.assertEquals(ValueType.BOOLEAN, booleanValue1.type());
+        Assert.assertEquals(false, booleanValue1.value());
+        Assert.assertEquals(true, booleanValue2.value());
 
-        intValue2.value(Integer.MAX_VALUE);
-        Assert.assertEquals(Integer.MAX_VALUE, intValue2.value());
-        Assert.assertEquals(intValue2, new IntValue(intValue2.value()));
-        Assert.assertNotEquals(intValue1, intValue2);
-        Assert.assertEquals(Integer.hashCode(Integer.MAX_VALUE),
-                            intValue2.hashCode());
+        booleanValue2.value(false);
+        Assert.assertEquals(false, booleanValue2.value());
+        Assert.assertEquals(booleanValue2,
+                            new BooleanValue(booleanValue2.value()));
+        Assert.assertEquals(booleanValue1, booleanValue2);
+        Assert.assertEquals(Boolean.hashCode(false),
+                            booleanValue2.hashCode());
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        assertValueEqualAfterWriteAndRead(new IntValue(Integer.MAX_VALUE));
+        assertValueEqualAfterWriteAndRead(new BooleanValue(true));
     }
 }

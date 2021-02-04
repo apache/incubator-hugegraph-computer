@@ -23,13 +23,13 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class Utf8IdTest extends BaseCoreTest {
+public class Utf8IdTest extends UnitTestBase {
 
     @Test
     public void test() {

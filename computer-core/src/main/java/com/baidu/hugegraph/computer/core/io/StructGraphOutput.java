@@ -24,7 +24,10 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 
@@ -40,29 +43,73 @@ public abstract class StructGraphOutput implements GraphOutput {
 
     public abstract void writeObjectEnd() throws IOException;
 
+    public abstract void writeArrayStart() throws IOException;
+
+    public abstract void writeArrayEnd() throws IOException;
+
     public abstract void writeKey(String key) throws IOException;
 
     public abstract void writeJoiner() throws IOException;
 
     public abstract void writeSplitter() throws IOException;
 
+    public void writeLineStart() throws IOException {
+        // pass
+    }
+
+    public void writeLineEnd() throws IOException {
+        this.writeRawString(System.lineSeparator());
+    }
+
     @Override
     public void writeId(Id id) throws IOException {
-        this.writeKey("id");
-        this.writeJoiner();
         id.write(this);
-        this.writeSplitter();
     }
 
     @Override
     public void writeValue(Value value) throws IOException {
-        // String key = config.get(RankKey);
-        // TODO: read key from config
-        this.writeKey("rank");
-        this.writeJoiner();
-        value.write(this);
-        // TODO: The splitter maybe doesn't need if no properties need write
-        this.writeSplitter();
+        switch (value.type()) {
+            case ID_VALUE:
+                this.writeIdValue((IdValue) value);
+                break;
+            case ID_VALUE_LIST:
+            case ID_VALUE_LIST_LIST:
+            case LIST_VALUE:
+                this.writeListValue((ListValue<?>) value);
+                break;
+            case NULL:
+            case BOOLEAN:
+            case INT:
+            case LONG:
+            case FLOAT:
+            case DOUBLE:
+                value.write(this);
+                break;
+            default:
+                throw new ComputerException("Unexpected value type %s",
+                                            value.type());
+        }
+    }
+
+    private void writeIdValue(IdValue idValue) throws IOException {
+        /*
+         * The idValue is shown as bytes in computation,
+         * but it's as id when output
+         */
+        this.writeId(idValue.id());
+    }
+
+    private void writeListValue(ListValue<?> listValue) throws IOException {
+        this.writeArrayStart();
+        int size = listValue.size();
+        int i = 0;
+        for (Value value : listValue.values()) {
+            this.writeValue(value);
+            if (++i < size) {
+                this.writeSplitter();
+            }
+        }
+        this.writeArrayEnd();
     }
 
     @Override
@@ -138,14 +185,16 @@ public abstract class StructGraphOutput implements GraphOutput {
     }
 
     protected void writeNumber(Number number) throws IOException {
-        this.out.writeUTF(number.toString());
+        this.out.writeBytes(number.toString());
     }
 
     protected void writeRawString(String s) throws IOException {
-        this.out.writeUTF(s);
+        this.out.writeBytes(s);
     }
 
     protected void writeString(String s) throws IOException {
-        this.out.writeUTF("\"" + StringEscapeUtils.escapeJson(s) + "\"");
+        this.out.writeBytes("\"");
+        this.out.writeBytes(StringEscapeUtils.escapeJson(s));
+        this.out.writeBytes("\"");
     }
 }

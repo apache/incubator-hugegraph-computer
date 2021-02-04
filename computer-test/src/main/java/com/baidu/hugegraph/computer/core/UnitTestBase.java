@@ -21,9 +21,13 @@ package com.baidu.hugegraph.computer.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -32,9 +36,11 @@ import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
+import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.util.E;
 
-public class BaseCoreTest {
+public class UnitTestBase {
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
@@ -68,5 +74,25 @@ public class BaseCoreTest {
             newValue.read(input);
             Assert.assertEquals(oldValue, newValue);
         }
+    }
+
+    public static void updateOptions(Object... optionKeyValues) {
+        if (optionKeyValues == null || optionKeyValues.length == 0) {
+            throw new ComputerException("Options can't be null or empty");
+        }
+        if ((optionKeyValues.length & 0x01) == 1) {
+            throw new ComputerException("Options length must be even");
+        }
+        Map<String, String> map = new HashMap<>();
+        for (int i = 0; i < optionKeyValues.length; i += 2) {
+            Object key = optionKeyValues[i];
+            E.checkArgument(key instanceof ConfigOption,
+                            "The option key must be ConfigOption class");
+            Object value = optionKeyValues[i + 1];
+            E.checkArgument(value instanceof String,
+                            "The option value must be String class");
+            map.put(((ConfigOption) key).name(), (String) value);
+        }
+        ComputerContext.updateOptions(map);
     }
 }

@@ -20,12 +20,12 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections.ListUtils;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
@@ -42,7 +42,7 @@ public class ListValue<T extends Value> implements Value {
 
     public ListValue(ValueType elemType) {
         this.elemType = elemType;
-        this.values = new ArrayList<>();
+        this.values = ComputerContext.instance().graphFactory().createList();
     }
 
     public void add(T value) {
@@ -91,7 +91,8 @@ public class ListValue<T extends Value> implements Value {
             this.elemType = SerialEnum.fromCode(ValueType.class,
                                                 in.readByte());
         }
-        this.values = new ArrayList<>();
+        this.values = ComputerContext.instance().graphFactory()
+                                                .createList(size);
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
             T value = (T) ValueFactory.createValue(this.elemType);

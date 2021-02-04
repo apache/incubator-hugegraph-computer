@@ -43,7 +43,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public class JsonStructGraphOutputTest {
+public class CsvStructGraphOutputTest {
 
     @Test
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
@@ -62,18 +62,17 @@ public class JsonStructGraphOutputTest {
         IdValue idValue = new LongId(999L).idValue();
         Vertex vertex = factory.createVertex(longId, idValue);
 
-        String fileName = "output.json";
+        String fileName = "output.csv";
         File file = new File(fileName);
         try (FileOutputStream fos = new FileOutputStream(file);
              DataOutputStream dos = new DataOutputStream(fos)) {
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos);
+                                       OutputFormat.CSV, dos);
             output.writeVertex(vertex);
 
-            String json = FileUtils.readFileToString(file);
-            Assert.assertEquals("{\"id\":100,\"rank\":999}" +
-                                System.lineSeparator(), json);
+            String text = FileUtils.readFileToString(file);
+            Assert.assertEquals("100,999" + System.lineSeparator(), text);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -100,21 +99,18 @@ public class JsonStructGraphOutputTest {
         vertex.addEdge(factory.createEdge(new LongId(200), new LongValue(1)));
         vertex.addEdge(factory.createEdge(new LongId(300), new LongValue(-1)));
 
-        String fileName = "output.json";
+        String fileName = "output2.csv";
         File file = new File(fileName);
         try (FileOutputStream fos = new FileOutputStream(file);
              DataOutputStream dos = new DataOutputStream(fos)) {
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos);
+                                       OutputFormat.CSV, dos);
             output.writeVertex(vertex);
 
             String json = FileUtils.readFileToString(file);
-            Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
-                                "\"adjacent_edges\":[{\"target_id\":200," +
-                                "\"value\":1},{\"target_id\":300," +
-                                "\"value\":-1}]}" + System.lineSeparator(),
-                                json);
+            Assert.assertEquals("100,[998,999],[{200,1},{300,-1}]" +
+                                System.lineSeparator(), json);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -153,22 +149,18 @@ public class JsonStructGraphOutputTest {
         vertex.properties().put("double", new DoubleValue(-0.01D));
         vertex.properties().put("idvalue", longId.idValue());
 
-        String fileName = "output.json";
+        String fileName = "output3.csv";
         File file = new File(fileName);
         try (FileOutputStream fos = new FileOutputStream(file);
              DataOutputStream dos = new DataOutputStream(fos)) {
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos);
+                                       OutputFormat.CSV, dos);
             output.writeVertex(vertex);
 
             String json = FileUtils.readFileToString(file);
-            Assert.assertEquals("{\"id\":100,\"rank\":[[66],[998,999]]," +
-                                "\"properties\":{\"boolean\":true," +
-                                "\"byte\":127,\"double\":-0.01," +
-                                "\"short\":16383,\"idvalue\":100," +
-                                "\"float\":0.1,\"int\":1000000," +
-                                "\"long\":10000000000}}" +
+            Assert.assertEquals("100,[[66],[998,999]],{true,127,-0.01,16383," +
+                                "100,0.1,1000000,10000000000}" +
                                 System.lineSeparator(), json);
         } finally {
             FileUtils.deleteQuietly(file);

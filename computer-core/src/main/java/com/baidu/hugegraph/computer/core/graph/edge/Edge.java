@@ -17,29 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.graph.edge;
 
-import java.io.DataInput;
-import java.io.IOException;
-
-import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.allocator.Recyclable;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public interface GraphInput extends DataInput {
+public interface Edge extends Recyclable {
 
-    Vertex readVertex() throws IOException;
+    Id targetId();
 
-    Edges readEdges() throws IOException;
+    void targetId(Id targetId);
 
-    Edge readEdge() throws IOException;
+    <V extends Value> V value();
 
-    Properties readProperties() throws IOException;
+    <V extends Value> void value(V value);
 
-    Id readId() throws IOException;
+    Properties properties();
 
-    Value readValue() throws IOException;
+    void properties(Properties properties);
 }

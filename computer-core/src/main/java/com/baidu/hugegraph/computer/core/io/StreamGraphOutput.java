@@ -19,13 +19,23 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import static com.baidu.hugegraph.computer.core.common.Constants.UINT16_MAX;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.util.CoderUtil;
+import com.baidu.hugegraph.util.E;
 
 public class StreamGraphOutput implements GraphOutput {
 
@@ -40,6 +50,51 @@ public class StreamGraphOutput implements GraphOutput {
     }
 
     @Override
+    public void writeVertex(Vertex vertex) throws IOException {
+        ComputerContext context = ComputerContext.instance();
+        // Write necessary
+        this.writeId(vertex.id());
+        this.writeValue(vertex.value());
+
+        if (context.config().outputVertexAdjacentEdges()) {
+            this.writeEdges(vertex.edges());
+        }
+        if (context.config().outputVertexProperties()) {
+            this.writeProperties(vertex.properties());
+        }
+    }
+
+    @Override
+    public void writeEdges(Edges edges) throws IOException {
+        this.writeInt(edges.size());
+        for (Edge edge : edges) {
+            this.writeEdge(edge);
+        }
+    }
+
+    @Override
+    public void writeEdge(Edge edge) throws IOException {
+        ComputerContext context = ComputerContext.instance();
+        // Write necessary
+        this.writeId(edge.targetId());
+        this.writeValue(edge.value());
+
+        if (context.config().outputEdgeProperties()) {
+            this.writeProperties(edge.properties());
+        }
+    }
+
+    @Override
+    public void writeProperties(Properties properties) throws IOException {
+        Map<String, Value> keyValues = properties.get();
+        this.writeInt(keyValues.size());
+        for (Map.Entry<String, Value> entry : keyValues.entrySet()) {
+            this.writeString(entry.getKey());
+            this.writeValue(entry.getValue());
+        }
+    }
+
+    @Override
     public void writeId(Id id) throws IOException {
         this.writeByte(id.type().code());
         id.write(this);
@@ -47,8 +102,6 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeValue(Value value) throws IOException {
-        // TODO: doesn't need write type, fetch value type from config
-        this.writeByte(value.type().code());
         value.write(this);
     }
 
@@ -106,13 +159,25 @@ public class StreamGraphOutput implements GraphOutput {
     }
 
     public void writeUInt16(int val) throws IOException {
-        assert val <= Constants.UINT16_MAX;
+        assert val <= UINT16_MAX;
         this.writeShort(val);
     }
 
     public void writeUInt32(long val) throws IOException {
         assert val <= Constants.UINT32_MAX;
         this.writeInt((int) val);
+    }
+
+    public void writeString(String val) throws IOException {
+        this.writeBytes(CoderUtil.encode(val).array());
+    }
+
+    public void writeBytes(byte[] bytes) throws IOException {
+        E.checkArgument(bytes.length <= UINT16_MAX,
+                        "The max length of bytes is %s, but got %s",
+                        UINT16_MAX, bytes.length);
+        this.writeVInt(bytes.length);
+        this.write(bytes);
     }
 
     @Override
