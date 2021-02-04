@@ -30,7 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.common.UnitTestBase;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -40,7 +40,7 @@ import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.kv.PutResponse;
 import io.etcd.jetcd.options.GetOption;
 
-public class EtcdClientTest extends UnitTestBase {
+public class EtcdClientTest {
 
     private static String ENDPOINTS = "http://localhost:2379";
     private static String NAMESPACE = "test_job_0001";
@@ -99,17 +99,17 @@ public class EtcdClientTest extends UnitTestBase {
     public void testGetWithTimeout() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            sleep(100L);
+            UnitTestBase.sleep(100L);
             this.client.put(KEY2, VALUE2);
             this.client.put(KEY1, VALUE1);
         };
         executorService.submit(putThread);
-        byte[] bytes1 = this.client.get(KEY1, 1000L);
+        byte[] bytes1 = this.client.get(KEY1, 1000L, 500L);
         executorService.shutdown();
         executorService.awaitTermination(1L, TimeUnit.SECONDS);
         Assert.assertArrayEquals(VALUE1, bytes1);
         Assert.assertThrows(ComputerException.class, () -> {
-            this.client.get(NO_SUCH_KEY, 1000L);
+            this.client.get(NO_SUCH_KEY, 1000L, 500L);
         });
         this.client.delete(KEY1);
         this.client.delete(KEY2);
@@ -119,12 +119,12 @@ public class EtcdClientTest extends UnitTestBase {
     public void testGetTimeoutThrowException() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            sleep(1000L);
+            UnitTestBase.sleep(1000L);
             this.client.put(KEY1, VALUE1);
         };
         executorService.submit(putThread);
         Assert.assertThrows(ComputerException.class, () -> {
-            this.client.get(KEY1, 50L);
+            this.client.get(KEY1, 50L, 50L);
         });
         executorService.shutdown();
         executorService.awaitTermination(1L, TimeUnit.SECONDS);
@@ -136,13 +136,13 @@ public class EtcdClientTest extends UnitTestBase {
     public void testGetWithTimeoutAndDisturbKey() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            sleep(100L);
+            UnitTestBase.sleep(100L);
             // Should ignore event prefix with KEY1
             this.client.put(KEY1 + "abc", VALUE2);
             this.client.put(KEY1, VALUE1);
         };
         executorService.submit(putThread);
-        byte[] bytes1 = this.client.get(KEY1, 1000L);
+        byte[] bytes1 = this.client.get(KEY1, 1000L, 500L);
         executorService.shutdown();
         executorService.awaitTermination(1L, TimeUnit.SECONDS);
         Assert.assertArrayEquals(VALUE1, bytes1);
@@ -181,7 +181,7 @@ public class EtcdClientTest extends UnitTestBase {
     public void testGetWithPrefixAndTimeout() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(1);
         Runnable putThread = () -> {
-            sleep(100L);
+            UnitTestBase.sleep(100L);
             this.client.put(KEY1, VALUE1);
             this.client.put(KEY1, VALUE1);
             this.client.put(KEY2, VALUE2);

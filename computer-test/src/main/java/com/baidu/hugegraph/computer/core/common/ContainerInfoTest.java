@@ -21,10 +21,10 @@ package com.baidu.hugegraph.computer.core.common;
 
 import java.io.IOException;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.testutil.Assert;
 
 public class ContainerInfoTest {
 
@@ -44,7 +44,7 @@ public class ContainerInfoTest {
     public void testReadWrite() throws IOException {
         ContainerInfo oldWorker = new ContainerInfo(0, HOST1, 8001, 8002);
         ContainerInfo newWorker = new ContainerInfo();
-        BaseCoreTest.assertEqualAfterWriteAndRead(oldWorker, newWorker);
+        UnitTestBase.assertEqualAfterWriteAndRead(oldWorker, newWorker);
     }
 
     @Test

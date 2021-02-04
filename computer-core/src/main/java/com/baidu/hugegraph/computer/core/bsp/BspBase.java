@@ -21,15 +21,15 @@ package com.baidu.hugegraph.computer.core.bsp;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.common.ComputerOptions;
-import com.baidu.hugegraph.config.HugeConfig;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.util.Log;
 
 public abstract class BspBase {
 
     private static final Logger LOG = Log.logger(BspBase.class);
 
-    private HugeConfig config;
+    private Config config;
     private BspClient bspClient;
     private int workerCount;
     private long registerTimeout;
@@ -37,7 +37,7 @@ public abstract class BspBase {
     private long barrierOnWorkersTimeout;
     private long logInterval;
 
-    public BspBase(HugeConfig config) {
+    public BspBase(Config config) {
         this.config = config;
     }
 
@@ -63,6 +63,7 @@ public abstract class BspBase {
      */
     public void close() {
         this.bspClient.close();
+        LOG.info("closed");
     }
 
     private BspClient createBspClient() {
@@ -100,7 +101,8 @@ public abstract class BspBase {
      */
     protected String constructPath(BspEvent event, Object... paths) {
         StringBuilder sb = new StringBuilder();
-        sb.append(event.code());
+        // TODO: replace event.code() with event.name()
+        sb.append(event.name());
         for (Object path : paths) {
             sb.append("/").append(path.toString());
         }

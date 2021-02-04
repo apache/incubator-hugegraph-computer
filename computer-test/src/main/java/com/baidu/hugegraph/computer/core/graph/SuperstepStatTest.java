@@ -21,12 +21,12 @@ package com.baidu.hugegraph.computer.core.graph;
 
 import java.io.IOException;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
+import com.baidu.hugegraph.testutil.Assert;
 
 public class SuperstepStatTest {
     
@@ -78,7 +78,7 @@ public class SuperstepStatTest {
         stat1.increase(partitionStat);
         stat1.increase(partitionStat);
         SuperstepStat stat1ReadObj = new SuperstepStat();
-        BaseCoreTest.assertEqualAfterWriteAndRead(stat1, stat1ReadObj);
+        UnitTestBase.assertEqualAfterWriteAndRead(stat1, stat1ReadObj);
     }
 
     @Test
@@ -96,7 +96,8 @@ public class SuperstepStatTest {
         Assert.assertNotEquals(stat1, stat3);
         Assert.assertNotEquals(stat1, new Object());
 
-        stat1.halt(true);
+        stat1.inactivate();
+        Assert.assertFalse(stat1.active());
         Assert.assertNotEquals(stat1, stat2);
     }
 
@@ -115,13 +116,24 @@ public class SuperstepStatTest {
     }
 
     @Test
+    public void testActive() {
+        SuperstepStat stat = new SuperstepStat();
+        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        stat.increase(partitionStat);
+        stat.increase(partitionStat);
+        Assert.assertTrue(stat.active());
+        stat.inactivate();
+        Assert.assertFalse(stat.active());
+    }
+
+    @Test
     public void testToString() {
         SuperstepStat stat = new SuperstepStat();
         PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         stat.increase(partitionStat);
-        String str = "GraphStat{\"vertexCount\":4,\"edgeCount\":3,\"" +
+        String str = "SuperstepStat{\"vertexCount\":4,\"edgeCount\":3,\"" +
                      "finishedVertexCount\":2,\"messageCount\":5,\"" +
-                     "messageBytes\":6,\"halt\":false}";
+                     "messageBytes\":6,\"active\":true}";
         Assert.assertEquals(str, stat.toString());
     }
 }

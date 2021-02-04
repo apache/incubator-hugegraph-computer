@@ -19,30 +19,28 @@
 
 package com.baidu.hugegraph.computer.core.bsp;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.commons.configuration.MapConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.common.ComputerOptions;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
-import com.baidu.hugegraph.computer.core.common.UnitTestBase;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
-import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
-public class EtcdBspTest extends UnitTestBase {
+public class EtcdBspTest {
 
     private static final Logger LOG = Log.logger(EtcdBspTest.class);
 
@@ -55,14 +53,14 @@ public class EtcdBspTest extends UnitTestBase {
 
     @Before
     public void setup() {
-        Map<String, Object> map = new HashMap<>();
-        String jobId = "local_001";
-        map.put(ComputerOptions.JOB_ID.name(), jobId);
-        map.put(ComputerOptions.JOB_WORKERS_COUNT.name(), 1);
-        map.put(ComputerOptions.BSP_LOG_INTERVAL.name(), 200L);
-        map.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), 2);
-        MapConfiguration configuration = new MapConfiguration(map);
-        HugeConfig config = new HugeConfig(configuration);
+        UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.BSP_LOG_INTERVAL, "30000",
+            ComputerOptions.BSP_MAX_SUPER_STEP, "2"
+        );
+
+        Config config = ComputerContext.instance().config();
         this.bsp4Master = new Bsp4Master(config);
         this.bsp4Master.init();
         this.masterInfo = new ContainerInfo(-1, "localhost", 8001, 8002);
@@ -150,17 +148,16 @@ public class EtcdBspTest extends UnitTestBase {
                     superstepStat.increase(workerStat1);
                 }
                 if (i == this.maxSuperStep - 1) {
-                    superstepStat.halt(true);
+                    superstepStat.inactivate();
                 }
                 this.bsp4Master.masterSuperstepDone(i, superstepStat);
             }
             countDownLatch.countDown();
-
         });
         this.executorService.submit(() -> {
             int superstep = -1;
             SuperstepStat superstepStat = null;
-            while (superstepStat == null || !superstepStat.halt()) {
+            while (superstepStat == null || superstepStat.active()) {
                 superstep++;
                 this.bsp4Worker.workerSuperstepPrepared(superstep);
                 this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
@@ -172,10 +169,11 @@ public class EtcdBspTest extends UnitTestBase {
                 workerStatInSuperstep.add(stat1);
                 workerStatInSuperstep.add(stat2);
                 // Sleep some time to simulate the worker do computation.
-                sleep(1000L);
+                UnitTestBase.sleep(100L);
                 this.bsp4Worker.workerSuperstepDone(superstep,
                                                     workerStatInSuperstep);
-                superstepStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
+                superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
+                                                superstep);
             }
             countDownLatch.countDown();
         });

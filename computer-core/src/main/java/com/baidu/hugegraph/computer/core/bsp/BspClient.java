@@ -42,7 +42,7 @@ interface BspClient {
 
     byte[] get(String key);
 
-    byte[] get(String key, long timeout);
+    byte[] get(String key, long timeout, long logInterval);
 
     /**
      * Get expected count of child values of the key. If

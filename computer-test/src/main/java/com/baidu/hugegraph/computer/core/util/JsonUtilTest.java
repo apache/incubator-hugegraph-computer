@@ -40,8 +40,8 @@ public class JsonUtilTest {
     @Test
     public void testNull() {
         String json = JsonUtil.toJson(null);
-        PartitionStat partitionStat1 = JsonUtil.fromJson(
-                json, PartitionStat.class);
+        PartitionStat partitionStat1 = JsonUtil.fromJson(json,
+                                                         PartitionStat.class);
         Assert.assertEquals(null, partitionStat1);
     }
 

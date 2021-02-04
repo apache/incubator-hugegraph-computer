@@ -21,10 +21,10 @@ package com.baidu.hugegraph.computer.core.graph.partition;
 
 import java.io.IOException;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.BaseCoreTest;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.testutil.Assert;
 
 public class PartitionStatTest {
 
@@ -49,10 +49,10 @@ public class PartitionStatTest {
     public void testReadWrite() throws IOException {
         PartitionStat stat1 = new PartitionStat(0, 1L, 2L);
         PartitionStat stat1ReadObj = new PartitionStat();
-        BaseCoreTest.assertEqualAfterWriteAndRead(stat1, stat1ReadObj);
+        UnitTestBase.assertEqualAfterWriteAndRead(stat1, stat1ReadObj);
         PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         PartitionStat stat2ReadObj = new PartitionStat();
-        BaseCoreTest.assertEqualAfterWriteAndRead(stat2, stat2ReadObj);
+        UnitTestBase.assertEqualAfterWriteAndRead(stat2, stat2ReadObj);
     }
 
     @Test

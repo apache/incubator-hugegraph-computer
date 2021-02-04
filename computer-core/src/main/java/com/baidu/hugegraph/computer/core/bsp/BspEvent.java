@@ -47,6 +47,6 @@ public enum BspEvent {
     }
 
     public String key() {
-        return key;
+        return this.key;
     }
 }

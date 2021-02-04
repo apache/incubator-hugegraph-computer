@@ -85,6 +85,11 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
     }
 
     @Override
+    public Iterator<PartitionStat> iterator() {
+        return this.partitionStats.iterator();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof WorkerStat)) {
             return false;
@@ -102,10 +107,5 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
     @Override
     public String toString() {
         return JsonUtil.toJsonWithClass(this);
-    }
-
-    @Override
-    public Iterator<PartitionStat> iterator() {
-        return this.partitionStats.iterator();
     }
 }

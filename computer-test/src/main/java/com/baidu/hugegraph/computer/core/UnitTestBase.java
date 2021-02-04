@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -98,6 +100,21 @@ public class UnitTestBase {
         ComputerContext.updateOptions(map);
     }
 
+    public static void updateWithRequiredOptions(Object... options) {
+        Object[] requiredOptions = new Object[] {
+            ComputerOptions.ALGORITHM_NAME, "page_rank",
+            ComputerOptions.VALUE_NAME, "rank",
+            ComputerOptions.EDGES_NAME, "value",
+            ComputerOptions.VALUE_TYPE, "LONG"};
+        Object[] allOptions = new Object[requiredOptions.length +
+                                         options.length];
+        System.arraycopy(requiredOptions, 0, allOptions, 0,
+                         requiredOptions.length);
+        System.arraycopy(options, 0, allOptions,
+                         requiredOptions.length, options.length);
+        UnitTestBase.updateOptions(allOptions);
+    }
+
     public static void assertEqualAfterWriteAndRead(Writable writeObj,
                                                     Readable readObj)
                                                     throws IOException {
@@ -112,6 +129,14 @@ public class UnitTestBase {
             StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             readObj.read(input);
             Assert.assertEquals(writeObj, readObj);
+        }
+    }
+
+    public static void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ignored) {
+            // Ignore InterruptedException
         }
     }
 }

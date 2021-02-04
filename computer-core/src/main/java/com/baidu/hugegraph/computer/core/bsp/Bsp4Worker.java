@@ -26,11 +26,11 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.util.ReadWriteUtil;
-import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.Log;
 
 public class Bsp4Worker extends BspBase {
@@ -39,7 +39,7 @@ public class Bsp4Worker extends BspBase {
 
     private final ContainerInfo workerInfo;
 
-    public Bsp4Worker(HugeConfig config, ContainerInfo workerInfo) {
+    public Bsp4Worker(Config config, ContainerInfo workerInfo) {
         super(config);
         this.workerInfo = workerInfo;
     }
@@ -60,7 +60,8 @@ public class Bsp4Worker extends BspBase {
      */
     public ContainerInfo waitMasterRegistered() {
         String path = this.constructPath(BspEvent.BSP_MASTER_REGISTERED);
-        byte[] bytes = this.bspClient().get(path, this.registerTimeout());
+        byte[] bytes = this.bspClient().get(path, this.registerTimeout(),
+                                            this.logInterval());
         ContainerInfo masterInfo = new ContainerInfo();
         ReadWriteUtil.fromBytes(bytes, masterInfo);
         LOG.info("Master {} registered", masterInfo);
@@ -94,7 +95,8 @@ public class Bsp4Worker extends BspBase {
     public int waitMasterSuperstepResume() {
         String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_RESUME);
         byte[] bytes = this.bspClient().get(path,
-                                            this.barrierOnMasterTimeout());
+                                            this.barrierOnMasterTimeout(),
+                                            this.logInterval());
         IntValue superstep = new IntValue();
         ReadWriteUtil.fromBytes(bytes, superstep);
         LOG.info("Resume from superstep {}", superstep.value());
@@ -118,7 +120,8 @@ public class Bsp4Worker extends BspBase {
      */
     public void waitMasterInputDone() {
         String path = this.constructPath(BspEvent.BSP_MASTER_INPUT_DONE);
-        this.bspClient().get(path, this.barrierOnMasterTimeout());
+        this.bspClient().get(path, this.barrierOnMasterTimeout(),
+                             this.logInterval());
         LOG.info("Master input done");
     }
 
@@ -142,7 +145,8 @@ public class Bsp4Worker extends BspBase {
         LOG.info("Waiting master prepared superstep {} done", superstep);
         String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_PREPARED,
                                          superstep);
-        this.bspClient().get(path, this.barrierOnMasterTimeout());
+        this.bspClient().get(path, this.barrierOnMasterTimeout(),
+                             this.logInterval());
     }
 
     /**
@@ -166,7 +170,8 @@ public class Bsp4Worker extends BspBase {
         String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_DONE,
                                          superstep);
         byte[] bytes = this.bspClient().get(path,
-                                            this.barrierOnMasterTimeout());
+                                            this.barrierOnMasterTimeout(),
+                                            this.logInterval());
         SuperstepStat superstepStat = new SuperstepStat();
         ReadWriteUtil.fromBytes(bytes, superstepStat);
         LOG.info("Master superstep {} done, graph stat: {}",

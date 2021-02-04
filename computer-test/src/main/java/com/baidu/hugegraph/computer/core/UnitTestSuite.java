@@ -43,7 +43,7 @@ import com.baidu.hugegraph.util.Log;
     ExceptionTest.class,
     GraphTestSuite.class,
     IOTestSuite.class,
-    BspTestSuite.class
+    BspTestSuite.class,
     WorkerTestSuite.class
 })
 public class UnitTestSuite {

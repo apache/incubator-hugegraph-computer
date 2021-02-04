@@ -21,15 +21,15 @@ package com.baidu.hugegraph.computer.core.bsp;
 
 import java.util.List;
 
-import com.baidu.hugegraph.computer.core.common.ComputerOptions;
-import com.baidu.hugegraph.config.HugeConfig;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 
 public final class EtcdBspClient implements BspClient {
 
-    private HugeConfig config;
+    private final Config config;
     private EtcdClient etcdClient;
 
-    public EtcdBspClient(HugeConfig config) {
+    public EtcdBspClient(Config config) {
         this.config = config;
     }
 
@@ -61,8 +61,8 @@ public final class EtcdBspClient implements BspClient {
     }
 
     @Override
-    public byte[] get(String key, long timeout) {
-        return this.etcdClient.get(key, timeout);
+    public byte[] get(String key, long timeout, long logInterval) {
+        return this.etcdClient.get(key, timeout, logInterval);
     }
 
     @Override

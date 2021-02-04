@@ -24,6 +24,7 @@ import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
 import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
@@ -127,4 +128,69 @@ public class ComputerOptions extends OptionHolder {
             VALUE_NAME.name(),
             EDGES_NAME.name()
     );
+
+    public static final ConfigOption<String> JOB_ID =
+            new ConfigOption<>(
+                    "job.id",
+                    "The job id.",
+                    disallowEmpty(),
+                    "local_0001"
+            );
+
+    public static final ConfigOption<Integer> JOB_WORKERS_COUNT =
+            new ConfigOption<>(
+                    "job.workers_count",
+                    "The workers count of the algorithm.",
+                    positiveInt(),
+                    1
+            );
+
+    public static final ConfigOption<Integer> BSP_MAX_SUPER_STEP =
+            new ConfigOption<>(
+                    "bsp.max_super_step",
+                    "The max super step of the algorithm.",
+                    positiveInt(),
+                    10
+            );
+
+    public static final ConfigOption<String> BSP_ETCD_ENDPOINTS =
+            new ConfigOption<>(
+                    "bsp.etcd_endpoints",
+                    "The end points to access etcd.",
+                    disallowEmpty(),
+                    "http://localhost:2379"
+            );
+
+    public static final ConfigOption<Long> BSP_REGISTER_TIMEOUT =
+            new ConfigOption<>(
+                    "bsp.register_timeout",
+                    "The max timeout to wait for master and works to register.",
+                    positiveInt(),
+                    TimeUnit.MINUTES.toMillis(5L)
+            );
+
+    public static final ConfigOption<Long> BSP_BARRIER_ON_WORKERS_TIMEOUT =
+            new ConfigOption<>(
+                    "bsp.barrier_workers_timeout",
+                    "The max timeout to wait for workers to sent bsp event.",
+                    positiveInt(),
+                    TimeUnit.HOURS.toMillis(24L)
+            );
+
+    public static final ConfigOption<Long> BSP_BARRIER_ON_MASTER_TIMEOUT =
+            new ConfigOption<>(
+                    "bsp.barrier_master_timeout",
+                    "The max timeout(in ms) to wait for master to sent bsp " +
+                    "event.",
+                    positiveInt(),
+                    TimeUnit.HOURS.toMillis(24L)
+            );
+
+    public static final ConfigOption<Long> BSP_LOG_INTERVAL =
+            new ConfigOption<>(
+                    "bsp.log_interval",
+                    "The max timeout to wait master to sent bsp event.",
+                    positiveInt(),
+                    TimeUnit.SECONDS.toMillis(30L)
+            );
 }

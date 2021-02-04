@@ -40,7 +40,7 @@ public class SuperstepStat implements Readable, Writable {
     private long finishedVertexCount;
     private long messageCount;
     private long messageBytes;
-    private boolean halt;
+    private boolean active = true;
 
     public SuperstepStat() {
     }
@@ -82,12 +82,12 @@ public class SuperstepStat implements Readable, Writable {
         return this.messageBytes;
     }
 
-    public boolean halt(boolean halt) {
-        return this.halt = halt;
+    public void inactivate() {
+        this.active = false;
     }
 
-    public boolean halt() {
-        return this.halt;
+    public boolean active() {
+        return this.active;
     }
 
     @Override
@@ -97,7 +97,7 @@ public class SuperstepStat implements Readable, Writable {
         this.finishedVertexCount = in.readLong();
         this.messageCount = in.readLong();
         this.messageBytes = in.readLong();
-        this.halt = in.readBoolean();
+        this.active = in.readBoolean();
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SuperstepStat implements Readable, Writable {
         out.writeLong(this.finishedVertexCount);
         out.writeLong(this.messageCount);
         out.writeLong(this.messageBytes);
-        out.writeBoolean(this.halt);
+        out.writeBoolean(this.active);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class SuperstepStat implements Readable, Writable {
                this.finishedVertexCount == other.finishedVertexCount &&
                this.messageCount == other.messageCount &&
                this.messageBytes == other.messageBytes &&
-               this.halt == other.halt;
+               this.active == other.active;
     }
 
     @Override
@@ -133,7 +133,7 @@ public class SuperstepStat implements Readable, Writable {
                (Long.hashCode(this.finishedVertexCount) >>> 24) ^
                (Long.hashCode(this.messageCount) >>> 16) ^
                (Long.hashCode(this.messageBytes) >>> 8) ^
-               Boolean.hashCode(this.halt);
+               Boolean.hashCode(this.active);
     }
 
     @Override
