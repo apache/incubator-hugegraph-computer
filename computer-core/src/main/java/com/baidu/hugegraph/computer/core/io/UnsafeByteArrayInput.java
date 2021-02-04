@@ -72,7 +72,7 @@ public final class UnsafeByteArrayInput implements DataInput {
 
     @Override
     public int skipBytes(int n) {
-        int remaining = remaining();
+        int remaining = this.remaining();
         if (remaining >= n) {
             this.position += n;
             return n;

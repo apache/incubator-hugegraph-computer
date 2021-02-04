@@ -82,7 +82,7 @@ public final class UnsafeByteArrayOutput implements DataOutput {
     @Override
     public void writeBoolean(boolean v) {
         this.require(Constants.BOOLEAN_LEN);
-        UNSAFE.putBoolean(buffer, this.offset(), v);
+        UNSAFE.putBoolean(this.buffer, this.offset(), v);
         this.position += Constants.BOOLEAN_LEN;
     }
 
@@ -96,51 +96,51 @@ public final class UnsafeByteArrayOutput implements DataOutput {
     @Override
     public void writeShort(int v) {
         this.require(Constants.SHORT_LEN);
-        UNSAFE.putShort(buffer, this.offset(), (short) v);
+        UNSAFE.putShort(this.buffer, this.offset(), (short) v);
         this.position += Constants.SHORT_LEN;
     }
 
     public void writeShort(int position, int v) {
-        UNSAFE.putShort(buffer, this.offset(position), (short) v);
+        UNSAFE.putShort(this.buffer, this.offset(position), (short) v);
     }
 
     @Override
     public void writeChar(int v) {
         this.require(Constants.CHAR_LEN);
-        UNSAFE.putChar(buffer, this.offset(), (char) v);
+        UNSAFE.putChar(this.buffer, this.offset(), (char) v);
         this.position += Constants.CHAR_LEN;
     }
 
     @Override
     public void writeInt(int v) {
         this.require(Constants.INT_LEN);
-        UNSAFE.putInt(buffer, this.offset(), v);
+        UNSAFE.putInt(this.buffer, this.offset(), v);
         this.position += Constants.INT_LEN;
     }
 
     public void writeInt(int position, int v) {
         this.require(Constants.INT_LEN);
-        UNSAFE.putInt(buffer, this.offset(position), v);
+        UNSAFE.putInt(this.buffer, this.offset(position), v);
     }
 
     @Override
     public void writeLong(long v) {
         this.require(Constants.LONG_LEN);
-        UNSAFE.putLong(buffer, this.offset(), v);
+        UNSAFE.putLong(this.buffer, this.offset(), v);
         this.position += Constants.LONG_LEN;
     }
 
     @Override
     public void writeFloat(float v) {
         this.require(Constants.FLOAT_LEN);
-        UNSAFE.putFloat(buffer, this.offset(), v);
+        UNSAFE.putFloat(this.buffer, this.offset(), v);
         this.position += Constants.FLOAT_LEN;
     }
 
     @Override
     public void writeDouble(double v) {
         this.require(Constants.DOUBLE_LEN);
-        UNSAFE.putDouble(buffer, this.offset(), v);
+        UNSAFE.putDouble(this.buffer, this.offset(), v);
         this.position += Constants.DOUBLE_LEN;
     }
 
@@ -189,7 +189,7 @@ public final class UnsafeByteArrayOutput implements DataOutput {
      * byte size and calls writeInt(int position, int v) to write the int at
      * skipped position. The serialized byte size can be get by
      * the difference of {@link #position()} before and after write the content.
-     * @returns the position before skip.
+     * @return the position before skip.
      */
     public int skipBytes(int bytesToSkip) {
         this.require(bytesToSkip);
