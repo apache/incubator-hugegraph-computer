@@ -27,19 +27,24 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.allocator.AllocatorTestSuite;
 import com.baidu.hugegraph.computer.core.bsp.BspTestSuite;
 import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
+import com.baidu.hugegraph.computer.core.common.ExceptionTest;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
 import com.baidu.hugegraph.computer.core.io.IOTestSuite;
 import com.baidu.hugegraph.config.OptionSpace;
+import com.baidu.hugegraph.computer.core.worker.WorkerTestSuite;
 import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     AllocatorTestSuite.class,
     CommonTestSuite.class,
+    BspTestSuite.class,
+    ExceptionTest.class,
     GraphTestSuite.class,
     IOTestSuite.class,
-    BspTestSuite.class
+    BspTestSuite.class,
+    WorkerTestSuite.class
 })
 public class UnitTestSuite {
 

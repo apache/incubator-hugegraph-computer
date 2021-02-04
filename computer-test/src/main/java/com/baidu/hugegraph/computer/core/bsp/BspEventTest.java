@@ -17,23 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.bsp;
 
-public final class Constants {
+import java.util.HashMap;
+import java.util.Map;
 
-    public static final byte[] EMPTY_BYTES = new byte[0];
+import org.junit.Test;
 
-    public static final int BOOLEAN_LEN = 1;
-    public static final int BYTE_LEN = Byte.BYTES;
-    public static final int SHORT_LEN = Short.BYTES;
-    public static final int INT_LEN = Integer.BYTES;
-    public static final int LONG_LEN = Long.BYTES;
-    public static final int CHAR_LEN = Character.BYTES;
-    public static final int FLOAT_LEN = Float.BYTES;
-    public static final int DOUBLE_LEN = Double.BYTES;
-    public static final int BLOB_LEN = 4;
+import com.baidu.hugegraph.testutil.Assert;
 
-    public static final int UINT8_MAX = ((byte) -1) & 0xff;
-    public static final int UINT16_MAX = ((short) -1) & 0xffff;
-    public static final long UINT32_MAX = (-1) & 0xffffffffL;
+public class BspEventTest {
+
+    @Test
+    public void testUniqueCodeAndKey() {
+        Map<Byte, String> codeMap = new HashMap();
+        Map<String, Byte> keyMap = new HashMap();
+        BspEvent[] events = BspEvent.values();
+        for (BspEvent e : events) {
+            codeMap.put(e.code(), e.key());
+            keyMap.put(e.key(), e.code());
+        }
+        // Assert code in unique
+        Assert.assertEquals(events.length, codeMap.size());
+        // Assert key in unique
+        Assert.assertEquals(events.length, keyMap.size());
+    }
 }

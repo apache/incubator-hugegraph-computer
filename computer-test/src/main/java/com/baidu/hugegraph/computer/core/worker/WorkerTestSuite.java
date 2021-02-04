@@ -17,23 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.worker;
 
-public final class Constants {
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-    public static final byte[] EMPTY_BYTES = new byte[0];
-
-    public static final int BOOLEAN_LEN = 1;
-    public static final int BYTE_LEN = Byte.BYTES;
-    public static final int SHORT_LEN = Short.BYTES;
-    public static final int INT_LEN = Integer.BYTES;
-    public static final int LONG_LEN = Long.BYTES;
-    public static final int CHAR_LEN = Character.BYTES;
-    public static final int FLOAT_LEN = Float.BYTES;
-    public static final int DOUBLE_LEN = Double.BYTES;
-    public static final int BLOB_LEN = 4;
-
-    public static final int UINT8_MAX = ((byte) -1) & 0xff;
-    public static final int UINT16_MAX = ((short) -1) & 0xffff;
-    public static final long UINT32_MAX = (-1) & 0xffffffffL;
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    WorkerStatTest.class
+})
+public class WorkerTestSuite {
 }
