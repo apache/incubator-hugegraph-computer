@@ -101,7 +101,7 @@ public final class UnsafeByteArrayOutput implements DataOutput {
     }
 
     public void writeShort(int position, int v) {
-        UNSAFE.putShort(buffer, offset(position), (short) v);
+        UNSAFE.putShort(buffer, this.offset(position), (short) v);
     }
 
     @Override
@@ -120,7 +120,7 @@ public final class UnsafeByteArrayOutput implements DataOutput {
 
     public void writeInt(int position, int v) {
         this.require(Constants.INT_LEN);
-        UNSAFE.putInt(buffer, offset(position), v);
+        UNSAFE.putInt(buffer, this.offset(position), v);
     }
 
     @Override

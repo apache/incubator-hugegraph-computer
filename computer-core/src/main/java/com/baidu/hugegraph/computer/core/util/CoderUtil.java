@@ -57,7 +57,7 @@ public class CoderUtil {
             }
         }
 
-        for ( ;i < strLen; i++) {
+        for (; i < strLen; i++) {
             c = s.charAt(i);
             if ((c >= 0x0001) && (c <= 0x007F)) {
                 bytes[count++] = (byte) c;
