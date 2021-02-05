@@ -50,10 +50,10 @@ public class LongId implements Id {
     @Override
     public IdValue idValue() {
         // len = id type(1 byte) + long data(1 ~ 10 bytes)
-        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput(11)) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput(11)) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             output.writeId(this);
-            return new IdValue(ubao.toByteArray());
+            return new IdValue(bao.toByteArray());
         } catch (IOException e) {
             throw new ComputerException("Failed to get idValue from id '%s'",
                                         e, this);

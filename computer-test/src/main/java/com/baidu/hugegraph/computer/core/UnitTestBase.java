@@ -47,15 +47,15 @@ public class UnitTestBase {
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             oldId.write(output);
-            bytes = ubao.toByteArray();
+            bytes = bao.toByteArray();
         }
 
         Id newId = IdFactory.createID(oldId.type());
-        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             newId.read(input);
             Assert.assertEquals(oldId, newId);
         }
@@ -64,15 +64,15 @@ public class UnitTestBase {
     public static void assertValueEqualAfterWriteAndRead(Value oldValue)
                                                          throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             oldValue.write(output);
-            bytes = ubao.toByteArray();
+            bytes = bao.toByteArray();
         }
 
         Value newValue = ValueFactory.createValue(oldValue.type());
-        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             newValue.read(input);
             Assert.assertEquals(oldValue, newValue);
         }
@@ -117,14 +117,14 @@ public class UnitTestBase {
                                                     Readable readObj)
                                                     throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             writeObj.write(output);
-            bytes = ubao.toByteArray();
+            bytes = bao.toByteArray();
         }
 
-        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             readObj.read(input);
             Assert.assertEquals(writeObj, readObj);
         }

@@ -54,10 +54,10 @@ public class UuidId implements Id {
     @Override
     public IdValue idValue() {
         // len = Byte.BYTES + Long.BYTES + Long.BYTES;
-        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput(17)) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput(17)) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             output.writeId(this);
-            return new IdValue(ubao.toByteArray());
+            return new IdValue(bao.toByteArray());
         } catch (IOException e) {
             throw new ComputerException("Failed to get idValue from id '%s'",
                                         e, this);

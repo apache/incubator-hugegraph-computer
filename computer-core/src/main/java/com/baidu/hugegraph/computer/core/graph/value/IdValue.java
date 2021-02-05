@@ -49,10 +49,9 @@ public class IdValue implements Value<IdValue> {
     }
 
     public Id id() {
-        try (UnsafeByteArrayInput bais = new UnsafeByteArrayInput(
-                                             this.bytes, 0,
-                                             this.length)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(this.bytes, 0,
+                                                                 this.length)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             return input.readId();
         } catch (IOException e) {
             throw new ComputerException("Failed to read Id", e);

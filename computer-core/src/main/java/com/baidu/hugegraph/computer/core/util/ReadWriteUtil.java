@@ -34,10 +34,10 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 public class ReadWriteUtil {
 
     public static byte[] toBytes(Writable obj) {
-        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             obj.write(output);
-            return ubao.toByteArray();
+            return bao.toByteArray();
         } catch (IOException e) {
             throw new ComputeException(
                       "Failed to create byte array with writable '%s'", e, obj);
@@ -45,8 +45,8 @@ public class ReadWriteUtil {
     }
 
     public static void fromBytes(byte[] bytes, Readable obj) {
-        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             obj.read(input);
         } catch (IOException e) {
             throw new ComputeException("Failed to read from byte array", e);

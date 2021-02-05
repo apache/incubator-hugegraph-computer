@@ -66,10 +66,10 @@ public class Utf8Id implements Id {
     @Override
     public IdValue idValue() {
         int len = Byte.BYTES + Integer.BYTES + this.length;
-        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput(len)) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput(len)) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             output.writeId(this);
-            return new IdValue(ubao.toByteArray());
+            return new IdValue(bao.toByteArray());
         } catch (IOException e) {
             throw new ComputerException("Failed to get idValue from id '%s'",
                                         e, this);
