@@ -30,10 +30,10 @@ public class ValueMinCombinerTest {
     public void test() {
         LongValue min = new LongValue(0L);
         ValueMinCombiner<LongValue> combiner = new ValueMinCombiner();
-        for (long i = 1; i <= 10; i++) {
-            LongValue value = new LongValue(i);
-            min = combiner.combine(min, value);
-        }
+        LongValue value1 = new LongValue(1L);
+        min = combiner.combine(min, value1);
+        LongValue value2 = new LongValue(2L);
+        min = combiner.combine(value2, min);
         Assert.assertEquals(new LongValue(0L), min);
     }
 }

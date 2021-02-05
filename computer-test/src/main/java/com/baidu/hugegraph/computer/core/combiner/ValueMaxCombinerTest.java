@@ -30,10 +30,10 @@ public class ValueMaxCombinerTest {
     public void test() {
         LongValue max = new LongValue(0L);
         ValueMaxCombiner<LongValue> combiner = new ValueMaxCombiner();
-        for (long i = 1; i <= 10; i++) {
-            LongValue value = new LongValue(i);
-            max = combiner.combine(max, value);
-        }
-        Assert.assertEquals(new LongValue(10L), max);
+        LongValue value1 = new LongValue(1L);
+        max = combiner.combine(max, value1);
+        LongValue value2 = new LongValue(2L);
+        max = combiner.combine(value2, max);
+        Assert.assertEquals(new LongValue(2L), max);
     }
 }
