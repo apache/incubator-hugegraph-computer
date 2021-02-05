@@ -19,7 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.Closeable;
 import java.io.DataInput;
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -29,7 +31,7 @@ import com.baidu.hugegraph.util.E;
 
 import sun.misc.Unsafe;
 
-public final class UnsafeByteArrayInput implements DataInput {
+public final class UnsafeByteArrayInput implements DataInput, Closeable {
 
     private static final sun.misc.Unsafe UNSAFE;
 
@@ -52,10 +54,14 @@ public final class UnsafeByteArrayInput implements DataInput {
     }
 
     public UnsafeByteArrayInput(byte[] buffer, int limit) {
+        this(buffer, 0, limit);
+    }
+
+    public UnsafeByteArrayInput(byte[] buffer, int position, int limit) {
         E.checkArgumentNotNull(buffer, "The buffer can't be null");
         this.buffer = buffer;
         this.limit = limit;
-        this.position = 0;
+        this.position = position;
     }
 
     @Override
@@ -193,5 +199,10 @@ public final class UnsafeByteArrayInput implements DataInput {
 
     private int offset() {
         return Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position;
+    }
+
+    @Override
+    public void close() throws IOException {
+        // Do nothing
     }
 }

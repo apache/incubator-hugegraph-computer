@@ -19,9 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataInputStream;
+import java.io.DataInput;
 import java.io.IOException;
-import java.io.InputStream;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
@@ -41,13 +40,9 @@ import com.baidu.hugegraph.util.E;
 
 public class StreamGraphInput implements GraphInput {
 
-    private final DataInputStream in;
+    private final DataInput in;
 
-    public StreamGraphInput(InputStream in) {
-        this(new DataInputStream(in));
-    }
-
-    public StreamGraphInput(DataInputStream in) {
+    public StreamGraphInput(DataInput in) {
         this.in = in;
     }
 
@@ -199,11 +194,11 @@ public class StreamGraphInput implements GraphInput {
     }
 
     public int readUInt8() throws IOException {
-        return this.readByte() & 0x000000ff;
+        return this.readUnsignedByte();
     }
 
     public int readUInt16() throws IOException {
-        return this.readShort() & 0x0000ffff;
+        return this.readUnsignedShort();
     }
 
     public long readUInt32() throws IOException {

@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.graph.id;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -30,6 +29,7 @@ import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
@@ -66,10 +66,10 @@ public class Utf8Id implements Id {
     @Override
     public IdValue idValue() {
         int len = Byte.BYTES + Integer.BYTES + this.length;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(len)) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput(len)) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeId(this);
-            return new IdValue(baos.toByteArray());
+            return new IdValue(ubao.toByteArray());
         } catch (IOException e) {
             throw new ComputerException("Failed to get idValue from id '%s'",
                                         e, this);

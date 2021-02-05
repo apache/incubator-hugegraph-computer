@@ -19,17 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataOutputStream;
+import java.io.DataOutput;
 import java.io.IOException;
-import java.io.OutputStream;
 
 public class OptimizedStreamGraphOutput extends StreamGraphOutput {
 
-    public OptimizedStreamGraphOutput(OutputStream out) {
-        super(out);
-    }
-
-    public OptimizedStreamGraphOutput(DataOutputStream out) {
+    public OptimizedStreamGraphOutput(DataOutput out) {
         super(out);
     }
 

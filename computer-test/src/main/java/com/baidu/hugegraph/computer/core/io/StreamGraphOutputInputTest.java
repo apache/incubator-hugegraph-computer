@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.collections.ListUtils;
@@ -59,15 +57,15 @@ public class StreamGraphOutputInputTest {
         LongValue longValue = new LongValue(999L);
         Vertex vertex1 = factory.createVertex(longId, longValue);
         byte[] bytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeVertex(vertex1);
-            bytes = baos.toByteArray();
+            bytes = ubao.toByteArray();
         }
 
         Vertex vertex2;
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             vertex2 = input.readVertex();
         }
         Assert.assertEquals(vertex1, vertex2);
@@ -89,15 +87,15 @@ public class StreamGraphOutputInputTest {
         edges1.add(factory.createEdge(new LongId(300), new LongValue(-1)));
 
         byte[] bytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeEdges(edges1);
-            bytes = baos.toByteArray();
+            bytes = ubao.toByteArray();
         }
 
         Edges edges2;
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             edges2 = input.readEdges();
         }
         Assert.assertEquals(edges1, edges2);
@@ -121,15 +119,15 @@ public class StreamGraphOutputInputTest {
         properties1.put("salary", new LongValue(20000L));
 
         byte[] bytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeProperties(properties1);
-            bytes = baos.toByteArray();
+            bytes = ubao.toByteArray();
         }
 
         Properties properties2;
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             properties2 = input.readProperties();
         }
         Assert.assertEquals(properties1, properties2);
@@ -146,14 +144,14 @@ public class StreamGraphOutputInputTest {
         properties1.put("name", new Utf8Id("marko").idValue());
         properties1.put("city", new Utf8Id("Beijing").idValue());
 
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeProperties(properties1);
-            bytes = baos.toByteArray();
+            bytes = ubao.toByteArray();
         }
 
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             properties2 = input.readProperties();
         }
         Assert.assertEquals(properties1, properties2);
@@ -163,10 +161,10 @@ public class StreamGraphOutputInputTest {
     public void testWriteReadId() throws IOException {
         LongId longId1 = new LongId(100L);
         byte[] bytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeId(longId1);
-            bytes = baos.toByteArray();
+            bytes = ubao.toByteArray();
         }
 
         byte[] expect = new byte[]{IdType.LONG.code(), 100};
@@ -174,8 +172,8 @@ public class StreamGraphOutputInputTest {
 
         Id longId2 = new LongId();
         Assert.assertEquals(0L, longId2.asLong());
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             longId2 = input.readId();
         }
         Assert.assertEquals(100L, longId2.asLong());
@@ -192,18 +190,18 @@ public class StreamGraphOutputInputTest {
 
         LongValue longValue1 = new LongValue(100L);
         byte[] bytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeValue(longValue1);
-            bytes = baos.toByteArray();
+            bytes = ubao.toByteArray();
         }
 
         byte[] expect = new byte[]{100};
         Assert.assertArrayEquals(expect, bytes);
 
         LongValue longValue2;
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             longValue2 = (LongValue) input.readValue();
         }
         Assert.assertEquals(100L, longValue2.value());
@@ -221,18 +219,18 @@ public class StreamGraphOutputInputTest {
         IdValueList idValueList1 = new IdValueList();
         idValueList1.add(longId1.idValue());
         idValueList1.add(longId2.idValue());
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeValue(idValueList1);
-            bytes = baos.toByteArray();
+            bytes = ubao.toByteArray();
         }
 
         expect = new byte[]{2, 2, 1, 100, 3, 1, -127, 72};
         Assert.assertArrayEquals(expect, bytes);
 
         IdValueList idValueList2;
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             idValueList2 = (IdValueList) input.readValue();
         }
         Assert.assertTrue(ListUtils.isEqualList(
@@ -298,14 +296,14 @@ public class StreamGraphOutputInputTest {
 
     public static void testBytesStreamWriteReadVInt(byte[] bytes, int value)
                                                     throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(5)) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput(5)) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeVInt(value);
-            Assert.assertArrayEquals(bytes, baos.toByteArray());
+            Assert.assertArrayEquals(bytes, ubao.toByteArray());
         }
 
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             int readValue = input.readVInt();
             Assert.assertEquals(value, readValue);
         }
@@ -313,14 +311,14 @@ public class StreamGraphOutputInputTest {
 
     public static void testBytesStreamWriteReadVLong(byte[] bytes, long value)
                                                      throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream(9)) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput(9)) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeVLong(value);
-            Assert.assertArrayEquals(bytes, baos.toByteArray());
+            Assert.assertArrayEquals(bytes, ubao.toByteArray());
         }
 
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             long readValue = input.readVLong();
             Assert.assertEquals(value, readValue);
         }
@@ -329,14 +327,14 @@ public class StreamGraphOutputInputTest {
     public static void testBytesStreamWriteReadString(byte[] bytes,
                                                       String value)
                                                       throws IOException {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             output.writeString(value);
-            Assert.assertArrayEquals(bytes, baos.toByteArray());
+            Assert.assertArrayEquals(bytes, ubao.toByteArray());
         }
 
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             String readValue = input.readString();
             Assert.assertEquals(value, readValue);
         }

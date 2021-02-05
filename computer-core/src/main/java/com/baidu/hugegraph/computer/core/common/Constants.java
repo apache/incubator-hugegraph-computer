@@ -33,7 +33,7 @@ public final class Constants {
     public static final int DOUBLE_LEN = Double.BYTES;
     public static final int BLOB_LEN = 4;
 
-    public static final int UINT8_MAX = ((byte) -1) & 0xff;
-    public static final int UINT16_MAX = ((short) -1) & 0xffff;
-    public static final long UINT32_MAX = (-1) & 0xffffffffL;
+    public static final int UINT8_MAX = 0xff;
+    public static final int UINT16_MAX = 0xffff;
+    public static final long UINT32_MAX = 0xffffffffL;
 }

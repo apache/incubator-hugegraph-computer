@@ -19,17 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
 public class GraphOutputFactory {
-
-    public static GraphOutput create(OutputFormat format,
-                                     ByteArrayOutputStream out) {
-        return create(format, new DataOutputStream(out));
-    }
 
     public static GraphOutput create(OutputFormat format,
                                      DataOutputStream out) {

@@ -19,10 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.util;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
@@ -30,15 +27,17 @@ import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
 public class ReadWriteUtil {
 
     public static byte[] toBytes(Writable obj) {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput ubao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(ubao);
             obj.write(output);
-            return baos.toByteArray();
+            return ubao.toByteArray();
         } catch (IOException e) {
             throw new ComputeException(
                       "Failed to create byte array with writable '%s'", e, obj);
@@ -46,8 +45,8 @@ public class ReadWriteUtil {
     }
 
     public static void fromBytes(byte[] bytes, Readable obj) {
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput ubai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(ubai);
             obj.read(input);
         } catch (IOException e) {
             throw new ComputeException("Failed to read from byte array", e);

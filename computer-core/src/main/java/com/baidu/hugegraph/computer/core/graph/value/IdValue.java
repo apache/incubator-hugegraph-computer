@@ -20,9 +20,7 @@
 
 package com.baidu.hugegraph.computer.core.graph.value;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -31,6 +29,7 @@ import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
 import com.baidu.hugegraph.util.E;
 
@@ -50,8 +49,9 @@ public class IdValue implements Value<IdValue> {
     }
 
     public Id id() {
-        try (InputStream bais = new ByteArrayInputStream(this.bytes, 0,
-                                                         this.length)) {
+        try (UnsafeByteArrayInput bais = new UnsafeByteArrayInput(
+                                             this.bytes, 0,
+                                             this.length)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bais);
             return input.readId();
         } catch (IOException e) {
