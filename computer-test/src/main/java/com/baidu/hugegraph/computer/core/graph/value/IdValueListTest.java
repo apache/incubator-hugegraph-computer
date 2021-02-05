@@ -68,4 +68,20 @@ public class IdValueListTest extends UnitTestBase {
         oldValue.add(longId2.idValue());
         assertValueEqualAfterWriteAndRead(oldValue);
     }
+
+    @Test
+    public void testCompare() {
+        LongId longId1 = new LongId(100L);
+        LongId longId2 = new LongId(200L);
+        IdValueList value1 = new IdValueList();
+        value1.add(longId1.idValue());
+        IdValueList value2 = new IdValueList();
+        value2.add(longId1.idValue());
+        IdValueList value3 = new IdValueList();
+        value3.add(longId1.idValue());
+        value3.add(longId2.idValue());
+        Assert.assertEquals(0, value1.compareTo(value2));
+        Assert.assertLt(0, value1.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
+    }
 }

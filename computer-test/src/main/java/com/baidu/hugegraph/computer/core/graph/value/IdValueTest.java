@@ -19,10 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.graph.value;
 
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+import org.junit.Test;
 
-public interface Value<T> extends Writable, Readable, Comparable<T> {
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.testutil.Assert;
 
-    ValueType type();
+public class IdValueTest {
+
+    @Test
+    public void testCompare() {
+        IdValue value1 = new LongId(123L).idValue();
+        IdValue value2 = new LongId(123L).idValue();
+        IdValue value3 = new LongId(321L).idValue();
+        Assert.assertEquals(0, value1.compareTo(value2));
+        Assert.assertLt(0, value2.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
+    }
 }

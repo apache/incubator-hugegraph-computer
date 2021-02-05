@@ -17,12 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+import org.junit.Test;
 
-public interface Value<T> extends Writable, Readable, Comparable<T> {
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.testutil.Assert;
 
-    ValueType type();
+public class LongValueSumCombinerTest {
+
+    @Test
+    public void test() {
+        LongValue sum = new LongValue(0L);
+        LongValueSumCombiner combiner = new LongValueSumCombiner();
+        for (int i = 1; i <= 10; i++) {
+            LongValue value = new LongValue(i);
+            sum = combiner.combine(sum, value);
+        }
+        Assert.assertEquals(55L, sum.value());
+    }
 }

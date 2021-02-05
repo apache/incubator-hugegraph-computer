@@ -23,8 +23,9 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.util.E;
 
-public class DoubleValue implements Value {
+public class DoubleValue implements Value<DoubleValue> {
 
     private double value;
 
@@ -61,6 +62,12 @@ public class DoubleValue implements Value {
     @Override
     public void write(GraphOutput out) throws IOException {
         out.writeDouble(this.value);
+    }
+
+    @Override
+    public int compareTo(DoubleValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return Double.compare(this.value, obj.value);
     }
 
     @Override

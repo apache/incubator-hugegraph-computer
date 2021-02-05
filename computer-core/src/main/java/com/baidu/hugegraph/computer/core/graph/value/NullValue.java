@@ -23,8 +23,9 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.util.E;
 
-public class NullValue implements Value {
+public class NullValue implements Value<NullValue> {
 
     private static final NullValue INSTANCE = new NullValue();
 
@@ -51,6 +52,12 @@ public class NullValue implements Value {
     @Override
     public void read(GraphInput in) throws IOException {
         // Do nothing
+    }
+
+    @Override
+    public int compareTo(NullValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return 0;
     }
 
     @Override

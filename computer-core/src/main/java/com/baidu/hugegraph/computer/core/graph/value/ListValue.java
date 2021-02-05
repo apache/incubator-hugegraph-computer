@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.util.E;
 
-public class ListValue<T extends Value> implements Value {
+public class ListValue<T extends Value> implements Value<ListValue<T>> {
 
     private ValueType elemType;
     private List<T> values;
@@ -115,6 +115,22 @@ public class ListValue<T extends Value> implements Value {
         for (T value : this.values) {
             value.write(out);
         }
+    }
+
+    @Override
+    public int compareTo(ListValue<T> obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        int cmp = this.size() - obj.size();
+        if (cmp != 0) {
+            return cmp;
+        }
+        for (int i = 0; i < this.size(); i++) {
+            cmp = this.values.get(i).compareTo(obj.values.get(i));
+            if (cmp != 0) {
+                return cmp;
+            }
+        }
+        return 0;
     }
 
     @Override

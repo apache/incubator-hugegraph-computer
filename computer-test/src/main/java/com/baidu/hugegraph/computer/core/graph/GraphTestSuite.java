@@ -35,6 +35,7 @@ import com.baidu.hugegraph.computer.core.graph.value.DoubleValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueListListTest;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueListTest;
+import com.baidu.hugegraph.computer.core.graph.value.IdValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.IntValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.ListValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.LongValueTest;
@@ -51,6 +52,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
     IdFactoryTest.class,
     NullValueTest.class,
     BooleanValueTest.class,
+    IdValueTest.class,
     IntValueTest.class,
     LongValueTest.class,
     FloatValueTest.class,

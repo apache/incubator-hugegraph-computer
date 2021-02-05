@@ -23,8 +23,9 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.util.E;
 
-public class BooleanValue implements Value {
+public class BooleanValue implements Value<BooleanValue> {
 
     public static final BooleanValue TRUE = new BooleanValue(true);
     public static final BooleanValue FALSE = new BooleanValue(false);
@@ -64,6 +65,12 @@ public class BooleanValue implements Value {
     @Override
     public void write(GraphOutput out) throws IOException {
         out.writeBoolean(this.value);
+    }
+
+    @Override
+    public int compareTo(BooleanValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        return Boolean.compare(this.value, obj.value);
     }
 
     @Override

@@ -17,12 +17,18 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public interface Value<T> extends Writable, Readable, Comparable<T> {
+public class ValueMaxCombiner <T extends Value> implements Combiner<T> {
 
-    ValueType type();
+    @Override
+    public T combine(T v1, T v2) {
+        if (v1.compareTo(v2) >= 0) {
+            return v1;
+        } else {
+            return v2;
+        }
+    }
 }

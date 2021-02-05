@@ -32,8 +32,9 @@ import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
+import com.baidu.hugegraph.util.E;
 
-public class IdValue implements Value, Comparable<IdValue> {
+public class IdValue implements Value<IdValue> {
 
     private byte[] bytes;
     private int length;
@@ -79,6 +80,7 @@ public class IdValue implements Value, Comparable<IdValue> {
 
     @Override
     public int compareTo(IdValue obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
         return ByteArrayUtil.compare(this.bytes, this.length,
                                      obj.bytes, obj.length);
     }

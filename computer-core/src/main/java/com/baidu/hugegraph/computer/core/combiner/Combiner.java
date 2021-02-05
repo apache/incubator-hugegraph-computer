@@ -17,12 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+public interface Combiner<T> {
 
-public interface Value<T> extends Writable, Readable, Comparable<T> {
-
-    ValueType type();
+    /**
+     * Combine v1 and v2, return the combined value. The combined value may
+     * take use v1 or v2. The value of v1 and v2 may be updated. Should not
+     * use v1 and v2 after combine them.
+     */
+    T combine(T v1, T v2);
 }

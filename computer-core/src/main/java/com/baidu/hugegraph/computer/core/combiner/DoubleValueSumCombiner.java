@@ -17,12 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 
-public interface Value<T> extends Writable, Readable, Comparable<T> {
+public class DoubleValueSumCombiner implements Combiner<DoubleValue> {
 
-    ValueType type();
+    @Override
+    public DoubleValue combine(DoubleValue v1, DoubleValue v2) {
+        v2.value(v1.value() + v2.value());
+        return v2;
+    }
 }

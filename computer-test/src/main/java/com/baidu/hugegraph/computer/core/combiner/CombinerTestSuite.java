@@ -17,12 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public interface Value<T> extends Writable, Readable, Comparable<T> {
-
-    ValueType type();
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    DoubleValueSumCombinerTest.class,
+    LongValueSumCombinerTest.class,
+    ValueMinCombinerTest.class,
+    ValueMaxCombinerTest.class
+})
+public class CombinerTestSuite {
 }

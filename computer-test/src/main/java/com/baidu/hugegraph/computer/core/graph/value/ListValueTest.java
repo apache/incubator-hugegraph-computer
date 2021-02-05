@@ -67,4 +67,18 @@ public class ListValueTest extends UnitTestBase {
         oldValue.add(new IntValue(200));
         assertValueEqualAfterWriteAndRead(oldValue);
     }
+
+    @Test
+    public void testCompare() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<IntValue> value2 = new ListValue<>(ValueType.INT);
+        value1.add(new IntValue(100));
+        value2.add(new IntValue(100));
+        ListValue<IntValue> value3 = new ListValue<>(ValueType.INT);
+        value3.add(new IntValue(100));
+        value3.add(new IntValue(200));
+        Assert.assertEquals(0, value1.compareTo(value2));
+        Assert.assertLt(0, value1.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
+    }
 }

@@ -49,4 +49,14 @@ public class LongValueTest extends UnitTestBase {
     public void testReadWrite() throws IOException {
         assertValueEqualAfterWriteAndRead(new LongValue(Long.MAX_VALUE));
     }
+
+    @Test
+    public void testCompare() {
+        LongValue value1 = new LongValue(123L);
+        LongValue value2 = new LongValue(123L);
+        LongValue value3 = new LongValue(321L);
+        Assert.assertEquals(0, value1.compareTo(value2));
+        Assert.assertLt(0, value1.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
+    }
 }
