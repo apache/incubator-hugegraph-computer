@@ -123,14 +123,11 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
         int cmp = this.size() - obj.size();
         if (cmp != 0) {
             return cmp;
-        } else {
-            for (int i = 0; i < this.size(); i++) {
-                cmp = this.values.get(i).compareTo(obj.values.get(i));
-                if (cmp != 0) {
-                    return cmp;
-                } else {
-                    // Continue compare next element until to end
-                }
+        }
+        for (int i = 0; i < this.size(); i++) {
+            cmp = this.values.get(i).compareTo(obj.values.get(i));
+            if (cmp != 0) {
+                return cmp;
             }
         }
         return 0;
