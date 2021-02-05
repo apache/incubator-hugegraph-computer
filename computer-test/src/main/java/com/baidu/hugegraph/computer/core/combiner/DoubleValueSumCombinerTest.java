@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
