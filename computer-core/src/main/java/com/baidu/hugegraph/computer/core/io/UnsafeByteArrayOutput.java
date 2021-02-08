@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.Closeable;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
@@ -31,7 +32,7 @@ import com.baidu.hugegraph.computer.core.util.CoderUtil;
 
 import sun.misc.Unsafe;
 
-public final class UnsafeByteArrayOutput implements DataOutput {
+public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
 
     private static final sun.misc.Unsafe UNSAFE;
     private static final int DEFAULT_SIZE = 32;
@@ -235,5 +236,10 @@ public final class UnsafeByteArrayOutput implements DataOutput {
 
     private int offset(int position) {
         return Unsafe.ARRAY_BYTE_BASE_OFFSET + position;
+    }
+
+    @Override
+    public void close() throws IOException {
+        // Do nothing
     }
 }

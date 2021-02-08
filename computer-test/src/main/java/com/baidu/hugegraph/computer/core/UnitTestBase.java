@@ -19,13 +19,9 @@
 
 package com.baidu.hugegraph.computer.core;
 
-
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -39,6 +35,8 @@ import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.testutil.Assert;
@@ -49,15 +47,15 @@ public class UnitTestBase {
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
         byte[] bytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             oldId.write(output);
-            bytes = baos.toByteArray();
+            bytes = bao.toByteArray();
         }
 
         Id newId = IdFactory.createID(oldId.type());
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             newId.read(input);
             Assert.assertEquals(oldId, newId);
         }
@@ -66,15 +64,15 @@ public class UnitTestBase {
     public static void assertValueEqualAfterWriteAndRead(Value oldValue)
                                                          throws IOException {
         byte[] bytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             oldValue.write(output);
-            bytes = baos.toByteArray();
+            bytes = bao.toByteArray();
         }
 
         Value newValue = ValueFactory.createValue(oldValue.type());
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             newValue.read(input);
             Assert.assertEquals(oldValue, newValue);
         }
@@ -119,14 +117,14 @@ public class UnitTestBase {
                                                     Readable readObj)
                                                     throws IOException {
         byte[] bytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(baos);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
             writeObj.write(output);
-            bytes = baos.toByteArray();
+            bytes = bao.toByteArray();
         }
 
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bais);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             readObj.read(input);
             Assert.assertEquals(writeObj, readObj);
         }

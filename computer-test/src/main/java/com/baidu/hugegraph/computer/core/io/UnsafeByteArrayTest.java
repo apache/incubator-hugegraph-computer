@@ -295,7 +295,6 @@ public class UnsafeByteArrayTest {
                                          output.toByteArray());
         for (int i = 0; i < chars.length(); i++) {
             char c = input.readChar();
-            LOG.info(c + "");
             Assert.assertEquals(chars.charAt(i), c);
         }
     }

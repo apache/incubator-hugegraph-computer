@@ -21,9 +21,8 @@ package com.baidu.hugegraph.computer.core.io;
 
 import static com.baidu.hugegraph.computer.core.common.Constants.UINT16_MAX;
 
-import java.io.DataOutputStream;
+import java.io.DataOutput;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -39,13 +38,9 @@ import com.baidu.hugegraph.util.E;
 
 public class StreamGraphOutput implements GraphOutput {
 
-    private final DataOutputStream out;
+    private final DataOutput out;
 
-    public StreamGraphOutput(OutputStream out) {
-        this(new DataOutputStream(out));
-    }
-
-    public StreamGraphOutput(DataOutputStream out) {
+    public StreamGraphOutput(DataOutput out) {
         this.out = out;
     }
 

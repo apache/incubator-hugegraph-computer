@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataOutputStream;
+import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -33,9 +33,9 @@ import com.baidu.hugegraph.computer.core.util.StringEncoding;
 
 public abstract class StructGraphOutput implements GraphOutput {
 
-    protected final DataOutputStream out;
+    protected final DataOutput out;
 
-    public StructGraphOutput(DataOutputStream out) {
+    public StructGraphOutput(DataOutput out) {
         this.out = out;
     }
 

@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataOutputStream;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
 
@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class JsonStructGraphOutput extends StructGraphOutput {
 
-    public JsonStructGraphOutput(DataOutputStream out) {
+    public JsonStructGraphOutput(DataOutput out) {
         super(out);
     }
 
