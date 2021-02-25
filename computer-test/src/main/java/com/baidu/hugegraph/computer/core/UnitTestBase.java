@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -136,5 +137,14 @@ public class UnitTestBase {
         } catch (InterruptedException ignored) {
             // Ignore InterruptedException
         }
+    }
+
+    public static byte[] randomBytes(int size) {
+        Random random = new Random();
+        byte[] bytes = new byte[size];
+        for (int i = 0; i < size; i++) {
+            bytes[i] = (byte) random.nextInt();
+        }
+        return bytes;
     }
 }

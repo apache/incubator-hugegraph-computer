@@ -36,4 +36,6 @@ public final class Constants {
     public static final int UINT8_MAX = 0xff;
     public static final int UINT16_MAX = 0xffff;
     public static final long UINT32_MAX = 0xffffffffL;
+
+    public static final int DEFAULT_BUFFER_SIZE = 8192;
 }

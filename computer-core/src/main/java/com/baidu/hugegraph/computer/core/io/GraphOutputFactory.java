@@ -19,14 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataOutputStream;
-
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
 public class GraphOutputFactory {
 
     public static GraphOutput create(OutputFormat format,
-                                     DataOutputStream out) {
+                                     RandomAccessOutput out) {
         switch (format) {
             case BIN:
                 return new OptimizedStreamGraphOutput(out);

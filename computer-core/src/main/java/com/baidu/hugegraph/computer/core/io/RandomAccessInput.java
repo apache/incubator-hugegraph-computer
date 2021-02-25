@@ -19,26 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.DataInput;
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+public interface RandomAccessInput extends DataInput {
 
-public interface GraphInput extends RandomAccessInput {
+    long position();
 
-    Vertex readVertex() throws IOException;
+    void seek(long position) throws IOException;
 
-    Edges readEdges() throws IOException;
-
-    Edge readEdge() throws IOException;
-
-    Properties readProperties() throws IOException;
-
-    Id readId() throws IOException;
-
-    Value readValue() throws IOException;
+    /**
+     * Skip {@code n} bytes.
+     * @return the position before skip. This is different from {@link
+     * DataInput#skipBytes} and {@link java.io.InputStream#skip}, which
+     * return the number of bytes actually skipped.
+     */
+    long skip(long n) throws IOException;
 }

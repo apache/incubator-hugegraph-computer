@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.io;
 
 import static com.baidu.hugegraph.computer.core.common.Constants.UINT16_MAX;
 
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
 
@@ -38,9 +37,9 @@ import com.baidu.hugegraph.util.E;
 
 public class StreamGraphOutput implements GraphOutput {
 
-    private final DataOutput out;
+    private final RandomAccessOutput out;
 
-    public StreamGraphOutput(DataOutput out) {
+    public StreamGraphOutput(RandomAccessOutput out) {
         this.out = out;
     }
 
@@ -61,10 +60,19 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeEdges(Edges edges) throws IOException {
+        int size = edges.size();
+        if (size == 0) {
+            this.writeFullInt(0);
+            return;
+        }
+        long startPosition = this.writeFullInt(0);
         this.writeInt(edges.size());
         for (Edge edge : edges) {
             this.writeEdge(edge);
         }
+        long endPosition = this.position();
+        long length = endPosition - startPosition - Constants.INT_LEN;
+        this.writeFullInt(startPosition, (int) length);
     }
 
     @Override
@@ -215,9 +223,25 @@ public class StreamGraphOutput implements GraphOutput {
         this.out.writeInt(v);
     }
 
+    public final long writeFullInt(int v) throws IOException {
+        long position = this.position();
+        this.out.writeInt(v);
+        return position;
+    }
+
+    public final void writeFullInt(long position, int v) throws IOException {
+        this.out.writeInt(position, v);
+    }
+
     @Override
     public void writeLong(long v) throws IOException {
         this.out.writeLong(v);
+    }
+
+    public final long writeFullLong(long v) throws IOException {
+        long position = this.position();
+        this.out.writeLong(v);
+        return position;
     }
 
     @Override
@@ -243,5 +267,9 @@ public class StreamGraphOutput implements GraphOutput {
     @Override
     public void writeUTF(String s) throws IOException {
         this.out.writeUTF(s);
+    }
+
+    public long position() {
+        return this.out.position();
     }
 }

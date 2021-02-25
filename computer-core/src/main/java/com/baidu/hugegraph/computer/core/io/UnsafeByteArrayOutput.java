@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.io;
 
 import java.io.Closeable;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.lang.reflect.Field;
@@ -29,10 +28,15 @@ import java.util.Arrays;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
+import com.baidu.hugegraph.util.E;
 
 import sun.misc.Unsafe;
 
-public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
+/**
+ * Use unsafe method to write the value to the buffer to improve the write
+ * performance. The buffer is auto extendable.
+ */
+public class UnsafeByteArrayOutput implements RandomAccessOutput, Closeable {
 
     private static final sun.misc.Unsafe UNSAFE;
     private static final int DEFAULT_SIZE = 32;
@@ -60,94 +64,90 @@ public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
     }
 
     @Override
-    public void write(int b) {
+    public void write(int b) throws IOException {
         this.require(Constants.BYTE_LEN);
         this.buffer[this.position] = (byte) b;
         this.position += Constants.BYTE_LEN;
     }
 
     @Override
-    public void write(byte[] b) {
+    public void write(byte[] b) throws IOException {
         this.require(b.length);
         System.arraycopy(b, 0, this.buffer, this.position, b.length);
         this.position += b.length;
     }
 
     @Override
-    public void write(byte[] b, int off, int len) {
+    public void write(byte[] b, int off, int len) throws IOException {
         this.require(len);
         System.arraycopy(b, off, this.buffer, this.position, len);
         this.position += len;
     }
 
     @Override
-    public void writeBoolean(boolean v) {
+    public void writeBoolean(boolean v) throws IOException {
         this.require(Constants.BOOLEAN_LEN);
         UNSAFE.putBoolean(this.buffer, this.offset(), v);
         this.position += Constants.BOOLEAN_LEN;
     }
 
     @Override
-    public void writeByte(int v) {
+    public void writeByte(int v) throws IOException {
         this.require(Constants.BYTE_LEN);
         this.buffer[this.position] = (byte) v;
         this.position += Constants.BYTE_LEN;
     }
 
     @Override
-    public void writeShort(int v) {
+    public void writeShort(int v) throws IOException {
         this.require(Constants.SHORT_LEN);
         UNSAFE.putShort(this.buffer, this.offset(), (short) v);
         this.position += Constants.SHORT_LEN;
     }
 
-    public void writeShort(int position, int v) {
-        this.require(position, Constants.SHORT_LEN);
-        UNSAFE.putShort(this.buffer, this.offset(position), (short) v);
-    }
-
     @Override
-    public void writeChar(int v) {
+    public void writeChar(int v) throws IOException {
         this.require(Constants.CHAR_LEN);
         UNSAFE.putChar(this.buffer, this.offset(), (char) v);
         this.position += Constants.CHAR_LEN;
     }
 
     @Override
-    public void writeInt(int v) {
+    public void writeInt(int v) throws IOException {
         this.require(Constants.INT_LEN);
         UNSAFE.putInt(this.buffer, this.offset(), v);
         this.position += Constants.INT_LEN;
     }
 
-    public void writeInt(int position, int v) {
+    @Override
+    public void writeInt(long position, int v) throws IOException {
         this.require(position, Constants.INT_LEN);
         UNSAFE.putInt(this.buffer, this.offset(position), v);
     }
 
     @Override
-    public void writeLong(long v) {
+    public void writeLong(long v) throws IOException {
         this.require(Constants.LONG_LEN);
         UNSAFE.putLong(this.buffer, this.offset(), v);
         this.position += Constants.LONG_LEN;
     }
 
     @Override
-    public void writeFloat(float v) {
+    public void writeFloat(float v) throws IOException {
         this.require(Constants.FLOAT_LEN);
         UNSAFE.putFloat(this.buffer, this.offset(), v);
         this.position += Constants.FLOAT_LEN;
     }
 
     @Override
-    public void writeDouble(double v) {
+    public void writeDouble(double v) throws IOException {
         this.require(Constants.DOUBLE_LEN);
         UNSAFE.putDouble(this.buffer, this.offset(), v);
         this.position += Constants.DOUBLE_LEN;
     }
 
     @Override
-    public void writeBytes(String s) {
+    public void writeBytes(String s) throws IOException {
         int len = s.length();
         this.require(len);
         for (int i = 0; i < len; i++) {
@@ -157,7 +157,7 @@ public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
     }
 
     @Override
-    public void writeChars(String s) {
+    public void writeChars(String s) throws IOException {
         int len = s.length();
         this.require(len * Constants.CHAR_LEN);
         for (int i = 0; i < len; i++) {
@@ -175,13 +175,17 @@ public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
                       "Encoded string too long: " + bytes.length + " bytes");
         }
         this.writeShort(bytes.length);
-        this.require(bytes.length);
-        System.arraycopy(bytes, 0, this.buffer, this.position, bytes.length);
-        this.position += bytes.length;
+        this.write(bytes);
     }
 
-    public int position() {
+    @Override
+    public long position() {
         return this.position;
+    }
+
+    @Override
+    public void seek(long position) throws IOException {
+        this.position = (int) position;
     }
 
     /**
@@ -193,9 +197,13 @@ public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
      * the difference of {@link #position()} before and after write the content.
      * @return the position before skip.
      */
-    public int skipBytes(int bytesToSkip) {
-        this.require(bytesToSkip);
-        int positionBeforeSkip = this.position;
+    @Override
+    public long skip(long bytesToSkip) throws IOException {
+        E.checkArgument(bytesToSkip >= 0,
+                        "The parameter bytesToSkip must be >= 0, but got %s",
+                        bytesToSkip);
+        this.require((int) bytesToSkip);
+        long positionBeforeSkip = this.position;
         this.position += bytesToSkip;
         return positionBeforeSkip;
     }
@@ -214,7 +222,7 @@ public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
         return Arrays.copyOf(this.buffer, this.position);
     }
 
-    private void require(int size) {
+    protected void require(int size) throws IOException {
         if (this.position + size > this.buffer.length) {
             byte[] newBuf = new byte[(this.buffer.length + size) << 1];
             System.arraycopy(this.buffer, 0, newBuf, 0, this.position);
@@ -222,7 +230,7 @@ public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
         }
     }
 
-    private void require(int position, int size) {
+    protected void require(long position, int size) throws IOException {
         if (position + size > this.buffer.length) {
             throw new ComputerException(
                       "Unable to write %s bytes at position %s",
@@ -230,11 +238,11 @@ public final class UnsafeByteArrayOutput implements DataOutput, Closeable {
         }
     }
 
-    private int offset() {
+    private long offset() {
         return Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position;
     }
 
-    private int offset(int position) {
+    private long offset(long position) {
         return Unsafe.ARRAY_BYTE_BASE_OFFSET + position;
     }
 

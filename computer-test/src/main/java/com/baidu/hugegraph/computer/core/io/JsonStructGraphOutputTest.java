@@ -19,9 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
@@ -64,12 +62,13 @@ public class JsonStructGraphOutputTest {
 
         String fileName = "output.json";
         File file = new File(fileName);
-        try (FileOutputStream fos = new FileOutputStream(file);
-             DataOutputStream dos = new DataOutputStream(fos)) {
+        try {
+            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
             output.writeVertex(vertex);
+            dos.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":999}" +
@@ -102,12 +101,13 @@ public class JsonStructGraphOutputTest {
 
         String fileName = "output.json";
         File file = new File(fileName);
-        try (FileOutputStream fos = new FileOutputStream(file);
-             DataOutputStream dos = new DataOutputStream(fos)) {
+        try {
+            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
             output.writeVertex(vertex);
+            dos.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
@@ -115,6 +115,7 @@ public class JsonStructGraphOutputTest {
                                 "\"value\":1},{\"target_id\":300," +
                                 "\"value\":-1}]}" + System.lineSeparator(),
                                 json);
+            dos.close();
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -155,12 +156,13 @@ public class JsonStructGraphOutputTest {
 
         String fileName = "output.json";
         File file = new File(fileName);
-        try (FileOutputStream fos = new FileOutputStream(file);
-             DataOutputStream dos = new DataOutputStream(fos)) {
+        try {
+            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
             output.writeVertex(vertex);
+            dos.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[[66],[998,999]]," +

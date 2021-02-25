@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataInput;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -40,9 +39,9 @@ import com.baidu.hugegraph.util.E;
 
 public class StreamGraphInput implements GraphInput {
 
-    private final DataInput in;
+    private final RandomAccessInput in;
 
-    public StreamGraphInput(DataInput in) {
+    public StreamGraphInput(RandomAccessInput in) {
         this.in = in;
     }
 
@@ -73,11 +72,18 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Edges readEdges() throws IOException {
+        // TODO: When the previous vertex is super vertex and has a few of
+        //  edges fragment. If the super vertex not read all the fragment,
+        //  the current vertex may read the super vertex's edges.
         ComputerContext context = ComputerContext.instance();
         GraphFactory factory = context.graphFactory();
-
+        int bytes = this.readFullInt();
+        if (bytes == 0) {
+            return factory.createEdges(0);
+        }
         int numEdges = this.readInt();
         Edges edges = factory.createEdges(numEdges);
+        // TODO: lazy deserialization
         for (int i = 0; i < numEdges; ++i) {
             Edge edge = this.readEdge();
             edges.add(edge);
@@ -129,6 +135,21 @@ public class StreamGraphInput implements GraphInput {
         Value value = ValueFactory.createValue(valueType);
         value.read(this);
         return value;
+    }
+
+    @Override
+    public long position() {
+        return in.position();
+    }
+
+    @Override
+    public void seek(long position) throws IOException {
+        in.seek(position);
+    }
+
+    @Override
+    public long skip(long n) throws IOException {
+        return in.skip(n);
     }
 
     public int readVInt() throws IOException {
@@ -267,8 +288,16 @@ public class StreamGraphInput implements GraphInput {
         return this.in.readInt();
     }
 
+    public final int readFullInt() throws IOException {
+        return this.in.readInt();
+    }
+
     @Override
     public long readLong() throws IOException {
+        return this.in.readLong();
+    }
+
+    public final long readFullLong() throws IOException {
         return this.in.readLong();
     }
 

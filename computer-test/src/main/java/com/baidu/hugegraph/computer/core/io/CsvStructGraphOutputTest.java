@@ -19,9 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
@@ -64,12 +62,13 @@ public class CsvStructGraphOutputTest {
 
         String fileName = "output.csv";
         File file = new File(fileName);
-        try (FileOutputStream fos = new FileOutputStream(file);
-             DataOutputStream dos = new DataOutputStream(fos)) {
+        try {
+            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.CSV, dos);
             output.writeVertex(vertex);
+            dos.close();
 
             String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,999" + System.lineSeparator(), text);
@@ -101,12 +100,13 @@ public class CsvStructGraphOutputTest {
 
         String fileName = "output2.csv";
         File file = new File(fileName);
-        try (FileOutputStream fos = new FileOutputStream(file);
-             DataOutputStream dos = new DataOutputStream(fos)) {
+        try {
+            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.CSV, dos);
             output.writeVertex(vertex);
+            dos.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[998,999],[{200,1},{300,-1}]" +
@@ -151,12 +151,13 @@ public class CsvStructGraphOutputTest {
 
         String fileName = "output3.csv";
         File file = new File(fileName);
-        try (FileOutputStream fos = new FileOutputStream(file);
-             DataOutputStream dos = new DataOutputStream(fos)) {
+        try {
+            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.CSV, dos);
             output.writeVertex(vertex);
+            dos.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[[66],[998,999]],{true,127,-0.01,16383," +
