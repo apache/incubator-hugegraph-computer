@@ -261,7 +261,9 @@ public class BufferedFileDataInOutTest {
 
         try (DataInputStream dis = new DataInputStream(
                                    new FileInputStream(file))) {
-            for (int i = -128; i <= 127; i++) {
+            Assert.assertEquals(-128, dis.readByte());
+            dis.skip(1);
+            for (int i = -126; i <= 127; i++) {
                 Assert.assertEquals(i, dis.readByte());
             }
             long count1 = dis.skip(4);

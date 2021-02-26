@@ -313,6 +313,22 @@ public class UnsafeByteArrayTest {
     @Test
     public void testSkipBytes() throws IOException {
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        long position = output.skip(4);
+        Assert.assertEquals(0, position);
+        output.writeInt(Integer.MAX_VALUE);
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
+                                         output.toByteArray());
+        int bytesSkipped = input.skipBytes(4);
+        Assert.assertEquals(4, bytesSkipped);
+        Assert.assertEquals(4, input.remaining());
+        Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
+        Assert.assertEquals(0, input.remaining());
+        Assert.assertEquals(0, input.skipBytes(1));
+    }
+
+    @Test
+    public void testSkip() throws IOException {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.skip(4);
         output.writeInt(Integer.MAX_VALUE);
         UnsafeByteArrayInput input = new UnsafeByteArrayInput(

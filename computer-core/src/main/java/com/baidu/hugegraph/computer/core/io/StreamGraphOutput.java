@@ -61,12 +61,11 @@ public class StreamGraphOutput implements GraphOutput {
     @Override
     public void writeEdges(Edges edges) throws IOException {
         int size = edges.size();
+        this.writeInt(size);
         if (size == 0) {
-            this.writeFullInt(0);
             return;
         }
         long startPosition = this.writeFullInt(0);
-        this.writeInt(edges.size());
         for (Edge edge : edges) {
             this.writeEdge(edge);
         }
@@ -271,5 +270,13 @@ public class StreamGraphOutput implements GraphOutput {
 
     public long position() {
         return this.out.position();
+    }
+
+    public void seek(long position) throws IOException {
+        this.out.seek(position);
+    }
+
+    public long skip(long n) throws IOException {
+        return this.out.skip(n);
     }
 }

@@ -194,10 +194,11 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
     }
 
     @Override
-    public long skip(long n) throws IOException {
-        int position = this.position;
-        this.require((int) n);
-        return position;
+    public long skip(long bytesToSkip) throws IOException {
+        int positionBeforeSkip = this.position;
+        this.require((int) bytesToSkip);
+        this.position += bytesToSkip;
+        return positionBeforeSkip;
     }
 
     public int remaining() {

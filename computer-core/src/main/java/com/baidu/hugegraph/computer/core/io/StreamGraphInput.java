@@ -77,11 +77,12 @@ public class StreamGraphInput implements GraphInput {
         //  the current vertex may read the super vertex's edges.
         ComputerContext context = ComputerContext.instance();
         GraphFactory factory = context.graphFactory();
-        int bytes = this.readFullInt();
-        if (bytes == 0) {
+
+        int numEdges = this.readInt();
+        if (numEdges == 0) {
             return factory.createEdges(0);
         }
-        int numEdges = this.readInt();
+        int bytes = this.readFullInt();
         Edges edges = factory.createEdges(numEdges);
         // TODO: lazy deserialization
         for (int i = 0; i < numEdges; ++i) {
@@ -137,19 +138,16 @@ public class StreamGraphInput implements GraphInput {
         return value;
     }
 
-    @Override
     public long position() {
-        return in.position();
+        return this.in.position();
     }
 
-    @Override
     public void seek(long position) throws IOException {
-        in.seek(position);
+        this.in.seek(position);
     }
 
-    @Override
     public long skip(long n) throws IOException {
-        return in.skip(n);
+        return this.in.skip(n);
     }
 
     public int readVInt() throws IOException {
@@ -288,7 +286,7 @@ public class StreamGraphInput implements GraphInput {
         return this.in.readInt();
     }
 
-    public final int readFullInt() throws IOException {
+    public int readFullInt() throws IOException {
         return this.in.readInt();
     }
 
