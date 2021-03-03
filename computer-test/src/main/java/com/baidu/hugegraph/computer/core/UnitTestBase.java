@@ -45,6 +45,10 @@ import com.baidu.hugegraph.util.E;
 
 public class UnitTestBase {
 
+    private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                                        "0123456789" +
+                                        "abcdefghijklmnopqrstuvxyz";
+
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
         byte[] bytes;
@@ -146,5 +150,14 @@ public class UnitTestBase {
             bytes[i] = (byte) random.nextInt();
         }
         return bytes;
+    }
+
+    public static String randomString(int size) {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            sb.append(CHARS.charAt(random.nextInt(CHARS.length())));
+        }
+        return sb.toString();
     }
 }

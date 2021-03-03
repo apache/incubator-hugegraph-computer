@@ -63,7 +63,7 @@ public class CsvStructGraphOutputTest {
         String fileName = "output.csv";
         File file = new File(fileName);
         try {
-            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
+            BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.CSV, dos);
@@ -101,7 +101,7 @@ public class CsvStructGraphOutputTest {
         String fileName = "output2.csv";
         File file = new File(fileName);
         try {
-            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
+            BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.CSV, dos);
@@ -152,7 +152,7 @@ public class CsvStructGraphOutputTest {
         String fileName = "output3.csv";
         File file = new File(fileName);
         try {
-            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
+            BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.CSV, dos);

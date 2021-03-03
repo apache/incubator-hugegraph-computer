@@ -19,44 +19,35 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.InputStream;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.util.E;
 
-public class BufferedFileDataInput extends UnsafeByteArrayInput
-                                   implements RandomAccessInput {
+public class BufferedInputStream  extends UnsafeByteArrayInput {
 
-    private long fileOffset;
+    private long inOffset;
     private int bufferSize;
-    private final RandomAccessFile file;
-    private final long fileLength;
+    private final InputStream in;
 
-    public BufferedFileDataInput(File file) throws IOException {
-        this(new RandomAccessFile(file, "r"), Constants.DEFAULT_BUFFER_SIZE);
+    public BufferedInputStream(InputStream in) throws IOException {
+        this(in, Constants.DEFAULT_BUFFER_SIZE);
     }
 
-    public BufferedFileDataInput(RandomAccessFile file, int bufferSize)
-                                 throws IOException {
+    public BufferedInputStream(InputStream in, int bufferSize)
+            throws IOException {
         super(new byte[bufferSize], 0);
         E.checkArgument(bufferSize >= 8,
                         "The parameter bufferSize must be >= 8");
-        this.file = file;
-        this.fileLength = file.length();
+        this.in = in;
         this.bufferSize = bufferSize;
-        int readLen = (int) Math.min(bufferSize, this.fileLength);
-        this.file.readFully(this.buffer(), 0, readLen);
-        this.fileOffset = readLen;
-        super.limit(readLen);
+        this.shiftAndFillBuffer();
     }
 
     @Override
     public long position() {
-        return this.fileOffset - super.remaining();
+        return this.inOffset - super.remaining();
     }
 
     @Override
@@ -69,33 +60,46 @@ public class BufferedFileDataInput extends UnsafeByteArrayInput
         if (len <= super.remaining()) {
             super.readFully(b, off, len);
         } else if (len <= this.bufferSize) {
-            this.cutAndRead();
+            this.shiftAndFillBuffer();
             super.readFully(b, off, len);
         } else {
             int remaining = super.remaining();
             super.readFully(b, off, remaining);
-            this.file.readFully(b, off + remaining, len - remaining);
-            this.fileOffset += len;
+            int expectedLen = len - remaining;
+            int readLen = this.in.read(b, off + remaining, expectedLen);
+            if (readLen != expectedLen) {
+                throw new IOException("There is no enough data in input " +
+                                      "stream");
+            }
+            this.inOffset += len;
         }
     }
 
     @Override
     public void seek(long position) throws IOException {
-        if (position < this.fileOffset &&
-            position >= this.fileOffset - this.bufferSize) {
-            super.seek(this.bufferSize - (this.fileOffset - position));
+        if (position < this.inOffset &&
+            position >= this.inOffset - this.bufferSize) {
+            super.seek(this.bufferSize - (this.inOffset - position));
             return;
         }
-        if (position < this.fileLength) {
-            this.file.seek(position);
-            int readLen = (int) Math.min(this.bufferSize,
-                                         this.fileLength - position);
-            super.seek(0L);
-            this.file.readFully(this.buffer(), 0, readLen);
-            super.limit(readLen);
-            this.fileOffset = position + readLen;
+        if (position >= this.inOffset) {
+            int skipLen = (int) (position - this.inOffset);
+            this.inOffset += skipLen;
+            byte[] buffer = this.buffer();
+            while (skipLen > 0) {
+                int expectLen = Math.min(skipLen, this.bufferSize);
+                int readLen = this.in.read(buffer, 0, expectLen);
+                if (readLen != expectLen) {
+                    throw new IOException("Can't seek at position " + position);
+                }
+                skipLen -= expectLen;
+            }
+            super.seek(0);
+            super.limit(0);
+            this.fillBuffer();
+
         } else {
-            throw new EOFException("Reach the end of file");
+            throw new IOException("The position is beyond the buffer");
         }
     }
 
@@ -107,33 +111,38 @@ public class BufferedFileDataInput extends UnsafeByteArrayInput
             return positionBeforeSkip;
         }
         n -= this.remaining();
-        long position = this.fileOffset + n;
+        long position = this.inOffset + n;
         this.seek(position);
         return positionBeforeSkip;
     }
 
     @Override
     public void close() throws IOException {
-        this.file.close();
+        this.in.close();
     }
 
     protected void require(int size) throws IOException {
         if (this.remaining() >= size) {
             return;
         }
-        if (this.bufferSize >= size) {
-            cutAndRead();
-        } else {
-            throw new ComputerException("Should not reach here");
+        shiftAndFillBuffer();
+        if (size > super.limit()) {
+            throw new IOException("Can't read " + size + " bytes");
         }
     }
 
-    private void cutAndRead() throws IOException {
-        this.cutReadBuffer();
-        int readLen = Math.min(this.bufferSize - super.limit(),
-                               (int) (this.fileLength - this.fileOffset));
-        this.fileOffset += readLen;
-        this.file.readFully(this.buffer(), super.limit(), readLen);
-        super.limit(super.limit() + readLen);
+    private void shiftAndFillBuffer() throws IOException {
+        this.shiftBuffer();
+        this.fillBuffer();
+    }
+
+    private int fillBuffer() throws IOException {
+        int expectLen = this.bufferSize - super.limit();
+        int readLen = this.in.read(this.buffer(), super.limit(), expectLen);
+        if (readLen > 0) {
+            super.limit(super.limit() + readLen);
+            this.inOffset += readLen;
+        }
+        return readLen;
     }
 }

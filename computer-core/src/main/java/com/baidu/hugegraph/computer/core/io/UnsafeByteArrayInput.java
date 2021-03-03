@@ -226,11 +226,11 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
      * Cut the content from 0 to position and copy the content from position
      * to the end to 0.
      */
-    protected void cutReadBuffer() {
+    protected void shiftBuffer() {
         int remaining = this.remaining();
         if (remaining > 0) {
             System.arraycopy(this.buffer, this.position,
-                             this.buffer,0, remaining);
+                             this.buffer, 0, remaining);
         }
         this.position = 0;
         this.limit = remaining;

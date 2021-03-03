@@ -20,10 +20,12 @@
 package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
+import java.io.UTFDataFormatException;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
@@ -308,6 +310,21 @@ public class UnsafeByteArrayTest {
             String value = input.readUTF();
             Assert.assertEquals(prefix + i, value);
         }
+    }
+
+    @Test
+    public void testUTFBoundary() throws IOException {
+        String prefix = "random string";
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        String s1 = UnitTestBase.randomString(65535);
+        output.writeUTF(s1);
+        String s2 = UnitTestBase.randomString(65536);
+        Assert.assertThrows(UTFDataFormatException.class, () -> {
+            output.writeUTF(s2);
+        });
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(output.buffer());
+        String value = input.readUTF();
+        Assert.assertEquals(s1, value);
     }
 
     @Test

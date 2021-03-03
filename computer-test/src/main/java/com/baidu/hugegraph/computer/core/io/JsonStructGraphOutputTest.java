@@ -63,7 +63,7 @@ public class JsonStructGraphOutputTest {
         String fileName = "output.json";
         File file = new File(fileName);
         try {
-            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
+            BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
@@ -102,7 +102,7 @@ public class JsonStructGraphOutputTest {
         String fileName = "output.json";
         File file = new File(fileName);
         try {
-            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
+            BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
@@ -157,7 +157,7 @@ public class JsonStructGraphOutputTest {
         String fileName = "output.json";
         File file = new File(fileName);
         try {
-            BufferedFileDataOutput dos = new BufferedFileDataOutput(file);
+            BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
