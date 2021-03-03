@@ -31,8 +31,8 @@ import com.baidu.hugegraph.util.E;
  */
 public class BufferedOutputStream extends UnsafeByteArrayOutput {
 
-    private final OutputStream out;
     private final int bufferSize;
+    private final OutputStream out;
     private long osOffset;
 
     public BufferedOutputStream(OutputStream out) {
@@ -88,7 +88,8 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
             position < this.osOffset + this.bufferSize) {
             super.seek(position - this.osOffset);
             return;
-        } else if (position >= this.osOffset + this.bufferSize) {
+        }
+        if (position >= this.osOffset + this.bufferSize) {
             this.skip(position - this.position());
         } else {
                 throw new IOException("The position " + position + " is out " +
@@ -135,7 +136,6 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
             return;
         }
         this.writeBuffer();
-        return;
     }
 
     private void writeBuffer() throws IOException {

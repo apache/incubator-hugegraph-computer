@@ -30,10 +30,9 @@ import com.baidu.hugegraph.util.E;
 
 public class BufferedFileInput extends UnsafeByteArrayInput {
 
-    private long fileOffset;
-    private int bufferSize;
+    private final int bufferSize;
     private final RandomAccessFile file;
-    private final long fileLength;
+    private long fileOffset;
 
     public BufferedFileInput(File file) throws IOException {
         this(new RandomAccessFile(file, "r"), Constants.DEFAULT_BUFFER_SIZE);
@@ -45,7 +44,6 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
         E.checkArgument(bufferSize >= 8,
                         "The parameter bufferSize must be >= 8");
         this.file = file;
-        this.fileLength = file.length();
         this.bufferSize = bufferSize;
         this.fillBuffer();
     }
@@ -82,7 +80,7 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
             super.seek(this.bufferSize - (this.fileOffset - position));
             return;
         }
-        if (position < this.fileLength) {
+        if (position < this.file.length()) {
             this.file.seek(position);
             super.seek(0L);
             super.limit(0);
@@ -128,8 +126,9 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
     }
 
     private void fillBuffer() throws IOException {
+        long fileLength = this.file.length();
         int readLen = Math.min(this.bufferSize - super.limit(),
-                               (int) (this.fileLength - this.fileOffset));
+                               (int) (fileLength - this.fileOffset));
         this.fileOffset += readLen;
         this.file.readFully(this.buffer(), super.limit(), readLen);
         super.limit(super.limit() + readLen);

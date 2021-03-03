@@ -35,8 +35,8 @@ import com.baidu.hugegraph.util.E;
  */
 public class BufferedFileOutput extends UnsafeByteArrayOutput {
 
-    private final RandomAccessFile file;
     private final int bufferSize;
+    private final RandomAccessFile file;
     private long fileOffset;
 
     public BufferedFileOutput(File file) throws FileNotFoundException {
@@ -130,7 +130,6 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
             return;
         }
         this.flushBuffer();
-        return;
     }
 
     private void flushBuffer() throws IOException {

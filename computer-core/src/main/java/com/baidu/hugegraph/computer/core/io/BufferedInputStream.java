@@ -27,9 +27,9 @@ import com.baidu.hugegraph.util.E;
 
 public class BufferedInputStream  extends UnsafeByteArrayInput {
 
-    private long inOffset;
-    private int bufferSize;
+    private final int bufferSize;
     private final InputStream in;
+    private long inOffset;
 
     public BufferedInputStream(InputStream in) throws IOException {
         this(in, Constants.DEFAULT_BUFFER_SIZE);
