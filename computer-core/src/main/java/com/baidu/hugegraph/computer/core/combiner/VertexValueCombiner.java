@@ -19,17 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    DefaultPropertiesCombinerTest.class,
-    DefaultVertexValueCombinerTest.class,
-    DoubleValueSumCombinerTest.class,
-    LongValueSumCombinerTest.class,
-    ValueMinCombinerTest.class,
-    ValueMaxCombinerTest.class
-})
-public class CombinerTestSuite {
+public interface VertexValueCombiner<T extends Value> extends Combiner<T> {
 }

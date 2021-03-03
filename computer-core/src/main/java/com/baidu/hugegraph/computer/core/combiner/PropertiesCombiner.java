@@ -19,17 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    DefaultPropertiesCombinerTest.class,
-    DefaultVertexValueCombinerTest.class,
-    DoubleValueSumCombinerTest.class,
-    LongValueSumCombinerTest.class,
-    ValueMinCombinerTest.class,
-    ValueMaxCombinerTest.class
-})
-public class CombinerTestSuite {
+/**
+ * When vertex properties with the same vertex id are loaded, this class
+ * specifies how to combine their properties.
+ */
+public interface PropertiesCombiner extends Combiner<Properties> {
 }

@@ -19,17 +19,26 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.Test;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    DefaultPropertiesCombinerTest.class,
-    DefaultVertexValueCombinerTest.class,
-    DoubleValueSumCombinerTest.class,
-    LongValueSumCombinerTest.class,
-    ValueMinCombinerTest.class,
-    ValueMaxCombinerTest.class
-})
-public class CombinerTestSuite {
+import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.testutil.Assert;
+
+public class DefaultPropertiesCombinerTest {
+
+    @Test
+    public void test() {
+        Properties properties1 = new DefaultProperties();
+        properties1.put("name", new Utf8Id("marko").idValue());
+        properties1.put("city", new Utf8Id("Beijing").idValue());
+
+        Properties properties2 = new DefaultProperties();
+        properties1.put("name", new Utf8Id("josh").idValue());
+
+        PropertiesCombiner combiner = new DefaultPropertiesCombiner();
+        Properties properties = combiner.combine(properties1, properties2);
+        Assert.assertEquals(properties2, properties);
+    }
 }

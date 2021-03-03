@@ -19,17 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    DefaultPropertiesCombinerTest.class,
-    DefaultVertexValueCombinerTest.class,
-    DoubleValueSumCombinerTest.class,
-    LongValueSumCombinerTest.class,
-    ValueMinCombinerTest.class,
-    ValueMaxCombinerTest.class
-})
-public class CombinerTestSuite {
+/**
+ * When vertex values with the same vertex id are loaded, this class
+ * specifies how to combine their values.
+ */
+public class DefaultVertexValueCombiner<T extends Value>
+                                        implements VertexValueCombiner<T> {
+
+    /**
+     * Just return the second value.
+     */
+    @Override
+    public T combine(T v1, T v2) {
+        return v2;
+    }
 }
