@@ -33,7 +33,7 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
 
     private final int bufferSize;
     private final OutputStream out;
-    private long osOffset;
+    private long outputOffset;
 
     public BufferedOutputStream(OutputStream out) {
         this(out, Constants.DEFAULT_BUFFER_SIZE);
@@ -45,7 +45,7 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
                         "The parameter bufferSize must be >= 8");
         this.bufferSize = bufferSize;
         this.out = out;
-        this.osOffset = 0L;
+        this.outputOffset = 0L;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
         } else {
             // The len is bigger than the buffer size, write out directly
             this.out.write(b, off, len);
-            this.osOffset += len;
+            this.outputOffset += len;
         }
     }
 
@@ -79,22 +79,23 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
 
     @Override
     public long position() {
-        return this.osOffset + super.position();
+        return this.outputOffset + super.position();
     }
 
     @Override
     public void seek(long position) throws IOException {
-        if (this.osOffset <= position &&
-            position < this.osOffset + this.bufferSize) {
-            super.seek(position - this.osOffset);
+        if (this.outputOffset <= position &&
+            position < this.outputOffset + this.bufferSize) {
+            super.seek(position - this.outputOffset);
             return;
         }
-        if (position >= this.osOffset + this.bufferSize) {
+        if (position >= this.outputOffset + this.bufferSize) {
             this.skip(position - this.position());
         } else {
                 throw new IOException("The position " + position + " is out " +
-                                      "of range [" + this.osOffset + ", " +
-                                      (this.osOffset + this.bufferSize) + ")");
+                                      "of range [" + this.outputOffset + ", " +
+                                      (this.outputOffset + this.bufferSize) +
+                                      ")");
         }
     }
 
@@ -103,7 +104,7 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
         E.checkArgument(size <= Integer.MAX_VALUE,
                         "The parameter bytesToSkip must be <= " +
                         "Integer.MAX_VALUE");
-        long positionBeforeSkip = this.osOffset + super.position();
+        long positionBeforeSkip = this.outputOffset + super.position();
         long bufferPosition = super.position();
         long bufferAvailable = this.bufferSize - bufferPosition;
         if (bufferAvailable >= size) {
@@ -115,7 +116,7 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
         if (size <= this.bufferSize) {
             super.skip(size);
         } else {
-            this.osOffset += size;
+            this.outputOffset += size;
             byte[] buffer = super.buffer();
             int writeSize = (int) size;
             while (writeSize > 0) {
@@ -144,7 +145,7 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
             return;
         }
         this.out.write(this.buffer(), 0, bufferPosition);
-        this.osOffset += bufferPosition;
+        this.outputOffset += bufferPosition;
         super.seek(0);
     }
 

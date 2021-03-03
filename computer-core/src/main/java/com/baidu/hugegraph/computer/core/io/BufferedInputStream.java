@@ -29,14 +29,14 @@ public class BufferedInputStream  extends UnsafeByteArrayInput {
 
     private final int bufferSize;
     private final InputStream in;
-    private long inOffset;
+    private long inputOffset;
 
     public BufferedInputStream(InputStream in) throws IOException {
         this(in, Constants.DEFAULT_BUFFER_SIZE);
     }
 
     public BufferedInputStream(InputStream in, int bufferSize)
-            throws IOException {
+                               throws IOException {
         super(new byte[bufferSize], 0);
         E.checkArgument(bufferSize >= 8,
                         "The parameter bufferSize must be >= 8");
@@ -47,7 +47,7 @@ public class BufferedInputStream  extends UnsafeByteArrayInput {
 
     @Override
     public long position() {
-        return this.inOffset - super.remaining();
+        return this.inputOffset - super.remaining();
     }
 
     @Override
@@ -71,20 +71,20 @@ public class BufferedInputStream  extends UnsafeByteArrayInput {
                 throw new IOException("There is no enough data in input " +
                                       "stream");
             }
-            this.inOffset += len;
+            this.inputOffset += len;
         }
     }
 
     @Override
     public void seek(long position) throws IOException {
-        if (position < this.inOffset &&
-            position >= this.inOffset - this.bufferSize) {
-            super.seek(this.bufferSize - (this.inOffset - position));
+        if (position < this.inputOffset &&
+            position >= this.inputOffset - this.bufferSize) {
+            super.seek(this.bufferSize - (this.inputOffset - position));
             return;
         }
-        if (position >= this.inOffset) {
-            int skipLen = (int) (position - this.inOffset);
-            this.inOffset += skipLen;
+        if (position >= this.inputOffset) {
+            int skipLen = (int) (position - this.inputOffset);
+            this.inputOffset += skipLen;
             byte[] buffer = this.buffer();
             while (skipLen > 0) {
                 int expectLen = Math.min(skipLen, this.bufferSize);
@@ -111,7 +111,7 @@ public class BufferedInputStream  extends UnsafeByteArrayInput {
             return positionBeforeSkip;
         }
         n -= this.remaining();
-        long position = this.inOffset + n;
+        long position = this.inputOffset + n;
         this.seek(position);
         return positionBeforeSkip;
     }
@@ -125,7 +125,7 @@ public class BufferedInputStream  extends UnsafeByteArrayInput {
         if (this.remaining() >= size) {
             return;
         }
-        shiftAndFillBuffer();
+        this.shiftAndFillBuffer();
         if (size > super.limit()) {
             throw new IOException("Can't read " + size + " bytes");
         }
@@ -141,7 +141,7 @@ public class BufferedInputStream  extends UnsafeByteArrayInput {
         int readLen = this.in.read(this.buffer(), super.limit(), expectLen);
         if (readLen > 0) {
             super.limit(super.limit() + readLen);
-            this.inOffset += readLen;
+            this.inputOffset += readLen;
         }
         return readLen;
     }

@@ -45,7 +45,6 @@ public class BufferedFileTest {
 
     private static final Logger LOG = Log.logger(
                                           BufferedFileTest.class);
-
     private static final int BUFFER_SIZE = 128;
 
     @Test
@@ -60,9 +59,15 @@ public class BufferedFileTest {
             }
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 new BufferedFileOutput(new RandomAccessFile(file, "rw"), 1);
+            }, e -> {
+                Assert.assertContains("The parameter bufferSize must be >= 8",
+                                      e.getMessage());
             });
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 new BufferedFileInput(new RandomAccessFile(file, "r"), 1);
+            }, e -> {
+                Assert.assertContains("The parameter bufferSize must be >= 8",
+                                      e.getMessage());
             });
         } finally {
             FileUtils.deleteQuietly(file);
@@ -232,6 +237,9 @@ public class BufferedFileTest {
                 input.skip(4);
                 Assert.assertThrows(EOFException.class, () -> {
                     input.seek(12); // Out of range
+                }, e -> {
+                    Assert.assertContains("Reach the end of file",
+                                          e.getMessage());
                 });
             }
         } finally {
@@ -549,17 +557,17 @@ public class BufferedFileTest {
         }
     }
 
-    private File createTempFile() throws IOException {
+    private static File createTempFile() throws IOException {
         return File.createTempFile(UUID.randomUUID().toString(), null);
     }
 
-    private BufferedFileOutput createOutput(File file)
+    private static BufferedFileOutput createOutput(File file)
                                                 throws FileNotFoundException {
         return new BufferedFileOutput(new RandomAccessFile(file, "rw"),
                                       BUFFER_SIZE);
     }
 
-    private BufferedFileInput createInput(File file)
+    private static BufferedFileInput createInput(File file)
                                               throws IOException {
         return new BufferedFileInput(new RandomAccessFile(file, "rw"),
                                      BUFFER_SIZE);

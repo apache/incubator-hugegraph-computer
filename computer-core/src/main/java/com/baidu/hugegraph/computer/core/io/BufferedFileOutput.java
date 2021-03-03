@@ -124,12 +124,11 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
     @Override
     protected void require(int size) throws IOException {
         E.checkArgument(size <= this.bufferSize, "size must be <=8");
-        long position = super.position();
-        long available = this.bufferSize - position;
-        if (available >= size) {
+        if (this.bufferAvailable() >= size) {
             return;
         }
         this.flushBuffer();
+        assert this.bufferAvailable() >= size;
     }
 
     private void flushBuffer() throws IOException {

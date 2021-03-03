@@ -40,7 +40,6 @@ import com.baidu.hugegraph.util.Log;
 public class BufferedStreamTest {
 
     private static final Logger LOG = Log.logger(BufferedStreamTest.class);
-
     private static final int BUFFER_SIZE = 128;
 
     @Test
@@ -57,9 +56,15 @@ public class BufferedStreamTest {
             }
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 new BufferedOutputStream(os, 1);
+            }, e -> {
+                Assert.assertContains("The parameter bufferSize must be >= 8",
+                                      e.getMessage());
             });
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 new BufferedInputStream(in, 1);
+            }, e -> {
+                Assert.assertContains("The parameter bufferSize must be >= 8",
+                                      e.getMessage());
             });
         } finally {
             FileUtils.deleteQuietly(file);
@@ -67,7 +72,7 @@ public class BufferedStreamTest {
     }
 
     @Test
-    public void testInt() throws IOException {
+    public void testWriteInt() throws IOException {
         File file = this.createTempFile();
         try {
             try (BufferedOutputStream output = this.createOutput(file)) {
@@ -102,7 +107,11 @@ public class BufferedStreamTest {
                 // Previous buffer
                 Assert.assertThrows(IOException.class, () -> {
                     output.writeInt(100, 4);
+                }, e -> {
+                    Assert.assertContains("is out of range",
+                                          e.getMessage());
                 });
+
                 output.writeInt(Integer.MAX_VALUE);
                 output.writeInt(Integer.MIN_VALUE);
             }
@@ -150,6 +159,9 @@ public class BufferedStreamTest {
                 }
                 Assert.assertThrows(IOException.class, () -> {
                     input.readFully(new byte[20]);
+                }, e -> {
+                    Assert.assertContains("Can't read 20 bytes",
+                                          e.getMessage());
                 });
             }
         } finally {
@@ -186,6 +198,10 @@ public class BufferedStreamTest {
                 }
                 Assert.assertThrows(IOException.class, () -> {
                     input.readFully(new byte[arraySize * 2]);
+                }, e -> {
+                    Assert.assertContains("There is no enough data in " +
+                                          "input stream",
+                                          e.getMessage());
                 });
             }
         } finally {
@@ -211,6 +227,9 @@ public class BufferedStreamTest {
                 }
                 Assert.assertThrows(IOException.class, () -> {
                     input.seek(size * 4 + 1);
+                }, e -> {
+                    Assert.assertContains("Can't seek at position ",
+                                          e.getMessage());
                 });
             }
         } finally {
@@ -235,6 +254,8 @@ public class BufferedStreamTest {
                 output.writeInt(Integer.MIN_VALUE);
                 Assert.assertThrows(IOException.class, () -> {
                     output.seek(output.position() - BUFFER_SIZE - 2);
+                }, e -> {
+                    Assert.assertContains("out of range ", e.getMessage());
                 });
             }
             try (BufferedInputStream input = this.createInput(file)) {
@@ -246,6 +267,10 @@ public class BufferedStreamTest {
                 Assert.assertEquals(Integer.MIN_VALUE, input.readInt());
                 Assert.assertThrows(IOException.class, () -> {
                     input.seek(input.position() - BUFFER_SIZE - 2);
+                }, e -> {
+                    Assert.assertContains("The position is beyond " +
+                                          "the buffer",
+                                          e.getMessage());
                 });
             }
         } finally {
@@ -264,7 +289,6 @@ public class BufferedStreamTest {
                 output.writeInt(Integer.MAX_VALUE);
                 output.writeInt(Integer.MIN_VALUE);
             }
-            LOG.info("file.length:{}", file.length());
             try (BufferedInputStream input = this.createInput(file)) {
                 Assert.assertEquals(1, input.readInt());
                 input.seek(seekPosition);
@@ -349,17 +373,17 @@ public class BufferedStreamTest {
         }
     }
 
-    private File createTempFile() throws IOException {
+    private static File createTempFile() throws IOException {
         return File.createTempFile(UUID.randomUUID().toString(), null);
     }
 
-    private BufferedOutputStream createOutput(File file)
+    private static BufferedOutputStream createOutput(File file)
                                               throws FileNotFoundException {
         return new BufferedOutputStream(new FileOutputStream(file),
                                         BUFFER_SIZE);
     }
 
-    private BufferedInputStream createInput(File file)
+    private static BufferedInputStream createInput(File file)
                                             throws IOException {
         return new BufferedInputStream(new FileInputStream(file),
                                        BUFFER_SIZE);
