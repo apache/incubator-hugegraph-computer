@@ -82,6 +82,11 @@ public class BufferedInputStream  extends UnsafeByteArrayInput {
             super.seek(this.bufferSize - (this.inputOffset - position));
             return;
         }
+        /*
+         * The reason to seek to the position beyond the current buffer is
+         * the user may need to skip the data unread and known the position of
+         * the data needed.
+         */
         if (position >= this.inputOffset) {
             int skipLen = (int) (position - this.inputOffset);
             this.inputOffset += skipLen;
@@ -90,16 +95,18 @@ public class BufferedInputStream  extends UnsafeByteArrayInput {
                 int expectLen = Math.min(skipLen, this.bufferSize);
                 int readLen = this.in.read(buffer, 0, expectLen);
                 if (readLen != expectLen) {
-                    throw new IOException("Can't seek at position " + position);
+                    throw new IOException("Reach the end of input stream");
                 }
                 skipLen -= expectLen;
             }
             super.seek(0);
             super.limit(0);
             this.fillBuffer();
-
         } else {
-            throw new IOException("The position is beyond the buffer");
+            throw new IOException(String.format(
+                      "The seek position %s is before the start position of " +
+                      "buffer %s",
+                      position, this.inputOffset - super.limit()));
         }
     }
 

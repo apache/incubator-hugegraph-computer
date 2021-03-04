@@ -562,13 +562,13 @@ public class BufferedFileTest {
     }
 
     private static BufferedFileOutput createOutput(File file)
-                                                throws FileNotFoundException {
+                                      throws FileNotFoundException {
         return new BufferedFileOutput(new RandomAccessFile(file, "rw"),
                                       BUFFER_SIZE);
     }
 
     private static BufferedFileInput createInput(File file)
-                                              throws IOException {
+                                                 throws IOException {
         return new BufferedFileInput(new RandomAccessFile(file, "rw"),
                                      BUFFER_SIZE);
     }

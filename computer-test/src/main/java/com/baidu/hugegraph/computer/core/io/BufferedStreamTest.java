@@ -103,10 +103,20 @@ public class BufferedStreamTest {
                 for (int i = 0; i < 64; i++) {
                     output.writeInt(i);
                 }
-                output.writeInt(200, 1);
+                // Start point of current buffer
+                output.writeInt(128, 1);
+                // Middle of current buffer
+                output.writeInt(200, 2);
+                output.writeInt(252, 3);
                 // Previous buffer
                 Assert.assertThrows(IOException.class, () -> {
                     output.writeInt(100, 4);
+                }, e -> {
+                    Assert.assertContains("is out of range",
+                                          e.getMessage());
+                });
+                Assert.assertThrows(IOException.class, () -> {
+                    output.writeInt(256, 5);
                 }, e -> {
                     Assert.assertContains("is out of range",
                                           e.getMessage());
@@ -118,10 +128,18 @@ public class BufferedStreamTest {
             try (BufferedInputStream input = this.createInput(file)) {
                 for (int i = 0; i < 64; i++) {
                     int position = i * 4;
-                    if (position == 200) {
-                        Assert.assertEquals(1, input.readInt());
-                    } else {
-                        Assert.assertEquals(i, input.readInt());
+                    switch (position) {
+                        case 128:
+                            Assert.assertEquals(1, input.readInt());
+                            break;
+                        case 200:
+                            Assert.assertEquals(2, input.readInt());
+                            break;
+                        case 252:
+                            Assert.assertEquals(3, input.readInt());
+                            break;
+                        default:
+                            Assert.assertEquals(i, input.readInt());
                     }
                 }
                 Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
@@ -133,7 +151,7 @@ public class BufferedStreamTest {
     }
 
     @Test
-    public void testByteArray() throws IOException {
+    public void testWriteByteArray() throws IOException {
         int loopTimes = 129;
         byte[] array = UnitTestBase.randomBytes(10);
         File file = this.createTempFile();
@@ -170,7 +188,7 @@ public class BufferedStreamTest {
     }
 
     @Test
-    public void testLargeByteArray() throws IOException {
+    public void testWriteLargeByteArray() throws IOException {
         int size = 10;
         int arraySize = 1280; // large than buffer size
         byte[] array = UnitTestBase.randomBytes(arraySize);
@@ -184,7 +202,7 @@ public class BufferedStreamTest {
 
             byte[] arrayRead = new byte[arraySize];
             try (DataInputStream dis = new DataInputStream(
-                    new FileInputStream(file))) {
+                                       new FileInputStream(file))) {
                 for (int i = 0; i < size; i++) {
                     dis.readFully(arrayRead);
                     Assert.assertArrayEquals(array, arrayRead);
@@ -228,7 +246,7 @@ public class BufferedStreamTest {
                 Assert.assertThrows(IOException.class, () -> {
                     input.seek(size * 4 + 1);
                 }, e -> {
-                    Assert.assertContains("Can't seek at position ",
+                    Assert.assertContains("Reach the end of input stream",
                                           e.getMessage());
                 });
             }
@@ -246,17 +264,26 @@ public class BufferedStreamTest {
                 for (int i = 0; i < size; i++) {
                     output.seek(i * 4);
                     output.writeInt(i);
-
                 }
                 // Overwrite last two elements
                 output.seek((size - 2) * 4);
                 output.writeInt(Integer.MAX_VALUE);
                 output.writeInt(Integer.MIN_VALUE);
+                // The position is before the buffer
                 Assert.assertThrows(IOException.class, () -> {
                     output.seek(output.position() - BUFFER_SIZE - 2);
                 }, e -> {
-                    Assert.assertContains("out of range ", e.getMessage());
+                    Assert.assertContains("out of range", e.getMessage());
                 });
+
+                // The position after the current position
+                Assert.assertThrows(IOException.class, () -> {
+                    output.seek(output.position() + 2);
+                }, e -> {
+                    Assert.assertContains("out of range", e.getMessage());
+                });
+
+
             }
             try (BufferedInputStream input = this.createInput(file)) {
                 for (int i = 0; i < size - 2; i++) {
@@ -268,32 +295,9 @@ public class BufferedStreamTest {
                 Assert.assertThrows(IOException.class, () -> {
                     input.seek(input.position() - BUFFER_SIZE - 2);
                 }, e -> {
-                    Assert.assertContains("The position is beyond " +
-                                          "the buffer",
+                    Assert.assertContains("before the position of buffer",
                                           e.getMessage());
                 });
-            }
-        } finally {
-            FileUtils.deleteQuietly(file);
-        }
-    }
-
-    @Test
-    public void testSeekMoreThanBuffer() throws IOException {
-        long seekPosition = BUFFER_SIZE * 2 + 1;
-        File file = this.createTempFile();
-        try {
-            try (BufferedOutputStream output = this.createOutput(file)) {
-                output.writeInt(1);
-                output.seek(seekPosition);
-                output.writeInt(Integer.MAX_VALUE);
-                output.writeInt(Integer.MIN_VALUE);
-            }
-            try (BufferedInputStream input = this.createInput(file)) {
-                Assert.assertEquals(1, input.readInt());
-                input.seek(seekPosition);
-                Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
-                Assert.assertEquals(Integer.MIN_VALUE, input.readInt());
             }
         } finally {
             FileUtils.deleteQuietly(file);
@@ -378,13 +382,13 @@ public class BufferedStreamTest {
     }
 
     private static BufferedOutputStream createOutput(File file)
-                                              throws FileNotFoundException {
+                                        throws FileNotFoundException {
         return new BufferedOutputStream(new FileOutputStream(file),
                                         BUFFER_SIZE);
     }
 
     private static BufferedInputStream createInput(File file)
-                                            throws IOException {
+                                                   throws IOException {
         return new BufferedInputStream(new FileInputStream(file),
                                        BUFFER_SIZE);
     }

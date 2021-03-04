@@ -32,19 +32,19 @@ import com.baidu.hugegraph.util.E;
 public class BufferedOutputStream extends UnsafeByteArrayOutput {
 
     private final int bufferSize;
-    private final OutputStream out;
+    private final OutputStream output;
     private long outputOffset;
 
-    public BufferedOutputStream(OutputStream out) {
-        this(out, Constants.DEFAULT_BUFFER_SIZE);
+    public BufferedOutputStream(OutputStream output) {
+        this(output, Constants.DEFAULT_BUFFER_SIZE);
     }
 
-    public BufferedOutputStream(OutputStream out, int bufferSize) {
+    public BufferedOutputStream(OutputStream output, int bufferSize) {
         super(bufferSize);
         E.checkArgument(bufferSize >= 8,
                         "The parameter bufferSize must be >= 8");
         this.bufferSize = bufferSize;
-        this.out = out;
+        this.output = output;
         this.outputOffset = 0L;
     }
 
@@ -64,17 +64,28 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
             super.write(b, off, len);
         } else {
             // The len is bigger than the buffer size, write out directly
-            this.out.write(b, off, len);
+            this.output.write(b, off, len);
             this.outputOffset += len;
         }
     }
 
+    /**
+     * The valid range of position is [the output position correspond to buffer
+     * start, the output position correspond to the current position - 4], it
+     * can't write data to the position before the buffer or after
+     * the current position.
+     */
     @Override
     public void writeInt(long position, int v) throws IOException {
-        long latestPosition = this.position();
-        this.seek(position);
-        super.writeInt(v);
-        this.seek(latestPosition);
+        if (this.outputOffset <= position &&
+            position <= this.position() - 4) {
+            super.writeInt(position - this.outputOffset, v);
+        } else {
+            throw new IOException(String.format(
+                      "The position %s is out of range [%s, %s]",
+                      position, this.outputOffset,
+                      this.position() - 4));
+        }
     }
 
     @Override
@@ -82,20 +93,26 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
         return this.outputOffset + super.position();
     }
 
+    /**
+     * The valid range of position is [the output position correspond to buffer
+     * start, the output position correspond to the current position], it
+     * can't seek to the position before the buffer or after
+     * the current position.
+     */
     @Override
     public void seek(long position) throws IOException {
+        /*
+         * It can seek the end of buffer. If the buffer size is 128, you can
+         * seek the position 128, the buffer will be write out while write data.
+         */
         if (this.outputOffset <= position &&
-            position < this.outputOffset + this.bufferSize) {
+            position <= this.position()) {
             super.seek(position - this.outputOffset);
-            return;
-        }
-        if (position >= this.outputOffset + this.bufferSize) {
-            this.skip(position - this.position());
         } else {
-                throw new IOException("The position " + position + " is out " +
-                                      "of range [" + this.outputOffset + ", " +
-                                      (this.outputOffset + this.bufferSize) +
-                                      ")");
+            throw new IOException(String.format(
+                      "The position %s is out of range [%s, %s]",
+                      position, this.outputOffset,
+                      this.outputOffset + this.bufferSize));
         }
     }
 
@@ -121,7 +138,7 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
             int writeSize = (int) size;
             while (writeSize > 0) {
                 int len = Math.min(buffer.length, writeSize);
-                this.out.write(buffer, 0, len);
+                this.output.write(buffer, 0, len);
                 writeSize -= len;
             }
         }
@@ -144,14 +161,14 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
         if (bufferPosition == 0) {
             return;
         }
-        this.out.write(this.buffer(), 0, bufferPosition);
+        this.output.write(this.buffer(), 0, bufferPosition);
         this.outputOffset += bufferPosition;
         super.seek(0);
     }
 
     public void close() throws IOException {
         this.writeBuffer();
-        this.out.close();
+        this.output.close();
     }
 
     private int bufferAvailable() {
