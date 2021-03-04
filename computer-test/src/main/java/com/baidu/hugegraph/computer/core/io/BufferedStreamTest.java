@@ -295,7 +295,7 @@ public class BufferedStreamTest {
                 Assert.assertThrows(IOException.class, () -> {
                     input.seek(input.position() - BUFFER_SIZE - 2);
                 }, e -> {
-                    Assert.assertContains("before the position of buffer",
+                    Assert.assertContains("before the start position of buffer",
                                           e.getMessage());
                 });
             }
