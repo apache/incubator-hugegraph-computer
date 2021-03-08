@@ -19,8 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
+import java.util.Iterator;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
@@ -34,9 +42,18 @@ public interface WorkerContext {
      */
     Config config();
 
-    <A extends Value> void aggregate(String name, A value);
+    /**
+     * Add a new value to specified name. The aggregator with the name cache
+     * in worker, and will be sent to master when current superstep finish.
+     * @param value The value to be aggregated
+     */
+    <V extends Value> void aggregateValue(String name, V value);
 
-    <A extends Value> A aggregatedValue(String name);
+    /**
+     * Get the aggregated value. The aggregated value is sent by master
+     * before current superstep start.
+     */
+    <V extends Value> V aggregatedValue(String name);
 
     /**
      * Send value to specified target vertex.
@@ -46,7 +63,43 @@ public interface WorkerContext {
     /**
      * Send value to all edges of vertex.
      */
-    void sendMessageToAllEdges(Vertex vertex, Value value);
+    default void sendMessageToAllEdges(Vertex vertex, Value value) {
+        Iterator<Edge> edges = vertex.edges().iterator();
+        while (edges.hasNext()) {
+            Edge edge = edges.next();
+            this.sendMessage(edge.targetId(), value);
+        }
+    }
+
+    /**
+     * Send all values to all edges of vertex
+     */
+    default <M extends Value> void sendMessagesToAllEdges(Vertex vertex,
+                                                          Iterator<M> values) {
+        while (values.hasNext()) {
+            M value = values.next();
+            this.sendMessageToAllEdges(vertex, value);
+        }
+    }
+
+    /**
+     * Send all values to all filtered edges of vertex
+     */
+    default <M extends Value> void sendMessagesToAllEdgesIf(
+                                   Vertex vertex,
+                                   Iterator<M> values,
+                                   BiFunction<M, Id, Boolean> filter) {
+        while (values.hasNext()) {
+            M value = values.next();
+            Iterator<Edge> edges = vertex.edges().iterator();
+            while (edges.hasNext()) {
+                Edge edge = edges.next();
+                if (filter.apply(value, edge.targetId())) {
+                    this.sendMessage(edge.targetId(), value);
+                }
+            }
+        }
+    }
 
     /**
      * @return the total vertex count of the graph. The value may vary from

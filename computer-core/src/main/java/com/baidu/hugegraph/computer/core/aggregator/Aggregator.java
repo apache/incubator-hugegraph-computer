@@ -21,26 +21,26 @@ package com.baidu.hugegraph.computer.core.aggregator;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public interface Aggregator<A extends Value> {
+public interface Aggregator<V extends Value> {
 
     /**
      * Add a new value, needs to be commutative and associative.
      * @param value The value to be aggregated
      */
-    void aggregate(A value);
+    void aggregateValue(V value);
 
     /**
      * Return the current aggregated value.
      */
-    A aggregatedValue();
+    V aggregatedValue();
 
     /**
      * Set the aggregated value.
      */
-    void aggregatedValue(A value);
+    void aggregatedValue(V value);
 
     /**
      * Create the initial value which is neutral to aggregate operation.
      */
-    A createInitialValue();
+    V createInitialValue();
 }

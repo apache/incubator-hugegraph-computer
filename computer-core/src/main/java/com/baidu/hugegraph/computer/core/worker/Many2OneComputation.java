@@ -19,46 +19,31 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public interface Computation<M extends Value> {
+public interface Many2OneComputation<M extends Value> extends Computation<M> {
 
-    /**
-     * Called at superstep0, with no messages.
-     */
-    void compute0(WorkerContext context, Vertex vertex);
-
-    /**
-     * Called at all other supersteps except superstep0, with messages.
-     */
-    void compute(WorkerContext context, Vertex vertex, Iterator<M> messages);
-
-    /**
-     * Used to add the resources the computation needed. This method is
-     * called only one time. The subclass may optional override this method.
-     */
-    default void init(WorkerContext context) {
+    @Override
+    default void compute0(WorkerContext context, Vertex vertex) {
+        M result = this.initialValue(context, vertex);
+        this.sendMessage(context, vertex, result);
     }
 
-    /**
-     * Close the resources used in the computation. This method is called
-     * only one time after all superstep iteration.
-     */
-    default void close(WorkerContext context) {
+    @Override
+    default void compute(WorkerContext context, Vertex vertex,
+                         Iterator<M> messages) {
+        M result = this.computeMessage(context, vertex, messages);
+        this.sendMessage(context, vertex, result);
     }
 
-    /**
-     * This method is called before every superstep.
-     */
-    default void beforeSuperstep(WorkerContext context) {
-    }
+    M computeMessage(WorkerContext context, Vertex vertex,
+                     Iterator<M> messages);
 
-    /**
-     * This method is called after every superstep.
-     */
-    default void afterSuperstep(WorkerContext context) {
-    }
+    void sendMessage(WorkerContext context, Vertex vertex, M result);
+
+    M initialValue(WorkerContext context, Vertex vertex);
 }
