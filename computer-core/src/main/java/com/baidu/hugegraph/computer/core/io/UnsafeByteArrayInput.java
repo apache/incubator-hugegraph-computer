@@ -207,7 +207,7 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
 
     @Override
     public void close() throws IOException {
-        // Do nothing
+        // Pass
     }
 
     protected void require(int size) throws IOException {
@@ -238,7 +238,7 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
 
     protected void limit(int limit) {
         E.checkArgument(limit <= this.buffer.length,
-                        "The limit must be >= buffer.length: {}",
+                        "The limit must be >= buffer length %s",
                         this.buffer.length);
         this.limit = limit;
     }

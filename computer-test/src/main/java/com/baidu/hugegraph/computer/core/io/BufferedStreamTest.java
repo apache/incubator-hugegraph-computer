@@ -246,7 +246,7 @@ public class BufferedStreamTest {
                 Assert.assertThrows(IOException.class, () -> {
                     input.seek(size * 4 + 1);
                 }, e -> {
-                    Assert.assertContains("Reach the end of input stream",
+                    Assert.assertContains("reach the end of input stream",
                                           e.getMessage());
                 });
             }

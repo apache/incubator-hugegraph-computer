@@ -315,7 +315,7 @@ public class BufferedFileTest {
                     output.skip(-1);
                 }, e -> {
                     e.getMessage().contains("The parameter bytesToSkip must " +
-                                            "be >=0");
+                                            "be >= 0");
                 });
             }
 

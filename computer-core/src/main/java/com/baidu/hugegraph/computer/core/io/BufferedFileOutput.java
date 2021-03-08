@@ -101,7 +101,7 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
     @Override
     public long skip(long bytesToSkip) throws IOException {
         E.checkArgument(bytesToSkip >= 0,
-                        "The parameter bytesToSkip must be >=0, but got %s",
+                        "The parameter bytesToSkip must be >= 0, but got %s",
                         bytesToSkip);
         long positionBeforeSkip = this.fileOffset + super.position();
         if (bytesToSkip <= this.bufferAvailable()) {

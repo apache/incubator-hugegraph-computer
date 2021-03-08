@@ -98,7 +98,10 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
                 int expectLen = Math.min(skipLen, this.bufferSize);
                 int readLen = this.input.read(buffer, 0, expectLen);
                 if (readLen == -1) {
-                    throw new IOException("Reach the end of input stream");
+                    throw new IOException(String.format(
+                              "Can't seek at position %s, reach the end of " +
+                              "input stream",
+                              position));
                 }
                 skipLen -= expectLen;
             }
