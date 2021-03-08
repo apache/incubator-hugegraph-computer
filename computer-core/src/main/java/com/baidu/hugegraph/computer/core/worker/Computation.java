@@ -48,9 +48,10 @@ public interface Computation<M extends Value> {
 
     /**
      * Used to add the resources the computation needed. This method is
-     * called only one time. The subclass may optional override this method.
+     * called only one time.
      */
     default void init(WorkerContext context) {
+        // pass
     }
 
     /**
@@ -58,17 +59,20 @@ public interface Computation<M extends Value> {
      * only one time after all superstep iteration.
      */
     default void close(WorkerContext context) {
+        // pass
     }
 
     /**
      * This method is called before every superstep.
      */
     default void beforeSuperstep(WorkerContext context) {
+        // pass
     }
 
     /**
      * This method is called after every superstep.
      */
     default void afterSuperstep(WorkerContext context) {
+        // pass
     }
 }
