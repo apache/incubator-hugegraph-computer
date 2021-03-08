@@ -295,7 +295,7 @@ public class BufferedStreamTest {
                 Assert.assertThrows(IOException.class, () -> {
                     input.seek(input.position() - BUFFER_SIZE - 2);
                 }, e -> {
-                    Assert.assertContains("underflow the start position",
+                    Assert.assertContains("underflows the start position",
                                           e.getMessage());
                 });
             }

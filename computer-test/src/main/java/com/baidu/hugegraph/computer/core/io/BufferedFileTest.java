@@ -313,6 +313,9 @@ public class BufferedFileTest {
                 output.writeByte(1);
                 Assert.assertThrows(IllegalArgumentException.class, () -> {
                     output.skip(-1);
+                }, e -> {
+                    e.getMessage().contains("The parameter bytesToSkip must " +
+                                            "be >=0");
                 });
             }
 
@@ -327,6 +330,9 @@ public class BufferedFileTest {
                 Assert.assertEquals((byte) 1, input.readByte());
                 Assert.assertThrows(IllegalArgumentException.class, () -> {
                     input.skip(-1);
+                }, e -> {
+                    e.getMessage().contains("The parameter bytesToSkip must " +
+                                            "be >= 0");
                 });
             }
         } finally {

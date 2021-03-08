@@ -118,8 +118,8 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
 
     @Override
     public long skip(long bytesToSkip) throws IOException {
-        E.checkArgument(bytesToSkip >= 0,
-                        "The parameter bytesToSkip must be >=0, but got %s",
+        E.checkArgument(bytesToSkip >= 0L,
+                        "The parameter bytesToSkip must be >= 0, but got %s",
                         bytesToSkip);
         long positionBeforeSkip = this.outputOffset + super.position();
         long bufferPosition = super.position();

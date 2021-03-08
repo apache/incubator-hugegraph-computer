@@ -107,15 +107,15 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
             this.fillBuffer();
         } else {
             throw new IOException(String.format(
-                      "The seek position %s is underflow the start position " +
+                      "The seek position %s underflows the start position " +
                       "%s of the buffer",
                       position, this.inputOffset - this.limit()));
         }
     }
 
     public long skip(long bytesToSkip) throws IOException {
-        E.checkArgument(bytesToSkip >= 0,
-                        "The parameter bytesToSkip must be >=0, but got %s",
+        E.checkArgument(bytesToSkip >= 0L,
+                        "The parameter bytesToSkip must be >= 0, but got %s",
                         bytesToSkip);
         long positionBeforeSkip = this.position();
         if (bytesToSkip <= this.remaining()) {
@@ -149,13 +149,12 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
         this.fillBuffer();
     }
 
-    private int fillBuffer() throws IOException {
+    private void fillBuffer() throws IOException {
         int expectLen = this.bufferSize - this.limit();
         int readLen = this.input.read(this.buffer(), this.limit(), expectLen);
         if (readLen > 0) {
             this.limit(this.limit() + readLen);
             this.inputOffset += readLen;
         }
-        return readLen;
     }
 }
