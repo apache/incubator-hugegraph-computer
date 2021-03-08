@@ -21,14 +21,11 @@ package com.baidu.hugegraph.computer.core.worker;
 
 import java.util.Iterator;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
@@ -117,4 +114,6 @@ public interface WorkerContext {
      * @return the current superstep.
      */
     int superstep();
+
+    <V extends Value> Combiner<V> combiner();
 }

@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -29,7 +30,16 @@ public interface Computation<M extends Value> {
     /**
      * Called at superstep0, with no messages.
      */
-    void compute0(WorkerContext context, Vertex vertex);
+    default void compute0(WorkerContext context, Vertex vertex) {
+        M result = this.initialValue(context, vertex);
+        this.compute(context, vertex, Arrays.asList(result).iterator());
+    }
+
+    /**
+     * Set vertex's value and return initial message. The message will be
+     * used to compute the vertex as parameter Iterator<M> messages.
+     */
+    M initialValue(WorkerContext context, Vertex vertex);
 
     /**
      * Called at all other supersteps except superstep0, with messages.

@@ -19,31 +19,29 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public interface Many2OneComputation<M extends Value> extends Computation<M> {
-
-    @Override
-    default void compute0(WorkerContext context, Vertex vertex) {
-        M result = this.initialValue(context, vertex);
-        this.sendMessage(context, vertex, result);
-    }
+public interface ReduceComputation<M extends Value> extends Computation<M> {
 
     @Override
     default void compute(WorkerContext context, Vertex vertex,
                          Iterator<M> messages) {
-        M result = this.computeMessage(context, vertex, messages);
+        M message = Combiner.combineAll(context.combiner(), messages);
+        M result = this.computeMessage(context, vertex, message);
         this.sendMessage(context, vertex, result);
     }
 
-    M computeMessage(WorkerContext context, Vertex vertex,
-                     Iterator<M> messages);
+    default void sendMessage(WorkerContext context, Vertex vertex, M result) {
+        context.sendMessageToAllEdges(vertex, result);
+    }
 
-    void sendMessage(WorkerContext context, Vertex vertex, M result);
-
-    M initialValue(WorkerContext context, Vertex vertex);
+    /**
+     * TODO: add description
+     * @param message Null if no message received
+     */
+    M computeMessage(WorkerContext context, Vertex vertex, M message);
 }

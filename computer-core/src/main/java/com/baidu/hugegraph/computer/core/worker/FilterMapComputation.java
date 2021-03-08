@@ -19,30 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.iterator.MapperIterator;
 
-public interface One2OneComputation<M extends Value> extends Computation<M> {
-
-    @Override
-    default void compute0(WorkerContext context, Vertex vertex) {
-        M result = this.initialValue(context, vertex);
-        this.compute(context, vertex, Arrays.asList(result).iterator());
-    }
+public interface FilterMapComputation<M extends Value> extends Computation<M> {
 
     @Override
     default void compute(WorkerContext context,
                          Vertex vertex,
                          Iterator<M> messages) {
         Iterator<M> results = this.computeMessages(context, vertex, messages);
-        this.sendMessage(context, vertex, results);
+        this.sendMessages(context, vertex, results);
     }
 
     default Iterator<M> computeMessages(WorkerContext context,
@@ -55,14 +45,11 @@ public interface One2OneComputation<M extends Value> extends Computation<M> {
         });
     }
 
-    default void sendMessage(WorkerContext context, Vertex vertex,
-                             Iterator<M> results) {
+    default void sendMessages(WorkerContext context, Vertex vertex,
+                              Iterator<M> results) {
         context.sendMessagesToAllEdges(vertex, results);
         vertex.inactivate();
     }
 
     M computeMessage(WorkerContext context, Vertex vertex, M message);
-
-
-    M initialValue(WorkerContext context, Vertex vertex);
 }

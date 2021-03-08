@@ -19,7 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
+import java.util.Iterator;
+
 public interface Combiner<T> {
+
+    public static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
+        if (!values.hasNext()) {
+            return null;
+        }
+        T result = values.next();
+        while (values.hasNext()) {
+            result = combiner.combine(result, values.next());
+        }
+        return result;
+    }
 
     /**
      * Combine v1 and v2, return the combined value. The combined value may
