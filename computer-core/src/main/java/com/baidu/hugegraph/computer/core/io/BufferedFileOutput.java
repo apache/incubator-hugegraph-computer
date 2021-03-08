@@ -59,15 +59,15 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        if (this.bufferAvailable() >= len) {
+        if (len <= this.bufferAvailable()) {
             super.write(b, off, len);
             return;
         }
         this.flushBuffer();
-        if (this.bufferSize >= len) {
+        if (len <= this.bufferSize) {
             super.write(b, off, len);
         } else {
-            // The len is bigger than the buffer size, write out directly
+            // The len > buffer size, write out directly
             this.file.write(b, off, len);
             this.fileOffset += len;
         }
@@ -99,23 +99,21 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
     }
 
     @Override
-    public long skip(long size) throws IOException {
-        E.checkArgument(size <= Integer.MAX_VALUE,
-                        "The parameter bytesToSkip must be <= " +
-                        "Integer.MAX_VALUE");
+    public long skip(long bytesToSkip) throws IOException {
+        E.checkArgument(bytesToSkip >= 0,
+                        "The parameter bytesToSkip must be >=0, but got %s",
+                        bytesToSkip);
         long positionBeforeSkip = this.fileOffset + super.position();
-        long bufferPosition = super.position();
-        long bufferAvailable = this.bufferSize - bufferPosition;
-        if (bufferAvailable >= size) {
-            super.skip(size);
+        if (bytesToSkip <= this.bufferAvailable()) {
+            super.skip(bytesToSkip);
             return positionBeforeSkip;
         }
 
         this.flushBuffer();
-        if (size <= this.bufferSize) {
-            super.skip(size);
+        if (bytesToSkip <= this.bufferSize) {
+            super.skip(bytesToSkip);
         } else {
-            this.fileOffset += size;
+            this.fileOffset += bytesToSkip;
             this.file.seek(this.fileOffset);
         }
         return positionBeforeSkip;
@@ -123,12 +121,14 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
 
     @Override
     protected void require(int size) throws IOException {
-        E.checkArgument(size <= this.bufferSize, "size must be <=8");
-        if (this.bufferAvailable() >= size) {
+        E.checkArgument(size <= this.bufferSize,
+                        "The parameter size must be <= %s",
+                        this.bufferSize);
+        if (size <= this.bufferAvailable()) {
             return;
         }
         this.flushBuffer();
-        assert this.bufferAvailable() >= size;
+        assert size <= this.bufferAvailable();
     }
 
     private void flushBuffer() throws IOException {
@@ -146,7 +146,7 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
         this.file.close();
     }
 
-    private int bufferAvailable() {
-        return this.buffer().length - (int) super.position();
+    private final int bufferAvailable() {
+        return this.bufferSize - (int) super.position();
     }
 }

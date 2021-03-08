@@ -29,17 +29,17 @@ import com.baidu.hugegraph.util.E;
  * This is used to buffer and output the buffer to output stream when buffer
  * is full.
  */
-public class BufferedOutputStream extends UnsafeByteArrayOutput {
+public class BufferedStreamOutput extends UnsafeByteArrayOutput {
 
     private final int bufferSize;
     private final OutputStream output;
     private long outputOffset;
 
-    public BufferedOutputStream(OutputStream output) {
+    public BufferedStreamOutput(OutputStream output) {
         this(output, Constants.DEFAULT_BUFFER_SIZE);
     }
 
-    public BufferedOutputStream(OutputStream output, int bufferSize) {
+    public BufferedStreamOutput(OutputStream output, int bufferSize) {
         super(bufferSize);
         E.checkArgument(bufferSize >= 8,
                         "The parameter bufferSize must be >= 8");
@@ -59,11 +59,11 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
             super.write(b, off, len);
             return;
         }
-        this.writeBuffer();
+        this.flushBuffer();
         if (this.bufferSize >= len) {
             super.write(b, off, len);
         } else {
-            // The len is bigger than the buffer size, write out directly
+            // The len > the buffer size, write out directly
             this.output.write(b, off, len);
             this.outputOffset += len;
         }
@@ -117,25 +117,25 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
     }
 
     @Override
-    public long skip(long size) throws IOException {
-        E.checkArgument(size <= Integer.MAX_VALUE,
-                        "The parameter bytesToSkip must be <= " +
-                        "Integer.MAX_VALUE");
+    public long skip(long bytesToSkip) throws IOException {
+        E.checkArgument(bytesToSkip >= 0,
+                        "The parameter bytesToSkip must be >=0, but got %s",
+                        bytesToSkip);
         long positionBeforeSkip = this.outputOffset + super.position();
         long bufferPosition = super.position();
         long bufferAvailable = this.bufferSize - bufferPosition;
-        if (bufferAvailable >= size) {
-            super.skip(size);
+        if (bufferAvailable >= bytesToSkip) {
+            super.skip(bytesToSkip);
             return positionBeforeSkip;
         }
 
-        this.writeBuffer();
-        if (size <= this.bufferSize) {
-            super.skip(size);
+        this.flushBuffer();
+        if (bytesToSkip <= this.bufferSize) {
+            super.skip(bytesToSkip);
         } else {
-            this.outputOffset += size;
+            this.outputOffset += bytesToSkip;
             byte[] buffer = super.buffer();
-            int writeSize = (int) size;
+            int writeSize = (int) bytesToSkip;
             while (writeSize > 0) {
                 int len = Math.min(buffer.length, writeSize);
                 this.output.write(buffer, 0, len);
@@ -147,16 +147,18 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
 
     @Override
     protected void require(int size) throws IOException {
-        E.checkArgument(size <= this.bufferSize, "size must be <=8");
+        E.checkArgument(size <= this.bufferSize,
+                        "The parameter size must be <= %s",
+                        this.bufferSize);
         long position = super.position();
         long bufferAvailable = this.bufferSize - position;
         if (bufferAvailable >= size) {
             return;
         }
-        this.writeBuffer();
+        this.flushBuffer();
     }
 
-    private void writeBuffer() throws IOException {
+    private void flushBuffer() throws IOException {
         int bufferPosition = (int) super.position();
         if (bufferPosition == 0) {
             return;
@@ -167,11 +169,11 @@ public class BufferedOutputStream extends UnsafeByteArrayOutput {
     }
 
     public void close() throws IOException {
-        this.writeBuffer();
+        this.flushBuffer();
         this.output.close();
     }
 
-    private int bufferAvailable() {
-        return this.buffer().length - (int) super.position();
+    private final int bufferAvailable() {
+        return this.bufferSize - (int) super.position();
     }
 }

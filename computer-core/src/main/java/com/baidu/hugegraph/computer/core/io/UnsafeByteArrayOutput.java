@@ -199,7 +199,7 @@ public class UnsafeByteArrayOutput implements RandomAccessOutput, Closeable {
      */
     @Override
     public long skip(long bytesToSkip) throws IOException {
-        E.checkArgument(bytesToSkip >= 0,
+        E.checkArgument(bytesToSkip >= 0L,
                         "The parameter bytesToSkip must be >= 0, but got %s",
                         bytesToSkip);
         this.require((int) bytesToSkip);

@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
+import com.baidu.hugegraph.util.Bytes;
+
 public final class Constants {
 
     public static final byte[] EMPTY_BYTES = new byte[0];
@@ -37,5 +39,9 @@ public final class Constants {
     public static final int UINT16_MAX = 0xffff;
     public static final long UINT32_MAX = 0xffffffffL;
 
-    public static final int DEFAULT_BUFFER_SIZE = 8192;
+    /*
+     * The default buffer size for buffered input & output in package
+     * com.baidu.hugegraph.computer.core.io
+     */
+    public static final int DEFAULT_BUFFER_SIZE = (int) Bytes.KB * 8;
 }

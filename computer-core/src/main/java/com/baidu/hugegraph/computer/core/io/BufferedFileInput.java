@@ -60,13 +60,13 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
 
     @Override
     public void readFully(byte[] b, int off, int len) throws IOException {
-        if (len <= super.remaining()) {
+        int remaining = super.remaining();
+        if (len <= remaining) {
             super.readFully(b, off, len);
         } else if (len <= this.bufferSize) {
             this.shiftAndFillBuffer();
             super.readFully(b, off, len);
         } else {
-            int remaining = super.remaining();
             super.readFully(b, off, remaining);
             this.file.readFully(b, off + remaining, len - remaining);
             this.fileOffset += len;
@@ -77,29 +77,34 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
     public void seek(long position) throws IOException {
         if (position < this.fileOffset &&
             position >= this.fileOffset - this.bufferSize) {
-            super.seek(this.bufferSize - (this.fileOffset - position));
+            super.seek(this.limit() - (this.fileOffset - position));
             return;
         }
-        if (position < this.file.length()) {
+        if (position >= this.file.length()) {
+            throw new EOFException(String.format(
+                                   "Can't seek to %s, reach the end of file",
+                                   position));
+        } else {
             this.file.seek(position);
             super.seek(0L);
-            super.limit(0);
+            this.limit(0);
             this.fileOffset = position;
             this.fillBuffer();
-        } else {
-            throw new EOFException("Reach the end of file");
         }
+
     }
 
-    public long skip(long n) throws IOException {
-        E.checkArgument(n >= 0, "The parameter n must be >=0, but got %s", n);
+    public long skip(long bytesToSkip) throws IOException {
+        E.checkArgument(bytesToSkip >= 0,
+                        "The parameter bytesToSkip must be >=0, but got %s",
+                        bytesToSkip);
         long positionBeforeSkip = this.position();
-        if (this.remaining() >= n) {
-            super.skip(n);
+        if (this.remaining() >= bytesToSkip) {
+            super.skip(bytesToSkip);
             return positionBeforeSkip;
         }
-        n -= this.remaining();
-        long position = this.fileOffset + n;
+        bytesToSkip -= this.remaining();
+        long position = this.fileOffset + bytesToSkip;
         this.seek(position);
         return positionBeforeSkip;
     }
@@ -127,10 +132,10 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
 
     private void fillBuffer() throws IOException {
         long fileLength = this.file.length();
-        int readLen = Math.min(this.bufferSize - super.limit(),
+        int readLen = Math.min(this.bufferSize - this.limit(),
                                (int) (fileLength - this.fileOffset));
         this.fileOffset += readLen;
-        this.file.readFully(this.buffer(), super.limit(), readLen);
-        super.limit(super.limit() + readLen);
+        this.file.readFully(this.buffer(), this.limit(), readLen);
+        this.limit(this.limit() + readLen);
     }
 }

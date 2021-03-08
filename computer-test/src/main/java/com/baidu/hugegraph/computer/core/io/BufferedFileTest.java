@@ -238,9 +238,31 @@ public class BufferedFileTest {
                 Assert.assertThrows(EOFException.class, () -> {
                     input.seek(12); // Out of range
                 }, e -> {
-                    Assert.assertContains("Reach the end of file",
+                    Assert.assertContains("reach the end of file",
                                           e.getMessage());
                 });
+            }
+        } finally {
+            FileUtils.deleteQuietly(file);
+        }
+    }
+
+    @Test
+    public void testOutputSeekOutRange() throws IOException {
+        File file = this.createTempFile();
+        try {
+            try (BufferedFileOutput output = this.createOutput(file)) {
+                output.seek(100L);
+                output.writeInt(1);
+                output.seek(511L);
+                output.writeInt(2);
+            }
+
+            try (BufferedFileInput input = this.createInput(file)) {
+                input.seek(100L);
+                Assert.assertEquals(1, input.readInt());
+                input.seek(511L);
+                Assert.assertEquals(2, input.readInt());
             }
         } finally {
             FileUtils.deleteQuietly(file);
@@ -289,6 +311,9 @@ public class BufferedFileTest {
                 output.skip(4L);
                 output.skip(1280L);
                 output.writeByte(1);
+                Assert.assertThrows(IllegalArgumentException.class, () -> {
+                    output.skip(-1);
+                });
             }
 
             try (BufferedFileInput input = this.createInput(file)) {
@@ -300,6 +325,9 @@ public class BufferedFileTest {
                 input.skip(4);
                 input.skip(1280);
                 Assert.assertEquals((byte) 1, input.readByte());
+                Assert.assertThrows(IllegalArgumentException.class, () -> {
+                    input.skip(-1);
+                });
             }
         } finally {
             FileUtils.deleteQuietly(file);
