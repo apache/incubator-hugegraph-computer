@@ -29,7 +29,7 @@ public class ValueMaxCombinerTest {
     @Test
     public void testCombine() {
         LongValue max = new LongValue(0L);
-        ValueMaxCombiner<LongValue> combiner = new ValueMaxCombiner();
+        ValueMaxCombiner<LongValue> combiner = new ValueMaxCombiner<>();
         LongValue value1 = new LongValue(1L);
         max = combiner.combine(max, value1);
         LongValue value2 = new LongValue(2L);

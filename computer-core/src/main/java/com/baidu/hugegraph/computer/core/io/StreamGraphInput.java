@@ -124,7 +124,7 @@ public class StreamGraphInput implements GraphInput {
     @Override
     public Id readId() throws IOException {
         byte type = this.readByte();
-        Id id = IdFactory.createID(type);
+        Id id = IdFactory.createId(type);
         id.read(this);
         return id;
     }

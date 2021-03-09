@@ -17,29 +17,21 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.bsp;
+package com.baidu.hugegraph.computer.core.input;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-import org.junit.Test;
+public interface InputSplitFetcher {
 
-import com.baidu.hugegraph.testutil.Assert;
+    /**
+     * Fetch all vertex input splits just once
+     * @return all vertex input splits
+     */
+    List<InputSplit> listVertexInputSplits();
 
-public class BspEventTest {
-
-    @Test
-    public void testUniqueCodeAndKey() {
-        Map<Byte, String> codeMap = new HashMap<>();
-        Map<String, Byte> keyMap = new HashMap<>();
-        BspEvent[] events = BspEvent.values();
-        for (BspEvent e : events) {
-            codeMap.put(e.code(), e.key());
-            keyMap.put(e.key(), e.code());
-        }
-        // Assert code in unique
-        Assert.assertEquals(events.length, codeMap.size());
-        // Assert key in unique
-        Assert.assertEquals(events.length, keyMap.size());
-    }
+    /**
+     * Fetch all edge input splits just once
+     * @return all edge input splits
+     */
+    List<InputSplit> listEdgeInputSplits();
 }

@@ -25,12 +25,12 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 public final class IdFactory {
 
     // Maybe can reuse Id
-    public static Id createID(byte code) {
+    public static Id createId(byte code) {
         IdType type = SerialEnum.fromCode(IdType.class, code);
-        return createID(type);
+        return createId(type);
     }
 
-    public static Id createID(IdType type) {
+    public static Id createId(IdType type) {
         switch (type) {
             case LONG:
                 return new LongId();

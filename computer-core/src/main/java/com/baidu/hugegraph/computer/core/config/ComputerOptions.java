@@ -79,6 +79,22 @@ public class ComputerOptions extends OptionHolder {
                     "value"
             );
 
+    public static final ConfigOption<Long> INPUT_SPLITS_SIZE =
+            new ConfigOption<>(
+                    "input.split_size",
+                    "The input split size in bytes",
+                    positiveInt(),
+                    1024 * 1024L
+            );
+
+    public static final ConfigOption<Integer> INPUT_PARTITION_COUNT =
+            new ConfigOption<>(
+                    "input.partition_count",
+                    "The total partition count for all worker",
+                    positiveInt(),
+                    10
+            );
+
     public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =
             new ConfigOption<>(
                     "output.with_adjacent_edges",
