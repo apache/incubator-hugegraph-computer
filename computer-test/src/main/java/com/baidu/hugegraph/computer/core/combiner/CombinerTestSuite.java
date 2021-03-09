@@ -24,12 +24,10 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    DefaultPropertiesCombinerTest.class,
     MergeOldPropertiesCombinerTest.class,
     MergeNewPropertiesCombinerTest.class,
-    DefaultVertexValueCombinerTest.class,
     DoubleValueSumCombinerTest.class,
-    OverwriteValueCombinerTest.class,
+    OverwriteCombinerTest.class,
     LongValueSumCombinerTest.class,
     ValueMinCombinerTest.class,
     ValueMaxCombinerTest.class

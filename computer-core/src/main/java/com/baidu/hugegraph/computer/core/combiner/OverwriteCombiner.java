@@ -19,7 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+public class OverwriteCombiner<T> implements Combiner<T> {
 
-public interface VertexValueCombiner<T extends Value> extends Combiner<T> {
+    @Override
+    public T combine(T v1, T v2) {
+        return v2;
+    }
 }
