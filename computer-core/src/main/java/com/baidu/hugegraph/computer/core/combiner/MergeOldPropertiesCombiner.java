@@ -19,20 +19,24 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.util.Map;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    DefaultPropertiesCombinerTest.class,
-    MergeOldPropertiesCombinerTest.class,
-    MergeNewPropertiesCombinerTest.class,
-    DefaultVertexValueCombinerTest.class,
-    DoubleValueSumCombinerTest.class,
-    OverwriteValueCombinerTest.class,
-    LongValueSumCombinerTest.class,
-    ValueMinCombinerTest.class,
-    ValueMaxCombinerTest.class
-})
-public class CombinerTestSuite {
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+
+public class MergeOldPropertiesCombiner implements PropertiesCombiner {
+
+    /**
+     * Merge properties v1 into v2. If a property exists in both v1 and v2,
+     * remain the value in v2.
+     */
+    @Override
+    public Properties combine(Properties v1, Properties v2) {
+        Map<String, Value> v1Map = v1.get();
+        Map<String, Value> v2Map = v2.get();
+        for (Map.Entry<String, Value> entry : v1Map.entrySet()) {
+            v2Map.putIfAbsent(entry.getKey(), entry.getValue());
+        }
+        return v2;
+    }
 }

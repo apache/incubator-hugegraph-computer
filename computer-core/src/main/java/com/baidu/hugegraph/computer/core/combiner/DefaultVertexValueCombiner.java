@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
  * specifies how to combine their values.
  */
 public class DefaultVertexValueCombiner<T extends Value>
-                                        implements VertexValueCombiner<T> {
+       implements VertexValueCombiner<T> {
 
     /**
      * Just return the second value.
