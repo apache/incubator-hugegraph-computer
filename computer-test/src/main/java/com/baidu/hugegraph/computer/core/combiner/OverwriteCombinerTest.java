@@ -40,7 +40,7 @@ public class OverwriteCombinerTest {
     public void testOverwriteValue() {
         LongValue value1 = new LongValue(1L);
         LongValue value2 = new LongValue(2L);
-        OverwriteCombiner<LongValue> combiner = new OverwriteCombiner();
+        OverwriteCombiner<LongValue> combiner = new OverwriteCombiner<>();
         Value value = combiner.combine(value1, value2);
         Assert.assertEquals(value2, value);
     }
@@ -59,7 +59,7 @@ public class OverwriteCombinerTest {
         Vertex vertex2 = factory.createVertex(longId2, value2);
         vertex2.addEdge(factory.createEdge(new LongId(1L), NullValue.get()));
 
-        OverwriteCombiner<Vertex> combiner = new OverwriteCombiner();
+        OverwriteCombiner<Vertex> combiner = new OverwriteCombiner<>();
         Vertex vertex = combiner.combine(vertex1, vertex2);
         Assert.assertEquals(vertex2, vertex);
     }
@@ -73,7 +73,7 @@ public class OverwriteCombinerTest {
         Properties properties2 = new DefaultProperties();
         properties1.put("name", new Utf8Id("josh").idValue());
 
-        OverwriteCombiner<Properties> combiner = new OverwriteCombiner();
+        OverwriteCombiner<Properties> combiner = new OverwriteCombiner<>();
         Properties properties = combiner.combine(properties1, properties2);
         Assert.assertEquals(properties2, properties);
     }

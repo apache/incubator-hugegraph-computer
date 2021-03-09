@@ -29,7 +29,7 @@ import com.baidu.hugegraph.testutil.Assert;
 public class MergeNewPropertiesCombinerTest {
 
     @Test
-    public void test() {
+    public void testCombine() {
         Properties properties1 = new DefaultProperties();
         properties1.put("name", new Utf8Id("marko").idValue());
         properties1.put("city", new Utf8Id("Beijing").idValue());
