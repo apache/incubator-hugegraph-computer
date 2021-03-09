@@ -207,7 +207,7 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
 
     @Override
     public void close() throws IOException {
-        // Pass
+        // pass
     }
 
     protected void require(int size) throws IOException {

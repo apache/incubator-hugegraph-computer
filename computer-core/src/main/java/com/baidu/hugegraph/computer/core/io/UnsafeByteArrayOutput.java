@@ -248,6 +248,6 @@ public class UnsafeByteArrayOutput implements RandomAccessOutput, Closeable {
 
     @Override
     public void close() throws IOException {
-        // Pass
+        // pass
     }
 }

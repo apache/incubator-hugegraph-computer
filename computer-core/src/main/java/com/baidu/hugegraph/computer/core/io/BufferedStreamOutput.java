@@ -82,12 +82,12 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
             super.writeInt(position - this.outputOffset, v);
         } else if (position < this.outputOffset) {
             throw new IOException(String.format(
-                      "Write int from position %s underflows the " +
+                      "Write int to position %s underflows the " +
                       "start position %s of the buffer",
                       position, this.outputOffset));
         } else {
             throw new IOException(String.format(
-                      "Write int from position %s overflows the write " +
+                      "Write int to position %s overflows the write " +
                       "position %s",
                       position, this.position()));
         }
