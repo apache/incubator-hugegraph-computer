@@ -143,7 +143,9 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
         }
         this.shiftAndFillBuffer();
         if (size > this.limit()) {
-            throw new IOException("Can't read " + size + " bytes");
+            throw new IOException(String.format(
+                      "Read %s bytes from position overflows buffer %s",
+                      size, this.limit()));
         }
     }
 

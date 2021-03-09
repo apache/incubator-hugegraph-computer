@@ -112,13 +112,13 @@ public class BufferedStreamTest {
                 Assert.assertThrows(IOException.class, () -> {
                     output.writeInt(100, 4);
                 }, e -> {
-                    Assert.assertContains("is out of range",
+                    Assert.assertContains("underflows the start position",
                                           e.getMessage());
                 });
                 Assert.assertThrows(IOException.class, () -> {
                     output.writeInt(256, 5);
                 }, e -> {
-                    Assert.assertContains("is out of range",
+                    Assert.assertContains("overflows the write position",
                                           e.getMessage());
                 });
 
@@ -164,7 +164,7 @@ public class BufferedStreamTest {
 
             byte[] arrayRead = new byte[10];
             try (DataInputStream dis = new DataInputStream(
-                    new FileInputStream(file))) {
+                                       new FileInputStream(file))) {
                 for (int i = 0; i < loopTimes; i++) {
                     dis.readFully(arrayRead);
                     Assert.assertArrayEquals(array, arrayRead);
@@ -178,7 +178,7 @@ public class BufferedStreamTest {
                 Assert.assertThrows(IOException.class, () -> {
                     input.readFully(new byte[20]);
                 }, e -> {
-                    Assert.assertContains("Can't read 20 bytes",
+                    Assert.assertContains("overflows buffer",
                                           e.getMessage());
                 });
             }
