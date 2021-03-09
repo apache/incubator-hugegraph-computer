@@ -46,5 +46,47 @@ public class MergeNewPropertiesCombinerTest {
         PropertiesCombiner combiner = new MergeNewPropertiesCombiner();
         Properties properties = combiner.combine(properties1, properties2);
         Assert.assertEquals(expect, properties);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(null, properties2);
+        }, e -> {
+            Assert.assertEquals("The parameter v1 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(properties1, null);
+        }, e -> {
+            Assert.assertEquals("The parameter v2 can't be null",
+                                e.getMessage());
+        });
+    }
+
+    @Test
+    public void testCombineNull() {
+        Properties properties1 = new DefaultProperties();
+        properties1.put("name", new Utf8Id("marko").idValue());
+        properties1.put("city", new Utf8Id("Beijing").idValue());
+
+        Properties properties2 = new DefaultProperties();
+        properties2.put("name", new Utf8Id("josh").idValue());
+        properties2.put("age", new Utf8Id("18").idValue());
+
+
+        PropertiesCombiner combiner = new MergeNewPropertiesCombiner();
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(null, properties2);
+        }, e -> {
+            Assert.assertEquals("The parameter v1 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(properties1, null);
+        }, e -> {
+            Assert.assertEquals("The parameter v2 can't be null",
+                                e.getMessage());
+        });
     }
 }

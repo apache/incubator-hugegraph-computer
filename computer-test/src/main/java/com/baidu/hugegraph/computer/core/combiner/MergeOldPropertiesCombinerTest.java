@@ -29,7 +29,7 @@ import com.baidu.hugegraph.testutil.Assert;
 public class MergeOldPropertiesCombinerTest {
 
     @Test
-    public void test() {
+    public void testCombine() {
         Properties properties1 = new DefaultProperties();
         properties1.put("name", new Utf8Id("marko").idValue());
         properties1.put("city", new Utf8Id("Beijing").idValue());
@@ -46,5 +46,32 @@ public class MergeOldPropertiesCombinerTest {
         PropertiesCombiner combiner = new MergeOldPropertiesCombiner();
         Properties properties = combiner.combine(properties1, properties2);
         Assert.assertEquals(expect, properties);
+    }
+
+    @Test
+    public void testCombineNullValue() {
+        Properties properties1 = new DefaultProperties();
+        properties1.put("name", new Utf8Id("marko").idValue());
+        properties1.put("city", new Utf8Id("Beijing").idValue());
+
+        Properties properties2 = new DefaultProperties();
+        properties2.put("name", new Utf8Id("josh").idValue());
+        properties2.put("age", new Utf8Id("18").idValue());
+
+        PropertiesCombiner combiner = new MergeOldPropertiesCombiner();
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(null, properties2);
+        }, e -> {
+            Assert.assertEquals("The parameter v1 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(properties1, null);
+        }, e -> {
+            Assert.assertEquals("The parameter v2 can't be null",
+                                e.getMessage());
+        });
     }
 }

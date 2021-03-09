@@ -27,7 +27,7 @@ import com.baidu.hugegraph.testutil.Assert;
 public class DoubleValueSumCombinerTest {
 
     @Test
-    public void test() {
+    public void testCombine() {
         DoubleValue sum = new DoubleValue(0.0D);
         DoubleValueSumCombiner combiner = new DoubleValueSumCombiner();
         for (int i = 1; i <= 10; i++) {
@@ -35,5 +35,25 @@ public class DoubleValueSumCombinerTest {
             sum = combiner.combine(sum, value);
         }
         Assert.assertEquals(55.0D, sum.value(), 0.0D);
+    }
+
+    @Test
+    public void testCombineNull() {
+        DoubleValue value1 = new DoubleValue(0.0D);
+        DoubleValue value2 = new DoubleValue(0.0D);
+        DoubleValueSumCombiner combiner = new DoubleValueSumCombiner();
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(null, value2);
+        }, e -> {
+            Assert.assertEquals("The parameter v1 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(value1, null);
+        }, e -> {
+            Assert.assertEquals("The parameter v2 can't be null",
+                                e.getMessage());
+        });
     }
 }

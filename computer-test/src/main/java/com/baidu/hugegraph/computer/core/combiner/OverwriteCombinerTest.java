@@ -37,7 +37,7 @@ import com.baidu.hugegraph.testutil.Assert;
 public class OverwriteCombinerTest {
 
     @Test
-    public void testOverwriteValue() {
+    public void testCombineValue() {
         LongValue value1 = new LongValue(1L);
         LongValue value2 = new LongValue(2L);
         OverwriteCombiner<LongValue> combiner = new OverwriteCombiner<>();
@@ -46,7 +46,27 @@ public class OverwriteCombinerTest {
     }
 
     @Test
-    public void testOverwriteVertex() {
+    public void testCombineNull() {
+        LongValue value1 = new LongValue(1L);
+        LongValue value2 = new LongValue(2L);
+        OverwriteCombiner<LongValue> combiner = new OverwriteCombiner<>();
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(null, value2);
+        }, e -> {
+            Assert.assertEquals("The parameter v1 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(value1, null);
+        }, e -> {
+            Assert.assertEquals("The parameter v2 can't be null",
+                                e.getMessage());
+        });
+    }
+
+    @Test
+    public void testCombineVertex() {
         GraphFactory factory = ComputerContext.instance().graphFactory();
         LongId longId1 = new LongId(1L);
         DoubleValue value1 = new DoubleValue(0.1D);
@@ -65,7 +85,7 @@ public class OverwriteCombinerTest {
     }
 
     @Test
-    public void testOverwriteProperties() {
+    public void testCombineProperties() {
         Properties properties1 = new DefaultProperties();
         properties1.put("name", new Utf8Id("marko").idValue());
         properties1.put("city", new Utf8Id("Beijing").idValue());

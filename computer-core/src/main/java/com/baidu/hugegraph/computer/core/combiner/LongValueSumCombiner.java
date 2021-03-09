@@ -20,11 +20,14 @@
 package com.baidu.hugegraph.computer.core.combiner;
 
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.util.E;
 
 public class LongValueSumCombiner implements Combiner<LongValue> {
 
     @Override
     public LongValue combine(LongValue v1, LongValue v2) {
+        E.checkArgumentNotNull(v1, "The parameter v1 can't be null");
+        E.checkArgumentNotNull(v2, "The parameter v2 can't be null");
         v2.value(v1.value() + v2.value());
         return v2;
     }

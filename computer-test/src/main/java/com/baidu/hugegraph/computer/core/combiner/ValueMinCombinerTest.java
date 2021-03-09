@@ -27,7 +27,7 @@ import com.baidu.hugegraph.testutil.Assert;
 public class ValueMinCombinerTest {
 
     @Test
-    public void test() {
+    public void testCombine() {
         LongValue min = new LongValue(0L);
         ValueMinCombiner<LongValue> combiner = new ValueMinCombiner();
         LongValue value1 = new LongValue(1L);
@@ -35,5 +35,25 @@ public class ValueMinCombinerTest {
         LongValue value2 = new LongValue(2L);
         min = combiner.combine(value2, min);
         Assert.assertEquals(new LongValue(0L), min);
+    }
+
+    @Test
+    public void testCombineNull() {
+        LongValue value1 = new LongValue(1L);
+        LongValue value2 = new LongValue(2L);
+        ValueMinCombiner combiner = new ValueMinCombiner();
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(null, value2);
+        }, e -> {
+            Assert.assertEquals("The parameter v1 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(value1, null);
+        }, e -> {
+            Assert.assertEquals("The parameter v2 can't be null",
+                                e.getMessage());
+        });
     }
 }
