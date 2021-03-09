@@ -25,6 +25,12 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.iterator.MapperIterator;
 
+/**
+ * FilterMapComputation suit for computation like ring detection, when a
+ * message received, it can be computed and decided whether to propagate
+ * along the edges.
+ * @param <M> Message type
+ */
 public interface FilterMapComputation<M extends Value> extends Computation<M> {
 
     @Override
@@ -35,6 +41,9 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
         this.sendMessages(context, vertex, results);
     }
 
+    /**
+     * Compute all the messages and get the results as iterator.
+     */
     default Iterator<M> computeMessages(WorkerContext context,
                                         Vertex vertex,
                                         Iterator<M> messages) {
@@ -45,11 +54,23 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
         });
     }
 
-    default void sendMessages(WorkerContext context, Vertex vertex,
+    /**
+     * Compute the message. This method will be called once for each message
+     * in a superstep.
+     * @return The value need to propagate along the edges, or null when
+     * needn't.
+     */
+    M computeMessage(WorkerContext context, Vertex vertex, M message);
+
+    /**
+     * Send messages along all the edges, and halt the vertex after send
+     * messages. Subclass should override this method when send message to
+     * selected target vertex.
+     */
+    default void sendMessages(WorkerContext context,
+                              Vertex vertex,
                               Iterator<M> results) {
         context.sendMessagesToAllEdges(vertex, results);
         vertex.inactivate();
     }
-
-    M computeMessage(WorkerContext context, Vertex vertex, M message);
 }

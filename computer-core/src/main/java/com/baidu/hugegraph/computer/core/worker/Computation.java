@@ -42,7 +42,9 @@ public interface Computation<M extends Value> {
     M initialValue(WorkerContext context, Vertex vertex);
 
     /**
-     * Called at all other supersteps except superstep0, with messages.
+     * Called at all supersteps(except superstep0) with messages,
+     * or at superstep0 with user defined message, in generally the message
+     * returned by the user is an empty message.
      */
     void compute(WorkerContext context, Vertex vertex, Iterator<M> messages);
 
