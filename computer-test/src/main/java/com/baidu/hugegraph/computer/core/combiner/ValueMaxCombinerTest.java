@@ -45,14 +45,14 @@ public class ValueMaxCombinerTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             combiner.combine(null, value2);
         }, e -> {
-            Assert.assertEquals("The parameter v1 can't be null",
+            Assert.assertEquals("The combine parameter v1 can't be null",
                                 e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             combiner.combine(value1, null);
         }, e -> {
-            Assert.assertEquals("The parameter v2 can't be null",
+            Assert.assertEquals("The combine parameter v2 can't be null",
                                 e.getMessage());
         });
     }

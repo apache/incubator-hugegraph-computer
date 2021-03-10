@@ -26,8 +26,8 @@ public class ValueMinCombiner<T extends Value> implements Combiner<T> {
 
     @Override
     public T combine(T v1, T v2) {
-        E.checkArgumentNotNull(v1, "The parameter v1 can't be null");
-        E.checkArgumentNotNull(v2, "The parameter v2 can't be null");
+        E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
+        E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
         if (v1.compareTo(v2) <= 0) {
             return v1;
         } else {

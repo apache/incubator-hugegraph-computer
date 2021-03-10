@@ -26,8 +26,8 @@ public class DoubleValueSumCombiner implements Combiner<DoubleValue> {
 
     @Override
     public DoubleValue combine(DoubleValue v1, DoubleValue v2) {
-        E.checkArgumentNotNull(v1, "The parameter v1 can't be null");
-        E.checkArgumentNotNull(v2, "The parameter v2 can't be null");
+        E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
+        E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
         v2.value(v1.value() + v2.value());
         return v2;
     }
