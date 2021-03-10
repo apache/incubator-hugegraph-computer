@@ -93,6 +93,7 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
         }
     }
 
+    @Override
     public long skip(long bytesToSkip) throws IOException {
         E.checkArgument(bytesToSkip >= 0,
                         "The parameter bytesToSkip must be >=0, but got %s",
@@ -113,6 +114,7 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
         this.file.close();
     }
 
+    @Override
     protected void require(int size) throws IOException {
         if (this.remaining() >= size) {
             return;

@@ -153,6 +153,7 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
         super.seek(0);
     }
 
+    @Override
     public void close() throws IOException {
         this.flushBuffer();
         this.file.close();

@@ -286,7 +286,7 @@ public class StreamGraphInput implements GraphInput {
         return this.in.readInt();
     }
 
-    public int readFullInt() throws IOException {
+    public final int readFullInt() throws IOException {
         return this.in.readInt();
     }
 

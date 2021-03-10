@@ -116,6 +116,7 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
         }
     }
 
+    @Override
     public long skip(long bytesToSkip) throws IOException {
         E.checkArgument(bytesToSkip >= 0L,
                         "The parameter bytesToSkip must be >= 0, but got %s",
@@ -137,6 +138,7 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
         this.input.close();
     }
 
+    @Override
     protected void require(int size) throws IOException {
         if (this.remaining() >= size) {
             return;

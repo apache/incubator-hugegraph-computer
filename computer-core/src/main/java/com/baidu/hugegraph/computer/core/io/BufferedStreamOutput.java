@@ -118,7 +118,7 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
             throw new IOException(String.format(
                       "The position %s is out of range [%s, %s]",
                       position, this.outputOffset,
-                      this.outputOffset + this.bufferCapacity));
+                      this.position()));
         }
     }
 
@@ -172,6 +172,12 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        this.flushBuffer();
+        this.output.close();
+    }
+
     private void flushBuffer() throws IOException {
         int bufferPosition = (int) super.position();
         if (bufferPosition == 0) {
@@ -180,11 +186,6 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
         this.output.write(this.buffer(), 0, bufferPosition);
         this.outputOffset += bufferPosition;
         super.seek(0);
-    }
-
-    public void close() throws IOException {
-        this.flushBuffer();
-        this.output.close();
     }
 
     private final int bufferAvailable() {
