@@ -27,7 +27,7 @@ import com.baidu.hugegraph.util.E;
 
 public class BufferedStreamInput extends UnsafeByteArrayInput {
 
-    private final int bufferSize;
+    private final int bufferCapacity;
     private final InputStream input;
     private long inputOffset;
 
@@ -35,13 +35,13 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
         this(input, Constants.DEFAULT_BUFFER_SIZE);
     }
 
-    public BufferedStreamInput(InputStream input, int bufferSize)
+    public BufferedStreamInput(InputStream input, int bufferCapacity)
                                throws IOException {
-        super(new byte[bufferSize], 0);
-        E.checkArgument(bufferSize >= 8,
+        super(new byte[bufferCapacity], 0);
+        E.checkArgument(bufferCapacity >= 8,
                         "The parameter bufferSize must be >= 8");
         this.input = input;
-        this.bufferSize = bufferSize;
+        this.bufferCapacity = bufferCapacity;
         this.shiftAndFillBuffer();
     }
 
@@ -59,7 +59,7 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
     public void readFully(byte[] b, int off, int len) throws IOException {
         if (len <= super.remaining()) {
             super.readFully(b, off, len);
-        } else if (len <= this.bufferSize) {
+        } else if (len <= this.bufferCapacity) {
             this.shiftAndFillBuffer();
             super.readFully(b, off, len);
         } else {
@@ -80,9 +80,9 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
 
     @Override
     public void seek(long position) throws IOException {
-        if (position < this.inputOffset &&
-            position >= this.inputOffset - this.bufferSize) {
-            super.seek(this.bufferSize - (this.inputOffset - position));
+        long bufferStart = this.inputOffset - this.limit();
+        if (position >= bufferStart && position < this.inputOffset) {
+            super.seek(position - bufferStart);
             return;
         }
         /*
@@ -95,7 +95,7 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
             this.inputOffset += skipLen;
             byte[] buffer = this.buffer();
             while (skipLen > 0) {
-                int expectLen = Math.min(skipLen, this.bufferSize);
+                int expectLen = Math.min(skipLen, this.bufferCapacity);
                 int readLen = this.input.read(buffer, 0, expectLen);
                 if (readLen == -1) {
                     throw new IOException(String.format(
@@ -142,6 +142,13 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
             return;
         }
         this.shiftAndFillBuffer();
+        /*
+         * The buffer capacity must be >= 8, read primitive data like int,
+         * long, float, double can be read from buffer. Only read bytes may
+         * exceed the limit, and read bytes using readFully is overrode
+         * in this class. In conclusion, the required data can be
+         * supplied after shiftAndFillBuffer.
+         */
         if (size > this.limit()) {
             throw new IOException(String.format(
                       "Read %s bytes from position %s overflows buffer %s",
@@ -155,7 +162,7 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
     }
 
     private void fillBuffer() throws IOException {
-        int expectLen = this.bufferSize - this.limit();
+        int expectLen = this.bufferCapacity - this.limit();
         int readLen = this.input.read(this.buffer(), this.limit(), expectLen);
         if (readLen > 0) {
             this.limit(this.limit() + readLen);

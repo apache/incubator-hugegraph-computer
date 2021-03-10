@@ -31,7 +31,7 @@ import com.baidu.hugegraph.util.E;
  */
 public class BufferedStreamOutput extends UnsafeByteArrayOutput {
 
-    private final int bufferSize;
+    private final int bufferCapacity;
     private final OutputStream output;
     private long outputOffset;
 
@@ -39,11 +39,11 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
         this(output, Constants.DEFAULT_BUFFER_SIZE);
     }
 
-    public BufferedStreamOutput(OutputStream output, int bufferSize) {
-        super(bufferSize);
-        E.checkArgument(bufferSize >= 8,
+    public BufferedStreamOutput(OutputStream output, int bufferCapacity) {
+        super(bufferCapacity);
+        E.checkArgument(bufferCapacity >= 8,
                         "The parameter bufferSize must be >= 8");
-        this.bufferSize = bufferSize;
+        this.bufferCapacity = bufferCapacity;
         this.output = output;
         this.outputOffset = 0L;
     }
@@ -60,7 +60,7 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
             return;
         }
         this.flushBuffer();
-        if (this.bufferSize >= len) {
+        if (this.bufferCapacity >= len) {
             super.write(b, off, len);
         } else {
             // The len > the buffer size, write out directly
@@ -71,14 +71,15 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
 
     /**
      * The valid range of position is [the output position correspond to buffer
-     * start, the output position correspond to the current position - 4], it
-     * can't write data to the position before the buffer or after
+     * start, the output position correspond to
+     * the current position - Constants.INT_LEN], it can't write data to the
+     * position before the buffer or after
      * the current position.
      */
     @Override
     public void writeInt(long position, int v) throws IOException {
         if (position >= this.outputOffset &&
-            position <= this.position() - 4) {
+            position <= this.position() - Constants.INT_LEN) {
             super.writeInt(position - this.outputOffset, v);
         } else if (position < this.outputOffset) {
             throw new IOException(String.format(
@@ -117,7 +118,7 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
             throw new IOException(String.format(
                       "The position %s is out of range [%s, %s]",
                       position, this.outputOffset,
-                      this.outputOffset + this.bufferSize));
+                      this.outputOffset + this.bufferCapacity));
         }
     }
 
@@ -127,15 +128,13 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
                         "The parameter bytesToSkip must be >= 0, but got %s",
                         bytesToSkip);
         long positionBeforeSkip = this.outputOffset + super.position();
-        long bufferPosition = super.position();
-        long bufferAvailable = this.bufferSize - bufferPosition;
-        if (bufferAvailable >= bytesToSkip) {
+        if (this.bufferAvailable() >= bytesToSkip) {
             super.skip(bytesToSkip);
             return positionBeforeSkip;
         }
 
         this.flushBuffer();
-        if (bytesToSkip <= this.bufferSize) {
+        if (bytesToSkip <= this.bufferCapacity) {
             super.skip(bytesToSkip);
         } else {
             this.outputOffset += bytesToSkip;
@@ -152,15 +151,25 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
 
     @Override
     protected void require(int size) throws IOException {
-        E.checkArgument(size <= this.bufferSize,
+        E.checkArgument(size <= this.bufferCapacity,
                         "The parameter size must be <= %s",
-                        this.bufferSize);
-        long position = super.position();
-        long bufferAvailable = this.bufferSize - position;
-        if (bufferAvailable >= size) {
+                        this.bufferCapacity);
+        if (this.bufferAvailable() >= size) {
             return;
         }
         this.flushBuffer();
+        /*
+         * The buffer capacity must be >= 8, write primitive data like int,
+         * long, float, double can be write to buffer after flush buffer.
+         * Only write bytes may exceed the limit, and write bytes using
+         * write(byte[] b) is overrode in this class. In conclusion, the
+         * required size can be supplied after flushBuffer.
+         */
+        if (size > this.bufferAvailable()) {
+            throw new IOException(String.format(
+                      "Write %s bytes to position %s overflows buffer %s",
+                      size, this.position(), this.bufferCapacity));
+        }
     }
 
     private void flushBuffer() throws IOException {
@@ -179,6 +188,6 @@ public class BufferedStreamOutput extends UnsafeByteArrayOutput {
     }
 
     private final int bufferAvailable() {
-        return this.bufferSize - (int) super.position();
+        return this.bufferCapacity - (int) super.position();
     }
 }

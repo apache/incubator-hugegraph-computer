@@ -25,26 +25,26 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.util.E;
 
 public class BufferedFileInput extends UnsafeByteArrayInput {
 
-    private final int bufferSize;
+    private final int bufferCapacity;
     private final RandomAccessFile file;
     private long fileOffset;
 
     public BufferedFileInput(File file) throws IOException {
-        this(new RandomAccessFile(file, "r"), Constants.DEFAULT_BUFFER_SIZE);
+        this(new RandomAccessFile(file, Constants.FILE_MODE_READ),
+             Constants.DEFAULT_BUFFER_SIZE);
     }
 
-    public BufferedFileInput(RandomAccessFile file, int bufferSize)
+    public BufferedFileInput(RandomAccessFile file, int bufferCapacity)
                              throws IOException {
-        super(new byte[bufferSize], 0);
-        E.checkArgument(bufferSize >= 8,
+        super(new byte[bufferCapacity], 0);
+        E.checkArgument(bufferCapacity >= 8,
                         "The parameter bufferSize must be >= 8");
         this.file = file;
-        this.bufferSize = bufferSize;
+        this.bufferCapacity = bufferCapacity;
         this.fillBuffer();
     }
 
@@ -63,7 +63,7 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
         int remaining = super.remaining();
         if (len <= remaining) {
             super.readFully(b, off, len);
-        } else if (len <= this.bufferSize) {
+        } else if (len <= this.bufferCapacity) {
             this.shiftAndFillBuffer();
             super.readFully(b, off, len);
         } else {
@@ -75,9 +75,9 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
 
     @Override
     public void seek(long position) throws IOException {
-        if (position < this.fileOffset &&
-            position >= this.fileOffset - this.bufferSize) {
-            super.seek(this.limit() - (this.fileOffset - position));
+        long bufferStart = this.fileOffset - this.limit();
+        if (position >= bufferStart && position < this.fileOffset) {
+            super.seek(position - bufferStart);
             return;
         }
         if (position >= this.file.length()) {
@@ -91,7 +91,6 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
             this.fileOffset = position;
             this.fillBuffer();
         }
-
     }
 
     public long skip(long bytesToSkip) throws IOException {
@@ -118,10 +117,20 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
         if (this.remaining() >= size) {
             return;
         }
-        if (this.bufferSize >= size) {
+        if (this.bufferCapacity >= size) {
             this.shiftAndFillBuffer();
-        } else {
-            throw new ComputerException("Should not reach here");
+        }
+        /*
+         * The buffer capacity must be >= 8, read primitive data like int,
+         * long, float, double can be read from buffer. Only read bytes may
+         * exceed the limit, and read bytes using readFully is overrode
+         * in this class. In conclusion, the required data can be
+         * supplied after shiftAndFillBuffer.
+         */
+        if (size > this.limit()) {
+            throw new IOException(String.format(
+                      "Read %s bytes from position %s overflows buffer %s",
+                       size, this.position(), this.limit()));
         }
     }
 
@@ -132,7 +141,7 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
 
     private void fillBuffer() throws IOException {
         long fileLength = this.file.length();
-        int readLen = Math.min(this.bufferSize - this.limit(),
+        int readLen = Math.min(this.bufferCapacity - this.limit(),
                                (int) (fileLength - this.fileOffset));
         this.fileOffset += readLen;
         this.file.readFully(this.buffer(), this.limit(), readLen);

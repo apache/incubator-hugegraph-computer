@@ -44,4 +44,11 @@ public final class Constants {
      * com.baidu.hugegraph.computer.core.io
      */
     public static final int DEFAULT_BUFFER_SIZE = (int) Bytes.KB * 8;
+
+    // The mode to read a file
+    public static final String FILE_MODE_READ = "r";
+
+    // The mode to write a file
+    public static final String FILE_MODE_WRITE = "rw";
+
 }
