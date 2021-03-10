@@ -24,6 +24,9 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    OverwriteCombinerTest.class,
+    MergeOldPropertiesCombinerTest.class,
+    MergeNewPropertiesCombinerTest.class,
     DoubleValueSumCombinerTest.class,
     LongValueSumCombinerTest.class,
     ValueMinCombinerTest.class,

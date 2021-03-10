@@ -19,19 +19,27 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
+import java.util.Map;
+
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.util.E;
 
-public class ValueMinCombiner<T extends Value> implements Combiner<T> {
+public class MergeOldPropertiesCombiner implements PropertiesCombiner {
 
+    /**
+     * Merge properties v1 into v2. If a property exists in both v1 and v2,
+     * remain the value in v2.
+     */
     @Override
-    public T combine(T v1, T v2) {
+    public Properties combine(Properties v1, Properties v2) {
         E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
-        if (v1.compareTo(v2) <= 0) {
-            return v1;
-        } else {
-            return v2;
+        Map<String, Value> v1Map = v1.get();
+        Map<String, Value> v2Map = v2.get();
+        for (Map.Entry<String, Value> entry : v1Map.entrySet()) {
+            v2Map.putIfAbsent(entry.getKey(), entry.getValue());
         }
+        return v2;
     }
 }
