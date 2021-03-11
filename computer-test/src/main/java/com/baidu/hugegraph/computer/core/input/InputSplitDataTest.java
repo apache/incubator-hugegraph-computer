@@ -54,23 +54,23 @@ public class InputSplitDataTest {
     @Test
     public void testMasterCreateAndPollInputSplits() {
         long count = masterInputHandler.createVertexInputSplits();
-        Assert.assertGt(0, count);
+        Assert.assertGt(0L, count);
         InputSplit split;
         while ((split = masterInputHandler.pollVertexInputSplit()) !=
                InputSplit.END_SPLIT) {
-            Assert.assertTrue(!split.start().isEmpty());
-            Assert.assertTrue(!split.end().isEmpty());
+            Assert.assertNotNull(split.start());
+            Assert.assertNotNull(split.end());
             count--;
         }
         Assert.assertEquals(InputSplit.END_SPLIT, split);
         Assert.assertEquals(0, count);
 
         count = masterInputHandler.createEdgeInputSplits();
-        Assert.assertGt(0, count);
+        Assert.assertGt(0L, count);
         while ((split = masterInputHandler.pollEdgeInputSplit()) !=
                InputSplit.END_SPLIT) {
-            Assert.assertTrue(!split.start().isEmpty());
-            Assert.assertTrue(!split.end().isEmpty());
+            Assert.assertNotNull(split.start());
+            Assert.assertNotNull(split.end());
             count--;
         }
         Assert.assertEquals(InputSplit.END_SPLIT, split);
@@ -80,7 +80,7 @@ public class InputSplitDataTest {
     @Test
     public void testWorkerFetchAndLoadEdgeInputSplits() {
         long count = masterInputHandler.createVertexInputSplits();
-        Assert.assertGt(0, count);
+        Assert.assertGt(0L, count);
         while (workerInputHandler.fetchNextVertexInputSplit()) {
             workerInputHandler.loadVertexInputSplitData();
             count--;
@@ -88,7 +88,7 @@ public class InputSplitDataTest {
         Assert.assertEquals(0, count);
 
         count = masterInputHandler.createEdgeInputSplits();
-        Assert.assertGt(0, count);
+        Assert.assertGt(0L, count);
         while (workerInputHandler.fetchNextEdgeInputSplit()) {
             workerInputHandler.loadEdgeInputSplitData();
             count--;
