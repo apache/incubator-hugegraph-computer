@@ -38,6 +38,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
@@ -58,13 +59,17 @@ public class BufferedFileTest {
                 Assert.assertEquals(0, input.position());
             }
             Assert.assertThrows(IllegalArgumentException.class, () -> {
-                new BufferedFileOutput(new RandomAccessFile(file, "rw"), 1);
+                new BufferedFileOutput(new RandomAccessFile(file,
+                                       Constants.FILE_MODE_WRITE),
+                                       1);
             }, e -> {
                 Assert.assertContains("The parameter bufferSize must be >= 8",
                                       e.getMessage());
             });
             Assert.assertThrows(IllegalArgumentException.class, () -> {
-                new BufferedFileInput(new RandomAccessFile(file, "r"), 1);
+                new BufferedFileInput(new RandomAccessFile(file,
+                                      Constants.FILE_MODE_READ),
+                                      1);
             }, e -> {
                 Assert.assertContains("The parameter bufferSize must be >= 8",
                                       e.getMessage());
@@ -584,7 +589,7 @@ public class BufferedFileTest {
             }
             endTime = System.currentTimeMillis();
             time = endTime - startTime;
-            LOG.info("Read {} bytes use DataInputStream.readFully takes{} ms",
+            LOG.info("Read {} bytes use DataInputStream.readFully takes {} ms",
                      size, time);
         } finally {
             FileUtils.deleteQuietly(dataFile);
@@ -597,13 +602,15 @@ public class BufferedFileTest {
 
     private static BufferedFileOutput createOutput(File file)
                                       throws FileNotFoundException {
-        return new BufferedFileOutput(new RandomAccessFile(file, "rw"),
+        return new BufferedFileOutput(new RandomAccessFile(file,
+                                      Constants.FILE_MODE_WRITE),
                                       BUFFER_SIZE);
     }
 
     private static BufferedFileInput createInput(File file)
                                                  throws IOException {
-        return new BufferedFileInput(new RandomAccessFile(file, "rw"),
+        return new BufferedFileInput(new RandomAccessFile(file,
+                                     Constants.FILE_MODE_READ),
                                      BUFFER_SIZE);
     }
 }

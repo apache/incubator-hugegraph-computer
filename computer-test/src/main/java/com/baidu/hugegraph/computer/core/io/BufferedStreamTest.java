@@ -44,7 +44,7 @@ public class BufferedStreamTest {
 
     @Test
     public void testConstructor() throws IOException {
-        File file  = this.createTempFile();
+        File file = this.createTempFile();
         try {
             OutputStream os = new FileOutputStream(file);
             try (BufferedStreamOutput output = new BufferedStreamOutput(os)) {
@@ -103,18 +103,20 @@ public class BufferedStreamTest {
                 for (int i = 0; i < 64; i++) {
                     output.writeInt(i);
                 }
-                // Start point of current buffer
+                // Write at start point of current buffer
                 output.writeInt(128, 1);
-                // Middle of current buffer
+                // Write at middle point of current buffer
                 output.writeInt(200, 2);
+                // Write at end point of current buffer
                 output.writeInt(252, 3);
-                // Previous buffer
+                // Write at previous buffer
                 Assert.assertThrows(IOException.class, () -> {
                     output.writeInt(100, 4);
                 }, e -> {
                     Assert.assertContains("underflows the start position",
                                           e.getMessage());
                 });
+                // Write at next buffer
                 Assert.assertThrows(IOException.class, () -> {
                     output.writeInt(256, 5);
                 }, e -> {
@@ -282,8 +284,6 @@ public class BufferedStreamTest {
                 }, e -> {
                     Assert.assertContains("out of range", e.getMessage());
                 });
-
-
             }
             try (BufferedStreamInput input = this.createInput(file)) {
                 for (int i = 0; i < size - 2; i++) {
