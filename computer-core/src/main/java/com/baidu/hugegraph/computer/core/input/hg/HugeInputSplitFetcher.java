@@ -41,7 +41,7 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
     }
 
     @Override
-    public List<InputSplit> listVertexInputSplits() {
+    public List<InputSplit> fetchVertexInputSplits() {
         long splitSize = this.config.get(ComputerOptions.INPUT_SPLITS_SIZE);
         List<Shard> shards = this.client.traverser().vertexShards(splitSize);
         List<InputSplit> splits = new ArrayList<>();
@@ -53,7 +53,7 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
     }
 
     @Override
-    public List<InputSplit> listEdgeInputSplits() {
+    public List<InputSplit> fetchEdgeInputSplits() {
         long splitSize = this.config.get(ComputerOptions.INPUT_SPLITS_SIZE);
         List<Shard> shards = this.client.traverser().edgeShards(splitSize);
         List<InputSplit> splits = new ArrayList<>();

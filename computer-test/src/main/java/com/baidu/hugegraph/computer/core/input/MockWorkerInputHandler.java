@@ -46,7 +46,7 @@ public class MockWorkerInputHandler {
         // Send request to master
         this.vertexInputSplit = this.rpcClient.getNextVertexInputSplit();
         return this.vertexInputSplit != null &&
-               this.vertexInputSplit != InputSplit.END_SPLIT;
+               !this.vertexInputSplit.equals(InputSplit.END_SPLIT);
     }
 
     public void loadVertexInputSplitData() {
@@ -54,7 +54,7 @@ public class MockWorkerInputHandler {
             throw new ComputerException("Should fetch vertex input split " +
                                         "meta before load");
         }
-        if (this.vertexInputSplit == InputSplit.END_SPLIT) {
+        if (this.vertexInputSplit.equals(InputSplit.END_SPLIT)) {
             throw new ComputerException("Can't load vertex input split data, " +
                                         "because it has been exhausted");
         }
@@ -70,7 +70,7 @@ public class MockWorkerInputHandler {
         // Send request to master
         this.edgeInputSplit = this.rpcClient.getNextEdgeInputSplit();
         return this.edgeInputSplit != null &&
-               this.edgeInputSplit != InputSplit.END_SPLIT;
+               !this.edgeInputSplit.equals(InputSplit.END_SPLIT);
     }
 
     public void loadEdgeInputSplitData() {
@@ -78,7 +78,7 @@ public class MockWorkerInputHandler {
             throw new ComputerException("Should fetch edge input split meta " +
                                         "before load");
         }
-        if (this.edgeInputSplit == InputSplit.END_SPLIT) {
+        if (this.edgeInputSplit.equals(InputSplit.END_SPLIT)) {
             throw new ComputerException("Can't load edge input split data, " +
                                         "because it has been exhausted");
         }

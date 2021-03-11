@@ -87,12 +87,12 @@ public class ComputerOptions extends OptionHolder {
                     1024 * 1024L
             );
 
-    public static final ConfigOption<Integer> INPUT_PARTITION_COUNT =
+    public static final ConfigOption<Integer> INPUT_SPLIT_PAGE_SIZE =
             new ConfigOption<>(
-                    "input.partition_count",
-                    "The total partition count for all worker",
+                    "input.split_page_size",
+                    "The page size for streamed load input split data",
                     positiveInt(),
-                    10
+                    500
             );
 
     public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =

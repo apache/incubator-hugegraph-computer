@@ -56,8 +56,8 @@ public class InputSplitDataTest {
         long count = masterInputHandler.createVertexInputSplits();
         Assert.assertGt(0L, count);
         InputSplit split;
-        while ((split = masterInputHandler.pollVertexInputSplit()) !=
-               InputSplit.END_SPLIT) {
+        while (!(split = masterInputHandler.pollVertexInputSplit()).equals(
+               InputSplit.END_SPLIT)) {
             Assert.assertNotNull(split.start());
             Assert.assertNotNull(split.end());
             count--;
@@ -67,8 +67,8 @@ public class InputSplitDataTest {
 
         count = masterInputHandler.createEdgeInputSplits();
         Assert.assertGt(0L, count);
-        while ((split = masterInputHandler.pollEdgeInputSplit()) !=
-               InputSplit.END_SPLIT) {
+        while (!(split = masterInputHandler.pollEdgeInputSplit()).equals(
+               InputSplit.END_SPLIT)) {
             Assert.assertNotNull(split.start());
             Assert.assertNotNull(split.end());
             count--;

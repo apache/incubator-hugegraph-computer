@@ -36,7 +36,7 @@ public class MasterInputHandler {
     }
 
     public int createVertexInputSplits() {
-        List<InputSplit> splits = this.fetcher.listVertexInputSplits();
+        List<InputSplit> splits = this.fetcher.fetchVertexInputSplits();
         for (InputSplit split : splits) {
             this.vertexSplits.offer(split);
         }
@@ -44,7 +44,7 @@ public class MasterInputHandler {
     }
 
     public int createEdgeInputSplits() {
-        List<InputSplit> splits = this.fetcher.listEdgeInputSplits();
+        List<InputSplit> splits = this.fetcher.fetchEdgeInputSplits();
         for (InputSplit split : splits) {
             this.edgeSplits.offer(split);
         }

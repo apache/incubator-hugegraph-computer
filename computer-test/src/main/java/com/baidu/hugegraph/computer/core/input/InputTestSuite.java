@@ -19,19 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
-import java.util.List;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public interface InputSplitFetcher {
-
-    /**
-     * Fetch all vertex input splits just once
-     * @return all vertex input splits
-     */
-    List<InputSplit> fetchVertexInputSplits();
-
-    /**
-     * Fetch all edge input splits just once
-     * @return all edge input splits
-     */
-    List<InputSplit> fetchEdgeInputSplits();
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    InputSplitDataTest.class,
+    HugeConverterTest.class
+})
+public class InputTestSuite {
 }

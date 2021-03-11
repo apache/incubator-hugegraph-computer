@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.input.hg;
 
 import java.util.Iterator;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.driver.HugeClient;
@@ -37,6 +38,8 @@ public class HugeVertexFetcher extends HugeElementFetcher<Vertex>
     @Override
     public Iterator<Vertex> fetch(InputSplit split) {
         Shard shard = split.toShard();
-        return this.client().traverser().iteratorVertices(shard, 500);
+        int pageSize = this.config().get(
+                       ComputerOptions.INPUT_SPLIT_PAGE_SIZE);
+        return this.client().traverser().iteratorVertices(shard, pageSize);
     }
 }
