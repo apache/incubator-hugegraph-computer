@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.io;
 
 import java.io.Closeable;
-import java.io.DataInput;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
@@ -31,12 +30,12 @@ import com.baidu.hugegraph.util.E;
 
 import sun.misc.Unsafe;
 
-public final class UnsafeByteArrayInput implements DataInput, Closeable {
+public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
 
     private static final sun.misc.Unsafe UNSAFE;
 
     private final byte[] buffer;
-    private final int limit;
+    private int limit;
     private int position;
 
     static {
@@ -57,6 +56,10 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
         this(buffer, 0, limit);
     }
 
+    public UnsafeByteArrayInput(byte[] buffer, long limit) {
+        this(buffer, 0, (int) limit);
+    }
+
     public UnsafeByteArrayInput(byte[] buffer, int position, int limit) {
         E.checkArgumentNotNull(buffer, "The buffer can't be null");
         this.buffer = buffer;
@@ -65,12 +68,12 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public void readFully(byte[] b) {
+    public void readFully(byte[] b) throws IOException {
         this.readFully(b, 0, b.length);
     }
 
     @Override
-    public void readFully(byte[] b, int off, int len) {
+    public void readFully(byte[] b, int off, int len) throws IOException {
         this.require(len);
         System.arraycopy(this.buffer, this.position, b, off, len);
         this.position += len;
@@ -89,7 +92,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public boolean readBoolean() {
+    public boolean readBoolean() throws IOException {
         this.require(Constants.BOOLEAN_LEN);
         boolean value = UNSAFE.getBoolean(this.buffer, this.offset());
         this.position += Constants.BOOLEAN_LEN;
@@ -97,7 +100,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public byte readByte() {
+    public byte readByte() throws IOException {
         this.require(Constants.BYTE_LEN);
         byte value = this.buffer[position];
         this.position += Constants.BYTE_LEN;
@@ -105,7 +108,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public int readUnsignedByte() {
+    public int readUnsignedByte() throws IOException {
         this.require(Constants.BYTE_LEN);
         int value = this.buffer[position] & 0xFF;
         this.position += Constants.BYTE_LEN;
@@ -113,7 +116,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public short readShort() {
+    public short readShort() throws IOException {
         this.require(Constants.SHORT_LEN);
         short value = UNSAFE.getShort(this.buffer, this.offset());
         this.position += Constants.SHORT_LEN;
@@ -121,7 +124,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public int readUnsignedShort() {
+    public int readUnsignedShort() throws IOException {
         this.require(Constants.SHORT_LEN);
         int value = UNSAFE.getShort(this.buffer, this.offset()) & 0xFFFF;
         this.position += Constants.SHORT_LEN;
@@ -129,7 +132,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public char readChar() {
+    public char readChar() throws IOException {
         this.require(Constants.CHAR_LEN);
         char value = UNSAFE.getChar(this.buffer, this.offset());
         this.position += Constants.CHAR_LEN;
@@ -137,7 +140,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public int readInt() {
+    public int readInt() throws IOException {
         this.require(Constants.INT_LEN);
         int value = UNSAFE.getInt(this.buffer, this.offset());
         this.position += Constants.INT_LEN;
@@ -145,7 +148,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public long readLong() {
+    public long readLong() throws IOException {
         this.require(Constants.LONG_LEN);
         long value = UNSAFE.getLong(this.buffer, this.offset());
         this.position += Constants.LONG_LEN;
@@ -153,7 +156,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public float readFloat() {
+    public float readFloat() throws IOException {
         this.require(Constants.FLOAT_LEN);
         float value = UNSAFE.getFloat(this.buffer, this.offset());
         this.position += Constants.FLOAT_LEN;
@@ -161,7 +164,7 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public double readDouble() {
+    public double readDouble() throws IOException {
         this.require(Constants.DOUBLE_LEN);
         double value = UNSAFE.getDouble(this.buffer, this.offset());
         this.position += Constants.DOUBLE_LEN;
@@ -174,22 +177,40 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
     }
 
     @Override
-    public String readUTF() {
+    public String readUTF() throws IOException {
         int len = this.readUnsignedShort();
         byte[] bytes = new byte[len];
         this.readFully(bytes, 0, len);
         return CoderUtil.decode(bytes);
     }
 
-    public int position() {
+    public long position() {
         return this.position;
+    }
+
+    @Override
+    public void seek(long position) throws IOException {
+        this.position = (int) position;
+    }
+
+    @Override
+    public long skip(long bytesToSkip) throws IOException {
+        int positionBeforeSkip = this.position;
+        this.require((int) bytesToSkip);
+        this.position += bytesToSkip;
+        return positionBeforeSkip;
     }
 
     public int remaining() {
         return this.limit - this.position;
     }
 
-    private void require(int size) {
+    @Override
+    public void close() throws IOException {
+        // pass
+    }
+
+    protected void require(int size) throws IOException {
         if (this.position + size > this.limit) {
             throw new ComputerException(
                       "Only %s bytes available, trying to read %s bytes",
@@ -197,12 +218,36 @@ public final class UnsafeByteArrayInput implements DataInput, Closeable {
         }
     }
 
-    private int offset() {
-        return Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position;
+    protected byte[] buffer() {
+        return this.buffer;
     }
 
-    @Override
-    public void close() throws IOException {
-        // Do nothing
+    /**
+     * Cut the content from 0 to position and copy the content from position
+     * to the end to 0.
+     */
+    protected void shiftBuffer() {
+        int remaining = this.remaining();
+        if (remaining > 0) {
+            System.arraycopy(this.buffer, this.position,
+                             this.buffer, 0, remaining);
+        }
+        this.position = 0;
+        this.limit = remaining;
+    }
+
+    protected void limit(int limit) {
+        E.checkArgument(limit <= this.buffer.length,
+                        "The limit must be >= buffer length %s",
+                        this.buffer.length);
+        this.limit = limit;
+    }
+
+    public int limit() {
+        return this.limit;
+    }
+
+    private int offset() {
+        return Unsafe.ARRAY_BYTE_BASE_OFFSET + this.position;
     }
 }

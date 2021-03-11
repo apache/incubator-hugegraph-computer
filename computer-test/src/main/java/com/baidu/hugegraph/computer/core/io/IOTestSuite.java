@@ -28,7 +28,9 @@ import org.junit.runners.Suite;
     StreamGraphOutputInputTest.class,
     JsonStructGraphOutputTest.class,
     CsvStructGraphOutputTest.class,
-    UnsafeByteArrayTest.class
+    UnsafeByteArrayTest.class,
+    BufferedFileTest.class,
+    BufferedStreamTest.class
 })
 public class IOTestSuite {
 }

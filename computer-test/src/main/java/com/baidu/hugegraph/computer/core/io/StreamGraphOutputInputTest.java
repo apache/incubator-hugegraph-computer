@@ -102,6 +102,32 @@ public class StreamGraphOutputInputTest {
     }
 
     @Test
+    public void testWriteReadEmptyEdges() throws IOException {
+        UnitTestBase.updateOptions(
+                ComputerOptions.ALGORITHM_NAME, "test",
+                ComputerOptions.VALUE_TYPE, "LONG",
+                ComputerOptions.VALUE_NAME, "value",
+                ComputerOptions.EDGES_NAME, "value"
+        );
+        GraphFactory factory = ComputerContext.instance().graphFactory();
+
+        Edges edges1 = factory.createEdges(0);
+        byte[] bytes;
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            output.writeEdges(edges1);
+            bytes = bao.toByteArray();
+        }
+
+        Edges edges2;
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            edges2 = input.readEdges();
+        }
+        Assert.assertEquals(edges1, edges2);
+    }
+
+    @Test
     public void testWriteReadProperties() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.ALGORITHM_NAME, "test",
@@ -240,6 +266,44 @@ public class StreamGraphOutputInputTest {
     }
 
     @Test
+    public void testReadWriteFullInt() throws IOException {
+        byte[] bytes;
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            output.writeFullInt(Integer.MIN_VALUE);
+            output.writeFullInt(Integer.MAX_VALUE);
+            output.writeFullInt(0);
+            bytes = bao.toByteArray();
+        }
+
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            Assert.assertEquals(Integer.MIN_VALUE, input.readFullInt());
+            Assert.assertEquals(Integer.MAX_VALUE, input.readFullInt());
+            Assert.assertEquals(0, input.readFullInt());
+        }
+    }
+
+    @Test
+    public void testReadWriteFullLong() throws IOException {
+        byte[] bytes;
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            output.writeFullLong(Long.MIN_VALUE);
+            output.writeFullLong(Long.MAX_VALUE);
+            output.writeFullLong(0L);
+            bytes = bao.toByteArray();
+        }
+
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            Assert.assertEquals(Long.MIN_VALUE, input.readFullLong());
+            Assert.assertEquals(Long.MAX_VALUE, input.readFullLong());
+            Assert.assertEquals(0L, input.readFullLong());
+        }
+    }
+
+    @Test
     public void testWriteReadVInt() throws IOException {
         testBytesStreamWriteReadVInt(new byte[]{0}, 0);
         testBytesStreamWriteReadVInt(new byte[]{1}, 1);
@@ -337,6 +401,63 @@ public class StreamGraphOutputInputTest {
             StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             String readValue = input.readString();
             Assert.assertEquals(value, readValue);
+        }
+    }
+
+    @Test
+    public void testPosition() throws IOException {
+        byte[] bytes;
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            Assert.assertEquals(0L, output.position());
+            output.writeFullLong(Long.MAX_VALUE);
+            Assert.assertEquals(8L, output.position());
+            bytes = bao.toByteArray();
+        }
+
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            Assert.assertEquals(0L, input.position());
+            Assert.assertEquals(Long.MAX_VALUE, input.readFullLong());
+            Assert.assertEquals(8L, input.position());
+        }
+    }
+
+    @Test
+    public void testSeek() throws IOException {
+        byte[] bytes;
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            output.writeFullLong(Long.MAX_VALUE);
+            output.seek(0L);
+            output.writeFullLong(Long.MIN_VALUE);
+            bytes = bao.toByteArray();
+        }
+
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            Assert.assertEquals(Long.MIN_VALUE, input.readFullLong());
+            input.seek(0L);
+            Assert.assertEquals(Long.MIN_VALUE, input.readFullLong());
+        }
+    }
+
+    @Test
+    public void testSkip() throws IOException {
+        byte[] bytes;
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            output.writeFullLong(Long.MAX_VALUE);
+            output.skip(4L);
+            output.writeFullLong(Long.MIN_VALUE);
+            bytes = bao.toByteArray();
+        }
+
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            Assert.assertEquals(Long.MAX_VALUE, input.readFullLong());
+            input.skip(4L);
+            Assert.assertEquals(Long.MIN_VALUE, input.readFullLong());
         }
     }
 }

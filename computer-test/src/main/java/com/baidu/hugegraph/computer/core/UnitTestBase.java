@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -43,6 +44,10 @@ import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
 
 public class UnitTestBase {
+
+    private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+                                        "0123456789" +
+                                        "abcdefghijklmnopqrstuvxyz";
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
@@ -136,5 +141,23 @@ public class UnitTestBase {
         } catch (InterruptedException ignored) {
             // Ignore InterruptedException
         }
+    }
+
+    public static byte[] randomBytes(int size) {
+        Random random = new Random();
+        byte[] bytes = new byte[size];
+        for (int i = 0; i < size; i++) {
+            bytes[i] = (byte) random.nextInt();
+        }
+        return bytes;
+    }
+
+    public static String randomString(int size) {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            sb.append(CHARS.charAt(random.nextInt(CHARS.length())));
+        }
+        return sb.toString();
     }
 }

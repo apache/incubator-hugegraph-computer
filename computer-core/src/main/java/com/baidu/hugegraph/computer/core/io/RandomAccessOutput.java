@@ -19,22 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import java.io.DataOutput;
+import java.io.IOException;
 
-public class GraphOutputFactory {
+public interface RandomAccessOutput extends DataOutput {
 
-    public static GraphOutput create(OutputFormat format,
-                                     RandomAccessOutput out) {
-        switch (format) {
-            case BIN:
-                return new OptimizedStreamGraphOutput(out);
-            case CSV:
-                return new CsvStructGraphOutput(out);
-            case JSON:
-                return new JsonStructGraphOutput(out);
-            default:
-                throw new ComputerException("Can't create GraphOutput for %s",
-                                            format);
-        }
-    }
+    long position();
+
+    void seek(long position) throws IOException;
+
+    /**
+     * Skip {@code n} bytes.
+     * @return the position before skip.
+     */
+    long skip(long n) throws IOException;
+
+    void writeInt(long position, int v) throws IOException;
 }

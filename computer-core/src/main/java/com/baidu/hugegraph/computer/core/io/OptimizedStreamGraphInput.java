@@ -19,12 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataInput;
 import java.io.IOException;
 
 public class OptimizedStreamGraphInput extends StreamGraphInput {
 
-    public OptimizedStreamGraphInput(DataInput in) {
+    public OptimizedStreamGraphInput(RandomAccessInput in) {
         super(in);
     }
 
