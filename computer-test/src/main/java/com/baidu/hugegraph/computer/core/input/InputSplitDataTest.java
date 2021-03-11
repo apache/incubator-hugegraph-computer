@@ -23,6 +23,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.hg.HugeInputSplitFetcher;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.HugeClientBuilder;
@@ -39,11 +41,13 @@ public class InputSplitDataTest {
 
     @BeforeClass
     public static void setup() {
+        Config config = ComputerContext.instance().config();
         client = new HugeClientBuilder(URL, GRAPH).build();
-        InputSplitFetcher fetcher = new HugeInputSplitFetcher(client);
+        InputSplitFetcher fetcher = new HugeInputSplitFetcher(config, client);
         masterInputHandler = new MasterInputHandler(fetcher);
         MockRpcClient rpcClient = new MockRpcClient(masterInputHandler);
-        workerInputHandler = new MockWorkerInputHandler(rpcClient, client);
+        workerInputHandler = new MockWorkerInputHandler(config, rpcClient,
+                                                        client);
     }
 
     @AfterClass
@@ -82,7 +86,8 @@ public class InputSplitDataTest {
         long count = masterInputHandler.createVertexInputSplits();
         Assert.assertGt(0L, count);
         while (workerInputHandler.fetchNextVertexInputSplit()) {
-            workerInputHandler.loadVertexInputSplitData();
+            Assert.assertGte(0,
+                             workerInputHandler.loadVertexInputSplitData());
             count--;
         }
         Assert.assertEquals(0, count);
@@ -90,7 +95,7 @@ public class InputSplitDataTest {
         count = masterInputHandler.createEdgeInputSplits();
         Assert.assertGt(0L, count);
         while (workerInputHandler.fetchNextEdgeInputSplit()) {
-            workerInputHandler.loadEdgeInputSplitData();
+            Assert.assertGte(0, workerInputHandler.loadEdgeInputSplitData());
             count--;
         }
         Assert.assertEquals(0, count);

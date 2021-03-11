@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.input.hg;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.ElementFetcher;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
@@ -35,8 +35,8 @@ public abstract class HugeElementFetcher<T> implements ElementFetcher<T> {
     private Iterator<T> localBatch;
     private T next;
 
-    public HugeElementFetcher(HugeClient client) {
-        this.config = ComputerContext.instance().config();
+    public HugeElementFetcher(Config config, HugeClient client) {
+        this.config = config;
         this.client = client;
     }
 
@@ -46,6 +46,10 @@ public abstract class HugeElementFetcher<T> implements ElementFetcher<T> {
 
     protected HugeClient client() {
         return this.client;
+    }
+
+    protected int pageSize() {
+        return this.config.get(ComputerOptions.INPUT_SPLIT_PAGE_SIZE);
     }
 
     @Override

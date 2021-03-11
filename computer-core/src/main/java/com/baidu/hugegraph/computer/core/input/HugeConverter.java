@@ -51,12 +51,11 @@ public final class HugeConverter {
         } else if (rawId instanceof UUID) {
             return new UuidId((UUID) rawId);
         } else {
-            throw new ComputerException("Can't convert Id from '%s'(%s)",
+            throw new ComputerException("Can't convert to Id from '%s'(%s)",
                                         rawId, rawId.getClass());
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static Value convertValue(Object rawValue) {
         if (rawValue == null) {
             return NullValue.get();
@@ -71,6 +70,7 @@ public final class HugeConverter {
         } else if (rawValue instanceof Double) {
             return new DoubleValue((double) rawValue);
         } else if (rawValue instanceof Collection) {
+            @SuppressWarnings("unchecked")
             Collection<Object> collection = (Collection<Object>) rawValue;
             ListValue listValue = new ListValue<>();
             for (Object nestedRawValue : collection) {
@@ -78,7 +78,7 @@ public final class HugeConverter {
             }
             return listValue;
         } else {
-            throw new ComputerException("Can't convert Value from '%s'(%s)",
+            throw new ComputerException("Can't convert to Value from '%s'(%s)",
                                         rawValue, rawValue.getClass());
         }
     }

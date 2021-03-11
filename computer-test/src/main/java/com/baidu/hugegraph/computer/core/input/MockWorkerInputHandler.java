@@ -20,11 +20,13 @@
 package com.baidu.hugegraph.computer.core.input;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.hg.HugeEdgeFetcher;
 import com.baidu.hugegraph.computer.core.input.hg.HugeVertexFetcher;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
+import com.baidu.hugegraph.testutil.Assert;
 
 public class MockWorkerInputHandler {
 
@@ -34,10 +36,11 @@ public class MockWorkerInputHandler {
     private InputSplit vertexInputSplit;
     private InputSplit edgeInputSplit;
 
-    public MockWorkerInputHandler(MockRpcClient rpcClient, HugeClient client) {
+    public MockWorkerInputHandler(Config config, MockRpcClient rpcClient,
+                                  HugeClient client) {
         this.rpcClient = rpcClient;
-        this.vertexFetcher = new HugeVertexFetcher(client);
-        this.edgeFetcher = new HugeEdgeFetcher(client);
+        this.vertexFetcher = new HugeVertexFetcher(config, client);
+        this.edgeFetcher = new HugeEdgeFetcher(config, client);
         this.vertexInputSplit = null;
         this.edgeInputSplit = null;
     }
@@ -49,7 +52,7 @@ public class MockWorkerInputHandler {
                !this.vertexInputSplit.equals(InputSplit.END_SPLIT);
     }
 
-    public void loadVertexInputSplitData() {
+    public int loadVertexInputSplitData() {
         if (this.vertexInputSplit == null) {
             throw new ComputerException("Should fetch vertex input split " +
                                         "meta before load");
@@ -59,11 +62,14 @@ public class MockWorkerInputHandler {
                                         "because it has been exhausted");
         }
         this.vertexFetcher.prepareLoadInputSplit(this.vertexInputSplit);
+        int count = 0;
         while (this.vertexFetcher.hasNext()) {
             Vertex vertex = this.vertexFetcher.next();
             // Write vertex to buffer
-            System.out.println(vertex);
+            Assert.assertNotNull(vertex);
+            count++;
         }
+        return count;
     }
 
     public boolean fetchNextEdgeInputSplit() {
@@ -73,7 +79,7 @@ public class MockWorkerInputHandler {
                !this.edgeInputSplit.equals(InputSplit.END_SPLIT);
     }
 
-    public void loadEdgeInputSplitData() {
+    public int loadEdgeInputSplitData() {
         if (this.edgeInputSplit == null) {
             throw new ComputerException("Should fetch edge input split meta " +
                                         "before load");
@@ -83,10 +89,13 @@ public class MockWorkerInputHandler {
                                         "because it has been exhausted");
         }
         this.edgeFetcher.prepareLoadInputSplit(this.edgeInputSplit);
+        int count = 0;
         while (this.edgeFetcher.hasNext()) {
             Edge edge = this.edgeFetcher.next();
             // Write edge to buffer
-            System.out.println(edge);
+            Assert.assertNotNull(edge);
+            count++;
         }
+        return count;
     }
 }

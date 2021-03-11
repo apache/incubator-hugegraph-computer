@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.input.hg;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
@@ -35,8 +34,8 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
     private final Config config;
     private final HugeClient client;
 
-    public HugeInputSplitFetcher(HugeClient client) {
-        this.config = ComputerContext.instance().config();
+    public HugeInputSplitFetcher(Config config, HugeClient client) {
+        this.config = config;
         this.client = client;
     }
 
