@@ -17,11 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort;
+package com.baidu.hugegraph.computer.core.store;
 
-public interface Range {
+import java.util.List;
 
-    int offset();
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-    int length();
+public interface SortCombiner {
+
+    /**
+     * Combine the list of inputs, and write the combined result length and
+     * results to output.
+     */
+    void combine(List<Pointer> inputs, RandomAccessOutput output);
 }

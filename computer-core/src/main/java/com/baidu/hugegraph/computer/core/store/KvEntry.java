@@ -17,15 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort;
+package com.baidu.hugegraph.computer.core.store;
 
-import java.io.File;
+import java.util.List;
 
-public interface FileInfo {
+public interface KvEntry {
 
-    // Get the file.
-    File file();
-
-    // Return the element count.
-    long count();
+    Pointer key();
+    List<Pointer> values();
 }

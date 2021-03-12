@@ -17,14 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort;
+package com.baidu.hugegraph.computer.core.store;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public interface Sorter {
@@ -34,41 +31,40 @@ public interface Sorter {
      * The input buffer format: | key1 length | key1 | value1 length | value1 |
      * key2 length | key2 | value2 length | value2 | and so on. If a same key
      * exists several time, combine the value before output.
-     * @param bufferInfo The input buffer.
+     * @param input The input buffer.
      * @param valueCombiner The combiner for the same key.
      * @return sorted buffer.
      */
-    BufferInfo sortBuffer(BufferInfo bufferInfo,
-                          Combiner<Pointer> valueCombiner);
+    long sortBuffer(HgkvInput input,
+                    SortCombiner valueCombiner,
+                    RandomAccessOutput output);
 
     /**
      * Merge the buffers by increasing order of key.
-     * The input buffer in list is in increasing order, it is in format: | key1
-     * length | key1 | value1 length | value1 | key2 length | key2 | value2
-     * length | value2 | and so on.
-     * @param bufferList The input buffer list.
+     * The input buffer in list is in increasing order, it is in format:
+     * | key1 length | key1 | value1 length | value1 | key2 length | key2 |
+     * value2 length | value2 | and so on.
+     * @param inputBuffers The input buffer list.
      * @param valueCombiner The combiner for the same key.
      * @param output sorted output. The output may be a buffer or a file.
      * @return the number of distinct keys after merge.
      */
-    long mergeBuffers(List<BufferInfo> bufferList,
-                      Combiner<Pointer> valueCombiner,
+    long mergeBuffers(List<HgkvInput> inputBuffers,
+                      SortCombiner valueCombiner,
                       RandomAccessOutput output);
 
     /**
-     * Merge the files in fileList into m files.
-     * The content in file is |key1 length | key1 | value1 length | value1 |,
+     * Merge the n inputs into m outputs.
+     * The content in inputs is | key1 length | key1 | value1 length | value1 |,
      * by increasing order of the key.
-     * For example number of the fileList is 100, and m is 10, this method
-     * merge 100 files into 10 files.
-     * @return The files merged.
+     * For example number of the inputs is 100, and m is 10, this method
+     * merge 100 inputs into 10 outputs.
+     * @return The outputs merged.
      */
-    List<FileInfo> mergeFiles(List<FileInfo> fileList, int m);
+    void mergeInputs(List<HgkvInput> inputs, List<HgkvOutput> outputs);
 
     /**
      * Get the iterator of <key, value> pair by increasing order of key.
-     *
      */
-    Iterator<Pair<Pointer, Pointer>> iterator(List<FileInfo> fileList,
-                                              Combiner<Pointer> valueCombiner);
+    Iterator<KvEntry> iterator(List<HgkvInput> inputs);
 }

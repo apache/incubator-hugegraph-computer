@@ -17,13 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort;
+package com.baidu.hugegraph.computer.core.store;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import java.io.File;
 
-public interface BufferInfo  {
+public interface HgkvFile {
 
-    RandomAccessInput input();
+    // Get the file.
+    File file();
 
+    // Return the element count.
     long count();
 }
