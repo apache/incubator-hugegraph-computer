@@ -86,6 +86,64 @@ public final class Config {
         return this.allConfig.get(option);
     }
 
+    public int getByte(String key, byte defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return Byte.parseByte(value);
+        }
+    }
+
+    public int getShort(String key, short defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return Short.parseShort(value);
+        }
+    }
+
+    public int getInt(String key, int defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return Integer.parseInt(value);
+        }
+    }
+
+    public long getLong(String key, long defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return Long.parseLong(value);
+        }
+    }
+
+    public float getFloat(String key, float defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return Float.parseFloat(value);
+        }
+    }
+
+    public double getDouble(String key, double defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return Double.parseDouble(value);
+        }
+    }
+
+    public String getString(String key, String defaultValue) {
+        return this.allConfig.getString(key, defaultValue);
+    }
+
     public String algorithmName() {
         return this.hotConfig.algorithmName();
     }
