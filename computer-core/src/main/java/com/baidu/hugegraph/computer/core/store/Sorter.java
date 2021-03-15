@@ -22,49 +22,56 @@ package com.baidu.hugegraph.computer.core.store;
 import java.util.Iterator;
 import java.util.List;
 
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public interface Sorter {
 
     /**
-     * Sort the buffer by increasing order of key.
-     * The input buffer format: | key1 length | key1 | value1 length | value1 |
-     * key2 length | key2 | value2 length | value2 | and so on. If a same key
-     * exists several time, combine the value before output.
+     * Sort the buffer by increasing order of key. Every key exists only once
+     * in output buffer.
+     * The input buffer format: | key value pairs count | key1 length |
+     * key1 | value1 length | value1 | key2 length | key2 | value2 length |
+     * value2 | and so on. If a same key exists several time, combine the
+     * value before output.
      * @param input The input buffer.
      * @param valueCombiner The combiner for the same key.
      * @return sorted buffer.
      */
-    long sortBuffer(HgkvInput input,
+    long sortBuffer(RandomAccessInput input,
                     SortCombiner valueCombiner,
                     RandomAccessOutput output);
 
     /**
      * Merge the buffers by increasing order of key.
      * The input buffer in list is in increasing order, it is in format:
-     * | key1 length | key1 | value1 length | value1 | key2 length | key2 |
-     * value2 length | value2 | and so on.
+     * | key value pairs count | key1 length | key1 | value1 length | value1
+     * | key2 length | key2 | value2 length | value2 | and so on.
      * @param inputBuffers The input buffer list.
      * @param valueCombiner The combiner for the same key.
      * @param output sorted output. The output may be a buffer or a file.
      * @return the number of distinct keys after merge.
      */
-    long mergeBuffers(List<HgkvInput> inputBuffers,
+    long mergeBuffers(List<RandomAccessInput> inputBuffers,
                       SortCombiner valueCombiner,
                       RandomAccessOutput output);
 
     /**
      * Merge the n inputs into m outputs.
-     * The content in inputs is | key1 length | key1 | value1 length | value1 |,
+     * The input buffer in list is in increasing order, it is in format:
+     * | key value pairs count | key1 length | key1 | value1 length | value1
+     * | key2 length | key2 | value2 length | value2 | and so on.
      * by increasing order of the key.
+     * The format of outputs is same as inputs.
      * For example number of the inputs is 100, and m is 10, this method
      * merge 100 inputs into 10 outputs.
      * @return The outputs merged.
      */
-    void mergeInputs(List<HgkvInput> inputs, List<HgkvOutput> outputs);
+    void mergeInputs(List<RandomAccessInput> inputs,
+                     List<RandomAccessOutput> outputs);
 
     /**
      * Get the iterator of <key, value> pair by increasing order of key.
      */
-    Iterator<KvEntry> iterator(List<HgkvInput> inputs);
+    Iterator<KvEntry> iterator(List<RandomAccessInput> inputs);
 }

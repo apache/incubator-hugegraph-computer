@@ -24,5 +24,6 @@ import java.util.List;
 public interface KvEntry {
 
     Pointer key();
+
     List<Pointer> values();
 }
