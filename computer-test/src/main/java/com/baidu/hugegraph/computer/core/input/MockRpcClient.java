@@ -17,29 +17,21 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.bsp;
+package com.baidu.hugegraph.computer.core.input;
 
-import java.util.HashMap;
-import java.util.Map;
+public class MockRpcClient {
 
-import org.junit.Test;
+    private final MasterInputHandler masterInputHandler;
 
-import com.baidu.hugegraph.testutil.Assert;
+    public MockRpcClient(MasterInputHandler masterInputHandler) {
+        this.masterInputHandler = masterInputHandler;
+    }
 
-public class BspEventTest {
+    public InputSplit getNextVertexInputSplit() {
+        return this.masterInputHandler.pollVertexInputSplit();
+    }
 
-    @Test
-    public void testUniqueCodeAndKey() {
-        Map<Byte, String> codeMap = new HashMap<>();
-        Map<String, Byte> keyMap = new HashMap<>();
-        BspEvent[] events = BspEvent.values();
-        for (BspEvent e : events) {
-            codeMap.put(e.code(), e.key());
-            keyMap.put(e.key(), e.code());
-        }
-        // Assert code in unique
-        Assert.assertEquals(events.length, codeMap.size());
-        // Assert key in unique
-        Assert.assertEquals(events.length, keyMap.size());
+    public InputSplit getNextEdgeInputSplit() {
+        return this.masterInputHandler.pollEdgeInputSplit();
     }
 }

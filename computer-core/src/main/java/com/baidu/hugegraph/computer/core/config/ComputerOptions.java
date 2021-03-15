@@ -79,6 +79,30 @@ public class ComputerOptions extends OptionHolder {
                     "value"
             );
 
+    public static final ConfigOption<Long> INPUT_SPLITS_SIZE =
+            new ConfigOption<>(
+                    "input.split_size",
+                    "The input split size in bytes",
+                    positiveInt(),
+                    1024 * 1024L
+            );
+
+    public static final ConfigOption<Integer> INPUT_MAX_SPLITS =
+            new ConfigOption<>(
+                    "input.split_max_splits",
+                    "The maximum number of input splits",
+                    positiveInt(),
+                    10_000_000
+            );
+
+    public static final ConfigOption<Integer> INPUT_SPLIT_PAGE_SIZE =
+            new ConfigOption<>(
+                    "input.split_page_size",
+                    "The page size for streamed load input split data",
+                    positiveInt(),
+                    500
+            );
+
     public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =
             new ConfigOption<>(
                     "output.with_adjacent_edges",

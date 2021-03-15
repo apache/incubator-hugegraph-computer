@@ -17,29 +17,27 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.bsp;
+package com.baidu.hugegraph.computer.core.input;
 
-import java.util.HashMap;
-import java.util.Map;
+public class InputSplit {
 
-import org.junit.Test;
+    public static final InputSplit END_SPLIT = new InputSplit(null, null);
 
-import com.baidu.hugegraph.testutil.Assert;
+    // inclusive
+    private final String start;
+    // exclusive
+    private final String end;
 
-public class BspEventTest {
+    public InputSplit(String start, String end) {
+        this.start = start;
+        this.end = end;
+    }
 
-    @Test
-    public void testUniqueCodeAndKey() {
-        Map<Byte, String> codeMap = new HashMap<>();
-        Map<String, Byte> keyMap = new HashMap<>();
-        BspEvent[] events = BspEvent.values();
-        for (BspEvent e : events) {
-            codeMap.put(e.code(), e.key());
-            keyMap.put(e.key(), e.code());
-        }
-        // Assert code in unique
-        Assert.assertEquals(events.length, codeMap.size());
-        // Assert key in unique
-        Assert.assertEquals(events.length, keyMap.size());
+    public String start() {
+        return this.start;
+    }
+
+    public String end() {
+        return this.end;
     }
 }

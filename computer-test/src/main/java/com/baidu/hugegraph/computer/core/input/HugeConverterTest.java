@@ -1,0 +1,127 @@
+/*
+ * Copyright 2017 HugeGraph Authors
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with this
+ * work for additional information regarding copyright ownership. The ASF
+ * licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+package com.baidu.hugegraph.computer.core.input;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.junit.Test;
+
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.id.UuidId;
+import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
+import com.baidu.hugegraph.computer.core.graph.value.ListValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.computer.core.graph.value.NullValue;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.testutil.Assert;
+import com.google.common.collect.ImmutableList;
+
+public class HugeConverterTest {
+
+    @Test
+    public void testConvertId() {
+        Assert.assertThrows(IllegalArgumentException.class,
+                            () -> HugeConverter.convertId(null));
+        Assert.assertEquals(new LongId(1L), HugeConverter.convertId(1L));
+        Assert.assertEquals(new Utf8Id("abc"), HugeConverter.convertId("abc"));
+        UUID uuid = UUID.randomUUID();
+        Assert.assertEquals(new UuidId(uuid), HugeConverter.convertId(uuid));
+
+        Assert.assertThrows(ComputerException.class,
+                            () -> HugeConverter.convertId(true));
+        Assert.assertThrows(ComputerException.class,
+                            () -> HugeConverter.convertId(new byte[0]));
+    }
+
+    @Test
+    public void testConvertValue() {
+        Assert.assertEquals(NullValue.get(), HugeConverter.convertValue(null));
+        Assert.assertEquals(new BooleanValue(true),
+                            HugeConverter.convertValue(true));
+        Assert.assertEquals(new IntValue(1), HugeConverter.convertValue(1));
+        Assert.assertEquals(new LongValue(-1L),
+                            HugeConverter.convertValue(-1L));
+        Assert.assertEquals(new FloatValue(0.999F),
+                            HugeConverter.convertValue(0.999F));
+        Assert.assertEquals(new DoubleValue(-0.001D),
+                            HugeConverter.convertValue(-0.001D));
+        ListValue<IntValue> listValue = new ListValue<>(ValueType.INT);
+        listValue.add(new IntValue(1));
+        listValue.add(new IntValue(2));
+        List<Integer> list = ImmutableList.of(1, 2);
+        Assert.assertEquals(listValue, HugeConverter.convertValue(list));
+
+        ListValue<ListValue<LongValue>> nestListValue = new ListValue<>(
+                                                        ValueType.LIST_VALUE);
+        ListValue<LongValue> subListValue1 = new ListValue<>(ValueType.LONG);
+        subListValue1.add(new LongValue(1L));
+        subListValue1.add(new LongValue(2L));
+        ListValue<LongValue> subListValue2 = new ListValue<>(ValueType.LONG);
+        subListValue2.add(new LongValue(3L));
+        subListValue2.add(new LongValue(4L));
+        nestListValue.add(subListValue1);
+        nestListValue.add(subListValue2);
+        List<List<Long>> nestList = ImmutableList.of(
+                                    ImmutableList.of(1L, 2L),
+                                    ImmutableList.of(3L, 4L));
+        Assert.assertEquals(nestListValue,
+                            HugeConverter.convertValue(nestList));
+
+        Assert.assertThrows(ComputerException.class,
+                            () -> HugeConverter.convertValue(new byte[0]));
+    }
+
+    @Test
+    public void testConvertProperties() {
+        Map<String, Object> rawProperties = new HashMap<>();
+        rawProperties.put("null-value", null);
+        rawProperties.put("boolean-value", true);
+        rawProperties.put("int-value", 1);
+        rawProperties.put("long-value", 2L);
+        rawProperties.put("float-value", 0.3F);
+        rawProperties.put("double-value", 0.4D);
+        rawProperties.put("list-value", ImmutableList.of(1, 2));
+
+        Properties properties = new DefaultProperties();
+        properties.put("null-value", NullValue.get());
+        properties.put("boolean-value", new BooleanValue(true));
+        properties.put("int-value", new IntValue(1));
+        properties.put("long-value", new LongValue(2L));
+        properties.put("float-value", new FloatValue(0.3F));
+        properties.put("double-value", new DoubleValue(0.4D));
+        ListValue<IntValue> listValue = new ListValue<>(ValueType.INT);
+        listValue.add(new IntValue(1));
+        listValue.add(new IntValue(2));
+        properties.put("list-value", listValue);
+
+        Assert.assertEquals(properties,
+                            HugeConverter.convertProperties(rawProperties));
+    }
+}

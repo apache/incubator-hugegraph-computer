@@ -17,29 +17,27 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.bsp;
+package com.baidu.hugegraph.computer.core.input.hg;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 
-import org.junit.Test;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.input.EdgeFetcher;
+import com.baidu.hugegraph.computer.core.input.InputSplit;
+import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.structure.graph.Edge;
+import com.baidu.hugegraph.structure.graph.Shard;
 
-import com.baidu.hugegraph.testutil.Assert;
+public class HugeEdgeFetcher extends HugeElementFetcher<Edge>
+                             implements EdgeFetcher {
 
-public class BspEventTest {
+    public HugeEdgeFetcher(Config config, HugeClient client) {
+        super(config, client);
+    }
 
-    @Test
-    public void testUniqueCodeAndKey() {
-        Map<Byte, String> codeMap = new HashMap<>();
-        Map<String, Byte> keyMap = new HashMap<>();
-        BspEvent[] events = BspEvent.values();
-        for (BspEvent e : events) {
-            codeMap.put(e.code(), e.key());
-            keyMap.put(e.key(), e.code());
-        }
-        // Assert code in unique
-        Assert.assertEquals(events.length, codeMap.size());
-        // Assert key in unique
-        Assert.assertEquals(events.length, keyMap.size());
+    @Override
+    public Iterator<Edge> fetch(InputSplit split) {
+        Shard shard = toShard(split);
+        return this.client().traverser().iteratorEdges(shard, this.pageSize());
     }
 }

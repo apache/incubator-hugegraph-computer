@@ -17,29 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.bsp;
+package com.baidu.hugegraph.computer.core.input;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-import org.junit.Test;
-
-import com.baidu.hugegraph.testutil.Assert;
-
-public class BspEventTest {
-
-    @Test
-    public void testUniqueCodeAndKey() {
-        Map<Byte, String> codeMap = new HashMap<>();
-        Map<String, Byte> keyMap = new HashMap<>();
-        BspEvent[] events = BspEvent.values();
-        for (BspEvent e : events) {
-            codeMap.put(e.code(), e.key());
-            keyMap.put(e.key(), e.code());
-        }
-        // Assert code in unique
-        Assert.assertEquals(events.length, codeMap.size());
-        // Assert key in unique
-        Assert.assertEquals(events.length, keyMap.size());
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    InputSplitDataTest.class,
+    HugeConverterTest.class
+})
+public class InputTestSuite {
 }

@@ -102,7 +102,7 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
     @Override
     public byte readByte() throws IOException {
         this.require(Constants.BYTE_LEN);
-        byte value = this.buffer[position];
+        byte value = this.buffer[this.position];
         this.position += Constants.BYTE_LEN;
         return value;
     }
@@ -110,7 +110,7 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
     @Override
     public int readUnsignedByte() throws IOException {
         this.require(Constants.BYTE_LEN);
-        int value = this.buffer[position] & 0xFF;
+        int value = this.buffer[this.position] & 0xFF;
         this.position += Constants.BYTE_LEN;
         return value;
     }

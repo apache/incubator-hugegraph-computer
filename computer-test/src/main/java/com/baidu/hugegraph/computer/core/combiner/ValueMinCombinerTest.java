@@ -29,7 +29,7 @@ public class ValueMinCombinerTest {
     @Test
     public void testCombine() {
         LongValue min = new LongValue(0L);
-        ValueMinCombiner<LongValue> combiner = new ValueMinCombiner();
+        ValueMinCombiner<LongValue> combiner = new ValueMinCombiner<>();
         LongValue value1 = new LongValue(1L);
         min = combiner.combine(min, value1);
         LongValue value2 = new LongValue(2L);

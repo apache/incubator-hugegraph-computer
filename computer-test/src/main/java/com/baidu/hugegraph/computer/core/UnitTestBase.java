@@ -58,7 +58,7 @@ public class UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        Id newId = IdFactory.createID(oldId.type());
+        Id newId = IdFactory.createId(oldId.type());
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             newId.read(input);
