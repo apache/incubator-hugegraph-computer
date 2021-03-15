@@ -43,9 +43,9 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
     @Override
     public List<InputSplit> fetchVertexInputSplits() {
         long splitSize = this.config.get(ComputerOptions.INPUT_SPLITS_SIZE);
+        int maxSplits = this.config.get(ComputerOptions.INPUT_MAX_SPLITS);
         List<Shard> shards = this.client.traverser().vertexShards(splitSize);
-        E.checkArgument(shards.size() <= this.config.get(
-                        ComputerOptions.INPUT_SPLITS_MAX_NUMBER),
+        E.checkArgument(shards.size() <= maxSplits,
                         "Too many shards due to too small splitSize");
         List<InputSplit> splits = new ArrayList<>();
         for (Shard shard : shards) {
@@ -58,9 +58,9 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
     @Override
     public List<InputSplit> fetchEdgeInputSplits() {
         long splitSize = this.config.get(ComputerOptions.INPUT_SPLITS_SIZE);
+        int maxSplits = this.config.get(ComputerOptions.INPUT_MAX_SPLITS);
         List<Shard> shards = this.client.traverser().edgeShards(splitSize);
-        E.checkArgument(shards.size() <= this.config.get(
-                        ComputerOptions.INPUT_SPLITS_MAX_NUMBER),
+        E.checkArgument(shards.size() <= maxSplits,
                         "Too many shards due to too small splitSize");
         List<InputSplit> splits = new ArrayList<>();
         for (Shard shard : shards) {
