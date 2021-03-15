@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
-import com.baidu.hugegraph.structure.graph.Shard;
-
 public class InputSplit {
 
     public static final InputSplit END_SPLIT = new InputSplit(null, null);
@@ -41,9 +39,5 @@ public class InputSplit {
 
     public String end() {
         return this.end;
-    }
-
-    public Shard toShard() {
-        return new Shard(this.start, this.end, 0);
     }
 }

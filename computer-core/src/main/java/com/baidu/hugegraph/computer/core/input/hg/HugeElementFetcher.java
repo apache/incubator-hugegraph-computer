@@ -27,6 +27,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.ElementFetcher;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.structure.graph.Shard;
 
 public abstract class HugeElementFetcher<T> implements ElementFetcher<T> {
 
@@ -82,4 +83,8 @@ public abstract class HugeElementFetcher<T> implements ElementFetcher<T> {
     }
 
     public abstract Iterator<T> fetch(InputSplit split);
+
+    public static Shard toShard(InputSplit split) {
+        return new Shard(split.start(), split.end(), 0);
+    }
 }

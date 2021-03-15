@@ -37,7 +37,7 @@ public class HugeEdgeFetcher extends HugeElementFetcher<Edge>
 
     @Override
     public Iterator<Edge> fetch(InputSplit split) {
-        Shard shard = split.toShard();
+        Shard shard = toShard(split);
         return this.client().traverser().iteratorEdges(shard, this.pageSize());
     }
 }

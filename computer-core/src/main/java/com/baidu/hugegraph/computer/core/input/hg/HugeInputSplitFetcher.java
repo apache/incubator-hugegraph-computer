@@ -28,6 +28,7 @@ import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.InputSplitFetcher;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.structure.graph.Shard;
+import com.baidu.hugegraph.util.E;
 
 public class HugeInputSplitFetcher implements InputSplitFetcher {
 
@@ -43,6 +44,9 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
     public List<InputSplit> fetchVertexInputSplits() {
         long splitSize = this.config.get(ComputerOptions.INPUT_SPLITS_SIZE);
         List<Shard> shards = this.client.traverser().vertexShards(splitSize);
+        E.checkArgument(shards.size() <= this.config.get(
+                        ComputerOptions.INPUT_SPLITS_MAX_NUMBER),
+                        "Too many shards due to too small splitSize");
         List<InputSplit> splits = new ArrayList<>();
         for (Shard shard : shards) {
             InputSplit split = new InputSplit(shard.start(), shard.end());
@@ -55,6 +59,9 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
     public List<InputSplit> fetchEdgeInputSplits() {
         long splitSize = this.config.get(ComputerOptions.INPUT_SPLITS_SIZE);
         List<Shard> shards = this.client.traverser().edgeShards(splitSize);
+        E.checkArgument(shards.size() <= this.config.get(
+                        ComputerOptions.INPUT_SPLITS_MAX_NUMBER),
+                        "Too many shards due to too small splitSize");
         List<InputSplit> splits = new ArrayList<>();
         for (Shard shard : shards) {
             InputSplit split = new InputSplit(shard.start(), shard.end());

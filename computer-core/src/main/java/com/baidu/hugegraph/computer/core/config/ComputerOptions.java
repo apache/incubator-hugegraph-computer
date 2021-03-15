@@ -87,6 +87,14 @@ public class ComputerOptions extends OptionHolder {
                     1024 * 1024L
             );
 
+    public static final ConfigOption<Integer> INPUT_SPLITS_MAX_NUMBER =
+            new ConfigOption<>(
+                    "input.split_max_number",
+                    "The maximum number of input splits",
+                    positiveInt(),
+                    10_000_000
+            );
+
     public static final ConfigOption<Integer> INPUT_SPLIT_PAGE_SIZE =
             new ConfigOption<>(
                     "input.split_page_size",
