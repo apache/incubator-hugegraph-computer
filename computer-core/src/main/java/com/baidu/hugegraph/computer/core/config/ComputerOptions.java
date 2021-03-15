@@ -219,4 +219,20 @@ public class ComputerOptions extends OptionHolder {
                     positiveInt(),
                     TimeUnit.SECONDS.toMillis(30L)
             );
+
+    public static final ConfigOption<Integer> WORKER_DATA_PORT_RANGE_START =
+            new ConfigOption<>(
+                    "worker.data_port_range_start",
+                    "The start of range that the worker's data port listen on.",
+                    positiveInt(),
+                    11000
+            );
+
+    public static final ConfigOption<Integer> WORKER_DATA_PORT_RANGE_END =
+            new ConfigOption<>(
+                    "worker.data_port_range_end",
+                    "The end of range that the worker's data port listen on.",
+                    positiveInt(),
+                    12000
+            );
 }

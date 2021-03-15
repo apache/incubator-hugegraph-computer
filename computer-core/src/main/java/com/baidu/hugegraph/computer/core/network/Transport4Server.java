@@ -27,12 +27,14 @@ import com.baidu.hugegraph.computer.core.config.Config;
 public interface Transport4Server {
 
     /**
-     * Startup server, return the port listened.
+     * Startup server, return the port listened. The port range in config is
+     * [{@link @ComputerOptions.WORKER_DATA_PORT_RANGE_START #STATIC_FIELD},
+     * {@link @ComputerOptions.WORKER_DATA_PORT_RANGE_END #STATIC_FIELD}].
      */
-    int setup(Config config, BufferHandler handler);
+    int listen(Config config, MessageHandler handler);
 
     /**
-     * Stop the server.
+     * Stop the server
      */
     void stop();
 }

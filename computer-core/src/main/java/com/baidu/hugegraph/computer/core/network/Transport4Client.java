@@ -21,27 +21,29 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.config.Config;
+
 import io.netty.buffer.ByteBuf;
 
 /**
  * This is used for worker to send buffer to other worker. The whole process
- * contains several iteration. In one iteration {@link #startIteration} is
+ * contains several iteration. In one iteration {@link #startSession} is
  * called only once. {@link #send} is called zero or more times.
- * {@link #finishIteration} is called only once.
+ * {@link #finishSession()} is called only once.
  */
 public interface Transport4Client {
 
     /**
      * Init the connection from client to server. This method is called only
-     * once.
+     * once. MAX_PENDING_REQUESTS  is set in config
      * @throws IOException if can't create connection.
      */
-    void init(String hostname, int port) throws IOException;
+    void init(Config config, String hostname, int port) throws IOException;
 
     /**
-     * This method is called before a iteration.
+     * This method is called before a iteration of sending buffers.
      */
-    void startIteration();
+    void startSession();
 
     /**
      * Send the buffer to the server. Block the caller if busy.
@@ -52,7 +54,8 @@ public interface Transport4Client {
               throws IOException;
 
     /**
-     * This method is called after a iteration.
+     * This method is called after a iteration. It will block the caller to
+     * make sure the buffers sent be received by target workers.
      */
-    void finishIteration() throws IOException;
+    void finishSession() throws IOException;
 }

@@ -21,11 +21,13 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.nio.ByteBuffer;
 
-public interface BufferHandler {
+public interface MessageHandler {
 
     /**
-     * Hand the buffer, it may block the caller a few seconds if it needs
-     * merge the buffers to file.
+     * Handle the buffer received. There are two buffer list for a partition,
+     * one for sorting and one for receiving new buffers. It may block the
+     * caller if the receiving list reached threshold and the sorting list is
+     * sorting in process.
      */
     void handle(byte messageType, int partition, ByteBuffer buffer);
 }
