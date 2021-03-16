@@ -86,12 +86,27 @@ public final class Config {
         return this.allConfig.get(option);
     }
 
+    public boolean getBoolean(String key, boolean defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return Boolean.parseBoolean(value);
+        }
+    }
+
     public int getByte(String key, byte defaultValue) {
         String value = this.allConfig.getString(key);
         if (value == null) {
             return defaultValue;
         } else {
-            return Byte.parseByte(value);
+            try {
+                return Byte.parseByte(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse '%s' into byte for key '%s'",
+                          value, key);
+            }
         }
     }
 
@@ -100,7 +115,13 @@ public final class Config {
         if (value == null) {
             return defaultValue;
         } else {
-            return Short.parseShort(value);
+            try {
+                return Short.parseShort(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse '%s' into short for key '%s'",
+                          value, key);
+            }
         }
     }
 
@@ -109,7 +130,13 @@ public final class Config {
         if (value == null) {
             return defaultValue;
         } else {
-            return Integer.parseInt(value);
+            try {
+                return Integer.parseInt(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse '%s' into int for key '%s'",
+                          value, key);
+            }
         }
     }
 
@@ -118,7 +145,13 @@ public final class Config {
         if (value == null) {
             return defaultValue;
         } else {
-            return Long.parseLong(value);
+            try {
+                return Long.parseLong(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse '%s' into long for key '%s'",
+                          value, key);
+            }
         }
     }
 
@@ -127,7 +160,13 @@ public final class Config {
         if (value == null) {
             return defaultValue;
         } else {
-            return Float.parseFloat(value);
+            try {
+                return Float.parseFloat(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse '%s' into float for key '%s'",
+                          value, key);
+            }
         }
     }
 
@@ -136,7 +175,13 @@ public final class Config {
         if (value == null) {
             return defaultValue;
         } else {
-            return Double.parseDouble(value);
+            try {
+                return Double.parseDouble(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse '%s' into double for key '%s'",
+                          value, key);
+            }
         }
     }
 
