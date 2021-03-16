@@ -35,13 +35,13 @@ public interface Transport4Client {
 
     /**
      * Init the connection from client to server. This method is called only
-     * once. MAX_PENDING_REQUESTS  is set in config
+     * once. MAX_PENDING_REQUESTS is set in config
      * @throws IOException if can't create connection.
      */
     void init(Config config, String hostname, int port) throws IOException;
 
     /**
-     * This method is called before a iteration of sending buffers.
+     * This method is called before an iteration of sending buffers.
      */
     void startSession();
 
@@ -54,7 +54,7 @@ public interface Transport4Client {
               throws IOException;
 
     /**
-     * This method is called after a iteration. It will block the caller to
+     * This method is called after an iteration. It will block the caller to
      * make sure the buffers sent be received by target workers.
      */
     void finishSession() throws IOException;
