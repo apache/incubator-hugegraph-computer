@@ -224,8 +224,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "worker.data_port_start",
                     "The start of range [data_port_start, data_port_end]. " +
-                    "The worker will choose one from small to large of the range" +
-                    " for data transportation.",
+                    "The worker will choose one from small to large of the " +
+                    "range for data transportation.",
                     positiveInt(),
                     11000
             );

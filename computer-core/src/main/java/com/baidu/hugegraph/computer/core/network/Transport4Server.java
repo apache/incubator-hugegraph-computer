@@ -28,8 +28,8 @@ public interface Transport4Server {
 
     /**
      * Startup server, return the port listened. The port range in config is
-     * [{@link @ComputerOptions.WORKER_DATA_PORT_RANGE_START #STATIC_FIELD},
-     * {@link @ComputerOptions.WORKER_DATA_PORT_RANGE_END #STATIC_FIELD}].
+     * [{@link @ComputerOptions.WORKER_DATA_PORT_START #STATIC_FIELD},
+     * {@link @ComputerOptions.WORKER_DATA_PORT_END #STATIC_FIELD}].
      */
     int listen(Config config, MessageHandler handler);
 
