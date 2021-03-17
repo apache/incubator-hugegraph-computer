@@ -219,4 +219,24 @@ public class ComputerOptions extends OptionHolder {
                     positiveInt(),
                     TimeUnit.SECONDS.toMillis(30L)
             );
+
+    public static final ConfigOption<Integer> WORKER_DATA_PORT_START =
+            new ConfigOption<>(
+                    "worker.data_port_start",
+                    "The start of range [data_port_start, data_port_end]. " +
+                    "The worker will choose one from small to large of the " +
+                    "range for data transportation.",
+                    positiveInt(),
+                    11000
+            );
+
+    public static final ConfigOption<Integer> WORKER_DATA_PORT_END =
+            new ConfigOption<>(
+                    "worker.data_port_end",
+                    "The end of range [data_port_start, data_port_end]. " +
+                    "The worker will choose one from small to large of the " +
+                    "range for data transportation.",
+                    positiveInt(),
+                    12000
+            );
 }
