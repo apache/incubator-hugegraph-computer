@@ -19,17 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.store;
 
-import java.util.Iterator;
-
-public interface KvEntry {
-
-    Pointer key();
+public interface HgkvFile {
 
     /**
-     * Each pointer in iteration is values for a specific key. It mean's
-     * key's value in a file. It may be several fragments for a key in a file.
-     * The values in fragments are at increasing order. The upper layer read
-     * a fragment from a pointer each time.
+     * The absolute path includes file name.
      */
-    Iterator<Pointer> values();
+    String path();
+
+    /**
+     * Return the count of entries.
+     */
+    long entries();
+
+    /**
+     * Return the version of file.
+     */
+    int version();
 }
