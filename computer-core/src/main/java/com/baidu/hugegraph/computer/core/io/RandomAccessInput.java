@@ -29,6 +29,11 @@ public interface RandomAccessInput extends DataInput {
      */
     long position();
 
+    /**
+     * Set current position to specified position, measured from the beginning
+     * of input.
+     * @throws IOException If can't seek to specified position.
+     */
     void seek(long position) throws IOException;
 
     /**
