@@ -377,6 +377,24 @@ public class BufferedStreamTest {
         }
     }
 
+    @Test
+    public void testAvailable() throws IOException {
+        int size = 1;
+        File file = this.createTempFile();
+        try {
+            try (BufferedStreamOutput output = this.createOutput(file)) {
+                for (int i = 0; i < size; i++) {
+                    output.writeInt(i);
+                }
+            }
+            try (BufferedStreamInput input = this.createInput(file)) {
+                Assert.assertEquals(Long.MAX_VALUE, input.available());
+            }
+        } finally {
+            FileUtils.deleteQuietly(file);
+        }
+    }
+
     private static File createTempFile() throws IOException {
         return File.createTempFile(UUID.randomUUID().toString(), null);
     }

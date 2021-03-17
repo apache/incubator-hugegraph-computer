@@ -24,6 +24,9 @@ import java.io.IOException;
 
 public interface RandomAccessInput extends DataInput {
 
+    /**
+     * @return The current position.
+     */
     long position();
 
     void seek(long position) throws IOException;
@@ -35,4 +38,10 @@ public interface RandomAccessInput extends DataInput {
      * return the number of bytes actually skipped.
      */
     long skip(long n) throws IOException;
+
+    /**
+     * @return The total bytes size unread.
+     * @throws IOException
+     */
+    long available() throws IOException;
 }

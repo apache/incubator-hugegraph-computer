@@ -399,4 +399,18 @@ public class UnsafeByteArrayTest {
         Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
         Assert.assertEquals(Integer.MIN_VALUE, input.readInt());
     }
+
+    @Test
+    public void testAvailable() throws IOException {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        for (int i = -128; i <= 127; i++) {
+            output.write(i);
+        }
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
+                                         output.toByteArray());
+        for (int i = 0; i < 256; i++) {
+            Assert.assertEquals(256 - i, input.available());
+            input.readByte();
+        }
+    }
 }
