@@ -20,7 +20,10 @@
 package com.baidu.hugegraph.computer.core.driver;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
+
+import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 
 public interface ComputerDriver {
 
@@ -41,35 +44,52 @@ public interface ComputerDriver {
 
     /**
      * Cancel the job with specified jobId, the parameters are in config.
-     * throw ComputerException if the job can't cancelled or can't found
+     * Throws ComputerException if the job can't cancelled or can't found
      * the job.
      */
     void cancelJob(String jobId, Map<String, String> params);
 
     /**
-     * Trace the job, it create a separate thread to trace the job and return
-     * immediately. Throws ComputerException if the job is tracing by another
-     * thread.
+     * Wait the job to finish, it create a separate thread to trace the job and
+     * return immediately. The thread will trace the execution of job and
+     * notify the observer at every superstep. Throws ComputerException if the
+     * job is waiting by another thread.
      */
-    void traceJob(String jobId, Map<String, String> params);
+    void waitJob(String jobId,
+                 Map<String, String> params,
+                 JobObserver observer);
 
     /**
-     * Get the main reason the job is failed. If the job is running or can't
-     * found the job throws ComputerException. If the job is exited
-     * successfully, return null.
+     * Get the current job state. Throws ComputerException if can't found the
+     * job.
+     */
+    JobState jobState(String jobId, Map<String, String> params);
+
+    /**
+     * Get the superstep stats of the job. Throws ComputerException if can't
+     * found the job.
+     */
+    List<SuperstepStat> superstepStats(String jobId,
+                                       Map<String, String> params);
+
+    /**
+     * Get the main reason the job is failed. Throws ComputerException if the
+     * job is running or can't found the job. Return null if the job is exited
+     * successfully.
      */
     String diagnostics(String jobId, Map<String, String> params);
 
     /**
-     * Get the log of specified task. Throw ComputerException if the job
+     * Get the log of specified container. Throws ComputerException if the job
      * can't found.
      * @param jobId The job id to which the job belongs.
-     * @param task 0 for master, the task id from 1
+     * @param containerId 0 for master, the worker's container id goes from 1
+     *                    to the number of workers.
      * @param offset The offset the log read from, must be >=0
      * @param length The length the log read, -1 for not limited.
      * @param params The parameters needed to read log are in config
      * @return The log content.
      */
-    String log(String jobId, int task, long offset, long length,
+    String log(String jobId, int containerId, long offset, long length,
                Map<String, String> params);
 }
