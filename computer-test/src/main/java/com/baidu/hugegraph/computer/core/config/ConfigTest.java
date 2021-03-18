@@ -53,46 +53,6 @@ public class ConfigTest {
     }
 
     @Test
-    public void testGetByte() {
-        final byte defaultValue = (byte) 1;
-        Map<String, String> options = this.initialOptions();
-        options.put(KEY_MAX, Byte.toString(Byte.MAX_VALUE));
-        options.put(KEY_MIN, Byte.toString(Byte.MIN_VALUE));
-        Config config = new Config(options);
-        Assert.assertEquals(Byte.MAX_VALUE,
-                            config.getByte(KEY_MAX, defaultValue));
-        Assert.assertEquals(Byte.MIN_VALUE,
-                            config.getByte(KEY_MIN, defaultValue));
-        Assert.assertEquals(defaultValue,
-                            config.getByte(KEY_EMPTY, defaultValue));
-        Assert.assertThrows(ComputerException.class, () -> {
-            config.getByte(KEY_ABC, defaultValue);
-        } ,e -> {
-            Assert.assertContains("into byte for key", e.getMessage());
-        });
-    }
-
-    @Test
-    public void testGetShort() {
-        final short defaultValue = (short) 1;
-        Map<String, String> options = this.initialOptions();
-        options.put(KEY_MAX, Short.toString(Short.MAX_VALUE));
-        options.put(KEY_MIN, Short.toString(Short.MIN_VALUE));
-        Config config = new Config(options);
-        Assert.assertEquals(Short.MAX_VALUE,
-                            config.getShort(KEY_MAX, defaultValue));
-        Assert.assertEquals(Short.MIN_VALUE,
-                            config.getShort(KEY_MIN, defaultValue));
-        Assert.assertEquals(defaultValue,
-                            config.getShort(KEY_EMPTY, defaultValue));
-        Assert.assertThrows(ComputerException.class, () -> {
-            config.getShort(KEY_ABC, defaultValue);
-        } ,e -> {
-            Assert.assertContains("into short for key", e.getMessage());
-        });
-    }
-
-    @Test
     public void testGetInt() {
         final int defaultValue = 1;
         Map<String, String> options = this.initialOptions();
@@ -108,7 +68,7 @@ public class ConfigTest {
         Assert.assertThrows(ComputerException.class, () -> {
             config.getInt(KEY_ABC, defaultValue);
         } ,e -> {
-            Assert.assertContains("into int for key", e.getMessage());
+            Assert.assertContains("Can't parse int value", e.getMessage());
         });
     }
 
@@ -128,31 +88,7 @@ public class ConfigTest {
         Assert.assertThrows(ComputerException.class, () -> {
             config.getLong(KEY_ABC, defaultValue);
         } ,e -> {
-            Assert.assertContains("into long for key", e.getMessage());
-        });
-    }
-
-    @Test
-    public void testGetFloat() {
-        final float defaultValue = 1.0F;
-        final float delta = 0.0F;
-        Map<String, String> options = this.initialOptions();
-        options.put(KEY_MAX, Float.toString(Float.MAX_VALUE));
-        options.put(KEY_MIN, Float.toString(Float.MIN_VALUE));
-        Config config = new Config(options);
-        Assert.assertEquals(Float.MAX_VALUE,
-                            config.getFloat(KEY_MAX, defaultValue),
-                            delta);
-        Assert.assertEquals(Float.MIN_VALUE,
-                            config.getFloat(KEY_MIN, defaultValue),
-                            delta);
-        Assert.assertEquals(defaultValue,
-                            config.getFloat(KEY_EMPTY, defaultValue),
-                            delta);
-        Assert.assertThrows(ComputerException.class, () -> {
-            config.getFloat(KEY_ABC, defaultValue);
-        } ,e -> {
-            Assert.assertContains("into float for key", e.getMessage());
+            Assert.assertContains("Can't parse long value", e.getMessage());
         });
     }
 
@@ -176,7 +112,7 @@ public class ConfigTest {
         Assert.assertThrows(ComputerException.class, () -> {
             config.getDouble(KEY_ABC, defaultValue);
         } ,e -> {
-            Assert.assertContains("into double for key", e.getMessage());
+            Assert.assertContains("Can't parse double value", e.getMessage());
         });
     }
 
