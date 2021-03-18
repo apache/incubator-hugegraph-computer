@@ -90,9 +90,16 @@ public final class Config {
         String value = this.allConfig.getString(key);
         if (value == null) {
             return defaultValue;
+        } else if (value.equalsIgnoreCase("true")) {
+            return true;
+        } else if (value.equalsIgnoreCase("false")) {
+            return false;
         } else {
-            return Boolean.parseBoolean(value);
+            throw new ComputerException(
+                      "Can't parse boolean value from '%s' for key '%s'",
+                      value, key);
         }
+
     }
 
     public int getInt(String key, int defaultValue) {

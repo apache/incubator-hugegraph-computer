@@ -49,7 +49,11 @@ public class ConfigTest {
         Assert.assertTrue(config.getBoolean(KEY_TRUE, defaultValue));
         Assert.assertFalse(config.getBoolean(KEY_FALSE, defaultValue));
         Assert.assertFalse(config.getBoolean(KEY_EMPTY, defaultValue));
-        Assert.assertFalse(config.getBoolean(KEY_ABC, Boolean.TRUE));
+        Assert.assertThrows(ComputerException.class, () -> {
+            config.getBoolean(KEY_ABC, Boolean.TRUE);
+        } ,e -> {
+            Assert.assertContains("Can't parse boolean value", e.getMessage());
+        });
     }
 
     @Test
