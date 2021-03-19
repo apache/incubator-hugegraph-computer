@@ -99,7 +99,6 @@ public final class Config {
                       "Can't parse boolean value from '%s' for key '%s'",
                       value, key);
         }
-
     }
 
     public int getInt(String key, int defaultValue) {

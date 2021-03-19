@@ -128,8 +128,10 @@ public class ConfigTest {
         options.put(KEY, value);
         Config config = new Config(options);
         Assert.assertEquals(value, config.getString(KEY, defaultValue));
+        Assert.assertEquals(value, config.getString(KEY, null));
         Assert.assertEquals(defaultValue,
                             config.getString(KEY_EMPTY, defaultValue));
+        Assert.assertNull(config.getString(KEY_EMPTY, null));
     }
 
     private Map<String, String> initialOptions() {
