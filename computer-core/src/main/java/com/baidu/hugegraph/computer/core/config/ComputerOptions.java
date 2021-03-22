@@ -402,7 +402,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
             new ConfigOption<>(
-                    "transport.max_pending_requests",
+                    "transport.min_pending_requests",
                     "The minimum number of client unreceived ack.",
                     positiveInt(),
                     5
