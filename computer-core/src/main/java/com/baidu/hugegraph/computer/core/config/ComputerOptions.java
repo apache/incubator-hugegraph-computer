@@ -408,12 +408,12 @@ public class ComputerOptions extends OptionHolder {
                     5
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_MIN_ACK_INTERVAL =
+    public static final ConfigOption<Long> TRANSPORT_MIN_ACK_INTERVAL =
             new ConfigOption<>(
                     "transport.min_ack_interval",
                     "The minimum interval(in ms) of server reply ack.",
                     positiveInt(),
-                    200
+                    200L
             );
 
     public static final ConfigOption<Integer>

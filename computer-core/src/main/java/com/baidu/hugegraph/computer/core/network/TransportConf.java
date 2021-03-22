@@ -18,15 +18,11 @@
 package com.baidu.hugegraph.computer.core.network;
 
 import java.util.Locale;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.google.common.primitives.Ints;
 
 import io.netty.channel.epoll.Epoll;
-import io.netty.util.NettyRuntime;
 
 public class TransportConf {
 
@@ -90,7 +86,7 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 
-    public int clientConnectionTimeoutMs() {
+    public int clientConnectionTimeout() {
         return this.config
                 .get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT_SECONDS);
     }
@@ -116,7 +112,7 @@ public class TransportConf {
     /**
      * The minimum interval(in ms) of server reply ack.
      */
-    public int minACKInterval(){
+    public long minACKInterval(){
         return this.config.get(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL);
     }
 
