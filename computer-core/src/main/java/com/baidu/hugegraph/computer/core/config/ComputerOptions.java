@@ -333,4 +333,104 @@ public class ComputerOptions extends OptionHolder {
                     disallowEmpty(),
                     "hugegraph"
             );
+
+    public static final ConfigOption<Integer> TRANSPORT_SERVER_THREADS =
+            new ConfigOption<>(
+                    "transport.server_threads",
+                    "The number of Netty server threads.",
+                    disallowEmpty(),
+                    0
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
+            new ConfigOption<>(
+                    "transport.client_threads",
+                    "The number of Netty client threads.",
+                    disallowEmpty(),
+                    0
+            );
+
+    public static final ConfigOption<String> TRANSPORT_IO_MODE =
+            new ConfigOption<>(
+                    "transport.io_mode",
+                    "The Netty IO Mode, either 'NIO' or 'EPOLL', This " +
+                    " defaults selecting the property mode automatically",
+                    disallowEmpty(),
+                    "AUTO"
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
+            new ConfigOption<>(
+                    "transport.send_buffer_size",
+                    "The Netty send buffer size.",
+                    positiveInt(),
+                    -1
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_RECEIVE_BUFFER_SIZE =
+            new ConfigOption<>(
+                    "transport.receive_buffer_size",
+                    "The Netty receive buffer size.",
+                    positiveInt(),
+                    -1
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
+            new ConfigOption<>(
+                    "transport.backlog",
+                    "The Netty server connection backlog.",
+                    positiveInt(),
+                    -1
+            );
+
+    public static final ConfigOption<Integer>
+           TRANSPORT_CLIENT_CONNECT_TIMEOUT_SECONDS =
+            new ConfigOption<>(
+                    "transport.client_connect_timeout_seconds",
+                    "The timeout of Netty client creation connection.",
+                    positiveInt(),
+                    -1
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_MAX_PENDING_REQUESTS =
+            new ConfigOption<>(
+                    "transport.max_pending_requests",
+                    "The max number of client unreceived ack.",
+                    positiveInt(),
+                    50
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
+            new ConfigOption<>(
+                    "transport.max_pending_requests",
+                    "The minimum number of client unreceived ack.",
+                    positiveInt(),
+                    5
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_MIN_ACK_INTERVAL =
+            new ConfigOption<>(
+                    "transport.min_ack_interval_seconds",
+                    "The minimum interval(in ms) of server reply ack.",
+                    positiveInt(),
+                    200
+            );
+
+    public static final ConfigOption<Integer>
+           TRANSPORT_HEARTBEAT_INTERVAL_SECONDS =
+            new ConfigOption<>(
+                    "transport.heartbeat_interval_seconds",
+                    "Time minimum interval(in seconds) of send heartbeat.",
+                    positiveInt(),
+                    60
+            );
+
+    public static final ConfigOption<Integer>
+           TRANSPORT_HEARTBEAT_TIMEOUT_SECONDS =
+            new ConfigOption<>(
+                    "transport.idle_timeout_seconds",
+                    "The max timeout(in seconds) of heartbeat.",
+                    positiveInt(),
+                    120
+            );
 }

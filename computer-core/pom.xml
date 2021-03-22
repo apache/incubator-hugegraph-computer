@@ -28,5 +28,9 @@
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
     </dependencies>
 </project>
