@@ -52,9 +52,8 @@ public interface ComputerDriver {
     void cancelJob(String jobId, Map<String, String> params);
 
     /**
-     * Wait the job to finish, it create a separate thread to trace the job and
-     * return immediately. The thread will trace the execution of job and
-     * notify the observer at every superstep. Throws ComputerException if the
+     * Wait the job to finish, it will trace the execution of job and notify
+     * the observer at every superstep. Throws ComputerException if the
      * job is waiting by another thread.
      * @param params reserved for other parameters in addition to jobId used
      *               to wait job.
