@@ -56,7 +56,7 @@ public interface ComputerDriver {
      * return immediately. The thread will trace the execution of job and
      * notify the observer at every superstep. Throws ComputerException if the
      * job is waiting by another thread.
-     * @param params reserved for other parameters in addition to job id used
+     * @param params reserved for other parameters in addition to jobId used
      *               to wait job.
      */
     void waitJob(String jobId,
