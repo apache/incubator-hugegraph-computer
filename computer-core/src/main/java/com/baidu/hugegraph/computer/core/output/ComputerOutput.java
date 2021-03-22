@@ -23,7 +23,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 /**
- * Computer output is used to output computer results. There is a output object
+ * Computer output is used to output computer results. There is an output object
  * for every partition.
  */
 public interface ComputerOutput {
