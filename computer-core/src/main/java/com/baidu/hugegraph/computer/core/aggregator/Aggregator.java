@@ -24,18 +24,18 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 public interface Aggregator<V extends Value> {
 
     /**
-     * Add a new value, needs to be commutative and associative.
+     * Workers used to add a new value, needs to be commutative and associative.
      * @param value The value to be aggregated
      */
     void aggregateValue(V value);
 
     /**
-     * Return the current aggregated value.
+     * Workers or Master can get get aggregated value.
      */
     V aggregatedValue();
 
     /**
-     * Set the aggregated value.
+     * Master can set the aggregated value.
      */
     void aggregatedValue(V value);
 

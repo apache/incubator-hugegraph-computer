@@ -40,10 +40,10 @@ public interface MasterComputation {
     void init(MasterContext context);
 
     /**
-     * This method is called before a superstep. In this method, the
-     * algorithm can using aggregators to determine whether to continue
-     * execution.
-     * @return true if continue execution, false if not.
+     * This method is called at the end of a superstep. In this method, the
+     * algorithm can using aggregators to determine whether to continue the
+     * next execution or not.
+     * @return true if want to continue the next iteration.
      */
     boolean compute(MasterContext context);
 

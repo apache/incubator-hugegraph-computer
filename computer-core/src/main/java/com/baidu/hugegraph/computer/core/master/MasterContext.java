@@ -33,17 +33,17 @@ public interface MasterContext {
      * TODO: try pass aggregator instance
      */
     <V extends Value> void registerAggregator(
-                      String name,
-                      Class<? extends Aggregator<V>> aggregatorClass);
+                           String name,
+                           Class<? extends Aggregator<V>> aggregatorClass);
 
     /**
-     * Get the aggregated value. The aggregated value is sent from workers at
-     * previous superstep.
+     * Master get the aggregated value. The aggregated value is sent from
+     * workers at this superstep.
      */
     <V extends Value> V aggregatedValue(String name);
 
     /**
-     * Set the aggregated value. The value is received by workers at this
+     * Master set the aggregated value. The value is received by workers at next
      * superstep.
      */
     <V extends Value> void aggregatedValue(String name, V value);

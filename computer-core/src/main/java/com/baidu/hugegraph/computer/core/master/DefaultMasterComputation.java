@@ -20,8 +20,8 @@
 package com.baidu.hugegraph.computer.core.master;
 
 /**
- * The default master computation if there is no algorithm specific master
- * computation.
+ * The default master computation, which can be used if there is no
+ * algorithm-specific master computation.
  */
 public class DefaultMasterComputation implements MasterComputation {
 
