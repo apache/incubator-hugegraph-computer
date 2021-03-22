@@ -40,19 +40,6 @@ public interface WorkerContext {
     Config config();
 
     /**
-     * Add a new value to specified name. The aggregator with the name cache
-     * in worker, and will be sent to master when current superstep finish.
-     * @param value The value to be aggregated
-     */
-    <V extends Value> void aggregateValue(String name, V value);
-
-    /**
-     * Get the aggregated value. The aggregated value is sent by master
-     * before current superstep start.
-     */
-    <V extends Value> V aggregatedValue(String name);
-
-    /**
      * Send value to specified target vertex.
      */
     void sendMessage(Id target, Value value);

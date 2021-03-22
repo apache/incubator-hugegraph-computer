@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.aggregator;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public interface Aggregator<V extends Value> {
@@ -27,7 +28,41 @@ public interface Aggregator<V extends Value> {
      * Workers used to add a new value, needs to be commutative and associative.
      * @param value The value to be aggregated
      */
-    void aggregateValue(V value);
+    default void aggregateValue(V value) {
+                 throw new ComputerException("Not implemented");
+    }
+
+    /**
+     * Aggregate an int value. For performance reasons, it can aggregate without
+     * create an IntValue object.
+     */
+    default void aggregateValue(int value) {
+                 throw new ComputerException("Not implemented");
+    }
+
+    /**
+     * Aggregate a long value. For performance reasons, it can aggregate without
+     * create a LongValue object.
+     */
+    default void aggregateValue(long value) {
+                 throw new ComputerException("Not implemented");
+    }
+
+    /**
+     * Aggregate a float value. For performance reasons, it can aggregate
+     * without create a FloatValue object.
+     */
+    default void aggregateValue(float value) {
+                 throw new ComputerException("Not implemented");
+    }
+
+    /**
+     * Aggregate a double value. For performance reasons, it can aggregate
+     * without create a DoubleValue object.
+     */
+    default void aggregateValue(double value) {
+                 throw new ComputerException("Not implemented");
+    }
 
     /**
      * Workers or Master can get get aggregated value.
@@ -38,9 +73,4 @@ public interface Aggregator<V extends Value> {
      * Master can set the aggregated value.
      */
     void aggregatedValue(V value);
-
-    /**
-     * Create the initial value which is neutral to aggregate operation.
-     */
-    V createInitialValue();
 }

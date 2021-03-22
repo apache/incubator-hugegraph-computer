@@ -56,14 +56,14 @@ public interface Computation<M extends Value> {
     /**
      * This method is called before every superstep.
      */
-    default void beforeSuperstep(WorkerContext context) {
+    default void beforeSuperstep(WorkerAggrContext context) {
         // pass
     }
 
     /**
      * This method is called after every superstep.
      */
-    default void afterSuperstep(WorkerContext context) {
+    default void afterSuperstep(WorkerAggrContext context) {
         // pass
     }
 }

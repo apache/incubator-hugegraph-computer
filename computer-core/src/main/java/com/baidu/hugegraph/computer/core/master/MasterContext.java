@@ -19,34 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
-import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Master;
 
 /**
  * The MasterContext is the interface from the algorithm's master computation.
  * Other master's internal services are defined in MasterService.
  */
-public interface MasterContext {
-
-    /**
-     * Register the aggregator with specified name.
-     * TODO: try pass aggregator instance
-     */
-    <V extends Value> void registerAggregator(
-                           String name,
-                           Class<? extends Aggregator<V>> aggregatorClass);
-
-    /**
-     * Master get the aggregated value. The aggregated value is sent from
-     * workers at this superstep.
-     */
-    <V extends Value> V aggregatedValue(String name);
-
-    /**
-     * Master set the aggregated value. The value is received by workers at next
-     * superstep.
-     */
-    <V extends Value> void aggregatedValue(String name, V value);
+public interface MasterContext extends Aggregator4Master {
 
     /**
      * @return the total vertex count of the graph. The value may vary from
