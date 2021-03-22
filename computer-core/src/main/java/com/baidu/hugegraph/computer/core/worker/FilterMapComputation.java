@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -33,12 +34,30 @@ import com.baidu.hugegraph.iterator.MapperIterator;
  */
 public interface FilterMapComputation<M extends Value> extends Computation<M> {
 
+    /**
+     * Set vertex's value and return initial message. The message will be
+     * used to compute the vertex as parameter Iterator<M> messages.
+     */
+    M initialValue(WorkerContext context, Vertex vertex);
+
+    @Override
+    default void compute0(WorkerContext context, Vertex vertex) {
+        M result = this.initialValue(context, vertex);
+        this.compute(context, vertex, Arrays.asList(result).iterator());
+    }
+
+    /**
+     * Called at all supersteps(except superstep0) with messages,
+     * or at superstep0 with user defined message, in generally the message
+     * returned by the user is an empty message.
+     */
     @Override
     default void compute(WorkerContext context,
                          Vertex vertex,
                          Iterator<M> messages) {
         Iterator<M> results = this.computeMessages(context, vertex, messages);
         this.sendMessages(context, vertex, results);
+        this.updateState(vertex);
     }
 
     /**
@@ -63,14 +82,19 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
     M computeMessage(WorkerContext context, Vertex vertex, M message);
 
     /**
-     * Send messages along all the edges, and halt the vertex after send
-     * messages. Subclass should override this method when send message to
-     * selected target vertex.
+     * Subclass should override this method if want to send messages to
+     * specified adjacent vertices, send to all adjacent vertices by default.
      */
     default void sendMessages(WorkerContext context,
                               Vertex vertex,
                               Iterator<M> results) {
         context.sendMessagesToAllEdges(vertex, results);
+    }
+
+    /**
+     * Set vertex's state after computation, set inactive by default.
+     */
+    default void updateState(Vertex vertex) {
         vertex.inactivate();
     }
 }

@@ -69,6 +69,22 @@ public interface WorkerContext {
     }
 
     /**
+     * Send all values to all filtered edges of vertex
+     */
+    default <M extends Value> void sendMessageToAllEdgesIf(
+                                   Vertex vertex,
+                                   M value,
+                                   BiFunction<M, Id, Boolean> filter) {
+        Iterator<Edge> edges = vertex.edges().iterator();
+        while (edges.hasNext()) {
+            Edge edge = edges.next();
+            if (filter.apply(value, edge.targetId())) {
+                this.sendMessage(edge.targetId(), value);
+            }
+        }
+    }
+
+    /**
      * Send all values to all edges of vertex
      */
     default <M extends Value> void sendMessagesToAllEdges(Vertex vertex,
@@ -114,6 +130,10 @@ public interface WorkerContext {
      * @return the current superstep.
      */
     int superstep();
+
+    /**
+     * @return The message combiner.
+     */
 
     <V extends Value> Combiner<V> combiner();
 }
