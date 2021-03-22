@@ -46,6 +46,8 @@ public interface ComputerDriver {
      * Cancel the job with specified jobId, the parameters are in config.
      * Throws ComputerException if the job can't cancelled or can't found
      * the job.
+     * @param params reserved for other parameters in addition to jobId used
+     *               to cancel job.
      */
     void cancelJob(String jobId, Map<String, String> params);
 
@@ -54,6 +56,8 @@ public interface ComputerDriver {
      * return immediately. The thread will trace the execution of job and
      * notify the observer at every superstep. Throws ComputerException if the
      * job is waiting by another thread.
+     * @param params reserved for other parameters in addition to job id used
+     *               to wait job.
      */
     void waitJob(String jobId,
                  Map<String, String> params,
@@ -62,12 +66,16 @@ public interface ComputerDriver {
     /**
      * Get the current job state. Throws ComputerException if can't found the
      * job.
+     * @param params reserved for other parameters in addition to jobId used
+     *               to get job state.
      */
     JobState jobState(String jobId, Map<String, String> params);
 
     /**
      * Get the superstep stats of the job. Throws ComputerException if can't
      * found the job.
+     * @param params reserved for other parameters in addition to jobId used
+     *               to get superstep stats.
      */
     List<SuperstepStat> superstepStats(String jobId,
                                        Map<String, String> params);
@@ -76,6 +84,8 @@ public interface ComputerDriver {
      * Get the main reason the job is failed. Throws ComputerException if the
      * job is running or can't found the job. Return null if the job is exited
      * successfully.
+     * @param params reserved for other parameters in addition to jobId used
+     *               to get diagnostics.
      */
     String diagnostics(String jobId, Map<String, String> params);
 
