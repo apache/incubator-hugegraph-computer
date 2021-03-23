@@ -19,8 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Locale;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 
@@ -28,10 +32,30 @@ import io.netty.channel.epoll.Epoll;
 
 public class TransportConf {
 
+    static final String SERVER_THREAD_GROUP_NAME = "hugegraph-netty-server";
+
+    static final String CLIENT_THREAD_GROUP_NAME = "hugegraph-netty-client";
+
     private final Config config;
 
     public TransportConf(Config config) {
         this.config = config;
+    }
+
+    public InetAddress serverAddress(){
+        String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
+        try {
+            return InetAddress.getByName(host);
+        } catch (UnknownHostException e) {
+            throw new ComputeException("Failed to conversion host address", e);
+        }
+    }
+
+    /**
+     * A port number of zero will let the system pick up an ephemeral port.
+     */
+    public int serverPort(){
+        return 0;
     }
 
     /**
@@ -46,8 +70,10 @@ public class TransportConf {
                 return IOMode.NIO;
             case "EPOLL":
                 return IOMode.EPOLL;
-            default:
+            case "AUTO":
                 return Epoll.isAvailable() ? IOMode.EPOLL : IOMode.NIO;
+            default:
+                throw new IllegalArgException("Unknown io_mode: %s", ioMode);
         }
     }
 
@@ -69,7 +95,7 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
     }
 
-    public int clientThreads() {
+    public final int clientThreads() {
         return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
     }
 
@@ -89,8 +115,7 @@ public class TransportConf {
     }
 
     public int clientConnectionTimeout() {
-        return this.config
-                .get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT_SECONDS);
+        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT);
     }
 
     /**
@@ -114,17 +139,19 @@ public class TransportConf {
     /**
      * The minimum interval(in ms) of server reply ack.
      */
-    public long minACKInterval(){
+    public long minAckInterval(){
         return this.config.get(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL);
     }
 
     public int heartbeatInterval() {
-        return this.config
-                .get(ComputerOptions.TRANSPORT_HEARTBEAT_INTERVAL_SECONDS);
+        return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_INTERVAL);
     }
 
     public int heartbeatTimeout() {
-        return this.config
-                .get(ComputerOptions.TRANSPORT_HEARTBEAT_TIMEOUT_SECONDS);
+        return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_TIMEOUT);
+    }
+
+    public boolean tcpKeepAlive(){
+        return true;
     }
 }
