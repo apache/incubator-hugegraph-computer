@@ -28,16 +28,14 @@ public interface Aggregator<V extends Value> {
      * Workers used to add a new value, needs to be commutative and associative.
      * @param value The value to be aggregated
      */
-    default void aggregateValue(V value) {
-                 throw new ComputerException("Not implemented");
-    }
+    void aggregateValue(V value);
 
     /**
      * Aggregate an int value. For performance reasons, it can aggregate without
      * create an IntValue object.
      */
     default void aggregateValue(int value) {
-                 throw new ComputerException("Not implemented");
+        throw new ComputerException("Not implemented: aggregateValue(int)");
     }
 
     /**
@@ -45,7 +43,7 @@ public interface Aggregator<V extends Value> {
      * create a LongValue object.
      */
     default void aggregateValue(long value) {
-                 throw new ComputerException("Not implemented");
+        throw new ComputerException("Not implemented: aggregateValue(long)");
     }
 
     /**
@@ -53,7 +51,7 @@ public interface Aggregator<V extends Value> {
      * without create a FloatValue object.
      */
     default void aggregateValue(float value) {
-                 throw new ComputerException("Not implemented");
+        throw new ComputerException("Not implemented: aggregateValue(float)");
     }
 
     /**
@@ -61,11 +59,11 @@ public interface Aggregator<V extends Value> {
      * without create a DoubleValue object.
      */
     default void aggregateValue(double value) {
-                 throw new ComputerException("Not implemented");
+        throw new ComputerException("Not implemented: aggregateValue(double)");
     }
 
     /**
-     * Workers or Master can get get aggregated value.
+     * Workers or Master can get aggregated value.
      */
     V aggregatedValue();
 
