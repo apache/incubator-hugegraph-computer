@@ -86,6 +86,70 @@ public final class Config {
         return this.allConfig.get(option);
     }
 
+    public boolean getBoolean(String key, boolean defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else if (value.equalsIgnoreCase("true")) {
+            return true;
+        } else if (value.equalsIgnoreCase("false")) {
+            return false;
+        } else {
+            throw new ComputerException(
+                      "Can't parse boolean value from '%s' for key '%s'",
+                      value, key);
+        }
+    }
+
+    public int getInt(String key, int defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            try {
+                return Integer.parseInt(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse int value from '%s' for key '%s'",
+                          value, key);
+            }
+        }
+    }
+
+    public long getLong(String key, long defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            try {
+                return Long.parseLong(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse long value from '%s' for key '%s'",
+                          value, key);
+            }
+        }
+    }
+
+    public double getDouble(String key, double defaultValue) {
+        String value = this.allConfig.getString(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            try {
+                return Double.parseDouble(value);
+            } catch (Exception e) {
+                throw new ComputerException(
+                          "Can't parse double value from '%s' for key '%s'",
+                          value, key);
+            }
+        }
+    }
+
+    public String getString(String key, String defaultValue) {
+        return this.allConfig.getString(key, defaultValue);
+    }
+
     public String algorithmName() {
         return this.hotConfig.algorithmName();
     }

@@ -17,36 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.store;
 
-import java.io.DataInput;
-import java.io.IOException;
+import java.util.List;
 
-public interface RandomAccessInput extends DataInput {
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-    /**
-     * @return The current position.
-     */
-    long position();
+public interface SortCombiner {
 
     /**
-     * Set current position to specified position, measured from the beginning
-     * of input.
-     * @throws IOException If can't seek to specified position.
+     * Combine the list of inputs, and write the combined result length and
+     * results to output.
      */
-    void seek(long position) throws IOException;
-
-    /**
-     * Skip {@code n} bytes.
-     * @return the position before skip. This is different from {@link
-     * DataInput#skipBytes} and {@link java.io.InputStream#skip}, which
-     * return the number of bytes actually skipped.
-     */
-    long skip(long n) throws IOException;
-
-    /**
-     * @return The total bytes size unread.
-     * @throws IOException
-     */
-    long available() throws IOException;
+    void combine(List<Pointer> inputs, RandomAccessOutput output);
 }

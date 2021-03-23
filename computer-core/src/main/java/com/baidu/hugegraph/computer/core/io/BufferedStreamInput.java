@@ -158,6 +158,14 @@ public class BufferedStreamInput extends UnsafeByteArrayInput {
         }
     }
 
+    /**
+     * The stream has no limit.
+     */
+    @Override
+    public long available() throws IOException {
+        return Long.MAX_VALUE;
+    }
+
     private void shiftAndFillBuffer() throws IOException {
         this.shiftBuffer();
         this.fillBuffer();

@@ -17,36 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.store;
 
-import java.io.DataInput;
-import java.io.IOException;
-
-public interface RandomAccessInput extends DataInput {
+public interface HgkvFile {
 
     /**
-     * @return The current position.
+     * The absolute path includes file name.
      */
-    long position();
+    String path();
 
     /**
-     * Set current position to specified position, measured from the beginning
-     * of input.
-     * @throws IOException If can't seek to specified position.
+     * Return the count of entries.
      */
-    void seek(long position) throws IOException;
+    long entries();
 
     /**
-     * Skip {@code n} bytes.
-     * @return the position before skip. This is different from {@link
-     * DataInput#skipBytes} and {@link java.io.InputStream#skip}, which
-     * return the number of bytes actually skipped.
+     * Return the version of file.
      */
-    long skip(long n) throws IOException;
-
-    /**
-     * @return The total bytes size unread.
-     * @throws IOException
-     */
-    long available() throws IOException;
+    int version();
 }

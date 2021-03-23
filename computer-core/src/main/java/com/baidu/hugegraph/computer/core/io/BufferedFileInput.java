@@ -136,6 +136,11 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
         }
     }
 
+    @Override
+    public long available() throws IOException {
+        return this.file.length() - this.position();
+    }
+
     private void shiftAndFillBuffer() throws IOException {
         this.shiftBuffer();
         this.fillBuffer();

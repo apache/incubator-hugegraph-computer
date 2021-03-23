@@ -376,6 +376,27 @@ public class BufferedFileTest {
     }
 
     @Test
+    public void testAvailable() throws IOException {
+        int size = 1024;
+        File file = this.createTempFile();
+        try {
+            try (BufferedFileOutput output = this.createOutput(file)) {
+                for (int i = 0; i < size; i++) {
+                    output.writeInt(i);
+                }
+            }
+            try (BufferedFileInput input = this.createInput(file)) {
+                for (int i = 0; i < size; i++) {
+                    Assert.assertEquals(4096 - i * 4, input.available());
+                    Assert.assertEquals(i, input.readInt());
+                }
+            }
+        } finally {
+            FileUtils.deleteQuietly(file);
+        }
+    }
+
+    @Test
     public void testLongPerformanceUnsafe() throws IOException {
         long size = 1024;
         long startTime;

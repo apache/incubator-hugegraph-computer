@@ -17,36 +17,19 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.store;
 
-import java.io.DataInput;
-import java.io.IOException;
+import java.util.Iterator;
 
-public interface RandomAccessInput extends DataInput {
+public interface KvEntry {
 
-    /**
-     * @return The current position.
-     */
-    long position();
+    Pointer key();
 
     /**
-     * Set current position to specified position, measured from the beginning
-     * of input.
-     * @throws IOException If can't seek to specified position.
+     * Each pointer in iteration is values for a specific key. It mean's
+     * key's value in a file. It may be several fragments for a key in a file.
+     * The values in fragments are at increasing order. The upper layer read
+     * a fragment from a pointer each time.
      */
-    void seek(long position) throws IOException;
-
-    /**
-     * Skip {@code n} bytes.
-     * @return the position before skip. This is different from {@link
-     * DataInput#skipBytes} and {@link java.io.InputStream#skip}, which
-     * return the number of bytes actually skipped.
-     */
-    long skip(long n) throws IOException;
-
-    /**
-     * @return The total bytes size unread.
-     * @throws IOException
-     */
-    long available() throws IOException;
+    Iterator<Pointer> values();
 }

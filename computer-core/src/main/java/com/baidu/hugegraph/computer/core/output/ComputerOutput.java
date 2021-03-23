@@ -17,36 +17,31 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.output;
 
-import java.io.DataInput;
-import java.io.IOException;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public interface RandomAccessInput extends DataInput {
-
-    /**
-     * @return The current position.
-     */
-    long position();
-
-    /**
-     * Set current position to specified position, measured from the beginning
-     * of input.
-     * @throws IOException If can't seek to specified position.
-     */
-    void seek(long position) throws IOException;
+/**
+ * Computer output is used to output computer results. There is an output object
+ * for every partition.
+ */
+public interface ComputerOutput {
 
     /**
-     * Skip {@code n} bytes.
-     * @return the position before skip. This is different from {@link
-     * DataInput#skipBytes} and {@link java.io.InputStream#skip}, which
-     * return the number of bytes actually skipped.
+     * Initialize the output. Create connection to target output system.
      */
-    long skip(long n) throws IOException;
+    void init(Config config, int partition);
 
     /**
-     * @return The total bytes size unread.
-     * @throws IOException
+     * For each vertex in partition, this method is called regardless
+     * vertex's status.
      */
-    long available() throws IOException;
+    void write(Vertex vertex);
+
+    /**
+     * Close the connection to target output system. Commit if target output
+     * required.
+     */
+    void close();
 }
