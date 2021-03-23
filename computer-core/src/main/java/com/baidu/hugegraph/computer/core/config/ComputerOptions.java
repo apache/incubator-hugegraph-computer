@@ -334,6 +334,14 @@ public class ComputerOptions extends OptionHolder {
                     "hugegraph"
             );
 
+    public static final ConfigOption<String> TRANSPORT_SERVER_HOST =
+            new ConfigOption<>(
+                    "transport.server_host",
+                    "The Netty server bind host.",
+                    disallowEmpty(),
+                    "127.0.0.1"
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_SERVER_THREADS =
             new ConfigOption<>(
                     "transport.server_threads",
@@ -353,9 +361,9 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> TRANSPORT_IO_MODE =
             new ConfigOption<>(
                     "transport.io_mode",
-                    "The Netty IO Mode, either 'NIO' or 'EPOLL', This " +
-                    " defaults selecting the property mode automatically",
-                    disallowEmpty(),
+                    "The Netty IO Mode, either 'NIO'、'EPOLL'、'AUTO', The " +
+                    "'AUTO' means selecting the property mode automatically",
+                    allowValues("NIO", "EPOLL", "AUTO"),
                     "AUTO"
             );
 
@@ -383,8 +391,7 @@ public class ComputerOptions extends OptionHolder {
                     -1
             );
 
-    public static final ConfigOption<Integer>
-           TRANSPORT_CLIENT_CONNECT_TIMEOUT_SECONDS =
+    public static final ConfigOption<Integer> TRANSPORT_CLIENT_CONNECT_TIMEOUT =
             new ConfigOption<>(
                     "transport.client_connect_timeout_seconds",
                     "The timeout of Netty client creation connection.",
@@ -416,8 +423,7 @@ public class ComputerOptions extends OptionHolder {
                     200L
             );
 
-    public static final ConfigOption<Integer>
-           TRANSPORT_HEARTBEAT_INTERVAL_SECONDS =
+    public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_INTERVAL =
             new ConfigOption<>(
                     "transport.heartbeat_interval_seconds",
                     "Time minimum interval(in seconds) of send heartbeat.",
@@ -425,10 +431,9 @@ public class ComputerOptions extends OptionHolder {
                     60
             );
 
-    public static final ConfigOption<Integer>
-           TRANSPORT_HEARTBEAT_TIMEOUT_SECONDS =
+    public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_TIMEOUT =
             new ConfigOption<>(
-                    "transport.idle_timeout_seconds",
+                    "transport.transport_timeout_seconds",
                     "The max timeout(in seconds) of heartbeat.",
                     positiveInt(),
                     120
