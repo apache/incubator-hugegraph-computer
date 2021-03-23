@@ -17,20 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.netty;
 
 /**
- * This is used for worker that receives data.
+ * Selector for which form of low-level IO we should use.
+ * NIO is always available, while EPOLL is only available on Linux.
  */
-public interface Transport4Server {
-
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(MessageHandler handler);
-
-    /**
-     * Stop the server
-     */
-    void stop();
+public enum IOMode {
+  NIO, EPOLL
 }

@@ -19,18 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-/**
- * This is used for worker that receives data.
- */
-public interface Transport4Server {
+import java.nio.ByteBuffer;
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(MessageHandler handler);
+public class MockMessageHandler implements MessageHandler{
+    @Override
+    public void handle(byte messageType, int partition, ByteBuffer buffer) {
 
-    /**
-     * Stop the server
-     */
-    void stop();
+    }
 }

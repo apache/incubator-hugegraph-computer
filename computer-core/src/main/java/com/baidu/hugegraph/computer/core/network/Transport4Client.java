@@ -21,8 +21,6 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.config.Config;
-
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -35,10 +33,10 @@ public interface Transport4Client {
 
     /**
      * Init the connection from client to server. This method is called only
-     * once. MAX_PENDING_REQUESTS is set in config
+     * once.
      * @throws IOException if can't create connection.
      */
-    void init(Config config, String hostname, int port) throws IOException;
+    void init(String hostname, int port) throws IOException;
 
     /**
      * This method is called before an iteration of sending buffers.

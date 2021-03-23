@@ -19,18 +19,14 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-/**
- * This is used for worker that receives data.
- */
-public interface Transport4Server {
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(MessageHandler handler);
+import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServerTest;
 
-    /**
-     * Stop the server
-     */
-    void stop();
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    NettyTransportServerTest.class
+})
+public class NetworkTestSuite {
 }

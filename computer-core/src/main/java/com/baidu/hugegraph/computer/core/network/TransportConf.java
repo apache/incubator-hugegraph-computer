@@ -27,14 +27,15 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.netty.IOMode;
 
 import io.netty.channel.epoll.Epoll;
 
 public class TransportConf {
 
-    static final String SERVER_THREAD_GROUP_NAME = "hugegraph-netty-server";
+    public static final String SERVER_THREAD_GROUP_NAME = "hugegraph-netty-server";
 
-    static final String CLIENT_THREAD_GROUP_NAME = "hugegraph-netty-client";
+    public static final String CLIENT_THREAD_GROUP_NAME = "hugegraph-netty-client";
 
     private final Config config;
 
@@ -47,7 +48,7 @@ public class TransportConf {
         try {
             return InetAddress.getByName(host);
         } catch (UnknownHostException e) {
-            throw new ComputeException("Failed to conversion host address", e);
+            throw new ComputeException("Failed to parse address from '%s'", e, host);
         }
     }
 
@@ -55,16 +56,15 @@ public class TransportConf {
      * A port number of zero will let the system pick up an ephemeral port.
      */
     public int serverPort(){
-        return 0;
+        return this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
     }
 
     /**
      * IO mode: nio or epoll
      */
     public IOMode ioMode() {
-        String ioMode =
-                this.config.get(ComputerOptions.TRANSPORT_IO_MODE)
-                           .toUpperCase(Locale.ROOT);
+        String ioMode = this.config.get(ComputerOptions.TRANSPORT_IO_MODE)
+                                   .toUpperCase(Locale.ROOT);
         switch (ioMode) {
             case "NIO":
                 return IOMode.NIO;
@@ -114,7 +114,7 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 
-    public int clientConnectionTimeout() {
+    public long clientConnectionTimeoutMs() {
         return this.config.get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT);
     }
 
@@ -152,6 +152,6 @@ public class TransportConf {
     }
 
     public boolean tcpKeepAlive(){
-        return true;
+        return this.config.get(ComputerOptions.TRANSPORT_TCP_KEEP_ALIVE);
     }
 }

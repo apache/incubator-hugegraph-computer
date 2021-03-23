@@ -17,20 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.netty;
 
-/**
- * This is used for worker that receives data.
- */
-public interface Transport4Server {
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(MessageHandler handler);
-
-    /**
-     * Stop the server
-     */
-    void stop();
+public class ByteBufAllocatorFactory {
+    public static ByteBufAllocator createByteBufAllocator() {
+        // TODO Pooled allocators
+        return PooledByteBufAllocator.DEFAULT;
+    }
 }

@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.config;
 
 import static com.baidu.hugegraph.config.OptionChecker.allowValues;
 import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
+import static com.baidu.hugegraph.config.OptionChecker.nonNegativeInt;
 import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 
 import java.util.Set;
@@ -342,11 +343,20 @@ public class ComputerOptions extends OptionHolder {
                     "127.0.0.1"
             );
 
+    public static final ConfigOption<Integer> TRANSPORT_SERVER_PORT =
+            new ConfigOption<>(
+                    "transport.server_port",
+                    "The Netty server bind port, if it is zero " +
+                    "will let the system pick up an ephemeral port.",
+                    nonNegativeInt(),
+                    0
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_SERVER_THREADS =
             new ConfigOption<>(
                     "transport.server_threads",
                     "The number of Netty server threads.",
-                    disallowEmpty(),
+                    nonNegativeInt(),
                     0
             );
 
@@ -354,7 +364,7 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.client_threads",
                     "The number of Netty client threads.",
-                    disallowEmpty(),
+                    nonNegativeInt(),
                     0
             );
 
@@ -371,32 +381,32 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.send_buffer_size",
                     "The Netty send buffer size.",
-                    positiveInt(),
-                    -1
+                    nonNegativeInt(),
+                    0
             );
 
     public static final ConfigOption<Integer> TRANSPORT_RECEIVE_BUFFER_SIZE =
             new ConfigOption<>(
                     "transport.receive_buffer_size",
                     "The Netty receive buffer size.",
-                    positiveInt(),
-                    -1
+                    nonNegativeInt(),
+                    0
             );
 
     public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
             new ConfigOption<>(
                     "transport.backlog",
                     "The Netty server connection backlog.",
-                    positiveInt(),
-                    -1
+                    nonNegativeInt(),
+                    0
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_CLIENT_CONNECT_TIMEOUT =
+    public static final ConfigOption<Long> TRANSPORT_CLIENT_CONNECT_TIMEOUT =
             new ConfigOption<>(
-                    "transport.client_connect_timeout_seconds",
-                    "The timeout of Netty client creation connection.",
+                    "transport.client_connect_timeout",
+                    "The timeout(in ms) of Netty client connection server.",
                     positiveInt(),
-                    -1
+                    3000L
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MAX_PENDING_REQUESTS =
@@ -433,9 +443,18 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_TIMEOUT =
             new ConfigOption<>(
-                    "transport.transport_timeout_seconds",
+                    "transport.heartbeat_timeout_seconds",
                     "The max timeout(in seconds) of heartbeat.",
                     positiveInt(),
                     120
             );
+
+    public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
+            new ConfigOption<>(
+                    "transport.transport_tcp_keep_alive",
+                    "The TCP keep alive.",
+                    allowValues(true, false),
+                    true
+            );
+
 }
