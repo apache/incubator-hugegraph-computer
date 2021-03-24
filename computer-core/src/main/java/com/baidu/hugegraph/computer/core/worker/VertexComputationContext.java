@@ -23,30 +23,30 @@ import java.util.Iterator;
 import java.util.function.BiFunction;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 /**
- * The WorkerContext is the interface for the algorithm's vertex computation.
- * Other worker's internal services are defined in WorkerService.
+ * The VertexComputationContext is the interface for the algorithm's vertex
+ * computation. It is passed to algorithm's vertex computation as parameter
+ * when compute a vertex. It used by algorithm's vertex computation to send
+ * messages and get graph information such as total vertex count and total
+ * edge count.
  */
-public interface WorkerContext {
+public interface VertexComputationContext {
 
     /**
-     * Get config
-     */
-    Config config();
-
-    /**
-     * Send value to specified target vertex.
+     * Send value to specified target vertex. The specified target vertex
+     * will receive the value at next superstep.
      */
     void sendMessage(Id target, Value value);
 
     /**
-     * Send value to all edges of vertex.
+     * Send value to all adjacent vertices of specified vertex. The adjacent
+     * vertices of specified vertex will receive the value at next superstep.
+     *
      */
     default void sendMessageToAllEdges(Vertex vertex, Value value) {
         Iterator<Edge> edges = vertex.edges().iterator();
@@ -57,7 +57,9 @@ public interface WorkerContext {
     }
 
     /**
-     * Send all values to all filtered edges of vertex
+     * Send all values to filtered adjacent vertices of specified vertex. The
+     * filtered adjacent vertices of specified vertex will receive the value
+     * at next superstep.
      */
     default <M extends Value> void sendMessageToAllEdgesIf(
                                    Vertex vertex,
@@ -73,7 +75,9 @@ public interface WorkerContext {
     }
 
     /**
-     * Send all values to all edges of vertex
+     * Send all values to all adjacent vertices of specified vertex. The
+     * adjacent vertices of specified vertex will receive the values at next
+     * superstep.
      */
     default <M extends Value> void sendMessagesToAllEdges(Vertex vertex,
                                                           Iterator<M> values) {
@@ -84,7 +88,9 @@ public interface WorkerContext {
     }
 
     /**
-     * Send all values to all filtered edges of vertex
+     * Send all values to filtered adjacent vertices of specified vertex. The
+     * filtered adjacent vertices of specified vertex will receive the values
+     * at next superstep.
      */
     default <M extends Value> void sendMessagesToAllEdgesIf(
                                    Vertex vertex,
@@ -120,7 +126,9 @@ public interface WorkerContext {
     int superstep();
 
     /**
-     * @return The message combiner.
+     * @return The message combiner, or null if there is no message combiner.
+     * The combiner is used to combine messages for a vertex.
+     * For {@link ReduceComputation}, there must be a combiner.
      */
     <V extends Value> Combiner<V> combiner();
 }

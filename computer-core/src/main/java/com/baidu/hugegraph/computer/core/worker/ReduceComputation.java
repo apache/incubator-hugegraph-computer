@@ -38,20 +38,25 @@ public interface ReduceComputation<M extends Value> extends Computation<M> {
      * Set vertex's value and return initial message. The message will be
      * used to compute the vertex as parameter Iterator<M> messages.
      */
-    M initialValue(WorkerContext context, Vertex vertex);
+    M initialValue(VertexComputationContext context, Vertex vertex);
 
+    /**
+     * Compute with initial message. Be invoked at superstep0 for every vertex.
+     */
     @Override
-    default void compute0(WorkerContext context, Vertex vertex) {
+    default void compute0(VertexComputationContext context, Vertex vertex) {
         M result = this.initialValue(context, vertex);
         this.compute(context, vertex, Arrays.asList(result).iterator());
     }
 
     /**
+     * Compute the specified vertex with messages.
      * Called at all supersteps(except superstep0) with messages,
-     * or at superstep0 with user defined message.
+     * or at superstep0 with user defined initial message.
+     * Update the vertex's state after compute.
      */
     @Override
-    default void compute(WorkerContext context,
+    default void compute(VertexComputationContext context,
                          Vertex vertex,
                          Iterator<M> messages) {
         M message = Combiner.combineAll(context.combiner(), messages);
@@ -68,14 +73,18 @@ public interface ReduceComputation<M extends Value> extends Computation<M> {
      * For a vertex, this method can be called only one time in a superstep.
      * @param message Combined message, or null if no message received
      */
-    M computeMessage(WorkerContext context, Vertex vertex, M message);
+    M computeMessage(VertexComputationContext context,
+                     Vertex vertex,
+                     M message);
 
     /**
      * By default, computed result will be sent to all adjacent vertices.
      * The algorithm should override this method if the algorithm doesn't wants
      * to send the result along all edges.
      */
-    default void sendMessage(WorkerContext context, Vertex vertex, M result) {
+    default void sendMessage(VertexComputationContext context,
+                             Vertex vertex,
+                             M result) {
         context.sendMessageToAllEdges(vertex, result);
     }
 

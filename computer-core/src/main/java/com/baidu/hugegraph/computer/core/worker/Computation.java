@@ -30,18 +30,21 @@ public interface Computation<M extends Value> {
      * Called at superstep0, with no messages. It should set vertex's initial
      * value in this method.
      */
-    void compute0(WorkerContext context, Vertex vertex);
+    void compute0(VertexComputationContext context, Vertex vertex);
 
     /**
      * Called at all supersteps(except superstep0) with messages.
      */
-    void compute(WorkerContext context, Vertex vertex, Iterator<M> messages);
+    void compute(VertexComputationContext context,
+                 Vertex vertex,
+                 Iterator<M> messages);
 
     /**
-     * Used to add the resources the computation needed. This method is
-     * called only one time.
+     * Used to init the resources the computation needed, like create
+     * a connection to other database, get the config the algorithm used. This
+     * method is called only one time before all superstep start.
      */
-    default void init(WorkerContext context) {
+    default void init(ComputationContext context) {
         // pass
     }
 
@@ -49,21 +52,23 @@ public interface Computation<M extends Value> {
      * Close the resources used in the computation. This method is called
      * only one time after all superstep iteration.
      */
-    default void close(WorkerContext context) {
+    default void close(ComputationContext context) {
         // pass
     }
 
     /**
-     * This method is called before every superstep.
+     * This method is called before every superstep. In this method,
+     * algorithm can get aggregators master aggregated at previous superstep.
      */
-    default void beforeSuperstep(WorkerAggrContext context) {
+    default void beforeSuperstep(ComputationContext context) {
         // pass
     }
 
     /**
-     * This method is called after every superstep.
+     * This method is called after every superstep. In this method, algorithm
+     * can aggregate the value to master.
      */
-    default void afterSuperstep(WorkerAggrContext context) {
+    default void afterSuperstep(ComputationContext context) {
         // pass
     }
 }

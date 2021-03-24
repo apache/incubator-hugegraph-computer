@@ -20,9 +20,19 @@
 package com.baidu.hugegraph.computer.core.worker;
 
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Worker;
+import com.baidu.hugegraph.computer.core.config.Config;
 
 /**
- * Worker aggregator context.
+ * Algorithm's computation context. Used by algorithm's computation except
+ * compute a vertex. Algorithm's computation can get(or set) aggregator and
+ * config from this context.
  */
-public interface WorkerAggrContext extends WorkerContext, Aggregator4Worker {
+public interface ComputationContext extends VertexComputationContext,
+                                            Aggregator4Worker {
+
+    /**
+     * Get config. The config remains immutable during the whole computation
+     * process.
+     */
+    Config config();
 }

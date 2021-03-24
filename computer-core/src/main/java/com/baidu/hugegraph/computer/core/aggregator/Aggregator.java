@@ -25,50 +25,51 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 public interface Aggregator<V extends Value> {
 
     /**
-     * Workers used to add a new value, needs to be commutative and associative.
+     * Used by worker to aggregate a new value when compute a vertex, needs to
+     * be commutative and associative.
      * @param value The value to be aggregated
      */
     void aggregateValue(V value);
 
     /**
-     * Aggregate an int value. For performance reasons, it can aggregate without
-     * create an IntValue object.
+     * Used by worker to aggregate an int value when compute a vertex. For
+     * performance reasons, it can aggregate without create an IntValue object.
      */
     default void aggregateValue(int value) {
         throw new ComputerException("Not implemented: aggregateValue(int)");
     }
 
     /**
-     * Aggregate a long value. For performance reasons, it can aggregate without
-     * create a LongValue object.
+     * Used by worker to aggregate a long value. For performance reasons, it can
+     * aggregate without create a LongValue object.
      */
     default void aggregateValue(long value) {
         throw new ComputerException("Not implemented: aggregateValue(long)");
     }
 
     /**
-     * Aggregate a float value. For performance reasons, it can aggregate
-     * without create a FloatValue object.
+     * Used by worker to aggregate a float value. For performance reasons, it
+     * can aggregate without create a FloatValue object.
      */
     default void aggregateValue(float value) {
         throw new ComputerException("Not implemented: aggregateValue(float)");
     }
 
     /**
-     * Aggregate a double value. For performance reasons, it can aggregate
-     * without create a DoubleValue object.
+     * Used by worker to aggregate a double value. For performance reasons,
+     * it can aggregate without create a DoubleValue object.
      */
     default void aggregateValue(double value) {
         throw new ComputerException("Not implemented: aggregateValue(double)");
     }
 
     /**
-     * Workers or Master can get aggregated value.
+     * Used by worker to get current aggregated value.
      */
     V aggregatedValue();
 
     /**
-     * Master can set the aggregated value.
+     * Used by worker to set current aggregated value directly.
      */
     void aggregatedValue(V value);
 }

@@ -27,9 +27,10 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.iterator.MapperIterator;
 
 /**
- * FilterMapComputation suit for computation like ring detection, when a
- * message received, it can be computed and decided whether to propagate
- * along the edges.
+ * FilterMapComputation is computation that can't combine the messages. When
+ * messages are received, it can be computed and decided whether to propagate
+ * along the adjacent vertices. FilterMapComputation suit for computation like
+ * ring detection.
  * @param <M> Message type
  */
 public interface FilterMapComputation<M extends Value> extends Computation<M> {
@@ -37,22 +38,30 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
     /**
      * Set vertex's value and return initial message. The message will be
      * used to compute the vertex as parameter Iterator<M> messages.
+     * The method is invoked at superstep0,
+     * {@link #compute0(VertexComputationContext, Vertex)}.
      */
-    M initialValue(WorkerContext context, Vertex vertex);
+    M initialValue(VertexComputationContext context, Vertex vertex);
 
+    /**
+     * Compute with initial message. Be invoked at superstep0 for every vertex.
+     */
     @Override
-    default void compute0(WorkerContext context, Vertex vertex) {
+    default void compute0(VertexComputationContext context, Vertex vertex) {
         M result = this.initialValue(context, vertex);
         this.compute(context, vertex, Arrays.asList(result).iterator());
     }
 
     /**
+     * Compute a vertex with messages.
      * Called at all supersteps(except superstep0) with messages,
-     * or at superstep0 with user defined message, in generally the message
-     * returned by the user is an empty message.
+     * or at superstep0 with user defined initial message.
+     * Subclass should override this method if want to compute the vertex when
+     * no messages received.
+     * Inactive the vertex after compute by default.
      */
     @Override
-    default void compute(WorkerContext context,
+    default void compute(VertexComputationContext context,
                          Vertex vertex,
                          Iterator<M> messages) {
         Iterator<M> results = this.computeMessages(context, vertex, messages);
@@ -61,9 +70,11 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
     }
 
     /**
-     * Compute all the messages and get the results as iterator.
+     * Compute vertex with all the messages received and get the results as
+     * iterator. Be invoked by
+     * {@link #compute(VertexComputationContext, Vertex, Iterator)}.
      */
-    default Iterator<M> computeMessages(WorkerContext context,
+    default Iterator<M> computeMessages(VertexComputationContext context,
                                         Vertex vertex,
                                         Iterator<M> messages) {
         // Streaming iterate messages
@@ -74,18 +85,20 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
     }
 
     /**
-     * Compute the message. This method will be called once for each message
-     * in a superstep.
+     * Compute vertex with a message. This method will be called once for each
+     * messages of a vertex in a superstep.
      * @return The value need to propagate along the edges, or null when
      * needn't.
      */
-    M computeMessage(WorkerContext context, Vertex vertex, M message);
+    M computeMessage(VertexComputationContext context,
+                     Vertex vertex,
+                     M message);
 
     /**
      * Subclass should override this method if want to send messages to
      * specified adjacent vertices, send to all adjacent vertices by default.
      */
-    default void sendMessages(WorkerContext context,
+    default void sendMessages(VertexComputationContext context,
                               Vertex vertex,
                               Iterator<M> results) {
         context.sendMessagesToAllEdges(vertex, results);
