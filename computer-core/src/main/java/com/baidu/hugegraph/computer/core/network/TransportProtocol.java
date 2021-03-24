@@ -30,7 +30,6 @@ public class TransportProtocol {
 
     private final TransportConf conf;
 
-
     public TransportProtocol(TransportConf conf) {
         this.conf = conf;
     }
@@ -73,8 +72,7 @@ public class TransportProtocol {
      * @return channel handlers
      */
     public ChannelHandler[] serverChannelHandlers(MessageHandler handler) {
-        return new ChannelHandler[] {
-        };
+        return new ChannelHandler[] {};
     }
 
     public void initializeServerPipeline(SocketChannel channel,
@@ -123,8 +121,7 @@ public class TransportProtocol {
      * @return channel handlers
      */
     public ChannelHandler[] clientChannelHandlers() {
-        return new ChannelHandler[] {
-        };
+        return new ChannelHandler[] {};
     }
 
     public void initializeClientPipeline(SocketChannel channel) {

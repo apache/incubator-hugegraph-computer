@@ -58,15 +58,16 @@ public class NettyTransportServerTest {
 
     @After
     public void tearDown() {
-        if (transport4Server != null) {
-            transport4Server.stop();
+        if (this.transport4Server != null) {
+            this.transport4Server.stop();
         }
     }
 
     @Test
     public void testConstructor() {
-        transport4Server = NettyTransportServer.newNettyTransportServer();
-        Assert.assertNotEquals(null, transport4Server.bufAllocator());
+        this.transport4Server = NettyTransportServer.newNettyTransportServer();
+        Assert.assertNotEquals(null,
+                               this.transport4Server.bufAllocator());
 
     }
 

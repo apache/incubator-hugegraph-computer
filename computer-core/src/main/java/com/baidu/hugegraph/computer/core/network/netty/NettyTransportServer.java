@@ -57,15 +57,15 @@ public class NettyTransportServer implements Transport4Server, Closeable {
             SERVER_THREAD_GROUP_NAME + "-worker";
     private static final int BOSS_THREADS = 1;
 
-    private final ByteBufAllocator byteBufAllocator;
+    private final ByteBufAllocator bufAllocator;
 
     private TransportConf conf;
     private ServerBootstrap bootstrap;
     private ChannelFuture bindFuture;
     private InetSocketAddress bindSocketAddress;
 
-    private NettyTransportServer(ByteBufAllocator byteBufAllocator) {
-        this.byteBufAllocator = byteBufAllocator;
+    private NettyTransportServer(ByteBufAllocator bufAllocator) {
+        this.bufAllocator = bufAllocator;
     }
 
     public static NettyTransportServer newNettyTransportServer() {
@@ -74,8 +74,8 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     }
 
     public static NettyTransportServer newNettyTransportServer(
-                                       ByteBufAllocator byteBufAllocator) {
-        return NettyTransportServer.newNettyTransportServer(byteBufAllocator);
+                                       ByteBufAllocator bufAllocator) {
+        return NettyTransportServer.newNettyTransportServer(bufAllocator);
     }
 
     @Override
@@ -86,7 +86,8 @@ public class NettyTransportServer implements Transport4Server, Closeable {
         this.init(config);
 
         // Child channel pipeline for accepted connections
-        this.bootstrap.childHandler(new ServerChannelInitializer(this.conf,
+        TransportProtocol protocol = new TransportProtocol(this.conf);
+        this.bootstrap.childHandler(new ServerChannelInitializer(protocol,
                                                                  handler));
 
         // Start Server
@@ -95,7 +96,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
                                  this.bindFuture.channel().localAddress();
 
         LOG.info("Transport server started on SocketAddress {}.",
-                 bindSocketAddress);
+                 this.bindSocketAddress);
         return this.bindSocketAddress().getPort();
     }
 
@@ -119,9 +120,11 @@ public class NettyTransportServer implements Transport4Server, Closeable {
                                     this.conf.serverPort());
 
         // The port can still be bound when the socket is in the TIME_WAIT state
-        this.bootstrap.option(ChannelOption.SO_REUSEADDR, true);
-        this.bootstrap.option(ChannelOption.ALLOCATOR, byteBufAllocator);
-        this.bootstrap.childOption(ChannelOption.ALLOCATOR, byteBufAllocator);
+        this.bootstrap.option(ChannelOption.SO_REUSEADDR,
+                              true);
+
+        this.bootstrap.option(ChannelOption.ALLOCATOR, this.bufAllocator);
+        this.bootstrap.childOption(ChannelOption.ALLOCATOR, this.bufAllocator);
         this.bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
         this.bootstrap.childOption(ChannelOption.SO_KEEPALIVE,
                                    this.conf.tcpKeepAlive());
@@ -143,7 +146,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     }
 
     public ByteBufAllocator bufAllocator() {
-        return this.byteBufAllocator;
+        return this.bufAllocator;
     }
 
     public TransportConf transportConf() {
@@ -159,7 +162,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     }
 
     public InetSocketAddress bindSocketAddress() {
-        E.checkArgumentNotNull(bindSocketAddress,
+        E.checkArgumentNotNull(this.bindSocketAddress,
                                "bindSocketAddress not initialized");
         return this.bindSocketAddress;
     }
@@ -193,19 +196,18 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     private static class ServerChannelInitializer
                    extends ChannelInitializer<SocketChannel> {
 
-        private final MessageHandler messageHandler;
+        private final MessageHandler handler;
         private final TransportProtocol protocol;
 
-        public ServerChannelInitializer(TransportConf conf,
-                                        MessageHandler messageHandler) {
-            this.messageHandler = messageHandler;
-            this.protocol = new TransportProtocol(conf);
+        public ServerChannelInitializer(TransportProtocol protocol,
+                                        MessageHandler handler) {
+            this.handler = handler;
+            this.protocol = protocol;
         }
 
         @Override
         public void initChannel(SocketChannel channel) {
-            this.protocol.initializeServerPipeline(channel,
-                                                   this.messageHandler);
+            this.protocol.initializeServerPipeline(channel, this.handler);
         }
     }
 }
