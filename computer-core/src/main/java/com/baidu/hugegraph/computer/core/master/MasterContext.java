@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.master;
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Master;
 
 /**
- * The MasterContext is the interface from the algorithm's master computation.
+ * The MasterContext is the interface for the algorithm's master computation.
  * Other master's internal services are defined in MasterService.
  */
 public interface MasterContext extends Aggregator4Master {

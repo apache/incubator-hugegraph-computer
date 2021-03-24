@@ -30,7 +30,8 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 /**
- * This class is the interface used by computation.
+ * The WorkerContext is the interface for the algorithm's vertex computation.
+ * Other worker's internal services are defined in WorkerService.
  */
 public interface WorkerContext {
 
@@ -121,6 +122,5 @@ public interface WorkerContext {
     /**
      * @return The message combiner.
      */
-
     <V extends Value> Combiner<V> combiner();
 }
