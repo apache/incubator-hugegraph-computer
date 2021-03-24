@@ -17,29 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.master;
+package com.baidu.hugegraph.computer.core.worker;
+
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Worker;
+import com.baidu.hugegraph.computer.core.config.Config;
 
 /**
- * The default master-computation, which can be used if there is no
- * algorithm-specific master-computation.
+ * Algorithm's computation context. Used by algorithm's computation except
+ * compute a vertex. Algorithm's computation can get(or set) aggregator and
+ * config from this context.
  */
-public class DefaultMasterComputation implements MasterComputation {
-
-    @Override
-    public void init(MasterContext context) {
-        // pass
-    }
+public interface WorkerContext extends ComputationContext,
+                                       Aggregator4Worker {
 
     /**
-     * Compute until max superstep.
+     * Get config. The config remains immutable during the whole computation
+     * process.
      */
-    @Override
-    public boolean compute(MasterContext context) {
-        return true;
-    }
-
-    @Override
-    public void close() {
-        // pass
-    }
+    Config config();
 }

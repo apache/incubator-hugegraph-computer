@@ -39,15 +39,15 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
      * Set vertex's value and return initial message. The message will be
      * used to compute the vertex as parameter Iterator<M> messages.
      * The method is invoked at superstep0,
-     * {@link #compute0(VertexComputationContext, Vertex)}.
+     * {@link #compute0(ComputationContext, Vertex)}.
      */
-    M initialValue(VertexComputationContext context, Vertex vertex);
+    M initialValue(ComputationContext context, Vertex vertex);
 
     /**
      * Compute with initial message. Be invoked at superstep0 for every vertex.
      */
     @Override
-    default void compute0(VertexComputationContext context, Vertex vertex) {
+    default void compute0(ComputationContext context, Vertex vertex) {
         M result = this.initialValue(context, vertex);
         this.compute(context, vertex, Arrays.asList(result).iterator());
     }
@@ -61,7 +61,7 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
      * Inactive the vertex after compute by default.
      */
     @Override
-    default void compute(VertexComputationContext context,
+    default void compute(ComputationContext context,
                          Vertex vertex,
                          Iterator<M> messages) {
         Iterator<M> results = this.computeMessages(context, vertex, messages);
@@ -71,10 +71,9 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
 
     /**
      * Compute vertex with all the messages received and get the results as
-     * iterator. Be invoked by
-     * {@link #compute(VertexComputationContext, Vertex, Iterator)}.
+     * iterator. Be invoked for every vertex.
      */
-    default Iterator<M> computeMessages(VertexComputationContext context,
+    default Iterator<M> computeMessages(ComputationContext context,
                                         Vertex vertex,
                                         Iterator<M> messages) {
         // Streaming iterate messages
@@ -90,7 +89,7 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
      * @return The value need to propagate along the edges, or null when
      * needn't.
      */
-    M computeMessage(VertexComputationContext context,
+    M computeMessage(ComputationContext context,
                      Vertex vertex,
                      M message);
 
@@ -98,7 +97,7 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
      * Subclass should override this method if want to send messages to
      * specified adjacent vertices, send to all adjacent vertices by default.
      */
-    default void sendMessages(VertexComputationContext context,
+    default void sendMessages(ComputationContext context,
                               Vertex vertex,
                               Iterator<M> results) {
         context.sendMessagesToAllEdges(vertex, results);

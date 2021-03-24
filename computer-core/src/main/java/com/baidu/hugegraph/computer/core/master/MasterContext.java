@@ -22,20 +22,23 @@ package com.baidu.hugegraph.computer.core.master;
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Master;
 
 /**
- * The MasterContext is the interface for the algorithm's master computation.
- * Other master's internal services are defined in MasterService.
+ * The MasterContext is the interface for the algorithm's master-computation.
+ * Algorithm's master-computation can get aggregators and get graph
+ * information such as total vertex count and total edge count.
  */
 public interface MasterContext extends Aggregator4Master {
 
     /**
      * @return the total vertex count of the graph. The value may vary from
-     * superstep to superstep.
+     * superstep to superstep, because the algorithm may add or delete vertices
+     * during superstep.
      */
     long totalVertexCount();
 
     /**
      * @return the total edge count of the graph. The value may vary from
-     * superstep to superstep.
+     * superstep to superstep, because the algorithm may add or delete edges
+     * during superstep.
      */
     long totalEdgeCount();
 
@@ -45,12 +48,12 @@ public interface MasterContext extends Aggregator4Master {
     long finishedVertexCount();
 
     /**
-     * @return the message count at previous superstep.
+     * @return the message count at current superstep.
      */
     long messageCount();
 
     /**
-     * @return the message received in bytes at previous superstep.
+     * @return the message received in bytes at current superstep.
      */
     long messageBytes();
 

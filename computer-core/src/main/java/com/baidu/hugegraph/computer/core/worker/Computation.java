@@ -24,51 +24,66 @@ import java.util.Iterator;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
+/**
+ * Computation is used to compute vertex. It is the most important algorithm
+ * interface. #compute() is invoked for every active vertex in a superstep
+ * The algorithm can set the vertex inactive. If a vertex is inactive no
+ * message received, the vertex will not be computed. If a vertex is inactive
+ * and a message is received, the framework will reactive the vertex and the
+ * vertex will be computed. The algorithm can inactive a vertex many times.
+ * @param <M>
+ */
 public interface Computation<M extends Value> {
 
     /**
-     * Called at superstep0, with no messages. It should set vertex's initial
-     * value in this method.
+     * Compute a vertex without message at superstep0. Every is active in
+     * superstep0. It should set vertex's initial value in this method.
      */
-    void compute0(VertexComputationContext context, Vertex vertex);
+    void compute0(ComputationContext context, Vertex vertex);
 
     /**
-     * Called at all supersteps(except superstep0) with messages.
+     * Compute a active vertex. If the vertex received messages, pass
+     * messages by an iterator. If the vertex does not received a message, an
+     * empty Iterator will be passed.
+     * Be invoked at all supersteps(except superstep0).
      */
-    void compute(VertexComputationContext context,
+    void compute(ComputationContext context,
                  Vertex vertex,
                  Iterator<M> messages);
 
     /**
-     * Used to init the resources the computation needed, like create
-     * a connection to other database, get the config the algorithm used. This
-     * method is called only one time before all superstep start.
+     * This method is invoked only one time before all superstep start.
+     * Subclass can override this method if want to init the resources the
+     * computation needed, like create a connection to other database, get
+     * the config the algorithm used.
      */
-    default void init(ComputationContext context) {
+    default void init(WorkerContext context) {
         // pass
     }
 
     /**
-     * Close the resources used in the computation. This method is called
-     * only one time after all superstep iteration.
+     * This method is invoked only one time after all superstep iteration.
+     * Subclass can override this method if want to close the resources used
+     * in the computation.
      */
-    default void close(ComputationContext context) {
+    default void close(WorkerContext context) {
         // pass
     }
 
     /**
-     * This method is called before every superstep. In this method,
-     * algorithm can get aggregators master aggregated at previous superstep.
+     * This method is invoked before every superstep. Subclass can override
+     * this method if want to get aggregators master aggregated at previous
+     * superstep.
      */
-    default void beforeSuperstep(ComputationContext context) {
+    default void beforeSuperstep(WorkerContext context) {
         // pass
     }
 
     /**
-     * This method is called after every superstep. In this method, algorithm
-     * can aggregate the value to master.
+     * This method is invoked after every superstep. Subclass can override
+     * this method if want to aggregate the aggregators to master.
      */
-    default void afterSuperstep(ComputationContext context) {
+    default void afterSuperstep(WorkerContext context) {
         // pass
     }
 }

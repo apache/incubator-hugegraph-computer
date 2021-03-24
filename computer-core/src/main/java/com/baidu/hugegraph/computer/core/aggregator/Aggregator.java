@@ -64,12 +64,17 @@ public interface Aggregator<V extends Value> {
     }
 
     /**
-     * Used by worker to get current aggregated value.
+     * Used by worker or master to get current aggregated value. The worker
+     * get aggregated value before a superstep. The master can get the
+     * aggregated value after a superstep.
      */
     V aggregatedValue();
 
     /**
-     * Used by worker to set current aggregated value directly.
+     * Used by worker or master to set current aggregated value directly. The
+     * worker set aggregated value and then sent to master for further
+     * aggregation. The master set aggregated value and then use by worker in
+     * next superstep.
      */
     void aggregatedValue(V value);
 }

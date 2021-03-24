@@ -20,36 +20,36 @@
 package com.baidu.hugegraph.computer.core.master;
 
 /**
- * Master computation runs on master. It can perform centralized computation
- * between supersteps. It will run every superstep before workers.
+ * Master-computation is computation that can determine whether to continue
+ * next superstep. It runs on master. It can perform centralized computation
+ * between supersteps. It runs after every superstep.
  *
- * The communication with the workers is performed via aggregators. The value
- * of aggregators are collected by the master before
- * {@link #compute(MasterContext)} ()} is called. This means aggregator
+ * The communication between the master and workers is performed via
+ * aggregators. The value of aggregators are collected by the master before
+ * {@link #compute(MasterContext)} ()} is invoked. This means aggregator
  * values used by the workers are consistent with aggregator values from the
- * master in the same superstep and aggregator used by the master are
- * consistent with aggregator values from the workers from the previous
- * superstep.
+ * master in the same superstep.
  */
 public interface MasterComputation {
 
     /**
      * Initialize the master computation. Register algorithms's aggregators in
-     * this method. Create resources used in compute.
+     * this method. Create resources used in compute. This method is invoked
+     * before all supersteps start.
      */
     void init(MasterContext context);
 
     /**
-     * This method is called at the end of a superstep. In this method, the
-     * algorithm can using aggregators to determine whether to continue the
-     * next execution or not.
+     * In this method, the algorithm can using aggregators to determine
+     * whether to continue the next execution or not. This method is invoked
+     * at the end of a superstep.
      * @return true if want to continue the next iteration.
      */
     boolean compute(MasterContext context);
 
     /**
      * Close the resource created in {@link #init(MasterContext)}. This
-     * method is executed after all iteration.
+     * method is executed after all supersteps.
      */
     void close();
 }
