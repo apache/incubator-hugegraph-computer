@@ -48,7 +48,7 @@ public interface Transport4Client {
      * This method is called zero or many times in iteration.
      * @throws IOException if failed, the job will fail.
      */
-    void send(byte messageType, int partition, ByteBuf buffer)
+    void send(MessageType messageType, int partition, ByteBuf buffer)
               throws IOException;
 
     /**

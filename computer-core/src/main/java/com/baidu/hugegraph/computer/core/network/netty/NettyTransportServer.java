@@ -42,7 +42,6 @@ import com.baidu.hugegraph.util.Log;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -52,116 +51,118 @@ public class NettyTransportServer implements Transport4Server, Closeable {
 
     private static final Logger LOG = Log.logger(NettyTransportServer.class);
 
-    private static final String BOSS_THREAD_PREFIX = SERVER_THREAD_GROUP_NAME + "-boss";
-    private static final String WORK_THREAD_PREFIX = SERVER_THREAD_GROUP_NAME + "-work";
+    private static final String BOSS_THREAD_GROUP_NAME =
+            SERVER_THREAD_GROUP_NAME + "-boss";
+    private static final String WORKER_THREAD_GROUP_NAME =
+            SERVER_THREAD_GROUP_NAME + "-worker";
     private static final int BOSS_THREADS = 1;
-
-    private final TransportConf conf;
-
-    private final TransportProtocol protocol;
 
     private final ByteBufAllocator byteBufAllocator;
 
+    private TransportConf conf;
     private ServerBootstrap bootstrap;
-
     private ChannelFuture bindFuture;
+    private InetSocketAddress bindSocketAddress;
 
-    private InetSocketAddress serverSocketAddress;
-
-    public NettyTransportServer(Config config) {
-        this(config, ByteBufAllocatorFactory.createByteBufAllocator());
-    }
-
-    public NettyTransportServer(Config config, ByteBufAllocator byteBufAllocator) {
-        this.conf = new TransportConf(config);
-        this.protocol = new TransportProtocol(conf);
+    private NettyTransportServer(ByteBufAllocator byteBufAllocator) {
         this.byteBufAllocator = byteBufAllocator;
-        init();
     }
 
-    private void init(){
-        bootstrap = new ServerBootstrap();
+    public static NettyTransportServer newNettyTransportServer() {
+        return new NettyTransportServer(
+                ByteBufAllocatorFactory.createByteBufAllocator());
+    }
 
-        IOMode ioMode = conf.ioMode();
-
-        // Create Netty EventLoopGroup
-        EventLoopGroup bossGroup = createEventLoop(ioMode, BOSS_THREADS,
-                                                   BOSS_THREAD_PREFIX);
-        EventLoopGroup workerGroup = createEventLoop(ioMode, conf.serverThreads(),
-                                                     WORK_THREAD_PREFIX);
-        bootstrap.group(bossGroup, workerGroup);
-        bootstrap.channel(serverChannelClass(ioMode));
-
-        // Server bind address
-        bootstrap.localAddress(conf.serverAddress(), conf.serverPort());
-
-        // The port can still be bound when the socket is in the TIME_WAIT state
-        bootstrap.option(ChannelOption.SO_REUSEADDR, true);
-        bootstrap.option(ChannelOption.ALLOCATOR, byteBufAllocator);
-        bootstrap.childOption(ChannelOption.ALLOCATOR, byteBufAllocator);
-        bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
-        bootstrap.childOption(ChannelOption.SO_KEEPALIVE, conf.tcpKeepAlive());
-
-        if (conf.backLog() > 0) {
-            bootstrap.option(ChannelOption.SO_BACKLOG, conf.backLog());
-        }
-
-        if (conf.receiveBuf() > 0) {
-            bootstrap.childOption(ChannelOption.SO_RCVBUF, conf.receiveBuf());
-        }
-
-        if (conf.sendBuf() > 0) {
-            bootstrap.childOption(ChannelOption.SO_SNDBUF, conf.sendBuf());
-        }
+    public static NettyTransportServer newNettyTransportServer(
+                                       ByteBufAllocator byteBufAllocator) {
+        return NettyTransportServer.newNettyTransportServer(byteBufAllocator);
     }
 
     @Override
-    public int listen(MessageHandler handler) {
-        E.checkState(bindFuture == null,
-                     "Netty server has already been listened.");
+    public int listen(Config config, MessageHandler handler) {
+        E.checkArgument(this.bindFuture == null,
+                        "Netty server has already been listened.");
+
+        this.init(config);
 
         // Child channel pipeline for accepted connections
-        bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel ch) {
-                LOG.debug("New connection accepted for remote address {}.",
-                          ch.remoteAddress());
-                ChannelHandler[] channelHandlers =
-                        protocol.serverChannelHandlers(handler);
-                protocol.initializePipeline(ch, channelHandlers);
-            }
-        });
+        this.bootstrap.childHandler(new ServerChannelInitializer(this.conf,
+                                                                 handler));
 
         // Start Server
-        bindFuture = bootstrap.bind().syncUninterruptibly();
+        this.bindFuture = this.bootstrap.bind().syncUninterruptibly();
+        this.bindSocketAddress = (InetSocketAddress)
+                                 this.bindFuture.channel().localAddress();
 
-        serverSocketAddress = (InetSocketAddress) bindFuture.channel().localAddress();
-
-        return this.port();
+        LOG.info("Transport server started on SocketAddress {}.",
+                 bindSocketAddress);
+        return this.bindSocketAddress().getPort();
     }
 
-    public TransportConf transportConf(){
+    private void init(Config config) {
+        this.conf = new TransportConf(config);
+        this.bootstrap = new ServerBootstrap();
+
+        IOMode ioMode = this.conf.ioMode();
+
+        // Create Netty EventLoopGroup
+        EventLoopGroup bossGroup = createEventLoop(ioMode, BOSS_THREADS,
+                                                   BOSS_THREAD_GROUP_NAME);
+        EventLoopGroup workerGroup = createEventLoop(ioMode,
+                                                     this.conf.serverThreads(),
+                                                     WORKER_THREAD_GROUP_NAME);
+        this.bootstrap.group(bossGroup, workerGroup);
+        this.bootstrap.channel(serverChannelClass(ioMode));
+
+        // Server bind address
+        this.bootstrap.localAddress(this.conf.serverAddress(),
+                                    this.conf.serverPort());
+
+        // The port can still be bound when the socket is in the TIME_WAIT state
+        this.bootstrap.option(ChannelOption.SO_REUSEADDR, true);
+        this.bootstrap.option(ChannelOption.ALLOCATOR, byteBufAllocator);
+        this.bootstrap.childOption(ChannelOption.ALLOCATOR, byteBufAllocator);
+        this.bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
+        this.bootstrap.childOption(ChannelOption.SO_KEEPALIVE,
+                                   this.conf.tcpKeepAlive());
+
+        if (this.conf.backLog() > 0) {
+            this.bootstrap.option(ChannelOption.SO_BACKLOG,
+                                  this.conf.backLog());
+        }
+
+        if (this.conf.receiveBuf() > 0) {
+            this.bootstrap.childOption(ChannelOption.SO_RCVBUF,
+                                       this.conf.receiveBuf());
+        }
+
+        if (this.conf.sendBuf() > 0) {
+            this.bootstrap.childOption(ChannelOption.SO_SNDBUF,
+                                       this.conf.sendBuf());
+        }
+    }
+
+    public ByteBufAllocator bufAllocator() {
+        return this.byteBufAllocator;
+    }
+
+    public TransportConf transportConf() {
         return this.conf;
     }
 
     public int port() {
-        return this.serverSocketAddress().getPort();
+        return this.bindSocketAddress().getPort();
     }
 
-    public String hostName() {
-        return this.serverSocketAddress().getHostString();
+    public String host() {
+        return this.bindSocketAddress().getHostString();
     }
 
-    public InetSocketAddress serverSocketAddress() {
-        E.checkArgumentNotNull(serverSocketAddress,
-                               "serverSocketAddress not initialized");
-        return this.serverSocketAddress;
+    public InetSocketAddress bindSocketAddress() {
+        E.checkArgumentNotNull(bindSocketAddress,
+                               "bindSocketAddress not initialized");
+        return this.bindSocketAddress;
     }
-
-    public TransportProtocol transportProtocol(){
-        return this.protocol;
-    }
-
 
     @Override
     public void stop() {
@@ -174,26 +175,37 @@ public class NettyTransportServer implements Transport4Server, Closeable {
 
     @Override
     public void close() throws IOException {
-        if (bindFuture != null) {
-            bindFuture.channel().close()
-                      .awaitUninterruptibly(10, TimeUnit.SECONDS);
-            bindFuture = null;
+        if (this.bindFuture != null) {
+            this.bindFuture.channel().close()
+                           .awaitUninterruptibly(10, TimeUnit.SECONDS);
+            this.bindFuture = null;
         }
-        if (bootstrap != null && bootstrap.config().group() != null) {
-            bootstrap.config().group().shutdownGracefully();
+        if (this.bootstrap != null && this.bootstrap.config().group() != null) {
+            this.bootstrap.config().group().shutdownGracefully();
         }
-        if (bootstrap != null && bootstrap.config().childGroup() != null) {
-            bootstrap.config().childGroup().shutdownGracefully();
+        if (this.bootstrap != null &&
+            this.bootstrap.config().childGroup() != null) {
+            this.bootstrap.config().childGroup().shutdownGracefully();
         }
-        bootstrap = null;
+        this.bootstrap = null;
     }
 
-    public static NettyTransportServer createNettyTransportServer(Config config) {
-        return new NettyTransportServer(config);
-    }
+    private static class ServerChannelInitializer
+                   extends ChannelInitializer<SocketChannel> {
 
-    public static NettyTransportServer createNettyTransportServer(Config config,
-                                                                  ByteBufAllocator byteBufAllocator) {
-        return new NettyTransportServer(config, byteBufAllocator);
+        private final MessageHandler messageHandler;
+        private final TransportProtocol protocol;
+
+        public ServerChannelInitializer(TransportConf conf,
+                                        MessageHandler messageHandler) {
+            this.messageHandler = messageHandler;
+            this.protocol = new TransportProtocol(conf);
+        }
+
+        @Override
+        public void initChannel(SocketChannel channel) {
+            this.protocol.initializeServerPipeline(channel,
+                                                   this.messageHandler);
+        }
     }
 }

@@ -29,5 +29,5 @@ public interface MessageHandler {
      * caller if the receiving list reached threshold and the sorting list is
      * sorting in process.
      */
-    void handle(byte messageType, int partition, ByteBuffer buffer);
+    void handle(MessageType messageType, int partition, ByteBuffer buffer);
 }

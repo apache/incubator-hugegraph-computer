@@ -82,5 +82,4 @@ public class NettyEventLoopFactory {
                 throw new IllegalArgException("Unknown io mode: " + mode);
         }
     }
-
 }

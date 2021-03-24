@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
+import com.baidu.hugegraph.computer.core.config.Config;
+
 /**
  * This is used for worker that receives data.
  */
@@ -27,7 +29,7 @@ public interface Transport4Server {
     /**
      * Startup server, return the port listened.
      */
-    int listen(MessageHandler handler);
+    int listen(Config config, MessageHandler handler);
 
     /**
      * Stop the server

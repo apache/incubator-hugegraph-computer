@@ -23,6 +23,7 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
 
 public class ByteBufAllocatorFactory {
+
     public static ByteBufAllocator createByteBufAllocator() {
         // TODO Pooled allocators
         return PooledByteBufAllocator.DEFAULT;

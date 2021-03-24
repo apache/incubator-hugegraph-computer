@@ -21,9 +21,21 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.nio.ByteBuffer;
 
-public class MockMessageHandler implements MessageHandler{
-    @Override
-    public void handle(byte messageType, int partition, ByteBuffer buffer) {
+import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServerTest;
+import com.baidu.hugegraph.util.Log;
+
+public class MockMessageHandler implements MessageHandler {
+
+    private static final Logger LOG =
+            Log.logger(NettyTransportServerTest.class);
+
+    @Override
+    public void handle(MessageType messageType, int partition,
+                       ByteBuffer buffer) {
+        LOG.info("messageType:{}, partition:{}, buffer limit:{}",
+                 messageType.name(),
+                 partition, buffer.limit());
     }
 }

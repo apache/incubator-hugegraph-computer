@@ -23,6 +23,9 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 
+/**
+ * Defines the server and client channel handlers, i.e. the protocol.
+ */
 public class TransportProtocol {
 
     private final TransportConf conf;
@@ -30,12 +33,6 @@ public class TransportProtocol {
 
     public TransportProtocol(TransportConf conf) {
         this.conf = conf;
-    }
-
-    public void initializePipeline(SocketChannel channel,
-                                   ChannelHandler[] channelHandlers) {
-        ChannelPipeline pipeline = channel.pipeline();
-        pipeline.addLast(channelHandlers);
     }
 
     /**
@@ -80,6 +77,14 @@ public class TransportProtocol {
         };
     }
 
+    public void initializeServerPipeline(SocketChannel channel,
+                                         MessageHandler handler) {
+        ChannelPipeline pipeline = channel.pipeline();
+        ChannelHandler[] channelHandlers = this.serverChannelHandlers(handler);
+        pipeline.addLast(channelHandlers);
+    }
+
+
     /**
      * Returns the client channel handlers.
      *
@@ -87,12 +92,12 @@ public class TransportProtocol {
      *                                         +----------------------+
      *                                         | request client       |
      *                                         +-----------+----------+
-     *                                                     | (1) send message         
+     *                                                     | (1) send message
      * +-------------------------------------------------------------------+
      * |                        CLIENT CHANNEL PIPELINE    |               |
      * |                                                  \|/              |
      * |    +---------------------+            +----------------------+    |
-     * |    | ResponseHandler     |            | MessageDncoder       |    |
+     * |    | ResponseHandler     |            | MessageDecoder       |    |
      * |    +----------+----------+            +-----------+----------+    |
      * |              /|\                                 \|/              |
      * |               |                                   |               |
@@ -120,5 +125,11 @@ public class TransportProtocol {
     public ChannelHandler[] clientChannelHandlers() {
         return new ChannelHandler[] {
         };
+    }
+
+    public void initializeClientPipeline(SocketChannel channel) {
+        ChannelPipeline pipeline = channel.pipeline();
+        ChannelHandler[] channelHandlers = this.clientChannelHandlers();
+        pipeline.addLast(channelHandlers);
     }
 }

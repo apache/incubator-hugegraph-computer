@@ -33,9 +33,10 @@ import io.netty.channel.epoll.Epoll;
 
 public class TransportConf {
 
-    public static final String SERVER_THREAD_GROUP_NAME = "hugegraph-netty-server";
-
-    public static final String CLIENT_THREAD_GROUP_NAME = "hugegraph-netty-client";
+    public static final String SERVER_THREAD_GROUP_NAME =
+            "hugegraph-netty-server";
+    public static final String CLIENT_THREAD_GROUP_NAME =
+            "hugegraph-netty-client";
 
     private final Config config;
 
@@ -43,19 +44,20 @@ public class TransportConf {
         this.config = config;
     }
 
-    public InetAddress serverAddress(){
+    public InetAddress serverAddress() {
         String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
         try {
             return InetAddress.getByName(host);
         } catch (UnknownHostException e) {
-            throw new ComputeException("Failed to parse address from '%s'", e, host);
+            throw new ComputeException("Failed to parse address from '%s'", e,
+                                       host);
         }
     }
 
     /**
      * A port number of zero will let the system pick up an ephemeral port.
      */
-    public int serverPort(){
+    public int serverPort() {
         return this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
     }
 
@@ -115,7 +117,8 @@ public class TransportConf {
     }
 
     public long clientConnectionTimeoutMs() {
-        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT);
+        return this.config
+                .get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT);
     }
 
     /**
@@ -125,21 +128,21 @@ public class TransportConf {
      * it will block the client from calling
      * {@link com.baidu.hugegraph.computer.core.network.Transport4Client#send}
      */
-    public int maxPendingRequests(){
+    public int maxPendingRequests() {
         return this.config.get(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS);
     }
 
     /**
      * The minimum number of client unreceived ack.
      */
-    public int minPendingRequests(){
+    public int minPendingRequests() {
         return this.config.get(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS);
     }
 
     /**
      * The minimum interval(in ms) of server reply ack.
      */
-    public long minAckInterval(){
+    public long minAckInterval() {
         return this.config.get(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL);
     }
 
@@ -151,7 +154,7 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_TIMEOUT);
     }
 
-    public boolean tcpKeepAlive(){
+    public boolean tcpKeepAlive() {
         return this.config.get(ComputerOptions.TRANSPORT_TCP_KEEP_ALIVE);
     }
 }

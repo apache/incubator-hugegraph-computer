@@ -37,7 +37,8 @@ import com.baidu.hugegraph.util.Log;
 
 public class NettyTransportServerTest {
 
-    private static final Logger LOG = Log.logger(NettyTransportServerTest.class);
+    private static final Logger LOG =
+            Log.logger(NettyTransportServerTest.class);
 
     private static Config config;
     private static MockMessageHandler messageHandler;
@@ -46,7 +47,10 @@ public class NettyTransportServerTest {
     @Before
     public void setup() {
         UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1"
+                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+                ComputerOptions.TRANSPORT_SERVER_PORT, "0",
+                ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
         config = ComputerContext.instance().config();
         messageHandler = new MockMessageHandler();
@@ -54,34 +58,38 @@ public class NettyTransportServerTest {
 
     @After
     public void tearDown() {
-        if(transport4Server != null) {
+        if (transport4Server != null) {
             transport4Server.stop();
         }
     }
 
     @Test
     public void testConstructor() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
-        );
-        config = ComputerContext.instance().config();
-        transport4Server = NettyTransportServer.createNettyTransportServer(config);
-        TransportConf transportConf = transport4Server.transportConf();
-        Assert.assertEquals(IOMode.NIO, transportConf.ioMode());
-        Assert.assertEquals("127.0.0.1", transportConf.serverAddress().getHostAddress());
+        transport4Server = NettyTransportServer.newNettyTransportServer();
+        Assert.assertNotEquals(null, transport4Server.bufAllocator());
+
     }
 
     @Test
-    public void testListen(){
-        try(NettyTransportServer transport4Server =
-                NettyTransportServer.createNettyTransportServer(config)) {
-            int port = transport4Server.listen(messageHandler);
+    public void testListen() {
+        try (NettyTransportServer nettyServer =
+                     NettyTransportServer.newNettyTransportServer()) {
+
+            int port = nettyServer.listen(config, messageHandler);
+
+            TransportConf conf = nettyServer.transportConf();
+            Assert.assertEquals(3, conf.serverThreads());
+            Assert.assertEquals(IOMode.NIO, conf.ioMode());
+            Assert.assertEquals("127.0.0.1",
+                                conf.serverAddress().getHostAddress());
+
+            Assert.assertNotEquals(0, nettyServer.port());
             Assert.assertNotEquals(0, port);
-            transport4Server.stop();
-        } catch (IOException e){
+            Assert.assertEquals("127.0.0.1", nettyServer.host());
+            Assert.assertEquals(port, nettyServer.port());
+            nettyServer.stop();
+        } catch (IOException e) {
             LOG.error("IOException should not have been thrown.", e);
         }
     }
-
 }

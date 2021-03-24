@@ -21,15 +21,22 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.util.concurrent.ThreadFactory;
 
+import io.netty.channel.Channel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 public class TransportUtil {
+
+    public static final int NUMBER_CPU_CORES =
+            Runtime.getRuntime().availableProcessors();
 
     public static ThreadFactory createNamedThreadFactory(String prefix) {
         return new DefaultThreadFactory(prefix, true);
     }
 
-    public static int getNumberCPUCores() {
-        return Runtime.getRuntime().availableProcessors();
+    public static String getRemoteAddress(Channel channel) {
+        if (channel != null && channel.remoteAddress() != null) {
+            return channel.remoteAddress().toString();
+        }
+        return "<unknown remote>";
     }
 }
