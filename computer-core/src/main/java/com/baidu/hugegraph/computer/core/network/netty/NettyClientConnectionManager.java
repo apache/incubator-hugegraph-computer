@@ -39,7 +39,6 @@ public class NettyClientConnectionManager implements ClientConnectionManager {
     private final ConcurrentHashMap<ConnectionID, Transport4Client>
                   clientPool = new ConcurrentHashMap<>();
 
-
     NettyClientConnectionManager(Config config) {
         this(config, ByteBufAllocatorFactory.createByteBufAllocator());
     }
