@@ -66,7 +66,7 @@ public enum MessageType implements SerialEnum {
         return SerialEnum.fromCode(MessageType.class, code);
     }
 
-    enum Category {
+    public enum Category {
         DATA,
         CONTROL
     }

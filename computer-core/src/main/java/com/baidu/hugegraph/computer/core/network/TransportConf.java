@@ -20,10 +20,8 @@
 package com.baidu.hugegraph.computer.core.network;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Locale;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -34,9 +32,9 @@ import io.netty.channel.epoll.Epoll;
 public class TransportConf {
 
     public static final String SERVER_THREAD_GROUP_NAME =
-            "hugegraph-netty-server";
+                               "hugegraph-netty-server";
     public static final String CLIENT_THREAD_GROUP_NAME =
-            "hugegraph-netty-client";
+                               "hugegraph-netty-client";
 
     private final Config config;
 
@@ -46,12 +44,7 @@ public class TransportConf {
 
     public InetAddress serverAddress() {
         String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
-        try {
-            return InetAddress.getByName(host);
-        } catch (UnknownHostException e) {
-            throw new ComputeException("Failed to parse address from '%s'", e,
-                                       host);
-        }
+        return TransportUtil.resolvedAddress(host);
     }
 
     /**
@@ -118,7 +111,7 @@ public class TransportConf {
 
     public long clientConnectionTimeoutMs() {
         return this.config
-                .get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT);
+                   .get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT);
     }
 
     /**

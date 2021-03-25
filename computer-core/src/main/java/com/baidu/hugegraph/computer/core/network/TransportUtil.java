@@ -19,15 +19,25 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.ThreadFactory;
+
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 public class TransportUtil {
 
+    private static final Logger LOG = Log.logger(TransportUtil.class);
+
     public static final int NUMBER_CPU_CORES =
-            Runtime.getRuntime().availableProcessors();
+                            Runtime.getRuntime().availableProcessors();
 
     public static ThreadFactory createNamedThreadFactory(String prefix) {
         return new DefaultThreadFactory(prefix, true);
@@ -38,5 +48,29 @@ public class TransportUtil {
             return channel.remoteAddress().toString();
         }
         return "<unknown remote>";
+    }
+
+    public static InetAddress resolvedAddress(String host) {
+        try {
+            return InetAddress.getByName(host);
+        } catch (
+                UnknownHostException e) {
+            throw new ComputeException("Failed to parse address from '%s'", e,
+                                       host);
+        }
+    }
+
+    public static InetSocketAddress resolvedAddress(String host, int port) {
+        long preResolveHost = System.nanoTime();
+        InetSocketAddress resolvedAddress = new InetSocketAddress(host, port);
+        long hostResolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000;
+
+        String resolvedMsg = resolvedAddress.isUnresolved() ? "failed" :
+                             "succeed";
+        if (hostResolveTimeMs > 2000) {
+            LOG.warn("DNS resolution {} for {} took {} ms",
+                     resolvedMsg, resolvedAddress, hostResolveTimeMs);
+        }
+        return resolvedAddress;
     }
 }

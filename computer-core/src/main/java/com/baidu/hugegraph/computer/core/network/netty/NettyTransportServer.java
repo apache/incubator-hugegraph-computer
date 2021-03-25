@@ -70,7 +70,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
 
     public static NettyTransportServer newNettyTransportServer() {
         return new NettyTransportServer(
-                ByteBufAllocatorFactory.createByteBufAllocator());
+               ByteBufAllocatorFactory.createByteBufAllocator());
     }
 
     public static NettyTransportServer newNettyTransportServer(
@@ -79,7 +79,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     }
 
     @Override
-    public int listen(Config config, MessageHandler handler) {
+    public synchronized int listen(Config config, MessageHandler handler) {
         E.checkArgument(this.bindFuture == null,
                         "Netty server has already been listened.");
 
@@ -143,10 +143,6 @@ public class NettyTransportServer implements Transport4Server, Closeable {
             this.bootstrap.childOption(ChannelOption.SO_SNDBUF,
                                        this.conf.sendBuf());
         }
-    }
-
-    public ByteBufAllocator bufAllocator() {
-        return this.bufAllocator;
     }
 
     public TransportConf transportConf() {

@@ -22,17 +22,18 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.io.IOException;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
 public class NettyTransportServerTest {
@@ -42,7 +43,7 @@ public class NettyTransportServerTest {
 
     private static Config config;
     private static MockMessageHandler messageHandler;
-    private NettyTransportServer transport4Server;
+    private NettyTransportServer server;
 
     @Before
     public void setup() {
@@ -54,43 +55,112 @@ public class NettyTransportServerTest {
         );
         config = ComputerContext.instance().config();
         messageHandler = new MockMessageHandler();
+        this.server = NettyTransportServer.newNettyTransportServer();
     }
 
     @After
-    public void tearDown() {
-        if (this.transport4Server != null) {
-            this.transport4Server.stop();
+    public void teardown() {
+        if (this.server != null) {
+            this.server.stop();
         }
     }
 
     @Test
-    public void testConstructor() {
-        this.transport4Server = NettyTransportServer.newNettyTransportServer();
-        Assert.assertNotEquals(null,
-                               this.transport4Server.bufAllocator());
-
-    }
-
-    @Test
-    public void testListen() {
+    public void testConstructor() throws IOException {
         try (NettyTransportServer nettyServer =
                      NettyTransportServer.newNettyTransportServer()) {
-
-            int port = nettyServer.listen(config, messageHandler);
-
-            TransportConf conf = nettyServer.transportConf();
-            Assert.assertEquals(3, conf.serverThreads());
-            Assert.assertEquals(IOMode.NIO, conf.ioMode());
-            Assert.assertEquals("127.0.0.1",
-                                conf.serverAddress().getHostAddress());
-
-            Assert.assertNotEquals(0, nettyServer.port());
-            Assert.assertNotEquals(0, port);
-            Assert.assertEquals("127.0.0.1", nettyServer.host());
-            Assert.assertEquals(port, nettyServer.port());
+            Assert.assertNotEquals(null, nettyServer);
             nettyServer.stop();
-        } catch (IOException e) {
-            LOG.error("IOException should not have been thrown.", e);
         }
+    }
+
+    @Test
+    public void testListenWithDefaultPort() {
+        int port = this.server.listen(config, messageHandler);
+
+        TransportConf conf = this.server.transportConf();
+        Assert.assertEquals(3, conf.serverThreads());
+        Assert.assertEquals(IOMode.NIO, conf.ioMode());
+        Assert.assertEquals("127.0.0.1",
+                            conf.serverAddress().getHostAddress());
+
+        Assert.assertNotEquals(0, this.server.port());
+        Assert.assertNotEquals(0, port);
+        Assert.assertEquals("127.0.0.1", this.server.host());
+        Assert.assertEquals(port, this.server.port());
+    }
+
+    @Test
+    public void testListenWithRandomPort() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+                ComputerOptions.TRANSPORT_SERVER_PORT, "9091",
+                ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+        );
+        config = ComputerContext.instance().config();
+
+        int port = this.server.listen(config, messageHandler);
+
+        TransportConf conf = this.server.transportConf();
+        Assert.assertEquals(3, conf.serverThreads());
+        Assert.assertEquals(IOMode.NIO, conf.ioMode());
+        Assert.assertEquals("127.0.0.1",
+                            conf.serverAddress().getHostAddress());
+
+        Assert.assertEquals(9091, this.server.port());
+        Assert.assertEquals(9091, port);
+        Assert.assertEquals("127.0.0.1", this.server.host());
+        Assert.assertEquals(port, this.server.port());
+    }
+
+    @Test
+    public void testListenWithInvalidHost() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "abcdefd",
+                ComputerOptions.TRANSPORT_SERVER_PORT, "0",
+                ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+        );
+        config = ComputerContext.instance().config();
+
+        Assert.assertThrows(ComputeException.class, () -> {
+            this.server.listen(config, messageHandler);
+        }, e -> {
+            Assert.assertTrue(e.getMessage().contains("Failed to parse"));
+        });
+    }
+
+    @Test
+    public void testListenWithInvalidPort() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+                ComputerOptions.TRANSPORT_SERVER_PORT, "67899",
+                ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+        );
+        config = ComputerContext.instance().config();
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            this.server.listen(config, messageHandler);
+        }, e -> {
+            Assert.assertTrue(e.getMessage().contains("port out of range"));
+        });
+
+    }
+
+    @Test
+    public void testListenTwice() {
+        int port = this.server.listen(config, messageHandler);
+        Assert.assertNotEquals(0, this.server.port());
+        Assert.assertNotEquals(0, port);
+        Assert.assertEquals("127.0.0.1", this.server.host());
+        Assert.assertEquals(port, this.server.port());
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            this.server.listen(config, messageHandler);
+        }, e -> {
+            Assert.assertTrue(e.getMessage().contains("already been listened"));
+        });
     }
 }

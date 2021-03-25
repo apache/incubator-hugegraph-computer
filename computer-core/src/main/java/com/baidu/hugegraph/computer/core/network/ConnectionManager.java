@@ -21,32 +21,35 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.io.IOException;
 
-import io.netty.buffer.ByteBuf;
+public interface ConnectionManager {
 
-/**
- * This is used for worker to send buffer to other worker. The whole process
- * contains several iteration. In one iteration {@link #startSession} is
- * called only once. {@link #send} is called zero or more times.
- * {@link #finishSession()} is called only once.
- */
-public interface Transport4Client {
+    void startup();
+
 
     /**
-     * This method is called before an iteration of sending buffers.
+     * Get a {@link Transport4Client} instance from the connection pool first.
+     * If {it is not found or not active, create a new one.
+     * @param connectionId {@link ConnectionID}
      */
-    void startSession();
+    Transport4Client getAndCreateTransport4Client(ConnectionID connectionId)
+                                                  throws IOException;
+
 
     /**
-     * Send the buffer to the server. Block the caller if busy.
-     * This method is called zero or many times in iteration.
-     * @throws IOException if failed, the job will fail.
+     * Get a {@link Transport4Client} instance from the connection pool first.
+     * If {it is not found or not active, create a new one.
+     * @param host the hostName or Ip
+     * @param port the port
      */
-    void send(MessageType messageType, int partition, ByteBuf buffer)
-              throws IOException;
+    Transport4Client getAndCreateTransport4Client(String host, int port)
+                                                  throws IOException;
+
 
     /**
-     * This method is called after an iteration. It will block the caller to
-     * make sure the buffers sent be received by target workers.
+     * Creates a {@link Transport4Server} not on listened status
      */
-    void finishSession() throws IOException;
+    Transport4Server createServer();
+
+
+    void shutdown() throws IOException;
 }
