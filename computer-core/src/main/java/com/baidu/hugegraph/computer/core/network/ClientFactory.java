@@ -19,13 +19,17 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.io.IOException;
+import java.io.Closeable;
 
-public interface ConnectionManager {
+public interface ClientFactory extends Closeable {
 
-    void startup();
+    void init();
 
-    void shutdown() throws IOException;
 
-    void removeClient(ConnectionID connectionID);
+    /**
+     * Create a Transport4Client
+     * @param connectionID ConnectionID
+     * @return Transport4Client
+     */
+    Transport4Client createClient(ConnectionID connectionID);
 }

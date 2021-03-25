@@ -17,18 +17,27 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.connection;
 
 import java.io.IOException;
 
-public interface ClientConnectionManager extends ConnectionManager {
+import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.Transport4Client;
+
+public interface ClientManager {
+
+    /**
+     * startup the clientManager
+     */
+    void startup();
+
 
     /**
      * Get a {@link Transport4Client} instance from the connection pool first.
      * If {it is not found or not active, create a new one.
      * @param connectionId {@link ConnectionID}
      */
-    Transport4Client getAndCreateTransport4Client(ConnectionID connectionId)
+    Transport4Client getOrCreateTransport4Client(ConnectionID connectionId)
                                                   throws IOException;
 
 
@@ -38,6 +47,18 @@ public interface ClientConnectionManager extends ConnectionManager {
      * @param host the hostName or Ip
      * @param port the port
      */
-    Transport4Client getAndCreateTransport4Client(String host, int port)
+    Transport4Client getOrCreateTransport4Client(String host, int port)
                                                   throws IOException;
+
+    /**
+     * remove a client from the connection pool
+     */
+    void removeClient(ConnectionID connectionID);
+
+
+    /**
+     * shutdown the clientManager
+     * @throws IOException
+     */
+    void shutdown() throws IOException;
 }

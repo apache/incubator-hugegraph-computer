@@ -24,14 +24,13 @@ import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFact
 import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.createEventLoop;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
-import com.baidu.hugegraph.computer.core.network.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProtocol;
@@ -47,28 +46,26 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 
-public class TransportClientFactory implements Closeable {
+public class NettyClientFactory implements ClientFactory {
 
-    private static final Logger LOG = Log.logger(TransportClientFactory.class);
+    private static final Logger LOG = Log.logger(NettyClientFactory.class);
 
     private final TransportConf conf;
     private final ByteBufAllocator bufAllocator;
     private final TransportProtocol protocol;
-    private final ConnectionManager connectionManager;
     private EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
 
 
-    TransportClientFactory(TransportConf conf, ByteBufAllocator bufAllocator,
-                           TransportProtocol protocol,
-                           ConnectionManager connectionManager) {
+    public NettyClientFactory(TransportConf conf, ByteBufAllocator bufAllocator,
+                              TransportProtocol protocol) {
         this.conf = conf;
         this.bufAllocator = bufAllocator;
         this.protocol = protocol;
-        this.connectionManager = connectionManager;
     }
 
-    protected synchronized void init() {
+    @Override
+    public synchronized void init() {
         E.checkArgument(this.bootstrap == null,
                         "TransportClientFactory has already been" +
                         " initialization.");
@@ -96,7 +93,7 @@ public class TransportClientFactory implements Closeable {
         this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel channel) {
-                TransportClientFactory.this.protocol
+                NettyClientFactory.this.protocol
                         .initializeClientPipeline(channel);
             }
         });
@@ -105,16 +102,17 @@ public class TransportClientFactory implements Closeable {
     /**
      * Create a new {@link Transport4Client} to the remote address.
      */
+    @Override
     public Transport4Client createClient(ConnectionID connectionID) {
         InetSocketAddress address = connectionID.socketAddress();
         LOG.debug("Creating new client connection to {}", connectionID);
 
         int connectTimeoutMs =
                 Math.toIntExact(this.conf.clientConnectionTimeoutMs());
-        Channel channel = this.doConnection(address, connectTimeoutMs);
+        Channel channel = this.doConnect(address, connectTimeoutMs);
         NettyTransportClient transportClient = new NettyTransportClient(
-                channel, connectionID,
-                this, connectTimeoutMs);
+                                               channel, connectionID,
+                                    this, connectTimeoutMs);
         LOG.debug("Success Creating new client connection to {}", connectionID);
         return transportClient;
     }
@@ -122,10 +120,11 @@ public class TransportClientFactory implements Closeable {
     /**
      * Connect to the remote server
      */
-    protected Channel doConnection(InetSocketAddress address,
-                                   int connectTimeoutMs) {
+    protected Channel doConnect(InetSocketAddress address,
+                                int connectTimeoutMs) {
+        E.checkArgumentNotNull(this.bootstrap, "TransportClientFactory has " +
+                                               "not been initialized yet.");
         long preConnect = System.nanoTime();
-
 
         LOG.debug("connectTimeout of address [{}] is [{}].", address,
                   connectTimeoutMs);
@@ -153,10 +152,6 @@ public class TransportClientFactory implements Closeable {
 
     public TransportConf transportConf() {
         return this.conf;
-    }
-
-    public ConnectionManager connectionManager() {
-        return this.connectionManager;
     }
 
     @Override

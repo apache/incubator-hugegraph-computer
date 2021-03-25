@@ -17,38 +17,40 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network.netty;
+package com.baidu.hugegraph.computer.core.network.connection;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.network.ClientConnectionManager;
+import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProtocol;
+import com.baidu.hugegraph.computer.core.network.netty.ByteBufAllocatorFactory;
+import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactory;
 
 import io.netty.buffer.ByteBufAllocator;
 
 
-public class NettyClientConnectionManager implements ClientConnectionManager {
+public class DefaultClientManager implements ClientManager {
 
     private final TransportConf conf;
-    private final TransportClientFactory clientFactory;
+    private final ClientFactory clientFactory;
     private final ConcurrentHashMap<ConnectionID, Transport4Client>
-                  clientPool = new ConcurrentHashMap<>();
+            clientPool = new ConcurrentHashMap<>();
 
-    NettyClientConnectionManager(Config config) {
+    DefaultClientManager(Config config) {
         this(config, ByteBufAllocatorFactory.createByteBufAllocator());
     }
 
-    NettyClientConnectionManager(Config config,
-                                 ByteBufAllocator bufAllocator) {
+    DefaultClientManager(Config config,
+                         ByteBufAllocator bufAllocator) {
         this.conf = new TransportConf(config);
         TransportProtocol protocol = new TransportProtocol(this.conf);
-        this.clientFactory = new TransportClientFactory(this.conf, bufAllocator,
-                                                        protocol, this);
+        this.clientFactory = new NettyClientFactory(this.conf, bufAllocator,
+                                                    protocol);
     }
 
     @Override
@@ -57,19 +59,19 @@ public class NettyClientConnectionManager implements ClientConnectionManager {
     }
 
     @Override
-    public Transport4Client getAndCreateTransport4Client(String host, int port)
-                                                         throws IOException {
+    public Transport4Client getOrCreateTransport4Client(String host, int port)
+            throws IOException {
         ConnectionID connectionID = ConnectionID.parseConnectionID(host, port);
-        return this.getAndCreateTransport4Client(connectionID);
+        return this.getOrCreateTransport4Client(connectionID);
     }
 
     @Override
-    public Transport4Client getAndCreateTransport4Client(
+    public Transport4Client getOrCreateTransport4Client(
             ConnectionID connectionId) throws IOException {
         return this.clientPool.computeIfAbsent(connectionId, k -> {
-            TransportClientFactory clientFactory =
-                    NettyClientConnectionManager.this.clientFactory;
-            return clientFactory.createClient(connectionId);
+            DefaultClientManager clientManager = DefaultClientManager.this;
+            return clientManager.clientFactory.createClient(connectionId)
+                                .bindClientManger(clientManager);
         });
     }
 

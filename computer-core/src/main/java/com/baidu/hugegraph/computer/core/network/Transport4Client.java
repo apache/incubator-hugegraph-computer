@@ -21,6 +21,8 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.network.connection.ClientManager;
+
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -30,6 +32,13 @@ import io.netty.buffer.ByteBuf;
  * {@link #finishSession()} is called only once.
  */
 public interface Transport4Client {
+
+    /**
+     * Bind a client connection manger to Transport4Client
+     * @param clientManager
+     */
+    Transport4Client bindClientManger(ClientManager clientManager);
+
 
     /**
      * This method is called before an iteration of sending buffers.
