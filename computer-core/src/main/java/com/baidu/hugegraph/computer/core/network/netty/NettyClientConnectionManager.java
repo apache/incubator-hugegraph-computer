@@ -52,10 +52,6 @@ public class NettyClientConnectionManager implements ClientConnectionManager {
                                                         protocol, this);
     }
 
-    public void removeClient(ConnectionID connectionID) {
-        this.clientPool.remove(connectionID);
-    }
-
     @Override
     public void startup() {
         this.clientFactory.init();
@@ -76,6 +72,11 @@ public class NettyClientConnectionManager implements ClientConnectionManager {
                     NettyClientConnectionManager.this.clientFactory;
             return clientFactory.createClient(connectionId);
         });
+    }
+
+    @Override
+    public void removeClient(ConnectionID connectionID) {
+        this.clientPool.remove(connectionID);
     }
 
     @Override
