@@ -19,23 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.netty.NettyTransportServer.newNettyTransportServer;
-
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.ClientConnectionManager;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
-import com.baidu.hugegraph.computer.core.network.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
-import com.baidu.hugegraph.computer.core.network.Transport4Server;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProtocol;
 
 import io.netty.buffer.ByteBufAllocator;
 
 
-public class NettyConnectionManager implements ConnectionManager {
+public class NettyClientConnectionManager implements ClientConnectionManager {
 
     private final TransportConf conf;
     private final TransportClientFactory clientFactory;
@@ -43,15 +40,20 @@ public class NettyConnectionManager implements ConnectionManager {
                   clientPool = new ConcurrentHashMap<>();
 
 
-    NettyConnectionManager(Config config) {
+    NettyClientConnectionManager(Config config) {
         this(config, ByteBufAllocatorFactory.createByteBufAllocator());
     }
 
-    NettyConnectionManager(Config config, ByteBufAllocator bufAllocator) {
+    NettyClientConnectionManager(Config config,
+                                 ByteBufAllocator bufAllocator) {
         this.conf = new TransportConf(config);
         TransportProtocol protocol = new TransportProtocol(this.conf);
         this.clientFactory = new TransportClientFactory(this.conf, bufAllocator,
-                                                        protocol);
+                                                        protocol, this);
+    }
+
+    public void removeClient(ConnectionID connectionID) {
+        this.clientPool.remove(connectionID);
     }
 
     @Override
@@ -71,14 +73,9 @@ public class NettyConnectionManager implements ConnectionManager {
             ConnectionID connectionId) throws IOException {
         return this.clientPool.computeIfAbsent(connectionId, k -> {
             TransportClientFactory clientFactory =
-                    NettyConnectionManager.this.clientFactory;
+                    NettyClientConnectionManager.this.clientFactory;
             return clientFactory.createClient(connectionId);
         });
-    }
-
-    @Override
-    public Transport4Server createServer() {
-        return newNettyTransportServer();
     }
 
     @Override

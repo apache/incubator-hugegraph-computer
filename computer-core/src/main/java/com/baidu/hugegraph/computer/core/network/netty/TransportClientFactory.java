@@ -31,6 +31,7 @@ import java.net.InetSocketAddress;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProtocol;
@@ -53,15 +54,18 @@ public class TransportClientFactory implements Closeable {
     private final TransportConf conf;
     private final ByteBufAllocator bufAllocator;
     private final TransportProtocol protocol;
+    private final ConnectionManager connectionManager;
     private EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
 
 
     TransportClientFactory(TransportConf conf, ByteBufAllocator bufAllocator,
-                           TransportProtocol protocol) {
+                           TransportProtocol protocol,
+                           ConnectionManager connectionManager) {
         this.conf = conf;
         this.bufAllocator = bufAllocator;
         this.protocol = protocol;
+        this.connectionManager = connectionManager;
     }
 
     protected synchronized void init() {
@@ -105,12 +109,12 @@ public class TransportClientFactory implements Closeable {
         InetSocketAddress address = connectionID.socketAddress();
         LOG.debug("Creating new client connection to {}", connectionID);
 
-        int connectTimeout =
+        int connectTimeoutMs =
                 Math.toIntExact(this.conf.clientConnectionTimeoutMs());
-        Channel channel = this.doConnection(address, connectTimeout);
+        Channel channel = this.doConnection(address, connectTimeoutMs);
         NettyTransportClient transportClient = new NettyTransportClient(
                 channel, connectionID,
-                this, connectTimeout);
+                this, connectTimeoutMs);
         LOG.debug("Success Creating new client connection to {}", connectionID);
         return transportClient;
     }
@@ -119,19 +123,19 @@ public class TransportClientFactory implements Closeable {
      * Connect to the remote server
      */
     protected Channel doConnection(InetSocketAddress address,
-                                   int connectTimeout) {
+                                   int connectTimeoutMs) {
         long preConnect = System.nanoTime();
 
 
         LOG.debug("connectTimeout of address [{}] is [{}].", address,
-                  connectTimeout);
+                  connectTimeoutMs);
 
         this.bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-                              connectTimeout);
+                              connectTimeoutMs);
 
         ChannelFuture future = this.bootstrap.connect(address);
 
-        boolean connectSuccess = future.awaitUninterruptibly(connectTimeout,
+        boolean connectSuccess = future.awaitUninterruptibly(connectTimeoutMs,
                                                              MILLISECONDS);
 
         E.checkArgument(connectSuccess && future.isDone(),
@@ -149,6 +153,10 @@ public class TransportClientFactory implements Closeable {
 
     public TransportConf transportConf() {
         return this.conf;
+    }
+
+    public ConnectionManager connectionManager() {
+        return this.connectionManager;
     }
 
     @Override

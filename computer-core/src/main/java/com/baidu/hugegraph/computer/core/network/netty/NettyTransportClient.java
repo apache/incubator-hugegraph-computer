@@ -41,21 +41,21 @@ public class NettyTransportClient implements Transport4Client, Closeable {
     private volatile Channel channel;
     private final ConnectionID connectionId;
     private final TransportClientFactory clientFactory;
-    private int connectTimeout;
+    private int connectTimeoutMs;
 
     protected NettyTransportClient(Channel channel, ConnectionID connectionId,
                                    TransportClientFactory clientFactory,
-                                   int connectTimeout) {
+                                   int connectTimeoutMs) {
         this.channel = channel;
         this.connectionId = connectionId;
         this.clientFactory = clientFactory;
-        this.connectTimeout = connectTimeout;
+        this.connectTimeoutMs = connectTimeoutMs;
     }
 
     public void connect() {
         InetSocketAddress address = this.connectionId.socketAddress();
         this.channel = this.clientFactory.doConnection(address,
-                                                       this.connectTimeout);
+                                                       this.connectTimeoutMs);
     }
 
     public Channel channel() {
@@ -97,5 +97,6 @@ public class NettyTransportClient implements Transport4Client, Closeable {
         if (this.channel != null) {
             this.channel.close().awaitUninterruptibly(10, TimeUnit.SECONDS);
         }
+        this.clientFactory.connectionManager().removeClient(this.connectionId);
     }
 }

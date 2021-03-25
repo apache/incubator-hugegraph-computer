@@ -21,11 +21,23 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.io.IOException;
 
-public interface ConnectionManager {
+public interface ClientConnectionManager extends ConnectionManager {
 
-    void startup();
+    /**
+     * Get a {@link Transport4Client} instance from the connection pool first.
+     * If {it is not found or not active, create a new one.
+     * @param connectionId {@link ConnectionID}
+     */
+    Transport4Client getAndCreateTransport4Client(ConnectionID connectionId)
+                                                  throws IOException;
 
-    void shutdown() throws IOException;
 
-    void removeClient(ConnectionID connectionID);
+    /**
+     * Get a {@link Transport4Client} instance from the connection pool first.
+     * If {it is not found or not active, create a new one.
+     * @param host the hostName or Ip
+     * @param port the port
+     */
+    Transport4Client getAndCreateTransport4Client(String host, int port)
+                                                  throws IOException;
 }
