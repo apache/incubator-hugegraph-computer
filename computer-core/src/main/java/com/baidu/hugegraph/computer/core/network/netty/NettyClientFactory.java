@@ -19,16 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.TransportConf.CLIENT_THREAD_GROUP_NAME;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.clientChannelClass;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.createEventLoop;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import org.slf4j.Logger;
-
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
@@ -36,7 +27,6 @@ import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProtocol;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
@@ -45,6 +35,15 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
+import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
+import static com.baidu.hugegraph.computer.core.network.TransportConf.CLIENT_THREAD_GROUP_NAME;
+import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.clientChannelClass;
+import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.createEventLoop;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class NettyClientFactory implements ClientFactory {
 
@@ -56,12 +55,23 @@ public class NettyClientFactory implements ClientFactory {
     private EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
 
-
-    public NettyClientFactory(TransportConf conf, ByteBufAllocator bufAllocator,
-                              TransportProtocol protocol) {
+    private NettyClientFactory(TransportConf conf,
+                               ByteBufAllocator bufAllocator) {
         this.conf = conf;
         this.bufAllocator = bufAllocator;
-        this.protocol = protocol;
+        this.protocol = new TransportProtocol(this.conf);
+    }
+
+    public static NettyClientFactory newNettyClientFactory(
+            Config config, ByteBufAllocator bufAllocator) {
+        TransportConf conf = new TransportConf(config);
+        return new NettyClientFactory(conf, bufAllocator);
+    }
+
+    public static NettyClientFactory newNettyClientFactory(Config config) {
+        TransportConf conf = new TransportConf(config);
+        return new NettyClientFactory(conf,
+               ByteBufAllocatorFactory.createByteBufAllocator());
     }
 
     @Override

@@ -27,7 +27,7 @@ import com.baidu.hugegraph.computer.core.network.Transport4Client;
 public interface ClientManager {
 
     /**
-     * startup the clientManager
+     * Startup the clientManager
      */
     void startup();
 
@@ -59,7 +59,6 @@ public interface ClientManager {
 
     /**
      * shutdown the clientManager
-     * @throws IOException
      */
     void shutdown() throws IOException;
 }

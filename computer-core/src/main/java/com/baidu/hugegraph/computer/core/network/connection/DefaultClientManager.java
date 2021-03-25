@@ -19,38 +19,22 @@
 
 package com.baidu.hugegraph.computer.core.network.connection;
 
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
-import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.TransportProtocol;
-import com.baidu.hugegraph.computer.core.network.netty.ByteBufAllocatorFactory;
-import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactory;
 
-import io.netty.buffer.ByteBufAllocator;
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class DefaultClientManager implements ClientManager {
 
-    private final TransportConf conf;
     private final ClientFactory clientFactory;
     private final ConcurrentHashMap<ConnectionID, Transport4Client>
             clientPool = new ConcurrentHashMap<>();
 
-    DefaultClientManager(Config config) {
-        this(config, ByteBufAllocatorFactory.createByteBufAllocator());
-    }
-
-    DefaultClientManager(Config config,
-                         ByteBufAllocator bufAllocator) {
-        this.conf = new TransportConf(config);
-        TransportProtocol protocol = new TransportProtocol(this.conf);
-        this.clientFactory = new NettyClientFactory(this.conf, bufAllocator,
-                                                    protocol);
+    DefaultClientManager(ClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
     }
 
     @Override

@@ -23,6 +23,9 @@ import java.io.Closeable;
 
 public interface ClientFactory extends Closeable {
 
+    /**
+     * init the ClientFactory
+     */
     void init();
 
 
