@@ -59,15 +59,14 @@ public class DefaultClientManager implements ClientManager {
     }
 
     @Override
-    public Transport4Client getOrCreateTransport4Client(String host, int port)
-            throws IOException {
+    public Transport4Client getOrCreateTransport4Client(String host, int port) {
         ConnectionID connectionID = ConnectionID.parseConnectionID(host, port);
         return this.getOrCreateTransport4Client(connectionID);
     }
 
     @Override
     public Transport4Client getOrCreateTransport4Client(
-            ConnectionID connectionId) throws IOException {
+                            ConnectionID connectionId) {
         return this.clientPool.computeIfAbsent(connectionId, k -> {
             DefaultClientManager clientManager = DefaultClientManager.this;
             return clientManager.clientFactory.createClient(connectionId)
