@@ -41,24 +41,24 @@ public class NettyTransportClient implements Transport4Client, Closeable {
     private static final Logger LOG = Log.logger(NettyTransportClient.class);
 
     private volatile Channel channel;
-    private final ConnectionID connectionId;
+    private final ConnectionID connectionID;
     private final NettyClientFactory clientFactory;
     private final AtomicReference<ClientManager> clientManagerRef =
                   new AtomicReference<>();
 
     private int connectTimeoutMs;
 
-    protected NettyTransportClient(Channel channel, ConnectionID connectionId,
+    protected NettyTransportClient(Channel channel, ConnectionID connectionID,
                                    NettyClientFactory clientFactory,
                                    int connectTimeoutMs) {
         this.channel = channel;
-        this.connectionId = connectionId;
+        this.connectionID = connectionID;
         this.clientFactory = clientFactory;
         this.connectTimeoutMs = connectTimeoutMs;
     }
 
     public synchronized void connect() {
-        InetSocketAddress address = this.connectionId.socketAddress();
+        InetSocketAddress address = this.connectionID.socketAddress();
         this.channel = this.clientFactory.doConnect(address,
                                                     this.connectTimeoutMs);
     }
@@ -67,8 +67,8 @@ public class NettyTransportClient implements Transport4Client, Closeable {
         return this.channel;
     }
 
-    public ConnectionID connectionId() {
-        return this.connectionId;
+    public ConnectionID connectionID() {
+        return this.connectionID;
     }
 
     public InetSocketAddress socketAddress() {
@@ -110,7 +110,7 @@ public class NettyTransportClient implements Transport4Client, Closeable {
         }
 
         if (this.clientManagerRef.get() != null) {
-            this.clientManagerRef.get().removeClient(this.connectionId);
+            this.clientManagerRef.get().removeClient(this.connectionID);
         }
     }
 }

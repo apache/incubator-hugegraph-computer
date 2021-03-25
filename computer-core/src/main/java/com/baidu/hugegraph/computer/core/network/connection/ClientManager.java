@@ -35,9 +35,9 @@ public interface ClientManager {
     /**
      * Get a {@link Transport4Client} instance from the connection pool first.
      * If {it is not found or not active, create a new one.
-     * @param connectionId {@link ConnectionID}
+     * @param connectionID {@link ConnectionID}
      */
-    Transport4Client getOrCreateTransport4Client(ConnectionID connectionId)
+    Transport4Client getOrCreateTransport4Client(ConnectionID connectionID)
                                                   throws IOException;
 
 
@@ -52,6 +52,7 @@ public interface ClientManager {
 
     /**
      * remove a client from the connection pool
+     * @param connectionID {@link ConnectionID}
      */
     void removeClient(ConnectionID connectionID);
 

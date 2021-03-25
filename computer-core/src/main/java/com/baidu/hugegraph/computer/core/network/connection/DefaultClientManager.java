@@ -66,10 +66,10 @@ public class DefaultClientManager implements ClientManager {
 
     @Override
     public Transport4Client getOrCreateTransport4Client(
-                            ConnectionID connectionId) {
-        return this.clientPool.computeIfAbsent(connectionId, k -> {
+                            ConnectionID connectionID) {
+        return this.clientPool.computeIfAbsent(connectionID, k -> {
             DefaultClientManager clientManager = DefaultClientManager.this;
-            return clientManager.clientFactory.createClient(connectionId)
+            return clientManager.clientFactory.createClient(connectionID)
                                 .bindClientManger(clientManager);
         });
     }
