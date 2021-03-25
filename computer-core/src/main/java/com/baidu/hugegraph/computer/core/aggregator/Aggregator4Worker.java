@@ -31,16 +31,18 @@ public interface Aggregator4Worker {
 
     /**
      * Set aggregate value after superstep. The value will be sent to
-     * master when current superstep finish. Throws ComputerException if
-     * master does not register the aggregator with specified name.
+     * master when current superstep finish.
+     * Throws ComputerException if master does not register the aggregator
+     * with specified name.
      * @param value The value to be aggregated
      */
     <V extends Value> void aggregateValue(String name, V value);
 
     /**
      * Get the aggregated value before a superstep start. The value is
-     * aggregated by master at previous superstep. Throws ComputerException
-     * if master does not register the aggregator with specified name.
+     * aggregated by master at previous superstep.
+     * Throws ComputerException if master does not register the aggregator
+     * with specified name.
      */
     <V extends Value> V aggregatedValue(String name);
 }

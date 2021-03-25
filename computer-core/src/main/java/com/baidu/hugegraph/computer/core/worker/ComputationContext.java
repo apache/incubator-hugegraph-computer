@@ -29,9 +29,9 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 /**
- * The VertexComputationContext is the interface for the algorithm's vertex
+ * The ComputationContext is the interface for the algorithm's vertex
  * computation. It is passed to algorithm's vertex computation as parameter
- * when compute a vertex. It used by algorithm's vertex computation to send
+ * when compute a vertex. It's used by algorithm's vertex computation to send
  * messages and get graph information such as total vertex count and total
  * edge count.
  */

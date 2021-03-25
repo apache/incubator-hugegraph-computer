@@ -24,7 +24,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 
 /**
- * Aggregator4Master used by algorithm's master computation. The master must
+ * Aggregator4Master used by algorithm's master-computation. The master must
  * register all aggregators before all supersteps start. Then the workers can
  * aggregate aggregators in superstep, send the aggregators to master when
  * superstep finish. The master aggregates the aggregators sent by workers.
@@ -35,7 +35,7 @@ public interface Aggregator4Master {
 
     /**
      * Register the aggregator with specified name. The name must be unique.
-     * Used by algorithm's master computation to register aggregators.
+     * Used by algorithm's master-computation to register aggregators.
      */
     <V extends Value> void registerAggregator(
                            String name,
@@ -44,7 +44,7 @@ public interface Aggregator4Master {
     /**
      * Register aggregator with specified value type and a combiner which can
      * combine values with specified value type. The name must be unique.
-     * Used by algorithm's master computation to register aggregators.
+     * Used by algorithm's master-computation to register aggregators.
      */
     <V extends Value> void registerAggregator(
                            String name,
@@ -52,16 +52,18 @@ public interface Aggregator4Master {
                            Class<? extends Combiner<V>> combinerClass);
 
     /**
-     * Set the aggregated value. The value is received by workers at next
-     * superstep. Throws ComputerException if master does not register the
-     * aggregator with specified name.
+     * Set the aggregated value by master-computation. The value will be
+     * received by workers at next superstep.
+     * Throws ComputerException if master does not register the aggregator
+     * with specified name.
      */
     <V extends Value> void aggregatedValue(String name, V value);
 
     /**
      * Get the aggregated value. The aggregated value is aggregated from
-     * workers at this superstep.Throws ComputerException if master does not
-     * register the aggregator with specified name.
+     * workers at this superstep.
+     * Throws ComputerException if master does not register the aggregator
+     * with specified name.
      */
     <V extends Value> V aggregatedValue(String name);
 }

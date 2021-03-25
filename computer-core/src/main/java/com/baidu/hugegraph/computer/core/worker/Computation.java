@@ -26,33 +26,36 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 /**
  * Computation is used to compute vertex. It is the most important algorithm
- * interface. #compute() is invoked for every active vertex in a superstep
- * The algorithm can set the vertex inactive. If a vertex is inactive no
+ * interface. #compute() is called for every active vertex in a superstep.
+ * The algorithm can set the vertex inactive. If a vertex is inactive and no
  * message received, the vertex will not be computed. If a vertex is inactive
- * and a message is received, the framework will reactive the vertex and the
+ * and any message is received, the framework will reactive the vertex and the
  * vertex will be computed. The algorithm can inactive a vertex many times.
+ * If a vertex is active(not set inactive by algorithm), the vertex will be
+ * computed.
  * @param <M>
  */
 public interface Computation<M extends Value> {
 
     /**
-     * Compute a vertex without message at superstep0. Every is active in
-     * superstep0. It should set vertex's initial value in this method.
+     * Compute a vertex without message in superstep0. Every vertex is active in
+     * superstep0. It should set vertex's initial value in this method. Be
+     * called for every vertex in superstep0.
      */
     void compute0(ComputationContext context, Vertex vertex);
 
     /**
      * Compute a active vertex. If the vertex received messages, pass
-     * messages by an iterator. If the vertex does not received a message, an
+     * messages by an iterator. If the vertex does not received any message, an
      * empty Iterator will be passed.
-     * Be invoked at all supersteps(except superstep0).
+     * Be called for every vertex in all supersteps(except superstep0).
      */
     void compute(ComputationContext context,
                  Vertex vertex,
                  Iterator<M> messages);
 
     /**
-     * This method is invoked only one time before all superstep start.
+     * This method is called only one time before all superstep start.
      * Subclass can override this method if want to init the resources the
      * computation needed, like create a connection to other database, get
      * the config the algorithm used.
@@ -62,7 +65,7 @@ public interface Computation<M extends Value> {
     }
 
     /**
-     * This method is invoked only one time after all superstep iteration.
+     * This method is called only one time after all superstep iteration.
      * Subclass can override this method if want to close the resources used
      * in the computation.
      */
@@ -71,7 +74,7 @@ public interface Computation<M extends Value> {
     }
 
     /**
-     * This method is invoked before every superstep. Subclass can override
+     * This method is called before every superstep. Subclass can override
      * this method if want to get aggregators master aggregated at previous
      * superstep.
      */
@@ -80,7 +83,7 @@ public interface Computation<M extends Value> {
     }
 
     /**
-     * This method is invoked after every superstep. Subclass can override
+     * This method is called after every superstep. Subclass can override
      * this method if want to aggregate the aggregators to master.
      */
     default void afterSuperstep(WorkerContext context) {

@@ -41,7 +41,7 @@ public interface ReduceComputation<M extends Value> extends Computation<M> {
     M initialValue(ComputationContext context, Vertex vertex);
 
     /**
-     * Compute with initial message. Be invoked at superstep0 for every vertex.
+     * Compute with initial message. Be called for every vertex in superstep0.
      */
     @Override
     default void compute0(ComputationContext context, Vertex vertex) {
@@ -51,8 +51,8 @@ public interface ReduceComputation<M extends Value> extends Computation<M> {
 
     /**
      * Compute the specified vertex with messages.
-     * Called at all supersteps(except superstep0) with messages,
-     * or at superstep0 with user defined initial message.
+     * Be called in all supersteps(except superstep0) with messages,
+     * or in superstep0 with user defined initial message.
      * Update the vertex's state after compute.
      */
     @Override
@@ -70,16 +70,17 @@ public interface ReduceComputation<M extends Value> extends Computation<M> {
     /**
      * Compute the vertex with combined message, or null if no message received.
      * The returned message will be sent to adjacent vertices.
-     * For a vertex, this method can be invoked only one time in a superstep.
+     * For a vertex, this method can be called only one time in a superstep.
      * @param message Combined message, or null if no message received
      */
     M computeMessage(ComputationContext context, Vertex vertex, M message);
 
     /**
-     * Send result to all adjacent vertices of a specified vertex.
-     * This method is invoked when the result is not null.
-     * The algorithm should override this method if the algorithm doesn't wants
-     * to send the result along all edges.
+     * Send result to adjacent vertices of a specified vertex. Send result to
+     * all adjacent vertices by default.
+     * Be called when the result is not null.
+     * The algorithm should override this method if the algorithm doesn't want
+     * to send the result to all adjacent vertices.
      */
     default void sendMessage(ComputationContext context,
                              Vertex vertex,

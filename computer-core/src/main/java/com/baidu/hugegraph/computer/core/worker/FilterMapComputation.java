@@ -38,13 +38,13 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
     /**
      * Set vertex's value and return initial message. The message will be
      * used to compute the vertex as parameter Iterator<M> messages.
-     * The method is invoked at superstep0,
+     * Be called for every vertex in superstep0.
      * {@link #compute0(ComputationContext, Vertex)}.
      */
     M initialValue(ComputationContext context, Vertex vertex);
 
     /**
-     * Compute with initial message. Be invoked at superstep0 for every vertex.
+     * Compute with initial message. Be called for every vertex in superstep0.
      */
     @Override
     default void compute0(ComputationContext context, Vertex vertex) {
@@ -54,10 +54,8 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
 
     /**
      * Compute a vertex with messages.
-     * Called at all supersteps(except superstep0) with messages,
-     * or at superstep0 with user defined initial message.
-     * Subclass should override this method if want to compute the vertex when
-     * no messages received.
+     * Be called in all supersteps(except superstep0) with messages,
+     * or in superstep0 with user defined initial message.
      * Inactive the vertex after compute by default.
      */
     @Override
@@ -70,8 +68,10 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
     }
 
     /**
-     * Compute vertex with all the messages received and get the results as
-     * iterator. Be invoked for every vertex.
+     * Compute vertex with all the messages received and return the results
+     * as an iterator. Be called for every vertex in a superstep.
+     * Subclass should override this method if want to compute the vertex when
+     * no message received.
      */
     default Iterator<M> computeMessages(ComputationContext context,
                                         Vertex vertex,
@@ -84,8 +84,9 @@ public interface FilterMapComputation<M extends Value> extends Computation<M> {
     }
 
     /**
-     * Compute vertex with a message. This method will be called once for each
-     * messages of a vertex in a superstep.
+     * Compute vertex with a message. Be called for each message of a vertex
+     * in a superstep. There may be multiple messages for a vertex, so it may
+     * be called multiple times for a vertex in a superstep.
      * @return The value need to propagate along the edges, or null when
      * needn't.
      */
