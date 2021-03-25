@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.TransportConf.SERVER_THREAD_GROUP_NAME;
 import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.createEventLoop;
 import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.serverChannelClass;
 
@@ -52,9 +51,9 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     private static final Logger LOG = Log.logger(NettyTransportServer.class);
 
     private static final String BOSS_THREAD_GROUP_NAME =
-            SERVER_THREAD_GROUP_NAME + "-boss";
+            TransportConf.SERVER_THREAD_GROUP_NAME + "-boss";
     private static final String WORKER_THREAD_GROUP_NAME =
-            SERVER_THREAD_GROUP_NAME + "-worker";
+            TransportConf.SERVER_THREAD_GROUP_NAME + "-worker";
     private static final int BOSS_THREADS = 1;
 
     private final ByteBufAllocator bufAllocator;
@@ -120,8 +119,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
                                     this.conf.serverPort());
 
         // The port can still be bound when the socket is in the TIME_WAIT state
-        this.bootstrap.option(ChannelOption.SO_REUSEADDR,
-                              true);
+        this.bootstrap.option(ChannelOption.SO_REUSEADDR, true);
 
         this.bootstrap.option(ChannelOption.ALLOCATOR, this.bufAllocator);
         this.bootstrap.childOption(ChannelOption.ALLOCATOR, this.bufAllocator);

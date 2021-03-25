@@ -41,7 +41,7 @@ public class ConnectionIDTest {
         ConnectionID connectionID1 = ConnectionID.parseConnectionID(
                 "localhost", 8080);
         InetSocketAddress localSocketAddress =
-                TransportUtil.resolvedAddress("127.0.0.1", 8080);
+                TransportUtil.resolvedSocketAddress("127.0.0.1", 8080);
         ConnectionID connectionID2 = new ConnectionID(localSocketAddress);
         Assert.assertEquals(connectionID1, connectionID2);
 

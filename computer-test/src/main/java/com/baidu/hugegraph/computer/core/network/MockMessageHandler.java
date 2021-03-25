@@ -34,8 +34,7 @@ public class MockMessageHandler implements MessageHandler {
     @Override
     public void handle(MessageType messageType, int partition,
                        ByteBuffer buffer) {
-        LOG.info("messageType:{}, partition:{}, buffer limit:{}",
-                 messageType.name(),
-                 partition, buffer.limit());
+        LOG.info("messageType: {}, partition: {}, buffer limit: {}",
+                 messageType.name(), partition, buffer.limit());
     }
 }

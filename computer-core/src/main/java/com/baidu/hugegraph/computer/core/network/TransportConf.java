@@ -44,7 +44,7 @@ public class TransportConf {
 
     public InetAddress serverAddress() {
         String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
-        return TransportUtil.resolvedAddress(host);
+        return TransportUtil.resolvedSocketAddress(host);
     }
 
     /**

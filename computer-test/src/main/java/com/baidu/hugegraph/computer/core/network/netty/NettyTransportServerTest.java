@@ -146,7 +146,6 @@ public class NettyTransportServerTest {
         }, e -> {
             Assert.assertTrue(e.getMessage().contains("port out of range"));
         });
-
     }
 
     @Test

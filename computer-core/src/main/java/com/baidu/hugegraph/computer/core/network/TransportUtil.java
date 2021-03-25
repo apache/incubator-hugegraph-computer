@@ -50,7 +50,7 @@ public class TransportUtil {
         return "<unknown remote>";
     }
 
-    public static InetAddress resolvedAddress(String host) {
+    public static InetAddress resolvedSocketAddress(String host) {
         try {
             return InetAddress.getByName(host);
         } catch (
@@ -60,7 +60,8 @@ public class TransportUtil {
         }
     }
 
-    public static InetSocketAddress resolvedAddress(String host, int port) {
+    public static InetSocketAddress resolvedSocketAddress(String host,
+                                                          int port) {
         long preResolveHost = System.nanoTime();
         InetSocketAddress resolvedAddress = new InetSocketAddress(host, port);
         long hostResolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000;
