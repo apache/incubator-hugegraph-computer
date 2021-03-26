@@ -17,27 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.combiner;
+package com.baidu.hugegraph.computer.core.master;
 
-import java.util.Iterator;
+/**
+ * The default master-computation, which can be used if there is no
+ * algorithm-specific master-computation.
+ */
+public class DefaultMasterComputation implements MasterComputation {
 
-public interface Combiner<T> {
-
-    public static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
-        if (!values.hasNext()) {
-            return null;
-        }
-        T result = values.next();
-        while (values.hasNext()) {
-            result = combiner.combine(result, values.next());
-        }
-        return result;
+    @Override
+    public void init(MasterContext context) {
+        // pass
     }
 
     /**
-     * Combine v1 and v2, return the combined value. The combined value may
-     * take use v1 or v2. The value of v1 and v2 may be updated. Should not
-     * use v1 and v2 after combine them.
+     * Compute until max superstep.
      */
-    T combine(T v1, T v2);
+    @Override
+    public boolean compute(MasterContext context) {
+        return true;
+    }
+
+    @Override
+    public void close() {
+        // pass
+    }
 }

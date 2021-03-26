@@ -17,27 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.combiner;
+package com.baidu.hugegraph.computer.core.worker;
 
-import java.util.Iterator;
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Worker;
+import com.baidu.hugegraph.computer.core.config.Config;
 
-public interface Combiner<T> {
-
-    public static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
-        if (!values.hasNext()) {
-            return null;
-        }
-        T result = values.next();
-        while (values.hasNext()) {
-            result = combiner.combine(result, values.next());
-        }
-        return result;
-    }
+/**
+ * Algorithm's computation context. Used by algorithm's computation except
+ * compute a vertex. Algorithm's computation can get(or set) aggregator and
+ * config from this context.
+ */
+public interface WorkerContext extends ComputationContext,
+                                       Aggregator4Worker {
 
     /**
-     * Combine v1 and v2, return the combined value. The combined value may
-     * take use v1 or v2. The value of v1 and v2 may be updated. Should not
-     * use v1 and v2 after combine them.
+     * Get config. The config remains immutable during the whole computation
+     * process.
      */
-    T combine(T v1, T v2);
+    Config config();
 }
