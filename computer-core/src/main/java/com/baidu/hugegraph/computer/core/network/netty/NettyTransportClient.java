@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,7 @@ import com.baidu.hugegraph.util.Log;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
-public class NettyTransportClient implements Transport4Client, Closeable {
+public class NettyTransportClient implements Transport4Client {
 
     private static final Logger LOG = Log.logger(NettyTransportClient.class);
 
@@ -94,7 +93,7 @@ public class NettyTransportClient implements Transport4Client, Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         // close is a local operation and should finish with milliseconds;
         // timeout just to be safe
         if (this.channel != null) {

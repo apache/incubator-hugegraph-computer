@@ -318,7 +318,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> TRANSPORT_SERVER_HOST =
             new ConfigOption<>(
                     "transport.server_host",
-                    "The Netty server bind host.",
+                    "The server bind host.",
                     disallowEmpty(),
                     "127.0.0.1"
             );
@@ -326,7 +326,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_SERVER_PORT =
             new ConfigOption<>(
                     "transport.server_port",
-                    "The Netty server bind port, if it is zero " +
+                    "The server bind port, if it is zero " +
                     "will let the system pick up an ephemeral port.",
                     nonNegativeInt(),
                     0
@@ -348,19 +348,36 @@ public class ComputerOptions extends OptionHolder {
                     0
             );
 
+    public static final ConfigOption<String> TRANSPORT_PROVIDER =
+            new ConfigOption<>(
+                    "transport.provider",
+                    "The transport provider, currently only supports Netty",
+                    allowValues("NETTY"),
+                    "NETTY"
+            );
+
     public static final ConfigOption<String> TRANSPORT_IO_MODE =
             new ConfigOption<>(
                     "transport.io_mode",
-                    "The Netty IO Mode, either 'NIO'、'EPOLL'、'AUTO', The " +
+                    "The Network IO Mode, either 'NIO'、'EPOLL'、'AUTO', The " +
                     "'AUTO' means selecting the property mode automatically",
                     allowValues("NIO", "EPOLL", "AUTO"),
                     "AUTO"
             );
 
+
+    public static final ConfigOption<Boolean> TRANSPORT_EPOLL_LT =
+            new ConfigOption<>(
+                    "transport.transport_epoll_lt",
+                    "Enabled EPOLL level trigger.",
+                    allowValues(true, false),
+                    true
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
             new ConfigOption<>(
                     "transport.send_buffer_size",
-                    "The Netty send buffer size.",
+                    "The Network send buffer size.",
                     nonNegativeInt(),
                     0
             );
@@ -368,7 +385,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_RECEIVE_BUFFER_SIZE =
             new ConfigOption<>(
                     "transport.receive_buffer_size",
-                    "The Netty receive buffer size.",
+                    "The Network receive buffer size.",
                     nonNegativeInt(),
                     0
             );
@@ -376,7 +393,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
             new ConfigOption<>(
                     "transport.backlog",
-                    "The Netty server connection backlog.",
+                    "The server connection backlog.",
                     nonNegativeInt(),
                     0
             );
@@ -384,7 +401,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> TRANSPORT_CLIENT_CONNECT_TIMEOUT =
             new ConfigOption<>(
                     "transport.client_connect_timeout",
-                    "The timeout(in ms) of Netty client connection server.",
+                    "The timeout(in ms) of client connection server.",
                     positiveInt(),
                     3000L
             );
@@ -440,9 +457,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
             new ConfigOption<>(
                     "transport.transport_tcp_keep_alive",
-                    "The TCP keep alive.",
+                    "Enabled TCP keep alive.",
                     allowValues(true, false),
                     true
             );
-
 }

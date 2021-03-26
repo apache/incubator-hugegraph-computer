@@ -38,7 +38,11 @@ public class TransportConf {
 
     private final Config config;
 
-    public TransportConf(Config config) {
+    public static TransportConf warpConfig(Config config) {
+        return new TransportConf(config);
+    }
+
+    protected TransportConf(Config config) {
         this.config = config;
     }
 
@@ -70,6 +74,28 @@ public class TransportConf {
             default:
                 throw new IllegalArgException("Unknown io_mode: %s", ioMode);
         }
+    }
+
+    /**
+     * The transport provider
+     */
+    public TransportProvider transportProvider() {
+        String provider = this.config.get(ComputerOptions.TRANSPORT_PROVIDER)
+                                     .toUpperCase(Locale.ROOT);
+        switch (provider) {
+            case "NETTY":
+                return TransportProvider.NETTY;
+            default:
+                throw new IllegalArgException("Unknown transportProvider: %s",
+                                              provider);
+        }
+    }
+
+    /**
+     * Enabled EPOLL level trigger
+     */
+    public boolean epollLevelTriggered() {
+        return this.config.get(ComputerOptions.TRANSPORT_EPOLL_LT);
     }
 
     /**

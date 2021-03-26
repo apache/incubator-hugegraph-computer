@@ -55,22 +55,20 @@ public class NettyTransportServerTest {
         );
         config = ComputerContext.instance().config();
         messageHandler = new MockMessageHandler();
-        this.server = NettyTransportServer.newNettyTransportServer();
+        this.server = new NettyTransportServer();
     }
 
     @After
     public void teardown() {
         if (this.server != null) {
-            this.server.stop();
+            this.server.shutdown();
         }
     }
 
     @Test
     public void testConstructor() throws IOException {
-        try (NettyTransportServer nettyServer =
-                     NettyTransportServer.newNettyTransportServer()) {
+        try (NettyTransportServer nettyServer = new NettyTransportServer()) {
             Assert.assertNotEquals(null, nettyServer);
-            nettyServer.stop();
         }
     }
 

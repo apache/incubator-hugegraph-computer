@@ -19,15 +19,18 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.io.Closeable;
 
-public interface ClientFactory extends Closeable {
+public interface ClientFactory {
 
     /**
-     * init the ClientFactory
+     * Init the ClientFactory
      */
     void init();
 
+    /**
+     * close the ClientFactory
+     */
+    void close();
 
     /**
      * Create a Transport4Client

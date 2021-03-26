@@ -25,20 +25,23 @@ import java.util.concurrent.ThreadFactory;
 
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 
+import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
+import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollMode;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-public class NettyEventLoopFactory {
+public class NettyEventLoopUtil {
 
     /**
-     * Creates a Netty EventLoopGroup based on the IOMode.
+     * Create a Netty EventLoopGroup based on the IOMode.
      */
     public static EventLoopGroup createEventLoop(IOMode mode, int numThreads,
                                                  String prefix) {
@@ -80,6 +83,25 @@ public class NettyEventLoopFactory {
                 return EpollServerSocketChannel.class;
             default:
                 throw new IllegalArgException("Unknown io mode: " + mode);
+        }
+    }
+
+    /**
+     * Use {@link EpollMode#LEVEL_TRIGGERED} for server bootstrap
+     * if level trigger enabled by system properties,
+     * otherwise use {@link EpollMode#EDGE_TRIGGERED}.
+     */
+    public static void enableTriggeredMode(IOMode ioMode, boolean enableLt,
+                                           ServerBootstrap serverBootstrap) {
+        if (ioMode != IOMode.EPOLL) {
+            return;
+        }
+        if (enableLt) {
+            serverBootstrap.childOption(EpollChannelOption.EPOLL_MODE,
+                                        EpollMode.LEVEL_TRIGGERED);
+        } else {
+            serverBootstrap.childOption(EpollChannelOption.EPOLL_MODE,
+                                        EpollMode.EDGE_TRIGGERED);
         }
     }
 }

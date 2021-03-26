@@ -21,23 +21,26 @@ package com.baidu.hugegraph.computer.core.network.connection;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
+import com.baidu.hugegraph.computer.core.network.Transport4Server;
 
-public interface ClientManager {
+public interface ConnectionManager {
 
     /**
-     * Startup the ClientManager
+     * Init the ClientFactory
      */
-    void startup();
+    void initClientFactory(Config config);
 
     /**
      * Get a {@link Transport4Client} instance from the connection pool first.
      * If {it is not found or not active, create a new one.
      * @param connectionID {@link ConnectionID}
      */
-    Transport4Client getOrCreateTransport4Client(ConnectionID connectionID)
-                                                 throws IOException;
+    Transport4Client getOrCreateClient(ConnectionID connectionID)
+                                       throws IOException;
 
     /**
      * Get a {@link Transport4Client} instance from the connection pool first.
@@ -45,16 +48,36 @@ public interface ClientManager {
      * @param host the hostName or Ip
      * @param port the port
      */
-    Transport4Client getOrCreateTransport4Client(String host, int port)
-                                                 throws IOException;
+    Transport4Client getOrCreateClient(String host, int port)
+                                       throws IOException;
     /**
-     * remove a client from the connection pool
+     * Close a client from the ConnectionManager
      * @param client {@link Transport4Client}
      */
-    void removeClient(Transport4Client client);
+    void closeClient(Transport4Client client);
 
     /**
-     * shutdown the clientManager
+     * Start the server
+     */
+    int startServer(Config config, MessageHandler handler);
+
+    /**
+     * Return the only one server
+     */
+    Transport4Server getServer();
+
+    /**
+     * Shutdown the ClientFactory
+     */
+    void shutdownClientFactory() throws IOException;
+
+    /**
+     * Shutdown the server
+     */
+    void shutdownServer() throws IOException;
+
+    /**
+     * Shutdown the ClientFactory and server
      */
     void shutdown() throws IOException;
 }

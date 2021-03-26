@@ -17,15 +17,8 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network.netty;
+package com.baidu.hugegraph.computer.core.network;
 
-/**
- * Selector for which form of low-level IO we should use.
- * NIO is always available, while EPOLL is only available on Linux.
- */
-public enum IOMode {
-
-    NIO,
-    EPOLL
-
+public enum TransportProvider {
+    NETTY
 }

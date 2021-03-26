@@ -19,8 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.createEventLoop;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.serverChannelClass;
+
+import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.createEventLoop;
+import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.serverChannelClass;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -63,24 +64,18 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     private ChannelFuture bindFuture;
     private InetSocketAddress bindAddress;
 
-    private NettyTransportServer(ByteBufAllocator bufAllocator) {
+    public NettyTransportServer() {
+        this(BufAllocatorFactory.createBufAllocator());
+    }
+
+    public NettyTransportServer(ByteBufAllocator bufAllocator) {
         this.bufAllocator = bufAllocator;
-    }
-
-    public static NettyTransportServer newNettyTransportServer() {
-        return new NettyTransportServer(
-               BufAllocatorFactory.createBufAllocator());
-    }
-
-    public static NettyTransportServer newNettyTransportServer(
-                                       ByteBufAllocator bufAllocator) {
-        return NettyTransportServer.newNettyTransportServer(bufAllocator);
     }
 
     @Override
     public synchronized int listen(Config config, MessageHandler handler) {
         E.checkArgument(this.bindFuture == null,
-                        "Netty server has already been listened.");
+                        "Netty server has already been listened");
 
         this.init(config);
 
@@ -92,15 +87,15 @@ public class NettyTransportServer implements Transport4Server, Closeable {
         // Start Server
         this.bindFuture = this.bootstrap.bind().syncUninterruptibly();
         this.bindAddress = (InetSocketAddress)
-                                 this.bindFuture.channel().localAddress();
+                           this.bindFuture.channel().localAddress();
 
-        LOG.info("Transport server started on SocketAddress {}.",
+        LOG.info("Transport server started on SocketAddress {}",
                  this.bindAddress);
         return this.bindAddress().getPort();
     }
 
     private void init(Config config) {
-        this.conf = new TransportConf(config);
+        this.conf = TransportConf.warpConfig(config);
         this.bootstrap = new ServerBootstrap();
 
         IOMode ioMode = this.conf.ioMode();
@@ -126,6 +121,11 @@ public class NettyTransportServer implements Transport4Server, Closeable {
         this.bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
         this.bootstrap.childOption(ChannelOption.SO_KEEPALIVE,
                                    this.conf.tcpKeepAlive());
+
+        // enable trigger mode for epoll if need
+        NettyEventLoopUtil.enableTriggeredMode(ioMode,
+                                               this.conf.tcpKeepAlive(),
+                                               this.bootstrap);
 
         if (this.conf.backLog() > 0) {
             this.bootstrap.option(ChannelOption.SO_BACKLOG,
@@ -157,17 +157,24 @@ public class NettyTransportServer implements Transport4Server, Closeable {
 
     @Override
     public InetSocketAddress bindAddress() {
-        E.checkArgumentNotNull(this.bindAddress, "bindAddress not initialized");
+        E.checkArgumentNotNull(this.bindAddress,
+                               "NettyServer has not been initialized yet");
         return this.bindAddress;
     }
 
     @Override
-    public void stop() {
+    public void shutdown() {
         try {
             this.close();
         } catch (IOException e) {
-            throw new ComputeException("Failed to stop server", e);
+            throw new ComputeException("Failed to shutdown server", e);
         }
+    }
+
+    @Override
+    public boolean isBound() {
+        return this.bindFuture != null && this.bindFuture.channel() != null &&
+               this.bindFuture.channel().isActive();
     }
 
     @Override

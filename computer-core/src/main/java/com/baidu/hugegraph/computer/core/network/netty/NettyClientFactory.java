@@ -20,16 +20,14 @@
 package com.baidu.hugegraph.computer.core.network.netty;
 
 import static com.baidu.hugegraph.computer.core.network.TransportConf.CLIENT_THREAD_GROUP_NAME;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.clientChannelClass;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.createEventLoop;
+import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.clientChannelClass;
+import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.createEventLoop;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
@@ -57,30 +55,21 @@ public class NettyClientFactory implements ClientFactory {
     private EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
 
-    private NettyClientFactory(TransportConf conf,
-                               ByteBufAllocator bufAllocator) {
+    public NettyClientFactory(TransportConf conf) {
+        this(conf, BufAllocatorFactory.createBufAllocator());
+    }
+
+    public NettyClientFactory(TransportConf conf,
+                              ByteBufAllocator bufAllocator) {
         this.conf = conf;
         this.bufAllocator = bufAllocator;
         this.protocol = new TransportProtocol(this.conf);
     }
 
-    public static NettyClientFactory newNettyClientFactory(
-            Config config, ByteBufAllocator bufAllocator) {
-        TransportConf conf = new TransportConf(config);
-        return new NettyClientFactory(conf, bufAllocator);
-    }
-
-    public static NettyClientFactory newNettyClientFactory(Config config) {
-        TransportConf conf = new TransportConf(config);
-        return new NettyClientFactory(conf,
-                                      BufAllocatorFactory.createBufAllocator());
-    }
-
     @Override
     public synchronized void init() {
         E.checkArgument(this.bootstrap == null,
-                        "TransportClientFactory has already been" +
-                        " initialization");
+                        "TransportClientFactory has already been initialized");
         this.workerGroup = createEventLoop(this.conf.ioMode(),
                                            this.conf.serverThreads(),
                                            CLIENT_THREAD_GROUP_NAME);
@@ -122,8 +111,6 @@ public class NettyClientFactory implements ClientFactory {
         InetSocketAddress address = connectionID.socketAddress();
         LOG.debug("Creating new client connection to {}", connectionID);
 
-        int connectTimeoutMs = Math.toIntExact(
-                               this.conf.clientConnectionTimeoutMs());
         Channel channel = this.doConnectWithRetries(address,
                                                     this.conf.networkRetries());
         NettyTransportClient transportClient = new NettyTransportClient(
@@ -155,7 +142,7 @@ public class NettyClientFactory implements ClientFactory {
                         "Create connection to %s timeout!", address);
         E.checkArgument(!future.isCancelled(), "Create connection to %s " +
                                                "cancelled by user!", address);
-        E.checkArgument(future.cause() != null,
+        E.checkArgument(future.cause() == null,
                         "Create connection to %s error!, cause: %s",
                         address, future.cause().getMessage());
         E.checkArgument(future.isSuccess(), "Create connection to %s error!",
@@ -194,7 +181,7 @@ public class NettyClientFactory implements ClientFactory {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (this.workerGroup != null && !this.workerGroup.isShuttingDown()) {
             this.workerGroup.shutdownGracefully();
         }

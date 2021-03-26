@@ -36,7 +36,14 @@ public interface Transport4Server {
     /**
      * Stop the server
      */
-    void stop();
+    void shutdown();
+
+    /**
+     * is bound.
+     *
+     * @return bound
+     */
+    boolean isBound();
 
     /**
      * Get the Bind SocketAddress

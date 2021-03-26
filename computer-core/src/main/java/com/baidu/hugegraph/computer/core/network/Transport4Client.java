@@ -66,4 +66,9 @@ public interface Transport4Client {
      * @return true if connection is active
      */
     boolean isActive();
+
+    /**
+     * close the client
+     */
+    void close();
 }
