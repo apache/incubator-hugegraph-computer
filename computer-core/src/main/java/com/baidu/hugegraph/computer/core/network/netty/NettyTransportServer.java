@@ -61,7 +61,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     private TransportConf conf;
     private ServerBootstrap bootstrap;
     private ChannelFuture bindFuture;
-    private InetSocketAddress bindSocketAddress;
+    private InetSocketAddress bindAddress;
 
     private NettyTransportServer(ByteBufAllocator bufAllocator) {
         this.bufAllocator = bufAllocator;
@@ -69,7 +69,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
 
     public static NettyTransportServer newNettyTransportServer() {
         return new NettyTransportServer(
-               ByteBufAllocatorFactory.createByteBufAllocator());
+               BufAllocatorFactory.createBufAllocator());
     }
 
     public static NettyTransportServer newNettyTransportServer(
@@ -91,12 +91,12 @@ public class NettyTransportServer implements Transport4Server, Closeable {
 
         // Start Server
         this.bindFuture = this.bootstrap.bind().syncUninterruptibly();
-        this.bindSocketAddress = (InetSocketAddress)
+        this.bindAddress = (InetSocketAddress)
                                  this.bindFuture.channel().localAddress();
 
         LOG.info("Transport server started on SocketAddress {}.",
-                 this.bindSocketAddress);
-        return this.bindSocketAddress().getPort();
+                 this.bindAddress);
+        return this.bindAddress().getPort();
     }
 
     private void init(Config config) {
@@ -148,17 +148,17 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     }
 
     public int port() {
-        return this.bindSocketAddress().getPort();
+        return this.bindAddress().getPort();
     }
 
     public String host() {
-        return this.bindSocketAddress().getHostString();
+        return this.bindAddress().getHostString();
     }
 
-    public InetSocketAddress bindSocketAddress() {
-        E.checkArgumentNotNull(this.bindSocketAddress,
-                               "bindSocketAddress not initialized");
-        return this.bindSocketAddress;
+    @Override
+    public InetSocketAddress bindAddress() {
+        E.checkArgumentNotNull(this.bindAddress, "bindAddress not initialized");
+        return this.bindAddress;
     }
 
     @Override

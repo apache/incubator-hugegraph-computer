@@ -22,9 +22,9 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
 
-public class ByteBufAllocatorFactory {
+public class BufAllocatorFactory {
 
-    public static ByteBufAllocator createByteBufAllocator() {
+    public static ByteBufAllocator createBufAllocator() {
         // TODO Pooled allocators
         return PooledByteBufAllocator.DEFAULT;
     }

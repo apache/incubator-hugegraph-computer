@@ -105,8 +105,8 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE);
     }
 
-    public int sendBuf() {
-        return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
+    public int networkRetries() {
+        return this.config.get(ComputerOptions.TRANSPORT_NETWORK_RETRIES);
     }
 
     public long clientConnectionTimeoutMs() {
@@ -149,5 +149,9 @@ public class TransportConf {
 
     public boolean tcpKeepAlive() {
         return this.config.get(ComputerOptions.TRANSPORT_TCP_KEEP_ALIVE);
+    }
+
+    public int sendBuf() {
+        return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 }

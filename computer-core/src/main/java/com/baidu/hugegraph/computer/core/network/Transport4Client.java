@@ -20,8 +20,7 @@
 package com.baidu.hugegraph.computer.core.network;
 
 import java.io.IOException;
-
-import com.baidu.hugegraph.computer.core.network.connection.ClientManager;
+import java.net.InetSocketAddress;
 
 import io.netty.buffer.ByteBuf;
 
@@ -34,16 +33,9 @@ import io.netty.buffer.ByteBuf;
 public interface Transport4Client {
 
     /**
-     * Bind a client connection manger to Transport4Client
-     * @param clientManager
-     */
-    Transport4Client bindClientManger(ClientManager clientManager);
-
-
-    /**
      * This method is called before an iteration of sending buffers.
      */
-    void startSession();
+    void startSession() throws IOException;
 
     /**
      * Send the buffer to the server. Block the caller if busy.
@@ -58,4 +50,20 @@ public interface Transport4Client {
      * make sure the buffers sent be received by target workers.
      */
     void finishSession() throws IOException;
+
+    /**
+     * Get the ConnectionID
+     */
+    ConnectionID connectionID();
+
+    /**
+     * Get the Remote SocketAddress
+     */
+    InetSocketAddress remoteAddress();
+
+    /**
+     * To check whether the connection is active to use
+     * @return true if connection is active
+     */
+    boolean isActive();
 }

@@ -389,6 +389,14 @@ public class ComputerOptions extends OptionHolder {
                     3000L
             );
 
+    public static final ConfigOption<Integer> TRANSPORT_NETWORK_RETRIES =
+            new ConfigOption<>(
+                    "transport.network_retries",
+                    "The number of retry attempts for network communication.",
+                    nonNegativeInt(),
+                    0
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_MAX_PENDING_REQUESTS =
             new ConfigOption<>(
                     "transport.max_pending_requests",

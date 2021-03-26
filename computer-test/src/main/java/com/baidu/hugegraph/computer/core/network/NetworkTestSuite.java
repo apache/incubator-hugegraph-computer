@@ -26,7 +26,8 @@ import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServerTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    NettyTransportServerTest.class
+    NettyTransportServerTest.class,
+    ConnectionIDTest.class
 })
 public class NetworkTestSuite {
 }

@@ -27,10 +27,9 @@ import com.baidu.hugegraph.computer.core.network.Transport4Client;
 public interface ClientManager {
 
     /**
-     * Startup the clientManager
+     * Startup the ClientManager
      */
     void startup();
-
 
     /**
      * Get a {@link Transport4Client} instance from the connection pool first.
@@ -38,8 +37,7 @@ public interface ClientManager {
      * @param connectionID {@link ConnectionID}
      */
     Transport4Client getOrCreateTransport4Client(ConnectionID connectionID)
-                                                  throws IOException;
-
+                                                 throws IOException;
 
     /**
      * Get a {@link Transport4Client} instance from the connection pool first.
@@ -48,14 +46,12 @@ public interface ClientManager {
      * @param port the port
      */
     Transport4Client getOrCreateTransport4Client(String host, int port)
-                                                  throws IOException;
-
+                                                 throws IOException;
     /**
      * remove a client from the connection pool
-     * @param connectionID {@link ConnectionID}
+     * @param client {@link Transport4Client}
      */
-    void removeClient(ConnectionID connectionID);
-
+    void removeClient(Transport4Client client);
 
     /**
      * shutdown the clientManager

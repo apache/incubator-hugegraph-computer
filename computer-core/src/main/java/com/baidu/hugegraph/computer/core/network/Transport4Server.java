@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
+import java.net.InetSocketAddress;
+
 import com.baidu.hugegraph.computer.core.config.Config;
 
 /**
@@ -35,4 +37,9 @@ public interface Transport4Server {
      * Stop the server
      */
     void stop();
+
+    /**
+     * Get the Bind SocketAddress
+     */
+    InetSocketAddress bindAddress();
 }

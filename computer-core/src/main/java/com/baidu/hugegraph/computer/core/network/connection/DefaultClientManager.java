@@ -19,21 +19,21 @@
 
 package com.baidu.hugegraph.computer.core.network.connection;
 
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
-
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 public class DefaultClientManager implements ClientManager {
 
     private final ClientFactory clientFactory;
     private final ConcurrentHashMap<ConnectionID, Transport4Client>
-            clientPool = new ConcurrentHashMap<>();
+            clients = new ConcurrentHashMap<>();
 
-    DefaultClientManager(ClientFactory clientFactory) {
+    public DefaultClientManager(ClientFactory clientFactory) {
         this.clientFactory = clientFactory;
     }
 
@@ -51,16 +51,17 @@ public class DefaultClientManager implements ClientManager {
     @Override
     public Transport4Client getOrCreateTransport4Client(
                             ConnectionID connectionID) {
-        return this.clientPool.computeIfAbsent(connectionID, k -> {
+        return this.clients.computeIfAbsent(connectionID, k -> {
             DefaultClientManager clientManager = DefaultClientManager.this;
-            return clientManager.clientFactory.createClient(connectionID)
-                                .bindClientManger(clientManager);
+            return clientManager.clientFactory.createClient(connectionID);
         });
     }
 
     @Override
-    public void removeClient(ConnectionID connectionID) {
-        this.clientPool.remove(connectionID);
+    public void removeClient(Transport4Client client) {
+        if (!client.isActive()) {
+            this.clients.remove(client.connectionID(), client);
+        }
     }
 
     @Override

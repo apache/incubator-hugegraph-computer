@@ -19,6 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
+import static com.baidu.hugegraph.computer.core.network.TransportConf.CLIENT_THREAD_GROUP_NAME;
+import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.clientChannelClass;
+import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.createEventLoop;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
@@ -27,6 +37,7 @@ import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProtocol;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
@@ -35,15 +46,6 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import org.slf4j.Logger;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-
-import static com.baidu.hugegraph.computer.core.network.TransportConf.CLIENT_THREAD_GROUP_NAME;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.clientChannelClass;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopFactory.createEventLoop;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class NettyClientFactory implements ClientFactory {
 
@@ -71,14 +73,14 @@ public class NettyClientFactory implements ClientFactory {
     public static NettyClientFactory newNettyClientFactory(Config config) {
         TransportConf conf = new TransportConf(config);
         return new NettyClientFactory(conf,
-               ByteBufAllocatorFactory.createByteBufAllocator());
+                                      BufAllocatorFactory.createBufAllocator());
     }
 
     @Override
     public synchronized void init() {
         E.checkArgument(this.bootstrap == null,
                         "TransportClientFactory has already been" +
-                        " initialization.");
+                        " initialization");
         this.workerGroup = createEventLoop(this.conf.ioMode(),
                                            this.conf.serverThreads(),
                                            CLIENT_THREAD_GROUP_NAME);
@@ -103,8 +105,8 @@ public class NettyClientFactory implements ClientFactory {
         this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel channel) {
-                NettyClientFactory.this.protocol
-                        .initializeClientPipeline(channel);
+                NettyClientFactory.this.protocol.initializeClientPipeline(
+                                                 channel);
             }
         });
     }
@@ -117,12 +119,13 @@ public class NettyClientFactory implements ClientFactory {
         InetSocketAddress address = connectionID.socketAddress();
         LOG.debug("Creating new client connection to {}", connectionID);
 
-        int connectTimeoutMs =
-                Math.toIntExact(this.conf.clientConnectionTimeoutMs());
-        Channel channel = this.doConnect(address, connectTimeoutMs);
+        int connectTimeoutMs = Math.toIntExact(
+                               this.conf.clientConnectionTimeoutMs());
+        Channel channel = this.doConnectWithRetries(address,
+                                                    connectTimeoutMs,
+                                                    this.conf.networkRetries());
         NettyTransportClient transportClient = new NettyTransportClient(
-                                               channel, connectionID,
-                                    this, connectTimeoutMs);
+                                               channel, connectionID, this);
         LOG.debug("Success Creating new client connection to {}", connectionID);
         return transportClient;
     }
@@ -132,8 +135,9 @@ public class NettyClientFactory implements ClientFactory {
      */
     protected Channel doConnect(InetSocketAddress address,
                                 int connectTimeoutMs) {
-        E.checkArgumentNotNull(this.bootstrap, "TransportClientFactory has " +
-                                               "not been initialized yet.");
+        E.checkArgumentNotNull(this.bootstrap,
+                               "TransportClientFactory has not been " +
+                               "initialized yet");
         long preConnect = System.nanoTime();
 
         LOG.debug("connectTimeout of address [{}] is [{}].", address,
@@ -151,6 +155,9 @@ public class NettyClientFactory implements ClientFactory {
                         "Create connection to %s timeout!", address);
         E.checkArgument(!future.isCancelled(), "Create connection to %s " +
                                                "cancelled by user!", address);
+        E.checkArgument(future.cause() != null,
+                        "Create connection to %s error!, cause: %s",
+                        address, future.cause().getMessage());
         E.checkArgument(future.isSuccess(), "Create connection to %s error!",
                         address);
         long postConnect = System.nanoTime();
@@ -158,6 +165,29 @@ public class NettyClientFactory implements ClientFactory {
         LOG.info("Successfully created connection to {} after {} ms",
                  address, (postConnect - preConnect) / 1000000);
         return future.channel();
+    }
+
+    /**
+     * Connect to the remote server with retries
+     */
+    protected Channel doConnectWithRetries(InetSocketAddress address,
+                                           int connectTimeoutMs,
+                                           int retryNumber) {
+        int tried = 0;
+        while (true) {
+            try {
+                return this.doConnect(address, connectTimeoutMs);
+            } catch (Exception e) {
+                tried++;
+                if (tried > retryNumber) {
+                    LOG.warn("Failed to connect to {}. Giving up.", address, e);
+                    throw e;
+                } else {
+                    LOG.warn("Failed {} times to connect to {}. Retrying.",
+                             tried, address, e);
+                }
+            }
+        }
     }
 
     public TransportConf transportConf() {

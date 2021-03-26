@@ -23,14 +23,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageType;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
-import com.baidu.hugegraph.computer.core.network.connection.ClientManager;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
@@ -43,44 +42,45 @@ public class NettyTransportClient implements Transport4Client, Closeable {
     private volatile Channel channel;
     private final ConnectionID connectionID;
     private final NettyClientFactory clientFactory;
-    private final AtomicReference<ClientManager> clientManagerRef =
-                  new AtomicReference<>();
-
-    private int connectTimeoutMs;
 
     protected NettyTransportClient(Channel channel, ConnectionID connectionID,
-                                   NettyClientFactory clientFactory,
-                                   int connectTimeoutMs) {
+                                   NettyClientFactory clientFactory) {
         this.channel = channel;
         this.connectionID = connectionID;
         this.clientFactory = clientFactory;
-        this.connectTimeoutMs = connectTimeoutMs;
     }
 
     public synchronized void connect() {
         InetSocketAddress address = this.connectionID.socketAddress();
-        this.channel = this.clientFactory.doConnect(address,
-                                                    this.connectTimeoutMs);
+        TransportConf conf = this.clientFactory.transportConf();
+        int timeoutMs = Math.toIntExact(conf.clientConnectionTimeoutMs());
+        int retries = conf.networkRetries();
+        this.channel = this.clientFactory.doConnectWithRetries(address,
+                                                               timeoutMs,
+                                                               retries);
     }
 
     public Channel channel() {
         return this.channel;
     }
 
+    @Override
     public ConnectionID connectionID() {
         return this.connectionID;
     }
 
-    public InetSocketAddress socketAddress() {
+    @Override
+    public InetSocketAddress remoteAddress() {
         return (InetSocketAddress) this.channel.remoteAddress();
     }
 
+    @Override
     public boolean isActive() {
         return (this.channel.isOpen() || this.channel.isActive());
     }
 
     @Override
-    public void startSession() {
+    public void startSession() throws IOException {
 
     }
 
@@ -96,21 +96,11 @@ public class NettyTransportClient implements Transport4Client, Closeable {
     }
 
     @Override
-    public Transport4Client bindClientManger(ClientManager clientManager) {
-        this.clientManagerRef.compareAndSet(null, clientManager);
-        return this;
-    }
-
-    @Override
     public void close() throws IOException {
         // close is a local operation and should finish with milliseconds;
         // timeout just to be safe
         if (this.channel != null) {
             this.channel.close().awaitUninterruptibly(10, TimeUnit.SECONDS);
-        }
-
-        if (this.clientManagerRef.get() != null) {
-            this.clientManagerRef.get().removeClient(this.connectionID);
         }
     }
 }

@@ -66,11 +66,11 @@ public class TransportUtil {
         InetSocketAddress resolvedAddress = new InetSocketAddress(host, port);
         long hostResolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000;
 
-        String resolvedMsg = resolvedAddress.isUnresolved() ? "failed" :
+        String status = resolvedAddress.isUnresolved() ? "failed" :
                              "succeed";
         if (hostResolveTimeMs > 2000) {
             LOG.warn("DNS resolution {} for {} took {} ms",
-                     resolvedMsg, resolvedAddress, hostResolveTimeMs);
+                     status, resolvedAddress, hostResolveTimeMs);
         }
         return resolvedAddress;
     }
