@@ -53,10 +53,8 @@ public class NettyTransportClient implements Transport4Client, Closeable {
     public synchronized void connect() {
         InetSocketAddress address = this.connectionID.socketAddress();
         TransportConf conf = this.clientFactory.transportConf();
-        int timeoutMs = Math.toIntExact(conf.clientConnectionTimeoutMs());
         int retries = conf.networkRetries();
         this.channel = this.clientFactory.doConnectWithRetries(address,
-                                                               timeoutMs,
                                                                retries);
     }
 

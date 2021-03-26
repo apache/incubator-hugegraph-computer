@@ -90,7 +90,10 @@ public class NettyClientFactory implements ClientFactory {
                       .option(ChannelOption.ALLOCATOR, this.bufAllocator)
                       .option(ChannelOption.TCP_NODELAY, true)
                       .option(ChannelOption.SO_KEEPALIVE,
-                              this.conf.tcpKeepAlive());
+                              this.conf.tcpKeepAlive())
+                      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+                              Math.toIntExact(
+                              this.conf.clientConnectionTimeoutMs()));
 
         if (this.conf.receiveBuf() > 0) {
             this.bootstrap.option(ChannelOption.SO_RCVBUF,
@@ -122,7 +125,6 @@ public class NettyClientFactory implements ClientFactory {
         int connectTimeoutMs = Math.toIntExact(
                                this.conf.clientConnectionTimeoutMs());
         Channel channel = this.doConnectWithRetries(address,
-                                                    connectTimeoutMs,
                                                     this.conf.networkRetries());
         NettyTransportClient transportClient = new NettyTransportClient(
                                                channel, connectionID, this);
@@ -133,18 +135,16 @@ public class NettyClientFactory implements ClientFactory {
     /**
      * Connect to the remote server
      */
-    protected Channel doConnect(InetSocketAddress address,
-                                int connectTimeoutMs) {
+    protected Channel doConnect(InetSocketAddress address) {
         E.checkArgumentNotNull(this.bootstrap,
                                "TransportClientFactory has not been " +
                                "initialized yet");
         long preConnect = System.nanoTime();
 
+        int connectTimeoutMs = Math.toIntExact(
+                               this.conf.clientConnectionTimeoutMs());
         LOG.debug("connectTimeout of address [{}] is [{}].", address,
                   connectTimeoutMs);
-
-        this.bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-                              connectTimeoutMs);
 
         ChannelFuture future = this.bootstrap.connect(address);
 
@@ -171,12 +171,11 @@ public class NettyClientFactory implements ClientFactory {
      * Connect to the remote server with retries
      */
     protected Channel doConnectWithRetries(InetSocketAddress address,
-                                           int connectTimeoutMs,
                                            int retryNumber) {
         int tried = 0;
         while (true) {
             try {
-                return this.doConnect(address, connectTimeoutMs);
+                return this.doConnect(address);
             } catch (Exception e) {
                 tried++;
                 if (tried > retryNumber) {
