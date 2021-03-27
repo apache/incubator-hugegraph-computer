@@ -23,13 +23,11 @@ import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServerTest;
 import com.baidu.hugegraph.util.Log;
 
 public class MockMessageHandler implements MessageHandler {
 
-    private static final Logger LOG =
-            Log.logger(NettyTransportServerTest.class);
+    private static final Logger LOG = Log.logger(MockMessageHandler.class);
 
     @Override
     public void handle(MessageType messageType, int partition,

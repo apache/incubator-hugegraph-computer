@@ -95,7 +95,7 @@ public class TransportProtocol {
      * |                        CLIENT CHANNEL PIPELINE    |               |
      * |                                                  \|/              |
      * |    +---------------------+            +----------------------+    |
-     * |    | ResponseHandler     |            | MessageDecoder       |    |
+     * |    | ResponseHandler     |            | MessageEncoder       |    |
      * |    +----------+----------+            +-----------+----------+    |
      * |              /|\                                 \|/              |
      * |               |                                   |               |

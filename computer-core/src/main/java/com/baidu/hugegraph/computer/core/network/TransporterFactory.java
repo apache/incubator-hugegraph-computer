@@ -45,8 +45,8 @@ public class TransporterFactory {
         TransportConf conf = TransportConf.warpConfig(config);
         TransportProvider provider = conf.transportProvider();
         if (TransportProvider.NETTY == provider) {
-            ByteBufAllocator bufAllocator =
-                    BufAllocatorFactory.createBufAllocator();
+            ByteBufAllocator bufAllocator = BufAllocatorFactory
+                                            .createBufAllocator();
             return new NettyClientFactory(conf, bufAllocator);
         }
         throw new IllegalArgException("Unknown transportProvider: %s",

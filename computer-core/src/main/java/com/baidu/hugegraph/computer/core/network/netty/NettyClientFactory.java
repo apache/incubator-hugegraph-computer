@@ -24,10 +24,12 @@ import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil
 import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.createEventLoop;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.Transport4Client;
@@ -52,6 +54,7 @@ public class NettyClientFactory implements ClientFactory {
     private final TransportConf conf;
     private final ByteBufAllocator bufAllocator;
     private final TransportProtocol protocol;
+
     private EventLoopGroup workerGroup;
     private Bootstrap bootstrap;
 
@@ -74,15 +77,16 @@ public class NettyClientFactory implements ClientFactory {
                                            this.conf.serverThreads(),
                                            CLIENT_THREAD_GROUP_NAME);
         this.bootstrap = new Bootstrap();
-        this.bootstrap.group(this.workerGroup)
-                      .channel(clientChannelClass(this.conf.ioMode()))
-                      .option(ChannelOption.ALLOCATOR, this.bufAllocator)
-                      .option(ChannelOption.TCP_NODELAY, true)
-                      .option(ChannelOption.SO_KEEPALIVE,
-                              this.conf.tcpKeepAlive())
-                      .option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+        this.bootstrap.group(this.workerGroup);
+        this.bootstrap.channel(clientChannelClass(this.conf.ioMode()));
+
+        this.bootstrap.option(ChannelOption.ALLOCATOR, this.bufAllocator);
+        this.bootstrap.option(ChannelOption.TCP_NODELAY, true);
+        this.bootstrap.option(ChannelOption.SO_KEEPALIVE,
+                              this.conf.tcpKeepAlive());
+        this.bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
                               Math.toIntExact(
-                              this.conf.clientConnectionTimeoutMs()));
+                              this.conf.clientConnectionTimeout()));
 
         if (this.conf.receiveBuf() > 0) {
             this.bootstrap.option(ChannelOption.SO_RCVBUF,
@@ -97,8 +101,8 @@ public class NettyClientFactory implements ClientFactory {
         this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel channel) {
-                NettyClientFactory.this.protocol.initializeClientPipeline(
-                                                 channel);
+                NettyClientFactory.this.protocol
+                                  .initializeClientPipeline(channel);
             }
         });
     }
@@ -107,30 +111,32 @@ public class NettyClientFactory implements ClientFactory {
      * Create a new {@link Transport4Client} to the remote address.
      */
     @Override
-    public Transport4Client createClient(ConnectionID connectionID) {
+    public Transport4Client createClient(ConnectionID connectionID)
+                                         throws IOException {
         InetSocketAddress address = connectionID.socketAddress();
         LOG.debug("Creating new client connection to {}", connectionID);
 
         Channel channel = this.doConnectWithRetries(address,
                                                     this.conf.networkRetries());
-        NettyTransportClient transportClient = new NettyTransportClient(
-                                               channel, connectionID, this);
-        LOG.debug("Success Creating new client connection to {}", connectionID);
-        return transportClient;
+        NettyTransportClient client = new NettyTransportClient(channel,
+                                                               connectionID,
+                                                               this);
+        LOG.debug("Success created a new client to {}", connectionID);
+        return client;
     }
 
     /**
-     * Connect to the remote server
+     * Connect to the remote server.
      */
-    protected Channel doConnect(InetSocketAddress address) {
+    protected Channel doConnect(InetSocketAddress address) throws IOException {
         E.checkArgumentNotNull(this.bootstrap,
                                "TransportClientFactory has not been " +
                                "initialized yet");
         long preConnect = System.nanoTime();
 
         int connectTimeoutMs = Math.toIntExact(
-                               this.conf.clientConnectionTimeoutMs());
-        LOG.debug("connectTimeout of address [{}] is [{}].", address,
+                               this.conf.clientConnectionTimeout());
+        LOG.debug("connectTimeout of address [{}] is [{}]", address,
                   connectTimeoutMs);
 
         ChannelFuture future = this.bootstrap.connect(address);
@@ -138,19 +144,31 @@ public class NettyClientFactory implements ClientFactory {
         boolean connectSuccess = future.awaitUninterruptibly(connectTimeoutMs,
                                                              MILLISECONDS);
 
-        E.checkArgument(connectSuccess && future.isDone(),
-                        "Create connection to %s timeout!", address);
-        E.checkArgument(!future.isCancelled(), "Create connection to %s " +
-                                               "cancelled by user!", address);
-        E.checkArgument(future.cause() == null,
-                        "Create connection to %s error!, cause: %s",
-                        address, future.cause().getMessage());
-        E.checkArgument(future.isSuccess(), "Create connection to %s error!",
-                        address);
+        if (!future.isDone()) {
+            throw new TransportException(
+                      "Create connection to %s timeout!", address);
+        }
+
+        if (future.isCancelled()) {
+            throw new TransportException(
+                    "Create connection to %s cancelled by user!", address);
+        }
+
+        if (future.cause() != null) {
+            throw new TransportException(
+                      "Create connection to %s cancelled by error!",
+                      future.cause(), address);
+        }
+
+        if (!connectSuccess || !future.isSuccess()) {
+            throw new TransportException(
+                      "Create connection to %s cancelled by error!", address);
+        }
+
         long postConnect = System.nanoTime();
 
         LOG.info("Successfully created connection to {} after {} ms",
-                 address, (postConnect - preConnect) / 1000000);
+                 address, (postConnect - preConnect) / 1000000L);
         return future.channel();
     }
 
@@ -158,25 +176,25 @@ public class NettyClientFactory implements ClientFactory {
      * Connect to the remote server with retries
      */
     protected Channel doConnectWithRetries(InetSocketAddress address,
-                                           int retryNumber) {
+                                           int retryNumber) throws IOException {
         int tried = 0;
         while (true) {
             try {
                 return this.doConnect(address);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 tried++;
                 if (tried > retryNumber) {
-                    LOG.warn("Failed to connect to {}. Giving up.", address, e);
+                    LOG.warn("Failed to connect to {}. Giving up", address, e);
                     throw e;
                 } else {
-                    LOG.warn("Failed {} times to connect to {}. Retrying.",
-                             tried, address, e);
+                    LOG.debug("Failed to connect to {} with retries times {}." +
+                              " Retrying...", address, tried, e);
                 }
             }
         }
     }
 
-    public TransportConf transportConf() {
+    public TransportConf conf() {
         return this.conf;
     }
 
@@ -184,6 +202,7 @@ public class NettyClientFactory implements ClientFactory {
     public void close() {
         if (this.workerGroup != null && !this.workerGroup.isShuttingDown()) {
             this.workerGroup.shutdownGracefully();
+            this.workerGroup = null;
         }
         this.bootstrap = null;
     }

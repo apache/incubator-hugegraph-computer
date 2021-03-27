@@ -20,5 +20,6 @@
 package com.baidu.hugegraph.computer.core.network;
 
 public enum TransportProvider {
+
     NETTY
 }

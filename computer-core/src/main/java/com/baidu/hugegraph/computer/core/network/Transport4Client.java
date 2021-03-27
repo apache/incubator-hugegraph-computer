@@ -52,12 +52,12 @@ public interface Transport4Client {
     void finishSession() throws IOException;
 
     /**
-     * Get the ConnectionID
+     * Get the {@link ConnectionID}
      */
     ConnectionID connectionID();
 
     /**
-     * Get the Remote SocketAddress
+     * Get the remote SocketAddress
      */
     InetSocketAddress remoteAddress();
 
@@ -68,7 +68,7 @@ public interface Transport4Client {
     boolean isActive();
 
     /**
-     * close the client
+     * Close the client
      */
     void close();
 }

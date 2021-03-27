@@ -34,19 +34,18 @@ public interface Transport4Server {
     int listen(Config config, MessageHandler handler);
 
     /**
-     * Stop the server
+     * Stop the server.
      */
     void shutdown();
 
     /**
-     * is bound.
-     *
-     * @return bound
+     * To check whether the server is bound to use.
+     * @return true if server is bound.
      */
     boolean isBound();
 
     /**
-     * Get the Bind SocketAddress
+     * Get the bind {@link InetSocketAddress}
      */
     InetSocketAddress bindAddress();
 }

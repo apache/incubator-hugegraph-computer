@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
+import static com.baidu.hugegraph.computer.core.network.TransportUtil.resolvedSocketAddress;
+
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -32,27 +34,27 @@ import com.baidu.hugegraph.util.E;
  */
 public class ConnectionID {
 
-    private final InetSocketAddress address;
-    private final int clientIndex;
     private static final ConcurrentHashMap<String, ConnectionID>
             CONNECTION_ID_CACHE = new ConcurrentHashMap<>();
+
+    private final InetSocketAddress address;
+    private final int clientIndex;
 
     public static ConnectionID parseConnectionID(String host, int port) {
         return parseConnectionID(host, port, 0);
     }
 
     public static ConnectionID parseConnectionID(String host, int port,
-                                               int clientIndex) {
+                                                 int clientIndex) {
 
         String cacheKey = buildCacheKey(host, port, clientIndex);
 
-        Function<String, ConnectionID> kvRemovalListener = key -> {
-            InetSocketAddress socketAddress =
-                    TransportUtil.resolvedSocketAddress(host, port);
+        Function<String, ConnectionID> function = key -> {
+            InetSocketAddress socketAddress = resolvedSocketAddress(host, port);
             return new ConnectionID(socketAddress, clientIndex);
         };
 
-        return CONNECTION_ID_CACHE.computeIfAbsent(cacheKey, kvRemovalListener);
+        return CONNECTION_ID_CACHE.computeIfAbsent(cacheKey, function);
     }
 
     public ConnectionID(InetSocketAddress address) {
@@ -93,7 +95,7 @@ public class ConnectionID {
             return true;
         }
 
-        if (obj.getClass() != ConnectionID.class) {
+        if (!(obj instanceof ConnectionID)) {
             return false;
         }
 

@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.network;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.Logger;
 
@@ -30,7 +29,6 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
-import io.netty.util.concurrent.DefaultThreadFactory;
 
 public class TransportUtil {
 
@@ -39,10 +37,6 @@ public class TransportUtil {
     public static final int NUMBER_CPU_CORES =
                             Runtime.getRuntime().availableProcessors();
 
-    public static ThreadFactory createNamedThreadFactory(String prefix) {
-        return new DefaultThreadFactory(prefix, true);
-    }
-
     public static String getRemoteAddress(Channel channel) {
         if (channel != null && channel.remoteAddress() != null) {
             return channel.remoteAddress().toString();
@@ -50,11 +44,10 @@ public class TransportUtil {
         return "<unknown remote>";
     }
 
-    public static InetAddress resolvedSocketAddress(String host) {
+    public static InetAddress resolvedAddress(String host) {
         try {
             return InetAddress.getByName(host);
-        } catch (
-                UnknownHostException e) {
+        } catch (UnknownHostException e) {
             throw new ComputeException("Failed to parse address from '%s'", e,
                                        host);
         }
@@ -64,13 +57,13 @@ public class TransportUtil {
                                                           int port) {
         long preResolveHost = System.nanoTime();
         InetSocketAddress resolvedAddress = new InetSocketAddress(host, port);
-        long hostResolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000;
+        long resolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000L;
 
-        String status = resolvedAddress.isUnresolved() ? "failed" :
-                             "succeed";
-        if (hostResolveTimeMs > 2000) {
+        if (resolveTimeMs > 2000L) {
+            String status = resolvedAddress.isUnresolved() ? "failed" :
+                            "succeed";
             LOG.warn("DNS resolution {} for {} took {} ms",
-                     status, resolvedAddress, hostResolveTimeMs);
+                     status, resolvedAddress, resolveTimeMs);
         }
         return resolvedAddress;
     }

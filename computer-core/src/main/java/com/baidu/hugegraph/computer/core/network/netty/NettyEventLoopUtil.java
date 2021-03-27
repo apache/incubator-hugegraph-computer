@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.createNamedThreadFactory;
-
 import java.util.concurrent.ThreadFactory;
 
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
@@ -37,8 +35,13 @@ import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.DefaultThreadFactory;
 
 public class NettyEventLoopUtil {
+
+    private static ThreadFactory createNamedThreadFactory(String prefix) {
+        return new DefaultThreadFactory(prefix, true);
+    }
 
     /**
      * Create a Netty EventLoopGroup based on the IOMode.
@@ -93,7 +96,7 @@ public class NettyEventLoopUtil {
      */
     public static void enableTriggeredMode(IOMode ioMode, boolean enableLt,
                                            ServerBootstrap serverBootstrap) {
-        if (ioMode != IOMode.EPOLL) {
+        if (serverBootstrap == null || ioMode != IOMode.EPOLL) {
             return;
         }
         if (enableLt) {

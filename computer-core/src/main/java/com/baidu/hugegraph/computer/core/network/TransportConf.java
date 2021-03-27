@@ -48,7 +48,7 @@ public class TransportConf {
 
     public InetAddress serverAddress() {
         String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
-        return TransportUtil.resolvedSocketAddress(host);
+        return TransportUtil.resolvedAddress(host);
     }
 
     /**
@@ -135,9 +135,13 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_NETWORK_RETRIES);
     }
 
-    public long clientConnectionTimeoutMs() {
+    public long clientConnectionTimeout() {
         return this.config
                    .get(ComputerOptions.TRANSPORT_CLIENT_CONNECT_TIMEOUT);
+    }
+
+    public long closeTimeout() {
+        return this.config.get(ComputerOptions.TRANSPORT_CLOSE_TIMEOUT);
     }
 
     /**

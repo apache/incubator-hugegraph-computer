@@ -30,23 +30,23 @@ public class ConnectionIDTest {
     @Test
     public void testParseConnectionID() {
         ConnectionID connectionID1 = ConnectionID.parseConnectionID(
-                "127.0.0.1", 8080);
+                                     "127.0.0.1", 8080);
         ConnectionID connectionID2 = ConnectionID.parseConnectionID(
-                "127.0.0.1", 8080);
+                                      "127.0.0.1", 8080);
         Assert.assertSame(connectionID1, connectionID2);
     }
 
     @Test
     public void testConnectionIDEquals() {
         ConnectionID connectionID1 = ConnectionID.parseConnectionID(
-                "localhost", 8080);
-        InetSocketAddress localSocketAddress =
-                TransportUtil.resolvedSocketAddress("127.0.0.1", 8080);
-        ConnectionID connectionID2 = new ConnectionID(localSocketAddress);
+                                     "localhost", 8080);
+        InetSocketAddress address = TransportUtil.resolvedSocketAddress(
+                                    "127.0.0.1", 8080);
+        ConnectionID connectionID2 = new ConnectionID(address);
         Assert.assertEquals(connectionID1, connectionID2);
 
         ConnectionID connectionID3 = ConnectionID.parseConnectionID(
-                "127.0.0.1", 8080, 2);
+                                     "127.0.0.1", 8080, 2);
         Assert.assertNotEquals(connectionID1, connectionID3);
     }
 
@@ -55,7 +55,7 @@ public class ConnectionIDTest {
         InetSocketAddress localSocketAddress =
                 InetSocketAddress.createUnresolved("127.0.0.1", 8080);
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            ConnectionID connectionID2 = new ConnectionID(localSocketAddress);
+            ConnectionID connectionID = new ConnectionID(localSocketAddress);
         }, e -> {
             Assert.assertTrue(e.getMessage().contains("The address must be " +
                                                       "resolved"));

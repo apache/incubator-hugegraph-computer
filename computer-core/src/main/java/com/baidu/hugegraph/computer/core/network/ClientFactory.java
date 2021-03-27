@@ -20,22 +20,24 @@
 package com.baidu.hugegraph.computer.core.network;
 
 
+import java.io.IOException;
+
 public interface ClientFactory {
 
     /**
-     * Init the ClientFactory
+     * Init the {@link ClientFactory}
      */
     void init();
 
     /**
-     * close the ClientFactory
+     * Close the {@link ClientFactory}
      */
     void close();
 
     /**
-     * Create a Transport4Client
-     * @param connectionID ConnectionID
-     * @return Transport4Client
+     * Create a Transport4Client.
+     * @param connectionID {@link ConnectionID}
+     * @return {@link Transport4Client}
      */
-    Transport4Client createClient(ConnectionID connectionID);
+    Transport4Client createClient(ConnectionID connectionID) throws IOException;
 }

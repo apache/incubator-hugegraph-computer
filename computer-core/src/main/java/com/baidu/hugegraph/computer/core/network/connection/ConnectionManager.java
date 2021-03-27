@@ -30,9 +30,10 @@ import com.baidu.hugegraph.computer.core.network.Transport4Server;
 public interface ConnectionManager {
 
     /**
-     * Init the ClientFactory
+     * Init the client connection manager.
+     * This method is called only once.
      */
-    void initClientFactory(Config config);
+    void initClient(Config config);
 
     /**
      * Get a {@link Transport4Client} instance from the connection pool first.
@@ -51,33 +52,34 @@ public interface ConnectionManager {
     Transport4Client getOrCreateClient(String host, int port)
                                        throws IOException;
     /**
-     * Close a client from the ConnectionManager
+     * Close a client from the {@link ConnectionManager}
      * @param client {@link Transport4Client}
      */
     void closeClient(Transport4Client client);
 
     /**
-     * Start the server
+     * Shutdown the client connection manager.
+     */
+    void shutdownClient();
+
+    /**
+     * Start the server, return the port listened.
+     * This method is called only once.
      */
     int startServer(Config config, MessageHandler handler);
 
     /**
-     * Return the only one server
+     * Return the only one listened server.
      */
     Transport4Server getServer();
 
     /**
-     * Shutdown the ClientFactory
+     * Shutdown the server.
      */
-    void shutdownClientFactory() throws IOException;
+    void shutdownServer();
 
     /**
-     * Shutdown the server
+     * Shutdown the ClientFactory and server.
      */
-    void shutdownServer() throws IOException;
-
-    /**
-     * Shutdown the ClientFactory and server
-     */
-    void shutdown() throws IOException;
+    void shutdown();
 }

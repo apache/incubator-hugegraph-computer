@@ -22,11 +22,11 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.createEventLoop;
 import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.serverChannelClass;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
@@ -91,7 +91,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
 
         LOG.info("Transport server started on SocketAddress {}",
                  this.bindAddress);
-        return this.bindAddress().getPort();
+        return this.bindAddress.getPort();
     }
 
     private void init(Config config) {
@@ -143,7 +143,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
         }
     }
 
-    public TransportConf transportConf() {
+    public TransportConf conf() {
         return this.conf;
     }
 
@@ -180,8 +180,9 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     @Override
     public void close() throws IOException {
         if (this.bindFuture != null) {
+            long timeout = this.conf.closeTimeout();
             this.bindFuture.channel().close()
-                           .awaitUninterruptibly(10, TimeUnit.SECONDS);
+                           .awaitUninterruptibly(timeout, MILLISECONDS);
             this.bindFuture = null;
         }
         if (this.bootstrap != null && this.bootstrap.config().group() != null) {

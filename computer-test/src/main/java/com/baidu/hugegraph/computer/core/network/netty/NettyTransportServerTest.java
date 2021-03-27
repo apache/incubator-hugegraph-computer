@@ -76,7 +76,7 @@ public class NettyTransportServerTest {
     public void testListenWithDefaultPort() {
         int port = this.server.listen(config, messageHandler);
 
-        TransportConf conf = this.server.transportConf();
+        TransportConf conf = this.server.conf();
         Assert.assertEquals(3, conf.serverThreads());
         Assert.assertEquals(IOMode.NIO, conf.ioMode());
         Assert.assertEquals("127.0.0.1",
@@ -100,7 +100,7 @@ public class NettyTransportServerTest {
 
         int port = this.server.listen(config, messageHandler);
 
-        TransportConf conf = this.server.transportConf();
+        TransportConf conf = this.server.conf();
         Assert.assertEquals(3, conf.serverThreads());
         Assert.assertEquals(IOMode.NIO, conf.ioMode());
         Assert.assertEquals("127.0.0.1",
@@ -125,7 +125,7 @@ public class NettyTransportServerTest {
         Assert.assertThrows(ComputeException.class, () -> {
             this.server.listen(config, messageHandler);
         }, e -> {
-            Assert.assertTrue(e.getMessage().contains("Failed to parse"));
+            Assert.assertContains("Failed to parse", e.getMessage());
         });
     }
 
@@ -142,7 +142,7 @@ public class NettyTransportServerTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             this.server.listen(config, messageHandler);
         }, e -> {
-            Assert.assertTrue(e.getMessage().contains("port out of range"));
+            Assert.assertContains("port out of range", e.getMessage());
         });
     }
 
@@ -157,7 +157,7 @@ public class NettyTransportServerTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             this.server.listen(config, messageHandler);
         }, e -> {
-            Assert.assertTrue(e.getMessage().contains("already been listened"));
+            Assert.assertContains("already been listened", e.getMessage());
         });
     }
 }

@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.network.connection;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
@@ -36,24 +35,33 @@ public class TransportConnectionManager implements ConnectionManager {
 
     private Transport4Server server;
     private ClientFactory clientFactory;
-    private final ConcurrentHashMap<ConnectionID, Transport4Client>
-            clients = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<ConnectionID, Transport4Client> clients;
+
+    public TransportConnectionManager() {
+        this.clients = new ConcurrentHashMap<>();
+    }
 
     @Override
-    public synchronized void initClientFactory(Config config) {
+    public synchronized void initClient(Config config) {
         E.checkArgument(this.clientFactory == null,
                         "ClientFactory has already been listened");
-        this.clientFactory = TransporterFactory.createClientFactory(config);
+        ClientFactory factory = TransporterFactory.createClientFactory(config);
+        factory.init();
+        this.clientFactory = factory;
     }
 
     @Override
     public Transport4Client getOrCreateClient(ConnectionID connectionID)
                                               throws IOException {
-        Function<ConnectionID, Transport4Client> createClientFunc = k -> {
+        Transport4Client client = this.clients.get(connectionID);
+        if (client == null) {
+            // Create the client if we don't have it yet.
             ClientFactory clientFactory = this.clientFactory;
-            return clientFactory.createClient(connectionID);
-        };
-        return this.clients.computeIfAbsent(connectionID, createClientFunc);
+            this.clients.putIfAbsent(connectionID,
+                                     clientFactory.createClient(connectionID));
+            client = this.clients.get(connectionID);
+        }
+        return client;
     }
 
     @Override
@@ -78,7 +86,6 @@ public class TransportConnectionManager implements ConnectionManager {
         E.checkArgument(this.server == null,
                         "The server has already been listened");
         Transport4Server server = TransporterFactory.createServer(config);
-        assert server != null;
         int bindPort = server.listen(config, handler);
         this.server = server;
         return bindPort;
@@ -92,22 +99,28 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public void shutdownClientFactory() throws IOException {
+    public void shutdownClient() {
         if (this.clientFactory != null) {
             this.clientFactory.close();
+            this.clientFactory = null;
+        }
+
+        if (!this.clients.isEmpty()) {
+            this.clients.clear();
         }
     }
 
     @Override
-    public void shutdownServer() throws IOException {
+    public void shutdownServer() {
         if (this.server != null) {
             this.server.shutdown();
+            this.server = null;
         }
     }
 
     @Override
-    public void shutdown() throws IOException {
-        this.shutdownClientFactory();
+    public void shutdown() {
+        this.shutdownClient();
         this.shutdownServer();
     }
 }

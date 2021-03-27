@@ -19,9 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
@@ -49,9 +50,9 @@ public class NettyTransportClient implements Transport4Client {
         this.clientFactory = clientFactory;
     }
 
-    public synchronized void connect() {
+    public synchronized void connect() throws IOException {
         InetSocketAddress address = this.connectionID.socketAddress();
-        TransportConf conf = this.clientFactory.transportConf();
+        TransportConf conf = this.clientFactory.conf();
         int retries = conf.networkRetries();
         this.channel = this.clientFactory.doConnectWithRetries(address,
                                                                retries);
@@ -78,26 +79,25 @@ public class NettyTransportClient implements Transport4Client {
 
     @Override
     public void startSession() throws IOException {
-
+        // TODO startSession
     }
 
     @Override
     public void send(MessageType messageType, int partition,
                      ByteBuf buffer) throws IOException {
-
+        // TODO send message
     }
 
     @Override
     public void finishSession() throws IOException {
-
+        // TODO finishSession
     }
 
     @Override
     public void close() {
-        // close is a local operation and should finish with milliseconds;
-        // timeout just to be safe
         if (this.channel != null) {
-            this.channel.close().awaitUninterruptibly(10, TimeUnit.SECONDS);
+            long timeout = this.clientFactory.conf().closeTimeout();
+            this.channel.close().awaitUninterruptibly(timeout, MILLISECONDS);
         }
     }
 }
