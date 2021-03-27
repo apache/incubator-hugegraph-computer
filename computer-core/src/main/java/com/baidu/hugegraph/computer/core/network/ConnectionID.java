@@ -28,9 +28,9 @@ import java.util.function.Function;
 import com.baidu.hugegraph.util.E;
 
 /**
- * A {@link ConnectionID} identifies a connection to a remote task manager by
- * the socket address and a client index. This allows multiple connections to
- * the same worker to be distinguished by their client index.
+ * A {@link ConnectionID} identifies a connection to a remote connection
+ * manager by the socket address and a client index. This allows multiple
+ * connections to the same worker to be distinguished by their client index.
  */
 public class ConnectionID {
 
