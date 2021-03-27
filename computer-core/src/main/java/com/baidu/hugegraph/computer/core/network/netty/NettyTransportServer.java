@@ -26,6 +26,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import org.slf4j.Logger;
@@ -76,6 +77,7 @@ public class NettyTransportServer implements Transport4Server, Closeable {
     public synchronized int listen(Config config, MessageHandler handler) {
         E.checkArgument(this.bindFuture == null,
                         "Netty server has already been listened");
+        final long start = System.currentTimeMillis();
 
         this.init(config);
 
@@ -89,8 +91,10 @@ public class NettyTransportServer implements Transport4Server, Closeable {
         this.bindAddress = (InetSocketAddress)
                            this.bindFuture.channel().localAddress();
 
-        LOG.info("Transport server started on SocketAddress {}",
-                 this.bindAddress);
+        final long duration = System.currentTimeMillis() - start;
+        LOG.info("Transport server started on SocketAddress {}, took {} ms",
+                 this.bindAddress, duration);
+
         return this.bindAddress.getPort();
     }
 
@@ -151,8 +155,9 @@ public class NettyTransportServer implements Transport4Server, Closeable {
         return this.bindAddress().getPort();
     }
 
-    public String host() {
-        return this.bindAddress().getHostString();
+    public String ip() {
+        InetAddress address = this.bindAddress().getAddress();
+        return address == null ? null : address.getHostAddress();
     }
 
     @Override

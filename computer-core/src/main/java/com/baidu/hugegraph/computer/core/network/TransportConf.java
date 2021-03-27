@@ -51,6 +51,10 @@ public class TransportConf {
         return TransportUtil.resolvedAddress(host);
     }
 
+    public String serverAddressString() {
+        return this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
+    }
+
     /**
      * A port number of zero will let the system pick up an ephemeral port.
      */

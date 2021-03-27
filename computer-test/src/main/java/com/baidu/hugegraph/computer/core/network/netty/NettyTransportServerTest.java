@@ -20,6 +20,8 @@
 package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,7 +86,65 @@ public class NettyTransportServerTest {
 
         Assert.assertNotEquals(0, this.server.port());
         Assert.assertNotEquals(0, port);
-        Assert.assertEquals("127.0.0.1", this.server.host());
+        Assert.assertEquals("127.0.0.1", this.server.ip());
+        // reverse lookup may not be able to find.
+        String hostName = this.server.bindAddress().getHostName();
+        Assert.assertEquals("localhost", hostName);
+        Assert.assertEquals(port, this.server.port());
+    }
+
+    @Test
+    public void testListenWithLocalHost() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "localhost"
+        );
+        config = ComputerContext.instance().config();
+        int port = this.server.listen(config, messageHandler);
+
+        TransportConf conf = this.server.conf();
+        Assert.assertEquals("localhost", conf.serverAddress().getHostName());
+
+        Assert.assertNotEquals(0, this.server.port());
+        Assert.assertNotEquals(0, port);
+        Assert.assertEquals("127.0.0.1", this.server.ip());
+        Assert.assertEquals(port, this.server.port());
+    }
+
+    @Test
+    public void testListenWithLocalAddress() throws UnknownHostException {
+        InetAddress localHost = InetAddress.getLocalHost();
+        String hostName = localHost.getHostName();
+        String ip = InetAddress.getLocalHost().getHostAddress();
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, hostName
+        );
+        config = ComputerContext.instance().config();
+        int port = this.server.listen(config, messageHandler);
+
+        TransportConf conf = this.server.conf();
+        Assert.assertEquals(hostName, conf.serverAddress().getHostName());
+
+        Assert.assertNotEquals(0, this.server.port());
+        Assert.assertNotEquals(0, port);
+        Assert.assertEquals(ip, this.server.ip());
+        Assert.assertEquals(port, this.server.port());
+    }
+
+    @Test
+    public void testListenWithZeroIp() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "0.0.0.0"
+        );
+        config = ComputerContext.instance().config();
+        int port = this.server.listen(config, messageHandler);
+
+        TransportConf conf = this.server.conf();
+        Assert.assertEquals("0.0.0.0", conf.serverAddress().getHostAddress());
+
+        Assert.assertNotEquals(0, port);
+        Assert.assertNotEquals(0, this.server.port());
+        Assert.assertTrue(this.server.bindAddress().getAddress()
+                                     .isAnyLocalAddress());
         Assert.assertEquals(port, this.server.port());
     }
 
@@ -108,7 +168,8 @@ public class NettyTransportServerTest {
 
         Assert.assertEquals(9091, this.server.port());
         Assert.assertEquals(9091, port);
-        Assert.assertEquals("127.0.0.1", this.server.host());
+        String ip = this.server.bindAddress().getAddress().getHostAddress();
+        Assert.assertEquals("127.0.0.1", ip);
         Assert.assertEquals(port, this.server.port());
     }
 
@@ -151,7 +212,7 @@ public class NettyTransportServerTest {
         int port = this.server.listen(config, messageHandler);
         Assert.assertNotEquals(0, this.server.port());
         Assert.assertNotEquals(0, port);
-        Assert.assertEquals("127.0.0.1", this.server.host());
+        Assert.assertEquals("127.0.0.1", this.server.ip());
         Assert.assertEquals(port, this.server.port());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {

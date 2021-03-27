@@ -156,13 +156,13 @@ public class NettyClientFactory implements ClientFactory {
 
         if (future.cause() != null) {
             throw new TransportException(
-                      "Create connection to %s cancelled by error!",
-                      future.cause(), address);
+                      "Create connection to %s error!, cause:%s",
+                      future.cause(), address, future.cause().getMessage());
         }
 
         if (!connectSuccess || !future.isSuccess()) {
             throw new TransportException(
-                      "Create connection to %s cancelled by error!", address);
+                      "Create connection to %s error!", address);
         }
 
         long postConnect = System.nanoTime();
