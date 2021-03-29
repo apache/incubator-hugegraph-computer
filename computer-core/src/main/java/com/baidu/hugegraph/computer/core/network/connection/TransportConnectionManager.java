@@ -26,16 +26,16 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
-import com.baidu.hugegraph.computer.core.network.Transport4Client;
-import com.baidu.hugegraph.computer.core.network.Transport4Server;
+import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportServer;
 import com.baidu.hugegraph.computer.core.network.TransporterFactory;
 import com.baidu.hugegraph.util.E;
 
 public class TransportConnectionManager implements ConnectionManager {
 
-    private Transport4Server server;
+    private TransportServer server;
     private ClientFactory clientFactory;
-    private final ConcurrentHashMap<ConnectionID, Transport4Client> clients;
+    private final ConcurrentHashMap<ConnectionID, TransportClient> clients;
 
     public TransportConnectionManager() {
         this.clients = new ConcurrentHashMap<>();
@@ -51,9 +51,9 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public Transport4Client getOrCreateClient(ConnectionID connectionID)
+    public TransportClient getOrCreateClient(ConnectionID connectionID)
                                               throws IOException {
-        Transport4Client client = this.clients.get(connectionID);
+        TransportClient client = this.clients.get(connectionID);
         if (client == null) {
             // Create the client if we don't have it yet.
             ClientFactory clientFactory = this.clientFactory;
@@ -65,14 +65,14 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public Transport4Client getOrCreateClient(String host, int port)
+    public TransportClient getOrCreateClient(String host, int port)
                                               throws IOException {
         ConnectionID connectionID = ConnectionID.parseConnectionID(host, port);
         return this.getOrCreateClient(connectionID);
     }
 
     @Override
-    public void closeClient(Transport4Client client) {
+    public void closeClient(TransportClient client) {
         if (client != null && client.connectionID() != null) {
             boolean ret = this.clients.remove(client.connectionID(), client);
             if (ret) {
@@ -85,16 +85,16 @@ public class TransportConnectionManager implements ConnectionManager {
     public synchronized int startServer(Config config, MessageHandler handler) {
         E.checkArgument(this.server == null,
                         "The server has already been listened");
-        Transport4Server server = TransporterFactory.createServer(config);
+        TransportServer server = TransporterFactory.createServer(config);
         int bindPort = server.listen(config, handler);
         this.server = server;
         return bindPort;
     }
 
     @Override
-    public Transport4Server getServer() {
+    public TransportServer getServer() {
         E.checkArgument(this.server != null && this.server.isBound(),
-                        "Transport4Server has not been initialized yet");
+                        "TransportServer has not been initialized yet");
         return this.server;
     }
 

@@ -24,9 +24,12 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
-import com.baidu.hugegraph.computer.core.network.Transport4Client;
-import com.baidu.hugegraph.computer.core.network.Transport4Server;
+import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportServer;
 
+/**
+ * This is used for unified manage server and client connection.
+ */
 public interface ConnectionManager {
 
     /**
@@ -36,26 +39,26 @@ public interface ConnectionManager {
     void initClient(Config config);
 
     /**
-     * Get a {@link Transport4Client} instance from the connection pool first.
+     * Get a {@link TransportClient} instance from the connection pool first.
      * If {it is not found or not active, create a new one.
      * @param connectionID {@link ConnectionID}
      */
-    Transport4Client getOrCreateClient(ConnectionID connectionID)
+    TransportClient getOrCreateClient(ConnectionID connectionID)
                                        throws IOException;
 
     /**
-     * Get a {@link Transport4Client} instance from the connection pool first.
+     * Get a {@link TransportClient} instance from the connection pool first.
      * If {it is not found or not active, create a new one.
      * @param host the hostName or Ip
      * @param port the port
      */
-    Transport4Client getOrCreateClient(String host, int port)
+    TransportClient getOrCreateClient(String host, int port)
                                        throws IOException;
     /**
      * Close a client from the {@link ConnectionManager}
-     * @param client {@link Transport4Client}
+     * @param client {@link TransportClient}
      */
-    void closeClient(Transport4Client client);
+    void closeClient(TransportClient client);
 
     /**
      * Shutdown the client connection manager.
@@ -71,7 +74,7 @@ public interface ConnectionManager {
     /**
      * Return the only one listened server.
      */
-    Transport4Server getServer();
+    TransportServer getServer();
 
     /**
      * Shutdown the server.

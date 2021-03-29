@@ -35,9 +35,9 @@ public interface ClientFactory {
     void close();
 
     /**
-     * Create a Transport4Client.
+     * Create a TransportClient.
      * @param connectionID {@link ConnectionID}
-     * @return {@link Transport4Client}
+     * @return {@link TransportClient}
      */
-    Transport4Client createClient(ConnectionID connectionID) throws IOException;
+    TransportClient createClient(ConnectionID connectionID) throws IOException;
 }

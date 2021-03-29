@@ -29,7 +29,7 @@ import io.netty.buffer.ByteBufAllocator;
 
 public class TransporterFactory {
 
-    public static Transport4Server createServer(Config config) {
+    public static TransportServer createServer(Config config) {
         TransportConf conf = TransportConf.warpConfig(config);
         TransportProvider provider = conf.transportProvider();
         if (TransportProvider.NETTY == provider) {

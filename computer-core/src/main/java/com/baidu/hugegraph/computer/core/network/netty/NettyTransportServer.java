@@ -34,9 +34,9 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
-import com.baidu.hugegraph.computer.core.network.Transport4Server;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProtocol;
+import com.baidu.hugegraph.computer.core.network.TransportServer;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -48,7 +48,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 
-public class NettyTransportServer implements Transport4Server, Closeable {
+public class NettyTransportServer implements TransportServer, Closeable {
 
     private static final Logger LOG = Log.logger(NettyTransportServer.class);
 

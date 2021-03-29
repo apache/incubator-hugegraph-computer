@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 /**
  * This is used for worker that receives data.
  */
-public interface Transport4Server {
+public interface TransportServer {
 
     /**
      * Startup server, return the port listened.

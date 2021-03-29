@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
-import com.baidu.hugegraph.computer.core.network.Transport4Client;
+import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProtocol;
 import com.baidu.hugegraph.util.E;
@@ -108,10 +108,10 @@ public class NettyClientFactory implements ClientFactory {
     }
 
     /**
-     * Create a new {@link Transport4Client} to the remote address.
+     * Create a new {@link TransportClient} to the remote address.
      */
     @Override
-    public Transport4Client createClient(ConnectionID connectionID)
+    public TransportClient createClient(ConnectionID connectionID)
                                          throws IOException {
         InetSocketAddress address = connectionID.socketAddress();
         LOG.debug("Creating new client connection to {}", connectionID);

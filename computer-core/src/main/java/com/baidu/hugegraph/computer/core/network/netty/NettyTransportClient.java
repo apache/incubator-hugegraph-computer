@@ -28,14 +28,14 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageType;
-import com.baidu.hugegraph.computer.core.network.Transport4Client;
+import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
-public class NettyTransportClient implements Transport4Client {
+public class NettyTransportClient implements TransportClient {
 
     private static final Logger LOG = Log.logger(NettyTransportClient.class);
 

@@ -30,7 +30,7 @@ import io.netty.buffer.ByteBuf;
  * called only once. {@link #send} is called zero or more times.
  * {@link #finishSession()} is called only once.
  */
-public interface Transport4Client {
+public interface TransportClient {
 
     /**
      * This method is called before an iteration of sending buffers.

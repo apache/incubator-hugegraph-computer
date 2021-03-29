@@ -153,7 +153,7 @@ public class TransportConf {
      * Note: If the number of unreceived ack greater than
      * TRANSPORT_MAX_PENDING_REQUESTS,
      * it will block the client from calling
-     * {@link com.baidu.hugegraph.computer.core.network.Transport4Client#send}
+     * {@link TransportClient#send}
      */
     public int maxPendingRequests() {
         return this.config.get(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS);
