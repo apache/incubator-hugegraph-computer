@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.util.E;
@@ -148,6 +149,23 @@ public final class Config {
 
     public String getString(String key, String defaultValue) {
         return this.allConfig.getString(key, defaultValue);
+    }
+
+    /**
+     * Create object by class option. It throws ComputerException if failed
+     * to create object.
+     */
+    public <T> T createObject(ConfigOption<Class<?>> clazzOption) {
+        Class clazz = this.get(clazzOption);
+        try {
+            @SuppressWarnings("unchecked")
+            T instance = (T) clazz.newInstance();
+            return instance;
+        } catch (Exception e) {
+            throw new ComputerException("Failed to create object for option " +
+                                        "'%s', class='%s'",
+                                        e, clazzOption.name(), clazz.getName());
+        }
     }
 
     public String algorithmName() {

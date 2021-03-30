@@ -27,15 +27,14 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.master.MasterComputation;
-import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class ObjectFactoryTest {
+public class ConfigTest {
 
     @Test
     public void testCreateObject() {
         Config config = ComputerContext.instance().config();
-        MasterComputation masterComputation = ObjectFactory.createObject(config,
+        MasterComputation masterComputation = config.createObject(
                           ComputerOptions.MASTER_COMPUTATION_CLASS);
         Assert.assertEquals(DefaultMasterComputation.class,
                             masterComputation.getClass());
@@ -49,11 +48,12 @@ public class ObjectFactoryTest {
         );
         Config config = ComputerContext.instance().config();
         Assert.assertThrows(ComputerException.class, () -> {
-            ObjectFactory.createObject(config,
-                                       ComputerOptions.MASTER_COMPUTATION_CLASS);
+            config.createObject(ComputerOptions.MASTER_COMPUTATION_CLASS);
         }, e -> {
             Assert.assertContains("Failed to create object for option",
                                   e.getMessage());
+            Assert.assertContains("with modifiers \"private\"",
+                                  e.getCause().getMessage());
         });
     }
 }
