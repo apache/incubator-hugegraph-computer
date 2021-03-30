@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
@@ -32,6 +33,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.worker.Manager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 
 /**
@@ -48,15 +50,16 @@ public class MasterService implements MasterContext {
     private SuperstepStat superstepStat;
     private int superstep;
     private int maxSuperStep;
+    public List<Manager> managers = new ArrayList();
 
-    public MasterService(Config config) {
-        this.config = config;
+    public MasterService() {
     }
 
     /**
      * Init master service, create the managers used by master.
      */
-    public void init() {
+    public void init(Config config) {
+        this.config = config;
         this.maxSuperStep = this.config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
         /*
          * TODO: start rpc server and get rpc port.
@@ -64,6 +67,9 @@ public class MasterService implements MasterContext {
          */
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
+        for (Manager manager : this.managers) {
+            manager.init(this.config);
+        }
         // TODO: get hostname
         this.masterInfo = new ContainerInfo(-1, "localhost", 8001, 8002);
         this.bsp4Master.registerMaster(this.masterInfo);
@@ -72,9 +78,12 @@ public class MasterService implements MasterContext {
 
     /**
      * Stop the the master service. Stop the managers created in
-     * {@link #init()}.
+     * {@link #init(Config)}.
      */
     public void close() {
+        for (Manager manager : this.managers) {
+            manager.close(this.config);
+        }
         this.bsp4Master.clean();
         this.bsp4Master.close();
     }
@@ -92,28 +101,30 @@ public class MasterService implements MasterContext {
         // TODO: determine superstep if fail over is enabled.
         this.superstep = Constants.INPUT_SUPERSTEP;
         this.bsp4Master.masterSuperstepResume(this.superstep);
-        this.input();
+        this.inputStep();
         this.superstep++;
         for (; this.superstep < this.maxSuperStep; this.superstep++) {
             this.bsp4Master.waitWorkersSuperstepPrepared(this.superstep);
+            for (Manager manager : this.managers) {
+                manager.beforeSuperstep(this.config, this.superstep);
+            }
             this.bsp4Master.masterSuperstepPrepared(this.superstep);
             List<WorkerStat> workerStats =
                              this.bsp4Master.waitWorkersSuperstepDone(
                                              this.superstep);
-            this.superstepStat = superstepStat(workerStats);
+            this.superstepStat = SuperstepStat.from(workerStats);
             // TODO: calls algorithm's master-computation to decide whether
             //  stop iteration
-            boolean allVertexInactiveAndNoMessage =
-                    this.finishedVertexCount() == this.totalVertexCount() &&
-                    this.messageCount() == 0;
-            if (this.superstep == this.maxSuperStep - 1 ||
-                allVertexInactiveAndNoMessage) {
+            if (this.finishedIteration()) {
                 this.superstepStat.inactivate();
+            }
+            for (Manager manager : this.managers) {
+                manager.afterSuperstep(this.config, this.superstep);
             }
             this.bsp4Master.masterSuperstepDone(this.superstep,
                                                 this.superstepStat);
         }
-        this.output();
+        this.outputStep();
     }
 
     @Override
@@ -155,9 +166,9 @@ public class MasterService implements MasterContext {
 
     @Override
     public <V extends Value> void registerAggregator(
-                             String name,
-                             ValueType type,
-                             Class<? extends Combiner<V>> combinerClass) {
+                                  String name,
+                                  ValueType type,
+                                  Class<? extends Combiner<V>> combinerClass) {
         throw new ComputerException("Not implemented");
     }
 
@@ -171,28 +182,29 @@ public class MasterService implements MasterContext {
         throw new ComputerException("Not implemented");
     }
 
-    /**
-     * Generate SuperstepStat from workerStat list.
-     */
-    private static SuperstepStat superstepStat(List<WorkerStat> workerStats) {
-        SuperstepStat superstepStat = new SuperstepStat();
-        for (WorkerStat workerStat : workerStats) {
-            superstepStat.increase(workerStat);
+    private boolean finishedIteration() {
+        boolean allVertexInactiveAndNoMessage =
+                this.finishedVertexCount() == this.totalVertexCount() &&
+                this.messageCount() == 0;
+        if (this.superstep == this.maxSuperStep - 1 ||
+            allVertexInactiveAndNoMessage) {
+            return true;
+        } else {
+            return false;
         }
-        return superstepStat;
     }
 
-    private void input() {
+    private void inputStep() {
         this.bsp4Master.waitWorkersInputDone();
         this.bsp4Master.masterInputDone();
         List<WorkerStat> workerStats = this.bsp4Master.waitWorkersSuperstepDone(
-                                            Constants.INPUT_SUPERSTEP);
-        this.superstepStat = superstepStat(workerStats);
+                                       Constants.INPUT_SUPERSTEP);
+        this.superstepStat = SuperstepStat.from(workerStats);
         this.bsp4Master.masterSuperstepDone(Constants.INPUT_SUPERSTEP,
                                             this.superstepStat);
     }
 
-    private void output() {
+    private void outputStep() {
         this.bsp4Master.waitWorkersOutputDone();
     }
 }

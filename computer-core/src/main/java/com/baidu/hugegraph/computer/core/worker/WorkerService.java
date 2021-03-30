@@ -42,7 +42,7 @@ public class WorkerService implements WorkerContext {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 
-    private final Config config;
+    private Config config;
     private Bsp4Worker bsp4Worker;
     private ContainerInfo workerInfo;
     private ContainerInfo masterInfo;
@@ -51,14 +51,14 @@ public class WorkerService implements WorkerContext {
     private SuperstepStat superstepStat;
     public List<Manager> managers = new ArrayList();
 
-    public WorkerService(Config config) {
-        this.config = config;
+    public WorkerService() {
     }
 
     /**
      * Init worker service, create the managers used by worker service.
      */
-    public void init() {
+    public void init(Config config) {
+        this.config = config;
         // TODO: start data transportation server and get data port.
         this.workerInfo = new ContainerInfo(0, "localhost", 0, 8004);
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
@@ -98,28 +98,32 @@ public class WorkerService implements WorkerContext {
         // TODO: determine superstep if fail over is enabled.
         this.superstep = this.bsp4Worker.waitMasterSuperstepResume();
         if (this.superstep == Constants.INPUT_SUPERSTEP) {
-            this.input();
+            this.inputStep();
             this.superstep++;
         }
-        LOG.info("superstep {} before while loop", this.superstep);
+        /*
+         * The master determine whether to execute the next superstep. The
+         * superstepStat is active while master decides to execute the next
+         * superstep.
+         */
         while (this.superstepStat.active()) {
+            LOG.info("Start iteration of superstep {}", this.superstep);
             for (Manager manager : this.managers) {
                 manager.beforeSuperstep(this.config, this.superstep);
             }
-            LOG.info("workerSuperstepPrepared superstep:{}", this.superstep);
             this.bsp4Worker.workerSuperstepPrepared(this.superstep);
             this.bsp4Worker.waitMasterSuperstepPrepared(this.superstep);
-            // TODO: computer partitions parallel and get workerStat
             WorkerStat workerStat = this.computePartitions();
             for (Manager manager : this.managers) {
                 manager.afterSuperstep(this.config, this.superstep);
             }
             this.bsp4Worker.workerSuperstepDone(this.superstep, workerStat);
+            LOG.info("End iteration of superstep {}", this.superstep);
             this.superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
                                                  this.superstep);
             this.superstep++;
         }
-        this.output();
+        this.outputStep();
     }
 
     @Override
@@ -170,11 +174,17 @@ public class WorkerService implements WorkerContext {
         throw new ComputerException("Not implemented");
     }
 
-    private void input() {
+    private void inputStep() {
+        /*
+         * Load vertices and edges parallel.
+         */
         // TODO: calls LoadService to load vertices and edges parallel
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
 
+        /*
+         * Merge vertices and edges in partitions parallel, and get workerStat.
+         */
         // TODO: merge the data in partitions parallel, and get workerStat
         WorkerStat workerStat = this.computePartitions();
         this.bsp4Worker.workerSuperstepDone(Constants.INPUT_SUPERSTEP,
@@ -183,7 +193,10 @@ public class WorkerService implements WorkerContext {
                              this.superstep);
     }
 
-    private void output() {
+    private void outputStep() {
+        /*
+         * Write results back parallel
+         */
         // TODO: output the vertices in partitions parallel
         this.bsp4Worker.workerOutputDone();
     }
@@ -193,6 +206,7 @@ public class WorkerService implements WorkerContext {
      * @return WorkerStat
      */
     protected WorkerStat computePartitions() {
+        // TODO: computer partitions parallel and get workerStat
         throw new ComputerException("Not implemented");
     }
 }

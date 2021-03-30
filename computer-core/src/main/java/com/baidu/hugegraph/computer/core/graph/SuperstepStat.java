@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.graph;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
@@ -140,5 +141,13 @@ public class SuperstepStat implements Readable, Writable {
     @Override
     public String toString() {
         return JsonUtil.toJsonWithClass(this);
+    }
+
+    public static SuperstepStat from(List<WorkerStat> workerStats) {
+        SuperstepStat superstepStat = new SuperstepStat();
+        for (WorkerStat workerStat : workerStats) {
+            superstepStat.increase(workerStat);
+        }
+        return superstepStat;
     }
 }

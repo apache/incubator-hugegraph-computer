@@ -27,8 +27,12 @@ import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
  */
 public class MockWorkerService extends WorkerService {
 
-    public MockWorkerService(Config config) {
-        super(config);
+    public MockWorkerService() {
+        super();
+    }
+
+    public void init(Config config) {
+        super.init(config);
     }
 
     /**

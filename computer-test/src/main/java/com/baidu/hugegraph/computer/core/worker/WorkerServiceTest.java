@@ -37,6 +37,7 @@ import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
 public class WorkerServiceTest {
+
     private static final Logger LOG = Log.logger(WorkerServiceTest.class);
 
     private MasterService masterService;
@@ -50,9 +51,8 @@ public class WorkerServiceTest {
                 ComputerOptions.BSP_LOG_INTERVAL, "30000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2"
         );
-        Config config = ComputerContext.instance().config();
-        this.masterService = new MasterService(config);
-        this.workerService = new MockWorkerService(config);
+        this.masterService = new MasterService();
+        this.workerService = new MockWorkerService();
     }
 
     @After
@@ -66,16 +66,18 @@ public class WorkerServiceTest {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch countDownLatch = new CountDownLatch(2);
         pool.submit(() -> {
-            try  {
-                this.workerService.init();
+            Config config = ComputerContext.instance().config();
+            try {
+                this.workerService.init(config);
                 this.workerService.execute();
             } finally {
                 countDownLatch.countDown();
             }
         });
         pool.submit(() -> {
+            Config config = ComputerContext.instance().config();
             try {
-                this.masterService.init();
+                this.masterService.init(config);
                 this.masterService.execute();
             } finally {
                 countDownLatch.countDown();
