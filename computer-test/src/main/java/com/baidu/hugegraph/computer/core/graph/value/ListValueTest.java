@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
@@ -80,5 +81,48 @@ public class ListValueTest extends UnitTestBase {
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+    }
+
+    @Test
+    public void testCopy() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        value1.add(new IntValue(100));
+        value1.add(new IntValue(200));
+        ListValue<IntValue> value2 = value1.copy();
+        Assert.assertEquals(value1, value2);
+        value2.add(new IntValue(300));
+
+        Assert.assertEquals(3, value2.size());
+        Assert.assertTrue(value2.contains(new IntValue(100)));
+        Assert.assertTrue(value2.contains(new IntValue(200)));
+        Assert.assertTrue(value2.contains(new IntValue(300)));
+
+        Assert.assertEquals(2, value1.size());
+        Assert.assertTrue(value1.contains(new IntValue(100)));
+        Assert.assertTrue(value1.contains(new IntValue(200)));
+    }
+
+    @Test
+    public void testContains() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        value1.add(new IntValue(100));
+        value1.add(new IntValue(200));
+        Assert.assertTrue(value1.contains(new IntValue(100)));
+        Assert.assertTrue(value1.contains(new IntValue(200)));
+        Assert.assertFalse(value1.contains(new IntValue(300)));
+    }
+
+    @Test
+    public void testGetLast() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        Assert.assertThrows(NoSuchElementException.class, () -> {
+            value1.getLast();
+        }, e -> {
+            Assert.assertContains("The list value is empty", e.getMessage());
+        });
+        value1.add(new IntValue(100));
+        Assert.assertTrue(value1.getLast().equals(new IntValue(100)));
+        value1.add(new IntValue(200));
+        Assert.assertTrue(value1.getLast().equals(new IntValue(200)));
     }
 }

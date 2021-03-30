@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.collections.ListUtils;
 
@@ -41,8 +42,12 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
     }
 
     public ListValue(ValueType elemType) {
+        this(elemType, ComputerContext.instance().graphFactory().createList());
+    }
+
+    public ListValue(ValueType elemType, List<T> values) {
         this.elemType = elemType;
-        this.values = ComputerContext.instance().graphFactory().createList();
+        this.values = values;
     }
 
     public void add(T value) {
@@ -59,6 +64,24 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
     }
 
     public T get(int index) {
+        return this.values.get(index);
+    }
+
+    public ListValue copy() {
+        List values = ComputerContext.instance().graphFactory().createList();
+        values.addAll(this.values);
+        return new ListValue(this.elemType, values);
+    }
+
+    public boolean contains(T obj) {
+        return this.values.contains(obj);
+    }
+
+    public T getLast() {
+        int index = values.size() - 1;
+        if (index < 0) {
+            throw new NoSuchElementException("The list value is empty");
+        }
         return this.values.get(index);
     }
 
