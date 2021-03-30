@@ -26,6 +26,7 @@ import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.google.common.collect.ImmutableSet;
@@ -170,6 +171,15 @@ public class ComputerOptions extends OptionHolder {
                     1
             );
 
+    public static final ConfigOption<Integer> JOB_PARTITIONS_COUNT =
+            new ConfigOption<>(
+                    "job.partitions_count",
+                    "The partitions count for computing one graph " +
+                    "algorithm job.",
+                    positiveInt(),
+                    1
+            );
+
     public static final ConfigOption<Integer> BSP_MAX_SUPER_STEP =
             new ConfigOption<>(
                     "bsp.max_super_step",
@@ -238,5 +248,31 @@ public class ComputerOptions extends OptionHolder {
                     "range for data transportation.",
                     positiveInt(),
                     12000
+            );
+
+    public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
+            new ConfigOption<>(
+                    "master.computation_class",
+                    "Master-computation is computation that can determine " +
+                    "whether to continue next superstep. It runs at the end " +
+                    "of each superstep on master.",
+                    disallowEmpty(),
+                    DefaultMasterComputation.class
+            );
+
+    public static final ConfigOption<String> HUGEGRAPH_URL =
+            new ConfigOption<>(
+                    "hugegraph.url",
+                    "The hugegraph url to load data and write results back.",
+                    disallowEmpty(),
+                    "http://127.0.0.1:8080"
+            );
+
+    public static final ConfigOption<String> HUGEGRAPH_GRAPH_NAME =
+            new ConfigOption<>(
+                    "hugegraph.name",
+                    "The graph name to load data and write results back.",
+                    disallowEmpty(),
+                    "hugegraph"
             );
 }

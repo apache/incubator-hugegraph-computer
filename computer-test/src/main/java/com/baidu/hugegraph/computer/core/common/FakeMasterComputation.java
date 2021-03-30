@@ -19,14 +19,27 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.master.MasterComputation;
+import com.baidu.hugegraph.computer.core.master.MasterContext;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ExceptionTest.class,
-    ContainerInfoTest.class,
-    ConfigTest.class
-})
-public class CommonTestSuite {
+/**
+ * Can't create instance, used for ObjectFactoryTest.
+ */
+public class FakeMasterComputation implements MasterComputation {
+
+    private FakeMasterComputation() {
+    }
+
+    @Override
+    public void init(MasterContext context) {
+    }
+
+    @Override
+    public void close() {
+    }
+
+    @Override
+    public boolean compute(MasterContext context) {
+        return false;
+    }
 }
