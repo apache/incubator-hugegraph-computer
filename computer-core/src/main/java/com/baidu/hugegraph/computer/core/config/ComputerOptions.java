@@ -254,9 +254,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "master.computation_class",
                     "Master-computation is computation that can determine " +
-                    "whether to continue next superstep. It runs on master. " +
-                    "It can perform centralized computation between " +
-                    "supersteps. It runs after every superstep.",
+                    "whether to continue next superstep. It runs at the end " +
+                    "of each superstep on master.",
                     disallowEmpty(),
                     DefaultMasterComputation.class
             );
@@ -264,7 +263,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> HUGEGRAPH_URL =
             new ConfigOption<>(
                     "hugegraph.url",
-                    "The hugegraph url to load data and write result.",
+                    "The hugegraph url to load data and write results back.",
                     disallowEmpty(),
                     "http://127.0.0.1:8080"
             );
@@ -272,7 +271,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> HUGEGRAPH_GRAPH_NAME =
             new ConfigOption<>(
                     "hugegraph.name",
-                    "The graph name to load data and write result.",
+                    "The graph name to load data and write results back.",
                     disallowEmpty(),
                     "hugegraph"
             );

@@ -49,8 +49,8 @@ public class ObjectFactoryTest {
         );
         Config config = ComputerContext.instance().config();
         Assert.assertThrows(ComputerException.class, () -> {
-            Computation computation = ObjectFactory.createObject(config,
-                                      ComputerOptions.MASTER_COMPUTATION_CLASS);
+            ObjectFactory.createObject(config,
+                                       ComputerOptions.MASTER_COMPUTATION_CLASS);
         }, e -> {
             Assert.assertContains("Failed to create object for option",
                                   e.getMessage());
