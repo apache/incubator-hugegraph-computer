@@ -23,13 +23,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.master.MasterService;
@@ -40,66 +39,84 @@ public class WorkerServiceTest {
 
     private static final Logger LOG = Log.logger(WorkerServiceTest.class);
 
-    private MasterService masterService;
-    private WorkerService workerService;
+    @Test
+    public void testServiceSucess() throws InterruptedException {
+        MasterService masterService = new MasterService();
+        WorkerService workerService = new MockWorkerService();
+        try {
+            UnitTestBase.updateWithRequiredOptions(
+                    ComputerOptions.JOB_ID, "local_001",
+                    ComputerOptions.JOB_WORKERS_COUNT, "1",
+                    ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2"
+            );
+            ExecutorService pool = Executors.newFixedThreadPool(2);
+            CountDownLatch countDownLatch = new CountDownLatch(2);
+            pool.submit(() -> {
+                Config config = ComputerContext.instance()
+                                               .config();
+                try {
+                    workerService.init(config);
+                    workerService.execute();
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+            pool.submit(() -> {
+                Config config = ComputerContext.instance()
+                                               .config();
+                try {
+                    masterService.init(config);
+                    masterService.execute();
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+            countDownLatch.await();
+            pool.shutdownNow();
 
-    @Before
-    public void setup() {
+            Assert.assertEquals(100L, masterService.totalVertexCount());
+            Assert.assertEquals(200L, masterService.totalEdgeCount());
+            Assert.assertEquals(50L, masterService.finishedVertexCount());
+            Assert.assertEquals(60L, masterService.messageCount());
+            Assert.assertEquals(70L, masterService.messageBytes());
+
+            Assert.assertEquals(100L, workerService.totalVertexCount());
+            Assert.assertEquals(200L, workerService.totalEdgeCount());
+        } finally {
+            workerService.close();
+            masterService.close();
+        }
+    }
+
+    @Test
+    public void testFailToConnectEtcd() {
+        WorkerService workerService = new MockWorkerService();
         UnitTestBase.updateWithRequiredOptions(
+                // Unavailable etcd endpoints
+                ComputerOptions.BSP_ETCD_ENDPOINTS, "http://abc:8098",
                 ComputerOptions.JOB_ID, "local_001",
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.BSP_LOG_INTERVAL, "30000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2"
         );
-        this.masterService = new MasterService();
-        this.workerService = new MockWorkerService();
-    }
 
-    @After
-    public void close() {
-        this.workerService.close();
-        this.masterService.close();
+        Config config = ComputerContext.instance().config();
+        Assert.assertThrows(ComputerException.class, () -> {
+            workerService.init(config);
+            workerService.execute();
+        }, e -> {
+            Assert.assertContains("Error while putting", e.getMessage());
+            Assert.assertContains("UNAVAILABLE: unresolved address",
+                                  e.getCause().getMessage());
+        });
     }
 
     @Test
-    public void testService() throws InterruptedException {
-        ExecutorService pool = Executors.newFixedThreadPool(2);
-        CountDownLatch countDownLatch = new CountDownLatch(2);
-        pool.submit(() -> {
-            Config config = ComputerContext.instance().config();
-            try {
-                this.workerService.init(config);
-                this.workerService.execute();
-            } finally {
-                countDownLatch.countDown();
-            }
-        });
-        pool.submit(() -> {
-            Config config = ComputerContext.instance().config();
-            try {
-                this.masterService.init(config);
-                this.masterService.execute();
-            } finally {
-                countDownLatch.countDown();
-            }
-        });
-        countDownLatch.await();
-        pool.shutdownNow();
-
-        Assert.assertEquals(100L,
-                            this.masterService.totalVertexCount());
-        Assert.assertEquals(200L,
-                            this.masterService.totalEdgeCount());
-        Assert.assertEquals(50L,
-                            this.masterService.finishedVertexCount());
-        Assert.assertEquals(60L,
-                            this.masterService.messageCount());
-        Assert.assertEquals(70L,
-                            this.masterService.messageBytes());
-
-        Assert.assertEquals(100L,
-                            this.workerService.totalVertexCount());
-        Assert.assertEquals(200L,
-                            this.workerService.totalEdgeCount());
+    public void testDataTransportManagerFail() throws InterruptedException {
+        /*
+         * TODO: Complete this test case after data transport manager is
+         *  completed.
+         */
     }
 }

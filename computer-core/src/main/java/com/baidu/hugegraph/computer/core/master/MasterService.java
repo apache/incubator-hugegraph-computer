@@ -50,9 +50,11 @@ public class MasterService implements MasterContext {
     private SuperstepStat superstepStat;
     private int superstep;
     private int maxSuperStep;
-    public List<Manager> managers = new ArrayList();
+    private List<Manager> managers;
+    private MasterComputation masterComputation;
 
     public MasterService() {
+        this.managers = new ArrayList();
     }
 
     /**
@@ -74,6 +76,8 @@ public class MasterService implements MasterContext {
         this.masterInfo = new ContainerInfo(-1, "localhost", 8001, 8002);
         this.bsp4Master.registerMaster(this.masterInfo);
         this.workers = this.bsp4Master.waitWorkersRegistered();
+        this.masterComputation = this.config.createObject(
+                                 ComputerOptions.MASTER_COMPUTATION_CLASS);
     }
 
     /**
@@ -91,19 +95,29 @@ public class MasterService implements MasterContext {
     /**
      * Execute the graph. First determines which superstep to start from. And
      * then execute the superstep iteration.
-     * The superstep iteration stops if met one of the following conditions:
-     * 1): Has run maxSuperStep times of superstep iteration.
-     * 2): The mater-computation returns false that stop superstep iteration.
-     * 3): All vertices are inactive and no message sent in a superstep.
+
      * After the superstep iteration, output the result.
      */
     public void execute() {
         // TODO: determine superstep if fail over is enabled.
         this.superstep = Constants.INPUT_SUPERSTEP;
         this.bsp4Master.masterSuperstepResume(this.superstep);
-        this.inputStep();
+        this.inputstep();
         this.superstep++;
-        for (; this.superstep < this.maxSuperStep; this.superstep++) {
+        /*
+         * Superstep iteration. The steps in a superstep are:
+         * 1): Master waits workers superstep prepared.
+         * 2): All managers call beforeSuperstep.
+         * 3): Master signals the workers that the master prepared superstep.
+         * 4): Master waits the workers do vertex computation, and get
+         *     superstepStat.
+         * 5): Master compute whether to continue the next superstep iteration.
+         * 6): All managers call afterSuperstep.
+         * 7): Master signals the workers with superstepStat, and workers
+         *     know whether to continue the next superstep iteration.
+         */
+        for (; this.superstep < this.maxSuperStep &&
+               this.superstepStat.active(); this.superstep++) {
             this.bsp4Master.waitWorkersSuperstepPrepared(this.superstep);
             for (Manager manager : this.managers) {
                 manager.beforeSuperstep(this.config, this.superstep);
@@ -113,9 +127,8 @@ public class MasterService implements MasterContext {
                              this.bsp4Master.waitWorkersSuperstepDone(
                                              this.superstep);
             this.superstepStat = SuperstepStat.from(workerStats);
-            // TODO: calls algorithm's master-computation to decide whether
-            //  stop iteration
-            if (this.finishedIteration()) {
+            boolean masterContinue = this.masterComputation.compute(this);
+            if (this.finishedIteration(masterContinue)) {
                 this.superstepStat.inactivate();
             }
             for (Manager manager : this.managers) {
@@ -124,7 +137,7 @@ public class MasterService implements MasterContext {
             this.bsp4Master.masterSuperstepDone(this.superstep,
                                                 this.superstepStat);
         }
-        this.outputStep();
+        this.outputstep();
     }
 
     @Override
@@ -182,19 +195,34 @@ public class MasterService implements MasterContext {
         throw new ComputerException("Not implemented");
     }
 
-    private boolean finishedIteration() {
-        boolean allVertexInactiveAndNoMessage =
-                this.finishedVertexCount() == this.totalVertexCount() &&
-                this.messageCount() == 0;
-        if (this.superstep == this.maxSuperStep - 1 ||
-            allVertexInactiveAndNoMessage) {
+    /**
+     * The superstep iteration stops if met one of the following conditions:
+     * 1): Has run maxSuperStep times of superstep iteration.
+     * 2): The mater-computation returns false that stop superstep iteration.
+     * 3): All vertices are inactive and no message sent in a superstep.
+     * @param masterContinue The master-computation decide
+     * @return true if finish superstep iteration.
+     */
+    private boolean finishedIteration(boolean masterContinue) {
+        if (!masterContinue) {
             return true;
-        } else {
-            return false;
         }
+        if (this.superstep == this.maxSuperStep - 1) {
+            return true;
+        }
+        long notFinishedVertexCount = this.totalVertexCount() -
+                                      this.finishedVertexCount();
+        return this.messageCount() == 0L && notFinishedVertexCount == 0L;
     }
 
-    private void inputStep() {
+    /**
+     * Coordinate with workers to load vertices and edges from HugeGraph. There
+     * are two phases in inputstep. First phase is get input splits from
+     * master, and read the vertices and edges from input splits. The second
+     * phase is after all workers read input splits, the workers merge the
+     * vertices and edges to get the stats for each partition.
+     */
+    private void inputstep() {
         this.bsp4Master.waitWorkersInputDone();
         this.bsp4Master.masterInputDone();
         List<WorkerStat> workerStats = this.bsp4Master.waitWorkersSuperstepDone(
@@ -204,7 +232,11 @@ public class MasterService implements MasterContext {
                                             this.superstepStat);
     }
 
-    private void outputStep() {
+    /**
+     * Wait the workers write result back. After this, the job is finished
+     * successfully.
+     */
+    private void outputstep() {
         this.bsp4Master.waitWorkersOutputDone();
     }
 }

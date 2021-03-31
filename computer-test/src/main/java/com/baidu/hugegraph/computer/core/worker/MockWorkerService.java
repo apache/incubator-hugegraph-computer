@@ -36,7 +36,6 @@ public class MockWorkerService extends WorkerService {
     }
 
     /**
-     *
      * @return WorkerStat mocked
      */
     @Override

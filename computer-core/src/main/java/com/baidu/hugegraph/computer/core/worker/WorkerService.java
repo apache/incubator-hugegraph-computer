@@ -46,12 +46,14 @@ public class WorkerService implements WorkerContext {
     private Bsp4Worker bsp4Worker;
     private ContainerInfo workerInfo;
     private ContainerInfo masterInfo;
-    private Map<Integer, ContainerInfo> workers = Maps.newHashMap();
+    private Map<Integer, ContainerInfo> workers;
     private int superstep;
     private SuperstepStat superstepStat;
-    public List<Manager> managers = new ArrayList();
+    public List<Manager> managers;
 
     public WorkerService() {
+        this.workers = Maps.newHashMap();
+        this.managers = new ArrayList();
     }
 
     /**
@@ -59,7 +61,7 @@ public class WorkerService implements WorkerContext {
      */
     public void init(Config config) {
         this.config = config;
-        // TODO: start data transportation server and get data port.
+        // TODO: Start data-transport server and get its host and port.
         this.workerInfo = new ContainerInfo(0, "localhost", 0, 8004);
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
         this.bsp4Worker.init();
@@ -72,10 +74,12 @@ public class WorkerService implements WorkerContext {
         }
         // TODO: create connections to other workers for data transportation.
         // TODO: create aggregator manager
+        LOG.info("WorkerService initialized.");
     }
 
     /**
-     * Stop the worker service. Stop the managers created in {@link #init()}.
+     * Stop the worker service. Stop the managers created in
+     * {@link #init(Config)}.
      */
     public void close() {
         /*
@@ -87,6 +91,7 @@ public class WorkerService implements WorkerContext {
             manager.close(this.config);
         }
         this.bsp4Worker.close();
+        LOG.info("WorkerService closed.");
     }
 
     /**
@@ -95,10 +100,11 @@ public class WorkerService implements WorkerContext {
      * superstepStat is inactive.
      */
     public void execute() {
+        LOG.info("WorkerService execute.");
         // TODO: determine superstep if fail over is enabled.
         this.superstep = this.bsp4Worker.waitMasterSuperstepResume();
         if (this.superstep == Constants.INPUT_SUPERSTEP) {
-            this.inputStep();
+            this.inputstep();
             this.superstep++;
         }
         /*
@@ -123,7 +129,7 @@ public class WorkerService implements WorkerContext {
                                                  this.superstep);
             this.superstep++;
         }
-        this.outputStep();
+        this.outputstep();
     }
 
     @Override
@@ -174,7 +180,15 @@ public class WorkerService implements WorkerContext {
         throw new ComputerException("Not implemented");
     }
 
-    private void inputStep() {
+    /**
+     * Load vertices and edges from HugeGraph. There are two phases in
+     * inputstep. First phase is get input splits from master, and read the
+     * vertices and edges from input splits. The second phase is after all
+     * workers read input splits, the workers merge the vertices and edges to
+     * get the stats for each partition.
+     */
+    private void inputstep() {
+        LOG.info("WorkerService inputstep started.");
         /*
          * Load vertices and edges parallel.
          */
@@ -191,22 +205,30 @@ public class WorkerService implements WorkerContext {
                                             workerStat);
         this.superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
                              this.superstep);
+        LOG.info("WorkerService inputstep finished.");
     }
 
-    private void outputStep() {
+    /**
+     * Write results back parallel to HugeGraph and signal the master. Be
+     * called after all superstep iteration finished. After this, this worker
+     * can exit successfully.
+     */
+    private void outputstep() {
         /*
          * Write results back parallel
          */
         // TODO: output the vertices in partitions parallel
         this.bsp4Worker.workerOutputDone();
+        LOG.info("WorkerService outputstep finished.");
     }
 
     /**
-     * Compute all partitions parallel for this worker.
+     * Compute all partitions parallel in this worker. Be called one time for
+     * a superstep.
      * @return WorkerStat
      */
     protected WorkerStat computePartitions() {
-        // TODO: computer partitions parallel and get workerStat
+        // TODO: compute partitions parallel and get workerStat
         throw new ComputerException("Not implemented");
     }
 }
