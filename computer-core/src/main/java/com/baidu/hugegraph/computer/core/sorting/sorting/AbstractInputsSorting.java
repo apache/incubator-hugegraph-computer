@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import com.baidu.hugegraph.computer.core.sorting.InputsSorting;
 import com.baidu.hugegraph.util.E;
 
 public abstract class AbstractInputsSorting<T> implements InputsSorting<T> {
@@ -37,7 +36,7 @@ public abstract class AbstractInputsSorting<T> implements InputsSorting<T> {
 
     @SuppressWarnings("unchecked")
     public AbstractInputsSorting(Collection<? extends Iterator<T>> sources,
-                                 Comparator<? super T> comparator){
+                                 Comparator<? super T> comparator) {
         E.checkNotEmpty(sources, "sources");
 
         this.sources = sources.toArray(new Iterator[0]);

@@ -55,7 +55,7 @@ public final class LoserTreeInputsSorting<T> extends AbstractInputsSorting<T> {
 
     @Override
     public T next() {
-        if(this.isEmpty()){
+        if (this.isEmpty()) {
             throw new NoSuchElementException();
         }
 

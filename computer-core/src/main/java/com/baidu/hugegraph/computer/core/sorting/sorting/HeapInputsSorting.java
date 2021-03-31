@@ -51,14 +51,14 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
 
     @Override
     public T next() {
-        if(this.isEmpty()){
+        if (this.isEmpty()) {
             throw new NoSuchElementException();
         }
 
         @SuppressWarnings("unchecked")
         T top = (T) this.data[0];
         Iterator<T> topSource = this.sources[0];
-        if(topSource.hasNext()){
+        if (topSource.hasNext()) {
             this.data[0] = topSource.next();
         } else {
             this.size--;
@@ -75,7 +75,7 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
 
     private void init() {
         // Init data array. Skip empty iterator.
-        for (int i = 0, len = this.sources.length - 1; i <= len;) {
+        for (int i = 0, len = this.sources.length - 1; i <= len; ) {
             if (!this.sources[i].hasNext()) {
                 System.arraycopy(this.sources, i + 1,
                                  this.sources, i, len - i);
@@ -98,10 +98,11 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
         int child;
         while ((child = (index << 1) + 1) < this.size) {
             if (child < this.size - 1 &&
-                this.compare((T)this.data[child], (T)this.data[child + 1]) > 0) {
+                this.compare((T) this.data[child], (T) this.data[child + 1]) >
+                0) {
                 child++;
             }
-            if (this.compare((T)this.data[index], (T)this.data[child]) > 0) {
+            if (this.compare((T) this.data[index], (T) this.data[child]) > 0) {
                 this.swap(index, child);
                 index = child;
             } else {
