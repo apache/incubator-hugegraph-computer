@@ -20,6 +20,8 @@
 package com.baidu.hugegraph.computer.core.network.connection;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -27,6 +29,7 @@ import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
 import com.baidu.hugegraph.computer.core.network.TransporterFactory;
 import com.baidu.hugegraph.util.E;
@@ -35,6 +38,7 @@ public class TransportConnectionManager implements ConnectionManager {
 
     private TransportServer server;
     private ClientFactory clientFactory;
+    private TransportHandler clientHandler;
     private final ConcurrentHashMap<ConnectionID, TransportClient> clients;
 
     public TransportConnectionManager() {
@@ -42,23 +46,28 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public synchronized void initClient(Config config) {
+    public synchronized void initClientManager(Config config,
+                                               TransportHandler clientHandler) {
         E.checkArgument(this.clientFactory == null,
-                        "ClientFactory has already been listened");
+                        "The clientManager has already been initialized");
         ClientFactory factory = TransporterFactory.createClientFactory(config);
         factory.init();
         this.clientFactory = factory;
+        this.clientHandler = clientHandler;
     }
 
     @Override
     public TransportClient getOrCreateClient(ConnectionID connectionID)
-                                              throws IOException {
+                                             throws IOException {
+        E.checkArgument(this.clientFactory != null,
+                        "The clientManager has not been initialized  yet");
         TransportClient client = this.clients.get(connectionID);
         if (client == null) {
             // Create the client if we don't have it yet.
             ClientFactory clientFactory = this.clientFactory;
-            this.clients.putIfAbsent(connectionID,
-                                     clientFactory.createClient(connectionID));
+            TransportClient newClient = clientFactory.createClient(
+                                        connectionID, this.clientHandler);
+            this.clients.putIfAbsent(connectionID, newClient);
             client = this.clients.get(connectionID);
         }
         return client;
@@ -66,25 +75,26 @@ public class TransportConnectionManager implements ConnectionManager {
 
     @Override
     public TransportClient getOrCreateClient(String host, int port)
-                                              throws IOException {
+                                             throws IOException {
+        E.checkArgument(this.clientFactory != null,
+                        "The clientManager has not been initialized  yet");
         ConnectionID connectionID = ConnectionID.parseConnectionID(host, port);
         return this.getOrCreateClient(connectionID);
     }
 
     @Override
-    public void closeClient(TransportClient client) {
-        if (client != null && client.connectionID() != null) {
-            boolean ret = this.clients.remove(client.connectionID(), client);
-            if (ret) {
-                client.close();
-            }
+    public void closeClient(ConnectionID connectionID) {
+        TransportClient client = this.clients.get(connectionID);
+        if (client != null) {
+            this.clients.remove(connectionID);
+            client.close();
         }
     }
 
     @Override
     public synchronized int startServer(Config config, MessageHandler handler) {
         E.checkArgument(this.server == null,
-                        "The server has already been listened");
+                        "The TransportServer has already been listened");
         TransportServer server = TransporterFactory.createServer(config);
         int bindPort = server.listen(config, handler);
         this.server = server;
@@ -94,19 +104,28 @@ public class TransportConnectionManager implements ConnectionManager {
     @Override
     public TransportServer getServer() {
         E.checkArgument(this.server != null && this.server.isBound(),
-                        "TransportServer has not been initialized yet");
+                        "The TransportServer has not been initialized yet");
         return this.server;
     }
 
     @Override
-    public void shutdownClient() {
+    public void shutdownClientManager() {
         if (this.clientFactory != null) {
             this.clientFactory.close();
             this.clientFactory = null;
         }
 
         if (!this.clients.isEmpty()) {
-            this.clients.clear();
+            Iterator<Map.Entry<ConnectionID, TransportClient>>
+            iterator = this.clients.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<ConnectionID, TransportClient> next = iterator.next();
+                TransportClient client = next.getValue();
+                if (client != null) {
+                    client.close();
+                }
+                iterator.remove();
+            }
         }
     }
 
@@ -120,7 +139,7 @@ public class TransportConnectionManager implements ConnectionManager {
 
     @Override
     public void shutdown() {
-        this.shutdownClient();
+        this.shutdownClientManager();
         this.shutdownServer();
     }
 }

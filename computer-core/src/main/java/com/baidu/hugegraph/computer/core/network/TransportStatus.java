@@ -19,43 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.net.InetSocketAddress;
+public enum TransportStatus {
 
-import com.baidu.hugegraph.computer.core.config.Config;
+    READY,
+    START_SEND,
+    START_RECV,
+    ESTABLISH,
+    FIN_SEND,
+    FIN_RECV
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
-
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
-
-    /**
-     * Stop the server.
-     */
-    void shutdown();
-
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
-
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
 }

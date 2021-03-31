@@ -23,6 +23,8 @@ import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.util.Log;
 
 public class MockMessageHandler implements MessageHandler {
@@ -34,5 +36,22 @@ public class MockMessageHandler implements MessageHandler {
                        ByteBuffer buffer) {
         LOG.info("messageType: {}, partition: {}, buffer limit: {}",
                  messageType.name(), partition, buffer.limit());
+    }
+
+    @Override
+    public void channelActive(ConnectionID connectionID) {
+        LOG.info("server channel active, connectionID: {}", connectionID);
+    }
+
+    @Override
+    public void channelInactive(ConnectionID connectionID) {
+        LOG.info("server channel inActive, connectionID: {}", connectionID);
+    }
+
+    @Override
+    public void exceptionCaught(TransportException cause,
+                                ConnectionID connectionID) {
+        LOG.error("server channel exception, connectionID: {}, cause: {}",
+                  connectionID, cause);
     }
 }

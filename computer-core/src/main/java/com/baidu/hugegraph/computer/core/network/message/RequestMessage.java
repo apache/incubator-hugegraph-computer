@@ -17,45 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-import java.net.InetSocketAddress;
+public interface RequestMessage extends Message {
 
-import com.baidu.hugegraph.computer.core.config.Config;
+    int requestId();
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
-
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
-
-    /**
-     * Stop the server.
-     */
-    void shutdown();
-
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
-
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
+    @Override
+    default int sequenceNumber() {
+        return this.requestId();
+    }
 }

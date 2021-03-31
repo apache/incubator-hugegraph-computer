@@ -25,7 +25,6 @@ import java.util.Locale;
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.network.netty.IOMode;
 
 import io.netty.channel.epoll.Epoll;
 
@@ -35,6 +34,11 @@ public class TransportConf {
                                "hugegraph-netty-server";
     public static final String CLIENT_THREAD_GROUP_NAME =
                                "hugegraph-netty-client";
+
+    public enum TransportProvider {
+
+        NETTY
+    }
 
     private final Config config;
 

@@ -25,7 +25,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 public class BufAllocatorFactory {
 
     public static ByteBufAllocator createBufAllocator() {
-        // TODO Pooled allocators
+        // TODO: Pooled allocators
         return PooledByteBufAllocator.DEFAULT;
     }
 }

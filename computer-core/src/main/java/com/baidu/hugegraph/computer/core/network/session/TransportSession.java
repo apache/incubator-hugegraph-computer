@@ -17,45 +17,36 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.session;
 
-import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.TransportStatus;
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
+public abstract class TransportSession {
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
+    protected volatile TransportStatus status;
+    protected final AtomicInteger maxRequestId;
 
-    /**
-     * Stop the server.
-     */
-    void shutdown();
+    protected TransportSession() {
+        this.status = TransportStatus.READY;
+        this.maxRequestId = new AtomicInteger(-1);
+    }
 
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
+    public TransportStatus status() {
+        return this.status;
+    }
 
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
+    public void ready() {
+        this.maxRequestId.set(-1);
+        this.status = TransportStatus.READY;
+    }
 
-    /**
-     * Get the bind IP
-     */
-    String ip();
+    public void establish() {
+        this.status = TransportStatus.ESTABLISH;
+    }
 
-    /**
-     * Get the bind port
-     */
-    int port();
+    public int maxRequestId() {
+        return this.maxRequestId.get();
+    }
 }

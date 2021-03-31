@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.util.concurrent.ThreadFactory;
 
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
+import com.baidu.hugegraph.computer.core.network.IOMode;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;

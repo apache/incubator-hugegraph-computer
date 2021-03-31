@@ -21,7 +21,9 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.nio.ByteBuffer;
 
-public interface MessageHandler {
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
+
+public interface MessageHandler extends TransportHandler {
 
     /**
      * Handle the buffer received. There are two buffer list for a partition,

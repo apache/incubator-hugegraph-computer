@@ -21,8 +21,9 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
-import io.netty.buffer.ByteBuf;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
 /**
  * This is used for worker to send buffer to other worker. The whole process
@@ -42,7 +43,7 @@ public interface TransportClient {
      * This method is called zero or many times in iteration.
      * @throws IOException if failed, the job will fail.
      */
-    void send(MessageType messageType, int partition, ByteBuf buffer)
+    void send(MessageType messageType, int partition, ByteBuffer buffer)
               throws IOException;
 
     /**
@@ -68,7 +69,10 @@ public interface TransportClient {
     boolean isActive();
 
     /**
-     * Close the client
+     * Close the client.
+     * NOTE: If the client is created with {@link ConnectionManager}, need to
+     * use {@link ConnectionManager#closeClient(ConnectionID)} to close it,
+     * otherwise there will be unsafe risks.
      */
     void close();
 }

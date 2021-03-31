@@ -33,9 +33,9 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.IOMode;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.TransportProtocol;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
@@ -76,13 +76,13 @@ public class NettyTransportServer implements TransportServer, Closeable {
     @Override
     public synchronized int listen(Config config, MessageHandler handler) {
         E.checkArgument(this.bindFuture == null,
-                        "Netty server has already been listened");
+                        "The TransportServer has already been listened");
         final long start = System.currentTimeMillis();
 
         this.init(config);
 
         // Child channel pipeline for accepted connections
-        TransportProtocol protocol = new TransportProtocol(this.conf);
+        NettyProtocol protocol = new NettyProtocol(this.conf);
         this.bootstrap.childHandler(new ServerChannelInitializer(protocol,
                                                                  handler));
 
@@ -92,7 +92,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
                            this.bindFuture.channel().localAddress();
 
         final long duration = System.currentTimeMillis() - start;
-        LOG.info("Transport server started on SocketAddress {}, took {} ms",
+        LOG.info("The TransportServer started on SocketAddress {}, took {} ms",
                  this.bindAddress, duration);
 
         return this.bindAddress.getPort();
@@ -151,10 +151,12 @@ public class NettyTransportServer implements TransportServer, Closeable {
         return this.conf;
     }
 
+    @Override
     public int port() {
         return this.bindAddress().getPort();
     }
 
+    @Override
     public String ip() {
         InetAddress address = this.bindAddress().getAddress();
         return address == null ? null : address.getHostAddress();
@@ -163,7 +165,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
     @Override
     public InetSocketAddress bindAddress() {
         E.checkArgumentNotNull(this.bindAddress,
-                               "NettyServer has not been initialized yet");
+                               "The TransportServer has not been initialized");
         return this.bindAddress;
     }
 
@@ -204,9 +206,9 @@ public class NettyTransportServer implements TransportServer, Closeable {
                    extends ChannelInitializer<SocketChannel> {
 
         private final MessageHandler handler;
-        private final TransportProtocol protocol;
+        private final NettyProtocol protocol;
 
-        public ServerChannelInitializer(TransportProtocol protocol,
+        public ServerChannelInitializer(NettyProtocol protocol,
                                         MessageHandler handler) {
             this.handler = handler;
             this.protocol = protocol;

@@ -25,19 +25,20 @@ import java.io.IOException;
 public interface ClientFactory {
 
     /**
-     * Init the {@link ClientFactory}
+     * Initialize the {@link ClientFactory}
      */
     void init();
-
-    /**
-     * Close the {@link ClientFactory}
-     */
-    void close();
 
     /**
      * Create a TransportClient.
      * @param connectionID {@link ConnectionID}
      * @return {@link TransportClient}
      */
-    TransportClient createClient(ConnectionID connectionID) throws IOException;
+    TransportClient createClient(ConnectionID connectionID,
+                                 TransportHandler handler) throws IOException;
+
+    /**
+     * Close the {@link ClientFactory}
+     */
+    void close();
 }

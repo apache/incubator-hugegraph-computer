@@ -23,39 +23,38 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
-import com.baidu.hugegraph.computer.core.network.MessageType;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
-import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.TransportHandler;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.Log;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 
 public class NettyTransportClient implements TransportClient {
 
     private static final Logger LOG = Log.logger(NettyTransportClient.class);
 
-    private volatile Channel channel;
+    private final Channel channel;
     private final ConnectionID connectionID;
     private final NettyClientFactory clientFactory;
+    private final TransportHandler handler;
+    private final ClientSession clientSession;
 
     protected NettyTransportClient(Channel channel, ConnectionID connectionID,
-                                   NettyClientFactory clientFactory) {
+                                   NettyClientFactory clientFactory,
+                                   TransportHandler handler) {
+        this.initChannel(channel, clientFactory.protocol());
         this.channel = channel;
         this.connectionID = connectionID;
         this.clientFactory = clientFactory;
-    }
-
-    public synchronized void connect() throws IOException {
-        InetSocketAddress address = this.connectionID.socketAddress();
-        TransportConf conf = this.clientFactory.conf();
-        int retries = conf.networkRetries();
-        this.channel = this.clientFactory.doConnectWithRetries(address,
-                                                               retries);
+        this.handler = handler;
+        this.clientSession = new ClientSession();
     }
 
     public Channel channel() {
@@ -78,19 +77,19 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public void startSession() throws IOException {
-        // TODO startSession
+    public synchronized void startSession() throws IOException {
+        // TODO: startSession
     }
 
     @Override
-    public void send(MessageType messageType, int partition,
-                     ByteBuf buffer) throws IOException {
-        // TODO send message
+    public synchronized void send(MessageType messageType, int partition,
+                                  ByteBuffer buffer) throws IOException {
+        // TODO: send message
     }
 
     @Override
-    public void finishSession() throws IOException {
-        // TODO finishSession
+    public synchronized void finishSession() throws IOException {
+        // TODO: finishSession
     }
 
     @Override
@@ -99,5 +98,19 @@ public class NettyTransportClient implements TransportClient {
             long timeout = this.clientFactory.conf().closeTimeout();
             this.channel.close().awaitUninterruptibly(timeout, MILLISECONDS);
         }
+    }
+
+    public ClientSession clientSession() {
+        return this.clientSession;
+    }
+
+    public TransportHandler handler() {
+        return this.handler;
+    }
+
+    private void initChannel(Channel channel, NettyProtocol protocol) {
+        protocol.replaceClientHandler(channel, this);
+        // client ready notice
+        this.handler.channelActive(this.connectionID);
     }
 }

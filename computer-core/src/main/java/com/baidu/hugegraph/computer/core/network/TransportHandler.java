@@ -19,43 +19,26 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.net.InetSocketAddress;
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 
-import com.baidu.hugegraph.computer.core.config.Config;
-
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
+public interface TransportHandler {
 
     /**
-     * Startup server, return the port listened.
+     * Invoked when the channel associated with the given connectionID is
+     * active.
      */
-    int listen(Config config, MessageHandler handler);
+    void channelActive(ConnectionID connectionID);
 
     /**
-     * Stop the server.
+     * Invoked when the channel associated with the given
+     * connectionID is inactive. No further requests will come from this
+     * channel.
      */
-    void shutdown();
+    void channelInactive(ConnectionID connectionID);
 
     /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
+     * Invoked when the channel associated with the given connectionID has
+     * an exception is thrown processing message.
      */
-    boolean isBound();
-
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
+    void exceptionCaught(TransportException cause, ConnectionID connectionID);
 }

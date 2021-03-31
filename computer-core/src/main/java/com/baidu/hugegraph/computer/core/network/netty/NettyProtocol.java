@@ -17,25 +17,53 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.netty;
 
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.computer.core.network.MessageHandler;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.netty.codec.FrameDecoder;
+import com.baidu.hugegraph.computer.core.network.netty.codec.MessageDecoder;
+import com.baidu.hugegraph.computer.core.network.netty.codec.MessageEncoder;
+import com.baidu.hugegraph.computer.core.network.session.ServerSession;
+import com.baidu.hugegraph.util.Log;
+
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 
 /**
  * Defines the server and client channel handlers, i.e. the protocol.
  */
-public class TransportProtocol {
+public class NettyProtocol {
+
+    private static final Logger LOG = Log.logger(NettyProtocol.class);
+
+    private static final MessageEncoder ENCODER = MessageEncoder.INSTANCE;
+    private static final MessageDecoder DECODER = MessageDecoder.INSTANCE;
+    private static final ServerIdleHandler SERVER_IDLE_HANDLER =
+            new ServerIdleHandler();
+    private static final HeartBeatHandler HEART_BEAT_HANDLER =
+            new HeartBeatHandler();
+
+    private static final ChannelHandler SLOT_CHANNEL_HANDLER =
+            new ChannelDuplexHandler();
+
+    private static final String CLIENT_HANDLER_NAME = "clientHandler";
 
     private final TransportConf conf;
 
-    public TransportProtocol(TransportConf conf) {
+    public NettyProtocol(TransportConf conf) {
         this.conf = conf;
     }
 
     /**
-     * Returns the server channel handlers.
+     * Initialize the server channel handlers.
      *
      * <pre>
      *     +----------------------+
@@ -46,7 +74,7 @@ public class TransportProtocol {
      * |               |        SERVER CHANNEL PIPELINE                    |
      * |               |                                                   |
      * |    +----------+----------+ (3)write ack +----------------------+  |
-     * |    | RequestHandler      +------------->+ MessageEncoder       |  |
+     * |    | ServerHandler       +------------->+ MessageEncoder       |  |
      * |    +----------+----------+              +-----------+----------+  |
      * |              /|\                                 \|/              |
      * |               |                                   |               |
@@ -68,23 +96,30 @@ public class TransportProtocol {
      * |  Netty Internal I/O Threads (Transport Implementation)            |
      * +-------------------------------------------------------------------+
      * </pre>
-     *
-     * @return channel handlers
      */
-    public ChannelHandler[] serverChannelHandlers(MessageHandler handler) {
-        return new ChannelHandler[] {};
-    }
-
-    public void initializeServerPipeline(SocketChannel channel,
-                                         MessageHandler handler) {
+    protected void initializeServerPipeline(Channel channel,
+                                            MessageHandler handler) {
         ChannelPipeline pipeline = channel.pipeline();
-        ChannelHandler[] channelHandlers = this.serverChannelHandlers(handler);
-        pipeline.addLast(channelHandlers);
+
+        pipeline.addLast("encoder", ENCODER);
+
+        pipeline.addLast("frameDecoder", new FrameDecoder());
+
+        pipeline.addLast("decoder", DECODER);
+
+        int timeout = this.conf.heartbeatTimeout();
+        pipeline.addLast("serverIdleStateHandler",
+                         new IdleStateHandler(0, 0,
+                                              timeout, TimeUnit.SECONDS));
+        // NOTE: The heartBeatHandler can reuse of a server
+        pipeline.addLast("serverIdleHandler", SERVER_IDLE_HANDLER);
+
+        pipeline.addLast("serverHandler", this.createRequestHandler(handler));
     }
 
 
     /**
-     * Returns the client channel handlers.
+     * Initialize the client channel handlers.
      *
      * <pre>
      *                                         +----------------------+
@@ -95,7 +130,7 @@ public class TransportProtocol {
      * |                        CLIENT CHANNEL PIPELINE    |               |
      * |                                                  \|/              |
      * |    +---------------------+            +----------------------+    |
-     * |    | ResponseHandler     |            | MessageEncoder       |    |
+     * |    | ClientHandler       |            | MessageEncoder       |    |
      * |    +----------+----------+            +-----------+----------+    |
      * |              /|\                                 \|/              |
      * |               |                                   |               |
@@ -117,16 +152,36 @@ public class TransportProtocol {
      * |  Netty Internal I/O Threads (Transport Implementation)            |
      * +-------------------------------------------------------------------+
      * </pre>
-     *
-     * @return channel handlers
      */
-    public ChannelHandler[] clientChannelHandlers() {
-        return new ChannelHandler[] {};
+    protected void initializeClientPipeline(Channel channel) {
+        ChannelPipeline pipeline = channel.pipeline();
+
+        pipeline.addLast("encoder", ENCODER);
+
+        pipeline.addLast("frameDecoder", new FrameDecoder());
+
+        pipeline.addLast("decoder", DECODER);
+
+        int interval = this.conf.heartbeatInterval();
+        pipeline.addLast("clientIdleStateHandler",
+                         new IdleStateHandler(interval, interval,
+                                              0, TimeUnit.SECONDS));
+        // NOTE: The heartBeatHandler can reuse
+        pipeline.addLast("heartBeatHandler", HEART_BEAT_HANDLER);
+
+        // NOTE: It will be replaced when the client object is initialized!
+        pipeline.addLast(CLIENT_HANDLER_NAME, SLOT_CHANNEL_HANDLER);
     }
 
-    public void initializeClientPipeline(SocketChannel channel) {
+    protected void replaceClientHandler(Channel channel,
+                                        NettyTransportClient client) {
         ChannelPipeline pipeline = channel.pipeline();
-        ChannelHandler[] channelHandlers = this.clientChannelHandlers();
-        pipeline.addLast(channelHandlers);
+        pipeline.replace(CLIENT_HANDLER_NAME, CLIENT_HANDLER_NAME,
+                         new NettyClientHandler(client));
+    }
+
+    private NettyServerHandler createRequestHandler(MessageHandler handler) {
+        ServerSession serverSession = new ServerSession();
+        return new NettyServerHandler(serverSession, handler);
     }
 }

@@ -17,9 +17,27 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-public enum TransportProvider {
+public class StartMessage extends AbstractMessage implements RequestMessage {
 
-    NETTY
+    private final int requestId;
+
+    public static final StartMessage INSTANCE = new StartMessage();
+
+    public StartMessage() {
+        super();
+        this.requestId = 0;
+    }
+
+    @Override
+    public MessageType type() {
+        return MessageType.START;
+    }
+
+
+    @Override
+    public int requestId() {
+        return this.requestId;
+    }
 }

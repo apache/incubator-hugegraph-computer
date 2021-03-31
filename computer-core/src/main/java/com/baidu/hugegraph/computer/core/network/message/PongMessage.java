@@ -17,45 +17,19 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-import java.net.InetSocketAddress;
+public class PongMessage extends AbstractMessage implements ResponseMessage  {
 
-import com.baidu.hugegraph.computer.core.config.Config;
+    public static final PongMessage INSTANCE = new PongMessage();
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
+    @Override
+    public MessageType type() {
+        return MessageType.PONG;
+    }
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
-
-    /**
-     * Stop the server.
-     */
-    void shutdown();
-
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
-
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
+    @Override
+    public int ackId() {
+        return -1;
+    }
 }

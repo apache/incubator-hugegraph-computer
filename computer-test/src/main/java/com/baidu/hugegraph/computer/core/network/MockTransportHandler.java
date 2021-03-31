@@ -19,43 +19,29 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.net.InetSocketAddress;
+import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.util.Log;
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
+public class MockTransportHandler implements TransportHandler {
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
+    private static final Logger LOG = Log.logger(MockTransportHandler.class);
 
-    /**
-     * Stop the server.
-     */
-    void shutdown();
+    @Override
+    public void channelActive(ConnectionID connectionID) {
+        LOG.info("client connection active, connectionID: {}", connectionID);
+    }
 
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
+    @Override
+    public void channelInactive(ConnectionID connectionID) {
+        LOG.info("client connection inActive, connectionID: {}", connectionID);
+    }
 
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
+    @Override
+    public void exceptionCaught(TransportException cause,
+                                ConnectionID connectionID) {
+        LOG.error("client connection exception, connectionID: {}, cause: {}",
+                  connectionID, cause);
+    }
 }

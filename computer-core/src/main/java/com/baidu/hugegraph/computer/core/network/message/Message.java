@@ -17,45 +17,44 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-import java.net.InetSocketAddress;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+import io.netty.buffer.ByteBuf;
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
+public interface Message {
 
     /**
-     * Startup server, return the port listened.
+     * Serializes this object by writing into the given ByteBuf.
+     *
+     * @param buf {@link ByteBuf}
      */
-    int listen(Config config, MessageHandler handler);
+    void encode(ByteBuf buf);
 
     /**
-     * Stop the server.
+     * Used to identify this message type.
      */
-    void shutdown();
+    MessageType type();
 
     /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
+     * Number of bytes of the encoded form of this body, if don't contain
+     * body it will is zero.
      */
-    boolean isBound();
+    int bodyLength();
 
     /**
-     * Get the bind {@link InetSocketAddress}
+     * An optional body for the message.
      */
-    InetSocketAddress bindAddress();
+    ManagedBuffer body();
 
     /**
-     * Get the bind IP
+     * The message sequence number
      */
-    String ip();
+    int sequenceNumber();
 
     /**
-     * Get the bind port
+     * The partition id
      */
-    int port();
+    int partition();
 }

@@ -17,45 +17,37 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-import java.net.InetSocketAddress;
+import io.netty.buffer.ByteBuf;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+public class AckMessage extends AbstractMessage implements ResponseMessage {
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
+    private final int ackId;
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
+    public AckMessage(int ackId, int partition) {
+        super(partition, null);
+        this.ackId = ackId;
+    }
 
-    /**
-     * Stop the server.
-     */
-    void shutdown();
+    public AckMessage(int ackId) {
+        super();
+        this.ackId = ackId;
+    }
 
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
+    @Override
+    public MessageType type() {
+        return MessageType.ACK;
+    }
 
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
+    @Override
+    public int ackId() {
+        return this.ackId;
+    }
 
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
+    public static AckMessage parseFrom(ByteBuf buf) {
+        int ackId = buf.readInt();
+        int partition = buf.readInt();
+        return new AckMessage(ackId, partition);
+    }
 }

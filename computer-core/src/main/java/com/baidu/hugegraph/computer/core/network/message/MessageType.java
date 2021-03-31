@@ -17,10 +17,10 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-import static com.baidu.hugegraph.computer.core.network.MessageType.Category.CONTROL;
-import static com.baidu.hugegraph.computer.core.network.MessageType.Category.DATA;
+import static com.baidu.hugegraph.computer.core.network.message.MessageType.Category.CONTROL;
+import static com.baidu.hugegraph.computer.core.network.message.MessageType.Category.DATA;
 
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 
@@ -59,6 +59,10 @@ public enum MessageType implements SerialEnum {
 
     public Category category() {
         return this.category;
+    }
+
+    public void encode(ByteBuf buf) {
+        buf.writeByte(this.code);
     }
 
     public static MessageType decode(ByteBuf buf) {

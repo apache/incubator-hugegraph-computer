@@ -31,8 +31,8 @@ public class TransporterFactory {
 
     public static TransportServer createServer(Config config) {
         TransportConf conf = TransportConf.warpConfig(config);
-        TransportProvider provider = conf.transportProvider();
-        if (TransportProvider.NETTY == provider) {
+        TransportConf.TransportProvider provider = conf.transportProvider();
+        if (TransportConf.TransportProvider.NETTY == provider) {
             ByteBufAllocator bufAllocator = BufAllocatorFactory
                                             .createBufAllocator();
             return new NettyTransportServer(bufAllocator);
@@ -43,8 +43,8 @@ public class TransporterFactory {
 
     public static ClientFactory createClientFactory(Config config) {
         TransportConf conf = TransportConf.warpConfig(config);
-        TransportProvider provider = conf.transportProvider();
-        if (TransportProvider.NETTY == provider) {
+        TransportConf.TransportProvider provider = conf.transportProvider();
+        if (TransportConf.TransportProvider.NETTY == provider) {
             ByteBufAllocator bufAllocator = BufAllocatorFactory
                                             .createBufAllocator();
             return new NettyClientFactory(conf, bufAllocator);

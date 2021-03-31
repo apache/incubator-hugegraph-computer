@@ -17,15 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network.netty;
+package com.baidu.hugegraph.computer.core.network.message;
 
-/**
- * Selector for which form of low-level IO we should use.
- * NIO is always available, while EPOLL is only available on Linux.
- */
-public enum IOMode {
+public interface ResponseMessage extends Message {
 
-    NIO,
-    EPOLL
+    int ackId();
 
+    @Override
+    default int sequenceNumber() {
+        return this.ackId();
+    }
 }

@@ -19,43 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.net.InetSocketAddress;
-
-import com.baidu.hugegraph.computer.core.config.Config;
-
 /**
- * This is used for worker that receives data.
+ * Selector for which form of low-level IO we should use.
+ * NIO is always available, while EPOLL is only available on Linux.
  */
-public interface TransportServer {
+public enum IOMode {
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
+    NIO,
+    EPOLL
 
-    /**
-     * Stop the server.
-     */
-    void shutdown();
-
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
-
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
 }

@@ -17,45 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.netty;
 
-import java.net.InetSocketAddress;
+import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.util.Log;
+
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 
 /**
- * This is used for worker that receives data.
+ * Heart beat triggered.
+ * send ping message
  */
-public interface TransportServer {
+@ChannelHandler.Sharable
+public class HeartBeatHandler extends ChannelDuplexHandler {
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
+    private static final Logger LOG = Log.logger(HeartBeatHandler.class);
 
-    /**
-     * Stop the server.
-     */
-    void shutdown();
-
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
-
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
+    @Override
+    public void userEventTriggered(final ChannelHandlerContext ctx,
+                                   Object evt) throws Exception {
+        // TODO: handle heartBeat
+        super.userEventTriggered(ctx, evt);
+    }
 }

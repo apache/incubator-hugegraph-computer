@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.network;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 
 import org.slf4j.Logger;
 
@@ -42,6 +43,16 @@ public class TransportUtil {
             return channel.remoteAddress().toString();
         }
         return "<unknown remote>";
+    }
+
+    public static ConnectionID getRemoteConnectionID(Channel channel) {
+        if (channel != null && channel.remoteAddress() != null) {
+            InetSocketAddress address = (InetSocketAddress)
+                                        channel.remoteAddress();
+            return ConnectionID.parseConnectionID(address.getHostName(),
+                                                  address.getPort());
+        }
+        return null;
     }
 
     public static InetAddress resolvedAddress(String host) {
@@ -66,5 +77,13 @@ public class TransportUtil {
                      status, resolvedAddress, resolveTimeMs);
         }
         return resolvedAddress;
+    }
+
+    public static byte[] encodeString(String str) {
+        return str.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static String decodeString(byte[] bytes) {
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 }

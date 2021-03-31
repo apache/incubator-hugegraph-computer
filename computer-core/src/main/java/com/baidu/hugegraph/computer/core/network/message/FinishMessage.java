@@ -17,45 +17,31 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-import java.net.InetSocketAddress;
+import io.netty.buffer.ByteBuf;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+public class FinishMessage extends AbstractMessage implements RequestMessage {
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
+    private final int finishId;
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
+    public FinishMessage(int finishId) {
+        super();
+        this.finishId = finishId;
+    }
 
-    /**
-     * Stop the server.
-     */
-    void shutdown();
+    @Override
+    public MessageType type() {
+        return MessageType.FINISH;
+    }
 
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
+    @Override
+    public int requestId() {
+        return this.finishId;
+    }
 
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
+    public static FinishMessage parseFrom(ByteBuf buf) {
+        int ackId = buf.readInt();
+        return new FinishMessage(ackId);
+    }
 }

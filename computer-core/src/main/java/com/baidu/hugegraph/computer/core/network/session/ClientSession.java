@@ -17,45 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.session;
 
-import java.net.InetSocketAddress;
+import com.baidu.hugegraph.computer.core.network.TransportStatus;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+public class ClientSession extends TransportSession {
 
-/**
- * This is used for worker that receives data.
- */
-public interface TransportServer {
+    public ClientSession() {
+        super();
+    }
 
-    /**
-     * Startup server, return the port listened.
-     */
-    int listen(Config config, MessageHandler handler);
+    public void startSend() {
+        this.maxRequestId.compareAndSet(-1, 0);
+        this.status = TransportStatus.START_SEND;
+    }
 
-    /**
-     * Stop the server.
-     */
-    void shutdown();
-
-    /**
-     * To check whether the server is bound to use.
-     * @return true if server is bound.
-     */
-    boolean isBound();
-
-    /**
-     * Get the bind {@link InetSocketAddress}
-     */
-    InetSocketAddress bindAddress();
-
-    /**
-     * Get the bind IP
-     */
-    String ip();
-
-    /**
-     * Get the bind port
-     */
-    int port();
+    public void finSend() {
+        this.status = TransportStatus.FIN_SEND;
+    }
 }

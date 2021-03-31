@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
 
 /**
@@ -33,10 +34,10 @@ import com.baidu.hugegraph.computer.core.network.TransportServer;
 public interface ConnectionManager {
 
     /**
-     * Init the client connection manager.
+     * Initialize the client connection manager.
      * This method is called only once.
      */
-    void initClient(Config config);
+    void initClientManager(Config config, TransportHandler clientHandler);
 
     /**
      * Get a {@link TransportClient} instance from the connection pool first.
@@ -44,7 +45,7 @@ public interface ConnectionManager {
      * @param connectionID {@link ConnectionID}
      */
     TransportClient getOrCreateClient(ConnectionID connectionID)
-                                       throws IOException;
+                                      throws IOException;
 
     /**
      * Get a {@link TransportClient} instance from the connection pool first.
@@ -52,24 +53,24 @@ public interface ConnectionManager {
      * @param host the hostName or Ip
      * @param port the port
      */
-    TransportClient getOrCreateClient(String host, int port)
-                                       throws IOException;
+    TransportClient getOrCreateClient(String host, int port) throws IOException;
+
     /**
      * Close a client from the {@link ConnectionManager}
-     * @param client {@link TransportClient}
+     * @param connectionID {@link ConnectionID}
      */
-    void closeClient(TransportClient client);
+    void closeClient(ConnectionID connectionID);
 
     /**
      * Shutdown the client connection manager.
      */
-    void shutdownClient();
+    void shutdownClientManager();
 
     /**
      * Start the server, return the port listened.
      * This method is called only once.
      */
-    int startServer(Config config, MessageHandler handler);
+    int startServer(Config config, MessageHandler serverHandler);
 
     /**
      * Return the only one listened server.
