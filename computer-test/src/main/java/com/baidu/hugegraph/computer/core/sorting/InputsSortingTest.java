@@ -29,6 +29,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.sorting.sorting.HeapInputsSorting;
+import com.baidu.hugegraph.computer.core.sorting.sorting.InputsSorting;
 import com.baidu.hugegraph.computer.core.sorting.sorting.LoserTreeInputsSorting;
 
 
