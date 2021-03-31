@@ -29,6 +29,7 @@ import com.baidu.hugegraph.computer.core.graph.id.IdTypeTest;
 import com.baidu.hugegraph.computer.core.graph.id.LongIdTest;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8IdTest;
 import com.baidu.hugegraph.computer.core.graph.id.UuidIdTest;
+import com.baidu.hugegraph.computer.core.graph.partition.HashPartitionerTest;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValueTest;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStatTest;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValueTest;
@@ -64,6 +65,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
     ValueFactoryTest.class,
     ContainerInfoTest.class,
     PartitionStatTest.class,
+    HashPartitionerTest.class,
     SuperstepStatTest.class
 })
 public class GraphTestSuite {
