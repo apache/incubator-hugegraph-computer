@@ -40,16 +40,16 @@ import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    //AllocatorTestSuite.class,
-    //CommonTestSuite.class,
-    //ConfigTestSuite.class,
-    //BspTestSuite.class,
-    //CombinerTestSuite.class,
-    //GraphTestSuite.class,
-    //IOTestSuite.class,
-    //BspTestSuite.class,
-    //InputTestSuite.class,
-    //WorkerTestSuite.class,
+    AllocatorTestSuite.class,
+    CommonTestSuite.class,
+    ConfigTestSuite.class,
+    BspTestSuite.class,
+    CombinerTestSuite.class,
+    GraphTestSuite.class,
+    IOTestSuite.class,
+    BspTestSuite.class,
+    InputTestSuite.class,
+    WorkerTestSuite.class,
     SortTestSuite.class
 })
 public class UnitTestSuite {
