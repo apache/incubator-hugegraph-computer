@@ -53,8 +53,7 @@ public class WorkerServiceTest {
             ExecutorService pool = Executors.newFixedThreadPool(2);
             CountDownLatch countDownLatch = new CountDownLatch(2);
             pool.submit(() -> {
-                Config config = ComputerContext.instance()
-                                               .config();
+                Config config = ComputerContext.instance().config();
                 try {
                     workerService.init(config);
                     workerService.execute();
@@ -63,8 +62,7 @@ public class WorkerServiceTest {
                 }
             });
             pool.submit(() -> {
-                Config config = ComputerContext.instance()
-                                               .config();
+                Config config = ComputerContext.instance().config();
                 try {
                     masterService.init(config);
                     masterService.execute();

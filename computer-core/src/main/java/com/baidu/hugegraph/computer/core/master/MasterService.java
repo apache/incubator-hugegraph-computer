@@ -95,29 +95,36 @@ public class MasterService implements MasterContext {
     /**
      * Execute the graph. First determines which superstep to start from. And
      * then execute the superstep iteration.
-
      * After the superstep iteration, output the result.
      */
     public void execute() {
-        // TODO: determine superstep if fail over is enabled.
+        /*
+         * TODO: determine which superstep to start from if fail over is
+         *  enabled.
+         */
+        // Step 1: Determines which superstep to start from.
         this.superstep = Constants.INPUT_SUPERSTEP;
         this.bsp4Master.masterSuperstepResume(this.superstep);
+        // Step 2: Input superstep for loading vertices and edges.
         this.inputstep();
         this.superstep++;
-        /*
-         * Superstep iteration. The steps in a superstep are:
-         * 1): Master waits workers superstep prepared.
-         * 2): All managers call beforeSuperstep.
-         * 3): Master signals the workers that the master prepared superstep.
-         * 4): Master waits the workers do vertex computation, and get
-         *     superstepStat.
-         * 5): Master compute whether to continue the next superstep iteration.
-         * 6): All managers call afterSuperstep.
-         * 7): Master signals the workers with superstepStat, and workers
-         *     know whether to continue the next superstep iteration.
-         */
+        // Step 3: Iteration computation of multiple superstep.
         for (; this.superstep < this.maxSuperStep &&
                this.superstepStat.active(); this.superstep++) {
+            /*
+             * Superstep iteration. The steps in a superstep are:
+             * 1): Master waits workers superstep prepared.
+             * 2): All managers call beforeSuperstep.
+             * 3): Master signals the workers that the master prepared
+             *     superstep.
+             * 4): Master waits the workers do vertex computation, and get
+             *     superstepStat.
+             * 5): Master compute whether to continue the next superstep
+             *     iteration.
+             * 6): All managers call afterSuperstep.
+             * 7): Master signals the workers with superstepStat, and workers
+             *     know whether to continue the next superstep iteration.
+             */
             this.bsp4Master.waitWorkersSuperstepPrepared(this.superstep);
             for (Manager manager : this.managers) {
                 manager.beforeSuperstep(this.config, this.superstep);
@@ -137,6 +144,7 @@ public class MasterService implements MasterContext {
             this.bsp4Master.masterSuperstepDone(this.superstep,
                                                 this.superstepStat);
         }
+        // Step 4: Output superstep for outputting results.
         this.outputstep();
     }
 

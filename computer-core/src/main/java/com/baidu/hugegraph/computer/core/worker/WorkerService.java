@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.worker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +37,6 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.util.Log;
-import com.google.common.collect.Maps;
 
 public class WorkerService implements WorkerContext {
 
@@ -52,7 +52,7 @@ public class WorkerService implements WorkerContext {
     public List<Manager> managers;
 
     public WorkerService() {
-        this.workers = Maps.newHashMap();
+        this.workers = new HashMap<>();
         this.managers = new ArrayList();
     }
 
@@ -74,7 +74,7 @@ public class WorkerService implements WorkerContext {
         }
         // TODO: create connections to other workers for data transportation.
         // TODO: create aggregator manager
-        LOG.info("WorkerService initialized.");
+        LOG.info("WorkerService {} initialized.", this.workerInfo.id());
     }
 
     /**
@@ -91,7 +91,7 @@ public class WorkerService implements WorkerContext {
             manager.close(this.config);
         }
         this.bsp4Worker.close();
-        LOG.info("WorkerService closed.");
+        LOG.info("WorkerService {} closed.", this.workerInfo.id());
     }
 
     /**
@@ -100,7 +100,7 @@ public class WorkerService implements WorkerContext {
      * superstepStat is inactive.
      */
     public void execute() {
-        LOG.info("WorkerService execute.");
+        LOG.info("WorkerService {} execute.", this.workerInfo.id());
         // TODO: determine superstep if fail over is enabled.
         this.superstep = this.bsp4Worker.waitMasterSuperstepResume();
         if (this.superstep == Constants.INPUT_SUPERSTEP) {
@@ -188,7 +188,7 @@ public class WorkerService implements WorkerContext {
      * get the stats for each partition.
      */
     private void inputstep() {
-        LOG.info("WorkerService inputstep started.");
+        LOG.info("WorkerService {} inputstep started.", this.workerInfo.id());
         /*
          * Load vertices and edges parallel.
          */
@@ -205,7 +205,7 @@ public class WorkerService implements WorkerContext {
                                             workerStat);
         this.superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
                              this.superstep);
-        LOG.info("WorkerService inputstep finished.");
+        LOG.info("WorkerService {} inputstep finished.", this.workerInfo.id());
     }
 
     /**
@@ -219,7 +219,7 @@ public class WorkerService implements WorkerContext {
          */
         // TODO: output the vertices in partitions parallel
         this.bsp4Worker.workerOutputDone();
-        LOG.info("WorkerService outputstep finished.");
+        LOG.info("WorkerService {} outputstep finished.", this.workerInfo.id());
     }
 
     /**
