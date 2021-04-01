@@ -101,7 +101,8 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
         while ((child = (parent << 1) + 1) < this.size) {
             // Compare left and right child if right child exist.
             if (child < this.size - 1 &&
-                this.compare((T) this.data[child], (T) this.data[child + 1]) > 0) {
+                this.compare((T) this.data[child],
+                             (T) this.data[child + 1]) > 0) {
                 child++;
             }
             if (this.compare((T) this.data[parent], (T) this.data[child]) > 0) {
