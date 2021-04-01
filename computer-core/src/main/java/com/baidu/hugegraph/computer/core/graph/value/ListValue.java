@@ -67,6 +67,14 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
         return this.values.get(index);
     }
 
+    public T getLast() {
+        int index = values.size() - 1;
+        if (index < 0) {
+            throw new NoSuchElementException("The list value is empty");
+        }
+        return this.values.get(index);
+    }
+
     public ListValue copy() {
         List values = ComputerContext.instance().graphFactory().createList();
         values.addAll(this.values);
@@ -75,14 +83,6 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
 
     public boolean contains(T obj) {
         return this.values.contains(obj);
-    }
-
-    public T getLast() {
-        int index = values.size() - 1;
-        if (index < 0) {
-            throw new NoSuchElementException("The list value is empty");
-        }
-        return this.values.get(index);
     }
 
     public List<T> values() {
