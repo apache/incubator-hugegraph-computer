@@ -54,15 +54,6 @@ public class TestData {
                     ImmutableList.of()
             );
 
-    public static final List<Iterator<Integer>> DATA =
-                                                toIterators(MULTIWAY_DATA_LIST);
-
-    public static final List<Iterator<Integer>> DATA_HAS_EMPTY =
-                        toIterators(MULTIWAY_DATA_HAS_EMPTY_LIST);
-
-    public static final List<Iterator<Integer>> EMPTY_DATA =
-                                                toIterators(ALL_EMPTY_LIST);
-
     public static List<Integer> getSortedResult(List<Iterator<Integer>> list) {
         return list.stream()
                    .map(iter -> {
@@ -91,5 +82,17 @@ public class TestData {
             result.add(resultItem);
         });
         return result;
+    }
+
+    public static List<Iterator<Integer>> data() {
+        return toIterators(MULTIWAY_DATA_LIST);
+    }
+
+    public static List<Iterator<Integer>> dataHasEmpty() {
+        return toIterators(MULTIWAY_DATA_HAS_EMPTY_LIST);
+    }
+
+    public static List<Iterator<Integer>> emptyData() {
+        return toIterators(ALL_EMPTY_LIST);
     }
 }
