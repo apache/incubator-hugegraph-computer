@@ -99,13 +99,12 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
     private void adjustHeap(int parent) {
         int child;
         while ((child = (parent << 1) + 1) < this.size) {
-            T smaller = (T) this.data[child];
             // Compare left and right child if right child exist.
             if (child < this.size - 1 &&
-                this.compare(smaller, (T) this.data[child + 1]) > 0) {
-                smaller = (T) this.data[++child];
+                this.compare((T) this.data[child], (T) this.data[child + 1]) > 0) {
+                child++;
             }
-            if (this.compare((T) this.data[parent], smaller) > 0) {
+            if (this.compare((T) this.data[parent], (T) this.data[child]) > 0) {
                 this.swap(parent, child);
                 parent = child;
             } else {
