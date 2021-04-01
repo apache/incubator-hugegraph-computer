@@ -19,11 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
-import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.data;
-import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.dataHasEmpty;
-import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.emptyData;
-import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.getSortedResult;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -35,35 +30,36 @@ public class InputsSortingTest {
 
     @Test
     public void testHeapInputsSorting() {
-        InputsSorting<Integer> heapInputsSorting;
+        InputsSorting<Integer> sorting;
 
-        heapInputsSorting = new HeapInputsSorting<>(data());
-        this.assertSorted(data(), heapInputsSorting);
+        sorting = new HeapInputsSorting<>(TestData.data());
+        this.assertSorted(TestData.data(), sorting);
 
-        heapInputsSorting = new HeapInputsSorting<>(dataHasEmpty());
-        this.assertSorted(dataHasEmpty(), heapInputsSorting);
+        sorting = new HeapInputsSorting<>(TestData.dataWithEmpty());
+        this.assertSorted(TestData.dataWithEmpty(), sorting);
 
-        heapInputsSorting = new HeapInputsSorting<>(emptyData());
-        this.assertSorted(emptyData(), heapInputsSorting);
+        sorting = new HeapInputsSorting<>(TestData.emptyData());
+        this.assertSorted(TestData.emptyData(), sorting);
     }
 
     @Test
     public void testLoserTreeInputsSorting() {
-        InputsSorting<Integer> loserTreeInputsSorting;
+        InputsSorting<Integer> sorting;
 
-        loserTreeInputsSorting = new LoserTreeInputsSorting<>(data());
-        this.assertSorted(data(), loserTreeInputsSorting);
+        sorting = new LoserTreeInputsSorting<>(TestData.data());
+        this.assertSorted(TestData.data(), sorting);
 
-        loserTreeInputsSorting = new LoserTreeInputsSorting<>(dataHasEmpty());
-        this.assertSorted(dataHasEmpty(), loserTreeInputsSorting);
+        sorting = new LoserTreeInputsSorting<>(TestData.dataWithEmpty());
+        this.assertSorted(TestData.dataWithEmpty(), sorting);
 
-        loserTreeInputsSorting = new LoserTreeInputsSorting<>(emptyData());
-        this.assertSorted(emptyData(), loserTreeInputsSorting);
+        sorting = new LoserTreeInputsSorting<>(TestData.emptyData());
+        this.assertSorted(TestData.emptyData(), sorting);
     }
 
     private void assertSorted(List<Iterator<Integer>> list,
                               InputsSorting<Integer> inputsSorting) {
-        Iterator<Integer> sortedResult = getSortedResult(list).iterator();
+        List<Integer> result = TestData.getSortedResult(list);
+        Iterator<Integer> sortedResult = result.iterator();
 
         while (inputsSorting.hasNext() && sortedResult.hasNext()) {
             Assert.assertEquals(inputsSorting.next(), sortedResult.next());
