@@ -22,6 +22,8 @@ package com.baidu.hugegraph.computer.core.master;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
 import com.baidu.hugegraph.computer.core.bsp.Bsp4Master;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
@@ -35,6 +37,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.worker.Manager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
+import com.baidu.hugegraph.util.Log;
 
 /**
  * Master service is job's controller. It controls the superstep iteration of
@@ -42,6 +45,8 @@ import com.baidu.hugegraph.computer.core.worker.WorkerStat;
  * aggregator manager, input manager and so on.
  */
 public class MasterService implements MasterContext {
+
+    private static final Logger LOG = Log.logger(MasterService.class);
 
     private Config config;
     private Bsp4Master bsp4Master;
@@ -67,17 +72,21 @@ public class MasterService implements MasterContext {
          * TODO: start rpc server and get rpc port.
          * TODO: start aggregator manager for master.
          */
+        int rpcPort = 8001;
+        LOG.info("[master] MasterService rpc port: {}", rpcPort);
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
         for (Manager manager : this.managers) {
             manager.init(this.config);
         }
         // TODO: get hostname
-        this.masterInfo = new ContainerInfo(-1, "localhost", 8001, 8002);
+        this.masterInfo = new ContainerInfo(-1, "localhost", rpcPort, 8002);
         this.bsp4Master.registerMaster(this.masterInfo);
         this.workers = this.bsp4Master.waitWorkersRegistered();
+        LOG.info("[master] MasterService worker count: {}", workers.size());
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
+        LOG.info("[master] MasterService initialized");
     }
 
     /**
@@ -90,6 +99,7 @@ public class MasterService implements MasterContext {
         }
         this.bsp4Master.clean();
         this.bsp4Master.close();
+        LOG.info("[master] MasterService closed");
     }
 
     /**
@@ -98,32 +108,48 @@ public class MasterService implements MasterContext {
      * After the superstep iteration, output the result.
      */
     public void execute() {
+        LOG.info("[master] MasterService execute");
         /*
-         * TODO: determine which superstep to start from if fail over is
-         *  enabled.
+         * Step 1: Determines which superstep to start from, and resume this
+         * superstep.
          */
-        // Step 1: Determines which superstep to start from.
-        this.superstep = Constants.INPUT_SUPERSTEP;
+        this.superstep = this.superstepToResume();
+        LOG.info("[master] MasterService resume from superstep: {}",
+                 this.superstep);
+        /*
+         * TODO: Get input splits from HugeGraph if resume from
+         * Constants.INPUT_SUPERSTEP.
+         */
         this.bsp4Master.masterSuperstepResume(this.superstep);
-        // Step 2: Input superstep for loading vertices and edges.
-        this.inputstep();
-        this.superstep++;
-        // Step 3: Iteration computation of multiple superstep.
+
+        /*
+         * Step 2: Input superstep for loading vertices and edges.
+         * This step may be skipped if resume from other superstep than
+         * Constants.INPUT_SUPERSTEP.
+         */
+        if (this.superstep == Constants.INPUT_SUPERSTEP) {
+            this.inputstep();
+            this.superstep++;
+        }
+
+        // Step 3: Iteration computation of all supersteps.
         for (; this.superstep < this.maxSuperStep &&
                this.superstepStat.active(); this.superstep++) {
+            LOG.info("[master] MasterService superstep {} started",
+                     this.superstep);
             /*
-             * Superstep iteration. The steps in a superstep are:
-             * 1): Master waits workers superstep prepared.
-             * 2): All managers call beforeSuperstep.
-             * 3): Master signals the workers that the master prepared
-             *     superstep.
-             * 4): Master waits the workers do vertex computation, and get
-             *     superstepStat.
-             * 5): Master compute whether to continue the next superstep
-             *     iteration.
-             * 6): All managers call afterSuperstep.
-             * 7): Master signals the workers with superstepStat, and workers
-             *     know whether to continue the next superstep iteration.
+             * Superstep iteration. The steps in each superstep are:
+             * 1) Master waits workers superstep prepared.
+             * 2) All managers call beforeSuperstep.
+             * 3) Master signals the workers that the master prepared
+             *    superstep.
+             * 4) Master waits the workers do vertex computation, and get
+             *    superstepStat.
+             * 5) Master compute whether to continue the next superstep
+             *    iteration.
+             * 6) All managers call afterSuperstep.
+             * 7) Master signals the workers with superstepStat, and workers
+             *    know whether to continue the next superstep iteration.
              */
             this.bsp4Master.waitWorkersSuperstepPrepared(this.superstep);
             for (Manager manager : this.managers) {
@@ -143,7 +169,10 @@ public class MasterService implements MasterContext {
             }
             this.bsp4Master.masterSuperstepDone(this.superstep,
                                                 this.superstepStat);
+            LOG.info("[master] MasterService superstep {} finished",
+                     this.superstep);
         }
+
         // Step 4: Output superstep for outputting results.
         this.outputstep();
     }
@@ -203,6 +232,14 @@ public class MasterService implements MasterContext {
         throw new ComputerException("Not implemented");
     }
 
+    private int superstepToResume() {
+        /*
+         * TODO: determines which superstep to start from if failover is
+         * enabled.
+         */
+        return Constants.INPUT_SUPERSTEP;
+    }
+
     /**
      * The superstep iteration stops if met one of the following conditions:
      * 1): Has run maxSuperStep times of superstep iteration.
@@ -231,6 +268,7 @@ public class MasterService implements MasterContext {
      * vertices and edges to get the stats for each partition.
      */
     private void inputstep() {
+        LOG.info("[master] MasterService inputstep started");
         this.bsp4Master.waitWorkersInputDone();
         this.bsp4Master.masterInputDone();
         List<WorkerStat> workerStats = this.bsp4Master.waitWorkersSuperstepDone(
@@ -238,6 +276,7 @@ public class MasterService implements MasterContext {
         this.superstepStat = SuperstepStat.from(workerStats);
         this.bsp4Master.masterSuperstepDone(Constants.INPUT_SUPERSTEP,
                                             this.superstepStat);
+        LOG.info("[master] MasterService inputstep finished");
     }
 
     /**
@@ -245,6 +284,8 @@ public class MasterService implements MasterContext {
      * successfully.
      */
     private void outputstep() {
+        LOG.info("[master] MasterService outputstep started");
         this.bsp4Master.waitWorkersOutputDone();
+        LOG.info("[master] MasterService outputstep finished");
     }
 }

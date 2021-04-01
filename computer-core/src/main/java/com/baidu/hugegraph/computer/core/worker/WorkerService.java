@@ -74,7 +74,7 @@ public class WorkerService implements WorkerContext {
         }
         // TODO: create connections to other workers for data transportation.
         // TODO: create aggregator manager
-        LOG.info("WorkerService {} initialized.", this.workerInfo.id());
+        LOG.info("[worker {}] WorkerService initialized", this);
     }
 
     /**
@@ -91,7 +91,7 @@ public class WorkerService implements WorkerContext {
             manager.close(this.config);
         }
         this.bsp4Worker.close();
-        LOG.info("WorkerService {} closed.", this.workerInfo.id());
+        LOG.info("[worker {}] WorkerService closed", this);
     }
 
     /**
@@ -100,7 +100,7 @@ public class WorkerService implements WorkerContext {
      * superstepStat is inactive.
      */
     public void execute() {
-        LOG.info("WorkerService {} execute.", this.workerInfo.id());
+        LOG.info("[worker {}] WorkerService execute", this);
         // TODO: determine superstep if fail over is enabled.
         this.superstep = this.bsp4Worker.waitMasterSuperstepResume();
         if (this.superstep == Constants.INPUT_SUPERSTEP) {
@@ -180,6 +180,11 @@ public class WorkerService implements WorkerContext {
         throw new ComputerException("Not implemented");
     }
 
+    @Override
+    public String toString() {
+        return Integer.toString(this.workerInfo.id());
+    }
+
     /**
      * Load vertices and edges from HugeGraph. There are two phases in
      * inputstep. First phase is get input splits from master, and read the
@@ -188,7 +193,7 @@ public class WorkerService implements WorkerContext {
      * get the stats for each partition.
      */
     private void inputstep() {
-        LOG.info("WorkerService {} inputstep started.", this.workerInfo.id());
+        LOG.info("[worker {}] WorkerService inputstep started", this);
         /*
          * Load vertices and edges parallel.
          */
@@ -205,7 +210,7 @@ public class WorkerService implements WorkerContext {
                                             workerStat);
         this.superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
                              this.superstep);
-        LOG.info("WorkerService {} inputstep finished.", this.workerInfo.id());
+        LOG.info("[worker {}] WorkerService inputstep finished", this);
     }
 
     /**
@@ -219,7 +224,7 @@ public class WorkerService implements WorkerContext {
          */
         // TODO: output the vertices in partitions parallel
         this.bsp4Worker.workerOutputDone();
-        LOG.info("WorkerService {} outputstep finished.", this.workerInfo.id());
+        LOG.info("[worker {}] WorkerService outputstep finished", this);
     }
 
     /**
