@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sorting.sorting;
+package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -43,7 +43,7 @@ public abstract class AbstractInputsSorting<T> implements InputsSorting<T> {
         this.comparator = comparator;
     }
 
-    protected int compare(T t1, T t2) {
+    protected final int compare(T t1, T t2) {
         @SuppressWarnings("unchecked")
         int result = this.comparator != null ?
                      this.comparator.compare(t1, t2) :

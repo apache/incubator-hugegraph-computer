@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sorting;
+package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,8 +27,9 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 
-public class TestDataUtil {
-    public static final List<List<Integer>> multiWayData =
+public class TestData {
+
+    private static final List<List<Integer>> MULTIWAY_DATA_LIST =
             ImmutableList.of(
                     ImmutableList.of(10, 29, 35),
                     ImmutableList.of(50),
@@ -37,7 +38,7 @@ public class TestDataUtil {
                     ImmutableList.of(11, 23)
             );
 
-    public static final List<List<Integer>> multiWayDataHasEmpty =
+    private static final List<List<Integer>> MULTIWAY_DATA_HAS_EMPTY_LIST =
             ImmutableList.of(
                     ImmutableList.of(10, 29, 35),
                     ImmutableList.of(),
@@ -46,15 +47,38 @@ public class TestDataUtil {
                     ImmutableList.of()
             );
 
-    public static List<Integer> getSortedResult(List<List<Integer>> list) {
-        return cloneList(list).stream()
-                              .flatMap(Collection::stream)
-                              .sorted()
-                              .collect(Collectors.toList());
+    private static final List<List<Integer>> ALL_EMPTY_LIST =
+            ImmutableList.of(
+                    ImmutableList.of(),
+                    ImmutableList.of(),
+                    ImmutableList.of()
+            );
+
+    public static final List<Iterator<Integer>> DATA =
+                                                toIterators(MULTIWAY_DATA_LIST);
+
+    public static final List<Iterator<Integer>> DATA_HAS_EMPTY =
+                        toIterators(MULTIWAY_DATA_HAS_EMPTY_LIST);
+
+    public static final List<Iterator<Integer>> EMPTY_DATA =
+                                                toIterators(ALL_EMPTY_LIST);
+
+    public static List<Integer> getSortedResult(List<Iterator<Integer>> list) {
+        return list.stream()
+                   .map(iter -> {
+                       List<Integer> itemList = new ArrayList<>();
+                       while (iter.hasNext()) {
+                           itemList.add(iter.next());
+                       }
+                       return itemList;
+                   })
+                   .flatMap(Collection::stream)
+                   .sorted()
+                   .collect(Collectors.toList());
     }
 
-    public static List<? extends Iterator<Integer>> convert(
-            List<List<Integer>> list) {
+    public static List<Iterator<Integer>> toIterators(
+                                          List<List<Integer>> list) {
         return cloneList(list).stream()
                               .map(List::iterator)
                               .collect(Collectors.toList());

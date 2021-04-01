@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sorting.sorting;
+package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -141,7 +141,6 @@ public final class LoserTreeInputsSorting<T> extends AbstractInputsSorting<T> {
         }
 
         int result = this.compare(t1, t2);
-
         return result <= 0;
     }
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sorting;
+package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

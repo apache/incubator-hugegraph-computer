@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sorting.sorting;
+package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -37,11 +37,11 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
                              Comparator<? super T> comparator) {
         super(sources, comparator);
 
-        this.data = new Object[sources.size()];
         this.size = sources.size();
+        this.data = new Object[this.size];
 
         // Init Heap
-        this.init();
+        this.constructHeap();
     }
 
     @Override
@@ -59,21 +59,23 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
         T top = (T) this.data[0];
         Iterator<T> topSource = this.sources[0];
         if (topSource.hasNext()) {
+            // Current element was removed, fill next element.
             this.data[0] = topSource.next();
         } else {
             this.size--;
+            // Move the last input to the top when the top input is empty.
             if (this.size > 0) {
                 this.sources[0] = this.sources[this.size];
                 this.data[0] = this.data[this.size];
             }
         }
 
-        this.siftDown(0);
+        this.adjustHeap(0);
 
         return top;
     }
 
-    private void init() {
+    private void constructHeap() {
         // Init data array. Skip empty iterator.
         for (int i = 0, len = this.sources.length - 1; i <= len; ) {
             if (!this.sources[i].hasNext()) {
@@ -89,22 +91,23 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
 
         // Build Heap
         for (int index = (this.size >> 1) - 1; index >= 0; index--) {
-            this.siftDown(index);
+            this.adjustHeap(index);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void siftDown(int index) {
+    private void adjustHeap(int parent) {
         int child;
-        while ((child = (index << 1) + 1) < this.size) {
+        while ((child = (parent << 1) + 1) < this.size) {
+            T smaller = (T) this.data[child];
+            // Compare left and right child if right child exist.
             if (child < this.size - 1 &&
-                this.compare((T) this.data[child], (T) this.data[child + 1]) >
-                0) {
-                child++;
+                this.compare(smaller, (T) this.data[child + 1]) > 0) {
+                smaller = (T) this.data[++child];
             }
-            if (this.compare((T) this.data[index], (T) this.data[child]) > 0) {
-                this.swap(index, child);
-                index = child;
+            if (this.compare((T) this.data[parent], smaller) > 0) {
+                this.swap(parent, child);
+                parent = child;
             } else {
                 break;
             }
@@ -124,6 +127,6 @@ public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
     }
 
     private boolean isEmpty() {
-        return this.size == 0;
+        return this.size <= 0;
     }
 }

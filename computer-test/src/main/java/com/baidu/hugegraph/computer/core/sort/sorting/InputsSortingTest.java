@@ -17,20 +17,18 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sorting;
+package com.baidu.hugegraph.computer.core.sort.sorting;
 
-import static com.baidu.hugegraph.computer.core.sorting.TestDataUtil.multiWayData;
-import static com.baidu.hugegraph.computer.core.sorting.TestDataUtil.multiWayDataHasEmpty;
+import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.DATA;
+import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.DATA_HAS_EMPTY;
+import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.EMPTY_DATA;
+import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.getSortedResult;
 
 import java.util.Iterator;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import com.baidu.hugegraph.computer.core.sorting.sorting.HeapInputsSorting;
-import com.baidu.hugegraph.computer.core.sorting.sorting.InputsSorting;
-import com.baidu.hugegraph.computer.core.sorting.sorting.LoserTreeInputsSorting;
 
 
 public class InputsSortingTest {
@@ -39,34 +37,33 @@ public class InputsSortingTest {
     public void testHeapInputsSorting() {
         InputsSorting<Integer> heapInputsSorting;
 
-        heapInputsSorting =
-                new HeapInputsSorting<>(TestDataUtil.convert(multiWayData));
-        this.assertSorted(multiWayData, heapInputsSorting);
+        heapInputsSorting = new HeapInputsSorting<>(DATA);
+        this.assertSorted(DATA, heapInputsSorting);
 
-        heapInputsSorting = new HeapInputsSorting<>(
-                TestDataUtil.convert(multiWayDataHasEmpty));
+        heapInputsSorting = new HeapInputsSorting<>(DATA_HAS_EMPTY);
+        this.assertSorted(DATA_HAS_EMPTY, heapInputsSorting);
 
-        this.assertSorted(multiWayDataHasEmpty, heapInputsSorting);
+        heapInputsSorting = new HeapInputsSorting<>(EMPTY_DATA);
+        this.assertSorted(EMPTY_DATA, heapInputsSorting);
     }
 
     @Test
     public void testLoserTreeInputsSorting() {
         InputsSorting<Integer> loserTreeInputsSorting;
 
-        loserTreeInputsSorting = new LoserTreeInputsSorting<>(
-                TestDataUtil.convert(multiWayData));
-        this.assertSorted(multiWayData, loserTreeInputsSorting);
+        loserTreeInputsSorting = new LoserTreeInputsSorting<>(DATA);
+        this.assertSorted(DATA, loserTreeInputsSorting);
 
-        loserTreeInputsSorting = new LoserTreeInputsSorting<>(
-                TestDataUtil.convert(multiWayDataHasEmpty));
+        loserTreeInputsSorting = new LoserTreeInputsSorting<>(DATA_HAS_EMPTY);
+        this.assertSorted(DATA_HAS_EMPTY, loserTreeInputsSorting);
 
-        this.assertSorted(multiWayDataHasEmpty, loserTreeInputsSorting);
+        loserTreeInputsSorting = new LoserTreeInputsSorting<>(EMPTY_DATA);
+        this.assertSorted(EMPTY_DATA, loserTreeInputsSorting);
     }
 
-    private void assertSorted(List<List<Integer>> list,
+    private void assertSorted(List<Iterator<Integer>> list,
                               InputsSorting<Integer> inputsSorting) {
-        Iterator<Integer> sortedResult =
-                TestDataUtil.getSortedResult(list).iterator();
+        Iterator<Integer> sortedResult = getSortedResult(list).iterator();
 
         while (inputsSorting.hasNext() && sortedResult.hasNext()) {
             Assert.assertEquals(inputsSorting.next(), sortedResult.next());
