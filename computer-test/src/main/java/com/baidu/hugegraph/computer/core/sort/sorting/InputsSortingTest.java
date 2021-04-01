@@ -19,7 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
-import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.*;
+import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.data;
+import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.dataHasEmpty;
+import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.emptyData;
+import static com.baidu.hugegraph.computer.core.sort.sorting.TestData.getSortedResult;
 
 import java.util.Iterator;
 import java.util.List;
