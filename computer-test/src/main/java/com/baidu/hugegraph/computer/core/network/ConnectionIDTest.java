@@ -19,7 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 import org.junit.Test;
 
@@ -60,5 +62,17 @@ public class ConnectionIDTest {
             Assert.assertTrue(e.getMessage().contains("The address must be " +
                                                       "resolved"));
         });
+    }
+
+    @Test
+    public void testConnectionIDWithLocalAddress() throws UnknownHostException {
+        InetAddress localHost = InetAddress.getLocalHost();
+        String hostName = localHost.getHostName();
+        InetSocketAddress address = TransportUtil.resolvedSocketAddress(
+                                    hostName, 8080);
+        ConnectionID connectionID = new ConnectionID(address);
+        ConnectionID connectionID2 = ConnectionID.parseConnectionID(
+                                     hostName, 8080);
+        Assert.assertEquals(connectionID, connectionID2);
     }
 }

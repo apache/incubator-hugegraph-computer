@@ -35,6 +35,7 @@ import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -139,7 +140,8 @@ public class NettyClientFactory implements ClientFactory {
                                "initialized yet");
         long preConnect = System.nanoTime();
 
-        LOG.debug("connectTimeout of address [{}] is [{}]", address,
+        String formatAddress = TransportUtil.formatAddress(address);
+        LOG.debug("connectTimeout of address [{}] is [{}]", formatAddress,
                   connectTimeoutMs);
 
         ChannelFuture future = this.bootstrap.connect(address);
@@ -149,29 +151,30 @@ public class NettyClientFactory implements ClientFactory {
 
         if (!future.isDone()) {
             throw new TransportException(
-                      "Create connection to %s timeout!", address);
+                    "Create connection to %s timeout!", formatAddress);
         }
 
         if (future.isCancelled()) {
             throw new TransportException(
-                      "Create connection to %s cancelled by user!", address);
+                    "Create connection to %s cancelled by user!",
+                    formatAddress);
         }
 
         if (future.cause() != null) {
             throw new TransportException(
-                      "Create connection to %s error!, cause:%s",
-                      future.cause(), address, future.cause().getMessage());
+                    "Create connection to %s error, cause: %s",
+                    future.cause(), formatAddress, future.cause().getMessage());
         }
 
         if (!connectSuccess || !future.isSuccess()) {
             throw new TransportException(
-                      "Create connection to %s error!", address);
+                    "Create connection to %s error!", formatAddress);
         }
 
         long postConnect = System.nanoTime();
 
         LOG.info("Successfully created connection to {} after {} ms",
-                 address, (postConnect - preConnect) / 1000000L);
+                 formatAddress, (postConnect - preConnect) / 1000000L);
         return future.channel();
     }
 
@@ -182,6 +185,7 @@ public class NettyClientFactory implements ClientFactory {
                                            int retryNumber,
                                            int connectTimeoutMs)
                                            throws IOException {
+        String formatAddress = TransportUtil.formatAddress(address);
         int tried = 0;
         while (true) {
             try {
@@ -189,11 +193,12 @@ public class NettyClientFactory implements ClientFactory {
             } catch (IOException e) {
                 tried++;
                 if (tried > retryNumber) {
-                    LOG.warn("Failed to connect to {}. Giving up", address, e);
+                    LOG.warn("Failed to connect to {}. Giving up",
+                             formatAddress, e);
                     throw e;
                 } else {
-                    LOG.debug("Failed to connect to {} with retries times {}." +
-                              " Retrying...", address, tried, e);
+                    LOG.debug("Failed to connect to {} with retries times {} " +
+                              "Retrying...", formatAddress, tried, e);
                 }
             }
         }
@@ -203,7 +208,7 @@ public class NettyClientFactory implements ClientFactory {
         return this.conf;
     }
 
-    public NettyProtocol protocol() {
+    protected NettyProtocol protocol() {
         return this.protocol;
     }
 

@@ -31,7 +31,7 @@ public interface TransportServer {
     /**
      * Startup server, return the port listened.
      */
-    int listen(Config config, MessageHandler handler);
+    int listen(Config config, MessageHandler serverHandler);
 
     /**
      * Stop the server.
@@ -42,7 +42,7 @@ public interface TransportServer {
      * To check whether the server is bound to use.
      * @return true if server is bound.
      */
-    boolean isBound();
+    boolean bound();
 
     /**
      * Get the bind {@link InetSocketAddress}

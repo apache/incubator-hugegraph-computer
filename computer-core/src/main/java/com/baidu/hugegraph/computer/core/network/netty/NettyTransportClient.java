@@ -32,6 +32,7 @@ import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
@@ -48,12 +49,14 @@ public class NettyTransportClient implements TransportClient {
 
     protected NettyTransportClient(Channel channel, ConnectionID connectionID,
                                    NettyClientFactory clientFactory,
-                                   TransportHandler handler) {
-        this.initChannel(channel, clientFactory.protocol());
+                                   TransportHandler clientHandler) {
+        E.checkArgumentNotNull(clientHandler,
+                               "The handler param can't be null");
+        this.initChannel(channel, clientFactory.protocol(), clientHandler);
         this.channel = channel;
         this.connectionID = connectionID;
         this.clientFactory = clientFactory;
-        this.handler = handler;
+        this.handler = clientHandler;
         this.clientSession = new ClientSession();
     }
 
@@ -72,8 +75,8 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public boolean isActive() {
-        return (this.channel.isOpen() || this.channel.isActive());
+    public boolean active() {
+        return this.channel.isActive();
     }
 
     @Override
@@ -108,9 +111,10 @@ public class NettyTransportClient implements TransportClient {
         return this.handler;
     }
 
-    private void initChannel(Channel channel, NettyProtocol protocol) {
+    private void initChannel(Channel channel, NettyProtocol protocol,
+                             TransportHandler handler) {
         protocol.replaceClientHandler(channel, this);
-        // client ready notice
-        this.handler.channelActive(this.connectionID);
+        // Client ready notice
+        handler.channelActive(this.connectionID);
     }
 }

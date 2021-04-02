@@ -23,40 +23,69 @@ import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.MAGIC_NUMBER;
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.PROTOCOL_VERSION;
 
-import java.util.List;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.message.Message;
+import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageEncoder;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
+import io.netty.channel.ChannelPromise;
 
 /**
  * Encoder used by the server side to encode server-to-client responses.
  * This encoder is stateless so it is safe to be shared by multiple threads.
  */
 @ChannelHandler.Sharable
-public class MessageEncoder extends MessageToMessageEncoder<Message> {
+public class MessageEncoder extends ChannelOutboundHandlerAdapter {
+
+    private static final Logger LOG = Log.logger(MessageEncoder.class);
 
     public static final MessageEncoder INSTANCE = new MessageEncoder();
 
-    private MessageEncoder() { }
+    private MessageEncoder() {
+    }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, Message message,
-                          List<Object> outs) throws Exception {
+    public void write(ChannelHandlerContext ctx, Object obj,
+                      ChannelPromise promise) throws Exception {
+        super.write(ctx, obj, promise);
+        if (obj instanceof Message) {
+            Message message = (Message) obj;
+            this.writeMessage(ctx, message, promise, ctx.alloc());
+        } else {
+            ctx.write(obj, promise);
+        }
+    }
+
+    private void writeMessage(ChannelHandlerContext ctx,
+                              Message message, ChannelPromise promise,
+                              ByteBufAllocator allocator) {
         int frameLen = FRAME_HEADER_LENGTH + message.bodyLength();
+        ByteBuf buf = null;
         try {
-            ByteBuf buf = ctx.alloc().directBuffer(frameLen);
-            buf.writeShort(MAGIC_NUMBER);
-            buf.writeByte(PROTOCOL_VERSION);
+            buf = allocator.directBuffer(frameLen);
+            this.fillCommonHeader(buf);
             message.encode(buf);
-            outs.add(buf);
+            ctx.write(buf, promise);
+        } catch (Throwable e) {
+            if (buf != null) {
+                buf.release();
+            }
+            LOG.error("Message encode fail, messageType: {}", message.type());
+            throw e;
         } finally {
             if (message.bodyLength() > 0) {
                 message.body().release();
             }
         }
+    }
+
+    private void fillCommonHeader(ByteBuf buf) {
+        buf.writeShort(MAGIC_NUMBER);
+        buf.writeByte(PROTOCOL_VERSION);
     }
 }

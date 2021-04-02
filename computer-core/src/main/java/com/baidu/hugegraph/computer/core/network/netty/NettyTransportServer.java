@@ -37,6 +37,7 @@ import com.baidu.hugegraph.computer.core.network.IOMode;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -74,17 +75,21 @@ public class NettyTransportServer implements TransportServer, Closeable {
     }
 
     @Override
-    public synchronized int listen(Config config, MessageHandler handler) {
+    public synchronized int listen(Config config,
+                                   MessageHandler serverHandler) {
         E.checkArgument(this.bindFuture == null,
                         "The TransportServer has already been listened");
+        E.checkArgumentNotNull(serverHandler,
+                               "The serverHandler param can't be null");
         final long start = System.currentTimeMillis();
 
         this.init(config);
 
         // Child channel pipeline for accepted connections
         NettyProtocol protocol = new NettyProtocol(this.conf);
-        this.bootstrap.childHandler(new ServerChannelInitializer(protocol,
-                                                                 handler));
+        ServerChannelInitializer initializer = new ServerChannelInitializer(
+                                                   protocol, serverHandler);
+        this.bootstrap.childHandler(initializer);
 
         // Start Server
         this.bindFuture = this.bootstrap.bind().syncUninterruptibly();
@@ -93,7 +98,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
 
         final long duration = System.currentTimeMillis() - start;
         LOG.info("The TransportServer started on SocketAddress {}, took {} ms",
-                 this.bindAddress, duration);
+                 TransportUtil.formatAddress(this.bindAddress), duration);
 
         return this.bindAddress.getPort();
     }
@@ -179,7 +184,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
     }
 
     @Override
-    public boolean isBound() {
+    public boolean bound() {
         return this.bindFuture != null && this.bindFuture.channel() != null &&
                this.bindFuture.channel().isActive();
     }

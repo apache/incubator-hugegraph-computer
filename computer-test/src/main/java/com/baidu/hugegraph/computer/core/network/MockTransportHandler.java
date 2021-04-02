@@ -30,18 +30,18 @@ public class MockTransportHandler implements TransportHandler {
 
     @Override
     public void channelActive(ConnectionID connectionID) {
-        LOG.info("client connection active, connectionID: {}", connectionID);
+        LOG.info("Client connection active, connectionID: {}", connectionID);
     }
 
     @Override
     public void channelInactive(ConnectionID connectionID) {
-        LOG.info("client connection inActive, connectionID: {}", connectionID);
+        LOG.info("Client connection inActive, connectionID: {}", connectionID);
     }
 
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionID connectionID) {
-        LOG.error("client connection exception, connectionID: {}, cause: {}",
+        LOG.error("Client connection exception, connectionID: {}, cause: {}",
                   connectionID, cause);
     }
 }

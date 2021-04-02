@@ -68,7 +68,7 @@ public class MessageDecoder extends MessageToMessageDecoder<ByteBuf> {
 
     private Message decode(MessageType msgType, ByteBuf in) {
         if (msgType.category() == MessageType.Category.DATA) {
-            // decode data message
+            // Decode data message
             return DataMessage.parseFrom(msgType, in);
         }
         switch (msgType) {

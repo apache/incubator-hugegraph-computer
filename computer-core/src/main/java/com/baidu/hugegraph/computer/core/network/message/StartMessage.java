@@ -35,7 +35,6 @@ public class StartMessage extends AbstractMessage implements RequestMessage {
         return MessageType.START;
     }
 
-
     @Override
     public int requestId() {
         return this.requestId;

@@ -36,6 +36,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.IOMode;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
@@ -125,6 +126,20 @@ public class NettyTransportServerTest {
         TransportConf conf = this.server.conf();
         Assert.assertEquals(hostName, conf.serverAddress().getHostName());
 
+        Assert.assertNotEquals(0, this.server.port());
+        Assert.assertNotEquals(0, port);
+        Assert.assertEquals(ip, this.server.ip());
+        Assert.assertEquals(port, this.server.port());
+    }
+
+    @Test
+    public void testListenWithLocalIp() {
+        String ip = TransportUtil.getLocalIPAddress();
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, ip
+        );
+        config = ComputerContext.instance().config();
+        int port = this.server.listen(config, messageHandler);
         Assert.assertNotEquals(0, this.server.port());
         Assert.assertNotEquals(0, port);
         Assert.assertEquals(ip, this.server.ip());

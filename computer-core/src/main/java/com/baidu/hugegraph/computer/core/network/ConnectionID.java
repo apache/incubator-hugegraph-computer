@@ -49,12 +49,12 @@ public class ConnectionID {
 
         String cacheKey = buildCacheKey(host, port, clientIndex);
 
-        Function<String, ConnectionID> function = key -> {
+        Function<String, ConnectionID> resolveAddress = key -> {
             InetSocketAddress socketAddress = resolvedSocketAddress(host, port);
             return new ConnectionID(socketAddress, clientIndex);
         };
 
-        return CONNECTION_ID_CACHE.computeIfAbsent(cacheKey, function);
+        return CONNECTION_ID_CACHE.computeIfAbsent(cacheKey, resolveAddress);
     }
 
     public ConnectionID(InetSocketAddress address) {
@@ -106,6 +106,8 @@ public class ConnectionID {
 
     @Override
     public String toString() {
-        return this.address + " [" + this.clientIndex + "]";
+        return String.format("%s [%d]",
+                             TransportUtil.formatAddress(this.address),
+                             this.clientIndex);
     }
 }

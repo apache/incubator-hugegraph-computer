@@ -50,6 +50,8 @@ public class TransportConnectionManager implements ConnectionManager {
                                                TransportHandler clientHandler) {
         E.checkArgument(this.clientFactory == null,
                         "The clientManager has already been initialized");
+        E.checkArgumentNotNull(clientHandler,
+                               "The clientHandler param can't be null");
         ClientFactory factory = TransporterFactory.createClientFactory(config);
         factory.init();
         this.clientFactory = factory;
@@ -60,7 +62,7 @@ public class TransportConnectionManager implements ConnectionManager {
     public TransportClient getOrCreateClient(ConnectionID connectionID)
                                              throws IOException {
         E.checkArgument(this.clientFactory != null,
-                        "The clientManager has not been initialized  yet");
+                        "The clientManager has not been initialized yet");
         TransportClient client = this.clients.get(connectionID);
         if (client == null) {
             // Create the client if we don't have it yet.
@@ -77,7 +79,7 @@ public class TransportConnectionManager implements ConnectionManager {
     public TransportClient getOrCreateClient(String host, int port)
                                              throws IOException {
         E.checkArgument(this.clientFactory != null,
-                        "The clientManager has not been initialized  yet");
+                        "The clientManager has not been initialized yet");
         ConnectionID connectionID = ConnectionID.parseConnectionID(host, port);
         return this.getOrCreateClient(connectionID);
     }
@@ -92,18 +94,21 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public synchronized int startServer(Config config, MessageHandler handler) {
+    public synchronized int startServer(Config config,
+                                        MessageHandler serverHandler) {
         E.checkArgument(this.server == null,
                         "The TransportServer has already been listened");
+        E.checkArgumentNotNull(serverHandler,
+                               "The serverHandler param can't be null");
         TransportServer server = TransporterFactory.createServer(config);
-        int bindPort = server.listen(config, handler);
+        int bindPort = server.listen(config, serverHandler);
         this.server = server;
         return bindPort;
     }
 
     @Override
     public TransportServer getServer() {
-        E.checkArgument(this.server != null && this.server.isBound(),
+        E.checkArgument(this.server != null && this.server.bound(),
                         "The TransportServer has not been initialized yet");
         return this.server;
     }

@@ -32,8 +32,8 @@ import com.baidu.hugegraph.computer.core.network.session.ServerSession;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.timeout.IdleStateHandler;
 
@@ -44,15 +44,14 @@ public class NettyProtocol {
 
     private static final Logger LOG = Log.logger(NettyProtocol.class);
 
+    private static final ChannelHandler SLOT_HANDLER = new SLOT_HANDLER();
+
     private static final MessageEncoder ENCODER = MessageEncoder.INSTANCE;
     private static final MessageDecoder DECODER = MessageDecoder.INSTANCE;
-    private static final ServerIdleHandler SERVER_IDLE_HANDLER =
-            new ServerIdleHandler();
-    private static final HeartBeatHandler HEART_BEAT_HANDLER =
-            new HeartBeatHandler();
-
-    private static final ChannelHandler SLOT_CHANNEL_HANDLER =
-            new ChannelDuplexHandler();
+    private static final ServerIdleHandler
+            SERVER_IDLE_HANDLER = new ServerIdleHandler();
+    private static final HeartBeatHandler
+            HEART_BEAT_HANDLER = new HeartBeatHandler();
 
     private static final String CLIENT_HANDLER_NAME = "clientHandler";
 
@@ -108,9 +107,10 @@ public class NettyProtocol {
         pipeline.addLast("decoder", DECODER);
 
         int timeout = this.conf.heartbeatTimeout();
-        pipeline.addLast("serverIdleStateHandler",
-                         new IdleStateHandler(0, 0,
-                                              timeout, TimeUnit.SECONDS));
+        IdleStateHandler idleHandler = new IdleStateHandler(0, 0,
+                                                            timeout,
+                                                            TimeUnit.SECONDS);
+        pipeline.addLast("serverIdleStateHandler", idleHandler);
         // NOTE: The heartBeatHandler can reuse of a server
         pipeline.addLast("serverIdleHandler", SERVER_IDLE_HANDLER);
 
@@ -163,14 +163,15 @@ public class NettyProtocol {
         pipeline.addLast("decoder", DECODER);
 
         int interval = this.conf.heartbeatInterval();
-        pipeline.addLast("clientIdleStateHandler",
-                         new IdleStateHandler(interval, interval,
-                                              0, TimeUnit.SECONDS));
+        IdleStateHandler idleHandler = new IdleStateHandler(interval, interval,
+                                                            0,
+                                                            TimeUnit.SECONDS);
+        pipeline.addLast("clientIdleStateHandler", idleHandler);
         // NOTE: The heartBeatHandler can reuse
         pipeline.addLast("heartBeatHandler", HEART_BEAT_HANDLER);
 
         // NOTE: It will be replaced when the client object is initialized!
-        pipeline.addLast(CLIENT_HANDLER_NAME, SLOT_CHANNEL_HANDLER);
+        pipeline.addLast(CLIENT_HANDLER_NAME, SLOT_HANDLER);
     }
 
     protected void replaceClientHandler(Channel channel,
@@ -183,5 +184,10 @@ public class NettyProtocol {
     private NettyServerHandler createRequestHandler(MessageHandler handler) {
         ServerSession serverSession = new ServerSession();
         return new NettyServerHandler(serverSession, handler);
+    }
+
+    @ChannelHandler.Sharable
+    private static class SLOT_HANDLER extends ChannelInboundHandlerAdapter {
+        // it is a empty handler for slot
     }
 }

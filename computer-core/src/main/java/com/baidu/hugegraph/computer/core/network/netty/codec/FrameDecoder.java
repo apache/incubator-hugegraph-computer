@@ -54,7 +54,7 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in)
-            throws Exception {
+                            throws Exception {
         ByteBuf msg = (ByteBuf) super.decode(ctx, in);
         if (msg == null) {
             return null;
@@ -76,7 +76,7 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("The FrameDecoder active from {}",
-                  TransportUtil.getRemoteAddress(ctx.channel()));
+                  TransportUtil.remoteAddress(ctx.channel()));
         this.frameHeaderBuf = ctx.alloc().directBuffer(FRAME_HEADER_LENGTH);
         super.channelActive(ctx);
     }
@@ -87,7 +87,7 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("The FrameDecoder inActive from {}",
-                  TransportUtil.getRemoteAddress(ctx.channel()));
+                  TransportUtil.remoteAddress(ctx.channel()));
         this.frameHeaderBuf.release();
         super.channelInactive(ctx);
     }

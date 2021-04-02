@@ -22,12 +22,16 @@ package com.baidu.hugegraph.computer.core.network;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.core.network.connection.ConnectionManagerTest;
+import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactoryTest;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServerTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     NettyTransportServerTest.class,
-    ConnectionIDTest.class
+    ConnectionIDTest.class,
+    NettyClientFactoryTest.class,
+    ConnectionManagerTest.class
 })
 public class NetworkTestSuite {
 }

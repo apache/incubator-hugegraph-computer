@@ -43,14 +43,6 @@ public class TransportException extends IOException {
     }
 
     public Throwable rootCause() {
-        return rootCause(this);
-    }
-
-    public static Throwable rootCause(Throwable e) {
-        Throwable cause = e;
-        while (cause.getCause() != null) {
-            cause = cause.getCause();
-        }
-        return cause;
+        return ComputeException.rootCause(this);
     }
 }

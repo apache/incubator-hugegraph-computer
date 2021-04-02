@@ -19,10 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
 
 import org.slf4j.Logger;
 
@@ -38,14 +41,14 @@ public class TransportUtil {
     public static final int NUMBER_CPU_CORES =
                             Runtime.getRuntime().availableProcessors();
 
-    public static String getRemoteAddress(Channel channel) {
+    public static String remoteAddress(Channel channel) {
         if (channel != null && channel.remoteAddress() != null) {
-            return channel.remoteAddress().toString();
+            return formatAddress((InetSocketAddress) channel.remoteAddress());
         }
         return "<unknown remote>";
     }
 
-    public static ConnectionID getRemoteConnectionID(Channel channel) {
+    public static ConnectionID remoteConnectionID(Channel channel) {
         if (channel != null && channel.remoteAddress() != null) {
             InetSocketAddress address = (InetSocketAddress)
                                         channel.remoteAddress();
@@ -71,12 +74,54 @@ public class TransportUtil {
         long resolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000L;
 
         if (resolveTimeMs > 2000L) {
-            String status = resolvedAddress.isUnresolved() ? "failed" :
-                            "succeed";
+            String status = resolvedAddress.isUnresolved() ?
+                            "failed" : "succeed";
             LOG.warn("DNS resolution {} for {} took {} ms",
                      status, resolvedAddress, resolveTimeMs);
         }
         return resolvedAddress;
+    }
+
+    public static String getLocalIPAddress() {
+        try {
+            Enumeration<NetworkInterface> allNetInterfaces =
+            NetworkInterface.getNetworkInterfaces();
+            InetAddress ip;
+            while (allNetInterfaces.hasMoreElements()) {
+                NetworkInterface netInterface = allNetInterfaces.nextElement();
+                if (!netInterface.isLoopback() && !netInterface.isVirtual() &&
+                    netInterface.isUp()) {
+                        Enumeration<InetAddress> addresses =
+                        netInterface.getInetAddresses();
+                        while (addresses.hasMoreElements()) {
+                            ip = addresses.nextElement();
+                            if (ip instanceof Inet4Address) {
+                                return ip.getHostAddress();
+                            }
+                        }
+                    }
+            }
+        } catch (Exception e) {
+            throw new ComputeException("Failed to getLocalIPAddress");
+        }
+        return "<unknown IP>";
+    }
+
+    /**
+     * Format Address, priority use of IP
+     */
+    public static String formatAddress(InetSocketAddress socketAddress) {
+        if (socketAddress != null) {
+            String host = "";
+            InetAddress address = socketAddress.getAddress();
+            if (address != null && !socketAddress.isUnresolved()) {
+                host = address.getHostAddress();
+            } else {
+                host = socketAddress.getHostString();
+            }
+            return String.format("<%s:%s>", host, socketAddress.getPort());
+        }
+        return "<unknown address>";
     }
 
     public static byte[] encodeString(String str) {

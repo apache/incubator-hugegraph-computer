@@ -118,7 +118,7 @@ public class TransportConf {
 
     /**
      * Number of threads used in the server EventLoop thread pool. Default to
-     * 0, which is 2x#cores.
+     * 0, which is CPUs * 2.
      */
     public int serverThreads() {
         return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);

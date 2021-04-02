@@ -1,0 +1,136 @@
+/*
+ * Copyright 2017 HugeGraph Authors
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with this
+ * work for additional information regarding copyright ownership. The ASF
+ * licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+package com.baidu.hugegraph.computer.core.network.netty;
+
+import java.io.IOException;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
+import com.baidu.hugegraph.computer.core.network.MockTransportHandler;
+import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.testutil.Whitebox;
+
+public class NettyClientFactoryTest {
+
+    private static Config config;
+    private static MockMessageHandler serverHandler;
+    private static MockTransportHandler clientHandler;
+    private NettyTransportServer server;
+    private TransportClient client;
+
+    @Before
+    public void setup() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+                ComputerOptions.TRANSPORT_SERVER_PORT, "8080",
+                ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+        );
+        config = ComputerContext.instance().config();
+        serverHandler = new MockMessageHandler();
+        clientHandler = new MockTransportHandler();
+        this.server = new NettyTransportServer();
+        this.server.listen(config, serverHandler);
+    }
+
+    @After
+    public void teardown() {
+        if (this.client != null) {
+            this.client.close();
+        }
+        if (this.server != null) {
+            this.server.shutdown();
+        }
+    }
+
+    @Test
+    public void testInit() {
+        TransportConf conf = TransportConf.warpConfig(config);
+        NettyClientFactory clientFactory = new NettyClientFactory(conf);
+        clientFactory.init();
+        Object bootstrap = Whitebox.getInternalState(clientFactory,
+                                                     "bootstrap");
+        Assert.assertNotNull(bootstrap);
+    }
+
+    @Test
+    public void testCreateClient() throws IOException {
+        TransportConf conf = TransportConf.warpConfig(config);
+        NettyClientFactory clientFactory = new NettyClientFactory(conf);
+        clientFactory.init();
+        ConnectionID connectionID = ConnectionID.parseConnectionID(
+                                    "127.0.0.1", 8080);
+        this.client = clientFactory.createClient(connectionID, clientHandler);
+        Assert.assertTrue(this.client.active());
+    }
+
+    @Test
+    public void testClose() throws IOException {
+        TransportConf conf = TransportConf.warpConfig(config);
+        NettyClientFactory clientFactory = new NettyClientFactory(conf);
+        clientFactory.init();
+        ConnectionID connectionID = ConnectionID.parseConnectionID(
+                                    "127.0.0.1", 8080);
+        this.client = clientFactory.createClient(connectionID, clientHandler);
+        Assert.assertTrue(this.client.active());
+        this.client.close();
+        Assert.assertFalse(this.client.active());
+    }
+
+    @Test
+    public void testCreateClientWithErrorSocket() {
+        TransportConf conf = TransportConf.warpConfig(config);
+        NettyClientFactory clientFactory = new NettyClientFactory(conf);
+        clientFactory.init();
+        ConnectionID connectionID = ConnectionID.parseConnectionID(
+                                    "127.0.0.1", 7777);
+        Assert.assertThrows(IOException.class, () -> {
+            this.client = clientFactory.createClient(connectionID,
+                                                     clientHandler);
+        }, e -> {
+            Assert.assertContains("Create connection to", e.getMessage());
+        });
+    }
+
+    @Test
+    public void testCreateClientWithNoInit() {
+        TransportConf conf = TransportConf.warpConfig(config);
+        NettyClientFactory clientFactory = new NettyClientFactory(conf);
+        ConnectionID connectionID = ConnectionID.parseConnectionID(
+                                    "127.0.0.1", 7777);
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            this.client = clientFactory.createClient(connectionID,
+                                                     clientHandler);
+        }, e -> {
+            Assert.assertContains("has not been initialized yet",
+                                  e.getMessage());
+        });
+    }
+}

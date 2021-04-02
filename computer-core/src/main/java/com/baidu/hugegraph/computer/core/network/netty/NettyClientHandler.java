@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.getRemoteAddress;
+import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteAddress;
 
 import org.slf4j.Logger;
 
@@ -68,8 +68,8 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Message> {
             exception = (TransportException) cause;
         } else {
             exception = new TransportException(
-                        "Exception in connection from {}",
-                        getRemoteAddress(ctx.channel()), cause);
+                        "Exception in connection from {}", cause,
+                        remoteAddress(ctx.channel()));
         }
 
         this.client.handler().exceptionCaught(exception,

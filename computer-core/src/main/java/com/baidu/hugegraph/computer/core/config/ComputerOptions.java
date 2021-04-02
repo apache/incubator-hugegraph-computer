@@ -335,8 +335,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_SERVER_THREADS =
             new ConfigOption<>(
                     "transport.server_threads",
-                    "The number of Netty server work threads, default to" +
-                    " zero, which is 2x#cores.",
+                    "The number of server work threads, the default value is " +
+                    "0, which means CPUs * 2",
                     nonNegativeInt(),
                     0
             );
@@ -344,8 +344,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
             new ConfigOption<>(
                     "transport.client_threads",
-                    "The number of Netty client threads, default to" +
-                    " zero, which is 2x#cores.",
+                    "The number of client threads, the default value is " +
+                    "0, which means CPUs * 2",
                     nonNegativeInt(),
                     0
             );
@@ -361,7 +361,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> TRANSPORT_IO_MODE =
             new ConfigOption<>(
                     "transport.io_mode",
-                    "The Network IO Mode, either 'NIO'、'EPOLL'、'AUTO', the " +
+                    "The network IO Mode, either 'NIO', 'EPOLL', 'AUTO', the " +
                     "'AUTO' means selecting the property mode automatically",
                     allowValues("NIO", "EPOLL", "AUTO"),
                     "AUTO"
@@ -371,7 +371,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Boolean> TRANSPORT_EPOLL_LT =
             new ConfigOption<>(
                     "transport.transport_epoll_lt",
-                    "Enabled EPOLL level trigger.",
+                    "Whether enable EPOLL level-trigger",
                     allowValues(true, false),
                     true
             );
@@ -379,8 +379,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
             new ConfigOption<>(
                     "transport.send_buffer_size",
-                    "The Network send buffer size, the zero means is use" +
-                    " system defaults",
+                    "The network send buffer size, 0 means using system " +
+                    "defaults",
                     nonNegativeInt(),
                     0
             );
@@ -388,8 +388,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_RECEIVE_BUFFER_SIZE =
             new ConfigOption<>(
                     "transport.receive_buffer_size",
-                    "The Network receive buffer size, the zero means is use" +
-                    " system defaults",
+                    "The network receive buffer size, 0 means using system " +
+                    "defaults",
                     nonNegativeInt(),
                     0
             );
@@ -397,8 +397,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
             new ConfigOption<>(
                     "transport.backlog",
-                    "The server connection backlog, the zero means is use" +
-                    " system defaults",
+                    "The server connection backlog, 0 means using system " +
+                    "defaults",
                     nonNegativeInt(),
                     0
             );
@@ -406,7 +406,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> TRANSPORT_CLIENT_CONNECT_TIMEOUT =
             new ConfigOption<>(
                     "transport.client_connect_timeout",
-                    "The timeout(in ms) of client connection server.",
+                    "The timeout(in ms) of client connect to server",
                     positiveInt(),
                     3000L
             );
@@ -414,7 +414,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> TRANSPORT_CLOSE_TIMEOUT =
             new ConfigOption<>(
                     "transport.close_timeout",
-                    "The timeout(in ms) of close server or client.",
+                    "The timeout(in ms) of close server or close client",
                     positiveInt(),
                     10_000L
             );
@@ -422,7 +422,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_NETWORK_RETRIES =
             new ConfigOption<>(
                     "transport.network_retries",
-                    "The number of retry attempts for network communication.",
+                    "The number of retry attempts for network communication," +
+                    "if network unstable",
                     nonNegativeInt(),
                     3
             );
@@ -430,7 +431,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_MAX_PENDING_REQUESTS =
             new ConfigOption<>(
                     "transport.max_pending_requests",
-                    "The max number of client unreceived ack.",
+                    "The max number of client unreceived ack",
                     positiveInt(),
                     50
             );
@@ -438,7 +439,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
             new ConfigOption<>(
                     "transport.min_pending_requests",
-                    "The minimum number of client unreceived ack.",
+                    "The minimum number of client unreceived ack",
                     positiveInt(),
                     5
             );
@@ -446,7 +447,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> TRANSPORT_MIN_ACK_INTERVAL =
             new ConfigOption<>(
                     "transport.min_ack_interval",
-                    "The minimum interval(in ms) of server reply ack.",
+                    "The minimum interval(in ms) of server reply ack",
                     positiveInt(),
                     200L
             );
@@ -454,7 +455,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_INTERVAL =
             new ConfigOption<>(
                     "transport.heartbeat_interval_seconds",
-                    "Time minimum interval(in seconds) of send heartbeat.",
+                    "Time minimum interval(in seconds) of send heartbeat",
                     positiveInt(),
                     60
             );
@@ -462,7 +463,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_TIMEOUT =
             new ConfigOption<>(
                     "transport.heartbeat_timeout_seconds",
-                    "The max timeout(in seconds) of heartbeat.",
+                    "The max timeout(in seconds) of heartbeat",
                     positiveInt(),
                     120
             );
@@ -470,7 +471,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
             new ConfigOption<>(
                     "transport.transport_tcp_keep_alive",
-                    "Enabled TCP keep alive.",
+                    "Whether enable TCP keep alive",
                     allowValues(true, false),
                     true
             );

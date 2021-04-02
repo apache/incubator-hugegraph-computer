@@ -66,7 +66,7 @@ public interface TransportClient {
      * To check whether the connection is active to use
      * @return true if connection is active
      */
-    boolean isActive();
+    boolean active();
 
     /**
      * Close the client.

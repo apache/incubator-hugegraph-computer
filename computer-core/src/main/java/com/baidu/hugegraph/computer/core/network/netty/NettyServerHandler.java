@@ -19,8 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.getRemoteAddress;
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.getRemoteConnectionID;
+import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteAddress;
+import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteConnectionID;
 
 import org.slf4j.Logger;
 
@@ -47,7 +47,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
         this.handler = handler;
     }
 
-
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext,
                                 Message message) throws Exception {
@@ -56,14 +55,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ConnectionID connectionID = getRemoteConnectionID(ctx.channel());
+        ConnectionID connectionID = remoteConnectionID(ctx.channel());
         this.handler.channelActive(connectionID);
         super.channelActive(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ConnectionID connectionID = getRemoteConnectionID(ctx.channel());
+        ConnectionID connectionID = remoteConnectionID(ctx.channel());
         this.handler.channelInactive(connectionID);
         super.channelInactive(ctx);
     }
@@ -76,10 +75,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
             exception = (TransportException) cause;
         } else {
             exception = new TransportException(
-                        "Exception in connection from {}",
-                        getRemoteAddress(ctx.channel()), cause);
+                        "Exception in connection from {}", cause,
+                        remoteAddress(ctx.channel()));
         }
-        ConnectionID connectionID = getRemoteConnectionID(ctx.channel());
+        ConnectionID connectionID = remoteConnectionID(ctx.channel());
         this.handler.exceptionCaught(exception, connectionID);
         super.exceptionCaught(ctx, cause);
     }
