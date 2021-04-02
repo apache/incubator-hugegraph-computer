@@ -68,6 +68,9 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
 
     public static FailMessage parseFrom(ByteBuf buf) {
         int failAckId = buf.readInt();
+        // skip partition
+        buf.skipBytes(4);
+        // skip body-length
         buf.skipBytes(4);
         buf.retain();
         return new FailMessage(failAckId,

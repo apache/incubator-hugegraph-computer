@@ -56,6 +56,7 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
     public static DataMessage parseFrom(MessageType type, ByteBuf buf) {
         int requestId = buf.readInt();
         int partition = buf.readInt();
+        // skip body-length
         buf.skipBytes(4);
         buf.retain();
         return new DataMessage(type, requestId, partition,

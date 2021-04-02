@@ -23,7 +23,9 @@ import com.baidu.hugegraph.computer.core.network.TransportStatus;
 
 public class ServerSession extends TransportSession {
 
-    public ServerSession() { super(); }
+    public ServerSession() {
+        super();
+    }
 
     public void startRecv() {
         this.maxRequestId.compareAndSet(-1, 0);
