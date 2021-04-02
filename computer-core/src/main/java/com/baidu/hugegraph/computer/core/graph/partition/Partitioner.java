@@ -19,9 +19,15 @@
 
 package com.baidu.hugegraph.computer.core.graph.partition;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 
 public interface Partitioner {
+
+    /**
+     * Initialize the partitioner with config.
+     */
+    void init(Config config);
 
     /**
      * Get the partition id by specified vertex id.

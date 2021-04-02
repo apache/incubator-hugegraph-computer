@@ -45,7 +45,9 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2"
         );
         Config config = ComputerContext.instance().config();
-        HashPartitioner partitioner = new HashPartitioner(config);
+        Partitioner partitioner = config.createObject(
+                                  ComputerOptions.WORKER_PARTITIONER);
+        partitioner.init(config);
         Id vertexId1 = new LongId(1L);
         Id vertexId2 = new LongId(2L);
         int partition1 = partitioner.partitionId(vertexId1);
@@ -65,7 +67,9 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2"
         );
         Config config = ComputerContext.instance().config();
-        HashPartitioner partitioner = new HashPartitioner(config);
+        Partitioner partitioner = config.createObject(
+                                  ComputerOptions.WORKER_PARTITIONER);
+        partitioner.init(config);
         int workerId1 = partitioner.workerId(1);
         int workerId2 = partitioner.workerId(2);
         Assert.assertEquals(0, workerId1);
@@ -83,7 +87,9 @@ public class HashPartitionerTest {
                 Integer.toString(partitionCount)
         );
         Config config = ComputerContext.instance().config();
-        HashPartitioner partitioner = new HashPartitioner(config);
+        Partitioner partitioner = config.createObject(
+                                  ComputerOptions.WORKER_PARTITIONER);
+        partitioner.init(config);
         int[] partitionStat = new int[partitionCount];
         int[] workerStat = new int[workerCount];
         Random random = new Random(1001);
@@ -96,5 +102,7 @@ public class HashPartitionerTest {
         }
         LOG.info("partitionStat: {}", Arrays.toString(partitionStat));
         LOG.info("workerStat: {}", Arrays.toString(workerStat));
+        Assert.assertEquals(1024, Arrays.stream(partitionStat).sum());
+        Assert.assertEquals(1024, Arrays.stream(workerStat).sum());
     }
 }

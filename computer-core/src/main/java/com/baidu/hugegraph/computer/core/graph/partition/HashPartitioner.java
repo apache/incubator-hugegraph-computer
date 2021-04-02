@@ -25,10 +25,15 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 
 public final class HashPartitioner implements Partitioner {
 
-    private final int partitionCount;
-    private final int workerCount;
+    private int partitionCount;
+    private int workerCount;
 
-    public HashPartitioner(Config config) {
+    public HashPartitioner() {
+        // pass
+    }
+
+    @Override
+    public void init(Config config) {
         this.partitionCount = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
     }
