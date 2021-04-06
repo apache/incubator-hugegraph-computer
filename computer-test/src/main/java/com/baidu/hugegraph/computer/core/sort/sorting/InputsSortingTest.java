@@ -25,7 +25,6 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class InputsSortingTest {
 
     @Test
@@ -38,8 +37,8 @@ public class InputsSortingTest {
         sorting = new HeapInputsSorting<>(TestData.dataWithEmpty());
         this.assertSorted(TestData.dataWithEmpty(), sorting);
 
-        sorting = new HeapInputsSorting<>(TestData.emptyData());
-        this.assertSorted(TestData.emptyData(), sorting);
+        sorting = new HeapInputsSorting<>(TestData.dataEmpty());
+        this.assertSorted(TestData.dataEmpty(), sorting);
     }
 
     @Test
@@ -52,8 +51,8 @@ public class InputsSortingTest {
         sorting = new LoserTreeInputsSorting<>(TestData.dataWithEmpty());
         this.assertSorted(TestData.dataWithEmpty(), sorting);
 
-        sorting = new LoserTreeInputsSorting<>(TestData.emptyData());
-        this.assertSorted(TestData.emptyData(), sorting);
+        sorting = new LoserTreeInputsSorting<>(TestData.dataEmpty());
+        this.assertSorted(TestData.dataEmpty(), sorting);
     }
 
     private void assertSorted(List<Iterator<Integer>> list,
