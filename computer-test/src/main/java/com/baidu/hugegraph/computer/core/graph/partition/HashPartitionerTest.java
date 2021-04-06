@@ -239,8 +239,8 @@ public class HashPartitionerTest {
             int workerId = partitioner.workerId(partitionId);
             workerStat[workerId]++;
         }
-        LOG.info("partitionStat: {}", Arrays.toString(partitionStat));
-        LOG.info("workerStat: {}", Arrays.toString(workerStat));
+        LOG.info("Partition distribution: {}", Arrays.toString(partitionStat));
+        LOG.info("Worker distribution: {}", Arrays.toString(workerStat));
         Assert.assertEquals(hashTimes, Arrays.stream(partitionStat).sum());
         Assert.assertEquals(hashTimes, Arrays.stream(workerStat).sum());
     }
