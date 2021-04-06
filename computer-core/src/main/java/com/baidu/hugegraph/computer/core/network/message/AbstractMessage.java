@@ -59,49 +59,49 @@ public abstract class AbstractMessage implements Message {
     private final int bodyLength;
 
     protected AbstractMessage() {
-      this(0, null);
+        this(0, null);
     }
 
     protected AbstractMessage(ManagedBuffer body) {
-      this(0, body);
+        this(0, body);
     }
 
     protected AbstractMessage(int partition, ManagedBuffer body) {
-      this.partition = partition;
-      if (body != null) {
-        this.body = body;
-        this.bodyLength = body.size();
-      } else {
-        this.body = null;
-        this.bodyLength = 0;
-      }
+        this.partition = partition;
+        if (body != null) {
+            this.body = body;
+            this.bodyLength = body.size();
+        } else {
+            this.body = null;
+            this.bodyLength = 0;
+        }
     }
 
     @Override
     public void encode(ByteBuf buf) {
-      this.type().encode(buf);
-      buf.writeInt(this.sequenceNumber());
-      buf.writeInt(this.partition());
-      if (this.bodyLength() > 0) {
-        buf.writeInt(this.bodyLength());
-        buf.writeBytes(this.body().nettyByteBuf());
-      } else {
-        buf.writeInt(0);
-      }
+        this.type().encode(buf);
+        buf.writeInt(this.sequenceNumber());
+        buf.writeInt(this.partition());
+        if (this.bodyLength() > 0) {
+            buf.writeInt(this.bodyLength());
+            buf.writeBytes(this.body().nettyByteBuf());
+        } else {
+            buf.writeInt(0);
+        }
     }
 
     @Override
     public int partition() {
-      return this.partition;
+        return this.partition;
     }
 
     @Override
     public int bodyLength() {
-      return this.bodyLength;
+        return this.bodyLength;
     }
 
     @Override
     public ManagedBuffer body() {
-      return this.bodyLength() > 0 ? this.body : null;
+        return this.bodyLength() > 0 ? this.body : null;
     }
 }

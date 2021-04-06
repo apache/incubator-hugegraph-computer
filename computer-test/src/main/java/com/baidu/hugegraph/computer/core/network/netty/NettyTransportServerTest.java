@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -134,16 +135,19 @@ public class NettyTransportServerTest {
 
     @Test
     public void testListenWithLocalIp() {
-        String ip = TransportUtil.getLocalIPAddress();
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_SERVER_HOST, ip
-        );
-        config = ComputerContext.instance().config();
-        int port = this.server.listen(config, messageHandler);
-        Assert.assertNotEquals(0, this.server.port());
-        Assert.assertNotEquals(0, port);
-        Assert.assertEquals(ip, this.server.ip());
-        Assert.assertEquals(port, this.server.port());
+        List<String> ips = TransportUtil.getLocalIPAddress();
+        if (!ips.isEmpty()) {
+            String ip = ips.get(0);
+            UnitTestBase.updateWithRequiredOptions(
+                    ComputerOptions.TRANSPORT_SERVER_HOST, ip
+            );
+            config = ComputerContext.instance().config();
+            int port = this.server.listen(config, messageHandler);
+            Assert.assertNotEquals(0, this.server.port());
+            Assert.assertNotEquals(0, port);
+            Assert.assertEquals(ip, this.server.ip());
+            Assert.assertEquals(port, this.server.port());
+        }
     }
 
     @Test

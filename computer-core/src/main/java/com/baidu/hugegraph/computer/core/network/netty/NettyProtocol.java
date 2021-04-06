@@ -45,13 +45,14 @@ public class NettyProtocol {
     private static final Logger LOG = Log.logger(NettyProtocol.class);
 
     private static final ChannelHandler SLOT_HANDLER = new SLOT_HANDLER();
+    private static final int DISABLE_IDLE_TIME = 0;
 
     private static final MessageEncoder ENCODER = MessageEncoder.INSTANCE;
     private static final MessageDecoder DECODER = MessageDecoder.INSTANCE;
-    private static final ServerIdleHandler
-            SERVER_IDLE_HANDLER = new ServerIdleHandler();
-    private static final HeartBeatHandler
-            HEART_BEAT_HANDLER = new HeartBeatHandler();
+    private static final ServerIdleHandler SERVER_IDLE_HANDLER =
+            new ServerIdleHandler();
+    private static final HeartBeatHandler HEART_BEAT_HANDLER =
+            new HeartBeatHandler();
 
     private static final String CLIENT_HANDLER_NAME = "clientHandler";
 
@@ -107,7 +108,8 @@ public class NettyProtocol {
         pipeline.addLast("decoder", DECODER);
 
         int timeout = this.conf.heartbeatTimeout();
-        IdleStateHandler idleHandler = new IdleStateHandler(0, 0,
+        IdleStateHandler idleHandler = new IdleStateHandler(DISABLE_IDLE_TIME,
+                                                            DISABLE_IDLE_TIME,
                                                             timeout,
                                                             TimeUnit.SECONDS);
         pipeline.addLast("serverIdleStateHandler", idleHandler);
@@ -164,7 +166,7 @@ public class NettyProtocol {
 
         int interval = this.conf.heartbeatInterval();
         IdleStateHandler idleHandler = new IdleStateHandler(interval, interval,
-                                                            0,
+                                                            DISABLE_IDLE_TIME,
                                                             TimeUnit.SECONDS);
         pipeline.addLast("clientIdleStateHandler", idleHandler);
         // NOTE: The heartBeatHandler can reuse
@@ -188,6 +190,6 @@ public class NettyProtocol {
 
     @ChannelHandler.Sharable
     private static class SLOT_HANDLER extends ChannelInboundHandlerAdapter {
-        // it is a empty handler for slot
+        // It is a empty handler for slot
     }
 }

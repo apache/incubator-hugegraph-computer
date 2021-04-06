@@ -52,7 +52,6 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
     @Override
     public void write(ChannelHandlerContext ctx, Object obj,
                       ChannelPromise promise) throws Exception {
-        super.write(ctx, obj, promise);
         if (obj instanceof Message) {
             Message message = (Message) obj;
             this.writeMessage(ctx, message, promise, ctx.alloc());

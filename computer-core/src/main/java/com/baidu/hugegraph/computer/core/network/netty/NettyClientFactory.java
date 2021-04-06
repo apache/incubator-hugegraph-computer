@@ -141,7 +141,7 @@ public class NettyClientFactory implements ClientFactory {
         long preConnect = System.nanoTime();
 
         String formatAddress = TransportUtil.formatAddress(address);
-        LOG.debug("connectTimeout of address [{}] is [{}]", formatAddress,
+        LOG.debug("ConnectTimeout of address [{}] is [{}]", formatAddress,
                   connectTimeoutMs);
 
         ChannelFuture future = this.bootstrap.connect(address);
@@ -151,24 +151,24 @@ public class NettyClientFactory implements ClientFactory {
 
         if (!future.isDone()) {
             throw new TransportException(
-                    "Create connection to %s timeout!", formatAddress);
+                  "Create connection to %s timeout!", formatAddress);
         }
 
         if (future.isCancelled()) {
             throw new TransportException(
-                    "Create connection to %s cancelled by user!",
-                    formatAddress);
+                  "Create connection to %s cancelled by user!",
+                  formatAddress);
         }
 
         if (future.cause() != null) {
             throw new TransportException(
-                    "Create connection to %s error, cause: %s",
-                    future.cause(), formatAddress, future.cause().getMessage());
+                  "Create connection to %s error, cause: %s",
+                  future.cause(), formatAddress, future.cause().getMessage());
         }
 
         if (!connectSuccess || !future.isSuccess()) {
             throw new TransportException(
-                    "Create connection to %s error!", formatAddress);
+                  "Create connection to %s error!", formatAddress);
         }
 
         long postConnect = System.nanoTime();
@@ -193,11 +193,11 @@ public class NettyClientFactory implements ClientFactory {
             } catch (IOException e) {
                 tried++;
                 if (tried > retryNumber) {
-                    LOG.warn("Failed to connect to {}. Giving up",
+                    LOG.warn("Failed to connect to {}, Giving up",
                              formatAddress, e);
                     throw e;
                 } else {
-                    LOG.debug("Failed to connect to {} with retries times {} " +
+                    LOG.debug("Failed to connect to {} with retries times {}," +
                               "Retrying...", formatAddress, tried, e);
                 }
             }

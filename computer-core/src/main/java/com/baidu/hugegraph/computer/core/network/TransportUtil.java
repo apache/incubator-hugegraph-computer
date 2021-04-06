@@ -25,7 +25,9 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import org.slf4j.Logger;
 
@@ -82,7 +84,8 @@ public class TransportUtil {
         return resolvedAddress;
     }
 
-    public static String getLocalIPAddress() {
+    public static List<String> getLocalIPAddress() {
+        List<String> ips = new ArrayList<>();
         try {
             Enumeration<NetworkInterface> allNetInterfaces =
             NetworkInterface.getNetworkInterfaces();
@@ -96,15 +99,15 @@ public class TransportUtil {
                         while (addresses.hasMoreElements()) {
                             ip = addresses.nextElement();
                             if (ip instanceof Inet4Address) {
-                                return ip.getHostAddress();
+                                ips.add(ip.getHostAddress());
                             }
                         }
                     }
             }
+            return ips;
         } catch (Exception e) {
-            throw new ComputeException("Failed to getLocalIPAddress");
+            throw new ComputeException("Failed to getLocalIPAddress", e);
         }
-        return "<unknown IP>";
     }
 
     /**
@@ -121,7 +124,7 @@ public class TransportUtil {
             }
             return String.format("<%s:%s>", host, socketAddress.getPort());
         }
-        return "<unknown address>";
+        return null;
     }
 
     public static byte[] encodeString(String str) {
