@@ -45,7 +45,7 @@ public final class LoserTreeInputsSorting<T> extends AbstractInputsSorting<T> {
         this.leaves = new Object[this.size];
         this.tree = new int[this.size];
 
-        this.init();
+        this.constructLoserTree();
     }
 
     @Override
@@ -75,7 +75,7 @@ public final class LoserTreeInputsSorting<T> extends AbstractInputsSorting<T> {
         return this.leaves[this.tree[0]] == INFINITY_LEAF;
     }
 
-    private void init() {
+    private void constructLoserTree() {
         // Init leaves
         for (int i = 0; i < this.sources.length; i++) {
             if (this.sources[i].hasNext()) {
@@ -124,7 +124,7 @@ public final class LoserTreeInputsSorting<T> extends AbstractInputsSorting<T> {
     }
 
     /**
-     * judge whether index1 can beat index2
+     * Judge whether index1 can beat index2
      * if order by asc. smaller one is winner. bigger one is loser.
      */
     private boolean beat(int index1, int index2) {

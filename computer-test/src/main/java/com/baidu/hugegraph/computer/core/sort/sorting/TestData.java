@@ -92,7 +92,7 @@ public class TestData {
         return toIterators(MULTIWAY_DATA_HAS_EMPTY_LIST);
     }
 
-    public static List<Iterator<Integer>> emptyData() {
+    public static List<Iterator<Integer>> dataEmpty() {
         return toIterators(ALL_EMPTY_LIST);
     }
 }
