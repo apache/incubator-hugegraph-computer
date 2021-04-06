@@ -17,30 +17,21 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.worker;
 
-import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.master.MasterComputation;
+import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.master.MasterContext;
+import com.baidu.hugegraph.testutil.Assert;
 
-/**
- * Can't create instance, used for ObjectFactoryTest.
- */
-public class FakeMasterComputation implements MasterComputation {
-
-    private FakeMasterComputation() {
-    }
-
-    @Override
-    public void init(Config config) {
-    }
-
-    @Override
-    public void close() {
-    }
+public class MockMasterComputation extends DefaultMasterComputation {
 
     @Override
     public boolean compute(MasterContext context) {
-        return false;
+        Assert.assertEquals(100L, context.totalVertexCount());
+        Assert.assertEquals(200L, context.totalEdgeCount());
+        Assert.assertEquals(50L, context.finishedVertexCount());
+        Assert.assertEquals(60L, context.messageCount());
+        Assert.assertEquals(70L, context.messageBytes());
+        return true;
     }
 }

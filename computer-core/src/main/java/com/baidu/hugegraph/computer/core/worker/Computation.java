@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.worker;
 
 import java.util.Iterator;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
@@ -60,7 +61,7 @@ public interface Computation<M extends Value> {
      * computation needed, like create a connection to other database, get
      * the config the algorithm used.
      */
-    default void init(WorkerContext context) {
+    default void init(Config config) {
         // pass
     }
 
@@ -69,7 +70,7 @@ public interface Computation<M extends Value> {
      * Subclass can override this method if want to close the resources used
      * in the computation.
      */
-    default void close(WorkerContext context) {
+    default void close() {
         // pass
     }
 

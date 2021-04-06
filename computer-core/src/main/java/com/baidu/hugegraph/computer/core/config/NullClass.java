@@ -17,30 +17,16 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.common;
+package com.baidu.hugegraph.computer.core.config;
 
-import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.master.MasterComputation;
-import com.baidu.hugegraph.computer.core.master.MasterContext;
+import com.baidu.hugegraph.config.ConfigOption;
 
 /**
- * Can't create instance, used for ObjectFactoryTest.
+ * NullClass is used in ConfigOption<Class> to indicate a null class option.
+ * The config does not allow the default value null, so this is used as the
+ * default class value when class option can be null.
+ * {@link Config#createObject(ConfigOption)} will return null, if the value
+ * is NullClass.
  */
-public class FakeMasterComputation implements MasterComputation {
-
-    private FakeMasterComputation() {
-    }
-
-    @Override
-    public void init(Config config) {
-    }
-
-    @Override
-    public void close() {
-    }
-
-    @Override
-    public boolean compute(MasterContext context) {
-        return false;
-    }
+public class NullClass {
 }

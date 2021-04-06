@@ -37,6 +37,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.worker.Manager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 /**
@@ -44,7 +45,7 @@ import com.baidu.hugegraph.util.Log;
  * the job. Master service assembles the managers used by master. For example,
  * aggregator manager, input manager and so on.
  */
-public class MasterService implements MasterContext {
+public class MasterService {
 
     private static final Logger LOG = Log.logger(MasterService.class);
 
@@ -52,14 +53,12 @@ public class MasterService implements MasterContext {
     private Bsp4Master bsp4Master;
     private ContainerInfo masterInfo;
     private List<ContainerInfo> workers;
-    private SuperstepStat superstepStat;
-    private int superstep;
     private int maxSuperStep;
     private List<Manager> managers;
     private MasterComputation masterComputation;
 
     public MasterService() {
-        this.managers = new ArrayList();
+        this.managers = new ArrayList<>();
     }
 
     /**
@@ -73,20 +72,23 @@ public class MasterService implements MasterContext {
          * TODO: start aggregator manager for master.
          */
         int rpcPort = 8001;
-        LOG.info("[master] MasterService rpc port: {}", rpcPort);
+        LOG.info("[master {}] MasterService rpc port: {}", this, rpcPort);
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
         for (Manager manager : this.managers) {
             manager.init(this.config);
         }
         // TODO: get hostname
-        this.masterInfo = new ContainerInfo(-1, "localhost", rpcPort, 8002);
+        String host = "localhost";
+        this.masterInfo = new ContainerInfo(-1, host, rpcPort);
         this.bsp4Master.registerMaster(this.masterInfo);
         this.workers = this.bsp4Master.waitWorkersRegistered();
-        LOG.info("[master] MasterService worker count: {}", workers.size());
+        LOG.info("[master {}] MasterService worker count: {}",
+                 this, this.workers.size());
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
-        LOG.info("[master] MasterService initialized");
+        this.masterComputation.init(this.config);
+        LOG.info("[master {}] MasterService initialized", this);
     }
 
     /**
@@ -99,7 +101,7 @@ public class MasterService implements MasterContext {
         }
         this.bsp4Master.clean();
         this.bsp4Master.close();
-        LOG.info("[master] MasterService closed");
+        LOG.info("[master {}] MasterService closed", this);
     }
 
     /**
@@ -108,35 +110,41 @@ public class MasterService implements MasterContext {
      * After the superstep iteration, output the result.
      */
     public void execute() {
-        LOG.info("[master] MasterService execute");
+        LOG.info("[master {}] MasterService execute", this);
         /*
          * Step 1: Determines which superstep to start from, and resume this
          * superstep.
          */
-        this.superstep = this.superstepToResume();
-        LOG.info("[master] MasterService resume from superstep: {}",
-                 this.superstep);
+        int superstep = this.superstepToResume();
+
+        LOG.info("[master {}] MasterService resume from superstep: {}",
+                 this, superstep);
         /*
          * TODO: Get input splits from HugeGraph if resume from
          * Constants.INPUT_SUPERSTEP.
          */
-        this.bsp4Master.masterSuperstepResume(this.superstep);
+        this.bsp4Master.masterSuperstepResume(superstep);
 
         /*
          * Step 2: Input superstep for loading vertices and edges.
          * This step may be skipped if resume from other superstep than
          * Constants.INPUT_SUPERSTEP.
          */
-        if (this.superstep == Constants.INPUT_SUPERSTEP) {
-            this.inputstep();
-            this.superstep++;
+        SuperstepStat superstepStat;
+        if (superstep == Constants.INPUT_SUPERSTEP) {
+            superstepStat = this.inputstep();
+            superstep++;
+        } else {
+            // TODO: Get superstepStat from bsp service.
+            superstepStat = null;
         }
-
+        E.checkState(superstep <= this.maxSuperStep,
+                     "The superstep {} > maxSuperStep {}",
+                     superstep, this.maxSuperStep);
         // Step 3: Iteration computation of all supersteps.
-        for (; this.superstep < this.maxSuperStep &&
-               this.superstepStat.active(); this.superstep++) {
-            LOG.info("[master] MasterService superstep {} started",
-                     this.superstep);
+        for (; superstepStat.active(); superstep++) {
+            LOG.info("[master {}] MasterService superstep {} started",
+                     this, superstep);
             /*
              * Superstep iteration. The steps in each superstep are:
              * 1) Master waits workers superstep prepared.
@@ -151,26 +159,26 @@ public class MasterService implements MasterContext {
              * 7) Master signals the workers with superstepStat, and workers
              *    know whether to continue the next superstep iteration.
              */
-            this.bsp4Master.waitWorkersSuperstepPrepared(this.superstep);
+            this.bsp4Master.waitWorkersSuperstepPrepared(superstep);
             for (Manager manager : this.managers) {
-                manager.beforeSuperstep(this.config, this.superstep);
+                manager.beforeSuperstep(this.config, superstep);
             }
-            this.bsp4Master.masterSuperstepPrepared(this.superstep);
+            this.bsp4Master.masterSuperstepPrepared(superstep);
             List<WorkerStat> workerStats =
-                             this.bsp4Master.waitWorkersSuperstepDone(
-                                             this.superstep);
-            this.superstepStat = SuperstepStat.from(workerStats);
-            boolean masterContinue = this.masterComputation.compute(this);
-            if (this.finishedIteration(masterContinue)) {
-                this.superstepStat.inactivate();
+                    this.bsp4Master.waitWorkersSuperstepDone(superstep);
+            superstepStat = SuperstepStat.from(workerStats);
+            SuperstepContext context = new SuperstepContext(superstep,
+                                                            superstepStat);
+            boolean masterContinue = this.masterComputation.compute(context);
+            if (this.finishedIteration(masterContinue, context)) {
+                superstepStat.inactivate();
             }
             for (Manager manager : this.managers) {
-                manager.afterSuperstep(this.config, this.superstep);
+                manager.afterSuperstep(this.config, superstep);
             }
-            this.bsp4Master.masterSuperstepDone(this.superstep,
-                                                this.superstepStat);
-            LOG.info("[master] MasterService superstep {} finished",
-                     this.superstep);
+            this.bsp4Master.masterSuperstepDone(superstep, superstepStat);
+            LOG.info("[master {}] MasterService superstep {} finished",
+                     this, superstep);
         }
 
         // Step 4: Output superstep for outputting results.
@@ -178,58 +186,8 @@ public class MasterService implements MasterContext {
     }
 
     @Override
-    public long totalVertexCount() {
-        return this.superstepStat.vertexCount();
-    }
-
-    @Override
-    public long totalEdgeCount() {
-        return this.superstepStat.edgeCount();
-    }
-
-    @Override
-    public long finishedVertexCount() {
-        return this.superstepStat.finishedVertexCount();
-    }
-
-    @Override
-    public long messageCount() {
-        return this.superstepStat.messageCount();
-    }
-
-    @Override
-    public long messageBytes() {
-        return this.superstepStat.messageBytes();
-    }
-
-    @Override
-    public int superstep() {
-        return this.superstep;
-    }
-
-    @Override
-    public <V extends Value> void registerAggregator(
-                             String name,
-                             Class<? extends Aggregator<V>> aggregatorClass) {
-        throw new ComputerException("Not implemented");
-    }
-
-    @Override
-    public <V extends Value> void registerAggregator(
-                                  String name,
-                                  ValueType type,
-                                  Class<? extends Combiner<V>> combinerClass) {
-        throw new ComputerException("Not implemented");
-    }
-
-    @Override
-    public <V extends Value> void aggregatedValue(String name, V value) {
-        throw new ComputerException("Not implemented");
-    }
-
-    @Override
-    public <V extends Value> V aggregatedValue(String name) {
-        throw new ComputerException("Not implemented");
+    public String toString() {
+        return Integer.toString(this.masterInfo.id());
     }
 
     private int superstepToResume() {
@@ -248,16 +206,17 @@ public class MasterService implements MasterContext {
      * @param masterContinue The master-computation decide
      * @return true if finish superstep iteration.
      */
-    private boolean finishedIteration(boolean masterContinue) {
+    private boolean finishedIteration(boolean masterContinue,
+                                      MasterContext context) {
         if (!masterContinue) {
             return true;
         }
-        if (this.superstep == this.maxSuperStep - 1) {
+        if (context.superstep() == this.maxSuperStep - 1) {
             return true;
         }
-        long notFinishedVertexCount = this.totalVertexCount() -
-                                      this.finishedVertexCount();
-        return this.messageCount() == 0L && notFinishedVertexCount == 0L;
+        long notFinishedVertexCount = context.totalVertexCount() -
+                                      context.finishedVertexCount();
+        return context.messageCount() == 0L && notFinishedVertexCount == 0L;
     }
 
     /**
@@ -267,16 +226,17 @@ public class MasterService implements MasterContext {
      * phase is after all workers read input splits, the workers merge the
      * vertices and edges to get the stats for each partition.
      */
-    private void inputstep() {
-        LOG.info("[master] MasterService inputstep started");
+    private SuperstepStat inputstep() {
+        LOG.info("[master {}] MasterService inputstep started", this);
         this.bsp4Master.waitWorkersInputDone();
         this.bsp4Master.masterInputDone();
         List<WorkerStat> workerStats = this.bsp4Master.waitWorkersSuperstepDone(
                                        Constants.INPUT_SUPERSTEP);
-        this.superstepStat = SuperstepStat.from(workerStats);
+        SuperstepStat superstepStat = SuperstepStat.from(workerStats);
         this.bsp4Master.masterSuperstepDone(Constants.INPUT_SUPERSTEP,
-                                            this.superstepStat);
-        LOG.info("[master] MasterService inputstep finished");
+                                            superstepStat);
+        LOG.info("[master {}] MasterService inputstep finished", this);
+        return superstepStat;
     }
 
     /**
@@ -284,8 +244,74 @@ public class MasterService implements MasterContext {
      * successfully.
      */
     private void outputstep() {
-        LOG.info("[master] MasterService outputstep started");
+        LOG.info("[master {}] MasterService outputstep started", this);
         this.bsp4Master.waitWorkersOutputDone();
-        LOG.info("[master] MasterService outputstep finished");
+        LOG.info("[master {}] MasterService outputstep finished", this);
+    }
+
+    private static class SuperstepContext implements MasterContext {
+
+        private final int superstep;
+        private final SuperstepStat superstepStat;
+
+        public SuperstepContext(int superstep, SuperstepStat superstepStat) {
+            this.superstep = superstep;
+            this.superstepStat = superstepStat;
+        }
+
+        @Override
+        public long totalVertexCount() {
+            return this.superstepStat.vertexCount();
+        }
+
+        @Override
+        public long totalEdgeCount() {
+            return this.superstepStat.edgeCount();
+        }
+
+        @Override
+        public long finishedVertexCount() {
+            return this.superstepStat.finishedVertexCount();
+        }
+
+        @Override
+        public long messageCount() {
+            return this.superstepStat.messageCount();
+        }
+
+        @Override
+        public long messageBytes() {
+            return this.superstepStat.messageBytes();
+        }
+
+        @Override
+        public int superstep() {
+            return this.superstep;
+        }
+
+        @Override
+        public <V extends Value> void registerAggregator(
+               String name,
+               Class<? extends Aggregator<V>> aggregatorClass) {
+            throw new ComputerException("Not implemented");
+        }
+
+        @Override
+        public <V extends Value> void registerAggregator(
+                                 String name,
+                                 ValueType type,
+                                 Class<? extends Combiner<V>> combinerClass) {
+            throw new ComputerException("Not implemented");
+        }
+
+        @Override
+        public <V extends Value> void aggregatedValue(String name, V value) {
+            throw new ComputerException("Not implemented");
+        }
+
+        @Override
+        public <V extends Value> V aggregatedValue(String name) {
+            throw new ComputerException("Not implemented");
+        }
     }
 }

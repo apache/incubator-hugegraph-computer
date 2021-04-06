@@ -31,6 +31,7 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -38,7 +39,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.util.Log;
 
-public class WorkerService implements WorkerContext {
+public class WorkerService {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 
@@ -47,13 +48,13 @@ public class WorkerService implements WorkerContext {
     private ContainerInfo workerInfo;
     private ContainerInfo masterInfo;
     private Map<Integer, ContainerInfo> workers;
-    private int superstep;
-    private SuperstepStat superstepStat;
-    public List<Manager> managers;
+    private Computation computation;
+    private List<Manager> managers;
+    private Combiner combiner;
 
     public WorkerService() {
         this.workers = new HashMap<>();
-        this.managers = new ArrayList();
+        this.managers = new ArrayList<>();
     }
 
     /**
@@ -72,6 +73,17 @@ public class WorkerService implements WorkerContext {
         for (ContainerInfo container : containers) {
             this.workers.put(container.id(), container);
         }
+        this.computation = this.config.createObject(
+                           ComputerOptions.WORKER_COMPUTATION_CLASS);
+        this.computation.init(config);
+        this.combiner = this.config.createObject(
+                        ComputerOptions.WORKER_COMBINER_CLASS);
+        if (this.combiner == null) {
+            LOG.info("Combiner is null");
+        } else {
+            LOG.info("Combiner {}", this.combiner.getClass().getName());
+        }
+
         // TODO: create connections to other workers for data transportation.
         // TODO: create aggregator manager
         LOG.info("[worker {}] WorkerService initialized", this);
@@ -90,6 +102,7 @@ public class WorkerService implements WorkerContext {
         for (Manager manager : this.managers) {
             manager.close(this.config);
         }
+        this.computation.close();
         this.bsp4Worker.close();
         LOG.info("[worker {}] WorkerService closed", this);
     }
@@ -102,82 +115,42 @@ public class WorkerService implements WorkerContext {
     public void execute() {
         LOG.info("[worker {}] WorkerService execute", this);
         // TODO: determine superstep if fail over is enabled.
-        this.superstep = this.bsp4Worker.waitMasterSuperstepResume();
-        if (this.superstep == Constants.INPUT_SUPERSTEP) {
-            this.inputstep();
-            this.superstep++;
+        int superstep = this.bsp4Worker.waitMasterSuperstepResume();
+        SuperstepStat superstepStat;
+        if (superstep == Constants.INPUT_SUPERSTEP) {
+            superstepStat = this.inputstep();
+            superstep++;
+        } else {
+            // TODO: Get superstepStat from bsp service.
+            superstepStat = null;
         }
+
         /*
          * The master determine whether to execute the next superstep. The
          * superstepStat is active while master decides to execute the next
          * superstep.
          */
-        while (this.superstepStat.active()) {
-            LOG.info("Start iteration of superstep {}", this.superstep);
+        while (superstepStat.active()) {
+            WorkerContext context = new SuperstepContext(superstep,
+                                                         superstepStat);
+            LOG.info("Start computation of superstep {}", superstep);
             for (Manager manager : this.managers) {
-                manager.beforeSuperstep(this.config, this.superstep);
+                manager.beforeSuperstep(this.config, superstep);
             }
-            this.bsp4Worker.workerSuperstepPrepared(this.superstep);
-            this.bsp4Worker.waitMasterSuperstepPrepared(this.superstep);
+            this.computation.beforeSuperstep(context);
+            this.bsp4Worker.workerSuperstepPrepared(superstep);
+            this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
             WorkerStat workerStat = this.computePartitions();
             for (Manager manager : this.managers) {
-                manager.afterSuperstep(this.config, this.superstep);
+                manager.afterSuperstep(this.config, superstep);
             }
-            this.bsp4Worker.workerSuperstepDone(this.superstep, workerStat);
-            LOG.info("End iteration of superstep {}", this.superstep);
-            this.superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
-                                                 this.superstep);
-            this.superstep++;
+            this.computation.afterSuperstep(context);
+            this.bsp4Worker.workerSuperstepDone(superstep, workerStat);
+            LOG.info("End computation of superstep {}", superstep);
+            superstepStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
+            superstep++;
         }
         this.outputstep();
-    }
-
-    @Override
-    public Config config() {
-        return this.config;
-    }
-
-    @Override
-    public <V extends Value> void aggregateValue(String name, V value) {
-        throw new ComputerException("Not implemented");
-    }
-
-    @Override
-    public <V extends Value> V aggregatedValue(String name) {
-       throw new ComputerException("Not implemented");
-    }
-
-    @Override
-    public void sendMessage(Id target, Value value) {
-        throw new ComputerException("Not implemented");
-    }
-
-    @Override
-    public void sendMessageToAllEdges(Vertex vertex, Value value) {
-        throw new ComputerException("Not implemented");
-    }
-
-    @Override
-    public long totalVertexCount() {
-        return this.superstepStat.vertexCount();
-    }
-
-    @Override
-    public long totalEdgeCount() {
-        return this.superstepStat.edgeCount();
-    }
-
-    @Override
-    public int superstep() {
-        return this.superstep;
-    }
-
-    /**
-     * Message combiner.
-     */
-    @Override
-    public <V extends Value> Combiner<V> combiner() {
-        throw new ComputerException("Not implemented");
     }
 
     @Override
@@ -192,7 +165,7 @@ public class WorkerService implements WorkerContext {
      * workers read input splits, the workers merge the vertices and edges to
      * get the stats for each partition.
      */
-    private void inputstep() {
+    private SuperstepStat inputstep() {
         LOG.info("[worker {}] WorkerService inputstep started", this);
         /*
          * Load vertices and edges parallel.
@@ -208,9 +181,10 @@ public class WorkerService implements WorkerContext {
         WorkerStat workerStat = this.computePartitions();
         this.bsp4Worker.workerSuperstepDone(Constants.INPUT_SUPERSTEP,
                                             workerStat);
-        this.superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
-                             this.superstep);
+        SuperstepStat superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
+                                      Constants.INPUT_SUPERSTEP);
         LOG.info("[worker {}] WorkerService inputstep finished", this);
+        return superstepStat;
     }
 
     /**
@@ -235,5 +209,64 @@ public class WorkerService implements WorkerContext {
     protected WorkerStat computePartitions() {
         // TODO: compute partitions parallel and get workerStat
         throw new ComputerException("Not implemented");
+    }
+
+    private class SuperstepContext implements WorkerContext {
+
+        private final int superstep;
+        private final SuperstepStat superstepStat;
+
+        private SuperstepContext(int superstep, SuperstepStat superstepStat) {
+            this.superstep = superstep;
+            this.superstepStat = superstepStat;
+        }
+
+        @Override
+        public Config config() {
+            return WorkerService.this.config;
+        }
+
+        @Override
+        public <V extends Value> void aggregateValue(String name, V value) {
+            throw new ComputerException("Not implemented");
+        }
+
+        @Override
+        public <V extends Value> V aggregatedValue(String name) {
+            throw new ComputerException("Not implemented");
+        }
+
+        @Override
+        public void sendMessage(Id target, Value value) {
+            throw new ComputerException("Not implemented");
+        }
+
+        @Override
+        public void sendMessageToAllEdges(Vertex vertex, Value value) {
+            throw new ComputerException("Not implemented");
+        }
+
+        @Override
+        public long totalVertexCount() {
+            return this.superstepStat.vertexCount();
+        }
+
+        @Override
+        public long totalEdgeCount() {
+            return this.superstepStat.edgeCount();
+        }
+
+        @Override
+        public int superstep() {
+            return this.superstep;
+        }
+
+        /**
+         * Message combiner.
+         */
+        @Override
+        public <V extends Value> Combiner<V> combiner() {
+            return WorkerService.this.combiner;
+        }
     }
 }

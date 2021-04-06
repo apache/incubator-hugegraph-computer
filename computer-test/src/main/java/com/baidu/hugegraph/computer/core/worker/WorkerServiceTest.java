@@ -40,7 +40,7 @@ public class WorkerServiceTest {
     private static final Logger LOG = Log.logger(WorkerServiceTest.class);
 
     @Test
-    public void testServiceSucess() throws InterruptedException {
+    public void testServiceSuccess() throws InterruptedException {
         MasterService masterService = new MasterService();
         WorkerService workerService = new MockWorkerService();
         try {
@@ -48,7 +48,11 @@ public class WorkerServiceTest {
                     ComputerOptions.JOB_ID, "local_001",
                     ComputerOptions.JOB_WORKERS_COUNT, "1",
                     ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                    ComputerOptions.BSP_MAX_SUPER_STEP, "2"
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                    ComputerOptions.WORKER_COMPUTATION_CLASS,
+                    MockComputation.class.getName(),
+                    ComputerOptions.MASTER_COMPUTATION_CLASS,
+                    MockMasterComputation.class.getName()
             );
             ExecutorService pool = Executors.newFixedThreadPool(2);
             CountDownLatch countDownLatch = new CountDownLatch(2);
@@ -73,14 +77,6 @@ public class WorkerServiceTest {
             countDownLatch.await();
             pool.shutdownNow();
 
-            Assert.assertEquals(100L, masterService.totalVertexCount());
-            Assert.assertEquals(200L, masterService.totalEdgeCount());
-            Assert.assertEquals(50L, masterService.finishedVertexCount());
-            Assert.assertEquals(60L, masterService.messageCount());
-            Assert.assertEquals(70L, masterService.messageBytes());
-
-            Assert.assertEquals(100L, workerService.totalVertexCount());
-            Assert.assertEquals(200L, workerService.totalEdgeCount());
         } finally {
             workerService.close();
             masterService.close();

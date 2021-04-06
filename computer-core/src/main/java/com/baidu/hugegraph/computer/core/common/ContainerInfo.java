@@ -43,6 +43,10 @@ public class ContainerInfo implements Readable, Writable {
     public ContainerInfo() {
     }
 
+    public ContainerInfo(int id, String hostname, int rpcPort) {
+        this(id, hostname, rpcPort, 0);
+    }
+
     public ContainerInfo(int id, String hostname, int rpcPort, int dataPort) {
         E.checkArgumentNotNull(hostname, "The hostname can't be null");
         this.id = id;

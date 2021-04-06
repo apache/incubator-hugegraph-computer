@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.google.common.collect.ImmutableSet;
@@ -258,6 +259,23 @@ public class ComputerOptions extends OptionHolder {
                     "should be in, and which worker a partition should be in.",
                     disallowEmpty(),
                     HashPartitioner.class
+            );
+
+    public static final ConfigOption<Class<?>> WORKER_COMPUTATION_CLASS =
+            new ConfigOption<>(
+                    "worker.computation_class",
+                    "Worker-computation is computation that compute a vertex " +
+                    "in each superstep.",
+                    disallowEmpty(),
+                    Computation.class
+            );
+
+    public static final ConfigOption<Class<?>> WORKER_COMBINER_CLASS =
+            new ConfigOption<>(
+                    "worker.combiner_class",
+                    "Combiner can combine messages for a vertex.",
+                    disallowEmpty(),
+                    NullClass.class
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
