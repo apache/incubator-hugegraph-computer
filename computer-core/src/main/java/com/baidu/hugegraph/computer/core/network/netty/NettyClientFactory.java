@@ -198,7 +198,7 @@ public class NettyClientFactory implements ClientFactory {
                     throw e;
                 } else {
                     LOG.debug("Failed to connect to {} with retries times {}," +
-                              "Retrying...", formatAddress, tried, e);
+                              " Retrying...", formatAddress, tried, e);
                 }
             }
         }

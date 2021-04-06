@@ -32,6 +32,7 @@ import java.util.List;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
@@ -114,17 +115,15 @@ public class TransportUtil {
      * Format Address, priority use of IP
      */
     public static String formatAddress(InetSocketAddress socketAddress) {
-        if (socketAddress != null) {
-            String host = "";
-            InetAddress address = socketAddress.getAddress();
-            if (address != null && !socketAddress.isUnresolved()) {
-                host = address.getHostAddress();
-            } else {
-                host = socketAddress.getHostString();
-            }
-            return String.format("<%s:%s>", host, socketAddress.getPort());
+        E.checkNotNull(socketAddress, "socketAddress");
+        String host = "";
+        InetAddress address = socketAddress.getAddress();
+        if (address != null && !socketAddress.isUnresolved()) {
+            host = address.getHostAddress();
+        } else {
+            host = socketAddress.getHostString();
         }
-        return null;
+        return String.format("<%s:%s>", host, socketAddress.getPort());
     }
 
     public static byte[] encodeString(String str) {

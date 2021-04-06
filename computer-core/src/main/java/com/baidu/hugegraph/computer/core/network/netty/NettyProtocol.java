@@ -50,9 +50,9 @@ public class NettyProtocol {
     private static final MessageEncoder ENCODER = MessageEncoder.INSTANCE;
     private static final MessageDecoder DECODER = MessageDecoder.INSTANCE;
     private static final ServerIdleHandler SERVER_IDLE_HANDLER =
-            new ServerIdleHandler();
+                                           new ServerIdleHandler();
     private static final HeartBeatHandler HEART_BEAT_HANDLER =
-            new HeartBeatHandler();
+                                          new HeartBeatHandler();
 
     private static final String CLIENT_HANDLER_NAME = "clientHandler";
 
