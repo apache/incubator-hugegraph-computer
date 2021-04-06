@@ -40,7 +40,8 @@ public final class HashPartitioner implements Partitioner {
 
     @Override
     public int partitionId(Id vertexId) {
-        return Math.abs(vertexId.hashCode() % this.partitionCount);
+        int hashCode = vertexId.hashCode() & Integer.MAX_VALUE;
+        return hashCode % this.partitionCount;
     }
 
     @Override
