@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
@@ -38,14 +36,14 @@ import com.baidu.hugegraph.util.Log;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageDecoder;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
  * Decoder used by the client side to encode server-to-client responses.
  * This encoder is stateless so it is safe to be shared by multiple threads.
  */
 @ChannelHandler.Sharable
-public class MessageDecoder extends MessageToMessageDecoder<ByteBuf> {
+public class MessageDecoder extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOG = Log.logger(MessageDecoder.class);
 
@@ -55,14 +53,20 @@ public class MessageDecoder extends MessageToMessageDecoder<ByteBuf> {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in,
-                          List<Object> ins) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+                            throws Exception {
+        if (!(msg instanceof ByteBuf)) {
+            ctx.fireChannelRead(msg);
+            return;
+        }
+
+        ByteBuf buf = (ByteBuf) msg;
         try {
-            MessageType msgType = MessageType.decode(in);
-            Message decoded = this.decode(msgType, in);
-            ins.add(decoded);
+            MessageType msgType = MessageType.decode(buf);
+            Message decoded = this.decode(msgType, buf);
+            ctx.fireChannelRead(decoded);
         } finally {
-            in.release();
+            buf.release();
         }
     }
 
