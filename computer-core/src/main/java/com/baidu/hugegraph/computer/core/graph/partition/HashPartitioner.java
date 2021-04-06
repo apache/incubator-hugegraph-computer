@@ -29,7 +29,8 @@ public final class HashPartitioner implements Partitioner {
     private int workerCount;
 
     public HashPartitioner() {
-        // pass
+        this.partitionCount = -1;
+        this.workerCount = -1;
     }
 
     @Override

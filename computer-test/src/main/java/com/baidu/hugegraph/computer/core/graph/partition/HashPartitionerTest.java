@@ -134,7 +134,7 @@ public class HashPartitionerTest {
         );
         Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
-                ComputerOptions.WORKER_PARTITIONER);
+                                  ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
         Id vertexId1 = new LongId(1L);
         Id vertexId2 = new LongId(2L);

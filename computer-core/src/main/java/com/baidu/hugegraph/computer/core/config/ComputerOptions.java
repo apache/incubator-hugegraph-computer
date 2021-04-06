@@ -254,8 +254,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Class<?>> WORKER_PARTITIONER =
             new ConfigOption<>(
                     "worker.partitioner",
-                    "The partitioner that decides partition id by vertex id, " +
-                    "and decides worker id by partition id.",
+                    "The partitioner that decides which partition a vertex " +
+                    "should be in, and which worker a partition should be in.",
                     disallowEmpty(),
                     HashPartitioner.class
             );
