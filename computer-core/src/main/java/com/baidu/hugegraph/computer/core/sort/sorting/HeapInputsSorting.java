@@ -24,7 +24,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
+public final class HeapInputsSorting<T> extends AbstractInputsSorting<T> {
 
     private final Object[] data;
     private int size;
