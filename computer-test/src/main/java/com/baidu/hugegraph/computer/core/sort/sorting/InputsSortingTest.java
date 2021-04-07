@@ -21,9 +21,11 @@ package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import com.baidu.hugegraph.testutil.Assert;
 
 public class InputsSortingTest {
 
@@ -31,7 +33,7 @@ public class InputsSortingTest {
     public void testHeapInputsSorting() {
         InputsSorting<Integer> sorting;
 
-        sorting = new HeapInputsSorting<>(TestData.data());
+        sorting = new HeapInputsSorting<>(TestData.data(), Integer::compareTo);
         this.assertSorted(TestData.data(), sorting);
 
         sorting = new HeapInputsSorting<>(TestData.dataWithEmpty());
@@ -45,7 +47,8 @@ public class InputsSortingTest {
     public void testLoserTreeInputsSorting() {
         InputsSorting<Integer> sorting;
 
-        sorting = new LoserTreeInputsSorting<>(TestData.data());
+        sorting = new LoserTreeInputsSorting<>(TestData.data(),
+                                               Integer::compareTo);
         this.assertSorted(TestData.data(), sorting);
 
         sorting = new LoserTreeInputsSorting<>(TestData.dataWithEmpty());
@@ -66,5 +69,6 @@ public class InputsSortingTest {
 
         Assert.assertFalse(inputsSorting.hasNext());
         Assert.assertFalse(sortedResult.hasNext());
+        Assert.assertThrows(NoSuchElementException.class, inputsSorting::next);
     }
 }

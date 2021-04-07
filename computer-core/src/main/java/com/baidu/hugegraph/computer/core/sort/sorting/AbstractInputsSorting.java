@@ -30,10 +30,6 @@ public abstract class AbstractInputsSorting<T> implements InputsSorting<T> {
     protected final Iterator<T>[] sources;
     protected final Comparator<? super T> comparator;
 
-    public AbstractInputsSorting(Collection<? extends Iterator<T>> sources) {
-        this(sources, null);
-    }
-
     @SuppressWarnings("unchecked")
     public AbstractInputsSorting(Collection<? extends Iterator<T>> sources,
                                  Comparator<? super T> comparator) {
