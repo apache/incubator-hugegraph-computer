@@ -63,7 +63,6 @@ public final class LoserTreeInputsSorting<T> extends AbstractInputsSorting<T> {
 
         @SuppressWarnings("unchecked")
         T winner = (T) this.leaves[winnerIndex];
-        assert winner != INFINITY_LEAF;
 
         this.fill(winnerIndex);
         this.adjust(winnerIndex);
