@@ -26,6 +26,7 @@ import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
@@ -248,6 +249,15 @@ public class ComputerOptions extends OptionHolder {
                     "range for data transportation.",
                     positiveInt(),
                     12000
+            );
+
+    public static final ConfigOption<Class<?>> WORKER_PARTITIONER =
+            new ConfigOption<>(
+                    "worker.partitioner",
+                    "The partitioner that decides which partition a vertex " +
+                    "should be in, and which worker a partition should be in.",
+                    disallowEmpty(),
+                    HashPartitioner.class
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
