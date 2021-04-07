@@ -123,7 +123,7 @@ public class TransportUtil {
         } else {
             host = socketAddress.getHostString();
         }
-        return String.format("<%s:%s>", host, socketAddress.getPort());
+        return String.format("%s:%s", host, socketAddress.getPort());
     }
 
     public static byte[] encodeString(String str) {

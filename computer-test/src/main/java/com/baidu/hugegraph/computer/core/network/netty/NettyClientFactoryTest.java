@@ -49,7 +49,7 @@ public class NettyClientFactoryTest {
     public void setup() {
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-                ComputerOptions.TRANSPORT_SERVER_PORT, "8080",
+                ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
                 ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
@@ -86,7 +86,7 @@ public class NettyClientFactoryTest {
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
         ConnectionID connectionID = ConnectionID.parseConnectionID(
-                                    "127.0.0.1", 8080);
+                                    "127.0.0.1", 8086);
         this.client = clientFactory.createClient(connectionID, clientHandler);
         Assert.assertTrue(this.client.active());
     }
@@ -97,7 +97,7 @@ public class NettyClientFactoryTest {
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
         ConnectionID connectionID = ConnectionID.parseConnectionID(
-                                    "127.0.0.1", 8080);
+                                    "127.0.0.1", 8086);
         this.client = clientFactory.createClient(connectionID, clientHandler);
         Assert.assertTrue(this.client.active());
         this.client.close();
