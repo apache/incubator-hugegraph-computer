@@ -157,7 +157,7 @@ public final class Config {
      */
     public <T> T createObject(ConfigOption<Class<?>> clazzOption) {
         Class clazz = this.get(clazzOption);
-        if (clazz == NullClass.class) {
+        if (clazz == Null.class) {
             return null;
         }
         try {

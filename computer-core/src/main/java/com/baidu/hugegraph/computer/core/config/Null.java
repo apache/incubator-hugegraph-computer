@@ -22,11 +22,11 @@ package com.baidu.hugegraph.computer.core.config;
 import com.baidu.hugegraph.config.ConfigOption;
 
 /**
- * NullClass is used in ConfigOption<Class> to indicate a null class option.
+ * Null is used in ConfigOption<Class> to indicate a null class option.
  * The config does not allow the default value null, so this is used as the
  * default class value when class option can be null.
  * {@link Config#createObject(ConfigOption)} will return null, if the value
- * is NullClass.
+ * is ${@code Null.class}".
  */
-public class NullClass {
+public class Null {
 }

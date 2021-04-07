@@ -264,7 +264,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Class<?>> WORKER_COMPUTATION_CLASS =
             new ConfigOption<>(
                     "worker.computation_class",
-                    "Worker-computation is computation that compute a vertex " +
+                    "The class to create worker-computation object, " +
+                    "worker-computation is used to  compute a vertex " +
                     "in each superstep.",
                     disallowEmpty(),
                     Computation.class
@@ -273,9 +274,11 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Class<?>> WORKER_COMBINER_CLASS =
             new ConfigOption<>(
                     "worker.combiner_class",
-                    "Combiner can combine messages for a vertex.",
+                    "Combiner can combine messages into one value for a " +
+                    "vertex, for example page-rank algorithm can combine " +
+                    "messages of a vertex to a sum value.",
                     disallowEmpty(),
-                    NullClass.class
+                    Null.class
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =

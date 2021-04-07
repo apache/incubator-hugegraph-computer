@@ -79,14 +79,17 @@ public class WorkerService {
         this.combiner = this.config.createObject(
                         ComputerOptions.WORKER_COMBINER_CLASS);
         if (this.combiner == null) {
-            LOG.info("Combiner is null");
+            LOG.info("None combiner is provided for computation '{}'",
+                     this.computation.getClass().getName());
         } else {
-            LOG.info("Combiner {}", this.combiner.getClass().getName());
+            LOG.info("Combiner {} for computation '{}'",
+                     this.combiner.getClass().getName(),
+                     this.computation.getClass().getName());
         }
 
         // TODO: create connections to other workers for data transportation.
         // TODO: create aggregator manager
-        LOG.info("[worker {}] WorkerService initialized", this);
+        LOG.info("{} WorkerService initialized", this);
     }
 
     /**
@@ -104,7 +107,7 @@ public class WorkerService {
         }
         this.computation.close();
         this.bsp4Worker.close();
-        LOG.info("[worker {}] WorkerService closed", this);
+        LOG.info("{} WorkerService closed", this);
     }
 
     /**
@@ -113,7 +116,7 @@ public class WorkerService {
      * superstepStat is inactive.
      */
     public void execute() {
-        LOG.info("[worker {}] WorkerService execute", this);
+        LOG.info("{} WorkerService execute", this);
         // TODO: determine superstep if fail over is enabled.
         int superstep = this.bsp4Worker.waitMasterSuperstepResume();
         SuperstepStat superstepStat;
@@ -155,7 +158,7 @@ public class WorkerService {
 
     @Override
     public String toString() {
-        return Integer.toString(this.workerInfo.id());
+        return String.format("worker %s", this.workerInfo.id());
     }
 
     /**
@@ -166,7 +169,7 @@ public class WorkerService {
      * get the stats for each partition.
      */
     private SuperstepStat inputstep() {
-        LOG.info("[worker {}] WorkerService inputstep started", this);
+        LOG.info("{} WorkerService inputstep started", this);
         /*
          * Load vertices and edges parallel.
          */
@@ -183,7 +186,7 @@ public class WorkerService {
                                             workerStat);
         SuperstepStat superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
                                       Constants.INPUT_SUPERSTEP);
-        LOG.info("[worker {}] WorkerService inputstep finished", this);
+        LOG.info("{} WorkerService inputstep finished", this);
         return superstepStat;
     }
 
@@ -198,7 +201,7 @@ public class WorkerService {
          */
         // TODO: output the vertices in partitions parallel
         this.bsp4Worker.workerOutputDone();
-        LOG.info("[worker {}] WorkerService outputstep finished", this);
+        LOG.info("{} WorkerService outputstep finished", this);
     }
 
     /**
@@ -228,21 +231,25 @@ public class WorkerService {
 
         @Override
         public <V extends Value> void aggregateValue(String name, V value) {
+            // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
         public <V extends Value> V aggregatedValue(String name) {
+            // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
         public void sendMessage(Id target, Value value) {
+            // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
         public void sendMessageToAllEdges(Vertex vertex, Value value) {
+            // TODO: implement
             throw new ComputerException("Not implemented");
         }
 

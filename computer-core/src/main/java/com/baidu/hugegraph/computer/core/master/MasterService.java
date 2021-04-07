@@ -72,7 +72,7 @@ public class MasterService {
          * TODO: start aggregator manager for master.
          */
         int rpcPort = 8001;
-        LOG.info("[master {}] MasterService rpc port: {}", this, rpcPort);
+        LOG.info("{} MasterService rpc port: {}", this, rpcPort);
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
         for (Manager manager : this.managers) {
@@ -83,12 +83,12 @@ public class MasterService {
         this.masterInfo = new ContainerInfo(-1, host, rpcPort);
         this.bsp4Master.registerMaster(this.masterInfo);
         this.workers = this.bsp4Master.waitWorkersRegistered();
-        LOG.info("[master {}] MasterService worker count: {}",
+        LOG.info("{} MasterService worker count: {}",
                  this, this.workers.size());
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
         this.masterComputation.init(this.config);
-        LOG.info("[master {}] MasterService initialized", this);
+        LOG.info("{} MasterService initialized", this);
     }
 
     /**
@@ -101,7 +101,7 @@ public class MasterService {
         }
         this.bsp4Master.clean();
         this.bsp4Master.close();
-        LOG.info("[master {}] MasterService closed", this);
+        LOG.info("{} MasterService closed", this);
     }
 
     /**
@@ -110,14 +110,14 @@ public class MasterService {
      * After the superstep iteration, output the result.
      */
     public void execute() {
-        LOG.info("[master {}] MasterService execute", this);
+        LOG.info("{} MasterService execute", this);
         /*
          * Step 1: Determines which superstep to start from, and resume this
          * superstep.
          */
         int superstep = this.superstepToResume();
 
-        LOG.info("[master {}] MasterService resume from superstep: {}",
+        LOG.info("{} MasterService resume from superstep: {}",
                  this, superstep);
         /*
          * TODO: Get input splits from HugeGraph if resume from
@@ -143,7 +143,7 @@ public class MasterService {
                      superstep, this.maxSuperStep);
         // Step 3: Iteration computation of all supersteps.
         for (; superstepStat.active(); superstep++) {
-            LOG.info("[master {}] MasterService superstep {} started",
+            LOG.info("{} MasterService superstep {} started",
                      this, superstep);
             /*
              * Superstep iteration. The steps in each superstep are:
@@ -177,7 +177,7 @@ public class MasterService {
                 manager.afterSuperstep(this.config, superstep);
             }
             this.bsp4Master.masterSuperstepDone(superstep, superstepStat);
-            LOG.info("[master {}] MasterService superstep {} finished",
+            LOG.info("{} MasterService superstep {} finished",
                      this, superstep);
         }
 
@@ -187,7 +187,7 @@ public class MasterService {
 
     @Override
     public String toString() {
-        return Integer.toString(this.masterInfo.id());
+        return String.format("[master %s]", this.masterInfo.id());
     }
 
     private int superstepToResume() {
@@ -227,7 +227,7 @@ public class MasterService {
      * vertices and edges to get the stats for each partition.
      */
     private SuperstepStat inputstep() {
-        LOG.info("[master {}] MasterService inputstep started", this);
+        LOG.info("{} MasterService inputstep started", this);
         this.bsp4Master.waitWorkersInputDone();
         this.bsp4Master.masterInputDone();
         List<WorkerStat> workerStats = this.bsp4Master.waitWorkersSuperstepDone(
@@ -235,7 +235,7 @@ public class MasterService {
         SuperstepStat superstepStat = SuperstepStat.from(workerStats);
         this.bsp4Master.masterSuperstepDone(Constants.INPUT_SUPERSTEP,
                                             superstepStat);
-        LOG.info("[master {}] MasterService inputstep finished", this);
+        LOG.info("{} MasterService inputstep finished", this);
         return superstepStat;
     }
 
@@ -244,9 +244,9 @@ public class MasterService {
      * successfully.
      */
     private void outputstep() {
-        LOG.info("[master {}] MasterService outputstep started", this);
+        LOG.info("{} MasterService outputstep started", this);
         this.bsp4Master.waitWorkersOutputDone();
-        LOG.info("[master {}] MasterService outputstep finished", this);
+        LOG.info("{} MasterService outputstep finished", this);
     }
 
     private static class SuperstepContext implements MasterContext {
@@ -291,8 +291,9 @@ public class MasterService {
 
         @Override
         public <V extends Value> void registerAggregator(
-               String name,
-               Class<? extends Aggregator<V>> aggregatorClass) {
+                                 String name,
+                                 Class<? extends Aggregator<V>> aggregator) {
+            // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
@@ -300,17 +301,20 @@ public class MasterService {
         public <V extends Value> void registerAggregator(
                                  String name,
                                  ValueType type,
-                                 Class<? extends Combiner<V>> combinerClass) {
+                                 Class<? extends Combiner<V>> combiner) {
+            // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
         public <V extends Value> void aggregatedValue(String name, V value) {
+            // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
         public <V extends Value> V aggregatedValue(String name) {
+            // TODO: implement
             throw new ComputerException("Not implemented");
         }
     }
