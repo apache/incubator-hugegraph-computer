@@ -80,11 +80,11 @@ public class WorkerService {
                         ComputerOptions.WORKER_COMBINER_CLASS);
         if (this.combiner == null) {
             LOG.info("None combiner is provided for computation '{}'",
-                     this.computation.getClass().getName());
+                     this.computation.name());
         } else {
             LOG.info("Combiner {} for computation '{}'",
-                     this.combiner.getClass().getName(),
-                     this.computation.getClass().getName());
+                     this.combiner.name(),
+                     this.computation.name());
         }
 
         // TODO: create connections to other workers for data transportation.
@@ -101,10 +101,8 @@ public class WorkerService {
          * TODO: close the connection to other workers.
          * TODO: stop the connection to the master
          * TODO: stop the data transportation server.
+         * TODO: close managers
          */
-        for (Manager manager : this.managers) {
-            manager.close(this.config);
-        }
         this.computation.close();
         this.bsp4Worker.close();
         LOG.info("{} WorkerService closed", this);
@@ -137,16 +135,12 @@ public class WorkerService {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
-            for (Manager manager : this.managers) {
-                manager.beforeSuperstep(this.config, superstep);
-            }
+            // TODO: call each manager.beforeSuperstep
             this.computation.beforeSuperstep(context);
             this.bsp4Worker.workerSuperstepPrepared(superstep);
             this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
             WorkerStat workerStat = this.computePartitions();
-            for (Manager manager : this.managers) {
-                manager.afterSuperstep(this.config, superstep);
-            }
+            // TODO: call each manager.afterSuperstep
             this.computation.afterSuperstep(context);
             this.bsp4Worker.workerSuperstepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
@@ -158,7 +152,7 @@ public class WorkerService {
 
     @Override
     public String toString() {
-        return String.format("worker %s", this.workerInfo.id());
+        return String.format("[worker %s]", this.workerInfo.id());
     }
 
     /**

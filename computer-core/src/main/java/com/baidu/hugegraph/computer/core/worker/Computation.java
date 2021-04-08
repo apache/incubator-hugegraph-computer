@@ -39,6 +39,14 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 public interface Computation<M extends Value> {
 
     /**
+     * The name of computation.
+     * @return class name by default.
+     */
+    default String name() {
+        return this.getClass().getName();
+    }
+
+    /**
      * Compute a vertex without message in superstep0. Every vertex is active in
      * superstep0. It should set vertex's initial value in this method. Be
      * called for every vertex in superstep0.

@@ -75,9 +75,7 @@ public class MasterService {
         LOG.info("{} MasterService rpc port: {}", this, rpcPort);
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
-        for (Manager manager : this.managers) {
-            manager.init(this.config);
-        }
+        // TODO: init each manager
         // TODO: get hostname
         String host = "localhost";
         this.masterInfo = new ContainerInfo(-1, host, rpcPort);
@@ -96,9 +94,7 @@ public class MasterService {
      * {@link #init(Config)}.
      */
     public void close() {
-        for (Manager manager : this.managers) {
-            manager.close(this.config);
-        }
+        // TODO: close each manager
         this.bsp4Master.clean();
         this.bsp4Master.close();
         LOG.info("{} MasterService closed", this);
@@ -160,9 +156,7 @@ public class MasterService {
              *    know whether to continue the next superstep iteration.
              */
             this.bsp4Master.waitWorkersSuperstepPrepared(superstep);
-            for (Manager manager : this.managers) {
-                manager.beforeSuperstep(this.config, superstep);
-            }
+            // TODO: call each manager.beforeSuperstep
             this.bsp4Master.masterSuperstepPrepared(superstep);
             List<WorkerStat> workerStats =
                     this.bsp4Master.waitWorkersSuperstepDone(superstep);
@@ -173,9 +167,7 @@ public class MasterService {
             if (this.finishedIteration(masterContinue, context)) {
                 superstepStat.inactivate();
             }
-            for (Manager manager : this.managers) {
-                manager.afterSuperstep(this.config, superstep);
-            }
+            // TODO: call each manager.afterSuperstep
             this.bsp4Master.masterSuperstepDone(superstep, superstepStat);
             LOG.info("{} MasterService superstep {} finished",
                      this, superstep);

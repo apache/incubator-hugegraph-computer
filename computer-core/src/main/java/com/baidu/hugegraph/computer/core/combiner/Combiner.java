@@ -23,6 +23,14 @@ import java.util.Iterator;
 
 public interface Combiner<T> {
 
+    /**
+     * @return The name of the combiner.
+     * @return class name by default.
+     */
+    default String name() {
+        return this.getClass().getName();
+    }
+
     public static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
         if (!values.hasNext()) {
             return null;

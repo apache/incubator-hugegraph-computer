@@ -265,7 +265,7 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "worker.computation_class",
                     "The class to create worker-computation object, " +
-                    "worker-computation is used to  compute a vertex " +
+                    "worker-computation is used to compute each vertex " +
                     "in each superstep.",
                     disallowEmpty(),
                     Computation.class
