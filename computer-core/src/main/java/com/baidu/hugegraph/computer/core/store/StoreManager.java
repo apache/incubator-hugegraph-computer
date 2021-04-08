@@ -19,32 +19,5 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
-import java.util.Iterator;
-
-import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.testutil.Assert;
-
-public class MockComputation implements Computation<DoubleValue> {
-
-    public void beforeSuperstep(WorkerContext context) {
-        Assert.assertEquals(100L, context.totalVertexCount());
-        Assert.assertEquals(200L, context.totalEdgeCount());
-    }
-
-    @Override
-    public String category() {
-        return "mock";
-    }
-
-    @Override
-    public void compute0(ComputationContext context, Vertex vertex) {
-        // pass
-    }
-
-    @Override
-    public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<DoubleValue> messages) {
-        // pass
-    }
+public class StoreManager {
 }

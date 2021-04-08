@@ -47,6 +47,11 @@ public interface Computation<M extends Value> {
     }
 
     /**
+     * @return category of the computation.
+     */
+    String category();
+
+    /**
      * Compute a vertex without message in superstep0. Every vertex is active in
      * superstep0. It should set vertex's initial value in this method. Be
      * called for every vertex in superstep0.

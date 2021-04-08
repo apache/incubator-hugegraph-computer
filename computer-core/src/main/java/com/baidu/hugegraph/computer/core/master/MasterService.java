@@ -25,6 +25,7 @@ import java.util.List;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
+import com.baidu.hugegraph.computer.core.aggregator.MasterAggrManager;
 import com.baidu.hugegraph.computer.core.bsp.Bsp4Master;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -75,7 +76,14 @@ public class MasterService {
         LOG.info("{} MasterService rpc port: {}", this, rpcPort);
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
-        // TODO: init each manager
+        MasterAggrManager aggregatorManager = this.config.createObject(
+                          ComputerOptions.MASTER_AGGREGATOR_MANAGER_CLASS);
+        this.managers.add(aggregatorManager);
+
+        for (Manager manager : this.managers) {
+            manager.init(this.config);
+        }
+
         // TODO: get hostname
         String host = "localhost";
         this.masterInfo = new ContainerInfo(-1, host, rpcPort);
@@ -94,7 +102,9 @@ public class MasterService {
      * {@link #init(Config)}.
      */
     public void close() {
-        // TODO: close each manager
+        for (Manager manager : this.managers) {
+            manager.close(this.config);
+        }
         this.bsp4Master.clean();
         this.bsp4Master.close();
         LOG.info("{} MasterService closed", this);
@@ -156,7 +166,9 @@ public class MasterService {
              *    know whether to continue the next superstep iteration.
              */
             this.bsp4Master.waitWorkersSuperstepPrepared(superstep);
-            // TODO: call each manager.beforeSuperstep
+            for (Manager manager : this.managers) {
+                manager.beforeSuperstep(this.config, superstep);
+            }
             this.bsp4Master.masterSuperstepPrepared(superstep);
             List<WorkerStat> workerStats =
                     this.bsp4Master.waitWorkersSuperstepDone(superstep);
@@ -167,7 +179,9 @@ public class MasterService {
             if (this.finishedIteration(masterContinue, context)) {
                 superstepStat.inactivate();
             }
-            // TODO: call each manager.afterSuperstep
+            for (Manager manager : this.managers) {
+                manager.afterSuperstep(this.config, superstep);
+            }
             this.bsp4Master.masterSuperstepDone(superstep, superstepStat);
             LOG.info("{} MasterService superstep {} finished",
                      this, superstep);

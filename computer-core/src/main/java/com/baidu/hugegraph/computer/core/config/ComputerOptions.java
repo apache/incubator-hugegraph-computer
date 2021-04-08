@@ -26,6 +26,8 @@ import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.baidu.hugegraph.computer.core.aggregator.MasterAggrManager;
+import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.worker.Computation;
@@ -281,6 +283,15 @@ public class ComputerOptions extends OptionHolder {
                     Null.class
             );
 
+    public static final ConfigOption<Class<?>> WORKER_AGGREGATOR_MANAGER_CLASS =
+            new ConfigOption<>(
+                    "worker.aggregator_manager_class",
+                    "Class to create aggregator manager that manages " +
+                    "aggregators in worker.",
+                    disallowEmpty(),
+                    WorkerAggrManager.class
+            );
+
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
             new ConfigOption<>(
                     "master.computation_class",
@@ -289,6 +300,15 @@ public class ComputerOptions extends OptionHolder {
                     "of each superstep on master.",
                     disallowEmpty(),
                     DefaultMasterComputation.class
+            );
+
+    public static final ConfigOption<Class<?>> MASTER_AGGREGATOR_MANAGER_CLASS =
+            new ConfigOption<>(
+                    "master.aggregator_manager_class",
+                    "Class to create aggregator manager that manages " +
+                    "aggregators in master.",
+                    disallowEmpty(),
+                    MasterAggrManager.class
             );
 
     public static final ConfigOption<String> HUGEGRAPH_URL =

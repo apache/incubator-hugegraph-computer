@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.bsp.Bsp4Worker;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -76,6 +77,9 @@ public class WorkerService {
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
         this.computation.init(config);
+        LOG.info("Computation name: {}, category: {}",
+                 computation.name(), computation.category());
+
         this.combiner = this.config.createObject(
                         ComputerOptions.WORKER_COMBINER_CLASS);
         if (this.combiner == null) {
@@ -83,12 +87,20 @@ public class WorkerService {
                      this.computation.name());
         } else {
             LOG.info("Combiner {} for computation '{}'",
-                     this.combiner.name(),
-                     this.computation.name());
+                     this.combiner.name(), this.computation.name());
         }
 
         // TODO: create connections to other workers for data transportation.
-        // TODO: create aggregator manager
+
+        WorkerAggrManager aggregatorManager = this.config.createObject(
+                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
+        this.managers.add(aggregatorManager);
+
+        // Init managers
+        for (Manager manager : this.managers) {
+            manager.init(this.config);
+        }
+
         LOG.info("{} WorkerService initialized", this);
     }
 
@@ -101,8 +113,10 @@ public class WorkerService {
          * TODO: close the connection to other workers.
          * TODO: stop the connection to the master
          * TODO: stop the data transportation server.
-         * TODO: close managers
          */
+        for (Manager manager : this.managers) {
+            manager.close(this.config);
+        }
         this.computation.close();
         this.bsp4Worker.close();
         LOG.info("{} WorkerService closed", this);
@@ -135,12 +149,16 @@ public class WorkerService {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
-            // TODO: call each manager.beforeSuperstep
+            for (Manager manager : this.managers) {
+                manager.beforeSuperstep(this.config, superstep);
+            }
             this.computation.beforeSuperstep(context);
             this.bsp4Worker.workerSuperstepPrepared(superstep);
             this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
             WorkerStat workerStat = this.computePartitions();
-            // TODO: call each manager.afterSuperstep
+            for (Manager manager : this.managers) {
+                manager.afterSuperstep(this.config, superstep);
+            }
             this.computation.afterSuperstep(context);
             this.bsp4Worker.workerSuperstepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
