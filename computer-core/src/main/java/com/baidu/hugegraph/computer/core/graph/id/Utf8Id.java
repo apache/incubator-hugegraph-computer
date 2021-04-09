@@ -47,7 +47,7 @@ public class Utf8Id implements Id {
     public Utf8Id(String value) {
         E.checkArgument(value != null, "Value can't be null");
         this.bytes = CoderUtil.encode(value);
-        this.length = bytes.length;
+        this.length = this.bytes.length;
     }
 
     public byte[] bytes() {
@@ -117,7 +117,7 @@ public class Utf8Id implements Id {
         }
         Utf8Id other = (Utf8Id) obj;
         return BytesUtil.compare(this.bytes, this.length,
-                                     other.bytes, other.length);
+                                 other.bytes, other.length);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class Utf8Id implements Id {
         }
         Utf8Id other = (Utf8Id) obj;
         return BytesUtil.compare(this.bytes, this.length,
-                                     other.bytes, other.length) == 0;
+                                 other.bytes, other.length) == 0;
     }
 
     @Override
