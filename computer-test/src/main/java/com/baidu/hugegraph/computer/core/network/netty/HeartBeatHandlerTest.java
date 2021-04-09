@@ -64,12 +64,12 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
     @Test
     public void testServerIdleHandler() throws Exception {
         ServerIdleHandler serverIdleHandler = new ServerIdleHandler();
-        ServerIdleHandler mockServerIdleHandler = Mockito.spy(serverIdleHandler);
+        ServerIdleHandler spyServerIdleHandler = Mockito.spy(serverIdleHandler);
         Mockito.doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
             Channel channel = invocationOnMock.getArgument(0);
             channel.pipeline().replace("serverIdleHandler", "serverIdleHandler",
-                                       mockServerIdleHandler);
+                                       spyServerIdleHandler);
             return null;
         }).when(serverProtocol).initializeServerPipeline(Mockito.any(),
                                                          Mockito.any());
@@ -77,7 +77,7 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
         TransportClient client = this.oneClient();
 
         long delay = (HEARTBEAT_TIME_OUT + 1) * 1000L;
-        Mockito.verify(mockServerIdleHandler, Mockito.timeout(delay).times(1))
+        Mockito.verify(spyServerIdleHandler, Mockito.timeout(delay).times(1))
                .userEventTriggered(Mockito.any(),
                                    Mockito.any(IdleStateEvent.class));
     }

@@ -81,7 +81,7 @@ public abstract class AbstractNetworkTest {
         this.initOption();
         Object[] objects = new Object[OPTIONS.size() * 2];
         Set<Map.Entry<ConfigOption<?>, String>> kvs = OPTIONS.entrySet();
-        int i =0;
+        int i = 0;
         for (Map.Entry<ConfigOption<?>, String> kv : kvs) {
             objects[i++] = kv.getKey();
             objects[i++] = kv.getValue();
@@ -116,7 +116,8 @@ public abstract class AbstractNetworkTest {
                                   clientProtocol);
 
         TransportServer sever = connectionManager.getServer();
-        ServerBootstrap bootstrap = Whitebox.getInternalState(sever, "bootstrap");
+        ServerBootstrap bootstrap = Whitebox.getInternalState(sever,
+                                                              "bootstrap");
         Object channelInitializer = Whitebox.invoke(ServerBootstrap.class,
                                                     "childHandler", bootstrap);
         NettyProtocol protocol = Whitebox.getInternalState(channelInitializer,
