@@ -59,7 +59,7 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
         // Skip body-length
         buf.skipBytes(4);
         buf.retain();
-        NettyManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
+        ManagedBuffer managedBuffer = new NettyManagedBuffer(buf.duplicate());
         return new DataMessage(type, requestId, partition, managedBuffer);
     }
 }
