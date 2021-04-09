@@ -118,6 +118,9 @@ public class BufferedFileTest {
                 output.writeInt(100, 4);
                 output.writeInt(Integer.MAX_VALUE);
                 output.writeInt(Integer.MIN_VALUE);
+                // Current buffer
+                output.writeInt(5);
+                output.writeInt(output.position() - Integer.BYTES, 6);
             }
 
             try (BufferedFileInput input = this.createInput(file)) {
@@ -126,7 +129,8 @@ public class BufferedFileTest {
                     int position = i * 4;
                     int readValue = input.readInt();
                     if (position != 0 && position != 12 &&
-                        position != 200 && position != 100) {
+                        position != 200 && position != 100 &&
+                        position != 1000) {
                         Assert.assertEquals(expectValue, readValue);
                     }
                 }
@@ -141,6 +145,7 @@ public class BufferedFileTest {
                 input.seek(256 * 4);
                 Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
                 Assert.assertEquals(Integer.MIN_VALUE, input.readInt());
+                Assert.assertEquals(6, input.readInt());
             }
         } finally {
             FileUtils.deleteQuietly(file);

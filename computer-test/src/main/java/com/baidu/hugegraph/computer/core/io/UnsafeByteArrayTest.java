@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -412,5 +413,31 @@ public class UnsafeByteArrayTest {
             Assert.assertEquals(256 - i, input.available());
             input.readByte();
         }
+    }
+
+    @Test
+    public void testReadBytes() throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        output.writeBytes(uuid);
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
+                                         output.toByteArray());
+        byte[] bytes = input.readBytes(uuid.length());
+        Assert.assertEquals(uuid, new String(bytes));
+    }
+
+    @Test
+    public void testCompare() throws IOException {
+        UnsafeByteArrayInput apple = this.inputByString("apple");
+        UnsafeByteArrayInput egg = this.inputByString("egg");
+        Assert.assertTrue(apple.compare(0, 2, egg, 0, 2) < 0);
+        Assert.assertTrue(apple.compare(1, 3, egg, 0, 2) > 0);
+        Assert.assertEquals(0, apple.compare(4, 1, egg, 0, 1));
+    }
+
+    private UnsafeByteArrayInput inputByString(String s) throws IOException {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        output.writeBytes(s);
+        return new UnsafeByteArrayInput(output.toByteArray());
     }
 }

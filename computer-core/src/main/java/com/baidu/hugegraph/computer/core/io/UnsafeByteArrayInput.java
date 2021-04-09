@@ -49,8 +49,6 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
         }
     }
 
-
-
     public UnsafeByteArrayInput(byte[] buffer) {
         this(buffer, buffer.length);
     }
