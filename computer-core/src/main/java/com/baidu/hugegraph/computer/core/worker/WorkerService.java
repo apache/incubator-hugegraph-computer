@@ -86,7 +86,7 @@ public class WorkerService {
             LOG.info("None combiner is provided for computation '{}'",
                      this.computation.name());
         } else {
-            LOG.info("Combiner {} for computation '{}'",
+            LOG.info("Combiner '{}' is provided for computation '{}'",
                      this.combiner.name(), this.computation.name());
         }
 

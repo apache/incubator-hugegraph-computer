@@ -33,6 +33,11 @@ public class MockComputation implements Computation<DoubleValue> {
     }
 
     @Override
+    public String name() {
+        return "mock";
+    }
+
+    @Override
     public String category() {
         return "mock";
     }

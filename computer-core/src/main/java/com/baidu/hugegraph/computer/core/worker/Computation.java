@@ -39,12 +39,9 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 public interface Computation<M extends Value> {
 
     /**
-     * The name of computation.
-     * @return class name by default.
+     * @return the name of computation.
      */
-    default String name() {
-        return this.getClass().getName();
-    }
+    String name();
 
     /**
      * @return category of the computation.
