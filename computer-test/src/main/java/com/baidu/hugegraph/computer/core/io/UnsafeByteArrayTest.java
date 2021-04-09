@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.util.UUID;
@@ -417,11 +418,22 @@ public class UnsafeByteArrayTest {
 
     @Test
     public void testWriteByInput() throws IOException {
-        String apple = "apple";
-        UnsafeByteArrayInput input = this.inputByString(apple);
+        // Input class is UnsafeByteArrayInput
+        String uuid = UUID.randomUUID().toString();
+        UnsafeByteArrayInput input = this.inputByString(uuid);
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.write(input, 0, input.available());
-        Assert.assertEquals(apple, new String(output.toByteArray()));
+        Assert.assertEquals(uuid, new String(output.toByteArray()));
+
+        // Input class isn't  UnsafeByteArrayInput
+        File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
+        BufferedFileOutput fileOutput = new BufferedFileOutput(tempFile);
+        fileOutput.writeBytes(uuid);
+        fileOutput.close();
+        BufferedFileInput fileInput = new BufferedFileInput(tempFile);
+        output = new UnsafeByteArrayOutput();
+        output.write(fileInput, 0, fileInput.available());
+        Assert.assertEquals(uuid, new String(output.toByteArray()));
     }
 
     @Test

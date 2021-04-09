@@ -212,7 +212,7 @@ public class UnsafeByteArrayOutput implements RandomAccessOutput, Closeable {
     @Override
     public void write(RandomAccessInput input, long offset, long length)
                       throws IOException {
-        if (input instanceof UnsafeByteArrayInput) {
+        if (UnsafeByteArrayInput.class == input.getClass()) {
             byte[] buffer = Whitebox.getInternalState(input, "buffer");
             this.write(buffer, (int) offset, (int) length);
         } else {
