@@ -51,7 +51,9 @@ public class NettyClientFactoryTest {
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
                 ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO",
+                ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE, "128",
+                ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE, "128"
         );
         config = ComputerContext.instance().config();
         serverHandler = new MockMessageHandler();

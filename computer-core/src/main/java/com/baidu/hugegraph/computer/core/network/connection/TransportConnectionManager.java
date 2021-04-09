@@ -29,9 +29,10 @@ import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
+import com.baidu.hugegraph.computer.core.network.TransportProvider;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
-import com.baidu.hugegraph.computer.core.network.TransporterFactory;
 import com.baidu.hugegraph.util.E;
 
 public class TransportConnectionManager implements ConnectionManager {
@@ -52,7 +53,9 @@ public class TransportConnectionManager implements ConnectionManager {
                         "The clientManager has already been initialized");
         E.checkArgumentNotNull(clientHandler,
                                "The clientHandler param can't be null");
-        ClientFactory factory = TransporterFactory.createClientFactory(config);
+        TransportConf conf = TransportConf.warpConfig(config);
+        TransportProvider provider = conf.transportProvider();
+        ClientFactory factory = provider.createClientFactory(conf);
         factory.init();
         this.clientFactory = factory;
         this.clientHandler = clientHandler;
@@ -100,7 +103,8 @@ public class TransportConnectionManager implements ConnectionManager {
                         "The TransportServer has already been listened");
         E.checkArgumentNotNull(serverHandler,
                                "The serverHandler param can't be null");
-        TransportServer server = TransporterFactory.createServer(config);
+        TransportConf conf = TransportConf.warpConfig(config);
+        TransportServer server = conf.transportProvider().createServer(conf);
         int bindPort = server.listen(config, serverHandler);
         this.server = server;
         return bindPort;

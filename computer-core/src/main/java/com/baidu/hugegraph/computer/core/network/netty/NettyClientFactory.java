@@ -79,7 +79,7 @@ public class NettyClientFactory implements ClientFactory {
                                 this.conf.clientConnectionTimeout());
 
         this.workerGroup = createEventLoop(this.conf.ioMode(),
-                                           this.conf.serverThreads(),
+                                           this.conf.clientThreads(),
                                            CLIENT_THREAD_GROUP_NAME);
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(this.workerGroup);

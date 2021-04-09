@@ -19,12 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.network.buffer;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
 
 public class NettyManagedBuffer implements ManagedBuffer {
 
@@ -59,10 +56,5 @@ public class NettyManagedBuffer implements ManagedBuffer {
     @Override
     public ByteBuf nettyByteBuf() {
         return this.buf.duplicate().retain();
-    }
-
-    @Override
-    public InputStream createInputStream() throws IOException {
-        return new ByteBufInputStream(this.buf);
     }
 }

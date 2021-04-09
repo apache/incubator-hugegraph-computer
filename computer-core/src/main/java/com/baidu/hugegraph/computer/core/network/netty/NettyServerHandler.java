@@ -75,7 +75,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
             exception = (TransportException) cause;
         } else {
             exception = new TransportException(
-                        "Exception in connection from {}", cause,
+                        "Exception in serverHandler from {}", cause,
                         remoteAddress(ctx.channel()));
         }
         ConnectionID connectionID = remoteConnectionID(ctx.channel());

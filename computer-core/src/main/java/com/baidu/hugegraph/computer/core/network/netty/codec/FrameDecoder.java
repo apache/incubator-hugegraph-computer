@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.FRAME_HEADER_LENGTH;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.INIT_FRAME_HEADER_LENGTH;
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.LENGTH_FIELD_LENGTH;
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.LENGTH_FIELD_OFFSET;
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.MAGIC_NUMBER;
@@ -49,7 +48,7 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
 
     public FrameDecoder() {
         super(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH,
-              0, INIT_FRAME_HEADER_LENGTH);
+              0, 0);
     }
 
     @Override

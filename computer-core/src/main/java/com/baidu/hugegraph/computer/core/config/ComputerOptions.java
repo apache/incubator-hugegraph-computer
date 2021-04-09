@@ -350,12 +350,12 @@ public class ComputerOptions extends OptionHolder {
                     0
             );
 
-    public static final ConfigOption<String> TRANSPORT_PROVIDER =
+    public static final ConfigOption<Class<?>> TRANSPORT_PROVIDER_CLASS =
             new ConfigOption<>(
-                    "transport.provider",
+                    "transport.provider_class",
                     "The transport provider, currently only supports Netty.",
-                    allowValues("NETTY"),
-                    "NETTY"
+                    disallowEmpty(),
+                    TransportProvider.NettyTransportProvider.class
             );
 
     public static final ConfigOption<String> TRANSPORT_IO_MODE =

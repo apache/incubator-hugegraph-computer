@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.message.Message;
-import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -44,14 +43,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx,
                                 Message message) throws Exception {
-        ClientSession clientSession = this.client.clientSession();
         // TODO: handle client message
-    }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        this.client.handler().channelActive(this.client.connectionID());
-        super.channelActive(ctx);
     }
 
     @Override
@@ -68,7 +60,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Message> {
             exception = (TransportException) cause;
         } else {
             exception = new TransportException(
-                        "Exception in connection from {}", cause,
+                        "Exception in clientHandler from {}", cause,
                         remoteAddress(ctx.channel()));
         }
 

@@ -17,43 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network.buffer;
+package com.baidu.hugegraph.computer.core.network;
 
-import java.nio.ByteBuffer;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.network.message.RequestMessage;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+public class MockRequestMessage extends AbstractMessage
+                                implements RequestMessage {
 
-public class NioManagedBuffer implements ManagedBuffer {
-
-    private final ByteBuffer buffer;
-
-    public NioManagedBuffer(ByteBuffer buffer) {
-        this.buffer = buffer;
+    @Override
+    public MessageType type() {
+        return MessageType.MSG;
     }
 
     @Override
-    public int size() {
-        return this.buffer.remaining();
-    }
-
-    @Override
-    public ByteBuffer nioByteBuffer() {
-        return this.buffer.duplicate();
-    }
-
-    @Override
-    public ManagedBuffer retain() {
-        return this;
-    }
-
-    @Override
-    public ManagedBuffer release() {
-        return this;
-    }
-
-    @Override
-    public ByteBuf nettyByteBuf() {
-        return Unpooled.wrappedBuffer(this.buffer);
+    public int requestId() {
+        return 0;
     }
 }

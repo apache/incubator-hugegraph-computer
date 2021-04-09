@@ -79,6 +79,7 @@ public abstract class AbstractMessage implements Message {
 
     @Override
     public void encode(ByteBuf buf) {
+        this.fillCommonHeader(buf);
         this.type().encode(buf);
         buf.writeInt(this.sequenceNumber());
         buf.writeInt(this.partition());
@@ -88,6 +89,11 @@ public abstract class AbstractMessage implements Message {
         } else {
             buf.writeInt(0);
         }
+    }
+
+    protected void fillCommonHeader(ByteBuf buf) {
+        buf.writeShort(MAGIC_NUMBER);
+        buf.writeByte(PROTOCOL_VERSION);
     }
 
     @Override

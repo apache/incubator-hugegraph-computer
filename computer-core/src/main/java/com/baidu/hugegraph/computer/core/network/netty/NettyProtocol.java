@@ -19,12 +19,18 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
+import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteAddress;
+import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteConnectionID;
+
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.netty.codec.FrameDecoder;
 import com.baidu.hugegraph.computer.core.network.netty.codec.MessageDecoder;
 import com.baidu.hugegraph.computer.core.network.netty.codec.MessageEncoder;
@@ -32,6 +38,8 @@ import com.baidu.hugegraph.computer.core.network.session.ServerSession;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
@@ -191,5 +199,32 @@ public class NettyProtocol {
     @ChannelHandler.Sharable
     private static class SLOT_HANDLER extends ChannelInboundHandlerAdapter {
         // It is a empty handler for slot
+    }
+}
+
+class ChannelFutureListenerOnWrite implements ChannelFutureListener {
+
+    private final TransportHandler handler;
+
+    ChannelFutureListenerOnWrite(TransportHandler handler) {
+        this.handler = handler;
+    }
+
+    @Override
+    public void operationComplete(ChannelFuture future) throws Exception {
+        Channel channel = future.channel();
+        if (!future.isSuccess()) {
+            TransportException exception;
+            Throwable cause = future.cause();
+            if (cause instanceof TransportException) {
+                exception = (TransportException) cause;
+            } else {
+                exception = new TransportException(
+                            "Exception in write data from {}", cause,
+                            remoteAddress(channel));
+            }
+            ConnectionID connectionID = remoteConnectionID(channel);
+            this.handler.exceptionCaught(exception, connectionID);
+        }
     }
 }

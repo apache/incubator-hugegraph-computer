@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.buffer;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
@@ -65,9 +63,4 @@ public interface ManagedBuffer {
      * be responsible for releasing this new reference.
      */
     ByteBuf nettyByteBuf();
-
-    /**
-     * Exposes this buffer's data as an InputStream.
-     */
-    InputStream createInputStream() throws IOException;
 }

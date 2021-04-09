@@ -20,8 +20,6 @@
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.FRAME_HEADER_LENGTH;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.MAGIC_NUMBER;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.PROTOCOL_VERSION;
 
 import org.slf4j.Logger;
 
@@ -67,7 +65,6 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
         ByteBuf buf = null;
         try {
             buf = allocator.directBuffer(frameLen);
-            this.fillCommonHeader(buf);
             message.encode(buf);
             ctx.write(buf, promise);
         } catch (Throwable e) {
@@ -81,10 +78,5 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
                 message.body().release();
             }
         }
-    }
-
-    private void fillCommonHeader(ByteBuf buf) {
-        buf.writeShort(MAGIC_NUMBER);
-        buf.writeByte(PROTOCOL_VERSION);
     }
 }

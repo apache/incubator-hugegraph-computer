@@ -35,11 +35,6 @@ public class TransportConf {
     public static final String CLIENT_THREAD_GROUP_NAME =
                                "hugegraph-netty-client";
 
-    public enum TransportProvider {
-
-        NETTY
-    }
-
     private final Config config;
 
     public static TransportConf warpConfig(Config config) {
@@ -53,10 +48,6 @@ public class TransportConf {
     public InetAddress serverAddress() {
         String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
         return TransportUtil.resolvedAddress(host);
-    }
-
-    public String serverAddressString() {
-        return this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
     }
 
     /**
@@ -88,15 +79,8 @@ public class TransportConf {
      * The transport provider
      */
     public TransportProvider transportProvider() {
-        String provider = this.config.get(ComputerOptions.TRANSPORT_PROVIDER)
-                                     .toUpperCase(Locale.ROOT);
-        switch (provider) {
-            case "NETTY":
-                return TransportProvider.NETTY;
-            default:
-                throw new IllegalArgException("Unknown transportProvider: %s",
-                                              provider);
-        }
+        return this.config
+                   .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
     }
 
     /**

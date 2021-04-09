@@ -52,7 +52,8 @@ public class NettyTransportClient implements TransportClient {
                                    TransportHandler clientHandler) {
         E.checkArgumentNotNull(clientHandler,
                                "The handler param can't be null");
-        this.initChannel(channel, clientFactory.protocol(), clientHandler);
+        this.initChannel(channel, connectionID, clientFactory.protocol(),
+                         clientHandler);
         this.channel = channel;
         this.connectionID = connectionID;
         this.clientFactory = clientFactory;
@@ -111,10 +112,10 @@ public class NettyTransportClient implements TransportClient {
         return this.handler;
     }
 
-    private void initChannel(Channel channel, NettyProtocol protocol,
-                             TransportHandler handler) {
+    private void initChannel(Channel channel, ConnectionID connectionID,
+                             NettyProtocol protocol, TransportHandler handler) {
         protocol.replaceClientHandler(channel, this);
         // Client ready notice
-        handler.channelActive(this.connectionID);
+        handler.channelActive(connectionID);
     }
 }

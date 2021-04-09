@@ -33,6 +33,6 @@ public class ServerSession extends TransportSession {
     }
 
     public void finRecv() {
-        this.status = TransportStatus.FIN_SEND;
+        this.status = TransportStatus.FIN_RECV;
     }
 }

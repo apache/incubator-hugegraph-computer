@@ -19,37 +19,32 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.netty.BufAllocatorFactory;
 import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactory;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServer;
 
 import io.netty.buffer.ByteBufAllocator;
 
-public class TransporterFactory {
+public interface TransportProvider {
 
-    public static TransportServer createServer(Config config) {
-        TransportConf conf = TransportConf.warpConfig(config);
-        TransportConf.TransportProvider provider = conf.transportProvider();
-        if (TransportConf.TransportProvider.NETTY == provider) {
+    TransportServer createServer(TransportConf conf);
+
+    ClientFactory createClientFactory(TransportConf conf);
+
+    class NettyTransportProvider implements TransportProvider {
+
+        @Override
+        public TransportServer createServer(TransportConf conf) {
             ByteBufAllocator bufAllocator = BufAllocatorFactory
                                             .createBufAllocator();
             return new NettyTransportServer(bufAllocator);
         }
-        throw new IllegalArgException("Unknown transportProvider: %s",
-                                      provider);
-    }
 
-    public static ClientFactory createClientFactory(Config config) {
-        TransportConf conf = TransportConf.warpConfig(config);
-        TransportConf.TransportProvider provider = conf.transportProvider();
-        if (TransportConf.TransportProvider.NETTY == provider) {
+        @Override
+        public ClientFactory createClientFactory(TransportConf conf) {
             ByteBufAllocator bufAllocator = BufAllocatorFactory
                                             .createBufAllocator();
             return new NettyClientFactory(conf, bufAllocator);
         }
-        throw new IllegalArgException("Unknown transportProvider: %s",
-                                      provider);
     }
 }

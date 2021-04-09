@@ -48,7 +48,7 @@ public enum MessageType implements SerialEnum {
     private final Category category;
 
     MessageType(int code, Category category) {
-        assert code >= -128 && code <= 127;
+        assert code >= 0 && code <= 255;
         this.code = (byte) code;
         this.category = category;
     }

@@ -133,7 +133,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
 
         // enable trigger mode for epoll if need
         NettyEventLoopUtil.enableTriggeredMode(ioMode,
-                                               this.conf.tcpKeepAlive(),
+                                               this.conf.epollLevelTriggered(),
                                                this.bootstrap);
 
         if (this.conf.backLog() > 0) {

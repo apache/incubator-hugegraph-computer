@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.ChannelDuplexHandler;
@@ -39,6 +40,9 @@ public class HeartBeatHandler extends ChannelDuplexHandler {
     @Override
     public void userEventTriggered(final ChannelHandlerContext ctx,
                                    Object evt) throws Exception {
+        LOG.info("HeartBeatHandler userEventTriggered, evt class: {} from: {}",
+                 evt.getClass().getName(),
+                 TransportUtil.remoteAddress(ctx.channel()));
         // TODO: handle heartBeat
         super.userEventTriggered(ctx, evt);
     }

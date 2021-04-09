@@ -45,10 +45,14 @@ public class TransportUtil {
                             Runtime.getRuntime().availableProcessors();
 
     public static String remoteAddress(Channel channel) {
-        if (channel != null && channel.remoteAddress() != null) {
-            return formatAddress((InetSocketAddress) channel.remoteAddress());
+        if (channel == null || channel.remoteAddress() == null) {
+            return "<unknown remote>";
         }
-        return "<unknown remote>";
+        if (channel.remoteAddress() instanceof InetSocketAddress) {
+            return formatAddress((InetSocketAddress) channel.remoteAddress());
+        } else {
+            return channel.toString();
+        }
     }
 
     public static ConnectionID remoteConnectionID(Channel channel) {

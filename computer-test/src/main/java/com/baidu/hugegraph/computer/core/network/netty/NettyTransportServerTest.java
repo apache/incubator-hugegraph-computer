@@ -41,6 +41,8 @@ import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
+import io.netty.channel.epoll.Epoll;
+
 public class NettyTransportServerTest {
 
     private static final Logger LOG =
@@ -56,7 +58,8 @@ public class NettyTransportServerTest {
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "0",
                 ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO",
+                ComputerOptions.TRANSPORT_BACKLOG, "1024"
         );
         config = ComputerContext.instance().config();
         messageHandler = new MockMessageHandler();
@@ -240,5 +243,23 @@ public class NettyTransportServerTest {
         }, e -> {
             Assert.assertContains("already been listened", e.getMessage());
         });
+    }
+
+    @Test
+    public void testEpollMode() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+                ComputerOptions.TRANSPORT_IO_MODE, "EPOLL"
+        );
+        config = ComputerContext.instance().config();
+
+        if (Epoll.isAvailable()) {
+            this.server.listen(config, messageHandler);
+            Assert.assertEquals(IOMode.EPOLL, this.server.conf().ioMode());
+        } else {
+            Assert.assertThrows(UnsatisfiedLinkError.class, () -> {
+                this.server.listen(config, messageHandler);
+            });
+        }
     }
 }

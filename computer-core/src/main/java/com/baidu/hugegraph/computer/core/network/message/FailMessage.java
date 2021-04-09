@@ -52,7 +52,9 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
             this.failString = failString;
         } else {
             ByteBuf byteBuf = failBuffer.nettyByteBuf();
-            this.failString = decodeString(byteBuf.array());
+            byte[] bytes = new byte[byteBuf.readableBytes()];
+            byteBuf.readBytes(bytes);
+            this.failString = decodeString(bytes);
         }
     }
 
