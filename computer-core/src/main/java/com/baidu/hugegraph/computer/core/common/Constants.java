@@ -51,4 +51,5 @@ public final class Constants {
     // The mode to write a file
     public static final String FILE_MODE_WRITE = "rw";
 
+    public static final int INPUT_SUPERSTEP = -1;
 }

@@ -17,15 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.worker;
+package com.baidu.hugegraph.computer.core.aggregator;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.worker.Manager;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    WorkerStatTest.class,
-    WorkerServiceTest.class
-})
-public class WorkerTestSuite {
+/**
+ * Aggregator manager manages aggregators in worker.
+ * TODO: implement
+ */
+public class WorkerAggrManager implements Manager {
 }

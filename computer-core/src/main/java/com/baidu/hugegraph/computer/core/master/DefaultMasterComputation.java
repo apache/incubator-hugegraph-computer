@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
+import com.baidu.hugegraph.computer.core.config.Config;
+
 /**
  * The default master-computation, which can be used if there is no
  * algorithm-specific master-computation.
@@ -26,7 +28,7 @@ package com.baidu.hugegraph.computer.core.master;
 public class DefaultMasterComputation implements MasterComputation {
 
     @Override
-    public void init(MasterContext context) {
+    public void init(Config config) {
         // pass
     }
 

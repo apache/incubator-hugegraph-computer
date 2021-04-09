@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.master.MasterComputation;
 import com.baidu.hugegraph.computer.core.master.MasterContext;
 
@@ -31,7 +32,7 @@ public class FakeMasterComputation implements MasterComputation {
     }
 
     @Override
-    public void init(MasterContext context) {
+    public void init(Config config) {
     }
 
     @Override

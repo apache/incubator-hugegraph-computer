@@ -56,4 +56,12 @@ public class ConfigTest {
                                   e.getCause().getMessage());
         });
     }
+
+    @Test
+    public void testNullClass() {
+        Config config = ComputerContext.instance().config();
+        Object combiner = config.createObject(
+                          ComputerOptions.WORKER_COMBINER_CLASS);
+        Assert.assertNull(combiner);
+    }
 }

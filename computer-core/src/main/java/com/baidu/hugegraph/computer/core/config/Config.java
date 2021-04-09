@@ -157,6 +157,9 @@ public final class Config {
      */
     public <T> T createObject(ConfigOption<Class<?>> clazzOption) {
         Class clazz = this.get(clazzOption);
+        if (clazz == Null.class) {
+            return null;
+        }
         try {
             @SuppressWarnings("unchecked")
             T instance = (T) clazz.newInstance();

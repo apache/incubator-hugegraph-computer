@@ -26,8 +26,11 @@ import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.baidu.hugegraph.computer.core.aggregator.MasterAggrManager;
+import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.google.common.collect.ImmutableSet;
@@ -260,6 +263,35 @@ public class ComputerOptions extends OptionHolder {
                     HashPartitioner.class
             );
 
+    public static final ConfigOption<Class<?>> WORKER_COMPUTATION_CLASS =
+            new ConfigOption<>(
+                    "worker.computation_class",
+                    "The class to create worker-computation object, " +
+                    "worker-computation is used to compute each vertex " +
+                    "in each superstep.",
+                    disallowEmpty(),
+                    Computation.class
+            );
+
+    public static final ConfigOption<Class<?>> WORKER_COMBINER_CLASS =
+            new ConfigOption<>(
+                    "worker.combiner_class",
+                    "Combiner can combine messages into one value for a " +
+                    "vertex, for example page-rank algorithm can combine " +
+                    "messages of a vertex to a sum value.",
+                    disallowEmpty(),
+                    Null.class
+            );
+
+    public static final ConfigOption<Class<?>> WORKER_AGGREGATOR_MANAGER_CLASS =
+            new ConfigOption<>(
+                    "worker.aggregator_manager_class",
+                    "Class to create aggregator manager that manages " +
+                    "aggregators in worker.",
+                    disallowEmpty(),
+                    WorkerAggrManager.class
+            );
+
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
             new ConfigOption<>(
                     "master.computation_class",
@@ -268,6 +300,15 @@ public class ComputerOptions extends OptionHolder {
                     "of each superstep on master.",
                     disallowEmpty(),
                     DefaultMasterComputation.class
+            );
+
+    public static final ConfigOption<Class<?>> MASTER_AGGREGATOR_MANAGER_CLASS =
+            new ConfigOption<>(
+                    "master.aggregator_manager_class",
+                    "Class to create aggregator manager that manages " +
+                    "aggregators in master.",
+                    disallowEmpty(),
+                    MasterAggrManager.class
             );
 
     public static final ConfigOption<String> HUGEGRAPH_URL =

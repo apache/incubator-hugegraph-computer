@@ -19,13 +19,5 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    WorkerStatTest.class,
-    WorkerServiceTest.class
-})
-public class WorkerTestSuite {
+public class StoreManager {
 }

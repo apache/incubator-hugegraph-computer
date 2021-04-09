@@ -19,13 +19,19 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.baidu.hugegraph.computer.core.master.MasterContext;
+import com.baidu.hugegraph.testutil.Assert;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    WorkerStatTest.class,
-    WorkerServiceTest.class
-})
-public class WorkerTestSuite {
+public class MockMasterComputation extends DefaultMasterComputation {
+
+    @Override
+    public boolean compute(MasterContext context) {
+        Assert.assertEquals(100L, context.totalVertexCount());
+        Assert.assertEquals(200L, context.totalEdgeCount());
+        Assert.assertEquals(50L, context.finishedVertexCount());
+        Assert.assertEquals(60L, context.messageCount());
+        Assert.assertEquals(70L, context.messageBytes());
+        return true;
+    }
 }
