@@ -56,10 +56,10 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
     public static DataMessage parseFrom(MessageType type, ByteBuf buf) {
         int requestId = buf.readInt();
         int partition = buf.readInt();
-        // skip body-length
+        // Skip body-length
         buf.skipBytes(4);
+        buf.retain();
         NettyManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
-        return new DataMessage(type, requestId, partition,
-                               managedBuffer);
+        return new DataMessage(type, requestId, partition, managedBuffer);
     }
 }
