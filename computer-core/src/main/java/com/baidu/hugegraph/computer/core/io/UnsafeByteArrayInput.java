@@ -207,7 +207,7 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
         return this.limit - this.position;
     }
 
-    public int remaining() {
+    protected int remaining() {
         return this.limit - this.position;
     }
 

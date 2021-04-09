@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -427,13 +428,25 @@ public class UnsafeByteArrayTest {
 
         // Input class isn't  UnsafeByteArrayInput
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
-        BufferedFileOutput fileOutput = new BufferedFileOutput(tempFile);
-        fileOutput.writeBytes(uuid);
-        fileOutput.close();
-        BufferedFileInput fileInput = new BufferedFileInput(tempFile);
-        output = new UnsafeByteArrayOutput();
-        output.write(fileInput, 0, fileInput.available());
-        Assert.assertEquals(uuid, new String(output.toByteArray()));
+        BufferedFileOutput fileOutput = null;
+        BufferedFileInput fileInput = null;
+        try {
+            fileOutput = new BufferedFileOutput(tempFile);
+            fileOutput.writeBytes(uuid);
+            fileOutput.close();
+            fileInput = new BufferedFileInput(tempFile);
+            output = new UnsafeByteArrayOutput();
+            output.write(fileInput, 0, fileInput.available());
+            Assert.assertEquals(uuid, new String(output.toByteArray()));
+        } finally {
+            if (fileInput != null) {
+                fileInput.close();
+            }
+            if (fileOutput != null) {
+                fileOutput.close();
+            }
+            FileUtils.deleteQuietly(tempFile);
+        }
     }
 
     @Test
