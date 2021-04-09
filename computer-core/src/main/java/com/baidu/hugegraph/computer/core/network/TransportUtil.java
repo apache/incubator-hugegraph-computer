@@ -46,7 +46,7 @@ public class TransportUtil {
 
     public static String remoteAddress(Channel channel) {
         if (channel == null || channel.remoteAddress() == null) {
-            return "<unknown remote>";
+            return null;
         }
         if (channel.remoteAddress() instanceof InetSocketAddress) {
             return formatAddress((InetSocketAddress) channel.remoteAddress());
