@@ -35,4 +35,7 @@ public interface RandomAccessOutput extends DataOutput {
     long skip(long n) throws IOException;
 
     void writeInt(long position, int v) throws IOException;
+
+    void write(RandomAccessInput input, long offset, long length)
+               throws IOException;
 }

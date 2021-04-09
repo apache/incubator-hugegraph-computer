@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
-import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
+import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
 
@@ -98,7 +98,7 @@ public class Utf8Id implements Id {
     @Override
     public void read(GraphInput in) throws IOException {
         int len = in.readInt();
-        this.bytes = ByteArrayUtil.ensureCapacityWithoutCopy(this.bytes, len);
+        this.bytes = BytesUtil.ensureCapacityWithoutCopy(this.bytes, len);
         in.readFully(this.bytes, 0, len);
         this.length = len;
     }
@@ -116,7 +116,7 @@ public class Utf8Id implements Id {
             return cmp;
         }
         Utf8Id other = (Utf8Id) obj;
-        return ByteArrayUtil.compare(this.bytes, this.length,
+        return BytesUtil.compare(this.bytes, this.length,
                                      other.bytes, other.length);
     }
 
@@ -126,13 +126,13 @@ public class Utf8Id implements Id {
             return false;
         }
         Utf8Id other = (Utf8Id) obj;
-        return ByteArrayUtil.compare(this.bytes, this.length,
+        return BytesUtil.compare(this.bytes, this.length,
                                      other.bytes, other.length) == 0;
     }
 
     @Override
     public int hashCode() {
-        return ByteArrayUtil.hashBytes(this.bytes, this.length);
+        return BytesUtil.hashBytes(this.bytes, this.length);
     }
 
     @Override

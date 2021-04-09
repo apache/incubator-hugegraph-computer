@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.util.ByteArrayUtil;
+import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.util.E;
 
 public class IdValue implements Value<IdValue> {
@@ -66,7 +66,7 @@ public class IdValue implements Value<IdValue> {
     @Override
     public void read(GraphInput in) throws IOException {
         int len = in.readInt();
-        this.bytes = ByteArrayUtil.ensureCapacityWithoutCopy(this.bytes, len);
+        this.bytes = BytesUtil.ensureCapacityWithoutCopy(this.bytes, len);
         in.readFully(this.bytes, 0, len);
         this.length = len;
     }
@@ -80,8 +80,8 @@ public class IdValue implements Value<IdValue> {
     @Override
     public int compareTo(IdValue obj) {
         E.checkArgumentNotNull(obj, "The compare argument can't be null");
-        return ByteArrayUtil.compare(this.bytes, this.length,
-                                     obj.bytes, obj.length);
+        return BytesUtil.compare(this.bytes, this.length,
+                                 obj.bytes, obj.length);
     }
 
     @Override
@@ -90,13 +90,13 @@ public class IdValue implements Value<IdValue> {
             return false;
         }
         IdValue other = (IdValue) obj;
-        return ByteArrayUtil.compare(this.bytes, this.length,
-                                     other.bytes, other.length) == 0;
+        return BytesUtil.compare(this.bytes, this.length,
+                                 other.bytes, other.length) == 0;
     }
 
     @Override
     public int hashCode() {
-        return ByteArrayUtil.hashBytes(this.bytes, this.length);
+        return BytesUtil.hashBytes(this.bytes, this.length);
     }
 
     @Override

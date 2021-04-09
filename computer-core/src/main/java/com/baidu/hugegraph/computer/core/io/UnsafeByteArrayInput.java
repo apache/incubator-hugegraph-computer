@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
 
@@ -47,6 +48,8 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
             throw new ComputerException("Failed to get unsafe", e);
         }
     }
+
+
 
     public UnsafeByteArrayInput(byte[] buffer) {
         this(buffer, buffer.length);
@@ -213,6 +216,17 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
     @Override
     public void close() throws IOException {
         // pass
+    }
+
+    @Override
+    public int compare(long offset, long length, RandomAccessInput other,
+                       long otherOffset, long otherLength) {
+        E.checkArgument(other instanceof UnsafeByteArrayInput,
+                        "Invalid parameter type %s", other.getClass());
+
+        return BytesUtil.compare(this.buffer, (int) offset, (int) length,
+                                 ((UnsafeByteArrayInput) other).buffer,
+                                 (int) otherOffset, (int) otherLength);
     }
 
     protected void require(int size) throws IOException {

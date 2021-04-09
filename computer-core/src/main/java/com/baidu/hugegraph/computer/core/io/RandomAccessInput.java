@@ -49,4 +49,20 @@ public interface RandomAccessInput extends DataInput {
      * @throws IOException
      */
     long available() throws IOException;
+
+    /**
+     * Compare two inputs in the specified range.
+     */
+    int compare(long offset, long length,
+                RandomAccessInput other, long otherOffset, long otherLength);
+
+    /**
+     * @return Read the byte array of size length from the current position
+     * @throws IOException
+     */
+    default byte[] readBytes(int size) throws IOException {
+        byte[] bytes = new byte[size];
+        this.readFully(bytes);
+        return bytes;
+    }
 }
