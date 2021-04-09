@@ -20,6 +20,7 @@ package com.baidu.hugegraph.computer.core.network.message;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.CompositeByteBuf;
 
 /**
  * Abstract class for messages which optionally
@@ -47,8 +48,6 @@ public abstract class AbstractMessage implements Message {
     public static final int FRAME_HEADER_LENGTH = 2 + 1 + 1 + 4 + 4 + 4;
     public static final int LENGTH_FIELD_OFFSET = 2 + 1 + 1 + 4 + 4;
     public static final int LENGTH_FIELD_LENGTH = 4;
-    // The length of the header part where all messages are the same
-    public static final int INIT_FRAME_HEADER_LENGTH = 2 + 1;
 
     // MAGIC_NUMBER = "HG"
     public static final short MAGIC_NUMBER = 0x4847;
@@ -79,21 +78,29 @@ public abstract class AbstractMessage implements Message {
 
     @Override
     public void encode(ByteBuf buf) {
-        this.fillCommonHeader(buf);
-        this.type().encode(buf);
-        buf.writeInt(this.sequenceNumber());
-        buf.writeInt(this.partition());
-        if (this.bodyLength() > 0) {
-            buf.writeInt(this.bodyLength());
-            buf.writeBytes(this.body().nettyByteBuf());
-        } else {
-            buf.writeInt(0);
+        this.encodeHeader(buf);
+        if (this.hasBody()) {
+            buf.writeBytes(this.body.nettyByteBuf());
         }
     }
 
-    protected void fillCommonHeader(ByteBuf buf) {
+    @Override
+    public void encodeZeroCopy(ByteBuf headerBuf, CompositeByteBuf byteBufs) {
+        this.encodeHeader(headerBuf);
+        byteBufs.addComponent(headerBuf);
+        if (this.hasBody()) {
+            byteBufs.addComponent(this.body.nettyByteBuf());
+        }
+    }
+
+    @Override
+    public void encodeHeader(ByteBuf buf) {
         buf.writeShort(MAGIC_NUMBER);
         buf.writeByte(PROTOCOL_VERSION);
+        buf.writeByte(this.type().code());
+        buf.writeInt(this.sequenceNumber());
+        buf.writeInt(this.partition());
+        buf.writeInt(this.bodyLength);
     }
 
     @Override
@@ -102,12 +109,19 @@ public abstract class AbstractMessage implements Message {
     }
 
     @Override
-    public int bodyLength() {
-        return this.bodyLength;
+    public boolean hasBody() {
+        return this.body != null && this.bodyLength > 0;
     }
 
     @Override
     public ManagedBuffer body() {
-        return this.bodyLength() > 0 ? this.body : null;
+        return this.hasBody() ? this.body : null;
+    }
+
+    @Override
+    public void sent() {
+        if (this.hasBody()) {
+            this.body.release();
+        }
     }
 }

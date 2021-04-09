@@ -128,6 +128,6 @@ public abstract class AbstractNetworkTest {
     }
 
     protected static void waitTillNext(long seconds) {
-        TimeUtil.tillNextMillis(TimeUtil.timeGen() + seconds * 1000);
+        TimeUtil.tillNextMillis(TimeUtil.timeGen() + seconds * 1000L);
     }
 }

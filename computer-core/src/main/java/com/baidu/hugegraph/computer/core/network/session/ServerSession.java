@@ -32,7 +32,7 @@ public class ServerSession extends TransportSession {
         this.status = TransportStatus.START_RECV;
     }
 
-    public void finRecv() {
-        this.status = TransportStatus.FIN_RECV;
+    public void finishRecv() {
+        this.status = TransportStatus.FINISH_RECV;
     }
 }

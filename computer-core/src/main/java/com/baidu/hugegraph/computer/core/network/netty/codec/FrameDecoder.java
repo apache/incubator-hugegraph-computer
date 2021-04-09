@@ -43,12 +43,14 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     private static final Logger LOG = Log.logger(FrameDecoder.class);
 
     private static final int MAX_FRAME_LENGTH = Integer.MAX_VALUE;
+    private static final int LENGTH_ADJUSTMENT = 0;
+    private static final int INITIAL_BYTES_TO_STRIP = 0;
 
     private ByteBuf frameHeaderBuf;
 
     public FrameDecoder() {
         super(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH,
-              0, 0);
+              LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP);
     }
 
     @Override

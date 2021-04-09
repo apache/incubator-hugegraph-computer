@@ -28,6 +28,7 @@ import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -61,22 +62,33 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
     private void writeMessage(ChannelHandlerContext ctx,
                               Message message, ChannelPromise promise,
                               ByteBufAllocator allocator) {
-        int frameLen = FRAME_HEADER_LENGTH + message.bodyLength();
-        ByteBuf buf = null;
+        CompositeByteBuf byteBufs = null;
+        ByteBuf bufHeader = null;
         try {
-            buf = allocator.directBuffer(frameLen);
-            message.encode(buf);
-            ctx.write(buf, promise);
+            ChannelPromise channelPromise = promise.addListener(future -> {
+                if (future.isSuccess()) {
+                    message.sent();
+                }
+            });
+            bufHeader = allocator.directBuffer(FRAME_HEADER_LENGTH);
+            if (!message.hasBody()) {
+                message.encodeHeader(bufHeader);
+                ctx.write(bufHeader, channelPromise);
+            } else {
+                int frameLen = FRAME_HEADER_LENGTH + message.body().size();
+                byteBufs = allocator.compositeDirectBuffer(frameLen);
+                message.encodeZeroCopy(bufHeader, byteBufs);
+                ctx.write(byteBufs, channelPromise);
+            }
         } catch (Throwable e) {
-            if (buf != null) {
-                buf.release();
+            if (bufHeader != null) {
+                bufHeader.release();
+            }
+            if (byteBufs != null) {
+                byteBufs.release();
             }
             LOG.error("Message encode fail, messageType: {}", message.type());
             throw e;
-        } finally {
-            if (message.bodyLength() > 0) {
-                message.body().release();
-            }
         }
     }
 }

@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.aggregator.MasterAggrManager;
 import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
-import com.baidu.hugegraph.computer.core.network.TransportProvider;
+import com.baidu.hugegraph.computer.core.network.NettyTransportProvider;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
@@ -337,8 +337,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_SERVER_THREADS =
             new ConfigOption<>(
                     "transport.server_threads",
-                    "The number of server work threads, the default value is " +
-                    "0, which means CPUs * 2.",
+                    "The number of transport threads for server, the default " +
+                    "value is 0, which means CPUs * 2.",
                     nonNegativeInt(),
                     0
             );
@@ -346,8 +346,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
             new ConfigOption<>(
                     "transport.client_threads",
-                    "The number of client threads, the default value is " +
-                    "0, which means CPUs * 2.",
+                    "The number of transport threads for client, the default " +
+                    "value is 0, which means CPUs * 2.",
                     nonNegativeInt(),
                     0
             );
@@ -357,7 +357,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.provider_class",
                     "The transport provider, currently only supports Netty.",
                     disallowEmpty(),
-                    TransportProvider.NettyTransportProvider.class
+                    NettyTransportProvider.class
             );
 
     public static final ConfigOption<String> TRANSPORT_IO_MODE =

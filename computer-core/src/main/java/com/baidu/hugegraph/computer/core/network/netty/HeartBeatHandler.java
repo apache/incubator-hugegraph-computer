@@ -40,9 +40,9 @@ public class HeartBeatHandler extends ChannelDuplexHandler {
     @Override
     public void userEventTriggered(final ChannelHandlerContext ctx,
                                    Object evt) throws Exception {
-        LOG.info("HeartBeatHandler userEventTriggered, evt class: {} from: {}",
-                 evt.getClass().getName(),
-                 TransportUtil.remoteAddress(ctx.channel()));
+        LOG.debug("HeartBeatHandler userEventTriggered, evt class: {} from: {}",
+                  evt.getClass().getName(),
+                  TransportUtil.remoteAddress(ctx.channel()));
         // TODO: handle heartBeat
         super.userEventTriggered(ctx, evt);
     }

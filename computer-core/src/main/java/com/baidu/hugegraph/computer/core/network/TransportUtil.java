@@ -41,9 +41,6 @@ public class TransportUtil {
 
     private static final Logger LOG = Log.logger(TransportUtil.class);
 
-    public static final int NUMBER_CPU_CORES =
-                            Runtime.getRuntime().availableProcessors();
-
     public static String remoteAddress(Channel channel) {
         if (channel == null || channel.remoteAddress() == null) {
             return null;

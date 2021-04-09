@@ -19,11 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.nio.ByteBuffer;
-
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.util.Log;
 
@@ -33,9 +32,9 @@ public class MockMessageHandler implements MessageHandler {
 
     @Override
     public void handle(MessageType messageType, int partition,
-                       ByteBuffer buffer) {
+                       ManagedBuffer buffer) {
         LOG.info("messageType: {}, partition: {}, buffer limit: {}",
-                 messageType.name(), partition, buffer.limit());
+                 messageType.name(), partition, buffer.nioByteBuffer().limit());
     }
 
     @Override

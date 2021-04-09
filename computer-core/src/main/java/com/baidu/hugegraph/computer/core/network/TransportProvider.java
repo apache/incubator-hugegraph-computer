@@ -19,32 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.network.netty.BufAllocatorFactory;
-import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactory;
-import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServer;
-
-import io.netty.buffer.ByteBufAllocator;
-
 public interface TransportProvider {
 
     TransportServer createServer(TransportConf conf);
 
     ClientFactory createClientFactory(TransportConf conf);
-
-    class NettyTransportProvider implements TransportProvider {
-
-        @Override
-        public TransportServer createServer(TransportConf conf) {
-            ByteBufAllocator bufAllocator = BufAllocatorFactory
-                                            .createBufAllocator();
-            return new NettyTransportServer(bufAllocator);
-        }
-
-        @Override
-        public ClientFactory createClientFactory(TransportConf conf) {
-            ByteBufAllocator bufAllocator = BufAllocatorFactory
-                                            .createBufAllocator();
-            return new NettyClientFactory(conf, bufAllocator);
-        }
-    }
 }

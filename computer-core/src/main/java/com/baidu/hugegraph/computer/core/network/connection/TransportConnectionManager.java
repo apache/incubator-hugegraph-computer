@@ -53,7 +53,7 @@ public class TransportConnectionManager implements ConnectionManager {
                         "The clientManager has already been initialized");
         E.checkArgumentNotNull(clientHandler,
                                "The clientHandler param can't be null");
-        TransportConf conf = TransportConf.warpConfig(config);
+        TransportConf conf = TransportConf.wrapConfig(config);
         TransportProvider provider = conf.transportProvider();
         ClientFactory factory = provider.createClientFactory(conf);
         factory.init();
@@ -103,7 +103,7 @@ public class TransportConnectionManager implements ConnectionManager {
                         "The TransportServer has already been listened");
         E.checkArgumentNotNull(serverHandler,
                                "The serverHandler param can't be null");
-        TransportConf conf = TransportConf.warpConfig(config);
+        TransportConf conf = TransportConf.wrapConfig(config);
         TransportServer server = conf.transportProvider().createServer(conf);
         int bindPort = server.listen(config, serverHandler);
         this.server = server;

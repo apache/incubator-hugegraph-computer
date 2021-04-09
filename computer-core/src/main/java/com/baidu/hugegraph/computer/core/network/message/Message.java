@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.network.message;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.CompositeByteBuf;
 
 public interface Message {
 
@@ -33,15 +34,31 @@ public interface Message {
     void encode(ByteBuf buf);
 
     /**
+     * Only serializes the header of this message by writing
+     * into the given ByteBuf.
+     *
+     * @param buf {@link ByteBuf}
+     */
+    void encodeHeader(ByteBuf buf);
+
+    /**
+     * Serializes this object by writing into the given ByteBuf,
+     * use zero-copy body.
+     *
+     * @param headerBuf {@link ByteBuf}, byteBufs {@link CompositeByteBuf}
+     */
+    void encodeZeroCopy(ByteBuf headerBuf, CompositeByteBuf byteBufs);
+
+    /**
      * Used to identify this message type.
      */
     MessageType type();
 
     /**
-     * Number of bytes of the encoded form of this body, if don't contain
-     * body it will is zero.
+     * Whether to include the body of the message
+     * in the same frame as the message.
      */
-    int bodyLength();
+    boolean hasBody();
 
     /**
      * An optional body for the message.
@@ -57,4 +74,9 @@ public interface Message {
      * The partition id
      */
     int partition();
+
+    /**
+     * Callback on send
+     */
+    void sent();
 }

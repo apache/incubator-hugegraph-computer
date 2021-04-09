@@ -32,7 +32,7 @@ public class ClientSession extends TransportSession {
         this.status = TransportStatus.START_SEND;
     }
 
-    public void finSend() {
-        this.status = TransportStatus.FIN_SEND;
+    public void finishSend() {
+        this.status = TransportStatus.FINISH_SEND;
     }
 }

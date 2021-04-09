@@ -33,7 +33,7 @@ public class TransportUtilTest {
     public void testRemoteAddressWithNull() {
         Channel channel = null;
         String address = TransportUtil.remoteAddress(channel);
-        Assert.assertEquals("<unknown remote>", address);
+        Assert.assertNull(address);
     }
 
     @Test

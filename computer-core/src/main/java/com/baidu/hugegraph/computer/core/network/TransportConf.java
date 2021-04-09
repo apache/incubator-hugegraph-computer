@@ -34,10 +34,12 @@ public class TransportConf {
                                "hugegraph-netty-server";
     public static final String CLIENT_THREAD_GROUP_NAME =
                                "hugegraph-netty-client";
+    public static final int NUMBER_CPU_CORES =
+                            Runtime.getRuntime().availableProcessors();
 
     private final Config config;
 
-    public static TransportConf warpConfig(Config config) {
+    public static TransportConf wrapConfig(Config config) {
         return new TransportConf(config);
     }
 
@@ -102,14 +104,18 @@ public class TransportConf {
 
     /**
      * Number of threads used in the server EventLoop thread pool. Default to
-     * 0, which is CPUs * 2.
+     * 0, which is CPUs.
      */
     public int serverThreads() {
-        return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
+        int serverThreads = this.config.get(
+                            ComputerOptions.TRANSPORT_SERVER_THREADS);
+        return serverThreads == 0 ? NUMBER_CPU_CORES : serverThreads;
     }
 
-    public final int clientThreads() {
-        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
+    public int clientThreads() {
+        int clientThreads = this.config.get(
+                            ComputerOptions.TRANSPORT_CLIENT_THREADS);
+        return clientThreads == 0 ? NUMBER_CPU_CORES : clientThreads;
     }
 
     /**

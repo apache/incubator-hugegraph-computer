@@ -104,7 +104,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
     }
 
     private void init(Config config) {
-        this.conf = TransportConf.warpConfig(config);
+        this.conf = TransportConf.wrapConfig(config);
         this.bootstrap = new ServerBootstrap();
 
         IOMode ioMode = this.conf.ioMode();

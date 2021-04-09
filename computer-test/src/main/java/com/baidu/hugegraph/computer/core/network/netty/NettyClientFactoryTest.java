@@ -74,7 +74,7 @@ public class NettyClientFactoryTest {
 
     @Test
     public void testInit() {
-        TransportConf conf = TransportConf.warpConfig(config);
+        TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
         Object bootstrap = Whitebox.getInternalState(clientFactory,
@@ -84,7 +84,7 @@ public class NettyClientFactoryTest {
 
     @Test
     public void testCreateClient() throws IOException {
-        TransportConf conf = TransportConf.warpConfig(config);
+        TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
         ConnectionID connectionID = ConnectionID.parseConnectionID(
@@ -95,7 +95,7 @@ public class NettyClientFactoryTest {
 
     @Test
     public void testClose() throws IOException {
-        TransportConf conf = TransportConf.warpConfig(config);
+        TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
         ConnectionID connectionID = ConnectionID.parseConnectionID(
@@ -108,7 +108,7 @@ public class NettyClientFactoryTest {
 
     @Test
     public void testCreateClientWithErrorSocket() {
-        TransportConf conf = TransportConf.warpConfig(config);
+        TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
         ConnectionID connectionID = ConnectionID.parseConnectionID(
@@ -123,7 +123,7 @@ public class NettyClientFactoryTest {
 
     @Test
     public void testCreateClientWithNoInit() {
-        TransportConf conf = TransportConf.warpConfig(config);
+        TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         ConnectionID connectionID = ConnectionID.parseConnectionID(
                                     "127.0.0.1", 7777);

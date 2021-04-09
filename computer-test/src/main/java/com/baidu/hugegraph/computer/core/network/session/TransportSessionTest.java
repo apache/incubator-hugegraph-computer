@@ -66,10 +66,10 @@ public class TransportSessionTest {
     @Test
     public void testFin() {
         ClientSession clientSession = new ClientSession();
-        clientSession.finSend();
-        Assert.assertEquals(TransportStatus.FIN_SEND, clientSession.status);
+        clientSession.finishSend();
+        Assert.assertEquals(TransportStatus.FINISH_SEND, clientSession.status);
         ServerSession serverSession = new ServerSession();
-        serverSession.finRecv();
-        Assert.assertEquals(TransportStatus.FIN_RECV, serverSession.status);
+        serverSession.finishRecv();
+        Assert.assertEquals(TransportStatus.FINISH_RECV, serverSession.status);
     }
 }

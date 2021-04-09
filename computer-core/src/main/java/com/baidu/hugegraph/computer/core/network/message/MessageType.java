@@ -61,10 +61,6 @@ public enum MessageType implements SerialEnum {
         return this.category;
     }
 
-    public void encode(ByteBuf buf) {
-        buf.writeByte(this.code);
-    }
-
     public static MessageType decode(ByteBuf buf) {
         byte code = buf.readByte();
         return SerialEnum.fromCode(MessageType.class, code);

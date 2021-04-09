@@ -25,7 +25,7 @@ public enum TransportStatus {
     START_SEND,
     START_RECV,
     ESTABLISH,
-    FIN_SEND,
-    FIN_RECV
+    FINISH_SEND,
+    FINISH_RECV
 
 }
