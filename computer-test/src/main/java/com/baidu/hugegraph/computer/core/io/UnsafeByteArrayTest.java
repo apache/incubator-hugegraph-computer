@@ -416,6 +416,15 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
+    public void testWriteByInput() throws IOException {
+        String apple = "apple";
+        UnsafeByteArrayInput input = this.inputByString(apple);
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        output.write(input, 0, input.available());
+        Assert.assertEquals(apple, new String(output.toByteArray()));
+    }
+
+    @Test
     public void testReadBytes() throws IOException {
         String uuid = UUID.randomUUID().toString();
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
