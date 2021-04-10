@@ -51,15 +51,15 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
     }
 
     /**
-     * Decoding uses the given ByteBuf as our data, and will zero-copy it.
+     * Decoding uses the given ByteBuf as our data, and will zzero-copy it.
      */
     public static DataMessage parseFrom(MessageType type, ByteBuf buf) {
         int requestId = buf.readInt();
         int partition = buf.readInt();
         // Skip body-length
         buf.skipBytes(4);
-        buf.retain();
         ManagedBuffer managedBuffer = new NettyManagedBuffer(buf.duplicate());
+        managedBuffer.retain();
         return new DataMessage(type, requestId, partition, managedBuffer);
     }
 }

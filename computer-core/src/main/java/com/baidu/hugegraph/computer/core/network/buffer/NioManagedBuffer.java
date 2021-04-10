@@ -56,4 +56,9 @@ public class NioManagedBuffer implements ManagedBuffer {
     public ByteBuf nettyByteBuf() {
         return Unpooled.wrappedBuffer(this.buffer);
     }
+
+    @Override
+    public int refCnt() {
+        return -1;
+    }
 }

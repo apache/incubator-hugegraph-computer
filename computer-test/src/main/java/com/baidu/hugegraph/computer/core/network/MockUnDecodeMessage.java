@@ -22,9 +22,10 @@ package com.baidu.hugegraph.computer.core.network;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.message.RequestMessage;
+import com.baidu.hugegraph.computer.core.network.message.ResponseMessage;
 
-public class MockRequestMessage extends AbstractMessage
-                                implements RequestMessage {
+public class MockUnDecodeMessage extends AbstractMessage
+                                 implements RequestMessage, ResponseMessage {
 
     @Override
     public MessageType type() {
@@ -33,6 +34,16 @@ public class MockRequestMessage extends AbstractMessage
 
     @Override
     public int requestId() {
+        return 0;
+    }
+
+    @Override
+    public int ackId() {
+        return 0;
+    }
+
+    @Override
+    public int sequenceNumber() {
         return 0;
     }
 }

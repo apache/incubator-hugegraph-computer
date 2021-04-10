@@ -74,6 +74,15 @@ public abstract class AbstractNetworkTest {
         return client;
     }
 
+    protected TransportClient oneClient(int clintIndex) throws IOException {
+        ConnectionID connectionID = ConnectionID.parseConnectionID(host, port,
+                                                                   clintIndex);
+        TransportClient client = connectionManager.getOrCreateClient(
+                connectionID);
+        Assert.assertTrue(client.active());
+        return client;
+    }
+
     @Before
     public void setup() {
         OPTIONS.put(ComputerOptions.TRANSPORT_SERVER_HOST, host);

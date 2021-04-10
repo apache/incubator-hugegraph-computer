@@ -41,7 +41,7 @@ public class MockTransportHandler implements TransportHandler {
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionID connectionID) {
-        LOG.error("Client connection exception, connectionID: {}, cause: {}",
+        LOG.error("Client connection exception, connectionID: {}, cause: ",
                   connectionID, cause);
     }
 }

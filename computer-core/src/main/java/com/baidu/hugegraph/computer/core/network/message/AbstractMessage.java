@@ -17,10 +17,12 @@
 
 package com.baidu.hugegraph.computer.core.network.message;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.CompositeByteBuf;
 
 /**
  * Abstract class for messages which optionally
@@ -85,15 +87,6 @@ public abstract class AbstractMessage implements Message {
     }
 
     @Override
-    public void encodeZeroCopy(ByteBuf headerBuf, CompositeByteBuf byteBufs) {
-        this.encodeHeader(headerBuf);
-        byteBufs.addComponent(headerBuf);
-        if (this.hasBody()) {
-            byteBufs.addComponent(this.body.nettyByteBuf());
-        }
-    }
-
-    @Override
     public void encodeHeader(ByteBuf buf) {
         buf.writeShort(MAGIC_NUMBER);
         buf.writeByte(PROTOCOL_VERSION);
@@ -123,5 +116,16 @@ public abstract class AbstractMessage implements Message {
         if (this.hasBody()) {
             this.body.release();
         }
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("messageType", this.type())
+                .append("sequenceNumber", this.sequenceNumber())
+                .append("partition", this.partition())
+                .append("hasBody", this.hasBody())
+                .append("bodyLength", this.bodyLength)
+                .toString();
     }
 }

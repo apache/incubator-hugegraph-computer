@@ -23,16 +23,17 @@ import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
+import io.netty.util.concurrent.PromiseCombiner;
 
 /**
  * Encoder used by the server side to encode server-to-client responses.
@@ -61,34 +62,30 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
 
     private void writeMessage(ChannelHandlerContext ctx,
                               Message message, ChannelPromise promise,
-                              ByteBufAllocator allocator) {
-        CompositeByteBuf byteBufs = null;
+                              ByteBufAllocator allocator)
+                              throws TransportException {
         ByteBuf bufHeader = null;
         try {
-            ChannelPromise channelPromise = promise.addListener(future -> {
-                if (future.isSuccess()) {
-                    message.sent();
-                }
-            });
+            PromiseCombiner combiner = new PromiseCombiner(ctx.executor());
             bufHeader = allocator.directBuffer(FRAME_HEADER_LENGTH);
-            if (!message.hasBody()) {
-                message.encodeHeader(bufHeader);
-                ctx.write(bufHeader, channelPromise);
-            } else {
-                int frameLen = FRAME_HEADER_LENGTH + message.body().size();
-                byteBufs = allocator.compositeDirectBuffer(frameLen);
-                message.encodeZeroCopy(bufHeader, byteBufs);
-                ctx.write(byteBufs, channelPromise);
+            message.encodeHeader(bufHeader);
+            combiner.add(ctx.write(bufHeader));
+            if (message.hasBody()) {
+                ByteBuf bodyBuf = message.body().nettyByteBuf();
+                combiner.add(ctx.write(bodyBuf));
             }
+            combiner.finish(promise);
+            bufHeader = null;
         } catch (Throwable e) {
+            String msg = String.format("Message encode fail, messageType: %s",
+                                       message.type());
+            LOG.error(msg, e);
+            throw new TransportException(msg, e);
+        } finally {
             if (bufHeader != null) {
                 bufHeader.release();
             }
-            if (byteBufs != null) {
-                byteBufs.release();
-            }
-            LOG.error("Message encode fail, messageType: {}", message.type());
-            throw e;
+            message.sent();
         }
     }
 }

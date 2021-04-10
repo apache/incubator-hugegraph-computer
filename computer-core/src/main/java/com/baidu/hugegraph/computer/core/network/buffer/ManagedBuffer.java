@@ -63,4 +63,9 @@ public interface ManagedBuffer {
      * be responsible for releasing this new reference.
      */
     ByteBuf nettyByteBuf();
+
+    /**
+     * Returns the reference count if applicable, otherwise return -1.
+     */
+    int refCnt();
 }

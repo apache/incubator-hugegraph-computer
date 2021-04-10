@@ -24,13 +24,13 @@ import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteAddr
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 
-public class NettyClientHandler extends SimpleChannelInboundHandler<Message> {
+public class NettyClientHandler extends AbstractNettyHandler {
 
     private static final Logger LOG = Log.logger(NettyClientHandler.class);
 
@@ -43,6 +43,10 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx,
                                 Message message) throws Exception {
+        if (message instanceof FailMessage) {
+            super.processFailMessage(ctx, (FailMessage) message,
+                                     this.client.handler());
+        }
         // TODO: handle client message
     }
 
@@ -60,12 +64,11 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Message> {
             exception = (TransportException) cause;
         } else {
             exception = new TransportException(
-                        "Exception in clientHandler from {}", cause,
-                        remoteAddress(ctx.channel()));
+                        "Exception on client receive data from %s",
+                        cause, remoteAddress(ctx.channel()));
         }
 
         this.client.handler().exceptionCaught(exception,
                                               this.client.connectionID());
-        super.exceptionCaught(ctx, cause);
     }
 }

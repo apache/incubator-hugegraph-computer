@@ -31,6 +31,7 @@ import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.netty.codec.FrameDecoder;
 import com.baidu.hugegraph.computer.core.network.netty.codec.MessageDecoder;
 import com.baidu.hugegraph.computer.core.network.netty.codec.MessageEncoder;
@@ -62,7 +63,8 @@ public class NettyProtocol {
     private static final HeartBeatHandler HEART_BEAT_HANDLER =
                                           new HeartBeatHandler();
 
-    private static final String CLIENT_HANDLER_NAME = "clientHandler";
+    protected static final String CLIENT_HANDLER_NAME = "networkClientHandler";
+    protected static final String SERVER_HANDLER_NAME = "networkServerHandler";
 
     private final TransportConf conf;
 
@@ -115,16 +117,13 @@ public class NettyProtocol {
 
         pipeline.addLast("decoder", DECODER);
 
-        int timeout = this.conf.heartbeatTimeout();
-        IdleStateHandler idleHandler = new IdleStateHandler(DISABLE_IDLE_TIME,
-                                                            DISABLE_IDLE_TIME,
-                                                            timeout,
-                                                            TimeUnit.SECONDS);
-        pipeline.addLast("serverIdleStateHandler", idleHandler);
+        pipeline.addLast("serverIdleStateHandler",
+                         this.newServerIdleStateHandler());
         // NOTE: The heartBeatHandler can reuse of a server
         pipeline.addLast("serverIdleHandler", SERVER_IDLE_HANDLER);
 
-        pipeline.addLast("serverHandler", this.createRequestHandler(handler));
+        pipeline.addLast(SERVER_HANDLER_NAME,
+                         this.newNettyServerHandler(handler));
     }
 
 
@@ -172,11 +171,8 @@ public class NettyProtocol {
 
         pipeline.addLast("decoder", DECODER);
 
-        int interval = this.conf.heartbeatInterval();
-        IdleStateHandler idleHandler = new IdleStateHandler(interval, interval,
-                                                            DISABLE_IDLE_TIME,
-                                                            TimeUnit.SECONDS);
-        pipeline.addLast("clientIdleStateHandler", idleHandler);
+        pipeline.addLast("clientIdleStateHandler",
+                         this.newClientIdleStateHandler());
         // NOTE: The heartBeatHandler can reuse
         pipeline.addLast("heartBeatHandler", HEART_BEAT_HANDLER);
 
@@ -191,9 +187,21 @@ public class NettyProtocol {
                          new NettyClientHandler(client));
     }
 
-    private NettyServerHandler createRequestHandler(MessageHandler handler) {
+    private NettyServerHandler newNettyServerHandler(MessageHandler handler) {
         ServerSession serverSession = new ServerSession();
         return new NettyServerHandler(serverSession, handler);
+    }
+
+    private IdleStateHandler newServerIdleStateHandler() {
+        int timeout = this.conf.heartbeatTimeout();
+        return new IdleStateHandler(DISABLE_IDLE_TIME, DISABLE_IDLE_TIME,
+                                    timeout, TimeUnit.SECONDS);
+    }
+
+    private IdleStateHandler newClientIdleStateHandler() {
+        int interval = this.conf.heartbeatInterval();
+        return new IdleStateHandler(interval, interval, DISABLE_IDLE_TIME,
+                                    TimeUnit.SECONDS);
     }
 
     @ChannelHandler.Sharable
@@ -203,6 +211,9 @@ public class NettyProtocol {
 }
 
 class ChannelFutureListenerOnWrite implements ChannelFutureListener {
+
+    private static final Logger LOG =
+            Log.logger(ChannelFutureListenerOnWrite.class);
 
     private final TransportHandler handler;
 
@@ -220,11 +231,14 @@ class ChannelFutureListenerOnWrite implements ChannelFutureListener {
                 exception = (TransportException) cause;
             } else {
                 exception = new TransportException(
-                            "Exception in write data from {}", cause,
+                            "Exception on write data to %s", cause,
                             remoteAddress(channel));
             }
             ConnectionID connectionID = remoteConnectionID(channel);
             this.handler.exceptionCaught(exception, connectionID);
+        } else {
+            LOG.debug("Write data success, to: {}",
+                      TransportUtil.remoteAddress(channel));
         }
     }
 }

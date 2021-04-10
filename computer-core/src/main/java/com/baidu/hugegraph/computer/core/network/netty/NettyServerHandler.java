@@ -27,14 +27,15 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
+import com.baidu.hugegraph.computer.core.network.message.DataMessage;
+import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 
-public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
+public class NettyServerHandler extends AbstractNettyHandler {
 
     private static final Logger LOG = Log.logger(NettyServerHandler.class);
 
@@ -48,8 +49,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext,
-                                Message message) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Message message)
+                                throws Exception {
+        if (message instanceof FailMessage) {
+            super.processFailMessage(ctx, (FailMessage) message, handler);
+        }
+        if (message instanceof DataMessage) {
+            this.handler.handle(message.type(), message.partition(),
+                                message.body());
+        }
         // TODO: handle server message
     }
 
@@ -75,11 +83,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
             exception = (TransportException) cause;
         } else {
             exception = new TransportException(
-                        "Exception in serverHandler from {}", cause,
-                        remoteAddress(ctx.channel()));
+                        "Exception on server receive data from %s",
+                        cause, remoteAddress(ctx.channel()));
         }
         ConnectionID connectionID = remoteConnectionID(ctx.channel());
         this.handler.exceptionCaught(exception, connectionID);
-        super.exceptionCaught(ctx, cause);
     }
 }

@@ -33,8 +33,14 @@ public class MockMessageHandler implements MessageHandler {
     @Override
     public void handle(MessageType messageType, int partition,
                        ManagedBuffer buffer) {
-        LOG.info("messageType: {}, partition: {}, buffer limit: {}",
-                 messageType.name(), partition, buffer.nioByteBuffer().limit());
+        LOG.info("messageType: {}, partition: {}, buffer readable size: {}",
+                 messageType.name(), partition,
+                 buffer != null ? buffer.size() : null);
+
+        if (buffer != null) {
+            // Must be release it
+            buffer.release();
+        }
     }
 
     @Override
@@ -50,7 +56,7 @@ public class MockMessageHandler implements MessageHandler {
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionID connectionID) {
-        LOG.error("Server channel exception, connectionID: {}, cause: {}",
+        LOG.error("Server channel exception, connectionID: {}, cause: ",
                   connectionID, cause);
     }
 }
