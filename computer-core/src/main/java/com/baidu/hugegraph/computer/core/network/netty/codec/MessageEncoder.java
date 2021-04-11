@@ -29,6 +29,7 @@ import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -70,8 +71,9 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
             bufHeader = allocator.directBuffer(FRAME_HEADER_LENGTH);
             message.encodeHeader(bufHeader);
             // Reference will be release called write()
-            combiner.add(ctx.write(bufHeader));
+            ChannelFuture headerWriteFuture = ctx.write(bufHeader);
             bufHeader = null;
+            combiner.add(headerWriteFuture);
             if (message.hasBody()) {
                 ByteBuf bodyBuf = message.body().nettyByteBuf();
                 message.body().retain();
