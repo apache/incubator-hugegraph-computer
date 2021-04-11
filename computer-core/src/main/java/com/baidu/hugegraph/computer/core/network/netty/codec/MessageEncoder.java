@@ -69,13 +69,16 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
             PromiseCombiner combiner = new PromiseCombiner(ctx.executor());
             bufHeader = allocator.directBuffer(FRAME_HEADER_LENGTH);
             message.encodeHeader(bufHeader);
+            // Reference will be release called write()
             combiner.add(ctx.write(bufHeader));
+            bufHeader = null;
             if (message.hasBody()) {
                 ByteBuf bodyBuf = message.body().nettyByteBuf();
+                message.body().retain();
+                // Reference will be release called write()
                 combiner.add(ctx.write(bodyBuf));
             }
             combiner.finish(promise);
-            bufHeader = null;
         } catch (Throwable e) {
             String msg = String.format("Message encode fail, messageType: %s",
                                        message.type());
@@ -85,7 +88,8 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
             if (bufHeader != null) {
                 bufHeader.release();
             }
-            message.sent();
+            // TODO: need to release the out reference?
+            // message.sent();
         }
     }
 }

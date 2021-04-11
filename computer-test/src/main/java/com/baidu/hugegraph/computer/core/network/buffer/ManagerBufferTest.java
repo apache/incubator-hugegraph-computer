@@ -45,8 +45,12 @@ public class ManagerBufferTest {
         ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
         nettyManagedBuffer.retain();
         Assert.assertSame(cnt + 1, byteBuf.refCnt());
+        Assert.assertSame(cnt + 1, nettyManagedBuffer.refCnt());
         ByteBuf buf = nettyManagedBuffer.nettyByteBuf();
+        nettyManagedBuffer.retain();
         Assert.assertSame(cnt + 2, buf.refCnt());
+        Assert.assertSame(cnt + 2, nettyManagedBuffer.refCnt());
+        nettyManagedBuffer.release();
         nettyManagedBuffer.release();
         nettyManagedBuffer.release();
     }
@@ -63,7 +67,7 @@ public class ManagerBufferTest {
         int cnt = byteBuf.refCnt();
         ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
         nettyManagedBuffer.release();
-        Assert.assertSame(cnt - 1, byteBuf.refCnt());
+        Assert.assertSame(cnt - 1, nettyManagedBuffer.refCnt());
     }
 
     @Test

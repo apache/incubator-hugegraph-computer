@@ -52,7 +52,8 @@ public class NettyServerHandler extends AbstractNettyHandler {
     protected void channelRead0(ChannelHandlerContext ctx, Message message)
                                 throws Exception {
         if (message instanceof FailMessage) {
-            super.processFailMessage(ctx, (FailMessage) message, handler);
+            super.processFailMessage(ctx, (FailMessage) message, this.handler);
+            return;
         }
         if (message instanceof DataMessage) {
             this.handler.handle(message.type(), message.partition(),

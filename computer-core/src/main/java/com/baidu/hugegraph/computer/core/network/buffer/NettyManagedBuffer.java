@@ -55,7 +55,7 @@ public class NettyManagedBuffer implements ManagedBuffer {
 
     @Override
     public ByteBuf nettyByteBuf() {
-        return this.buf.duplicate().retain();
+        return this.buf.duplicate();
     }
 
     @Override

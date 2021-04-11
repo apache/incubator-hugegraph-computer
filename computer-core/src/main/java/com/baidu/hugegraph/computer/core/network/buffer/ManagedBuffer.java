@@ -59,8 +59,6 @@ public interface ManagedBuffer {
 
     /**
      * Convert the buffer into an ByteBuf object, used to write the data out.
-     * the buffer's reference count will be incremented and the caller will
-     * be responsible for releasing this new reference.
      */
     ByteBuf nettyByteBuf();
 
