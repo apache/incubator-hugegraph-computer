@@ -35,6 +35,8 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 
 public class TransportUtil {
@@ -135,5 +137,13 @@ public class TransportUtil {
 
     public static String decodeString(byte[] bytes) {
         return new String(bytes, StandardCharsets.UTF_8);
+    }
+
+    public static String readString(ByteBuf buf) {
+        byte[] bytes = ByteBufUtil.getBytes(buf);
+        if (bytes == null) {
+            return null;
+        }
+        return decodeString(bytes);
     }
 }

@@ -19,16 +19,15 @@
 
 package com.baidu.hugegraph.computer.core.network.message;
 
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.decodeString;
 import static com.baidu.hugegraph.computer.core.network.TransportUtil.encodeString;
 
 import java.nio.ByteBuffer;
 
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 
 public class FailMessage extends AbstractMessage implements ResponseMessage {
 
@@ -55,17 +54,9 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
     }
 
     @Override
-    public ManagedBuffer encode(ByteBuf buf) {
-        buf.writeShort(MAGIC_NUMBER);
-        buf.writeByte(PROTOCOL_VERSION);
-        buf.writeByte(this.type().code());
-        buf.writeInt(this.sequenceNumber());
-        buf.writeInt(this.partition());
-
+    protected ManagedBuffer encodeBody(ByteBuf buf) {
         byte[] bytes = encodeString(this.failMsg);
         int bodyLength = 4 + bytes.length;
-        buf.writeInt(bodyLength);
-
         // Copy to direct memory
         ByteBuffer buffer = ByteBuffer.allocateDirect(bodyLength)
                                       .putInt(this.failCode)
@@ -86,10 +77,7 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
 
         if (bodyLength >= 4) {
             failCode = buf.readInt();
-            byte[] bytes = ByteBufUtil.getBytes(buf);
-            if (bytes != null) {
-                failMsg = decodeString(bytes);
-            }
+            failMsg = TransportUtil.readString(buf);
         }
         return new FailMessage(failAckId, failCode, failMsg);
     }

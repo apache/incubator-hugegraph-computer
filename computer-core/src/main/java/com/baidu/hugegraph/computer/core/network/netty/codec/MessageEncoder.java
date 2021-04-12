@@ -71,14 +71,17 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
             PromiseCombiner combiner = new PromiseCombiner(ctx.executor());
             bufHeader = allocator.directBuffer(HEADER_LENGTH);
             ManagedBuffer bodyBuffer = message.encode(bufHeader);
-            // Reference will be release called write()
             ChannelFuture headerWriteFuture = ctx.write(bufHeader);
+            /*
+             * Released bufHeader after in ctx.write(), set bufHeader = null
+             * to not release again
+             */
             bufHeader = null;
             combiner.add(headerWriteFuture);
             if (bodyBuffer != null) {
                 ByteBuf bodyBuf = bodyBuffer.nettyByteBuf();
+                // Will call bodyBuf.release() in ctx.write(), retain() first
                 bodyBuffer.retain();
-                // Reference will be release called write()
                 combiner.add(ctx.write(bodyBuf));
             }
             combiner.finish(promise);

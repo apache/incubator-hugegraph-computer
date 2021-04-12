@@ -84,7 +84,16 @@ public abstract class AbstractMessage implements Message {
     @Override
     public ManagedBuffer encode(ByteBuf buf) {
         this.encodeHeader(buf);
-        return this.encodeBody(buf);
+        ManagedBuffer managedBuffer = this.encodeBody(buf);
+        int bodyLength = 0;
+        if (managedBuffer != null) {
+            bodyLength = managedBuffer.length();
+        }
+        int lastWriteIndex = buf.writerIndex();
+        buf.resetWriterIndex();
+        buf.writeInt(bodyLength);
+        buf.writerIndex(lastWriteIndex);
+        return managedBuffer;
     }
 
     /**
@@ -97,7 +106,8 @@ public abstract class AbstractMessage implements Message {
         buf.writeByte(this.type().code());
         buf.writeInt(this.sequenceNumber());
         buf.writeInt(this.partition());
-        buf.writeInt(this.bodyLength);
+        buf.markWriterIndex();
+        buf.writerIndex(buf.writerIndex() + 4);
     }
 
     /**

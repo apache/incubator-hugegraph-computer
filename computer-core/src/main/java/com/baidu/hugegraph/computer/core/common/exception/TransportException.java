@@ -26,23 +26,42 @@ import java.io.IOException;
  */
 public class TransportException extends IOException {
 
+    private final int errorCode;
+
     public TransportException(String message) {
         super(message);
+        this.errorCode = 0;
+    }
+
+    public TransportException(String message, Object... args) {
+        this(0, message, args);
+    }
+
+    public TransportException(int errorCode, String message, Object... args) {
+        super(String.format(message, args));
+        this.errorCode = errorCode;
     }
 
     public TransportException(String message, Throwable cause) {
         super(message, cause);
+        this.errorCode = 0;
     }
 
-    public TransportException(String message, Object... args) {
-        super(String.format(message, args));
+    public TransportException(int errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
     }
 
     public TransportException(String message, Throwable cause, Object... args) {
         super(String.format(message, args), cause);
+        this.errorCode = 0;
     }
 
     public Throwable rootCause() {
         return ComputeException.rootCause(this);
+    }
+
+    public int errorCode() {
+        return this.errorCode;
     }
 }
