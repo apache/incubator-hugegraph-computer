@@ -46,7 +46,7 @@ import io.netty.buffer.ByteBuf;
  */
 public abstract class AbstractMessage implements Message {
 
-    /**
+    /*
      * Header:
      * magic(2) version(1) message-type (1) seq(4) partition(4) body-length(4)
      */
