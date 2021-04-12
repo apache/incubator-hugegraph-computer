@@ -36,7 +36,7 @@ public interface ClientFactory {
      * @return {@link TransportClient}
      */
     TransportClient createClient(ConnectionID connectionID,
-                                 WakeHandler handler) throws IOException;
+                                 ClientHandler handler) throws IOException;
 
     /**
      * Close the {@link ClientFactory}

@@ -22,11 +22,11 @@ package com.baidu.hugegraph.computer.core.network.connection;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
-import com.baidu.hugegraph.computer.core.network.WakeHandler;
 
 /**
  * This is used for unified manage server and client connection.
@@ -37,7 +37,7 @@ public interface ConnectionManager {
      * Initialize the client connection manager.
      * This method is called only once.
      */
-    void initClientManager(Config config, WakeHandler clientHandler);
+    void initClientManager(Config config, ClientHandler clientHandler);
 
     /**
      * Get a {@link TransportClient} instance from the connection pool first.

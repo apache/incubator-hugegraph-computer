@@ -32,19 +32,18 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
+import com.baidu.hugegraph.computer.core.network.MockClientHandler;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
-import com.baidu.hugegraph.computer.core.network.MockWakeHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
-import com.baidu.hugegraph.computer.core.network.WakeHandler;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.TimeUtil;
 
 import io.netty.bootstrap.ServerBootstrap;
 
@@ -53,7 +52,7 @@ public abstract class AbstractNetworkTest {
     private static final Map<ConfigOption<?>, String> OPTIONS = new HashMap<>();
     protected static Config config;
     protected static MessageHandler serverHandler;
-    protected static WakeHandler clientHandler;
+    protected static ClientHandler clientHandler;
     protected static ConnectionManager connectionManager;
     protected static NettyProtocol clientProtocol;
     protected static NettyProtocol serverProtocol;
@@ -99,7 +98,7 @@ public abstract class AbstractNetworkTest {
         UnitTestBase.updateWithRequiredOptions(objects);
         config = ComputerContext.instance().config();
         serverHandler = Mockito.spy(new MockMessageHandler());
-        clientHandler = Mockito.spy(new MockWakeHandler());
+        clientHandler = Mockito.spy(new MockClientHandler());
         connectionManager = new TransportConnectionManager();
         port = connectionManager.startServer(config, serverHandler);
         connectionManager.initClientManager(config, clientHandler);
@@ -134,9 +133,5 @@ public abstract class AbstractNetworkTest {
         serverProtocol = Mockito.spy(protocol);
         Whitebox.setInternalState(channelInitializer, "protocol",
                                   serverProtocol);
-    }
-
-    protected static void waitTillNext(long seconds) {
-        TimeUtil.tillNextMillis(TimeUtil.timeGen() + seconds * 1000L);
     }
 }

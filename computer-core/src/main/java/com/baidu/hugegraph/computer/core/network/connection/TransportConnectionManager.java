@@ -26,20 +26,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
+import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProvider;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
-import com.baidu.hugegraph.computer.core.network.WakeHandler;
 import com.baidu.hugegraph.util.E;
 
 public class TransportConnectionManager implements ConnectionManager {
 
     private TransportServer server;
     private ClientFactory clientFactory;
-    private WakeHandler clientHandler;
+    private ClientHandler clientHandler;
     private final ConcurrentHashMap<ConnectionID, TransportClient> clients;
 
     public TransportConnectionManager() {
@@ -48,7 +48,7 @@ public class TransportConnectionManager implements ConnectionManager {
 
     @Override
     public synchronized void initClientManager(Config config,
-                                               WakeHandler clientHandler) {
+                                               ClientHandler clientHandler) {
         E.checkArgument(this.clientFactory == null,
                         "The clientManager has already been initialized");
         E.checkArgumentNotNull(clientHandler,

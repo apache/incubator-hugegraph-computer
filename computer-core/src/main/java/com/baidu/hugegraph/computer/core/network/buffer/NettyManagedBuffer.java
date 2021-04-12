@@ -29,20 +29,12 @@ public class NettyManagedBuffer implements ManagedBuffer {
     private final ByteBuf buf;
 
     public NettyManagedBuffer(ByteBuf buf) {
-        this.buf = buf;
+        this.buf = buf.duplicate();
     }
 
     @Override
     public int length() {
         return this.buf.readableBytes();
-    }
-
-    /**
-     * NOTE: It will trigger copy when this.buf.nioBufferCount > 1
-     */
-    @Override
-    public ByteBuffer nioByteBuffer() {
-        return this.buf.nioBuffer();
     }
 
     @Override
@@ -58,13 +50,21 @@ public class NettyManagedBuffer implements ManagedBuffer {
     }
 
     @Override
-    public ByteBuf nettyByteBuf() {
-        return this.buf.duplicate();
+    public int referenceCount() {
+        return this.buf.refCnt();
+    }
+
+    /**
+     * NOTE: It will trigger copy when this.buf.nioBufferCount > 1
+     */
+    @Override
+    public ByteBuffer nioByteBuffer() {
+        return this.buf.nioBuffer();
     }
 
     @Override
-    public int referenceCount() {
-        return this.buf.refCnt();
+    public ByteBuf nettyByteBuf() {
+        return this.buf.duplicate();
     }
 
     @Override

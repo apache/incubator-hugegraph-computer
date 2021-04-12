@@ -192,6 +192,10 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         FailMessage failMsg = FailMessage.createFailMessage(requestId,
                                                             "mock fail msg");
 
+        Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
+                            "partition=1,hasBody=true,bodyLength=8]",
+                            dataMessage.toString());
+
         final int times = 10;
 
         for (int i = 0; i < times; i++) {
@@ -219,5 +223,20 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
 
         Mockito.verify(spyListener, Mockito.timeout(10000L).times(times * 7))
                .operationComplete(Mockito.any());
+    }
+
+    @Test
+    public void testSent() {
+        int requestId = 99;
+        int partition = 1;
+        byte[] bytes = encodeString("mock msg");
+        ByteBuf buf = Unpooled.directBuffer().writeBytes(bytes);
+        NettyManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
+        DataMessage dataMessage = new DataMessage(MessageType.MSG,
+                                                  requestId, partition,
+                                                  managedBuffer);
+        Assert.assertEquals(1, managedBuffer.referenceCount());
+        dataMessage.sent();
+        Assert.assertEquals(0, managedBuffer.referenceCount());
     }
 }

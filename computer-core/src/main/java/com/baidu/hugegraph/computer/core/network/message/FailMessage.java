@@ -43,8 +43,8 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length).put(bytes);
         // Flip to make it readable
         buffer.flip();
-        return new FailMessage(failAckId, new NioManagedBuffer(buffer),
-                               failMsg);
+        NioManagedBuffer nioManagedBuffer = new NioManagedBuffer(buffer);
+        return new FailMessage(failAckId, nioManagedBuffer, failMsg);
     }
 
     public FailMessage(int failAckId, ManagedBuffer failBuffer) {
@@ -79,7 +79,7 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         buf.skipBytes(4);
         // Skip body-length
         buf.skipBytes(4);
-        ManagedBuffer managedBuffer = new NettyManagedBuffer(buf.duplicate());
+        ManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
         managedBuffer.retain();
         return new FailMessage(failAckId, managedBuffer);
     }

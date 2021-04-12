@@ -27,9 +27,9 @@ import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
-import com.baidu.hugegraph.computer.core.network.WakeHandler;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.E;
@@ -44,12 +44,12 @@ public class NettyTransportClient implements TransportClient {
     private final Channel channel;
     private final ConnectionID connectionID;
     private final NettyClientFactory clientFactory;
-    private final WakeHandler handler;
+    private final ClientHandler handler;
     private final ClientSession clientSession;
 
     protected NettyTransportClient(Channel channel, ConnectionID connectionID,
                                    NettyClientFactory clientFactory,
-                                   WakeHandler clientHandler) {
+                                   ClientHandler clientHandler) {
         E.checkArgumentNotNull(clientHandler,
                                "The handler param can't be null");
         this.initChannel(channel, connectionID, clientFactory.protocol(),
@@ -109,12 +109,12 @@ public class NettyTransportClient implements TransportClient {
         return this.clientSession;
     }
 
-    public WakeHandler handler() {
+    public ClientHandler handler() {
         return this.handler;
     }
 
     private void initChannel(Channel channel, ConnectionID connectionID,
-                             NettyProtocol protocol, WakeHandler handler) {
+                             NettyProtocol protocol, ClientHandler handler) {
         protocol.replaceClientHandler(channel, this);
         // Client ready notice
         handler.channelActive(connectionID);

@@ -37,7 +37,7 @@ import io.netty.channel.ChannelFutureListener;
 class ChannelFutureListenerOnWrite implements ChannelFutureListener {
 
     private static final Logger LOG =
-            Log.logger(ChannelFutureListenerOnWrite.class);
+                         Log.logger(ChannelFutureListenerOnWrite.class);
 
     private final TransportHandler handler;
 

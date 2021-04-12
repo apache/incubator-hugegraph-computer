@@ -29,17 +29,12 @@ public class NioManagedBuffer implements ManagedBuffer {
     private final ByteBuffer buffer;
 
     public NioManagedBuffer(ByteBuffer buffer) {
-        this.buffer = buffer;
+        this.buffer = buffer.duplicate();
     }
 
     @Override
     public int length() {
         return this.buffer.remaining();
-    }
-
-    @Override
-    public ByteBuffer nioByteBuffer() {
-        return this.buffer.duplicate();
     }
 
     @Override
@@ -53,13 +48,18 @@ public class NioManagedBuffer implements ManagedBuffer {
     }
 
     @Override
-    public ByteBuf nettyByteBuf() {
-        return Unpooled.wrappedBuffer(this.buffer);
+    public int referenceCount() {
+        return -1;
     }
 
     @Override
-    public int referenceCount() {
-        return -1;
+    public ByteBuffer nioByteBuffer() {
+        return this.buffer.duplicate();
+    }
+
+    @Override
+    public ByteBuf nettyByteBuf() {
+        return Unpooled.wrappedBuffer(this.buffer);
     }
 
     @Override

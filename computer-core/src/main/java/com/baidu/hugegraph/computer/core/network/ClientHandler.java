@@ -19,11 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-public interface WakeHandler extends TransportHandler {
+public interface ClientHandler extends TransportHandler {
 
     /**
      * Invoked when the channel associated with the given connectionID channel
-     * is able send data immediately.
+     * is able to send data immediately.
      */
-    void sendWake(ConnectionID connectionID);
+    void sendAvailable(ConnectionID connectionID);
 }

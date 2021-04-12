@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.util.Log;
 
-public class MockWakeHandler implements WakeHandler {
+public class MockClientHandler implements ClientHandler {
 
-    private static final Logger LOG = Log.logger(MockWakeHandler.class);
+    private static final Logger LOG = Log.logger(MockClientHandler.class);
 
     @Override
     public void channelActive(ConnectionID connectionID) {
@@ -46,7 +46,7 @@ public class MockWakeHandler implements WakeHandler {
     }
 
     @Override
-    public void sendWake(ConnectionID connectionID) {
+    public void sendAvailable(ConnectionID connectionID) {
         LOG.error("Client able send data, connectionID: {}", connectionID);
     }
 }

@@ -30,13 +30,13 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
+import com.baidu.hugegraph.computer.core.network.MockClientHandler;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
-import com.baidu.hugegraph.computer.core.network.MockWakeHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
-import com.baidu.hugegraph.computer.core.network.WakeHandler;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
@@ -46,7 +46,7 @@ public class ConnectionManagerTest {
 
     private static Config config;
     private static MessageHandler serverHandler;
-    private static WakeHandler clientHandler;
+    private static ClientHandler clientHandler;
     private static ConnectionManager connectionManager;
     private static int port;
 
@@ -58,7 +58,7 @@ public class ConnectionManagerTest {
         );
         config = ComputerContext.instance().config();
         serverHandler = new MockMessageHandler();
-        clientHandler = new MockWakeHandler();
+        clientHandler = new MockClientHandler();
         connectionManager = new TransportConnectionManager();
         port = connectionManager.startServer(config, serverHandler);
         connectionManager.initClientManager(config, clientHandler);

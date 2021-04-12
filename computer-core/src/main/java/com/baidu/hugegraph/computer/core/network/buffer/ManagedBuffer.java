@@ -40,13 +40,6 @@ public interface ManagedBuffer {
     int length();
 
     /**
-     * Exposes this buffer's data as an NIO ByteBuffer.
-     * Changing the position and limit of the returned ByteBuffer should not
-     * affect the content of this buffer.
-     */
-    ByteBuffer nioByteBuffer();
-
-    /**
      * Increment the reference count by one if applicable.
      */
     ManagedBuffer retain();
@@ -58,15 +51,21 @@ public interface ManagedBuffer {
     ManagedBuffer release();
 
     /**
-     * Convert the buffer into an ByteBuf object, used to write the data out.
-     */
-    ByteBuf nettyByteBuf();
-
-    /**
      * Returns the reference count if applicable, otherwise return -1.
      */
     int referenceCount();
 
+    /**
+     * Exposes this buffer's data as an NIO ByteBuffer.
+     * Changing the position and limit of the returned ByteBuffer should not
+     * affect the content of this buffer.
+     */
+    ByteBuffer nioByteBuffer();
+
+    /**
+     * Convert the buffer into an ByteBuf object, used to write the data out.
+     */
+    ByteBuf nettyByteBuf();
 
     /**
      * Copy to a new byte[]
