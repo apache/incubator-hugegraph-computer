@@ -55,8 +55,8 @@ class ChannelFutureListenerOnWrite implements ChannelFutureListener {
                 exception = (TransportException) cause;
             } else {
                 exception = new TransportException(
-                        "Exception on write data to %s", cause,
-                        remoteAddress(channel));
+                            "Exception on write data to %s", cause,
+                            remoteAddress(channel));
             }
             ConnectionID connectionID = remoteConnectionID(channel);
             this.handler.exceptionCaught(exception, connectionID);
