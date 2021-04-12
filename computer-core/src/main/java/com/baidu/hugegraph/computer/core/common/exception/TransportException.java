@@ -26,15 +26,23 @@ import java.io.IOException;
  */
 public class TransportException extends IOException {
 
+    private static final long serialVersionUID = -6538118382075299762L;
+
+    public static final int DEFAULT_CODE = 0;
+
     private final int errorCode;
 
     public TransportException(String message) {
+        this(DEFAULT_CODE, message);
+    }
+
+    public TransportException(int errorCode, String message) {
         super(message);
-        this.errorCode = 0;
+        this.errorCode = errorCode;
     }
 
     public TransportException(String message, Object... args) {
-        this(0, message, args);
+        this(DEFAULT_CODE, message, args);
     }
 
     public TransportException(int errorCode, String message, Object... args) {
@@ -44,17 +52,12 @@ public class TransportException extends IOException {
 
     public TransportException(String message, Throwable cause) {
         super(message, cause);
-        this.errorCode = 0;
-    }
-
-    public TransportException(int errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
+        this.errorCode = DEFAULT_CODE;
     }
 
     public TransportException(String message, Throwable cause, Object... args) {
         super(String.format(message, args), cause);
-        this.errorCode = 0;
+        this.errorCode = DEFAULT_CODE;
     }
 
     public Throwable rootCause() {

@@ -31,16 +31,14 @@ import io.netty.buffer.ByteBuf;
 
 public class FailMessage extends AbstractMessage implements ResponseMessage {
 
-    public static int DEFAULT_FAIL_CODE = 1;
-
     private final int failAckId;
-    private final int failCode;
-    private final String failMsg;
+    private final int errorCode;
+    private final String msg;
 
-    public FailMessage(int failAckId, int failCode, String failMsg) {
+    public FailMessage(int failAckId, int errorCode, String msg) {
         this.failAckId = failAckId;
-        this.failCode = failCode;
-        this.failMsg = failMsg;
+        this.errorCode = errorCode;
+        this.msg = msg;
     }
 
     @Override
@@ -55,11 +53,11 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
 
     @Override
     protected ManagedBuffer encodeBody(ByteBuf buf) {
-        byte[] bytes = encodeString(this.failMsg);
+        byte[] bytes = encodeString(this.msg);
         int bodyLength = 4 + bytes.length;
         // Copy to direct memory
         ByteBuffer buffer = ByteBuffer.allocateDirect(bodyLength)
-                                      .putInt(this.failCode)
+                                      .putInt(this.errorCode)
                                       .put(bytes);
         // Flip to make it readable
         buffer.flip();
@@ -82,11 +80,11 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         return new FailMessage(failAckId, failCode, failMsg);
     }
 
-    public String failMessage() {
-        return this.failMsg;
+    public String msg() {
+        return this.msg;
     }
 
-    public int failCode() {
-        return this.failCode;
+    public int errorCode() {
+        return this.errorCode;
     }
 }

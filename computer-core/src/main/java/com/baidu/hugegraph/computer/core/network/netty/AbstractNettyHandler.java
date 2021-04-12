@@ -17,8 +17,9 @@ public abstract class AbstractNettyHandler
     protected void processFailMessage(ChannelHandlerContext ctx,
                                       FailMessage failMessage,
                                       TransportHandler handler) {
-        String failMsg = failMessage.failMessage();
-        TransportException exception = new TransportException(failMsg);
+        int errorCode = failMessage.errorCode();
+        String msg = failMessage.msg();
+        TransportException exception = new TransportException(errorCode, msg);
         ConnectionId connectionID = remoteConnectionID(ctx.channel());
         handler.exceptionCaught(exception, connectionID);
     }
