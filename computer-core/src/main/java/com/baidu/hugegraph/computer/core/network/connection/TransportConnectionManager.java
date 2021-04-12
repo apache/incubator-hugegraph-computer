@@ -62,18 +62,18 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public TransportClient getOrCreateClient(ConnectionId connectionID)
+    public TransportClient getOrCreateClient(ConnectionId connectionId)
                                              throws IOException {
         E.checkArgument(this.clientFactory != null,
                         "The clientManager has not been initialized yet");
-        TransportClient client = this.clients.get(connectionID);
+        TransportClient client = this.clients.get(connectionId);
         if (client == null) {
             // Create the client if we don't have it yet.
             ClientFactory clientFactory = this.clientFactory;
             TransportClient newClient = clientFactory.createClient(
-                                        connectionID, this.clientHandler);
-            this.clients.putIfAbsent(connectionID, newClient);
-            client = this.clients.get(connectionID);
+                                        connectionId, this.clientHandler);
+            this.clients.putIfAbsent(connectionId, newClient);
+            client = this.clients.get(connectionId);
         }
         return client;
     }
@@ -83,15 +83,15 @@ public class TransportConnectionManager implements ConnectionManager {
                                              throws IOException {
         E.checkArgument(this.clientFactory != null,
                         "The clientManager has not been initialized yet");
-        ConnectionId connectionID = ConnectionId.parseConnectionID(host, port);
-        return this.getOrCreateClient(connectionID);
+        ConnectionId connectionId = ConnectionId.parseConnectionID(host, port);
+        return this.getOrCreateClient(connectionId);
     }
 
     @Override
-    public void closeClient(ConnectionId connectionID) {
-        TransportClient client = this.clients.get(connectionID);
+    public void closeClient(ConnectionId connectionId) {
+        TransportClient client = this.clients.get(connectionId);
         if (client != null) {
-            this.clients.remove(connectionID);
+            this.clients.remove(connectionId);
             client.close();
         }
     }

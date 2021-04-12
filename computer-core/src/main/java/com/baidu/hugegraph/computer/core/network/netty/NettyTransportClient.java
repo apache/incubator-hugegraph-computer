@@ -43,21 +43,21 @@ public class NettyTransportClient implements TransportClient {
     private static final Logger LOG = Log.logger(NettyTransportClient.class);
 
     private final Channel channel;
-    private final ConnectionId connectionID;
+    private final ConnectionId connectionId;
     private final NettyClientFactory clientFactory;
     private final ClientHandler handler;
     private final ClientSession clientSession;
     private final ClientChannelListenerOnWrite listenerOnWrite;
 
-    protected NettyTransportClient(Channel channel, ConnectionId connectionID,
+    protected NettyTransportClient(Channel channel, ConnectionId connectionId,
                                    NettyClientFactory clientFactory,
                                    ClientHandler clientHandler) {
         E.checkArgumentNotNull(clientHandler,
                                "The handler param can't be null");
-        this.initChannel(channel, connectionID, clientFactory.protocol(),
+        this.initChannel(channel, connectionId, clientFactory.protocol(),
                          clientHandler);
         this.channel = channel;
-        this.connectionID = connectionID;
+        this.connectionId = connectionId;
         this.clientFactory = clientFactory;
         this.handler = clientHandler;
         this.clientSession = new ClientSession();
@@ -69,8 +69,8 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public ConnectionId connectionID() {
-        return this.connectionID;
+    public ConnectionId connectionId() {
+        return this.connectionId;
     }
 
     @Override
@@ -121,11 +121,11 @@ public class NettyTransportClient implements TransportClient {
         return this.channel.isWritable();
     }
 
-    private void initChannel(Channel channel, ConnectionId connectionID,
+    private void initChannel(Channel channel, ConnectionId connectionId,
                              NettyProtocol protocol, ClientHandler handler) {
         protocol.replaceClientHandler(channel, this);
         // Client ready notice
-        handler.channelActive(connectionID);
+        handler.channelActive(connectionId);
     }
 
     private class ClientChannelListenerOnWrite
@@ -140,7 +140,7 @@ public class NettyTransportClient implements TransportClient {
             super.onSuccess(channel, future);
             NettyTransportClient client = NettyTransportClient.this;
             if (client.checkSendAvailable()) {
-                client.handler.sendAvailable(client.connectionID);
+                client.handler.sendAvailable(client.connectionId);
             }
         }
     }

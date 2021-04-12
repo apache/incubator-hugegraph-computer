@@ -42,9 +42,9 @@ public interface ConnectionManager {
     /**
      * Get a {@link TransportClient} instance from the connection pool first.
      * If {it is not found or not active, create a new one.
-     * @param connectionID {@link ConnectionId}
+     * @param connectionId {@link ConnectionId}
      */
-    TransportClient getOrCreateClient(ConnectionId connectionID)
+    TransportClient getOrCreateClient(ConnectionId connectionId)
                                       throws IOException;
 
     /**
@@ -57,9 +57,9 @@ public interface ConnectionManager {
 
     /**
      * Close a client from the {@link ConnectionManager}
-     * @param connectionID {@link ConnectionId}
+     * @param connectionId {@link ConnectionId}
      */
-    void closeClient(ConnectionId connectionID);
+    void closeClient(ConnectionId connectionId);
 
     /**
      * Shutdown the client connection manager.

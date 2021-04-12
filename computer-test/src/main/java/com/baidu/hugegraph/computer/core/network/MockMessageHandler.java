@@ -46,19 +46,19 @@ public class MockMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void channelActive(ConnectionId connectionID) {
-        LOG.info("Server channel active, connectionID: {}", connectionID);
+    public void channelActive(ConnectionId connectionId) {
+        LOG.info("Server channel active, connectionId: {}", connectionId);
     }
 
     @Override
-    public void channelInactive(ConnectionId connectionID) {
-        LOG.info("Server channel inActive, connectionID: {}", connectionID);
+    public void channelInactive(ConnectionId connectionId) {
+        LOG.info("Server channel inActive, connectionId: {}", connectionId);
     }
 
     @Override
     public void exceptionCaught(TransportException cause,
-                                ConnectionId connectionID) {
-        LOG.error("Server channel exception, connectionID: {}, cause: ",
-                  connectionID, cause);
+                                ConnectionId connectionId) {
+        LOG.error("Server channel exception, connectionId: {}, cause: ",
+                  connectionId, cause);
     }
 }

@@ -56,7 +56,7 @@ public interface TransportClient {
     /**
      * Get the {@link ConnectionId}
      */
-    ConnectionId connectionID();
+    ConnectionId connectionId();
 
     /**
      * Get the remote SocketAddress

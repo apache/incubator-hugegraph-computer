@@ -48,17 +48,17 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testConnectID() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        ConnectionId connectionID = ConnectionId.parseConnectionID(host, port);
-        ConnectionId clientConnectionId = client.connectionID();
-        Assert.assertEquals(connectionID, clientConnectionId);
+        ConnectionId connectionId = ConnectionId.parseConnectionID(host, port);
+        ConnectionId clientConnectionId = client.connectionId();
+        Assert.assertEquals(connectionId, clientConnectionId);
     }
 
     @Test
     public void testRemoteAddress() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        ConnectionId connectionID = ConnectionId.parseConnectionID(host, port);
+        ConnectionId connectionId = ConnectionId.parseConnectionID(host, port);
         InetSocketAddress address = client.remoteAddress();
-        Assert.assertEquals(connectionID.socketAddress(), address);
+        Assert.assertEquals(connectionId.socketAddress(), address);
     }
 
     @Test

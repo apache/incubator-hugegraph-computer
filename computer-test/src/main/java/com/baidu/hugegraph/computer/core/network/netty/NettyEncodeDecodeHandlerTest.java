@@ -69,7 +69,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
               .addListener(new ChannelFutureListenerOnWrite(clientHandler));
 
         Mockito.verify(clientHandler, Mockito.timeout(2000L).times(1))
-               .channelActive(client.connectionID());
+               .channelActive(client.connectionId());
 
         Mockito.verify(serverHandler, Mockito.timeout(2000L).times(1))
                .channelActive(Mockito.any());

@@ -64,15 +64,15 @@ public class NettyServerHandler extends AbstractNettyHandler {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ConnectionId connectionID = remoteConnectionID(ctx.channel());
-        this.handler.channelActive(connectionID);
+        ConnectionId connectionId = remoteConnectionID(ctx.channel());
+        this.handler.channelActive(connectionId);
         super.channelActive(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ConnectionId connectionID = remoteConnectionID(ctx.channel());
-        this.handler.channelInactive(connectionID);
+        ConnectionId connectionId = remoteConnectionID(ctx.channel());
+        this.handler.channelInactive(connectionId);
         super.channelInactive(ctx);
     }
 
@@ -87,7 +87,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
                         "Exception on server receive data from %s",
                         cause, remoteAddress(ctx.channel()));
         }
-        ConnectionId connectionID = remoteConnectionID(ctx.channel());
-        this.handler.exceptionCaught(exception, connectionID);
+        ConnectionId connectionId = remoteConnectionID(ctx.channel());
+        this.handler.exceptionCaught(exception, connectionId);
     }
 }

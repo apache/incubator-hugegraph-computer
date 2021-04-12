@@ -75,7 +75,7 @@ class ChannelFutureListenerOnWrite implements ChannelFutureListener {
                         "Exception on write data to %s", cause,
                         remoteAddress(channel));
         }
-        ConnectionId connectionID = remoteConnectionID(channel);
-        this.handler.exceptionCaught(exception, connectionID);
+        ConnectionId connectionId = remoteConnectionID(channel);
+        this.handler.exceptionCaught(exception, connectionId);
     }
 }

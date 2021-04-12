@@ -20,7 +20,7 @@ public abstract class AbstractNettyHandler
         int errorCode = failMessage.errorCode();
         String msg = failMessage.msg();
         TransportException exception = new TransportException(errorCode, msg);
-        ConnectionId connectionID = remoteConnectionID(ctx.channel());
-        handler.exceptionCaught(exception, connectionID);
+        ConnectionId connectionId = remoteConnectionID(ctx.channel());
+        handler.exceptionCaught(exception, connectionId);
     }
 }

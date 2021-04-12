@@ -24,21 +24,21 @@ import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 public interface TransportHandler {
 
     /**
-     * Invoked when the channel associated with the given connectionID is
+     * Invoked when the channel associated with the given connectionId is
      * active.
      */
-    void channelActive(ConnectionId connectionID);
+    void channelActive(ConnectionId connectionId);
 
     /**
      * Invoked when the channel associated with the given
-     * connectionID is inactive. No further requests will come from this
+     * connectionId is inactive. No further requests will come from this
      * channel.
      */
-    void channelInactive(ConnectionId connectionID);
+    void channelInactive(ConnectionId connectionId);
 
     /**
-     * Invoked when the channel associated with the given connectionID has
+     * Invoked when the channel associated with the given connectionId has
      * an exception is thrown processing message.
      */
-    void exceptionCaught(TransportException cause, ConnectionId connectionID);
+    void exceptionCaught(TransportException cause, ConnectionId connectionId);
 }

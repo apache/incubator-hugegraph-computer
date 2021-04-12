@@ -22,8 +22,8 @@ package com.baidu.hugegraph.computer.core.network;
 public interface ClientHandler extends TransportHandler {
 
     /**
-     * Invoked when the channel associated with the given connectionID channel
+     * Invoked when the channel associated with the given connectionId channel
      * is able to send data immediately.
      */
-    void sendAvailable(ConnectionId connectionID);
+    void sendAvailable(ConnectionId connectionId);
 }

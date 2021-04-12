@@ -29,24 +29,24 @@ public class MockClientHandler implements ClientHandler {
     private static final Logger LOG = Log.logger(MockClientHandler.class);
 
     @Override
-    public void channelActive(ConnectionId connectionID) {
-        LOG.info("Client connection active, connectionID: {}", connectionID);
+    public void channelActive(ConnectionId connectionId) {
+        LOG.info("Client connection active, connectionId: {}", connectionId);
     }
 
     @Override
-    public void channelInactive(ConnectionId connectionID) {
-        LOG.info("Client connection inActive, connectionID: {}", connectionID);
+    public void channelInactive(ConnectionId connectionId) {
+        LOG.info("Client connection inActive, connectionId: {}", connectionId);
     }
 
     @Override
     public void exceptionCaught(TransportException cause,
-                                ConnectionId connectionID) {
-        LOG.error("Client connection exception, connectionID: {}, cause: ",
-                  connectionID, cause);
+                                ConnectionId connectionId) {
+        LOG.error("Client connection exception, connectionId: {}, cause: ",
+                  connectionId, cause);
     }
 
     @Override
-    public void sendAvailable(ConnectionId connectionID) {
-        LOG.error("Client able send data, connectionID: {}", connectionID);
+    public void sendAvailable(ConnectionId connectionId) {
+        LOG.error("Client able send data, connectionId: {}", connectionId);
     }
 }

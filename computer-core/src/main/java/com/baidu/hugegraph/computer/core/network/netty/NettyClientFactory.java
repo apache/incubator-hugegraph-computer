@@ -114,19 +114,19 @@ public class NettyClientFactory implements ClientFactory {
      * Create a new {@link TransportClient} to the remote address.
      */
     @Override
-    public TransportClient createClient(ConnectionId connectionID,
+    public TransportClient createClient(ConnectionId connectionId,
                                         ClientHandler handler)
                                         throws IOException {
-        InetSocketAddress address = connectionID.socketAddress();
-        LOG.debug("Creating new client connection to {}", connectionID);
+        InetSocketAddress address = connectionId.socketAddress();
+        LOG.debug("Creating new client connection to {}", connectionId);
 
         Channel channel = this.doConnectWithRetries(address,
                                                     this.conf.networkRetries(),
                                                     this.connectTimeoutMs);
         NettyTransportClient client = new NettyTransportClient(channel,
-                                                               connectionID,
+                                                               connectionId,
                                                                this, handler);
-        LOG.debug("Successfully created a new client to {}", connectionID);
+        LOG.debug("Successfully created a new client to {}", connectionId);
         return client;
     }
 

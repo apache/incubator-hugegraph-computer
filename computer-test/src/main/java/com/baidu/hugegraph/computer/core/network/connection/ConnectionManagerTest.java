@@ -92,31 +92,31 @@ public class ConnectionManagerTest {
 
     @Test
     public void testGetOrCreateClient() throws IOException {
-        ConnectionId connectionID = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionID(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
-                                 connectionID);
+                                 connectionId);
         Assert.assertTrue(client.active());
     }
 
     @Test
     public void testCloseClient() throws IOException {
-        ConnectionId connectionID = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionID(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
-                                 connectionID);
+                                 connectionId);
         Assert.assertTrue(client.active());
-        connectionManager.closeClient(client.connectionID());
+        connectionManager.closeClient(client.connectionId());
         Assert.assertFalse(client.active());
     }
 
     @Test
     public void testGetClientWithNoInit() {
         ConnectionManager connectionManager1 = new TransportConnectionManager();
-        ConnectionId connectionID = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionID(
                                     "127.0.0.1", port);
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            connectionManager1.getOrCreateClient(connectionID);
+            connectionManager1.getOrCreateClient(connectionId);
         }, e -> {
             Assert.assertContains("has not been initialized yet",
                                   e.getMessage());
@@ -125,14 +125,14 @@ public class ConnectionManagerTest {
 
     @Test
     public void testShutDown() throws IOException {
-        ConnectionId connectionID = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionID(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
-                                 connectionID);
+                                 connectionId);
         Assert.assertTrue(client.active());
         connectionManager.shutdownClientManager();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            connectionManager.getOrCreateClient(connectionID);
+            connectionManager.getOrCreateClient(connectionId);
         }, e -> {
             Assert.assertContains("has not been initialized yet",
                                   e.getMessage());

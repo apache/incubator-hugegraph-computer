@@ -87,9 +87,9 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionId connectionID = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionID(
                                     "127.0.0.1", 8086);
-        this.client = clientFactory.createClient(connectionID, clientHandler);
+        this.client = clientFactory.createClient(connectionId, clientHandler);
         Assert.assertTrue(this.client.active());
     }
 
@@ -98,9 +98,9 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionId connectionID = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionID(
                                     "127.0.0.1", 8086);
-        this.client = clientFactory.createClient(connectionID, clientHandler);
+        this.client = clientFactory.createClient(connectionId, clientHandler);
         Assert.assertTrue(this.client.active());
         this.client.close();
         Assert.assertFalse(this.client.active());
@@ -111,10 +111,10 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionId connectionID = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionID(
                                     "127.0.0.1", 7777);
         Assert.assertThrows(IOException.class, () -> {
-            this.client = clientFactory.createClient(connectionID,
+            this.client = clientFactory.createClient(connectionId,
                                                      clientHandler);
         }, e -> {
             Assert.assertContains("Failed to create connection",
@@ -126,10 +126,10 @@ public class NettyClientFactoryTest {
     public void testCreateClientWithNoInit() {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
-        ConnectionId connectionID = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionID(
                                     "127.0.0.1", 7777);
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            this.client = clientFactory.createClient(connectionID,
+            this.client = clientFactory.createClient(connectionId,
                                                      clientHandler);
         }, e -> {
             Assert.assertContains("has not been initialized yet",

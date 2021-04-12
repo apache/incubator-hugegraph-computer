@@ -47,7 +47,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        this.client.handler().channelInactive(this.client.connectionID());
+        this.client.handler().channelInactive(this.client.connectionId());
         super.channelInactive(ctx);
     }
 
@@ -64,6 +64,6 @@ public class NettyClientHandler extends AbstractNettyHandler {
         }
 
         this.client.handler().exceptionCaught(exception,
-                                              this.client.connectionID());
+                                              this.client.connectionId());
     }
 }

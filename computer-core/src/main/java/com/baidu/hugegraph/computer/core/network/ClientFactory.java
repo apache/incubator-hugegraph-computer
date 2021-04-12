@@ -31,11 +31,11 @@ public interface ClientFactory {
 
     /**
      * Create a TransportClient.
-     * @param connectionID {@link ConnectionId}
+     * @param connectionId {@link ConnectionId}
      * @param handler
      * @return {@link TransportClient}
      */
-    TransportClient createClient(ConnectionId connectionID,
+    TransportClient createClient(ConnectionId connectionId,
                                  ClientHandler handler) throws IOException;
 
     /**
