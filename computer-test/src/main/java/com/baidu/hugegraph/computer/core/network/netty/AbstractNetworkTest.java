@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
@@ -38,6 +39,7 @@ import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.MockClientHandler;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
@@ -85,7 +87,7 @@ public abstract class AbstractNetworkTest {
     @Before
     public void setup() {
         OPTIONS.put(ComputerOptions.TRANSPORT_SERVER_HOST, host);
-        OPTIONS.put(ComputerOptions.TRANSPORT_IO_MODE, "NIO");
+        OPTIONS.put(ComputerOptions.TRANSPORT_IO_MODE, "AUTO");
         this.initOption();
         Object[] objects = new Object[OPTIONS.size() * 2];
         Set<Map.Entry<ConfigOption<?>, String>> kvs = OPTIONS.entrySet();
@@ -133,5 +135,23 @@ public abstract class AbstractNetworkTest {
         serverProtocol = Mockito.spy(protocol);
         Whitebox.setInternalState(channelInitializer, "protocol",
                                   serverProtocol);
+    }
+
+
+    @Test
+    public void testTransportConf() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO",
+                ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "20",
+                ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
+                ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
+        );
+        config = ComputerContext.instance().config();
+
+        TransportConf conf = TransportConf.wrapConfig(config);
+        Assert.assertEquals(20, conf.maxPendingRequests());
+        Assert.assertEquals(5, conf.minPendingRequests());
+        Assert.assertEquals(500L, conf.minAckInterval());
     }
 }

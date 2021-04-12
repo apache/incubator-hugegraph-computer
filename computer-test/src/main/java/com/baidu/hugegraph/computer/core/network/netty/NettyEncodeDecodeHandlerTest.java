@@ -41,10 +41,12 @@ import com.baidu.hugegraph.computer.core.network.message.PongMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.netty.codec.FrameDecoder;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.testutil.Whitebox;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.embedded.EmbeddedChannel;
 
 public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
@@ -176,10 +178,10 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     public void testSendOtherMessageType() throws Exception {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
-        ChannelFutureListenerOnWrite listener =
-        new ChannelFutureListenerOnWrite(clientHandler);
-        ChannelFutureListenerOnWrite spyListener = Mockito.spy(listener);
-
+        Object listener = Whitebox.getInternalState(client, "listenerOnWrite");
+        ChannelFutureListener spyListener = (ChannelFutureListenerOnWrite)
+                                            Mockito.spy(listener);
+        Whitebox.setInternalState(client, "listenerOnWrite", spyListener);
         int requestId = 99;
         int partition = 1;
         byte[] bytes = encodeString("mock msg");

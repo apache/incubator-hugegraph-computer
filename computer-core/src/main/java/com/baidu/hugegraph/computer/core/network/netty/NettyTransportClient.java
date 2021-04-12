@@ -47,6 +47,7 @@ public class NettyTransportClient implements TransportClient {
     private final NettyClientFactory clientFactory;
     private final ClientHandler handler;
     private final ClientSession clientSession;
+    private final ClientChannelListenerOnWrite listenerOnWrite;
 
     protected NettyTransportClient(Channel channel, ConnectionID connectionID,
                                    NettyClientFactory clientFactory,
@@ -60,6 +61,7 @@ public class NettyTransportClient implements TransportClient {
         this.clientFactory = clientFactory;
         this.handler = clientHandler;
         this.clientSession = new ClientSession();
+        this.listenerOnWrite = new ClientChannelListenerOnWrite();
     }
 
     public Channel channel() {

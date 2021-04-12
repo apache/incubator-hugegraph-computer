@@ -77,7 +77,7 @@ public class TransportUtil {
         InetSocketAddress resolvedAddress = new InetSocketAddress(host, port);
         long resolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000L;
 
-        if (resolveTimeMs > 2000L) {
+        if (resolveTimeMs > 2000L || resolvedAddress.isUnresolved()) {
             String status = resolvedAddress.isUnresolved() ?
                             "failed" : "succeed";
             LOG.warn("DNS resolution {} for {} took {} ms",
