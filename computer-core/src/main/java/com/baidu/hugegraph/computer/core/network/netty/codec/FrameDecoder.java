@@ -28,7 +28,6 @@ import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
-import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
@@ -62,14 +61,19 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
         }
 
         int magicNumber = msg.readShort();
-        E.checkState(magicNumber == MAGIC_NUMBER,
-                     "Network stream corrupted: received incorrect " +
-                     "magic number: %s", magicNumber);
-
+        if (magicNumber != MAGIC_NUMBER) {
+            LOG.warn("Network stream corrupted: received incorrect " +
+                     "magic number: {}", magicNumber);
+            msg.release();
+            return null;
+        }
         int version = msg.readByte();
-        E.checkState(version == PROTOCOL_VERSION,
-                     "Network stream corrupted: received incorrect " +
-                     "protocol version: %s", version);
+        if (version != PROTOCOL_VERSION) {
+            LOG.warn("Network stream corrupted: received incorrect " +
+                     "protocol version: {}", version);
+            msg.release();
+            return null;
+        }
         // TODO: improve it use shard memory
         return msg;
     }

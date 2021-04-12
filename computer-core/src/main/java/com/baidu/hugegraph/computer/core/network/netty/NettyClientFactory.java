@@ -168,7 +168,7 @@ public class NettyClientFactory implements ClientFactory {
 
         if (!connectSuccess || !future.isSuccess()) {
             throw new TransportException(
-                  "Failed to create connection to '%s', cause unknown",
+                  "Failed to create connection to '%s'",
                   formatAddress);
         }
 

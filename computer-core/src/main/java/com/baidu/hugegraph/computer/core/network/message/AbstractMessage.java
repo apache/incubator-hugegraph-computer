@@ -51,7 +51,7 @@ public abstract class AbstractMessage implements Message {
      * magic(2) version(1) message-type (1) seq(4) partition(4) body-length(4)
      */
     public static final int HEADER_LENGTH = 2 + 1 + 1 + 4 + 4 + 4;
-    public static final int OFFSET_BODY_LENGTH = 2 + 1 + 1 + 4 + 4;
+    public static final int OFFSET_BODY_LENGTH = HEADER_LENGTH - 4;
     public static final int LENGTH_BODY_LENGTH = 4;
 
     // MAGIC_NUMBER = "HG"
@@ -82,20 +82,30 @@ public abstract class AbstractMessage implements Message {
     }
 
     @Override
-    public void encode(ByteBuf buf) {
+    public ManagedBuffer encode(ByteBuf buf) {
         this.encodeHeader(buf);
-        if (this.hasBody()) {
-            buf.writeBytes(this.body.nettyByteBuf());
-        }
+        return this.encodeBody(buf);
     }
 
-    public void encodeHeader(ByteBuf buf) {
+    /**
+     * Only serializes the header of this message by writing
+     * into the given ByteBuf.
+     */
+    protected void encodeHeader(ByteBuf buf) {
         buf.writeShort(MAGIC_NUMBER);
         buf.writeByte(PROTOCOL_VERSION);
         buf.writeByte(this.type().code());
         buf.writeInt(this.sequenceNumber());
         buf.writeInt(this.partition());
         buf.writeInt(this.bodyLength);
+    }
+
+    /**
+     * Only serializes the body of this message by writing
+     * into the given ByteBuf and return the body buffer.
+     */
+    protected ManagedBuffer encodeBody(ByteBuf buf) {
+        return this.body();
     }
 
     @Override

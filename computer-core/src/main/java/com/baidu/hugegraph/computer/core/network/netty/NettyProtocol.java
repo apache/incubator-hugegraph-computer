@@ -197,7 +197,6 @@ public class NettyProtocol {
 
     @ChannelHandler.Sharable
     private static class SLOT_HANDLER extends ChannelInboundHandlerAdapter {
-
-        // It is a empty handler for slot
+        // It is an empty handler, only for placeholder to replace it later
     }
 }

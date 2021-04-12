@@ -84,13 +84,18 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         ManagedBuffer body = new NioManagedBuffer(buffer);
         DataMessage dataMessage = new DataMessage(null, requestId,
                                                   partition, body);
+        ChannelFutureListenerOnWrite listener =
+        new ChannelFutureListenerOnWrite(clientHandler);
+        ChannelFutureListenerOnWrite spyListener = Mockito.spy(listener);
         client.channel().writeAndFlush(dataMessage)
-              .addListener(new ChannelFutureListenerOnWrite(clientHandler));
+              .addListener(spyListener);
 
         Mockito.verify(clientHandler, Mockito.timeout(3000L).times(1))
               .channelActive(Mockito.any());
         Mockito.verify(clientHandler, Mockito.timeout(3000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
+        Mockito.verify(spyListener, Mockito.timeout(3000L).times(1))
+               .onFailure(Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -127,15 +132,9 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         StartMessage.INSTANCE.encode(buf);
         buf.setShort(0, magicError);
 
-        Assert.assertThrows(Exception.class, () -> {
-            embeddedChannel.writeInbound(buf);
-        }, e -> {
-            Assert.assertContains("received incorrect magic number",
-                                  e.getMessage());
-        });
-
+        embeddedChannel.writeInbound(buf);
         Assert.assertFalse(embeddedChannel.finish());
-        buffer.release();
+        Assert.assertNull(embeddedChannel.readInbound());
     }
 
     @Test
@@ -148,15 +147,9 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         StartMessage.INSTANCE.encode(buf);
         buf.setByte(2, versionError);
 
-        Assert.assertThrows(Exception.class, () -> {
-            embeddedChannel.writeInbound(buf);
-        }, e -> {
-            Assert.assertContains("received incorrect protocol version",
-                                  e.getMessage());
-        });
-
+        embeddedChannel.writeInbound(buf);
         Assert.assertFalse(embeddedChannel.finish());
-        buffer.release();
+        Assert.assertNull(embeddedChannel.readInbound());
     }
 
     @Test
@@ -192,9 +185,8 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         DataMessage dataMessage = new DataMessage(MessageType.MSG,
                                                   requestId, partition,
                                                   new NioManagedBuffer(buffer));
-        FailMessage failMsg = FailMessage.createFailMessage(requestId,
-                                                            DEFAULT_FAIL_CODE,
-                                                            "mock fail msg");
+        FailMessage failMsg = new FailMessage(requestId, DEFAULT_FAIL_CODE,
+                                              "mock fail msg");
 
         Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
                             "partition=1,hasBody=true,bodyLength=8]",

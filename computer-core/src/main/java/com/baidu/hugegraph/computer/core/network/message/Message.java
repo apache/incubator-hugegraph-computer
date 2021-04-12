@@ -28,17 +28,11 @@ public interface Message {
     /**
      * Serializes this object by writing into the given ByteBuf.
      *
-     * @param buf {@link ByteBuf}
+     * @param buf {@link ByteBuf} the header buffer, if use zero-copy.
+     * Otherwise it will contain header and body.
+     * @return {@link ManagedBuffer} body buffer, if use zero-copy
      */
-    void encode(ByteBuf buf);
-
-    /**
-     * Only serializes the header of this message by writing
-     * into the given ByteBuf.
-     *
-     * @param buf {@link ByteBuf}
-     */
-    void encodeHeader(ByteBuf buf);
+    ManagedBuffer encode(ByteBuf buf);
 
     /**
      * Used to identify this message type.

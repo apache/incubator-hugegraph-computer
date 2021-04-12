@@ -40,6 +40,7 @@ import io.netty.channel.Channel;
 public class TransportUtil {
 
     private static final Logger LOG = Log.logger(TransportUtil.class);
+    private static final long RESOLVE_TIMEOUT = 2000L;
 
     public static String remoteAddress(Channel channel) {
         if (channel == null || channel.remoteAddress() == null) {
@@ -77,11 +78,11 @@ public class TransportUtil {
         InetSocketAddress resolvedAddress = new InetSocketAddress(host, port);
         long resolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000L;
 
-        final long resolveTimeOut = 2000L;
-        if (resolveTimeMs > resolveTimeOut || resolvedAddress.isUnresolved()) {
+
+        if (resolveTimeMs > RESOLVE_TIMEOUT || resolvedAddress.isUnresolved()) {
             String status = resolvedAddress.isUnresolved() ?
                             "failed" : "succeed";
-            LOG.warn("DNS resolution {} for{} took {} ms",
+            LOG.warn("DNS resolution {} for '{}' took {} ms",
                      status, resolvedAddress, resolveTimeMs);
         }
         return resolvedAddress;

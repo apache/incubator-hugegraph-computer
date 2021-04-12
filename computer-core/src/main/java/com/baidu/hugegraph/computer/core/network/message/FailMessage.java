@@ -25,7 +25,6 @@ import static com.baidu.hugegraph.computer.core.network.TransportUtil.encodeStri
 import java.nio.ByteBuffer;
 
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
 
 import io.netty.buffer.ByteBuf;
@@ -36,39 +35,25 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
     public static int DEFAULT_FAIL_CODE = 1;
 
     private final int failAckId;
-    private final String failMsg;
     private final int failCode;
+    private final String failMsg;
 
-    public static FailMessage createFailMessage(int failAckId, int failCode,
-                                                String failMsg) {
-        byte[] bytes = encodeString(failMsg);
+    @Override
+    protected ManagedBuffer encodeBody(ByteBuf buf) {
+        byte[] bytes = encodeString(this.failMsg);
         // Copy to direct memory
         ByteBuffer buffer = ByteBuffer.allocateDirect(4 + bytes.length)
-                                      .putInt(failCode)
+                                      .putInt(this.failCode)
                                       .put(bytes);
         // Flip to make it readable
         buffer.flip();
-        NioManagedBuffer nioManagedBuffer = new NioManagedBuffer(buffer);
-        return new FailMessage(failAckId, nioManagedBuffer, failCode, failMsg);
+        return new NioManagedBuffer(buffer);
     }
 
-    public FailMessage(int failAckId, ManagedBuffer failBuffer) {
-        this(failAckId, failBuffer, 0, null);
-    }
-
-    private FailMessage(int failAckId, ManagedBuffer failBuffer,
-                        int failCode, String failMsg) {
-        super(failBuffer);
+    public FailMessage(int failAckId, int failCode, String failMsg) {
         this.failAckId = failAckId;
-        if (failMsg != null) {
-            this.failCode = failCode;
-            this.failMsg = failMsg;
-        } else {
-            ByteBuf buf = failBuffer.nettyByteBuf();
-            this.failCode = buf.readInt();
-            byte[] bytes = ByteBufUtil.getBytes(buf);
-            this.failMsg = bytes != null ? decodeString(bytes) : "";
-        }
+        this.failCode = failCode;
+        this.failMsg = failMsg;
     }
 
     @Override
@@ -87,9 +72,14 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         buf.skipBytes(4);
         // Skip body-length
         buf.skipBytes(4);
-        ManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
-        managedBuffer.retain();
-        return new FailMessage(failAckId, managedBuffer);
+
+        int failCode = buf.readInt();
+        byte[] bytes = ByteBufUtil.getBytes(buf);
+        String failMsg = null;
+        if (bytes != null) {
+            failMsg = decodeString(bytes);
+        }
+        return new FailMessage(failAckId, failCode, failMsg);
     }
 
     public String failMessage() {
