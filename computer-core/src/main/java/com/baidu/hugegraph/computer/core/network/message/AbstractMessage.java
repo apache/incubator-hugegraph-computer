@@ -112,7 +112,7 @@ public abstract class AbstractMessage implements Message {
 
     /**
      * Only serializes the body of this message by writing
-     * into the given ByteBuf and return the body buffer.
+     * into the given ByteBuf or return the body buffer.
      */
     protected ManagedBuffer encodeBody(ByteBuf buf) {
         return this.body();
