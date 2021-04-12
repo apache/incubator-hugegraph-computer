@@ -41,5 +41,5 @@ public interface GraphInput extends DataInput {
 
     Id readId() throws IOException;
 
-    Value readValue() throws IOException;
+    Value<?> readValue() throws IOException;
 }

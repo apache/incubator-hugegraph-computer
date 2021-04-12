@@ -36,7 +36,7 @@ public interface Aggregator4Worker {
      * with specified name.
      * @param value The value to be aggregated
      */
-    <V extends Value> void aggregateValue(String name, V value);
+    <V extends Value<?>> void aggregateValue(String name, V value);
 
     /**
      * Get the aggregated value before a superstep start. The value is
@@ -44,5 +44,5 @@ public interface Aggregator4Worker {
      * Throws ComputerException if master does not register the aggregator
      * with specified name.
      */
-    <V extends Value> V aggregatedValue(String name);
+    <V extends Value<?>> V aggregatedValue(String name);
 }

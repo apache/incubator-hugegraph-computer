@@ -30,6 +30,7 @@ import com.baidu.hugegraph.util.E;
 
 import sun.misc.Unsafe;
 
+@SuppressWarnings("deprecation") // Unsafe.getXx
 public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
 
     private static final sun.misc.Unsafe UNSAFE;
@@ -184,6 +185,7 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
         return CoderUtil.decode(bytes);
     }
 
+    @Override
     public long position() {
         return this.position;
     }

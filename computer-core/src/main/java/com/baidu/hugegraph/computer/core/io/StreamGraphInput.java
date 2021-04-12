@@ -51,7 +51,7 @@ public class StreamGraphInput implements GraphInput {
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         Id id = this.readId();
-        Value value = this.readValue();
+        Value<?> value = this.readValue();
         /*
          * TODO: Reuse Vertex has two ways
          * 1. ObjectPool(Recycler), need consider safely free object
@@ -82,6 +82,7 @@ public class StreamGraphInput implements GraphInput {
         if (numEdges == 0) {
             return factory.createEdges(0);
         }
+        @SuppressWarnings("unused")
         int bytes = this.readFullInt();
         Edges edges = factory.createEdges(numEdges);
         // TODO: lazy deserialization
@@ -99,7 +100,7 @@ public class StreamGraphInput implements GraphInput {
 
         // Write necessary
         Id targetId = this.readId();
-        Value value = this.readValue();
+        Value<?> value = this.readValue();
         Edge edge = factory.createEdge(targetId, value);
 
         if (context.config().outputEdgeProperties()) {
@@ -115,7 +116,7 @@ public class StreamGraphInput implements GraphInput {
         int size = this.readInt();
         for (int i = 0; i < size; i++) {
             String key = this.readString();
-            Value value = this.readValue();
+            Value<?> value = this.readValue();
             properties.put(key, value);
         }
         return properties;
@@ -130,10 +131,10 @@ public class StreamGraphInput implements GraphInput {
     }
 
     @Override
-    public Value readValue() throws IOException {
+    public Value<?> readValue() throws IOException {
         ComputerContext context = ComputerContext.instance();
         ValueType valueType = context.config().valueType();
-        Value value = ValueFactory.createValue(valueType);
+        Value<?> value = ValueFactory.createValue(valueType);
         value.read(this);
         return value;
     }

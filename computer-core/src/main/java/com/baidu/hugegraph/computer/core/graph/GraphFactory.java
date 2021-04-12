@@ -39,7 +39,7 @@ public final class GraphFactory {
         return new DefaultVertex();
     }
 
-    public <V extends Value> Vertex createVertex(Id id, V value) {
+    public <V extends Value<?>> Vertex createVertex(Id id, V value) {
         return new DefaultVertex(id, value);
     }
 
@@ -51,7 +51,7 @@ public final class GraphFactory {
         return new DefaultEdge();
     }
 
-    public <V extends Value> Edge createEdge(Id targetId, V value) {
+    public <V extends Value<?>> Edge createEdge(Id targetId, V value) {
         return new DefaultEdge(targetId, value);
     }
 

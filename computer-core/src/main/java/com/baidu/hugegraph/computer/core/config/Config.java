@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.configuration.MapConfiguration;
-import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
@@ -32,11 +31,8 @@ import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
 
 public final class Config {
-
-    private static final Logger LOG = Log.logger(Config.class);
 
     private final HugeConfig allConfig;
     private final HotConfig hotConfig;
@@ -156,7 +152,7 @@ public final class Config {
      * to create object.
      */
     public <T> T createObject(ConfigOption<Class<?>> clazzOption) {
-        Class clazz = this.get(clazzOption);
+        Class<?> clazz = this.get(clazzOption);
         if (clazz == Null.class) {
             return null;
         }

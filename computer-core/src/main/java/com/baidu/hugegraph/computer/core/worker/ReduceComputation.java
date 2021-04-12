@@ -32,7 +32,8 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
  * null will be passed. Compute message will return a result that send to
  * all adjacent vertices by default.
  */
-public interface ReduceComputation<M extends Value> extends Computation<M> {
+public interface ReduceComputation<M extends Value<?>>
+       extends Computation<M> {
 
     /**
      * Set vertex's value and return initial message. The message will be
@@ -59,7 +60,9 @@ public interface ReduceComputation<M extends Value> extends Computation<M> {
     default void compute(ComputationContext context,
                          Vertex vertex,
                          Iterator<M> messages) {
-        M message = Combiner.combineAll(context.combiner(), messages);
+        @SuppressWarnings("unchecked")
+        Combiner<M> combiner = (Combiner<M>) context.combiner();
+        M message = Combiner.combineAll(combiner, messages);
         M result = this.computeMessage(context, vertex, message);
         if (result != null) {
             this.sendMessage(context, vertex, result);

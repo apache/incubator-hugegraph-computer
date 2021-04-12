@@ -94,7 +94,7 @@ public class CsvStructGraphOutput extends StructGraphOutput {
         this.writeObjectStart();
         int size = properties.get().size();
         int i = 0;
-        for (Map.Entry<String, Value> entry : properties.get().entrySet()) {
+        for (Map.Entry<String, Value<?>> entry : properties.get().entrySet()) {
             this.writeValue(entry.getValue());
             if (++i < size) {
                 this.writeSplitter();
@@ -123,6 +123,7 @@ public class CsvStructGraphOutput extends StructGraphOutput {
         this.writeRawString("]");
     }
 
+    @Override
     public void writeKey(String key) throws IOException {
         // pass
     }

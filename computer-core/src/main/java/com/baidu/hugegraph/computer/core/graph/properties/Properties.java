@@ -25,7 +25,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public interface Properties {
 
-    Map<String, Value> get();
+    Map<String, Value<?>> get();
 
-    void put(String key, Value value);
+    void put(String key, Value<?> value);
 }

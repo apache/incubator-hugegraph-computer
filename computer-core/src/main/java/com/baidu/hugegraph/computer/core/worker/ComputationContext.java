@@ -41,13 +41,13 @@ public interface ComputationContext {
      * Send value to specified target vertex. The specified target vertex
      * will receive the value at next superstep.
      */
-    void sendMessage(Id target, Value value);
+    void sendMessage(Id target, Value<?> value);
 
     /**
      * Send value to all adjacent vertices of specified vertex. The adjacent
      * vertices of specified vertex will receive the value at next superstep.
      */
-    default void sendMessageToAllEdges(Vertex vertex, Value value) {
+    default void sendMessageToAllEdges(Vertex vertex, Value<?> value) {
         Iterator<Edge> edges = vertex.edges().iterator();
         while (edges.hasNext()) {
             Edge edge = edges.next();
@@ -60,10 +60,10 @@ public interface ComputationContext {
      * filtered adjacent vertices of specified vertex will receive the value
      * at next superstep.
      */
-    default <M extends Value> void sendMessageToAllEdgesIf(
-                                   Vertex vertex,
-                                   M value,
-                                   BiFunction<M, Id, Boolean> filter) {
+    default <M extends Value<?>> void sendMessageToAllEdgesIf(
+                                      Vertex vertex,
+                                      M value,
+                                      BiFunction<M, Id, Boolean> filter) {
         Iterator<Edge> edges = vertex.edges().iterator();
         while (edges.hasNext()) {
             Edge edge = edges.next();
@@ -78,8 +78,9 @@ public interface ComputationContext {
      * adjacent vertices of specified vertex will receive the values at next
      * superstep.
      */
-    default <M extends Value> void sendMessagesToAllEdges(Vertex vertex,
-                                                          Iterator<M> values) {
+    default <M extends Value<?>> void sendMessagesToAllEdges(
+                                      Vertex vertex,
+                                      Iterator<M> values) {
         while (values.hasNext()) {
             M value = values.next();
             this.sendMessageToAllEdges(vertex, value);
@@ -91,10 +92,10 @@ public interface ComputationContext {
      * filtered adjacent vertices of specified vertex will receive the values
      * at next superstep.
      */
-    default <M extends Value> void sendMessagesToAllEdgesIf(
-                                   Vertex vertex,
-                                   Iterator<M> values,
-                                   BiFunction<M, Id, Boolean> filter) {
+    default <M extends Value<?>> void sendMessagesToAllEdgesIf(
+                                      Vertex vertex,
+                                      Iterator<M> values,
+                                      BiFunction<M, Id, Boolean> filter) {
         while (values.hasNext()) {
             M value = values.next();
             Iterator<Edge> edges = vertex.edges().iterator();
@@ -131,5 +132,5 @@ public interface ComputationContext {
      * The combiner is used to combine messages for a vertex.
      * For {@link ReduceComputation}, there must be a combiner.
      */
-    <V extends Value> Combiner<V> combiner();
+    <V extends Value<?>> Combiner<V> combiner();
 }

@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 public class DefaultVertex implements Vertex {
 
     private Id id;
-    private Value value;
+    private Value<?> value;
     private Edges edges;
     private Properties properties;
     private boolean active;
@@ -43,7 +43,7 @@ public class DefaultVertex implements Vertex {
         this(null, null);
     }
 
-    public DefaultVertex(Id id, Value value) {
+    public DefaultVertex(Id id, Value<?> value) {
         this.id = id;
         this.value = value;
         int averageDegree = ComputerContext.instance().config().get(
@@ -65,12 +65,12 @@ public class DefaultVertex implements Vertex {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends Value> V value() {
+    public <V extends Value<?>> V value() {
         return (V) this.value;
     }
 
     @Override
-    public <V extends Value> void value(V value) {
+    public <V extends Value<?>> void value(V value) {
         this.value = value;
     }
 

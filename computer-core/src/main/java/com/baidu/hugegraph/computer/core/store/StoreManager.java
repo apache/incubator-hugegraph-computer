@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.worker;
+package com.baidu.hugegraph.computer.core.store;
 
 public class StoreManager {
 }

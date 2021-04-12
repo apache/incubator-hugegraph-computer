@@ -24,13 +24,13 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
 public final class ValueFactory {
 
-    public static Value createValue(byte code) {
+    public static Value<?> createValue(byte code) {
         ValueType type = SerialEnum.fromCode(ValueType.class, code);
         return createValue(type);
     }
 
     // Can reuse Value
-    public static Value createValue(ValueType type) {
+    public static Value<?> createValue(ValueType type) {
         switch (type) {
             case NULL:
                 return NullValue.get();

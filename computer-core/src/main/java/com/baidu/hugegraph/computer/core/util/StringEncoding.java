@@ -51,7 +51,6 @@ public final class StringEncoding {
 
     private static final MessageDigest DIGEST;
     private static final byte[] BYTES_EMPTY = new byte[0];
-    private static final int BLOCK_SIZE = 4096;
 
     static {
         final String ALG = "SHA-256";

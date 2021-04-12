@@ -56,7 +56,7 @@ public final class HugeConverter {
         }
     }
 
-    public static Value convertValue(Object rawValue) {
+    public static Value<?> convertValue(Object rawValue) {
         if (rawValue == null) {
             return NullValue.get();
         } else if (rawValue instanceof Boolean) {
@@ -72,7 +72,7 @@ public final class HugeConverter {
         } else if (rawValue instanceof Collection) {
             @SuppressWarnings("unchecked")
             Collection<Object> collection = (Collection<Object>) rawValue;
-            ListValue listValue = new ListValue<>();
+            ListValue<Value<?>> listValue = new ListValue<>();
             for (Object nestedRawValue : collection) {
                 listValue.add(convertValue(nestedRawValue));
             }
@@ -88,7 +88,7 @@ public final class HugeConverter {
         Properties properties = new DefaultProperties();
         for (Map.Entry<String, Object> entry : rawProperties.entrySet()) {
             String key = entry.getKey();
-            Value value = convertValue(entry.getValue());
+            Value<?> value = convertValue(entry.getValue());
             properties.put(key, value);
         }
         return properties;

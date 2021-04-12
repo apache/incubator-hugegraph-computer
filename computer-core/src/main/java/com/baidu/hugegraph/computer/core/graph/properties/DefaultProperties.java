@@ -27,23 +27,23 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultProperties implements Properties {
 
-    private final Map<String, Value> keyValues;
+    private final Map<String, Value<?>> keyValues;
 
     public DefaultProperties() {
         this(ComputerContext.instance().graphFactory().createMap());
     }
 
-    public DefaultProperties(Map<String, Value> keyValues) {
+    public DefaultProperties(Map<String, Value<?>> keyValues) {
         this.keyValues = keyValues;
     }
 
     @Override
-    public Map<String, Value> get() {
+    public Map<String, Value<?>> get() {
         return this.keyValues;
     }
 
     @Override
-    public void put(String key, Value value) {
+    public void put(String key, Value<?> value) {
         this.keyValues.put(key, value);
     }
 

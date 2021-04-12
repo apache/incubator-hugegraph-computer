@@ -22,13 +22,14 @@ package com.baidu.hugegraph.computer.core.combiner;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.util.E;
 
-public class ValueMaxCombiner <T extends Value> implements Combiner<T> {
+public class ValueMaxCombiner<T extends Value<?>> implements Combiner<T> {
 
     @Override
+    @SuppressWarnings("unchecked")
     public T combine(T v1, T v2) {
         E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
-        if (v1.compareTo(v2) >= 0) {
+        if (((Value<Object>) v1).compareTo(v2) >= 0) {
             return v1;
         } else {
             return v2;
