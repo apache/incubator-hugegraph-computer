@@ -76,6 +76,7 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
 
     @Override
     public void writeInt(long position, int v) throws IOException {
+        // The write position is in the buffer
         if (this.fileOffset <= position &&
             position <= this.position() - Constants.INT_LEN) {
             super.writeInt(position - this.fileOffset, v);
@@ -94,8 +95,7 @@ public class BufferedFileOutput extends UnsafeByteArrayOutput {
 
     @Override
     public void seek(long position) throws IOException {
-        if (this.fileOffset <= position &&
-            position <= this.position()) {
+        if (this.fileOffset <= position && position <= this.position()) {
             super.seek(position - this.fileOffset);
             return;
         }
