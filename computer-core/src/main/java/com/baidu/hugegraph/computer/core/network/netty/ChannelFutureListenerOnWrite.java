@@ -47,22 +47,36 @@ class ChannelFutureListenerOnWrite implements ChannelFutureListener {
 
     @Override
     public void operationComplete(ChannelFuture future) throws Exception {
-        Channel channel = future.channel();
-        if (!future.isSuccess()) {
-            TransportException exception;
-            Throwable cause = future.cause();
-            if (cause instanceof TransportException) {
-                exception = (TransportException) cause;
-            } else {
-                exception = new TransportException(
-                            "Exception on write data to %s", cause,
-                            remoteAddress(channel));
-            }
-            ConnectionID connectionID = remoteConnectionID(channel);
-            this.handler.exceptionCaught(exception, connectionID);
-        } else {
-            LOG.debug("Write data success, to: {}",
-                      TransportUtil.remoteAddress(channel));
+        if (future.isDone()) {
+            Channel channel = future.channel();
+            this.writeDone(channel, future);
         }
+    }
+
+    public void writeDone(Channel channel, ChannelFuture future) {
+        if (!future.isSuccess()) {
+            this.writeFail(channel, future);
+        } else {
+            this.writeSuccess(channel, future);
+        }
+    }
+
+    public  void writeSuccess(Channel channel, ChannelFuture future) {
+        LOG.debug("Write data success, to: {}",
+                  TransportUtil.remoteAddress(channel));
+    }
+
+    public void writeFail(Channel channel, ChannelFuture future) {
+        TransportException exception;
+        Throwable cause = future.cause();
+        if (cause instanceof TransportException) {
+            exception = (TransportException) cause;
+        } else {
+            exception = new TransportException(
+                        "Exception on write data to %s", cause,
+                        remoteAddress(channel));
+        }
+        ConnectionID connectionID = remoteConnectionID(channel);
+        this.handler.exceptionCaught(exception, connectionID);
     }
 }

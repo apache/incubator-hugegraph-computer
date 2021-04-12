@@ -30,12 +30,14 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 
 public class NettyTransportClient implements TransportClient {
 
@@ -113,10 +115,32 @@ public class NettyTransportClient implements TransportClient {
         return this.handler;
     }
 
+    protected boolean checkSendAvailable() {
+        // TODO: checkSendAvailable
+        return this.channel.isWritable();
+    }
+
     private void initChannel(Channel channel, ConnectionID connectionID,
                              NettyProtocol protocol, ClientHandler handler) {
         protocol.replaceClientHandler(channel, this);
         // Client ready notice
         handler.channelActive(connectionID);
+    }
+
+    private class ClientChannelListenerOnWrite
+            extends ChannelFutureListenerOnWrite {
+
+        ClientChannelListenerOnWrite(TransportHandler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void writeSuccess(Channel channel, ChannelFuture future) {
+            super.writeDone(channel, future);
+            NettyTransportClient client = NettyTransportClient.this;
+            if (client.checkSendAvailable()) {
+                client.handler.sendAvailable(client.connectionID);
+            }
+        }
     }
 }
