@@ -83,7 +83,7 @@ public class TransportConnectionManager implements ConnectionManager {
                                              throws IOException {
         E.checkArgument(this.clientFactory != null,
                         "The clientManager has not been initialized yet");
-        ConnectionId connectionId = ConnectionId.parseConnectionID(host, port);
+        ConnectionId connectionId = ConnectionId.parseConnectionId(host, port);
         return this.getOrCreateClient(connectionId);
     }
 

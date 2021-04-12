@@ -92,7 +92,7 @@ public class ConnectionManagerTest {
 
     @Test
     public void testGetOrCreateClient() throws IOException {
-        ConnectionId connectionId = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionId(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionId);
@@ -101,7 +101,7 @@ public class ConnectionManagerTest {
 
     @Test
     public void testCloseClient() throws IOException {
-        ConnectionId connectionId = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionId(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionId);
@@ -113,7 +113,7 @@ public class ConnectionManagerTest {
     @Test
     public void testGetClientWithNoInit() {
         ConnectionManager connectionManager1 = new TransportConnectionManager();
-        ConnectionId connectionId = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionId(
                                     "127.0.0.1", port);
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             connectionManager1.getOrCreateClient(connectionId);
@@ -125,7 +125,7 @@ public class ConnectionManagerTest {
 
     @Test
     public void testShutDown() throws IOException {
-        ConnectionId connectionId = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionId(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionId);

@@ -87,7 +87,7 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionId connectionId = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionId(
                                     "127.0.0.1", 8086);
         this.client = clientFactory.createClient(connectionId, clientHandler);
         Assert.assertTrue(this.client.active());
@@ -98,7 +98,7 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionId connectionId = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionId(
                                     "127.0.0.1", 8086);
         this.client = clientFactory.createClient(connectionId, clientHandler);
         Assert.assertTrue(this.client.active());
@@ -111,7 +111,7 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionId connectionId = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionId(
                                     "127.0.0.1", 7777);
         Assert.assertThrows(IOException.class, () -> {
             this.client = clientFactory.createClient(connectionId,
@@ -126,7 +126,7 @@ public class NettyClientFactoryTest {
     public void testCreateClientWithNoInit() {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
-        ConnectionId connectionId = ConnectionId.parseConnectionID(
+        ConnectionId connectionId = ConnectionId.parseConnectionId(
                                     "127.0.0.1", 7777);
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             this.client = clientFactory.createClient(connectionId,

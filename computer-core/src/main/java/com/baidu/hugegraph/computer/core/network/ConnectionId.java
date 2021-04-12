@@ -40,11 +40,11 @@ public class ConnectionId {
     private final InetSocketAddress address;
     private final int clientIndex;
 
-    public static ConnectionId parseConnectionID(String host, int port) {
-        return parseConnectionID(host, port, 0);
+    public static ConnectionId parseConnectionId(String host, int port) {
+        return parseConnectionId(host, port, 0);
     }
 
-    public static ConnectionId parseConnectionID(String host, int port,
+    public static ConnectionId parseConnectionId(String host, int port,
                                                  int clientIndex) {
 
         String cacheKey = buildCacheKey(host, port, clientIndex);

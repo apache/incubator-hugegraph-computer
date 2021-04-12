@@ -31,23 +31,23 @@ public class ConnectionIdTest {
 
     @Test
     public void testParseConnectionID() {
-        ConnectionId connectionId1 = ConnectionId.parseConnectionID(
+        ConnectionId connectionId1 = ConnectionId.parseConnectionId(
                                      "127.0.0.1", 8080);
-        ConnectionId connectionId2 = ConnectionId.parseConnectionID(
+        ConnectionId connectionId2 = ConnectionId.parseConnectionId(
                                       "127.0.0.1", 8080);
         Assert.assertSame(connectionId1, connectionId2);
     }
 
     @Test
     public void testConnectionIDEquals() {
-        ConnectionId connectionId1 = ConnectionId.parseConnectionID(
+        ConnectionId connectionId1 = ConnectionId.parseConnectionId(
                                      "localhost", 8080);
         InetSocketAddress address = TransportUtil.resolvedSocketAddress(
                                     "127.0.0.1", 8080);
         ConnectionId connectionId2 = new ConnectionId(address);
         Assert.assertEquals(connectionId1, connectionId2);
 
-        ConnectionId connectionId3 = ConnectionId.parseConnectionID(
+        ConnectionId connectionId3 = ConnectionId.parseConnectionId(
                                      "127.0.0.1", 8080, 2);
         Assert.assertNotEquals(connectionId1, connectionId3);
     }
@@ -71,7 +71,7 @@ public class ConnectionIdTest {
         InetSocketAddress address = TransportUtil.resolvedSocketAddress(
                                     hostName, 8080);
         ConnectionId connectionId = new ConnectionId(address);
-        ConnectionId connectionId2 = ConnectionId.parseConnectionID(
+        ConnectionId connectionId2 = ConnectionId.parseConnectionId(
                                      hostName, 8080);
         Assert.assertEquals(connectionId, connectionId2);
     }

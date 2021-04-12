@@ -59,7 +59,7 @@ public class TransportUtil {
         if (channel != null && channel.remoteAddress() != null) {
             InetSocketAddress address = (InetSocketAddress)
                                         channel.remoteAddress();
-            return ConnectionId.parseConnectionID(address.getHostName(),
+            return ConnectionId.parseConnectionId(address.getHostName(),
                                                   address.getPort());
         }
         return null;

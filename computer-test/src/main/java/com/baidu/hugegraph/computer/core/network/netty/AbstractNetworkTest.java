@@ -68,7 +68,7 @@ public abstract class AbstractNetworkTest {
     }
 
     protected TransportClient oneClient() throws IOException {
-        ConnectionId connectionId = ConnectionId.parseConnectionID(host, port);
+        ConnectionId connectionId = ConnectionId.parseConnectionId(host, port);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionId);
         Assert.assertTrue(client.active());
@@ -76,7 +76,7 @@ public abstract class AbstractNetworkTest {
     }
 
     protected TransportClient oneClient(int clintIndex) throws IOException {
-        ConnectionId connectionId = ConnectionId.parseConnectionID(host, port,
+        ConnectionId connectionId = ConnectionId.parseConnectionId(host, port,
                                                                    clintIndex);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionId);
