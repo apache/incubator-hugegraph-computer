@@ -44,7 +44,7 @@ public class TransportSessionTest {
     }
 
     @Test
-    public void testStart() {
+    public void testStartSendAndStartRecv() {
         ClientSession clientSession = new ClientSession();
         clientSession.startSend();
         Assert.assertEquals(TransportStatus.START_SEND, clientSession.status);
@@ -64,7 +64,7 @@ public class TransportSessionTest {
     }
 
     @Test
-    public void testFin() {
+    public void testFinishSendAndFinishRecv() {
         ClientSession clientSession = new ClientSession();
         clientSession.finishSend();
         Assert.assertEquals(TransportStatus.FINISH_SEND, clientSession.status);

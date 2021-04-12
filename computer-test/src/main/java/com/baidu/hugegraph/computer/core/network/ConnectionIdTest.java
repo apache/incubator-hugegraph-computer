@@ -27,29 +27,29 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.testutil.Assert;
 
-public class ConnectionIDTest {
+public class ConnectionIdTest {
 
     @Test
     public void testParseConnectionID() {
-        ConnectionID connectionID1 = ConnectionID.parseConnectionID(
+        ConnectionId connectionId1 = ConnectionId.parseConnectionID(
                                      "127.0.0.1", 8080);
-        ConnectionID connectionID2 = ConnectionID.parseConnectionID(
+        ConnectionId connectionId2 = ConnectionId.parseConnectionID(
                                       "127.0.0.1", 8080);
-        Assert.assertSame(connectionID1, connectionID2);
+        Assert.assertSame(connectionId1, connectionId2);
     }
 
     @Test
     public void testConnectionIDEquals() {
-        ConnectionID connectionID1 = ConnectionID.parseConnectionID(
+        ConnectionId connectionId1 = ConnectionId.parseConnectionID(
                                      "localhost", 8080);
         InetSocketAddress address = TransportUtil.resolvedSocketAddress(
                                     "127.0.0.1", 8080);
-        ConnectionID connectionID2 = new ConnectionID(address);
-        Assert.assertEquals(connectionID1, connectionID2);
+        ConnectionId connectionId2 = new ConnectionId(address);
+        Assert.assertEquals(connectionId1, connectionId2);
 
-        ConnectionID connectionID3 = ConnectionID.parseConnectionID(
+        ConnectionId connectionId3 = ConnectionId.parseConnectionID(
                                      "127.0.0.1", 8080, 2);
-        Assert.assertNotEquals(connectionID1, connectionID3);
+        Assert.assertNotEquals(connectionId1, connectionId3);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class ConnectionIDTest {
         InetSocketAddress localSocketAddress =
                 InetSocketAddress.createUnresolved("127.0.0.1", 8080);
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            ConnectionID connectionID = new ConnectionID(localSocketAddress);
+            ConnectionId connectionID = new ConnectionId(localSocketAddress);
         }, e -> {
             Assert.assertTrue(e.getMessage().contains("The address must be " +
                                                       "resolved"));
@@ -70,9 +70,9 @@ public class ConnectionIDTest {
         String hostName = localHost.getHostName();
         InetSocketAddress address = TransportUtil.resolvedSocketAddress(
                                     hostName, 8080);
-        ConnectionID connectionID = new ConnectionID(address);
-        ConnectionID connectionID2 = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = new ConnectionId(address);
+        ConnectionId connectionId2 = ConnectionId.parseConnectionID(
                                      hostName, 8080);
-        Assert.assertEquals(connectionID, connectionID2);
+        Assert.assertEquals(connectionID, connectionId2);
     }
 }

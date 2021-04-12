@@ -39,7 +39,7 @@ public class TransportUtilTest {
     @Test
     public void testRemoteConnectionIDWithNull() {
         Channel channel = null;
-        ConnectionID connectionID = TransportUtil.remoteConnectionID(channel);
+        ConnectionId connectionID = TransportUtil.remoteConnectionID(channel);
         Assert.assertNull(connectionID);
     }
 

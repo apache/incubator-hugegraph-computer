@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
-import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
@@ -40,7 +40,7 @@ public class TransportConnectionManager implements ConnectionManager {
     private TransportServer server;
     private ClientFactory clientFactory;
     private ClientHandler clientHandler;
-    private final ConcurrentHashMap<ConnectionID, TransportClient> clients;
+    private final ConcurrentHashMap<ConnectionId, TransportClient> clients;
 
     public TransportConnectionManager() {
         this.clients = new ConcurrentHashMap<>();
@@ -62,7 +62,7 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public TransportClient getOrCreateClient(ConnectionID connectionID)
+    public TransportClient getOrCreateClient(ConnectionId connectionID)
                                              throws IOException {
         E.checkArgument(this.clientFactory != null,
                         "The clientManager has not been initialized yet");
@@ -83,12 +83,12 @@ public class TransportConnectionManager implements ConnectionManager {
                                              throws IOException {
         E.checkArgument(this.clientFactory != null,
                         "The clientManager has not been initialized yet");
-        ConnectionID connectionID = ConnectionID.parseConnectionID(host, port);
+        ConnectionId connectionID = ConnectionId.parseConnectionID(host, port);
         return this.getOrCreateClient(connectionID);
     }
 
     @Override
-    public void closeClient(ConnectionID connectionID) {
+    public void closeClient(ConnectionId connectionID) {
         TransportClient client = this.clients.get(connectionID);
         if (client != null) {
             this.clients.remove(connectionID);
@@ -125,10 +125,10 @@ public class TransportConnectionManager implements ConnectionManager {
         }
 
         if (!this.clients.isEmpty()) {
-            Iterator<Map.Entry<ConnectionID, TransportClient>>
+            Iterator<Map.Entry<ConnectionId, TransportClient>>
             iterator = this.clients.entrySet().iterator();
             while (iterator.hasNext()) {
-                Map.Entry<ConnectionID, TransportClient> next = iterator.next();
+                Map.Entry<ConnectionId, TransportClient> next = iterator.next();
                 TransportClient client = next.getValue();
                 if (client != null) {
                     client.close();

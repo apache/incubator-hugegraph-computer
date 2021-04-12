@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.network.session.TransportSessionTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     NettyTransportServerTest.class,
-    ConnectionIDTest.class,
+    ConnectionIdTest.class,
     NettyClientFactoryTest.class,
     ConnectionManagerTest.class,
     TransportUtilTest.class,

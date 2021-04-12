@@ -23,6 +23,9 @@ public class PingMessage extends AbstractMessage implements RequestMessage  {
 
     public static final PingMessage INSTANCE = new PingMessage();
 
+    private PingMessage(){
+    }
+
     @Override
     public MessageType type() {
         return MessageType.PING;

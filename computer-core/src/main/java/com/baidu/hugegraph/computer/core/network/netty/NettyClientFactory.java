@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
-import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
@@ -114,7 +114,7 @@ public class NettyClientFactory implements ClientFactory {
      * Create a new {@link TransportClient} to the remote address.
      */
     @Override
-    public TransportClient createClient(ConnectionID connectionID,
+    public TransportClient createClient(ConnectionId connectionID,
                                         ClientHandler handler)
                                         throws IOException {
         InetSocketAddress address = connectionID.socketAddress();
@@ -126,7 +126,7 @@ public class NettyClientFactory implements ClientFactory {
         NettyTransportClient client = new NettyTransportClient(channel,
                                                                connectionID,
                                                                this, handler);
-        LOG.debug("Success created a new client to {}", connectionID);
+        LOG.debug("Successfully created a new client to {}", connectionID);
         return client;
     }
 
@@ -162,13 +162,14 @@ public class NettyClientFactory implements ClientFactory {
 
         if (future.cause() != null) {
             throw new TransportException(
-                  "Create connection to %s error, cause: %s",
+                  "Failed to create connection to '%s', caused by: %s",
                   future.cause(), formatAddress, future.cause().getMessage());
         }
 
         if (!connectSuccess || !future.isSuccess()) {
             throw new TransportException(
-                  "Create connection to %s error!", formatAddress);
+                  "Failed to create connection to '%s', cause unknown",
+                  formatAddress);
         }
 
         long postConnect = System.nanoTime();

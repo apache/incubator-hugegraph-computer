@@ -67,7 +67,7 @@ public interface Message {
     int partition();
 
     /**
-     * Callback on send complete
+     * Release the message
      */
-    void sent();
+    void release();
 }

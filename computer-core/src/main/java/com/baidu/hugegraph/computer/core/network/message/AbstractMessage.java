@@ -46,10 +46,13 @@ import io.netty.buffer.ByteBuf;
  */
 public abstract class AbstractMessage implements Message {
 
-    // magic(2) version(1) message-type (1) seq(4) partition(4) body-length(4)
-    public static final int FRAME_HEADER_LENGTH = 2 + 1 + 1 + 4 + 4 + 4;
-    public static final int LENGTH_FIELD_OFFSET = 2 + 1 + 1 + 4 + 4;
-    public static final int LENGTH_FIELD_LENGTH = 4;
+    /**
+     * Header:
+     * magic(2) version(1) message-type (1) seq(4) partition(4) body-length(4)
+     */
+    public static final int HEADER_LENGTH = 2 + 1 + 1 + 4 + 4 + 4;
+    public static final int OFFSET_BODY_LENGTH = 2 + 1 + 1 + 4 + 4;
+    public static final int LENGTH_BODY_LENGTH = 4;
 
     // MAGIC_NUMBER = "HG"
     public static final short MAGIC_NUMBER = 0x4847;
@@ -86,7 +89,6 @@ public abstract class AbstractMessage implements Message {
         }
     }
 
-    @Override
     public void encodeHeader(ByteBuf buf) {
         buf.writeShort(MAGIC_NUMBER);
         buf.writeByte(PROTOCOL_VERSION);
@@ -112,7 +114,7 @@ public abstract class AbstractMessage implements Message {
     }
 
     @Override
-    public void sent() {
+    public void release() {
         if (this.hasBody()) {
             this.body.release();
         }

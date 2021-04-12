@@ -28,40 +28,40 @@ import java.util.function.Function;
 import com.baidu.hugegraph.util.E;
 
 /**
- * A {@link ConnectionID} identifies a connection to a remote connection
+ * A {@link ConnectionId} identifies a connection to a remote connection
  * manager by the socket address and a client index. This allows multiple
  * connections to the same worker to be distinguished by their client index.
  */
-public class ConnectionID {
+public class ConnectionId {
 
-    private static final ConcurrentHashMap<String, ConnectionID>
+    private static final ConcurrentHashMap<String, ConnectionId>
             CONNECTION_ID_CACHE = new ConcurrentHashMap<>();
 
     private final InetSocketAddress address;
     private final int clientIndex;
 
-    public static ConnectionID parseConnectionID(String host, int port) {
+    public static ConnectionId parseConnectionID(String host, int port) {
         return parseConnectionID(host, port, 0);
     }
 
-    public static ConnectionID parseConnectionID(String host, int port,
+    public static ConnectionId parseConnectionID(String host, int port,
                                                  int clientIndex) {
 
         String cacheKey = buildCacheKey(host, port, clientIndex);
 
-        Function<String, ConnectionID> resolveAddress = key -> {
+        Function<String, ConnectionId> resolveAddress = key -> {
             InetSocketAddress socketAddress = resolvedSocketAddress(host, port);
-            return new ConnectionID(socketAddress, clientIndex);
+            return new ConnectionId(socketAddress, clientIndex);
         };
 
         return CONNECTION_ID_CACHE.computeIfAbsent(cacheKey, resolveAddress);
     }
 
-    public ConnectionID(InetSocketAddress address) {
+    public ConnectionId(InetSocketAddress address) {
         this(address, 0);
     }
 
-    public ConnectionID(InetSocketAddress address, int clientIndex) {
+    public ConnectionId(InetSocketAddress address, int clientIndex) {
         E.checkArgument(clientIndex >= 0,
                         "The clientIndex must be >= 0");
         // Use resolved address here
@@ -95,11 +95,11 @@ public class ConnectionID {
             return true;
         }
 
-        if (!(obj instanceof ConnectionID)) {
+        if (!(obj instanceof ConnectionId)) {
             return false;
         }
 
-        final ConnectionID other = (ConnectionID) obj;
+        final ConnectionId other = (ConnectionId) obj;
         return other.socketAddress().equals(this.address) &&
                other.clientIndex() == this.clientIndex;
     }

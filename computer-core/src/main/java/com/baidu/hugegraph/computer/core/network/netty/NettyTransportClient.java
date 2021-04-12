@@ -28,7 +28,7 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
-import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
@@ -43,13 +43,13 @@ public class NettyTransportClient implements TransportClient {
     private static final Logger LOG = Log.logger(NettyTransportClient.class);
 
     private final Channel channel;
-    private final ConnectionID connectionID;
+    private final ConnectionId connectionID;
     private final NettyClientFactory clientFactory;
     private final ClientHandler handler;
     private final ClientSession clientSession;
     private final ClientChannelListenerOnWrite listenerOnWrite;
 
-    protected NettyTransportClient(Channel channel, ConnectionID connectionID,
+    protected NettyTransportClient(Channel channel, ConnectionId connectionID,
                                    NettyClientFactory clientFactory,
                                    ClientHandler clientHandler) {
         E.checkArgumentNotNull(clientHandler,
@@ -69,7 +69,7 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public ConnectionID connectionID() {
+    public ConnectionId connectionID() {
         return this.connectionID;
     }
 
@@ -121,7 +121,7 @@ public class NettyTransportClient implements TransportClient {
         return this.channel.isWritable();
     }
 
-    private void initChannel(Channel channel, ConnectionID connectionID,
+    private void initChannel(Channel channel, ConnectionId connectionID,
                              NettyProtocol protocol, ClientHandler handler) {
         protocol.replaceClientHandler(channel, this);
         // Client ready notice

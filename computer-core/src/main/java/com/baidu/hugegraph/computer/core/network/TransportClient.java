@@ -54,9 +54,9 @@ public interface TransportClient {
     void finishSession() throws IOException;
 
     /**
-     * Get the {@link ConnectionID}
+     * Get the {@link ConnectionId}
      */
-    ConnectionID connectionID();
+    ConnectionId connectionID();
 
     /**
      * Get the remote SocketAddress
@@ -72,7 +72,7 @@ public interface TransportClient {
     /**
      * Close the client.
      * NOTE: If the client is created with {@link ConnectionManager}, need to
-     * use {@link ConnectionManager#closeClient(ConnectionID)} to close it,
+     * use {@link ConnectionManager#closeClient(ConnectionId)} to close it,
      * otherwise there will be unsafe risks.
      */
     void close();

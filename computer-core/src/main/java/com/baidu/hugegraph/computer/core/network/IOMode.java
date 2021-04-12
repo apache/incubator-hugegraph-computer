@@ -24,8 +24,6 @@ package com.baidu.hugegraph.computer.core.network;
  * NIO is always available, while EPOLL is only available on Linux.
  */
 public enum IOMode {
-
     NIO,
     EPOLL
-
 }

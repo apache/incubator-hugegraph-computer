@@ -25,7 +25,7 @@ import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteConn
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FailMessage;
@@ -64,14 +64,14 @@ public class NettyServerHandler extends AbstractNettyHandler {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ConnectionID connectionID = remoteConnectionID(ctx.channel());
+        ConnectionId connectionID = remoteConnectionID(ctx.channel());
         this.handler.channelActive(connectionID);
         super.channelActive(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ConnectionID connectionID = remoteConnectionID(ctx.channel());
+        ConnectionId connectionID = remoteConnectionID(ctx.channel());
         this.handler.channelInactive(connectionID);
         super.channelInactive(ctx);
     }
@@ -87,7 +87,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
                         "Exception on server receive data from %s",
                         cause, remoteAddress(ctx.channel()));
         }
-        ConnectionID connectionID = remoteConnectionID(ctx.channel());
+        ConnectionId connectionID = remoteConnectionID(ctx.channel());
         this.handler.exceptionCaught(exception, connectionID);
     }
 }

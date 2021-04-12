@@ -20,12 +20,10 @@
 package com.baidu.hugegraph.computer.core.network;
 
 public enum TransportStatus {
-
     READY,
     START_SEND,
     START_RECV,
     ESTABLISH,
     FINISH_SEND,
     FINISH_RECV
-
 }

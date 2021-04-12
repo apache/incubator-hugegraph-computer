@@ -25,5 +25,5 @@ public interface ClientHandler extends TransportHandler {
      * Invoked when the channel associated with the given connectionID channel
      * is able to send data immediately.
      */
-    void sendAvailable(ConnectionID connectionID);
+    void sendAvailable(ConnectionId connectionID);
 }

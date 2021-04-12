@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.FRAME_HEADER_LENGTH;
+import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.HEADER_LENGTH;
 
 import org.slf4j.Logger;
 
@@ -68,7 +68,7 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
         ByteBuf bufHeader = null;
         try {
             PromiseCombiner combiner = new PromiseCombiner(ctx.executor());
-            bufHeader = allocator.directBuffer(FRAME_HEADER_LENGTH);
+            bufHeader = allocator.directBuffer(HEADER_LENGTH);
             message.encodeHeader(bufHeader);
             // Reference will be release called write()
             ChannelFuture headerWriteFuture = ctx.write(bufHeader);
@@ -82,7 +82,7 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
             }
             combiner.finish(promise);
         } catch (Throwable e) {
-            String msg = String.format("Message encode fail, messageType: %s",
+            String msg = String.format("Encode message fail, messageType: %s",
                                        message.type());
             LOG.error(msg, e);
             throw new TransportException(msg, e);
@@ -91,7 +91,7 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
                 bufHeader.release();
             }
             // TODO: need to release the out reference?
-            // message.sent();
+            // message.release();
         }
     }
 }

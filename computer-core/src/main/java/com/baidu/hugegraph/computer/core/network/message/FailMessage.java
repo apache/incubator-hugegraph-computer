@@ -33,33 +33,41 @@ import io.netty.buffer.ByteBufUtil;
 
 public class FailMessage extends AbstractMessage implements ResponseMessage {
 
+    public static int DEFAULT_FAIL_CODE = 1;
+
     private final int failAckId;
     private final String failMsg;
+    private final int failCode;
 
-    public static FailMessage createFailMessage(int failAckId,
+    public static FailMessage createFailMessage(int failAckId, int failCode,
                                                 String failMsg) {
         byte[] bytes = encodeString(failMsg);
         // Copy to direct memory
-        ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length).put(bytes);
+        ByteBuffer buffer = ByteBuffer.allocateDirect(4 + bytes.length)
+                                      .putInt(failCode)
+                                      .put(bytes);
         // Flip to make it readable
         buffer.flip();
         NioManagedBuffer nioManagedBuffer = new NioManagedBuffer(buffer);
-        return new FailMessage(failAckId, nioManagedBuffer, failMsg);
+        return new FailMessage(failAckId, nioManagedBuffer, failCode, failMsg);
     }
 
     public FailMessage(int failAckId, ManagedBuffer failBuffer) {
-        this(failAckId, failBuffer, null);
+        this(failAckId, failBuffer, 0, null);
     }
 
-    public FailMessage(int failAckId, ManagedBuffer failBuffer,
-                       String failMsg) {
+    private FailMessage(int failAckId, ManagedBuffer failBuffer,
+                        int failCode, String failMsg) {
         super(failBuffer);
         this.failAckId = failAckId;
         if (failMsg != null) {
+            this.failCode = failCode;
             this.failMsg = failMsg;
         } else {
-            byte[] bytes = ByteBufUtil.getBytes(failBuffer.nettyByteBuf());
-            this.failMsg = decodeString(bytes);
+            ByteBuf buf = failBuffer.nettyByteBuf();
+            this.failCode = buf.readInt();
+            byte[] bytes = ByteBufUtil.getBytes(buf);
+            this.failMsg = bytes != null ? decodeString(bytes) : "";
         }
     }
 
@@ -84,7 +92,11 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         return new FailMessage(failAckId, managedBuffer);
     }
 
-    public String failMsg() {
+    public String failMessage() {
         return this.failMsg;
+    }
+
+    public int failCode() {
+        return this.failCode;
     }
 }

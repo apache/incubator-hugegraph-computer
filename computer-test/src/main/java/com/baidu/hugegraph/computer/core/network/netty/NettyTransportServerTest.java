@@ -172,20 +172,16 @@ public class NettyTransportServerTest {
     }
 
     @Test
-    public void testListenWithRandomPort() {
+    public void testListenWithAssignPort() {
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-                ComputerOptions.TRANSPORT_SERVER_PORT, "9091",
-                ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+                ComputerOptions.TRANSPORT_SERVER_PORT, "9091"
         );
         config = ComputerContext.instance().config();
 
         int port = this.server.listen(config, messageHandler);
 
         TransportConf conf = this.server.conf();
-        Assert.assertEquals(3, conf.serverThreads());
-        Assert.assertEquals(IOMode.NIO, conf.ioMode());
         Assert.assertEquals("127.0.0.1",
                             conf.serverAddress().getHostAddress());
 

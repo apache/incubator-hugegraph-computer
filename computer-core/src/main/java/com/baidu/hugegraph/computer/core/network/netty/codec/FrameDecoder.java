@@ -19,10 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.FRAME_HEADER_LENGTH;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.LENGTH_FIELD_LENGTH;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.LENGTH_FIELD_OFFSET;
+import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.HEADER_LENGTH;
+import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.LENGTH_BODY_LENGTH;
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.MAGIC_NUMBER;
+import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.OFFSET_BODY_LENGTH;
 import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.PROTOCOL_VERSION;
 
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     private ByteBuf frameHeaderBuf;
 
     public FrameDecoder() {
-        super(MAX_FRAME_LENGTH, LENGTH_FIELD_OFFSET, LENGTH_FIELD_LENGTH,
+        super(MAX_FRAME_LENGTH, OFFSET_BODY_LENGTH, LENGTH_BODY_LENGTH,
               LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP);
     }
 
@@ -64,12 +64,12 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
         int magicNumber = msg.readShort();
         E.checkState(magicNumber == MAGIC_NUMBER,
                      "Network stream corrupted: received incorrect " +
-                     "magic number: %s ", magicNumber);
+                     "magic number: %s", magicNumber);
 
         int version = msg.readByte();
         E.checkState(version == PROTOCOL_VERSION,
                      "Network stream corrupted: received incorrect " +
-                     "protocol version: %s ", version);
+                     "protocol version: %s", version);
         // TODO: improve it use shard memory
         return msg;
     }
@@ -78,7 +78,7 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("The FrameDecoder active from {}",
                   TransportUtil.remoteAddress(ctx.channel()));
-        this.frameHeaderBuf = ctx.alloc().directBuffer(FRAME_HEADER_LENGTH);
+        this.frameHeaderBuf = ctx.alloc().directBuffer(HEADER_LENGTH);
         super.channelActive(ctx);
     }
 

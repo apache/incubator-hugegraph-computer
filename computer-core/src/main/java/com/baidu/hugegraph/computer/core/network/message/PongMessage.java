@@ -23,6 +23,9 @@ public class PongMessage extends AbstractMessage implements ResponseMessage  {
 
     public static final PongMessage INSTANCE = new PongMessage();
 
+    private PongMessage() {
+    }
+
     @Override
     public MessageType type() {
         return MessageType.PONG;

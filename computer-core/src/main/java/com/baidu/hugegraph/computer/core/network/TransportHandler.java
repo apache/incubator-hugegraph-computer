@@ -27,18 +27,18 @@ public interface TransportHandler {
      * Invoked when the channel associated with the given connectionID is
      * active.
      */
-    void channelActive(ConnectionID connectionID);
+    void channelActive(ConnectionId connectionID);
 
     /**
      * Invoked when the channel associated with the given
      * connectionID is inactive. No further requests will come from this
      * channel.
      */
-    void channelInactive(ConnectionID connectionID);
+    void channelInactive(ConnectionId connectionID);
 
     /**
      * Invoked when the channel associated with the given connectionID has
      * an exception is thrown processing message.
      */
-    void exceptionCaught(TransportException cause, ConnectionID connectionID);
+    void exceptionCaught(TransportException cause, ConnectionId connectionID);
 }

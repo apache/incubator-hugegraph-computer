@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
-import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.MockClientHandler;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
@@ -92,7 +92,7 @@ public class ConnectionManagerTest {
 
     @Test
     public void testGetOrCreateClient() throws IOException {
-        ConnectionID connectionID = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = ConnectionId.parseConnectionID(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionID);
@@ -101,7 +101,7 @@ public class ConnectionManagerTest {
 
     @Test
     public void testCloseClient() throws IOException {
-        ConnectionID connectionID = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = ConnectionId.parseConnectionID(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionID);
@@ -113,7 +113,7 @@ public class ConnectionManagerTest {
     @Test
     public void testGetClientWithNoInit() {
         ConnectionManager connectionManager1 = new TransportConnectionManager();
-        ConnectionID connectionID = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = ConnectionId.parseConnectionID(
                                     "127.0.0.1", port);
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             connectionManager1.getOrCreateClient(connectionID);
@@ -125,7 +125,7 @@ public class ConnectionManagerTest {
 
     @Test
     public void testShutDown() throws IOException {
-        ConnectionID connectionID = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = ConnectionId.parseConnectionID(
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionID);

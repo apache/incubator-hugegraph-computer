@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.testutil.Assert;
@@ -48,15 +48,15 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testConnectID() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        ConnectionID connectionID = ConnectionID.parseConnectionID(host, port);
-        ConnectionID clientConnectionID = client.connectionID();
-        Assert.assertEquals(connectionID, clientConnectionID);
+        ConnectionId connectionID = ConnectionId.parseConnectionID(host, port);
+        ConnectionId clientConnectionId = client.connectionID();
+        Assert.assertEquals(connectionID, clientConnectionId);
     }
 
     @Test
     public void testRemoteAddress() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        ConnectionID connectionID = ConnectionID.parseConnectionID(host, port);
+        ConnectionId connectionID = ConnectionId.parseConnectionID(host, port);
         InetSocketAddress address = client.remoteAddress();
         Assert.assertEquals(connectionID.socketAddress(), address);
     }

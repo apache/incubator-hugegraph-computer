@@ -52,11 +52,11 @@ public class TransportUtil {
         }
     }
 
-    public static ConnectionID remoteConnectionID(Channel channel) {
+    public static ConnectionId remoteConnectionID(Channel channel) {
         if (channel != null && channel.remoteAddress() != null) {
             InetSocketAddress address = (InetSocketAddress)
                                         channel.remoteAddress();
-            return ConnectionID.parseConnectionID(address.getHostName(),
+            return ConnectionId.parseConnectionID(address.getHostName(),
                                                   address.getPort());
         }
         return null;
@@ -77,10 +77,11 @@ public class TransportUtil {
         InetSocketAddress resolvedAddress = new InetSocketAddress(host, port);
         long resolveTimeMs = (System.nanoTime() - preResolveHost) / 1000000L;
 
-        if (resolveTimeMs > 2000L || resolvedAddress.isUnresolved()) {
+        final long resolveTimeOut = 2000L;
+        if (resolveTimeMs > resolveTimeOut || resolvedAddress.isUnresolved()) {
             String status = resolvedAddress.isUnresolved() ?
                             "failed" : "succeed";
-            LOG.warn("DNS resolution {} for {} took {} ms",
+            LOG.warn("DNS resolution {} for{} took {} ms",
                      status, resolvedAddress, resolveTimeMs);
         }
         return resolvedAddress;

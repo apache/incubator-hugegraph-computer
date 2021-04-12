@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
-import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
@@ -42,9 +42,9 @@ public interface ConnectionManager {
     /**
      * Get a {@link TransportClient} instance from the connection pool first.
      * If {it is not found or not active, create a new one.
-     * @param connectionID {@link ConnectionID}
+     * @param connectionID {@link ConnectionId}
      */
-    TransportClient getOrCreateClient(ConnectionID connectionID)
+    TransportClient getOrCreateClient(ConnectionId connectionID)
                                       throws IOException;
 
     /**
@@ -57,9 +57,9 @@ public interface ConnectionManager {
 
     /**
      * Close a client from the {@link ConnectionManager}
-     * @param connectionID {@link ConnectionID}
+     * @param connectionID {@link ConnectionId}
      */
-    void closeClient(ConnectionID connectionID);
+    void closeClient(ConnectionId connectionID);
 
     /**
      * Shutdown the client connection manager.

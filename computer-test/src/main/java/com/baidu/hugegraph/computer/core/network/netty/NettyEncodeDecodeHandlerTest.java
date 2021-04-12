@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.network.netty;
 
 import static com.baidu.hugegraph.computer.core.network.TransportUtil.encodeString;
+import static com.baidu.hugegraph.computer.core.network.message.FailMessage.DEFAULT_FAIL_CODE;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -192,6 +193,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
                                                   requestId, partition,
                                                   new NioManagedBuffer(buffer));
         FailMessage failMsg = FailMessage.createFailMessage(requestId,
+                                                            DEFAULT_FAIL_CODE,
                                                             "mock fail msg");
 
         Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
@@ -228,7 +230,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testSent() {
+    public void testMessageRelease() {
         int requestId = 99;
         int partition = 1;
         byte[] bytes = encodeString("mock msg");
@@ -238,7 +240,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
                                                   requestId, partition,
                                                   managedBuffer);
         Assert.assertEquals(1, managedBuffer.referenceCount());
-        dataMessage.sent();
+        dataMessage.release();
         Assert.assertEquals(0, managedBuffer.referenceCount());
     }
 }

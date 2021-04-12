@@ -29,7 +29,7 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.network.ConnectionID;
+import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MockClientHandler;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
@@ -87,7 +87,7 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionID connectionID = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = ConnectionId.parseConnectionID(
                                     "127.0.0.1", 8086);
         this.client = clientFactory.createClient(connectionID, clientHandler);
         Assert.assertTrue(this.client.active());
@@ -98,7 +98,7 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionID connectionID = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = ConnectionId.parseConnectionID(
                                     "127.0.0.1", 8086);
         this.client = clientFactory.createClient(connectionID, clientHandler);
         Assert.assertTrue(this.client.active());
@@ -111,13 +111,14 @@ public class NettyClientFactoryTest {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
         clientFactory.init();
-        ConnectionID connectionID = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = ConnectionId.parseConnectionID(
                                     "127.0.0.1", 7777);
         Assert.assertThrows(IOException.class, () -> {
             this.client = clientFactory.createClient(connectionID,
                                                      clientHandler);
         }, e -> {
-            Assert.assertContains("Create connection to", e.getMessage());
+            Assert.assertContains("Failed to create connection",
+                                  e.getMessage());
         });
     }
 
@@ -125,7 +126,7 @@ public class NettyClientFactoryTest {
     public void testCreateClientWithNoInit() {
         TransportConf conf = TransportConf.wrapConfig(config);
         NettyClientFactory clientFactory = new NettyClientFactory(conf);
-        ConnectionID connectionID = ConnectionID.parseConnectionID(
+        ConnectionId connectionID = ConnectionId.parseConnectionID(
                                     "127.0.0.1", 7777);
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             this.client = clientFactory.createClient(connectionID,
