@@ -469,7 +469,8 @@ public class UnsafeByteArrayTest {
         Assert.assertEquals(0, apple.compare(4, 1, egg, 0, 1));
     }
 
-    private static UnsafeByteArrayInput inputByString(String s) throws IOException {
+    private static UnsafeByteArrayInput inputByString(String s)
+                                                      throws IOException {
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.writeBytes(s);
         return new UnsafeByteArrayInput(output.toByteArray());
