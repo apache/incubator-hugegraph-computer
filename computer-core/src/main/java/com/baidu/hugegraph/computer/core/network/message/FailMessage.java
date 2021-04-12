@@ -38,18 +38,6 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
     private final int failCode;
     private final String failMsg;
 
-    @Override
-    protected ManagedBuffer encodeBody(ByteBuf buf) {
-        byte[] bytes = encodeString(this.failMsg);
-        // Copy to direct memory
-        ByteBuffer buffer = ByteBuffer.allocateDirect(4 + bytes.length)
-                                      .putInt(this.failCode)
-                                      .put(bytes);
-        // Flip to make it readable
-        buffer.flip();
-        return new NioManagedBuffer(buffer);
-    }
-
     public FailMessage(int failAckId, int failCode, String failMsg) {
         this.failAckId = failAckId;
         this.failCode = failCode;
@@ -66,18 +54,42 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         return this.failAckId;
     }
 
+    @Override
+    public ManagedBuffer encode(ByteBuf buf) {
+        buf.writeShort(MAGIC_NUMBER);
+        buf.writeByte(PROTOCOL_VERSION);
+        buf.writeByte(this.type().code());
+        buf.writeInt(this.sequenceNumber());
+        buf.writeInt(this.partition());
+
+        byte[] bytes = encodeString(this.failMsg);
+        int bodyLength = 4 + bytes.length;
+        buf.writeInt(bodyLength);
+
+        // Copy to direct memory
+        ByteBuffer buffer = ByteBuffer.allocateDirect(bodyLength)
+                                      .putInt(this.failCode)
+                                      .put(bytes);
+        // Flip to make it readable
+        buffer.flip();
+        return new NioManagedBuffer(buffer);
+    }
+
     public static FailMessage parseFrom(ByteBuf buf) {
         int failAckId = buf.readInt();
+        int failCode = 0;
+        String failMsg = null;
         // Skip partition
         buf.skipBytes(4);
         // Skip body-length
-        buf.skipBytes(4);
+        int bodyLength = buf.readInt();
 
-        int failCode = buf.readInt();
-        byte[] bytes = ByteBufUtil.getBytes(buf);
-        String failMsg = null;
-        if (bytes != null) {
-            failMsg = decodeString(bytes);
+        if (bodyLength >= 4) {
+            failCode = buf.readInt();
+            byte[] bytes = ByteBufUtil.getBytes(buf);
+            if (bytes != null) {
+                failMsg = decodeString(bytes);
+            }
         }
         return new FailMessage(failAckId, failCode, failMsg);
     }
