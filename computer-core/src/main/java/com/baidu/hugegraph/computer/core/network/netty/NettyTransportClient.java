@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
-import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.E;
@@ -130,8 +129,8 @@ public class NettyTransportClient implements TransportClient {
     private class ClientChannelListenerOnWrite
             extends ChannelFutureListenerOnWrite {
 
-        ClientChannelListenerOnWrite(TransportHandler handler) {
-            super(handler);
+        ClientChannelListenerOnWrite() {
+            super(NettyTransportClient.this.handler);
         }
 
         @Override
