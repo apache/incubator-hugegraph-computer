@@ -37,19 +37,16 @@ public interface Aggregator4Master {
      * Register the aggregator with specified name. The name must be unique.
      * Used by algorithm's master-computation to register aggregators.
      */
-    <V extends Value> void registerAggregator(
-                           String name,
-                           Class<? extends Aggregator<V>> aggregatorClass);
+    void registerAggregator(String name, Class<? extends Aggregator<Value<?>>>
+                                         aggregatorClass);
 
     /**
      * Register aggregator with specified value type and a combiner which can
      * combine values with specified value type. The name must be unique.
      * Used by algorithm's master-computation to register aggregators.
      */
-    <V extends Value> void registerAggregator(
-                           String name,
-                           ValueType type,
-                           Class<? extends Combiner<V>> combinerClass);
+    void registerAggregator(String name, ValueType type,
+                            Class<? extends Combiner<Value<?>>> combinerClass);
 
     /**
      * Set the aggregated value by master-computation. The value will be
@@ -57,7 +54,7 @@ public interface Aggregator4Master {
      * Throws ComputerException if master does not register the aggregator
      * with specified name.
      */
-    <V extends Value> void aggregatedValue(String name, V value);
+    <V extends Value<?>> void aggregatedValue(String name, V value);
 
     /**
      * Get the aggregated value. The aggregated value is aggregated from
@@ -65,5 +62,5 @@ public interface Aggregator4Master {
      * Throws ComputerException if master does not register the aggregator
      * with specified name.
      */
-    <V extends Value> V aggregatedValue(String name);
+    <V extends Value<?>> V aggregatedValue(String name);
 }

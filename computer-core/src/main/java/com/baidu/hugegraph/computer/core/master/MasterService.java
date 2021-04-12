@@ -296,30 +296,29 @@ public class MasterService {
         }
 
         @Override
-        public <V extends Value> void registerAggregator(
-                                 String name,
-                                 Class<? extends Aggregator<V>> aggregator) {
+        public void registerAggregator(
+                    String name,
+                    Class<? extends Aggregator<Value<?>>> aggregator) {
             // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
-        public <V extends Value> void registerAggregator(
-                                 String name,
-                                 ValueType type,
-                                 Class<? extends Combiner<V>> combiner) {
+        public void registerAggregator(
+                    String name, ValueType type,
+                    Class<? extends Combiner<Value<?>>> combiner) {
             // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
-        public <V extends Value> void aggregatedValue(String name, V value) {
+        public <V extends Value<?>> void aggregatedValue(String name, V value) {
             // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
-        public <V extends Value> V aggregatedValue(String name) {
+        public <V extends Value<?>> V aggregatedValue(String name) {
             // TODO: implement
             throw new ComputerException("Not implemented");
         }

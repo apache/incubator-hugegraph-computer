@@ -29,14 +29,14 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 public class DefaultEdge implements Edge {
 
     private Id targetId;
-    private Value value;
+    private Value<?> value;
     private Properties properties;
 
     public DefaultEdge() {
         this(null, null);
     }
 
-    public DefaultEdge(Id targetId, Value value) {
+    public DefaultEdge(Id targetId, Value<?> value) {
         this.targetId = targetId;
         this.value = value;
         this.properties = new DefaultProperties();
@@ -54,12 +54,12 @@ public class DefaultEdge implements Edge {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends Value> V value() {
+    public <V extends Value<?>> V value() {
         return (V) this.value;
     }
 
     @Override
-    public <V extends Value> void value(V value) {
+    public <V extends Value<?>> void value(V value) {
         this.value = value;
     }
 

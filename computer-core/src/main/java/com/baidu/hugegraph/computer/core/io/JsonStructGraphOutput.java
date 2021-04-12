@@ -112,7 +112,7 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeObjectStart();
         int size = properties.get().size();
         int i = 0;
-        for (Map.Entry<String, Value> entry : properties.get().entrySet()) {
+        for (Map.Entry<String, Value<?>> entry : properties.get().entrySet()) {
             this.writeKey(entry.getKey());
             this.writeJoiner();
             this.writeValue(entry.getValue());

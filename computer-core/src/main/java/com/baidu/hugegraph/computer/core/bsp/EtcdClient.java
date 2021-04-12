@@ -439,7 +439,7 @@ public class EtcdClient {
     }
 
     private static List<byte[]> getResponseValues(GetResponse response) {
-        List<byte[]> values = new ArrayList((int) response.getCount());
+        List<byte[]> values = new ArrayList<>((int) response.getCount());
         for (KeyValue kv : response.getKvs()) {
             values.add(kv.getValue().getBytes());
         }
@@ -468,8 +468,8 @@ public class EtcdClient {
             while (remaining > 0) {
                 logInterval = Math.min(remaining, logInterval);
                 if (this.barrierEvent.await(logInterval)) {
-                    assert result != null;
-                    return result;
+                    assert this.result != null;
+                    return this.result;
                 } else {
                     logFunc.run();
                 }

@@ -31,6 +31,14 @@ public interface Combiner<T> {
         return this.getClass().getName();
     }
 
+    /**
+     * Combine v1 and v2, return the combined value. The combined value may
+     * take use v1 or v2. The value of v1 and v2 may be updated. Should not
+     * use v1 and v2 after combine them.
+     */
+    T combine(T v1, T v2);
+
+
     public static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
         if (!values.hasNext()) {
             return null;
@@ -41,11 +49,4 @@ public interface Combiner<T> {
         }
         return result;
     }
-
-    /**
-     * Combine v1 and v2, return the combined value. The combined value may
-     * take use v1 or v2. The value of v1 and v2 may be updated. Should not
-     * use v1 and v2 after combine them.
-     */
-    T combine(T v1, T v2);
 }

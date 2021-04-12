@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.util.E;
 
-public class ListValue<T extends Value> implements Value<ListValue<T>> {
+public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
     private ValueType elemType;
     private List<T> values;
@@ -68,17 +68,17 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
     }
 
     public T getLast() {
-        int index = values.size() - 1;
+        int index = this.values.size() - 1;
         if (index < 0) {
             throw new NoSuchElementException("The list value is empty");
         }
         return this.values.get(index);
     }
 
-    public ListValue copy() {
-        List values = ComputerContext.instance().graphFactory().createList();
+    public ListValue<T> copy() {
+        List<T> values = ComputerContext.instance().graphFactory().createList();
         values.addAll(this.values);
-        return new ListValue(this.elemType, values);
+        return new ListValue<>(this.elemType, values);
     }
 
     public boolean contains(T obj) {
@@ -148,7 +148,9 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
             return cmp;
         }
         for (int i = 0; i < this.size(); i++) {
-            cmp = this.values.get(i).compareTo(obj.values.get(i));
+            @SuppressWarnings("unchecked")
+            Value<Object> self = (Value<Object>) this.values.get(i);
+            cmp = self.compareTo(obj.values.get(i));
             if (cmp != 0) {
                 return cmp;
             }
@@ -161,7 +163,8 @@ public class ListValue<T extends Value> implements Value<ListValue<T>> {
         if (!(obj instanceof ListValue)) {
             return false;
         }
-        ListValue other = (ListValue) obj;
+        @SuppressWarnings("unchecked")
+        ListValue<T> other = (ListValue<T>) obj;
         if (this.elemType != other.elemType) {
             return false;
         }

@@ -36,7 +36,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
  * computed.
  * @param <M>
  */
-public interface Computation<M extends Value> {
+public interface Computation<M extends Value<?>> {
 
     /**
      * @return the name of computation.

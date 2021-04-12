@@ -30,9 +30,9 @@ public interface Edge extends Recyclable {
 
     void targetId(Id targetId);
 
-    <V extends Value> V value();
+    <V extends Value<?>> V value();
 
-    <V extends Value> void value(V value);
+    <V extends Value<?>> void value(V value);
 
     Properties properties();
 

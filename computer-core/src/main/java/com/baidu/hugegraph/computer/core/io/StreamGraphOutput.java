@@ -88,9 +88,9 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeProperties(Properties properties) throws IOException {
-        Map<String, Value> keyValues = properties.get();
+        Map<String, Value<?>> keyValues = properties.get();
         this.writeInt(keyValues.size());
-        for (Map.Entry<String, Value> entry : keyValues.entrySet()) {
+        for (Map.Entry<String, Value<?>> entry : keyValues.entrySet()) {
             this.writeString(entry.getKey());
             this.writeValue(entry.getValue());
         }
@@ -103,7 +103,7 @@ public class StreamGraphOutput implements GraphOutput {
     }
 
     @Override
-    public void writeValue(Value value) throws IOException {
+    public void writeValue(Value<?> value) throws IOException {
         value.write(this);
     }
 

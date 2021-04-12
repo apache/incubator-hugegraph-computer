@@ -67,7 +67,7 @@ public abstract class StructGraphOutput implements GraphOutput {
     }
 
     @Override
-    public void writeValue(Value value) throws IOException {
+    public void writeValue(Value<?> value) throws IOException {
         switch (value.type()) {
             case ID_VALUE:
                 this.writeIdValue((IdValue) value);
@@ -103,7 +103,7 @@ public abstract class StructGraphOutput implements GraphOutput {
         this.writeArrayStart();
         int size = listValue.size();
         int i = 0;
-        for (Value value : listValue.values()) {
+        for (Value<?> value : listValue.values()) {
             this.writeValue(value);
             if (++i < size) {
                 this.writeSplitter();

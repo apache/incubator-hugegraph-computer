@@ -47,11 +47,13 @@ public class WorkerService {
     private Config config;
     private Bsp4Worker bsp4Worker;
     private ContainerInfo workerInfo;
-    private ContainerInfo masterInfo;
     private Map<Integer, ContainerInfo> workers;
-    private Computation computation;
+    private Computation<?> computation;
     private List<Manager> managers;
-    private Combiner combiner;
+    private Combiner<Value<?>> combiner;
+
+    @SuppressWarnings("unused")
+    private ContainerInfo masterInfo;
 
     public WorkerService() {
         this.workers = new HashMap<>();
@@ -78,7 +80,7 @@ public class WorkerService {
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
         this.computation.init(config);
         LOG.info("Computation name: {}, category: {}",
-                 computation.name(), computation.category());
+                 this.computation.name(), this.computation.category());
 
         this.combiner = this.config.createObject(
                         ComputerOptions.WORKER_COMBINER_CLASS);
@@ -242,25 +244,25 @@ public class WorkerService {
         }
 
         @Override
-        public <V extends Value> void aggregateValue(String name, V value) {
+        public <V extends Value<?>> void aggregateValue(String name, V value) {
             // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
-        public <V extends Value> V aggregatedValue(String name) {
+        public <V extends Value<?>> V aggregatedValue(String name) {
             // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
-        public void sendMessage(Id target, Value value) {
+        public void sendMessage(Id target, Value<?> value) {
             // TODO: implement
             throw new ComputerException("Not implemented");
         }
 
         @Override
-        public void sendMessageToAllEdges(Vertex vertex, Value value) {
+        public void sendMessageToAllEdges(Vertex vertex, Value<?> value) {
             // TODO: implement
             throw new ComputerException("Not implemented");
         }
@@ -284,8 +286,9 @@ public class WorkerService {
          * Message combiner.
          */
         @Override
-        public <V extends Value> Combiner<V> combiner() {
-            return WorkerService.this.combiner;
+        @SuppressWarnings("unchecked")
+        public <V extends Value<?>> Combiner<V> combiner() {
+            return (Combiner<V>) WorkerService.this.combiner;
         }
     }
 }
