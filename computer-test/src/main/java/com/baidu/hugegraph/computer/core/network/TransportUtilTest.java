@@ -56,6 +56,23 @@ public class TransportUtilTest {
         InetSocketAddress address3 = TransportUtil.resolvedSocketAddress(
                                      "xxxxx", 80);
         Assert.assertTrue(address3.isUnresolved());
+
+        InetSocketAddress address4 = TransportUtil.resolvedSocketAddress(
+                                     "127.0.0.1", 80);
+        Assert.assertFalse(address4.isUnresolved());
+    }
+
+    @Test
+    public void testFormatAddress() {
+        InetSocketAddress address = TransportUtil.resolvedSocketAddress(
+                                    "xxxxx", 80);
+        String formatAddress = TransportUtil.formatAddress(address);
+        Assert.assertEquals("xxxxx:80", formatAddress);
+
+        InetSocketAddress address2 = TransportUtil.resolvedSocketAddress(
+                                     "127.0.0.1", 8089);
+        String formatAddress2 = TransportUtil.formatAddress(address2);
+        Assert.assertContains("127.0.0.1:8089", formatAddress2);
     }
 
     @Test
