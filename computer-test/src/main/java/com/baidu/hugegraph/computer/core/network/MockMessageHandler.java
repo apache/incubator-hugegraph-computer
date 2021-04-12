@@ -33,11 +33,13 @@ public class MockMessageHandler implements MessageHandler {
     @Override
     public void handle(MessageType messageType, int partition,
                        ManagedBuffer buffer) {
-        LOG.info("messageType: {}, partition: {}, buffer readable length: {}",
-                 messageType.name(), partition,
+        LOG.info("Receive data from remote, messageType: {}, partition: {}, " +
+                 "buffer readable length: {}", messageType.name(), partition,
                  buffer != null ? buffer.length() : null);
 
         if (buffer != null) {
+            byte[] bytes = buffer.copyToByteArray();
+
             // Must release it
             buffer.release();
         }
