@@ -37,7 +37,7 @@ public interface ManagedBuffer {
     /**
      * Number of bytes of the data.
      */
-    int size();
+    int length();
 
     /**
      * Exposes this buffer's data as an NIO ByteBuffer.
@@ -65,5 +65,11 @@ public interface ManagedBuffer {
     /**
      * Returns the reference count if applicable, otherwise return -1.
      */
-    int refCnt();
+    int referenceCount();
+
+
+    /**
+     * Copy to a new byte[]
+     */
+    byte[] copyToByteArray();
 }

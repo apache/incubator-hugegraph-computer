@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
-import com.baidu.hugegraph.computer.core.network.MockTransportHandler;
+import com.baidu.hugegraph.computer.core.network.MockWakeHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.testutil.Assert;
@@ -41,7 +41,7 @@ public class NettyClientFactoryTest {
 
     private static Config config;
     private static MockMessageHandler serverHandler;
-    private static MockTransportHandler clientHandler;
+    private static MockWakeHandler clientHandler;
     private NettyTransportServer server;
     private TransportClient client;
 
@@ -57,7 +57,7 @@ public class NettyClientFactoryTest {
         );
         config = ComputerContext.instance().config();
         serverHandler = new MockMessageHandler();
-        clientHandler = new MockTransportHandler();
+        clientHandler = new MockWakeHandler();
         this.server = new NettyTransportServer();
         this.server.listen(config, serverHandler);
     }

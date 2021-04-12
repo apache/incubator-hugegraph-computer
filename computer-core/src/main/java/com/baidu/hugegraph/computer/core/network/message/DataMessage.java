@@ -51,7 +51,7 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
     }
 
     /**
-     * Decoding uses the given ByteBuf as our data, and will zzero-copy it.
+     * Decoding uses the given ByteBuf as our data, and will zero-copy it.
      */
     public static DataMessage parseFrom(MessageType type, ByteBuf buf) {
         int requestId = buf.readInt();

@@ -22,41 +22,31 @@ package com.baidu.hugegraph.computer.core.network;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.util.Log;
 
-public class MockMessageHandler implements MessageHandler {
+public class MockWakeHandler implements WakeHandler {
 
-    private static final Logger LOG = Log.logger(MockMessageHandler.class);
-
-    @Override
-    public void handle(MessageType messageType, int partition,
-                       ManagedBuffer buffer) {
-        LOG.info("messageType: {}, partition: {}, buffer readable length: {}",
-                 messageType.name(), partition,
-                 buffer != null ? buffer.length() : null);
-
-        if (buffer != null) {
-            // Must release it
-            buffer.release();
-        }
-    }
+    private static final Logger LOG = Log.logger(MockWakeHandler.class);
 
     @Override
     public void channelActive(ConnectionID connectionID) {
-        LOG.info("Server channel active, connectionID: {}", connectionID);
+        LOG.info("Client connection active, connectionID: {}", connectionID);
     }
 
     @Override
     public void channelInactive(ConnectionID connectionID) {
-        LOG.info("Server channel inActive, connectionID: {}", connectionID);
+        LOG.info("Client connection inActive, connectionID: {}", connectionID);
     }
 
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionID connectionID) {
-        LOG.error("Server channel exception, connectionID: {}, cause: ",
+        LOG.error("Client connection exception, connectionID: {}, cause: ",
                   connectionID, cause);
+    }
+
+    @Override
+    public void sendWake(ConnectionID connectionID) {
+        LOG.error("Client able send data, connectionID: {}", connectionID);
     }
 }

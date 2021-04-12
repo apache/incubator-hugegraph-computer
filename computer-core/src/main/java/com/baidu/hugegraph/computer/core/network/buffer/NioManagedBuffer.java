@@ -33,7 +33,7 @@ public class NioManagedBuffer implements ManagedBuffer {
     }
 
     @Override
-    public int size() {
+    public int length() {
         return this.buffer.remaining();
     }
 
@@ -58,7 +58,14 @@ public class NioManagedBuffer implements ManagedBuffer {
     }
 
     @Override
-    public int refCnt() {
+    public int referenceCount() {
         return -1;
+    }
+
+    @Override
+    public byte[] copyToByteArray() {
+        byte[] bytes = new byte[this.buffer.remaining()];
+        this.buffer.duplicate().get(bytes);
+        return bytes;
     }
 }

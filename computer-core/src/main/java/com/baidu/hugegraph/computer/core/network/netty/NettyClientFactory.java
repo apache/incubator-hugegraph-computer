@@ -34,8 +34,8 @@ import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
+import com.baidu.hugegraph.computer.core.network.WakeHandler;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -115,7 +115,7 @@ public class NettyClientFactory implements ClientFactory {
      */
     @Override
     public TransportClient createClient(ConnectionID connectionID,
-                                        TransportHandler handler)
+                                        WakeHandler handler)
                                         throws IOException {
         InetSocketAddress address = connectionID.socketAddress();
         LOG.debug("Creating new client connection to {}", connectionID);

@@ -39,12 +39,13 @@ public interface TransportClient {
     void startSession() throws IOException;
 
     /**
-     * Send the buffer to the server. Block the caller if busy.
+     * Send the buffer to the server.
+     * Return false if unable send data immediately.
      * This method is called zero or many times in iteration.
      * @throws IOException if failed, the job will fail.
      */
-    void send(MessageType messageType, int partition, ByteBuffer buffer)
-              throws IOException;
+    boolean send(MessageType messageType, int partition, ByteBuffer buffer)
+                 throws IOException;
 
     /**
      * This method is called after an iteration. It will block the caller to

@@ -32,10 +32,11 @@ public interface ClientFactory {
     /**
      * Create a TransportClient.
      * @param connectionID {@link ConnectionID}
+     * @param handler
      * @return {@link TransportClient}
      */
     TransportClient createClient(ConnectionID connectionID,
-                                 TransportHandler handler) throws IOException;
+                                 WakeHandler handler) throws IOException;
 
     /**
      * Close the {@link ClientFactory}

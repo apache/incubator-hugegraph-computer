@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
-import com.baidu.hugegraph.computer.core.network.TransportHandler;
+import com.baidu.hugegraph.computer.core.network.WakeHandler;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.E;
@@ -44,12 +44,12 @@ public class NettyTransportClient implements TransportClient {
     private final Channel channel;
     private final ConnectionID connectionID;
     private final NettyClientFactory clientFactory;
-    private final TransportHandler handler;
+    private final WakeHandler handler;
     private final ClientSession clientSession;
 
     protected NettyTransportClient(Channel channel, ConnectionID connectionID,
                                    NettyClientFactory clientFactory,
-                                   TransportHandler clientHandler) {
+                                   WakeHandler clientHandler) {
         E.checkArgumentNotNull(clientHandler,
                                "The handler param can't be null");
         this.initChannel(channel, connectionID, clientFactory.protocol(),
@@ -86,8 +86,9 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public synchronized void send(MessageType messageType, int partition,
-                                  ByteBuffer buffer) throws IOException {
+    public synchronized boolean send(MessageType messageType, int partition,
+                                     ByteBuffer buffer) throws IOException {
+        return false;
         // TODO: send message
     }
 
@@ -108,12 +109,12 @@ public class NettyTransportClient implements TransportClient {
         return this.clientSession;
     }
 
-    public TransportHandler handler() {
+    public WakeHandler handler() {
         return this.handler;
     }
 
     private void initChannel(Channel channel, ConnectionID connectionID,
-                             NettyProtocol protocol, TransportHandler handler) {
+                             NettyProtocol protocol, WakeHandler handler) {
         protocol.replaceClientHandler(channel, this);
         // Client ready notice
         handler.channelActive(connectionID);

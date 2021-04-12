@@ -30,16 +30,16 @@ import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.TransportProvider;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
+import com.baidu.hugegraph.computer.core.network.WakeHandler;
 import com.baidu.hugegraph.util.E;
 
 public class TransportConnectionManager implements ConnectionManager {
 
     private TransportServer server;
     private ClientFactory clientFactory;
-    private TransportHandler clientHandler;
+    private WakeHandler clientHandler;
     private final ConcurrentHashMap<ConnectionID, TransportClient> clients;
 
     public TransportConnectionManager() {
@@ -48,7 +48,7 @@ public class TransportConnectionManager implements ConnectionManager {
 
     @Override
     public synchronized void initClientManager(Config config,
-                                               TransportHandler clientHandler) {
+                                               WakeHandler clientHandler) {
         E.checkArgument(this.clientFactory == null,
                         "The clientManager has already been initialized");
         E.checkArgumentNotNull(clientHandler,

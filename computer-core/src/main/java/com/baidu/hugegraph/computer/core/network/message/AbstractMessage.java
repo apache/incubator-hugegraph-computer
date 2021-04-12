@@ -71,7 +71,7 @@ public abstract class AbstractMessage implements Message {
         this.partition = partition;
         if (body != null) {
             this.body = body;
-            this.bodyLength = body.size();
+            this.bodyLength = body.length();
         } else {
             this.body = null;
             this.bodyLength = 0;
@@ -121,11 +121,11 @@ public abstract class AbstractMessage implements Message {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("messageType", this.type())
-                .append("sequenceNumber", this.sequenceNumber())
-                .append("partition", this.partition())
-                .append("hasBody", this.hasBody())
-                .append("bodyLength", this.bodyLength)
-                .toString();
+                   .append("messageType", this.type())
+                   .append("sequenceNumber", this.sequenceNumber())
+                   .append("partition", this.partition())
+                   .append("hasBody", this.hasBody())
+                   .append("bodyLength", this.bodyLength)
+                   .toString();
     }
 }

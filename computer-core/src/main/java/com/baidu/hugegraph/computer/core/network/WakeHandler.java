@@ -19,29 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import org.slf4j.Logger;
+public interface WakeHandler extends TransportHandler {
 
-import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.util.Log;
-
-public class MockTransportHandler implements TransportHandler {
-
-    private static final Logger LOG = Log.logger(MockTransportHandler.class);
-
-    @Override
-    public void channelActive(ConnectionID connectionID) {
-        LOG.info("Client connection active, connectionID: {}", connectionID);
-    }
-
-    @Override
-    public void channelInactive(ConnectionID connectionID) {
-        LOG.info("Client connection inActive, connectionID: {}", connectionID);
-    }
-
-    @Override
-    public void exceptionCaught(TransportException cause,
-                                ConnectionID connectionID) {
-        LOG.error("Client connection exception, connectionID: {}, cause: ",
-                  connectionID, cause);
-    }
+    /**
+     * Invoked when the channel associated with the given connectionID channel
+     * is able send data immediately.
+     */
+    void sendWake(ConnectionID connectionID);
 }

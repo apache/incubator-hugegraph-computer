@@ -23,12 +23,13 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.testutil.Assert;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-public class ManagerBufferTest {
+public class ManagedBufferTest {
 
     @Test
     public void testRetain() {
@@ -45,11 +46,11 @@ public class ManagerBufferTest {
         ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
         nettyManagedBuffer.retain();
         Assert.assertSame(cnt + 1, byteBuf.refCnt());
-        Assert.assertSame(cnt + 1, nettyManagedBuffer.refCnt());
+        Assert.assertSame(cnt + 1, nettyManagedBuffer.referenceCount());
         ByteBuf buf = nettyManagedBuffer.nettyByteBuf();
         nettyManagedBuffer.retain();
         Assert.assertSame(cnt + 2, buf.refCnt());
-        Assert.assertSame(cnt + 2, nettyManagedBuffer.refCnt());
+        Assert.assertSame(cnt + 2, nettyManagedBuffer.referenceCount());
         nettyManagedBuffer.release();
         nettyManagedBuffer.release();
         nettyManagedBuffer.release();
@@ -67,7 +68,7 @@ public class ManagerBufferTest {
         int cnt = byteBuf.refCnt();
         ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
         nettyManagedBuffer.release();
-        Assert.assertSame(cnt - 1, nettyManagedBuffer.refCnt());
+        Assert.assertSame(cnt - 1, nettyManagedBuffer.referenceCount());
     }
 
     @Test
@@ -96,5 +97,41 @@ public class ManagerBufferTest {
         ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
         ByteBuf buf = nettyManagedBuffer.nettyByteBuf();
         Assert.assertSame(buf.array(), byteBuf.array());
+    }
+
+    @Test
+    public void testCopyToByteArray() {
+        String testData = "test data";
+        byte[] bytesSource = TransportUtil.encodeString(testData);
+
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bytesSource.length);
+        byteBuffer = byteBuffer.put(bytesSource);
+        byteBuffer.flip();
+        NioManagedBuffer nioManagedBuffer = new NioManagedBuffer(byteBuffer);
+        byte[] bytes = nioManagedBuffer.copyToByteArray();
+        Assert.assertArrayEquals(bytesSource, bytes);
+        Assert.assertNotSame(bytesSource, bytes);
+
+        ByteBuffer byteBuffer2 = ByteBuffer.allocate(bytesSource.length);
+        byteBuffer2 = byteBuffer2.put(bytesSource);
+        byteBuffer2.flip();
+        NioManagedBuffer nioManagedBuffer2 = new NioManagedBuffer(byteBuffer2);
+        byte[] bytes2 = nioManagedBuffer2.copyToByteArray();
+        Assert.assertArrayEquals(bytesSource, bytes2);
+        Assert.assertNotSame(bytesSource, bytes2);
+
+        ByteBuf buf3 = Unpooled.directBuffer(bytesSource.length);
+        buf3 = buf3.writeBytes(bytesSource);
+        NettyManagedBuffer nettyManagedBuffer3 = new NettyManagedBuffer(buf3);
+        byte[] bytes3 = nettyManagedBuffer3.copyToByteArray();
+        Assert.assertArrayEquals(bytesSource, bytes3);
+        Assert.assertNotSame(bytesSource, bytes3);
+
+        ByteBuf buf4 = Unpooled.buffer(bytesSource.length);
+        buf4 = buf4.writeBytes(bytesSource);
+        NettyManagedBuffer nettyManagedBuffer4 = new NettyManagedBuffer(buf4);
+        byte[] bytes4 = nettyManagedBuffer4.copyToByteArray();
+        Assert.assertArrayEquals(bytesSource, bytes4);
+        Assert.assertNotSame(bytesSource, bytes4);
     }
 }

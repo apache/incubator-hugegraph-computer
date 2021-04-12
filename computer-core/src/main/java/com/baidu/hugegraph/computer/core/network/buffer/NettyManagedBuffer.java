@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.network.buffer;
 import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 
 public class NettyManagedBuffer implements ManagedBuffer {
 
@@ -32,10 +33,13 @@ public class NettyManagedBuffer implements ManagedBuffer {
     }
 
     @Override
-    public int size() {
+    public int length() {
         return this.buf.readableBytes();
     }
 
+    /**
+     * NOTE: It will trigger copy when this.buf.nioBufferCount > 1
+     */
     @Override
     public ByteBuffer nioByteBuffer() {
         return this.buf.nioBuffer();
@@ -59,7 +63,15 @@ public class NettyManagedBuffer implements ManagedBuffer {
     }
 
     @Override
-    public int refCnt() {
+    public int referenceCount() {
         return this.buf.refCnt();
+    }
+
+    @Override
+    public byte[] copyToByteArray() {
+        return ByteBufUtil.getBytes(this.buf.duplicate(),
+                                    this.buf.readerIndex(),
+                                    this.buf.readableBytes(),
+                                    true);
     }
 }

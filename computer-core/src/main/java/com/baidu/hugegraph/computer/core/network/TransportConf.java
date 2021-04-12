@@ -146,8 +146,7 @@ public class TransportConf {
      * The max number of request allowed to unreceived ack.
      * Note: If the number of unreceived ack greater than
      * TRANSPORT_MAX_PENDING_REQUESTS,
-     * it will block the client from calling
-     * {@link TransportClient#send}
+     * {@link TransportClient#send} will unavailable
      */
     public int maxPendingRequests() {
         return this.config.get(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS);

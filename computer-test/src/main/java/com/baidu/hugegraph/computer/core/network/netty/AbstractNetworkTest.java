@@ -35,10 +35,10 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ConnectionID;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
-import com.baidu.hugegraph.computer.core.network.MockTransportHandler;
+import com.baidu.hugegraph.computer.core.network.MockWakeHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
-import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
+import com.baidu.hugegraph.computer.core.network.WakeHandler;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.config.ConfigOption;
@@ -53,7 +53,7 @@ public abstract class AbstractNetworkTest {
     private static final Map<ConfigOption<?>, String> OPTIONS = new HashMap<>();
     protected static Config config;
     protected static MessageHandler serverHandler;
-    protected static TransportHandler clientHandler;
+    protected static WakeHandler clientHandler;
     protected static ConnectionManager connectionManager;
     protected static NettyProtocol clientProtocol;
     protected static NettyProtocol serverProtocol;
@@ -78,7 +78,7 @@ public abstract class AbstractNetworkTest {
         ConnectionID connectionID = ConnectionID.parseConnectionID(host, port,
                                                                    clintIndex);
         TransportClient client = connectionManager.getOrCreateClient(
-                connectionID);
+                                 connectionID);
         Assert.assertTrue(client.active());
         return client;
     }
@@ -99,7 +99,7 @@ public abstract class AbstractNetworkTest {
         UnitTestBase.updateWithRequiredOptions(objects);
         config = ComputerContext.instance().config();
         serverHandler = Mockito.spy(new MockMessageHandler());
-        clientHandler = Mockito.spy(new MockTransportHandler());
+        clientHandler = Mockito.spy(new MockWakeHandler());
         connectionManager = new TransportConnectionManager();
         port = connectionManager.startServer(config, serverHandler);
         connectionManager.initClientManager(config, clientHandler);
