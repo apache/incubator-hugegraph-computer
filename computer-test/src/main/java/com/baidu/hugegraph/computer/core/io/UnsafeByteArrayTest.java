@@ -421,7 +421,7 @@ public class UnsafeByteArrayTest {
     public void testWriteByInput() throws IOException {
         // Input class is UnsafeByteArrayInput
         String uuid = UUID.randomUUID().toString();
-        UnsafeByteArrayInput input = this.inputByString(uuid);
+        UnsafeByteArrayInput input = inputByString(uuid);
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.write(input, 0, input.available());
         Assert.assertEquals(uuid, new String(output.toByteArray()));
@@ -462,14 +462,14 @@ public class UnsafeByteArrayTest {
 
     @Test
     public void testCompare() throws IOException {
-        UnsafeByteArrayInput apple = this.inputByString("apple");
-        UnsafeByteArrayInput egg = this.inputByString("egg");
+        UnsafeByteArrayInput apple = inputByString("apple");
+        UnsafeByteArrayInput egg = inputByString("egg");
         Assert.assertTrue(apple.compare(0, 2, egg, 0, 2) < 0);
         Assert.assertTrue(apple.compare(1, 3, egg, 0, 2) > 0);
         Assert.assertEquals(0, apple.compare(4, 1, egg, 0, 1));
     }
 
-    private UnsafeByteArrayInput inputByString(String s) throws IOException {
+    private static UnsafeByteArrayInput inputByString(String s) throws IOException {
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         output.writeBytes(s);
         return new UnsafeByteArrayInput(output.toByteArray());

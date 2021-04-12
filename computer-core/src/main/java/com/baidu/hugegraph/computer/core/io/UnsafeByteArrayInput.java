@@ -219,7 +219,7 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
     @Override
     public int compare(long offset, long length, RandomAccessInput other,
                        long otherOffset, long otherLength) {
-        E.checkArgument(other instanceof UnsafeByteArrayInput,
+        E.checkArgument(other.getClass() == UnsafeByteArrayInput.class,
                         "Invalid parameter type %s", other.getClass());
 
         return BytesUtil.compare(this.buffer, (int) offset, (int) length,
