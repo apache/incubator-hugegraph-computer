@@ -49,26 +49,25 @@ class ChannelFutureListenerOnWrite implements ChannelFutureListener {
     public void operationComplete(ChannelFuture future) throws Exception {
         if (future.isDone()) {
             Channel channel = future.channel();
-            this.writeDone(channel, future);
+            this.onDone(channel, future);
         }
     }
 
-    public void writeDone(Channel channel, ChannelFuture future) {
-        if (!future.isSuccess()) {
-            this.writeFail(channel, future);
+    public void onDone(Channel channel, ChannelFuture future) {
+        if (future.isSuccess()) {
+            this.onSuccess(channel, future);
         } else {
-            this.writeSuccess(channel, future);
+            this.onFailure(channel, future.cause());
         }
     }
 
-    public  void writeSuccess(Channel channel, ChannelFuture future) {
+    public  void onSuccess(Channel channel, ChannelFuture future) {
         LOG.debug("Write data success, to: {}",
                   TransportUtil.remoteAddress(channel));
     }
 
-    public void writeFail(Channel channel, ChannelFuture future) {
+    public void onFailure(Channel channel, Throwable cause) {
         TransportException exception;
-        Throwable cause = future.cause();
         if (cause instanceof TransportException) {
             exception = (TransportException) cause;
         } else {

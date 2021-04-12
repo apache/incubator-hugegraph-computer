@@ -134,8 +134,8 @@ public class NettyTransportClient implements TransportClient {
         }
 
         @Override
-        public void writeSuccess(Channel channel, ChannelFuture future) {
-            super.writeDone(channel, future);
+        public void onSuccess(Channel channel, ChannelFuture future) {
+            super.onSuccess(channel, future);
             NettyTransportClient client = NettyTransportClient.this;
             if (client.checkSendAvailable()) {
                 client.handler.sendAvailable(client.connectionID);
