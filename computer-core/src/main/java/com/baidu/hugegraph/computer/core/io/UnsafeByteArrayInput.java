@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Comparator;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -218,13 +219,20 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
 
     @Override
     public int compare(long offset, long length, RandomAccessInput other,
-                       long otherOffset, long otherLength) {
-        E.checkArgument(other.getClass() == UnsafeByteArrayInput.class,
-                        "Invalid parameter type %s", other.getClass());
+                       long otherOffset, long otherLength) throws IOException {
+        if (other.getClass() == UnsafeByteArrayInput.class) {
+            return BytesUtil.compare(this.buffer, (int) offset, (int) length,
+                                     ((UnsafeByteArrayInput) other).buffer,
+                                     (int) otherOffset, (int) otherLength);
+        } else {
+            long otherPosition = other.position();
+            other.seek(otherOffset);
+            byte[] bytes = other.readBytes((int) otherLength);
+            other.seek(otherPosition);
 
-        return BytesUtil.compare(this.buffer, (int) offset, (int) length,
-                                 ((UnsafeByteArrayInput) other).buffer,
-                                 (int) otherOffset, (int) otherLength);
+            return BytesUtil.compare(this.buffer, (int) offset, (int) length,
+                                     bytes, 0, bytes.length);
+        }
     }
 
     protected void require(int size) throws IOException {
