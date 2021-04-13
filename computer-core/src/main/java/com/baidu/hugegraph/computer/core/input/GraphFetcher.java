@@ -19,13 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
-import com.baidu.hugegraph.structure.graph.Edge;
-
-/**
- * Streamed read the data of each input split, and return one HugeEdge object
- * at each iteration
- */
-public interface EdgeFetcher extends ElementFetcher<Edge> {
+public interface GraphFetcher {
 
     void close();
+
+    VertexFetcher vertexFetcher();
+
+    EdgeFetcher edgeFetcher();
 }

@@ -25,38 +25,34 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.input.hg.HugeInputSplitFetcher;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.HugeClientBuilder;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class InputSplitDataTest {
 
-    private static final String URL = "http://127.0.0.1:8080";
-    private static final String GRAPH = "hugegraph";
-
-    private static HugeClient client;
-    private static MasterInputHandler masterInputHandler;
-    private static MockWorkerInputHandler workerInputHandler;
+    private static MockMasterInputManager masterInputManager;
+    private static MockWorkerInputManager workerInputManager;
 
     @BeforeClass
     public static void setup() {
         Config config = ComputerContext.instance().config();
-        client = new HugeClientBuilder(URL, GRAPH).build();
-        InputSplitFetcher fetcher = new HugeInputSplitFetcher(config, client);
-        masterInputHandler = new MasterInputHandler(fetcher);
-        MockRpcClient rpcClient = new MockRpcClient(masterInputHandler);
-        workerInputHandler = new MockWorkerInputHandler(config, rpcClient,
-                                                        client);
+        masterInputManager = new MockMasterInputManager();
+        masterInputManager.init(config);
+
+        MockRpcClient rpcClient = new MockRpcClient(
+                                  masterInputManager.handler());
+        workerInputManager = new MockWorkerInputManager(rpcClient);
+        workerInputManager.init(config);
     }
 
     @AfterClass
     public static void teardown() {
-        client.close();
+        masterInputManager.close(ComputerContext.instance().config());
+        workerInputManager.close(ComputerContext.instance().config());
     }
 
     @Test
     public void testMasterCreateAndPollInputSplits() {
+        MasterInputHandler masterInputHandler = masterInputManager.handler();
         long count = masterInputHandler.createVertexInputSplits();
         Assert.assertGt(0L, count);
         InputSplit split;
@@ -83,19 +79,20 @@ public class InputSplitDataTest {
 
     @Test
     public void testWorkerFetchAndLoadEdgeInputSplits() {
+        MasterInputHandler masterInputHandler = masterInputManager.handler();
+
         long count = masterInputHandler.createVertexInputSplits();
         Assert.assertGt(0L, count);
-        while (workerInputHandler.fetchNextVertexInputSplit()) {
-            Assert.assertGte(0,
-                             workerInputHandler.loadVertexInputSplitData());
+        while (workerInputManager.fetchNextVertexInputSplit()) {
+            Assert.assertGte(0, workerInputManager.loadVertexInputSplitData());
             count--;
         }
         Assert.assertEquals(0, count);
 
         count = masterInputHandler.createEdgeInputSplits();
         Assert.assertGt(0L, count);
-        while (workerInputHandler.fetchNextEdgeInputSplit()) {
-            Assert.assertGte(0, workerInputHandler.loadEdgeInputSplitData());
+        while (workerInputManager.fetchNextEdgeInputSplit()) {
+            Assert.assertGte(0, workerInputManager.loadEdgeInputSplitData());
             count--;
         }
         Assert.assertEquals(0, count);
