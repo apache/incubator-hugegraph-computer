@@ -41,7 +41,7 @@ public class ValueMinCombinerTest {
     public void testCombineNull() {
         LongValue value1 = new LongValue(1L);
         LongValue value2 = new LongValue(2L);
-        ValueMinCombiner combiner = new ValueMinCombiner();
+        ValueMinCombiner<LongValue> combiner = new ValueMinCombiner<>();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             combiner.combine(null, value2);
         }, e -> {

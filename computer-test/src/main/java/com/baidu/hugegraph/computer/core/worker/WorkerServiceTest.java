@@ -24,7 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.junit.Test;
-import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -33,11 +32,8 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
 
 public class WorkerServiceTest {
-
-    private static final Logger LOG = Log.logger(WorkerServiceTest.class);
 
     @Test
     public void testServiceSuccess() throws InterruptedException {
