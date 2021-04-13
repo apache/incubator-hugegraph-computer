@@ -36,6 +36,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
@@ -151,13 +152,16 @@ public class WorkerService {
             this.computation.beforeSuperstep(context);
             this.bsp4Worker.workerSuperstepPrepared(superstep);
             this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
-            WorkerStat workerStat = this.computePartitions();
+
+            WorkerStat workerStat = this.compute();
+
             for (Manager manager : this.managers) {
                 manager.afterSuperstep(this.config, superstep);
             }
             this.computation.afterSuperstep(context);
             this.bsp4Worker.workerSuperstepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
+
             superstepStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
             superstep++;
         }
@@ -242,13 +246,17 @@ public class WorkerService {
     }
 
     /**
-     * Compute all partitions parallel in this worker.
+     * Compute vertices of all partitions parallel in this worker.
      * Be called one time for a superstep.
      * @return WorkerStat
      */
-    private WorkerStat computePartitions() {
+    private WorkerStat compute() {
         // TODO: compute partitions parallel and get workerStat
-        throw new ComputerException("Not implemented");
+        PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
+                                                50L, 60L, 70L);
+        WorkerStat workerStat = new WorkerStat();
+        workerStat.add(stat1);
+        return workerStat;
     }
 
     private class SuperstepContext implements WorkerContext {
