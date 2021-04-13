@@ -191,7 +191,8 @@ public class NettyTransportServer implements TransportServer, Closeable {
         if (this.bindFuture != null) {
             long timeout = this.conf.closeTimeout();
             this.bindFuture.channel().close()
-                           .awaitUninterruptibly(timeout,TimeUnit.MILLISECONDS);
+                           .awaitUninterruptibly(timeout,
+                                                 TimeUnit.MILLISECONDS);
             this.bindFuture = null;
         }
         if (this.bootstrap != null && this.bootstrap.config().group() != null) {
