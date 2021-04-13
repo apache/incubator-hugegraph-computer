@@ -28,10 +28,10 @@ public class MockRpcClient {
     }
 
     public InputSplit getNextVertexInputSplit() {
-        return this.masterInputHandler.pollVertexInputSplit();
+        return this.masterInputHandler.nextVertexInputSplit();
     }
 
     public InputSplit getNextEdgeInputSplit() {
-        return this.masterInputHandler.pollEdgeInputSplit();
+        return this.masterInputHandler.nextEdgeInputSplit();
     }
 }

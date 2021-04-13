@@ -30,8 +30,10 @@ import com.baidu.hugegraph.util.E;
 
 public class ContainerInfo implements Readable, Writable {
 
+    public static final int MASTER_ID = -1;
+
     /*
-     * There is only 1 master, so the id of master is no use.
+     * There is only 1 master, and the id of master is -1.
      * The id of workers start from 0. The id is used to identify a worker.
      */
     private int id;

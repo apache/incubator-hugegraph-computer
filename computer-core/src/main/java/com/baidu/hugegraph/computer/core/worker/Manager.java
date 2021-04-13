@@ -30,6 +30,11 @@ import com.baidu.hugegraph.computer.core.config.Config;
 public interface Manager {
 
     /**
+     * The unique identify name.
+     */
+//    String name();
+
+    /**
      * Used to add the resources the computation needed. Be called only one
      * time before all supersteps start.
      */

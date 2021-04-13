@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,8 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.input.MasterInputManager;
+import com.baidu.hugegraph.computer.core.rpc.MasterRpcManager;
 import com.baidu.hugegraph.computer.core.worker.Manager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.E;
@@ -68,33 +71,54 @@ public class MasterService {
     public void init(Config config) {
         this.config = config;
         this.maxSuperStep = this.config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
-        /*
-         * TODO: start rpc server and get rpc port.
-         * TODO: start aggregator manager for master.
-         */
-        int rpcPort = 8001;
-        LOG.info("{} MasterService rpc port: {}", this, rpcPort);
+
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
+
+        URL rpcAddress = this.initManagers();
+        String rpcHost = rpcAddress.getHost();
+        int rpcPort = rpcAddress.getPort();
+
+        this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
+                                            rpcHost, rpcPort);
+        this.bsp4Master.registerMaster(this.masterInfo);
+        this.workers = this.bsp4Master.waitWorkersRegistered();
+
+        LOG.info("{} MasterService worker count: {}",
+                 this, this.workers.size());
+
+        this.masterComputation = this.config.createObject(
+                                 ComputerOptions.MASTER_COMPUTATION_CLASS);
+        this.masterComputation.init(this.config);
+
+        LOG.info("{} MasterService initialized", this);
+    }
+
+    private URL initManagers() {
+        // Create managers
+        MasterInputManager inputManager = new MasterInputManager();
+        this.managers.add(inputManager);
+
         MasterAggrManager aggregatorManager = this.config.createObject(
                           ComputerOptions.MASTER_AGGREGATOR_MANAGER_CLASS);
         this.managers.add(aggregatorManager);
 
+        MasterRpcManager rpcManager = new MasterRpcManager();
+        this.managers.add(rpcManager);
+
+        // Init managers
         for (Manager manager : this.managers) {
             manager.init(this.config);
         }
 
-        // TODO: get hostname
-        String host = "localhost";
-        this.masterInfo = new ContainerInfo(-1, host, rpcPort);
-        this.bsp4Master.registerMaster(this.masterInfo);
-        this.workers = this.bsp4Master.waitWorkersRegistered();
-        LOG.info("{} MasterService worker count: {}",
-                 this, this.workers.size());
-        this.masterComputation = this.config.createObject(
-                                 ComputerOptions.MASTER_COMPUTATION_CLASS);
-        this.masterComputation.init(this.config);
-        LOG.info("{} MasterService initialized", this);
+        // Register rpc service
+        rpcManager.registerInputSplitService(inputManager.handler());
+        rpcManager.registerInputSplitService(aggregatorManager.handler());
+
+        // Start rpc server
+        URL address = rpcManager.start();
+        LOG.info("{} MasterService started rpc server: {}", this, address);
+        return address;
     }
 
     /**
@@ -105,6 +129,7 @@ public class MasterService {
         for (Manager manager : this.managers) {
             manager.close(this.config);
         }
+
         this.bsp4Master.clean();
         this.bsp4Master.close();
         LOG.info("{} MasterService closed", this);

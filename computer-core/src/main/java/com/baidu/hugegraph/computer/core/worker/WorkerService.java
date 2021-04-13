@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,8 @@ import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
+import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.util.Log;
 
 public class WorkerService {
@@ -92,18 +95,7 @@ public class WorkerService {
                      this.combiner.name(), this.computation.name());
         }
 
-        // TODO: create connections to other workers for data transportation.
-
-        WorkerAggrManager aggregatorManager = this.config.createObject(
-                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
-        this.managers.add(aggregatorManager);
-
-        // Init managers
-        for (Manager manager : this.managers) {
-            manager.init(this.config);
-        }
-
-        LOG.info("{} WorkerService initialized", this);
+        this.initManagers();
     }
 
     /**
@@ -188,11 +180,13 @@ public class WorkerService {
          * Load vertices and edges parallel.
          */
         // TODO: calls LoadService to load vertices and edges parallel
+
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
 
         /*
-         * Merge vertices and edges in partitions parallel, and get workerStat.
+         * Merge vertices and edges in each partition parallel,
+         * and get the workerStat.
          */
         // TODO: merge the data in partitions parallel, and get workerStat
         WorkerStat workerStat = this.computePartitions();
@@ -223,9 +217,33 @@ public class WorkerService {
      * a superstep.
      * @return WorkerStat
      */
-    protected WorkerStat computePartitions() {
+    private WorkerStat computePartitions() {
         // TODO: compute partitions parallel and get workerStat
         throw new ComputerException("Not implemented");
+    }
+
+    private URL initManagers() {
+        // Create managers
+        WorkerRpcManager rpcManager = new WorkerRpcManager();
+        this.managers.add(rpcManager);
+
+        WorkerInputManager inputManager = new WorkerInputManager();
+        inputManager.service(rpcManager.inputSplitService());
+        this.managers.add(inputManager);
+
+        WorkerAggrManager aggregatorManager = this.config.createObject(
+                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
+        aggregatorManager.service(rpcManager.aggregatorRpcService());
+        this.managers.add(aggregatorManager);
+
+        // Init managers
+        for (Manager manager : this.managers) {
+            manager.init(this.config);
+        }
+
+        // TODO: create connections to other workers for data transportation.
+
+        LOG.info("{} WorkerService initialized", this);
     }
 
     private class SuperstepContext implements WorkerContext {
