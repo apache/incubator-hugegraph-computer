@@ -73,7 +73,7 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         int bodyLength = buf.readInt();
         if (bodyLength >= Integer.BYTES) {
             failCode = buf.readInt();
-            failMsg = TransportUtil.readString(buf, bodyLength);
+            failMsg = TransportUtil.readString(buf, bodyLength - Integer.BYTES);
         }
 
         skipExtraBuffer(buf);
