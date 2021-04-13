@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.network.TransportUtil;
+import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.testutil.Assert;
 
 import io.netty.buffer.ByteBuf;
@@ -102,7 +102,7 @@ public class ManagedBufferTest {
     @Test
     public void testCopyToByteArray() {
         String testData = "test data";
-        byte[] bytesSource = TransportUtil.encodeString(testData);
+        byte[] bytesSource = StringEncoding.encode(testData);
 
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bytesSource.length);
         byteBuffer = byteBuffer.put(bytesSource);

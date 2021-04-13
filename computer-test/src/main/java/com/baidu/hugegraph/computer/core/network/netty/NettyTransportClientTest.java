@@ -26,8 +26,8 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
-import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.testutil.Assert;
 
 import io.netty.channel.Channel;
@@ -77,6 +77,6 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     public void testSend() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         client.send(MessageType.MSG, 1,
-                    ByteBuffer.wrap(TransportUtil.encodeString("hello")));
+                    ByteBuffer.wrap(StringEncoding.encode("hello")));
     }
 }

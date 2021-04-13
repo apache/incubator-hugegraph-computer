@@ -130,19 +130,11 @@ public class TransportUtil {
         return String.format("%s:%s", host, socketAddress.getPort());
     }
 
-    public static byte[] encodeString(String str) {
-        return StringEncoding.encode(str);
-    }
-
-    public static String decodeString(byte[] bytes) {
-        return StringEncoding.decode(bytes);
-    }
-
     public static String readString(ByteBuf buf, int length) {
         if (length > 0) {
             byte[] bytes = new byte[length];
             buf.readBytes(bytes);
-            return decodeString(bytes);
+            return StringEncoding.decode(bytes);
         }
         return null;
     }

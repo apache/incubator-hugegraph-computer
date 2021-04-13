@@ -74,12 +74,4 @@ public class TransportUtilTest {
         String formatAddress2 = TransportUtil.formatAddress(address2);
         Assert.assertContains("127.0.0.1:8089", formatAddress2);
     }
-
-    @Test
-    public void testEncodeDecodeString() {
-        String str = "hello hugegraph";
-        byte[] bytes = TransportUtil.encodeString(str);
-        String decodeString = TransportUtil.decodeString(bytes);
-        Assert.assertEquals(str, decodeString);
-    }
 }
