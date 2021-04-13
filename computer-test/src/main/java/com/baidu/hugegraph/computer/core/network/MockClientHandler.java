@@ -41,6 +41,7 @@ public class MockClientHandler implements ClientHandler {
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionId connectionId) {
+        // Close the client associated with the given connectionId
         LOG.error("Client connection exception, connectionId: {}, cause: ",
                   connectionId, cause);
     }
