@@ -55,9 +55,27 @@
             </dependency>
             <dependency>
                 <groupId>com.baidu.hugegraph</groupId>
+                <artifactId>hugegraph-rpc</artifactId>
+                <version>1.0.0</version>
+                <exclusions>
+                    <!-- conflict with etcd -->
+                    <exclusion>
+                        <groupId>io.grpc</groupId>
+                        <artifactId>grpc-netty-shaded</artifactId>
+                    </exclusion>
+                    <!-- conflict with transport-netty  -->
+                    <exclusion>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty-all</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.baidu.hugegraph</groupId>
                 <artifactId>hugegraph-client</artifactId>
                 <version>1.9.3</version>
             </dependency>
+
             <dependency>
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>

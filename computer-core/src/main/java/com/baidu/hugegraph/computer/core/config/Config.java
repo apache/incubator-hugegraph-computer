@@ -79,6 +79,10 @@ public final class Config {
         return hotConfig;
     }
 
+    public HugeConfig hugeConfig() {
+        return this.allConfig;
+    }
+
     public <R> R get(TypedOption<?, R> option) {
         return this.allConfig.get(option);
     }
