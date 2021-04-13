@@ -42,7 +42,8 @@ public class MockWorkerInputManager implements Manager {
 
     @Override
     public void init(Config config) {
-        this.fetcher = InputSourceFactory.createGraphFetcher(config);
+        this.fetcher = InputSourceFactory.createGraphFetcher(config,
+                                                             this.rpcClient);
         this.vertexInputSplit = null;
         this.edgeInputSplit = null;
     }
@@ -54,7 +55,7 @@ public class MockWorkerInputManager implements Manager {
 
     public boolean fetchNextVertexInputSplit() {
         // Send request to master
-        this.vertexInputSplit = this.rpcClient.getNextVertexInputSplit();
+        this.vertexInputSplit = this.fetcher.nextVertexInputSplit();
         return this.vertexInputSplit != null &&
                !this.vertexInputSplit.equals(InputSplit.END_SPLIT);
     }
@@ -82,7 +83,7 @@ public class MockWorkerInputManager implements Manager {
 
     public boolean fetchNextEdgeInputSplit() {
         // Send request to master
-        this.edgeInputSplit = this.rpcClient.getNextEdgeInputSplit();
+        this.edgeInputSplit = this.fetcher.nextEdgeInputSplit();
         return this.edgeInputSplit != null &&
                !this.edgeInputSplit.equals(InputSplit.END_SPLIT);
     }

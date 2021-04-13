@@ -19,7 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
-public class MockRpcClient {
+import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
+
+public class MockRpcClient implements InputSplitRpcService {
 
     private final MasterInputHandler masterInputHandler;
 
@@ -27,11 +29,13 @@ public class MockRpcClient {
         this.masterInputHandler = masterInputHandler;
     }
 
-    public InputSplit getNextVertexInputSplit() {
+    @Override
+    public InputSplit nextVertexInputSplit() {
         return this.masterInputHandler.nextVertexInputSplit();
     }
 
-    public InputSplit getNextEdgeInputSplit() {
+    @Override
+    public InputSplit nextEdgeInputSplit() {
         return this.masterInputHandler.nextEdgeInputSplit();
     }
 }

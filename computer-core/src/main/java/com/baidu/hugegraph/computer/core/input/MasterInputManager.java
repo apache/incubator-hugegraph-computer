@@ -30,7 +30,7 @@ public class MasterInputManager implements Manager {
 
     @Override
     public void init(Config config) {
-        this.fetcher = InputSplitFetcherFactory.createFetcher(config);
+        this.fetcher = InputSourceFactory.createInputSplitFetcher(config);
         this.handler = new MasterInputHandler(this.fetcher);
     }
 

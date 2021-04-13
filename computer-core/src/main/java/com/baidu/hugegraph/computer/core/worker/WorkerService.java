@@ -244,6 +244,8 @@ public class WorkerService {
         // TODO: create connections to other workers for data transportation.
 
         LOG.info("{} WorkerService initialized", this);
+
+        return null;
     }
 
     private class SuperstepContext implements WorkerContext {

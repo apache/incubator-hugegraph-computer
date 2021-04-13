@@ -24,6 +24,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.hg.HugeGraphFetcher;
 import com.baidu.hugegraph.computer.core.input.hg.HugeInputSplitFetcher;
+import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 
 public class InputSourceFactory {
 
@@ -37,11 +38,12 @@ public class InputSourceFactory {
         }
     }
 
-    public static GraphFetcher createGraphFetcher(Config config) {
+    public static GraphFetcher createGraphFetcher(Config config,
+                                                  InputSplitRpcService srv) {
         String type = config.get(ComputerOptions.INPUT_SOURCE_TYPE);
         switch (type) {
             case "hugegraph":
-                return new HugeGraphFetcher(config);
+                return new HugeGraphFetcher(config, srv);
             default:
                 throw new ComputerException("Unexpected source type %s", type);
         }

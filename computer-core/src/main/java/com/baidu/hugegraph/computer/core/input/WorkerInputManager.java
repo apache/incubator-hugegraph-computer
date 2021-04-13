@@ -31,7 +31,7 @@ public class WorkerInputManager implements Manager {
      *   VertexFetcher vertexFetcher;
      *   EdgeFetcher edgeFetcher;
      */
-    private InputGraphFetcher fetcher;
+    private GraphFetcher fetcher;
     /*
      * Service proxy on the client
      */
@@ -45,8 +45,8 @@ public class WorkerInputManager implements Manager {
     @Override
     public void init(Config config) {
         assert this.service != null;
-        this.fetcher = InputGraphFetcherFactory.createFetcher(config,
-                                                              this.service);
+        this.fetcher = InputSourceFactory.createGraphFetcher(config,
+                                                             this.service);
     }
 
     @Override
