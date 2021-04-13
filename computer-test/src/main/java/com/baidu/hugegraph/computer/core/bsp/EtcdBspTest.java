@@ -27,7 +27,6 @@ import java.util.concurrent.Executors;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -38,11 +37,8 @@ import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
 
 public class EtcdBspTest {
-
-    private static final Logger LOG = Log.logger(EtcdBspTest.class);
 
     private Bsp4Master bsp4Master;
     private Bsp4Worker bsp4Worker;

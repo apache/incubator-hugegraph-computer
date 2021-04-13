@@ -23,17 +23,14 @@ import java.io.IOException;
 import java.io.UTFDataFormatException;
 
 import org.junit.Test;
-import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
 
+@SuppressWarnings("resource")
 public class UnsafeByteArrayTest {
-
-    private static final Logger LOG = Log.logger(UnsafeByteArrayTest.class);
 
     @Test
     public void testConstructor() {
@@ -210,14 +207,14 @@ public class UnsafeByteArrayTest {
     public void testFloat() throws IOException {
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         for (int i = -128; i <= 127; i++) {
-            output.writeFloat((float) i);
+            output.writeFloat(i);
         }
         output.writeFloat(Float.MAX_VALUE);
         output.writeFloat(Float.MIN_VALUE);
         UnsafeByteArrayInput input = new UnsafeByteArrayInput(
                                          output.toByteArray());
         for (int i = -128; i <= 127; i++) {
-            Assert.assertEquals((float) i, input.readFloat(), 0.0D);
+            Assert.assertEquals(i, input.readFloat(), 0.0D);
         }
         Assert.assertEquals(Float.MAX_VALUE, input.readFloat(), 0.0D);
         Assert.assertEquals(Float.MIN_VALUE, input.readFloat(), 0.0D);
@@ -314,7 +311,6 @@ public class UnsafeByteArrayTest {
 
     @Test
     public void testUTFBoundary() throws IOException {
-        String prefix = "random string";
         UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
         String s1 = UnitTestBase.randomString(65535);
         output.writeUTF(s1);

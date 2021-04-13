@@ -50,7 +50,7 @@ public class BufferedFileTest {
 
     @Test
     public void testConstructor() throws IOException {
-        File file  = this.createTempFile();
+        File file  = createTempFile();
         try {
             try (BufferedFileOutput output = new BufferedFileOutput(file)) {
                 Assert.assertEquals(0, output.position());
@@ -81,16 +81,16 @@ public class BufferedFileTest {
 
     @Test
     public void testInt() throws IOException {
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 for (int i = -128; i <= 127; i++) {
                     output.writeInt(i);
                 }
                 output.writeInt(Integer.MAX_VALUE);
                 output.writeInt(Integer.MIN_VALUE);
             }
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 for (int i = -128; i <= 127; i++) {
                     Assert.assertEquals(i, input.readInt());
                 }
@@ -104,9 +104,9 @@ public class BufferedFileTest {
 
     @Test
     public void testWriteIntWithPosition() throws IOException {
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 for (int i = -128; i <= 127; i++) {
                     output.writeInt(i);
                 }
@@ -120,7 +120,7 @@ public class BufferedFileTest {
                 output.writeInt(Integer.MIN_VALUE);
             }
 
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 for (int i = 0; i < 256; i++) {
                     int expectValue = i - 128;
                     int position = i * 4;
@@ -151,8 +151,8 @@ public class BufferedFileTest {
     public void testByteArray() throws IOException {
         int loopTimes = 129;
         byte[] array = UnitTestBase.randomBytes(10);
-        File file = this.createTempFile();
-        try (BufferedFileOutput output = this.createOutput(file)) {
+        File file = createTempFile();
+        try (BufferedFileOutput output = createOutput(file)) {
             for (int i = 0; i < loopTimes; i++) {
                 output.write(array);
             }
@@ -166,7 +166,7 @@ public class BufferedFileTest {
                 Assert.assertArrayEquals(array, arrayRead);
             }
         }
-        try (BufferedFileInput input = this.createInput(file)) {
+        try (BufferedFileInput input = createInput(file)) {
             for (int i = 0; i < loopTimes; i++) {
                 input.readFully(arrayRead);
                 Assert.assertArrayEquals(array, arrayRead);
@@ -180,16 +180,16 @@ public class BufferedFileTest {
         int loopTimes = 10;
         int arraySize = 1280; // large than buffer size
         byte[] array = UnitTestBase.randomBytes(arraySize);
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 for (int i = 0; i < loopTimes; i++) {
                     output.write(array);
                 }
             }
 
             byte[] arrayRead = new byte[arraySize];
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 for (int i = 0; i < loopTimes; i++) {
                     input.readFully(arrayRead);
                     Assert.assertArrayEquals(array, arrayRead);
@@ -203,9 +203,9 @@ public class BufferedFileTest {
     @Test
     public void testInputSeekAtRandom() throws IOException {
         int size = 128;
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 for (int i = 0; i < size; i++) {
                     output.writeInt(i);
                 }
@@ -215,7 +215,7 @@ public class BufferedFileTest {
                 }
             }
             Random random = new Random(1001);
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 for (int i = 0; i <= 10; i++) {
                     long position = 4 * random.nextInt(size);
                     input.seek(position);
@@ -229,15 +229,15 @@ public class BufferedFileTest {
 
     @Test
     public void testInputSeekOutRange() throws IOException {
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 output.writeInt(1);
                 output.writeInt(2);
                 output.writeInt(3);
             }
 
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 Assert.assertEquals(1, input.readInt());
                 input.skip(4);
                 Assert.assertThrows(EOFException.class, () -> {
@@ -254,16 +254,16 @@ public class BufferedFileTest {
 
     @Test
     public void testOutputSeekOutRange() throws IOException {
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 output.seek(100L);
                 output.writeInt(1);
                 output.seek(511L);
                 output.writeInt(2);
             }
 
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 input.seek(100L);
                 Assert.assertEquals(1, input.readInt());
                 input.seek(511L);
@@ -276,9 +276,9 @@ public class BufferedFileTest {
 
     @Test
     public void testSeekAtEnd() throws IOException {
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 for (int i = -128; i <= 127; i++) {
                     output.writeInt(i);
                 }
@@ -288,7 +288,7 @@ public class BufferedFileTest {
                 output.writeInt(Integer.MIN_VALUE);
             }
 
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 for (int i = -128; i <= 125; i++) {
                     Assert.assertEquals(i, input.readInt());
                 }
@@ -305,9 +305,9 @@ public class BufferedFileTest {
 
     @Test
     public void testSkip() throws IOException {
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 for (int i = -128; i <= 127; i++) {
                     output.writeByte(i);
                 }
@@ -324,7 +324,7 @@ public class BufferedFileTest {
                 });
             }
 
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 for (int i = -128; i <= 127; i++) {
                     Assert.assertEquals(i, input.readByte());
                 }
@@ -348,15 +348,15 @@ public class BufferedFileTest {
     @Test
     public void testPosition() throws IOException {
         int size = 1024;
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 for (int i = 0; i < size; i++) {
                     Assert.assertEquals(i * 4, output.position());
                     output.writeInt(i);
                 }
             }
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 for (int i = 0; i < size; i++) {
                     Assert.assertEquals(i * 4, input.position());
                     Assert.assertEquals(i, input.readInt());
@@ -378,14 +378,14 @@ public class BufferedFileTest {
     @Test
     public void testAvailable() throws IOException {
         int size = 1024;
-        File file = this.createTempFile();
+        File file = createTempFile();
         try {
-            try (BufferedFileOutput output = this.createOutput(file)) {
+            try (BufferedFileOutput output = createOutput(file)) {
                 for (int i = 0; i < size; i++) {
                     output.writeInt(i);
                 }
             }
-            try (BufferedFileInput input = this.createInput(file)) {
+            try (BufferedFileInput input = createInput(file)) {
                 for (int i = 0; i < size; i++) {
                     Assert.assertEquals(4096 - i * 4, input.available());
                     Assert.assertEquals(i, input.readInt());
