@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.input;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
+import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.E;
 
 public class WorkerInputManager implements Manager {
@@ -39,11 +40,6 @@ public class WorkerInputManager implements Manager {
      */
     private InputSplitRpcService service;
 
-    public void service(InputSplitRpcService service) {
-        E.checkNotNull(service, "service");
-        this.service = service;
-    }
-
     @Override
     public String name() {
         return NAME;
@@ -59,5 +55,19 @@ public class WorkerInputManager implements Manager {
     @Override
     public void close(Config config) {
         this.fetcher.close();
+    }
+
+    public void service(InputSplitRpcService service) {
+        E.checkNotNull(service, "service");
+        this.service = service;
+    }
+
+    public void loadGraph() {
+        // TODO: calls LoadService to load vertices and edges parallel
+    }
+
+    public WorkerStat mergeGraph() {
+        // TODO: merge the data in partitions parallel, and get workerStat
+        return null;
     }
 }

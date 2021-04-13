@@ -205,9 +205,10 @@ public class WorkerService {
     private SuperstepStat inputstep() {
         LOG.info("{} WorkerService inputstep started", this);
         /*
-         * Load vertices and edges parallel.
+         * TODO: Load vertices and edges parallel.
          */
-        // TODO: calls LoadService to load vertices and edges parallel
+        WorkerInputManager manager = this.managers.get(WorkerInputManager.NAME);
+        manager.loadGraph();
 
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
@@ -216,8 +217,8 @@ public class WorkerService {
          * Merge vertices and edges in each partition parallel,
          * and get the workerStat.
          */
-        // TODO: merge the data in partitions parallel, and get workerStat
-        WorkerStat workerStat = this.computePartitions();
+        WorkerStat workerStat = manager.mergeGraph();
+
         this.bsp4Worker.workerSuperstepDone(Constants.INPUT_SUPERSTEP,
                                             workerStat);
         SuperstepStat superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
@@ -241,8 +242,8 @@ public class WorkerService {
     }
 
     /**
-     * Compute all partitions parallel in this worker. Be called one time for
-     * a superstep.
+     * Compute all partitions parallel in this worker.
+     * Be called one time for a superstep.
      * @return WorkerStat
      */
     private WorkerStat computePartitions() {
