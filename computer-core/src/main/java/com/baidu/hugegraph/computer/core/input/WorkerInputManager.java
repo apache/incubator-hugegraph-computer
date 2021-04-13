@@ -20,11 +20,13 @@
 package com.baidu.hugegraph.computer.core.input;
 
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
-import com.baidu.hugegraph.computer.core.worker.Manager;
 import com.baidu.hugegraph.util.E;
 
 public class WorkerInputManager implements Manager {
+
+    public static final String NAME = "worker_input";
 
     /*
      * InputGraphFetcher include:
@@ -40,6 +42,11 @@ public class WorkerInputManager implements Manager {
     public void service(InputSplitRpcService service) {
         E.checkNotNull(service, "service");
         this.service = service;
+    }
+
+    @Override
+    public String name() {
+        return NAME;
     }
 
     @Override

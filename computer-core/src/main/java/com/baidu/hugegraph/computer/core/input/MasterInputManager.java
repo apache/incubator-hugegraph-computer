@@ -20,13 +20,20 @@
 package com.baidu.hugegraph.computer.core.input;
 
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.worker.Manager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.util.E;
 
 public class MasterInputManager implements Manager {
 
+    public static final String NAME = "master_input";
+
     private InputSplitFetcher fetcher;
     private MasterInputHandler handler;
+
+    @Override
+    public String name() {
+        return NAME;
+    }
 
     @Override
     public void init(Config config) {

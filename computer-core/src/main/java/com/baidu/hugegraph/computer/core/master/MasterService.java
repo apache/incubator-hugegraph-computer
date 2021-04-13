@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.master;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -38,8 +37,9 @@ import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.input.MasterInputManager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
+import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.rpc.MasterRpcManager;
-import com.baidu.hugegraph.computer.core.worker.Manager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
@@ -53,16 +53,17 @@ public class MasterService {
 
     private static final Logger LOG = Log.logger(MasterService.class);
 
+    private final Managers managers;
+
     private Config config;
     private Bsp4Master bsp4Master;
     private ContainerInfo masterInfo;
     private List<ContainerInfo> workers;
     private int maxSuperStep;
-    private List<Manager> managers;
     private MasterComputation masterComputation;
 
     public MasterService() {
-        this.managers = new ArrayList<>();
+        this.managers = new Managers();
     }
 
     /**
@@ -92,33 +93,6 @@ public class MasterService {
         this.masterComputation.init(this.config);
 
         LOG.info("{} MasterService initialized", this);
-    }
-
-    private URL initManagers() {
-        // Create managers
-        MasterInputManager inputManager = new MasterInputManager();
-        this.managers.add(inputManager);
-
-        MasterAggrManager aggregatorManager = this.config.createObject(
-                          ComputerOptions.MASTER_AGGREGATOR_MANAGER_CLASS);
-        this.managers.add(aggregatorManager);
-
-        MasterRpcManager rpcManager = new MasterRpcManager();
-        this.managers.add(rpcManager);
-
-        // Init managers
-        for (Manager manager : this.managers) {
-            manager.init(this.config);
-        }
-
-        // Register rpc service
-        rpcManager.registerInputSplitService(inputManager.handler());
-        rpcManager.registerInputSplitService(aggregatorManager.handler());
-
-        // Start rpc server
-        URL address = rpcManager.start();
-        LOG.info("{} MasterService started rpc server: {}", this, address);
-        return address;
     }
 
     /**
@@ -219,6 +193,33 @@ public class MasterService {
     @Override
     public String toString() {
         return String.format("[master %s]", this.masterInfo.id());
+    }
+
+    private URL initManagers() {
+        // Create managers
+        MasterInputManager inputManager = new MasterInputManager();
+        this.managers.add(inputManager);
+
+        MasterAggrManager aggregatorManager = this.config.createObject(
+                          ComputerOptions.MASTER_AGGREGATOR_MANAGER_CLASS);
+        this.managers.add(aggregatorManager);
+
+        MasterRpcManager rpcManager = new MasterRpcManager();
+        this.managers.add(rpcManager);
+
+        // Init managers
+        for (Manager manager : this.managers) {
+            manager.init(this.config);
+        }
+
+        // Register rpc service
+        rpcManager.registerInputSplitService(inputManager.handler());
+        rpcManager.registerInputSplitService(aggregatorManager.handler());
+
+        // Start rpc server
+        URL address = rpcManager.start();
+        LOG.info("{} MasterService started rpc server: {}", this, address);
+        return address;
     }
 
     private int superstepToResume() {

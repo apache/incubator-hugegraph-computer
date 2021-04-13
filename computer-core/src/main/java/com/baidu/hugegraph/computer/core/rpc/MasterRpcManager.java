@@ -23,14 +23,21 @@ import java.net.URL;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.worker.Manager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.rpc.RpcProviderConfig;
 import com.baidu.hugegraph.rpc.RpcServer;
 import com.baidu.hugegraph.util.E;
 
 public class MasterRpcManager implements Manager {
 
+    public static final String NAME = "master_rpc";
+
     private RpcServer rpcServer = null;
+
+    @Override
+    public String name() {
+        return NAME;
+    }
 
     @Override
     public void init(Config config) {

@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.input;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.worker.Manager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
@@ -38,6 +38,11 @@ public class MockWorkerInputManager implements Manager {
         this.fetcher = null;
         this.vertexInputSplit = null;
         this.edgeInputSplit = null;
+    }
+
+    @Override
+    public String name() {
+        return "mack_worker_input";
     }
 
     @Override

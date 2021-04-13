@@ -20,13 +20,20 @@
 package com.baidu.hugegraph.computer.core.rpc;
 
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.worker.Manager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.rpc.RpcClientProvider;
 import com.baidu.hugegraph.rpc.RpcConsumerConfig;
 
 public class WorkerRpcManager implements Manager {
 
+    public static final String NAME = "worker_rpc";
+
     private RpcClientProvider rpcClient = null;
+
+    @Override
+    public String name() {
+        return NAME;
+    }
 
     @Override
     public void init(Config config) {

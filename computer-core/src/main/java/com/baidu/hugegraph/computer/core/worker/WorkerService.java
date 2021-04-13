@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.worker;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,8 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
+import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.util.Log;
 
@@ -47,12 +48,13 @@ public class WorkerService {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 
+    private final Managers managers;
+
     private Config config;
     private Bsp4Worker bsp4Worker;
     private ContainerInfo workerInfo;
     private Map<Integer, ContainerInfo> workers;
     private Computation<?> computation;
-    private List<Manager> managers;
     private Combiner<Value<?>> combiner;
 
     @SuppressWarnings("unused")
@@ -60,7 +62,7 @@ public class WorkerService {
 
     public WorkerService() {
         this.workers = new HashMap<>();
-        this.managers = new ArrayList<>();
+        this.managers = new Managers();
     }
 
     /**
@@ -167,6 +169,32 @@ public class WorkerService {
         return String.format("[worker %s]", this.workerInfo.id());
     }
 
+    private URL initManagers() {
+        // Create managers
+        WorkerRpcManager rpcManager = new WorkerRpcManager();
+        this.managers.add(rpcManager);
+
+        WorkerInputManager inputManager = new WorkerInputManager();
+        inputManager.service(rpcManager.inputSplitService());
+        this.managers.add(inputManager);
+
+        WorkerAggrManager aggregatorManager = this.config.createObject(
+                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
+        aggregatorManager.service(rpcManager.aggregatorRpcService());
+        this.managers.add(aggregatorManager);
+
+        // Init managers
+        for (Manager manager : this.managers) {
+            manager.init(this.config);
+        }
+
+        // TODO: create connections to other workers for data transportation.
+
+        LOG.info("{} WorkerService initialized", this);
+
+        return null;
+    }
+
     /**
      * Load vertices and edges from HugeGraph. There are two phases in
      * inputstep. First phase is get input splits from master, and read the
@@ -220,32 +248,6 @@ public class WorkerService {
     private WorkerStat computePartitions() {
         // TODO: compute partitions parallel and get workerStat
         throw new ComputerException("Not implemented");
-    }
-
-    private URL initManagers() {
-        // Create managers
-        WorkerRpcManager rpcManager = new WorkerRpcManager();
-        this.managers.add(rpcManager);
-
-        WorkerInputManager inputManager = new WorkerInputManager();
-        inputManager.service(rpcManager.inputSplitService());
-        this.managers.add(inputManager);
-
-        WorkerAggrManager aggregatorManager = this.config.createObject(
-                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
-        aggregatorManager.service(rpcManager.aggregatorRpcService());
-        this.managers.add(aggregatorManager);
-
-        // Init managers
-        for (Manager manager : this.managers) {
-            manager.init(this.config);
-        }
-
-        // TODO: create connections to other workers for data transportation.
-
-        LOG.info("{} WorkerService initialized", this);
-
-        return null;
     }
 
     private class SuperstepContext implements WorkerContext {

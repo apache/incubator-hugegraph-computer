@@ -20,7 +20,7 @@
 package com.baidu.hugegraph.computer.core.input;
 
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.worker.Manager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
 
 public class MockMasterInputManager implements Manager {
 
@@ -30,6 +30,11 @@ public class MockMasterInputManager implements Manager {
     public MockMasterInputManager() {
         this.fetcher = null;
         this.handler = null;
+    }
+
+    @Override
+    public String name() {
+        return "mack_master_input";
     }
 
     @Override
