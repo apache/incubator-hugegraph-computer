@@ -107,7 +107,7 @@ public abstract class AbstractMessage implements Message {
         buf.writeInt(this.sequenceNumber());
         buf.writeInt(this.partition());
         buf.markWriterIndex();
-        buf.writerIndex(buf.writerIndex() + 4);
+        buf.writerIndex(buf.writerIndex() + Integer.BYTES);
     }
 
     /**

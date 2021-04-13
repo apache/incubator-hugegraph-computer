@@ -54,7 +54,7 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
     @Override
     protected ManagedBuffer encodeBody(ByteBuf buf) {
         byte[] bytes = encodeString(this.msg);
-        int bodyLength = 4 + bytes.length;
+        int bodyLength = Integer.BYTES + bytes.length;
         // Copy to direct memory
         ByteBuffer buffer = ByteBuffer.allocateDirect(bodyLength)
                                       .putInt(this.errorCode)
@@ -69,11 +69,11 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         int failCode = 0;
         String failMsg = null;
         // Skip partition
-        buf.skipBytes(4);
+        buf.skipBytes(Integer.BYTES);
         // Skip body-length
         int bodyLength = buf.readInt();
 
-        if (bodyLength >= 4) {
+        if (bodyLength >= Integer.BYTES) {
             failCode = buf.readInt();
             failMsg = TransportUtil.readString(buf);
         }
