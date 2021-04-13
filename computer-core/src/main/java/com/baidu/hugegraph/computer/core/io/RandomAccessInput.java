@@ -54,7 +54,8 @@ public interface RandomAccessInput extends DataInput {
      * Compare two inputs in the specified range.
      */
     int compare(long offset, long length,
-                RandomAccessInput other, long otherOffset, long otherLength);
+                RandomAccessInput other, long otherOffset, long otherLength)
+                throws IOException;
 
     /**
      * @return Read the byte array of size length from the current position
