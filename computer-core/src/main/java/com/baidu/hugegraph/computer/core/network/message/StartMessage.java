@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network.message;
 
+import io.netty.buffer.ByteBuf;
+
 public class StartMessage extends AbstractMessage implements RequestMessage {
 
     private final int requestId;
@@ -38,5 +40,10 @@ public class StartMessage extends AbstractMessage implements RequestMessage {
     @Override
     public int requestId() {
         return this.requestId;
+    }
+
+    public static StartMessage parseFrom(ByteBuf buf) {
+        skipExtraBuffer(buf);
+        return INSTANCE;
     }
 }

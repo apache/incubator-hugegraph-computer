@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network.message;
 
+import io.netty.buffer.ByteBuf;
+
 public class PingMessage extends AbstractMessage implements RequestMessage  {
 
     public static final PingMessage INSTANCE = new PingMessage();
@@ -34,5 +36,10 @@ public class PingMessage extends AbstractMessage implements RequestMessage  {
     @Override
     public int requestId() {
         return -1;
+    }
+
+    public static PingMessage parseFrom(ByteBuf buf) {
+        skipExtraBuffer(buf);
+        return INSTANCE;
     }
 }

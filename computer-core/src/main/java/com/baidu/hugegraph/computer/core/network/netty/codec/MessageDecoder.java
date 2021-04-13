@@ -77,7 +77,7 @@ public class MessageDecoder extends ChannelInboundHandlerAdapter {
         }
         switch (msgType) {
             case START:
-                return StartMessage.INSTANCE;
+                return StartMessage.parseFrom(in);
             case FAIL:
                 return FailMessage.parseFrom(in);
             case ACK:
@@ -85,9 +85,9 @@ public class MessageDecoder extends ChannelInboundHandlerAdapter {
             case FINISH:
                 return FinishMessage.parseFrom(in);
             case PING:
-                return PingMessage.INSTANCE;
+                return PingMessage.parseFrom(in);
             case PONG:
-                return PongMessage.INSTANCE;
+                return PongMessage.parseFrom(in);
             default:
                 throw new IllegalArgException("Can't decode message type: %s",
                                               msgType);

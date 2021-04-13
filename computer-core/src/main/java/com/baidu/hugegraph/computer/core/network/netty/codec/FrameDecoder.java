@@ -19,15 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.HEADER_LENGTH;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.LENGTH_BODY_LENGTH;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.MAGIC_NUMBER;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.OFFSET_BODY_LENGTH;
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.PROTOCOL_VERSION;
-
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
@@ -41,14 +36,15 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
 
     private static final Logger LOG = Log.logger(FrameDecoder.class);
 
-    private static final int MAX_FRAME_LENGTH = Integer.MAX_VALUE;
     private static final int LENGTH_ADJUSTMENT = 0;
     private static final int INITIAL_BYTES_TO_STRIP = 0;
 
     private ByteBuf frameHeaderBuf;
 
     public FrameDecoder() {
-        super(MAX_FRAME_LENGTH, OFFSET_BODY_LENGTH, LENGTH_BODY_LENGTH,
+        super(AbstractMessage.MAX_MESSAGE_LENGTH,
+              AbstractMessage.OFFSET_BODY_LENGTH,
+              AbstractMessage.LENGTH_BODY_LENGTH,
               LENGTH_ADJUSTMENT, INITIAL_BYTES_TO_STRIP);
     }
 
@@ -61,14 +57,14 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
         }
 
         int magicNumber = msg.readShort();
-        if (magicNumber != MAGIC_NUMBER) {
+        if (magicNumber != AbstractMessage.MAGIC_NUMBER) {
             LOG.warn("Network stream corrupted: received incorrect " +
                      "magic number: {}", magicNumber);
             msg.release();
             return null;
         }
         int version = msg.readByte();
-        if (version != PROTOCOL_VERSION) {
+        if (version != AbstractMessage.PROTOCOL_VERSION) {
             LOG.warn("Network stream corrupted: received incorrect " +
                      "protocol version: {}", version);
             msg.release();
@@ -82,7 +78,8 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("The FrameDecoder active from {}",
                   TransportUtil.remoteAddress(ctx.channel()));
-        this.frameHeaderBuf = ctx.alloc().directBuffer(HEADER_LENGTH);
+        this.frameHeaderBuf = ctx.alloc()
+                                 .directBuffer(AbstractMessage.HEADER_LENGTH);
         super.channelActive(ctx);
     }
 

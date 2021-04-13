@@ -19,9 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteAddress;
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteConnectionID;
-
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
@@ -73,9 +70,9 @@ class ChannelFutureListenerOnWrite implements ChannelFutureListener {
         } else {
             exception = new TransportException(
                         "Exception on write data to %s", cause,
-                        remoteAddress(channel));
+                        TransportUtil.remoteAddress(channel));
         }
-        ConnectionId connectionId = remoteConnectionID(channel);
+        ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
         this.handler.exceptionCaught(exception, connectionId);
     }
 }

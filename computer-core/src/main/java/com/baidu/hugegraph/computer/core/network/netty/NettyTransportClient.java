@@ -19,11 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
@@ -104,7 +103,8 @@ public class NettyTransportClient implements TransportClient {
     public void close() {
         if (this.channel != null) {
             long timeout = this.clientFactory.conf().closeTimeout();
-            this.channel.close().awaitUninterruptibly(timeout, MILLISECONDS);
+            this.channel.close().awaitUninterruptibly(timeout,
+                                                      TimeUnit.MILLISECONDS);
         }
     }
 

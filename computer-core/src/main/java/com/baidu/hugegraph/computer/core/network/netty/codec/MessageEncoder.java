@@ -19,12 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
-import static com.baidu.hugegraph.computer.core.network.message.AbstractMessage.HEADER_LENGTH;
-
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.util.Log;
 
@@ -69,7 +68,7 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
         ByteBuf bufHeader = null;
         try {
             PromiseCombiner combiner = new PromiseCombiner(ctx.executor());
-            bufHeader = allocator.directBuffer(HEADER_LENGTH);
+            bufHeader = allocator.directBuffer(AbstractMessage.HEADER_LENGTH);
             ManagedBuffer bodyBuffer = message.encode(bufHeader);
             ChannelFuture headerWriteFuture = ctx.write(bufHeader);
             /*

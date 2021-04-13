@@ -19,15 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.createEventLoop;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.serverChannelClass;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
@@ -110,13 +106,14 @@ public class NettyTransportServer implements TransportServer, Closeable {
         IOMode ioMode = this.conf.ioMode();
 
         // Create Netty EventLoopGroup
-        EventLoopGroup bossGroup = createEventLoop(ioMode, BOSS_THREADS,
-                                                   BOSS_THREAD_GROUP_NAME);
-        EventLoopGroup workerGroup = createEventLoop(ioMode,
-                                                     this.conf.serverThreads(),
-                                                     WORKER_THREAD_GROUP_NAME);
+        EventLoopGroup bossGroup = NettyEventLoopUtil.createEventLoop(
+                                   ioMode, BOSS_THREADS,
+                                   BOSS_THREAD_GROUP_NAME);
+        EventLoopGroup workerGroup = NettyEventLoopUtil.createEventLoop(
+                                     ioMode, this.conf.serverThreads(),
+                                     WORKER_THREAD_GROUP_NAME);
         this.bootstrap.group(bossGroup, workerGroup);
-        this.bootstrap.channel(serverChannelClass(ioMode));
+        this.bootstrap.channel(NettyEventLoopUtil.serverChannelClass(ioMode));
 
         // Server bind address
         this.bootstrap.localAddress(this.conf.serverAddress(),
@@ -194,7 +191,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
         if (this.bindFuture != null) {
             long timeout = this.conf.closeTimeout();
             this.bindFuture.channel().close()
-                           .awaitUninterruptibly(timeout, MILLISECONDS);
+                           .awaitUninterruptibly(timeout,TimeUnit.MILLISECONDS);
             this.bindFuture = null;
         }
         if (this.bootstrap != null && this.bootstrap.config().group() != null) {

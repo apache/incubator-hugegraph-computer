@@ -19,13 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.TransportConf.CLIENT_THREAD_GROUP_NAME;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.clientChannelClass;
-import static com.baidu.hugegraph.computer.core.network.netty.NettyEventLoopUtil.createEventLoop;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
@@ -78,12 +74,14 @@ public class NettyClientFactory implements ClientFactory {
         this.connectTimeoutMs = Math.toIntExact(
                                 this.conf.clientConnectionTimeout());
 
-        this.workerGroup = createEventLoop(this.conf.ioMode(),
-                                           this.conf.clientThreads(),
-                                           CLIENT_THREAD_GROUP_NAME);
+        this.workerGroup = NettyEventLoopUtil.createEventLoop(
+                           this.conf.ioMode(), this.conf.clientThreads(),
+                           TransportConf.CLIENT_THREAD_GROUP_NAME);
+
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(this.workerGroup);
-        this.bootstrap.channel(clientChannelClass(this.conf.ioMode()));
+        this.bootstrap
+            .channel(NettyEventLoopUtil.clientChannelClass(this.conf.ioMode()));
 
         this.bootstrap.option(ChannelOption.ALLOCATOR, this.bufAllocator);
         this.bootstrap.option(ChannelOption.TCP_NODELAY, true);
@@ -146,8 +144,8 @@ public class NettyClientFactory implements ClientFactory {
 
         ChannelFuture future = this.bootstrap.connect(address);
 
-        boolean connectSuccess = future.awaitUninterruptibly(connectTimeoutMs,
-                                                             MILLISECONDS);
+        boolean success = future.awaitUninterruptibly(connectTimeoutMs,
+                                                      TimeUnit.MILLISECONDS);
 
         if (!future.isDone()) {
             throw new TransportException(
@@ -166,7 +164,7 @@ public class NettyClientFactory implements ClientFactory {
                   future.cause(), formatAddress, future.cause().getMessage());
         }
 
-        if (!connectSuccess || !future.isSuccess()) {
+        if (!success || !future.isSuccess()) {
             throw new TransportException(
                   "Failed to create connection to '%s'",
                   formatAddress);

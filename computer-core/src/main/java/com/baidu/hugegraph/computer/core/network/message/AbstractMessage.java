@@ -53,6 +53,7 @@ public abstract class AbstractMessage implements Message {
     public static final int HEADER_LENGTH = 2 + 1 + 1 + 4 + 4 + 4;
     public static final int OFFSET_BODY_LENGTH = HEADER_LENGTH - 4;
     public static final int LENGTH_BODY_LENGTH = 4;
+    public static final int MAX_MESSAGE_LENGTH = Integer.MAX_VALUE;
 
     // MAGIC_NUMBER = "HG"
     public static final short MAGIC_NUMBER = 0x4847;
@@ -90,9 +91,12 @@ public abstract class AbstractMessage implements Message {
             bodyLength = managedBuffer.length();
         }
         int lastWriteIndex = buf.writerIndex();
-        buf.resetWriterIndex();
-        buf.writeInt(bodyLength);
-        buf.writerIndex(lastWriteIndex);
+        try {
+            buf.resetWriterIndex();
+            buf.writeInt(bodyLength);
+        } finally {
+            buf.writerIndex(lastWriteIndex);
+        }
         return managedBuffer;
     }
 
@@ -107,7 +111,8 @@ public abstract class AbstractMessage implements Message {
         buf.writeInt(this.sequenceNumber());
         buf.writeInt(this.partition());
         buf.markWriterIndex();
-        buf.writerIndex(buf.writerIndex() + Integer.BYTES);
+        // This is an placeholder
+        buf.writeInt(0);
     }
 
     /**
@@ -137,6 +142,14 @@ public abstract class AbstractMessage implements Message {
     public void release() {
         if (this.hasBody()) {
             this.body.release();
+        }
+    }
+
+    // Skip extra buffer
+    protected static void skipExtraBuffer(ByteBuf buf) {
+        int readableBytes = buf.readableBytes();
+        if (readableBytes > 0) {
+            buf.skipBytes(readableBytes);
         }
     }
 

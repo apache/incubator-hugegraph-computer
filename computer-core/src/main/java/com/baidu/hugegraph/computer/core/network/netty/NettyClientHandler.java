@@ -19,11 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.remoteAddress;
-
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.util.Log;
 
@@ -60,7 +59,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
         } else {
             exception = new TransportException(
                         "Exception on client receive data from %s",
-                        cause, remoteAddress(ctx.channel()));
+                        cause, TransportUtil.remoteAddress(ctx.channel()));
         }
 
         this.client.handler().exceptionCaught(exception,

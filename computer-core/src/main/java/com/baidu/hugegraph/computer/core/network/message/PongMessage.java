@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network.message;
 
+import io.netty.buffer.ByteBuf;
+
 public class PongMessage extends AbstractMessage implements ResponseMessage  {
 
     public static final PongMessage INSTANCE = new PongMessage();
@@ -34,5 +36,10 @@ public class PongMessage extends AbstractMessage implements ResponseMessage  {
     @Override
     public int ackId() {
         return -1;
+    }
+
+    public static PongMessage parseFrom(ByteBuf buf) {
+        skipExtraBuffer(buf);
+        return INSTANCE;
     }
 }

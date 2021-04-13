@@ -19,16 +19,15 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import static com.baidu.hugegraph.computer.core.common.exception.TransportException.DEFAULT_CODE;
-import static com.baidu.hugegraph.computer.core.network.TransportUtil.encodeString;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.MockUnDecodeMessage;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
@@ -61,7 +60,8 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         int requestId = 99;
         int partition = 1;
-        ByteBuffer buffer = ByteBuffer.wrap(encodeString("mock msg"));
+        byte[] bytes = TransportUtil.encodeString("mock msg");
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
         ManagedBuffer body = new NioManagedBuffer(buffer);
         DataMessage dataMessage = new DataMessage(MessageType.MSG, requestId,
                                                   partition, body);
@@ -80,7 +80,8 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         int requestId = 99;
         int partition = 1;
-        ByteBuffer buffer = ByteBuffer.wrap(encodeString("mock msg"));
+        byte[] bytes = TransportUtil.encodeString("mock msg");
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
         ManagedBuffer body = new NioManagedBuffer(buffer);
         DataMessage dataMessage = new DataMessage(null, requestId,
                                                   partition, body);
@@ -178,14 +179,15 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         Whitebox.setInternalState(client, "listenerOnWrite", spyListener);
         int requestId = 99;
         int partition = 1;
-        byte[] bytes = encodeString("mock msg");
+        byte[] bytes = TransportUtil.encodeString("mock msg");
         ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length).put(bytes);
         // Flip to make it readable
         buffer.flip();
         DataMessage dataMessage = new DataMessage(MessageType.MSG,
                                                   requestId, partition,
                                                   new NioManagedBuffer(buffer));
-        FailMessage failMsg = new FailMessage(requestId, DEFAULT_CODE,
+        FailMessage failMsg = new FailMessage(requestId,
+                                              TransportException.DEFAULT_CODE,
                                               "mock fail msg");
 
         Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
@@ -225,7 +227,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     public void testMessageRelease() {
         int requestId = 99;
         int partition = 1;
-        byte[] bytes = encodeString("mock msg");
+        byte[] bytes = TransportUtil.encodeString("mock msg");
         ByteBuf buf = Unpooled.directBuffer().writeBytes(bytes);
         NettyManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
         DataMessage dataMessage = new DataMessage(MessageType.MSG,
