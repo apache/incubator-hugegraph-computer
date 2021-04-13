@@ -41,7 +41,7 @@ public class ValueMaxCombinerTest {
     public void testCombineNull() {
         LongValue value1 = new LongValue(1L);
         LongValue value2 = new LongValue(2L);
-        ValueMaxCombiner combiner = new ValueMaxCombiner();
+        ValueMaxCombiner<LongValue> combiner = new ValueMaxCombiner<>();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             combiner.combine(null, value2);
         }, e -> {

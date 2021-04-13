@@ -58,6 +58,8 @@ public class UnitTestSuite {
 
     @BeforeClass
     public static void setup() {
+        LOG.info("Setup for UnitTestSuite of hugegraph-computer");
+
         // Don't forget to register options
         OptionSpace.register("computer", ComputerOptions.instance());
 

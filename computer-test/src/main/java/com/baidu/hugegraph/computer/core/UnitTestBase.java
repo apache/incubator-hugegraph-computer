@@ -38,8 +38,8 @@ import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
-import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
 
@@ -66,7 +66,7 @@ public class UnitTestBase {
         }
     }
 
-    public static void assertValueEqualAfterWriteAndRead(Value oldValue)
+    public static void assertValueEqualAfterWriteAndRead(Value<?> oldValue)
                                                          throws IOException {
         byte[] bytes;
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
@@ -75,7 +75,7 @@ public class UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        Value newValue = ValueFactory.createValue(oldValue.type());
+        Value<?> newValue = ValueFactory.createValue(oldValue.type());
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             newValue.read(input);
@@ -98,7 +98,7 @@ public class UnitTestBase {
             Object value = optionKeyValues[i + 1];
             E.checkArgument(value instanceof String,
                             "The option value must be String class");
-            map.put(((ConfigOption) key).name(), (String) value);
+            map.put(((ConfigOption<?>) key).name(), (String) value);
         }
         ComputerContext.updateOptions(map);
     }
