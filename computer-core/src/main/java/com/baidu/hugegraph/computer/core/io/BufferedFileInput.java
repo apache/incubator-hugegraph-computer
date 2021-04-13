@@ -161,15 +161,15 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
                        long otherOffset, long otherLength) throws IOException {
         long position = this.position();
         this.seek(offset);
-        byte[] b1 = this.readBytes((int) length);
+        byte[] bytes1 = this.readBytes((int) length);
         this.seek(position);
 
         long otherPosition = other.position();
         other.seek(otherOffset);
-        byte[] b2 = other.readBytes((int) otherLength);
+        byte[] bytes2 = other.readBytes((int) otherLength);
         other.seek(otherPosition);
 
-        return BytesUtil.compare(b1, 0, (int) length,
-                                 b2, 0, (int) otherLength);
+        return BytesUtil.compare(bytes1, 0, (int) length,
+                                 bytes2, 0, (int) otherLength);
     }
 }

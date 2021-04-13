@@ -219,6 +219,10 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
     @Override
     public int compare(long offset, long length, RandomAccessInput other,
                        long otherOffset, long otherLength) throws IOException {
+        E.checkArgument(offset <= this.buffer.length - 1 &&
+                        length <= (this.buffer.length - offset),
+                        "offset and length must be in buffer range");
+
         if (other.getClass() == UnsafeByteArrayInput.class) {
             return BytesUtil.compare(this.buffer, (int) offset, (int) length,
                                      ((UnsafeByteArrayInput) other).buffer,
