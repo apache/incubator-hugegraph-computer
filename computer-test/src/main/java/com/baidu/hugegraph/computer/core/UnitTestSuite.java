@@ -61,7 +61,11 @@ public class UnitTestSuite {
         LOG.info("Setup for UnitTestSuite of hugegraph-computer");
 
         // Don't forget to register options
-        OptionSpace.register("computer", ComputerOptions.instance());
+        OptionSpace.register("computer",
+                             "com.baidu.hugegraph.computer.core.config." +
+                             "ComputerOptions");
+        OptionSpace.register("computer-rpc",
+                             "com.baidu.hugegraph.config.RpcOptions");
 
         UnitTestBase.updateOptions(
             ComputerOptions.ALGORITHM_NAME, "test",
