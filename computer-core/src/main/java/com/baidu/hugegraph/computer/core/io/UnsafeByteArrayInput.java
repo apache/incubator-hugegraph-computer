@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Comparator;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;

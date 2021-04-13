@@ -26,10 +26,7 @@ import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
-import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
-
-import sun.misc.Unsafe;
 
 public class BufferedFileInput extends UnsafeByteArrayInput {
 
