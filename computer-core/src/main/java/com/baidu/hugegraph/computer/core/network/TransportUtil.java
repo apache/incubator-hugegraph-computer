@@ -24,7 +24,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -140,8 +139,11 @@ public class TransportUtil {
     }
 
     public static String readString(ByteBuf buf, int length) {
-        CharSequence sequence = buf.readCharSequence(length,
-                                                     StandardCharsets.UTF_8);
-        return sequence == null ? null : (String) sequence;
+        if (length > 0) {
+            byte[] bytes = new byte[length];
+            buf.readBytes(bytes);
+            return decodeString(bytes);
+        }
+        return null;
     }
 }
