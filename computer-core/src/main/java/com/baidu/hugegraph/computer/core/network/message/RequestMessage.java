@@ -21,10 +21,7 @@ package com.baidu.hugegraph.computer.core.network.message;
 
 public interface RequestMessage extends Message {
 
-    int requestId();
-
-    @Override
-    default int sequenceNumber() {
-        return this.requestId();
+    default int requestId() {
+        return this.sequenceNumber();
     }
 }

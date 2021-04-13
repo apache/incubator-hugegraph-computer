@@ -23,11 +23,8 @@ import io.netty.buffer.ByteBuf;
 
 public class FinishMessage extends AbstractMessage implements RequestMessage {
 
-    private final int finishId;
-
     public FinishMessage(int finishId) {
-        super();
-        this.finishId = finishId;
+        super(finishId);
     }
 
     @Override
@@ -35,10 +32,6 @@ public class FinishMessage extends AbstractMessage implements RequestMessage {
         return MessageType.FINISH;
     }
 
-    @Override
-    public int requestId() {
-        return this.finishId;
-    }
 
     public static FinishMessage parseFrom(ByteBuf buf) {
         int ackId = buf.readInt();

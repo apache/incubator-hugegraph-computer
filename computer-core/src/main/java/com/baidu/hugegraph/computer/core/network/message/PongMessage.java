@@ -33,11 +33,6 @@ public class PongMessage extends AbstractMessage implements ResponseMessage  {
         return MessageType.PONG;
     }
 
-    @Override
-    public int ackId() {
-        return -1;
-    }
-
     public static PongMessage parseFrom(ByteBuf buf) {
         buf.skipBytes(UN_COMMON_HEADER_LENGTH);
         return INSTANCE;

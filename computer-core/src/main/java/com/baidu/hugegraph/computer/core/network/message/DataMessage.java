@@ -27,27 +27,20 @@ import io.netty.buffer.ByteBuf;
 
 public class DataMessage extends AbstractMessage implements RequestMessage {
 
-    public final int requestId;
     private final MessageType type;
 
     public DataMessage(MessageType type, int requestId,
                        int partition, ManagedBuffer data) {
-        super(partition, data);
+        super(requestId, partition, data);
         E.checkArgument(requestId > 0,
                         "The data requestId must be > 0, but got %s",
                         requestId);
-        this.requestId = requestId;
         this.type = type;
     }
 
     @Override
     public MessageType type() {
         return this.type;
-    }
-
-    @Override
-    public int requestId() {
-        return this.requestId;
     }
 
     /**

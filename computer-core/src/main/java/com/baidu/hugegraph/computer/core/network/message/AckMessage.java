@@ -23,26 +23,17 @@ import io.netty.buffer.ByteBuf;
 
 public class AckMessage extends AbstractMessage implements ResponseMessage {
 
-    private final int ackId;
-
-    public AckMessage(int ackId, int partition) {
-        super(partition, null);
-        this.ackId = ackId;
+    public AckMessage(int ackId) {
+        super(ackId, 0);
     }
 
-    public AckMessage(int ackId) {
-        super();
-        this.ackId = ackId;
+    public AckMessage(int ackId, int partition) {
+        super(ackId, partition);
     }
 
     @Override
     public MessageType type() {
         return MessageType.ACK;
-    }
-
-    @Override
-    public int ackId() {
-        return this.ackId;
     }
 
     public static AckMessage parseFrom(ByteBuf buf) {

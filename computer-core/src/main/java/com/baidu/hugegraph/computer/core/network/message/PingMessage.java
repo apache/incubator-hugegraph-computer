@@ -33,11 +33,6 @@ public class PingMessage extends AbstractMessage implements RequestMessage  {
         return MessageType.PING;
     }
 
-    @Override
-    public int requestId() {
-        return -1;
-    }
-
     public static PingMessage parseFrom(ByteBuf buf) {
         buf.skipBytes(UN_COMMON_HEADER_LENGTH);
         return INSTANCE;

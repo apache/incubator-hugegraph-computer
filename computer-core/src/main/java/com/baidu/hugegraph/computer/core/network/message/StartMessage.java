@@ -23,23 +23,15 @@ import io.netty.buffer.ByteBuf;
 
 public class StartMessage extends AbstractMessage implements RequestMessage {
 
-    private final int requestId;
-
     public static final StartMessage INSTANCE = new StartMessage();
 
     public StartMessage() {
-        super();
-        this.requestId = 0;
+        super(0);
     }
 
     @Override
     public MessageType type() {
         return MessageType.START;
-    }
-
-    @Override
-    public int requestId() {
-        return this.requestId;
     }
 
     public static StartMessage parseFrom(ByteBuf buf) {

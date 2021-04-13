@@ -30,12 +30,11 @@ import io.netty.buffer.ByteBuf;
 
 public class FailMessage extends AbstractMessage implements ResponseMessage {
 
-    private final int failAckId;
     private final int errorCode;
     private final String message;
 
-    public FailMessage(int failAckId, int errorCode, String message) {
-        this.failAckId = failAckId;
+    public FailMessage(int ackId, int errorCode, String message) {
+        super(ackId);
         this.errorCode = errorCode;
         this.message = message;
     }
@@ -43,11 +42,6 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
     @Override
     public MessageType type() {
         return MessageType.FAIL;
-    }
-
-    @Override
-    public int ackId() {
-        return this.failAckId;
     }
 
     @Override

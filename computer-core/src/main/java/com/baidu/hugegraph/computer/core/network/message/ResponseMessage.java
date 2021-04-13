@@ -21,10 +21,7 @@ package com.baidu.hugegraph.computer.core.network.message;
 
 public interface ResponseMessage extends Message {
 
-    int ackId();
-
-    @Override
-    default int sequenceNumber() {
-        return this.ackId();
+    default int ackId() {
+        return this.sequenceNumber();
     }
 }

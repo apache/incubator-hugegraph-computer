@@ -61,19 +61,34 @@ public abstract class AbstractMessage implements Message {
     public static final short MAGIC_NUMBER = 0x4847;
     public static final byte PROTOCOL_VERSION = 1;
 
+    private final int sequenceNumber;
     private final int partition;
-    private final ManagedBuffer body;
     private final int bodyLength;
+    private final ManagedBuffer body;
 
     protected AbstractMessage() {
-        this(0, null);
+        this(0);
+    }
+
+    protected AbstractMessage(int sequenceNumber) {
+        this(sequenceNumber, 0);
+    }
+
+    protected AbstractMessage(int sequenceNumber, int partition) {
+        this(sequenceNumber, partition, null);
+    }
+
+    protected AbstractMessage(int sequenceNumber, ManagedBuffer body) {
+        this(sequenceNumber, 0, body);
     }
 
     protected AbstractMessage(ManagedBuffer body) {
-        this(0, body);
+        this(0, 0, body);
     }
 
-    protected AbstractMessage(int partition, ManagedBuffer body) {
+    protected AbstractMessage(int sequenceNumber, int partition,
+                              ManagedBuffer body) {
+        this.sequenceNumber = sequenceNumber;
         this.partition = partition;
         if (body != null) {
             this.body = body;
@@ -123,6 +138,11 @@ public abstract class AbstractMessage implements Message {
      */
     protected ManagedBuffer encodeBody(ByteBuf buf) {
         return this.body();
+    }
+
+    @Override
+    public int sequenceNumber() {
+        return this.sequenceNumber;
     }
 
     @Override
