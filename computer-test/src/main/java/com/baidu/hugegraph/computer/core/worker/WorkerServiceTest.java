@@ -52,6 +52,7 @@ public class WorkerServiceTest {
             );
             ExecutorService pool = Executors.newFixedThreadPool(2);
             CountDownLatch countDownLatch = new CountDownLatch(2);
+
             pool.submit(() -> {
                 Config config = ComputerContext.instance().config();
                 try {
@@ -61,6 +62,7 @@ public class WorkerServiceTest {
                     countDownLatch.countDown();
                 }
             });
+
             pool.submit(() -> {
                 Config config = ComputerContext.instance().config();
                 try {
@@ -70,6 +72,7 @@ public class WorkerServiceTest {
                     countDownLatch.countDown();
                 }
             });
+
             countDownLatch.await();
             pool.shutdownNow();
 

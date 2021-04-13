@@ -43,6 +43,7 @@ import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 public class WorkerService {
@@ -50,11 +51,12 @@ public class WorkerService {
     private static final Logger LOG = Log.logger(WorkerService.class);
 
     private final Managers managers;
+    private final Map<Integer, ContainerInfo> workers;
 
+    private boolean inited;
     private Config config;
     private Bsp4Worker bsp4Worker;
     private ContainerInfo workerInfo;
-    private Map<Integer, ContainerInfo> workers;
     private Computation<?> computation;
     private Combiner<Value<?>> combiner;
 
@@ -62,8 +64,9 @@ public class WorkerService {
     private ContainerInfo masterInfo;
 
     public WorkerService() {
-        this.workers = new HashMap<>();
         this.managers = new Managers();
+        this.workers = new HashMap<>();
+        this.inited = false;
     }
 
     /**
@@ -99,6 +102,7 @@ public class WorkerService {
         }
 
         this.initManagers();
+        this.inited = true;
     }
 
     /**
@@ -106,6 +110,8 @@ public class WorkerService {
      * {@link #init(Config)}.
      */
     public void close() {
+        this.checkInited();
+
         /*
          * TODO: close the connection to other workers.
          * TODO: stop the connection to the master
@@ -125,6 +131,8 @@ public class WorkerService {
      * superstepStat is inactive.
      */
     public void execute() {
+        this.checkInited();
+
         LOG.info("{} WorkerService execute", this);
         // TODO: determine superstep if fail over is enabled.
         int superstep = this.bsp4Worker.waitMasterSuperstepResume();
@@ -197,6 +205,10 @@ public class WorkerService {
         LOG.info("{} WorkerService initialized", this);
 
         return null;
+    }
+
+    private void checkInited() {
+        E.checkArgument(this.inited, "The %s has not been initialized ", this);
     }
 
     /**

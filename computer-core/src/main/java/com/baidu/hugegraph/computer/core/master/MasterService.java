@@ -55,6 +55,7 @@ public class MasterService {
 
     private final Managers managers;
 
+    private boolean inited;
     private Config config;
     private Bsp4Master bsp4Master;
     private ContainerInfo masterInfo;
@@ -93,6 +94,7 @@ public class MasterService {
         this.masterComputation.init(this.config);
 
         LOG.info("{} MasterService initialized", this);
+        this.inited = true;
     }
 
     /**
@@ -100,6 +102,8 @@ public class MasterService {
      * {@link #init(Config)}.
      */
     public void close() {
+        this.checkInited();
+
         for (Manager manager : this.managers) {
             manager.close(this.config);
         }
@@ -115,6 +119,8 @@ public class MasterService {
      * After the superstep iteration, output the result.
      */
     public void execute() {
+        this.checkInited();
+
         LOG.info("{} MasterService execute", this);
         /*
          * Step 1: Determines which superstep to start from, and resume this
@@ -220,6 +226,10 @@ public class MasterService {
         URL address = rpcManager.start();
         LOG.info("{} MasterService started rpc server: {}", this, address);
         return address;
+    }
+
+    private void checkInited() {
+        E.checkArgument(this.inited, "The %s has not been initialized ", this);
     }
 
     private int superstepToResume() {
