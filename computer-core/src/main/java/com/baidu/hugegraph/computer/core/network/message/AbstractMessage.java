@@ -54,8 +54,6 @@ public abstract class AbstractMessage implements Message {
     public static final int OFFSET_BODY_LENGTH = HEADER_LENGTH - 4;
     public static final int LENGTH_BODY_LENGTH = 4;
     public static final int MAX_MESSAGE_LENGTH = Integer.MAX_VALUE;
-    // (seq + partition + body-length)
-    public static final int UN_COMMON_HEADER_LENGTH = 4 + 4 + 4;
 
     // MAGIC_NUMBER = "HG"
     public static final short MAGIC_NUMBER = 0x4847;
