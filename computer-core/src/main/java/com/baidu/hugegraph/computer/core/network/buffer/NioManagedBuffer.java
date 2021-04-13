@@ -29,7 +29,7 @@ public class NioManagedBuffer implements ManagedBuffer {
     private final ByteBuffer buffer;
 
     public NioManagedBuffer(ByteBuffer buffer) {
-        this.buffer = buffer.duplicate();
+        this.buffer = buffer;
     }
 
     @Override

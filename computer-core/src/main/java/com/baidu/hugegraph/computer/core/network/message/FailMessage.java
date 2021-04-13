@@ -76,7 +76,6 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
             failMsg = TransportUtil.readString(buf, bodyLength - Integer.BYTES);
         }
 
-        skipExtraBuffer(buf);
         return new FailMessage(failAckId, failCode, failMsg);
     }
 

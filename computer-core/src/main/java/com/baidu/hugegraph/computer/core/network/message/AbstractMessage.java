@@ -145,14 +145,6 @@ public abstract class AbstractMessage implements Message {
         }
     }
 
-    // Skip extra buffer
-    protected static void skipExtraBuffer(ByteBuf buf) {
-        int readableBytes = buf.readableBytes();
-        if (readableBytes > 0) {
-            buf.skipBytes(readableBytes);
-        }
-    }
-
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)

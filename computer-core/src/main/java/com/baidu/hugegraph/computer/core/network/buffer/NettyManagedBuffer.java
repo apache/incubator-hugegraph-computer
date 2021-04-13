@@ -29,7 +29,7 @@ public class NettyManagedBuffer implements ManagedBuffer {
     private final ByteBuf buf;
 
     public NettyManagedBuffer(ByteBuf buf) {
-        this.buf = buf.duplicate();
+        this.buf = buf;
     }
 
     @Override

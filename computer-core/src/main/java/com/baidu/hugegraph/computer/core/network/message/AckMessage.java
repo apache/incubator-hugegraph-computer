@@ -48,7 +48,8 @@ public class AckMessage extends AbstractMessage implements ResponseMessage {
     public static AckMessage parseFrom(ByteBuf buf) {
         int ackId = buf.readInt();
         int partition = buf.readInt();
-        skipExtraBuffer(buf);
+        // Skip body-length
+        buf.skipBytes(Integer.BYTES);
         return new AckMessage(ackId, partition);
     }
 }

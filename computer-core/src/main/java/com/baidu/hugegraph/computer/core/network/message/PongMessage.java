@@ -39,7 +39,8 @@ public class PongMessage extends AbstractMessage implements ResponseMessage  {
     }
 
     public static PongMessage parseFrom(ByteBuf buf) {
-        skipExtraBuffer(buf);
+        // Skip (seq + partition + body-length)
+        buf.skipBytes(Integer.BYTES + Integer.BYTES + Integer.BYTES);
         return INSTANCE;
     }
 }

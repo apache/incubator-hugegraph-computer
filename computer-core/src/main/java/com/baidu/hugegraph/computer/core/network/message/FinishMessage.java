@@ -42,7 +42,8 @@ public class FinishMessage extends AbstractMessage implements RequestMessage {
 
     public static FinishMessage parseFrom(ByteBuf buf) {
         int ackId = buf.readInt();
-        skipExtraBuffer(buf);
+        // Skip (partition + body-length)
+        buf.skipBytes(Integer.BYTES + Integer.BYTES);
         return new FinishMessage(ackId);
     }
 }

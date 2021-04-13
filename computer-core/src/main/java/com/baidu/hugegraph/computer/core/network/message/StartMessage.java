@@ -43,7 +43,8 @@ public class StartMessage extends AbstractMessage implements RequestMessage {
     }
 
     public static StartMessage parseFrom(ByteBuf buf) {
-        skipExtraBuffer(buf);
+        // Skip (seq + partition + body-length)
+        buf.skipBytes(Integer.BYTES + Integer.BYTES + Integer.BYTES);
         return INSTANCE;
     }
 }
