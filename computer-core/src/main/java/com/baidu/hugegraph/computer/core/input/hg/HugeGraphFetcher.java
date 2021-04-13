@@ -19,30 +19,40 @@
 
 package com.baidu.hugegraph.computer.core.input.hg;
 
-import java.util.Iterator;
-
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.EdgeFetcher;
-import com.baidu.hugegraph.computer.core.input.InputSplit;
+import com.baidu.hugegraph.computer.core.input.GraphFetcher;
+import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.graph.Shard;
+import com.baidu.hugegraph.driver.HugeClientBuilder;
 
-public class HugeEdgeFetcher extends HugeElementFetcher<Edge>
-                             implements EdgeFetcher {
+public class HugeGraphFetcher implements GraphFetcher {
 
-    public HugeEdgeFetcher(Config config, HugeClient client) {
-        super(config, client);
-    }
+    private final HugeClient client;
+    private final VertexFetcher vertexFetcher;
+    private final EdgeFetcher edgeFetcher;
 
-    @Override
-    public Iterator<Edge> fetch(InputSplit split) {
-        Shard shard = toShard(split);
-        return this.client().traverser().iteratorEdges(shard, this.pageSize());
+    public HugeGraphFetcher(Config config) {
+        String url = config.get(ComputerOptions.HUGEGRAPH_URL);
+        String graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
+        this.client = new HugeClientBuilder(url, graph).build();
+        this.vertexFetcher = new HugeVertexFetcher(config, this.client);
+        this.edgeFetcher = new HugeEdgeFetcher(config, this.client);
     }
 
     @Override
     public void close() {
-        // HugeClient was closed in HugeGraphFetcher
+        this.client.close();
+    }
+
+    @Override
+    public VertexFetcher vertexFetcher() {
+        return this.vertexFetcher;
+    }
+
+    @Override
+    public EdgeFetcher edgeFetcher() {
+        return this.edgeFetcher;
     }
 }

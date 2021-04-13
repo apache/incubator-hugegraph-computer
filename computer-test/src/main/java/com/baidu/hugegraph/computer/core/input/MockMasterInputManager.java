@@ -19,13 +19,35 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
-import com.baidu.hugegraph.structure.graph.Edge;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.worker.Manager;
 
-/**
- * Streamed read the data of each input split, and return one HugeEdge object
- * at each iteration
- */
-public interface EdgeFetcher extends ElementFetcher<Edge> {
+public class MockMasterInputManager implements Manager {
 
-    void close();
+    private InputSplitFetcher fetcher;
+    private MasterInputHandler handler;
+
+    public MockMasterInputManager() {
+        this.fetcher = null;
+        this.handler = null;
+    }
+
+    @Override
+    public void init(Config config) {
+        this.fetcher = InputSourceFactory.createInputSplitFetcher(config);
+        this.handler = new MasterInputHandler(this.fetcher);
+    }
+
+    @Override
+    public void close(Config config) {
+        this.fetcher.close();
+    }
+
+    public InputSplitFetcher fetcher() {
+        return this.fetcher;
+    }
+
+    public MasterInputHandler handler() {
+        return this.handler;
+    }
 }

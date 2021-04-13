@@ -27,4 +27,5 @@ import com.baidu.hugegraph.structure.graph.Vertex;
  */
 public interface VertexFetcher extends ElementFetcher<Vertex> {
 
+    void close();
 }

@@ -27,6 +27,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.InputSplitFetcher;
 import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.driver.HugeClientBuilder;
 import com.baidu.hugegraph.structure.graph.Shard;
 import com.baidu.hugegraph.util.E;
 
@@ -35,9 +36,16 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
     private final Config config;
     private final HugeClient client;
 
-    public HugeInputSplitFetcher(Config config, HugeClient client) {
+    public HugeInputSplitFetcher(Config config) {
         this.config = config;
-        this.client = client;
+        String url = config.get(ComputerOptions.HUGEGRAPH_URL);
+        String graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
+        this.client = new HugeClientBuilder(url, graph).build();
+    }
+
+    @Override
+    public void close() {
+        this.client.close();
     }
 
     @Override

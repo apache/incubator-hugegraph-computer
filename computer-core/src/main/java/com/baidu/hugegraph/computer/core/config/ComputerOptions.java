@@ -84,6 +84,14 @@ public class ComputerOptions extends OptionHolder {
                     "value"
             );
 
+    public static final ConfigOption<String> INPUT_SOURCE_TYPE =
+            new ConfigOption<>(
+                    "input.source_type",
+                    "The source type to load input data",
+                    allowValues("hugegraph"),
+                    "hugegraph"
+            );
+
     public static final ConfigOption<Long> INPUT_SPLITS_SIZE =
             new ConfigOption<>(
                     "input.split_size",

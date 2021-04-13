@@ -41,4 +41,9 @@ public class HugeVertexFetcher extends HugeElementFetcher<Vertex>
         return this.client().traverser().iteratorVertices(shard,
                                                           this.pageSize());
     }
+
+    @Override
+    public void close() {
+        // HugeClient was closed in HugeGraphFetcher
+    }
 }

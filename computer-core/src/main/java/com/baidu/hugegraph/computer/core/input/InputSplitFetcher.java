@@ -24,6 +24,11 @@ import java.util.List;
 public interface InputSplitFetcher {
 
     /**
+     * Close the resources used in the input split fetch
+     */
+    void close();
+
+    /**
      * Fetch all vertex input splits just once
      * @return all vertex input splits
      */
