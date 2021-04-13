@@ -622,6 +622,35 @@ public class BufferedFileTest {
         }
     }
 
+    @Test
+    public void testCompare() throws IOException {
+        // BufferedFileInput compare to BufferedFileInput
+        File f1 = createTempFile();
+        File f2 = createTempFile();
+        try (BufferedFileInput input1 = inputByString(f1, "apple");
+             BufferedFileInput input2 = inputByString(f2, "banana")) {
+            int result = input1.compare(0, input1.available(), input2, 0,
+                                        input2.available());
+            Assert.assertTrue(result < 0);
+        } finally {
+            FileUtils.deleteQuietly(f1);
+            FileUtils.deleteQuietly(f2);
+        }
+
+        // UnsafeByteArrayInput compare to BufferedFileInput
+        f1 = createTempFile();
+        try (BufferedFileInput fileInput = inputByString(f1, "apple")) {
+            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+            output.writeBytes("banana");
+            RandomAccessInput input = new UnsafeByteArrayInput(output.buffer());
+            int result = input.compare(0, input.available(), fileInput, 0,
+                                        fileInput.available());
+            Assert.assertTrue(result > 0);
+        } finally {
+            FileUtils.deleteQuietly(f1);
+        }
+    }
+
     private static File createTempFile() throws IOException {
         return File.createTempFile(UUID.randomUUID().toString(), null);
     }
@@ -638,5 +667,13 @@ public class BufferedFileTest {
         return new BufferedFileInput(new RandomAccessFile(file,
                                      Constants.FILE_MODE_READ),
                                      BUFFER_SIZE);
+    }
+
+    private static BufferedFileInput inputByString(File file, String s)
+                                                   throws IOException {
+        BufferedFileOutput output = new BufferedFileOutput(file);
+        output.writeBytes(s);
+        output.close();
+        return new BufferedFileInput(file);
     }
 }

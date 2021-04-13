@@ -166,7 +166,7 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
 
         long otherPosition = other.position();
         other.seek(otherOffset);
-        byte[] b2 = this.readBytes((int) otherLength);
+        byte[] b2 = other.readBytes((int) otherLength);
         other.seek(otherPosition);
 
         return BytesUtil.compare(b1, 0, (int) length,
