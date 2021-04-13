@@ -59,8 +59,8 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
 
         int bodyLength = buf.readInt();
         // Slice body and retain it, the readIndex of buf will auto to body end
-        ByteBuf byteBuf = buf.readRetainedSlice(bodyLength);
-        ManagedBuffer managedBuffer = new NettyManagedBuffer(byteBuf);
+        ByteBuf bodySlice = buf.readRetainedSlice(bodyLength);
+        ManagedBuffer managedBuffer = new NettyManagedBuffer(bodySlice);
         return new DataMessage(type, requestId, partition, managedBuffer);
     }
 }
