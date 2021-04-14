@@ -59,8 +59,10 @@ class ChannelFutureListenerOnWrite implements ChannelFutureListener {
     }
 
     public  void onSuccess(Channel channel, ChannelFuture future) {
-        LOG.debug("Write data success, to: {}",
-                  TransportUtil.remoteAddress(channel));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Write data success, to: {}",
+                      TransportUtil.remoteAddress(channel));
+        }
     }
 
     public void onFailure(Channel channel, Throwable cause) {

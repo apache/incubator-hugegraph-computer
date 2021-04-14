@@ -24,7 +24,7 @@ import io.netty.buffer.ByteBuf;
 public class AckMessage extends AbstractMessage implements ResponseMessage {
 
     public AckMessage(int ackId) {
-        super(ackId, 0);
+        super(ackId);
     }
 
     public AckMessage(int ackId, int partition) {

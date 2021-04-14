@@ -93,7 +93,6 @@ public class NettyTransportServerTest {
         Assert.assertNotEquals(0, this.server.port());
         Assert.assertNotEquals(0, port);
         Assert.assertEquals("127.0.0.1", this.server.ip());
-        // reverse lookup may not be able to find.
         String hostName = this.server.bindAddress().getHostName();
         Assert.assertEquals("localhost", hostName);
         Assert.assertEquals(port, this.server.port());

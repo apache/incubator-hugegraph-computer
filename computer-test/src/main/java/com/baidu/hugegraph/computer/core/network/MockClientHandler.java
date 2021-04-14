@@ -48,6 +48,6 @@ public class MockClientHandler implements ClientHandler {
 
     @Override
     public void sendAvailable(ConnectionId connectionId) {
-        LOG.error("Client able send data, connectionId: {}", connectionId);
+        LOG.info("Client able send data, connectionId: {}", connectionId);
     }
 }
