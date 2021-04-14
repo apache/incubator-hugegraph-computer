@@ -220,12 +220,11 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
     public int compare(long offset, long length, RandomAccessInput other,
                        long otherOffset, long otherLength) throws IOException {
         E.checkArgument(offset < this.buffer.length,
-                        String.format("Invalid offset parameter %s, expect < " +
-                                      "%s.", offset, this.buffer.length));
+                        "Invalid offset parameter %s, expect < %s",
+                        offset, this.buffer.length);
         E.checkArgument(length <= (this.buffer.length - offset),
-                        String.format("Invalid length parameter %s, expect <=" +
-                                      " %s.", length,
-                                      this.buffer.length - offset));
+                        "Invalid length parameter %s, expect <= %s",
+                        length, this.buffer.length - offset);
 
         if (other.getClass() == UnsafeByteArrayInput.class) {
             return BytesUtil.compare(this.buffer, (int) offset, (int) length,
