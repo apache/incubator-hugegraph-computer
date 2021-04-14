@@ -19,11 +19,23 @@
 
 package com.baidu.hugegraph.computer.core.aggregator;
 
-import com.baidu.hugegraph.computer.core.worker.Manager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
+import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
 
 /**
  * Aggregator manager manages aggregators in worker.
  * TODO: implement
  */
 public class WorkerAggrManager implements Manager {
+
+    public static final String NAME = "worker_aggr";
+
+    @Override
+    public String name() {
+        return NAME;
+    }
+
+    public void service(AggregateRpcService service) {
+        // TODO: implement
+    }
 }

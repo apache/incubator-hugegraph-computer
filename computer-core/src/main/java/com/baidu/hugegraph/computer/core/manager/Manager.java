@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.worker;
+package com.baidu.hugegraph.computer.core.manager;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 
@@ -28,6 +28,11 @@ import com.baidu.hugegraph.computer.core.config.Config;
  * {@link #close} after all supersteps ended.
  */
 public interface Manager {
+
+    /**
+     * The unique identify name.
+     */
+    String name();
 
     /**
      * Used to add the resources the computation needed. Be called only one

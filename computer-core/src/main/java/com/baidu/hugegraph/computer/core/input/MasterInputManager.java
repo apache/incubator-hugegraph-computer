@@ -17,29 +17,37 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.aggregator;
+package com.baidu.hugegraph.computer.core.input;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
-import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
+import com.baidu.hugegraph.util.E;
 
-/**
- * Aggregator manager manages aggregators in master.
- * TODO: implement
- */
-public class MasterAggrManager implements Manager {
+public class MasterInputManager implements Manager {
 
-    public static final String NAME = "master_aggr";
+    public static final String NAME = "master_input";
+
+    private InputSplitFetcher fetcher;
+    private MasterInputHandler handler;
 
     @Override
     public String name() {
         return NAME;
     }
 
-    public AggregateRpcService handler() {
-        //E.checkNotNull(handler, "handler");
-        // TODO: implement
-        return new AggregateRpcService() {
-            // mock
-        };
+    @Override
+    public void init(Config config) {
+        this.fetcher = InputSourceFactory.createInputSplitFetcher(config);
+        this.handler = new MasterInputHandler(this.fetcher);
+    }
+
+    @Override
+    public void close(Config config) {
+        this.fetcher.close();
+    }
+
+    public MasterInputHandler handler() {
+        E.checkNotNull(this.handler, "handler");
+        return this.handler;
     }
 }

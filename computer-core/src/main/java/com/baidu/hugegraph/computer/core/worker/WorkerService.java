@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
-import java.util.ArrayList;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,37 +36,50 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
+import com.baidu.hugegraph.computer.core.manager.Managers;
+import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 public class WorkerService {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 
+    private final Managers managers;
+    private final Map<Integer, ContainerInfo> workers;
+
+    private boolean inited;
     private Config config;
     private Bsp4Worker bsp4Worker;
     private ContainerInfo workerInfo;
-    private Map<Integer, ContainerInfo> workers;
     private Computation<?> computation;
-    private List<Manager> managers;
     private Combiner<Value<?>> combiner;
 
     @SuppressWarnings("unused")
     private ContainerInfo masterInfo;
 
     public WorkerService() {
+        this.managers = new Managers();
         this.workers = new HashMap<>();
-        this.managers = new ArrayList<>();
+        this.inited = false;
     }
 
     /**
      * Init worker service, create the managers used by worker service.
      */
     public void init(Config config) {
+        E.checkArgument(!this.inited, "The %s has been initialized", this);
+
         this.config = config;
-        // TODO: Start data-transport server and get its host and port.
-        this.workerInfo = new ContainerInfo(0, "localhost", 0, 8004);
+
+        InetSocketAddress dataAddress = this.initManagers();
+
+        this.workerInfo = new ContainerInfo(0, dataAddress.getHostName(),
+                                            0, dataAddress.getPort());
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
         this.bsp4Worker.init();
         this.bsp4Worker.registerWorker();
@@ -75,7 +88,11 @@ public class WorkerService {
                             this.bsp4Worker.waitWorkersRegistered();
         for (ContainerInfo container : containers) {
             this.workers.put(container.id(), container);
+            // TODO: Connect to other workers for data transport
+            //DataClientManager dm = this.managers.get(DataClientManager.NAME);
+            //dm.connect(container.hostname(), container.dataPort());
         }
+
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
         this.computation.init(config);
@@ -83,7 +100,7 @@ public class WorkerService {
                  this.computation.name(), this.computation.category());
 
         this.combiner = this.config.createObject(
-                        ComputerOptions.WORKER_COMBINER_CLASS);
+                        ComputerOptions.WORKER_COMBINER_CLASS, false);
         if (this.combiner == null) {
             LOG.info("None combiner is provided for computation '{}'",
                      this.computation.name());
@@ -92,18 +109,7 @@ public class WorkerService {
                      this.combiner.name(), this.computation.name());
         }
 
-        // TODO: create connections to other workers for data transportation.
-
-        WorkerAggrManager aggregatorManager = this.config.createObject(
-                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
-        this.managers.add(aggregatorManager);
-
-        // Init managers
-        for (Manager manager : this.managers) {
-            manager.init(this.config);
-        }
-
-        LOG.info("{} WorkerService initialized", this);
+        this.inited = true;
     }
 
     /**
@@ -111,14 +117,14 @@ public class WorkerService {
      * {@link #init(Config)}.
      */
     public void close() {
+        this.checkInited();
+
         /*
          * TODO: close the connection to other workers.
          * TODO: stop the connection to the master
          * TODO: stop the data transportation server.
          */
-        for (Manager manager : this.managers) {
-            manager.close(this.config);
-        }
+        this.managers.closeAll(this.config);
         this.computation.close();
         this.bsp4Worker.close();
         LOG.info("{} WorkerService closed", this);
@@ -130,6 +136,8 @@ public class WorkerService {
      * superstepStat is inactive.
      */
     public void execute() {
+        this.checkInited();
+
         LOG.info("{} WorkerService execute", this);
         // TODO: determine superstep if fail over is enabled.
         int superstep = this.bsp4Worker.waitMasterSuperstepResume();
@@ -151,19 +159,18 @@ public class WorkerService {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
-            for (Manager manager : this.managers) {
-                manager.beforeSuperstep(this.config, superstep);
-            }
+            this.managers.beforeSuperstep(this.config, superstep);
             this.computation.beforeSuperstep(context);
             this.bsp4Worker.workerSuperstepPrepared(superstep);
             this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
-            WorkerStat workerStat = this.computePartitions();
-            for (Manager manager : this.managers) {
-                manager.afterSuperstep(this.config, superstep);
-            }
+
+            WorkerStat workerStat = this.compute();
+
+            this.managers.afterSuperstep(this.config, superstep);
             this.computation.afterSuperstep(context);
             this.bsp4Worker.workerSuperstepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
+
             superstepStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
             superstep++;
         }
@@ -173,6 +180,37 @@ public class WorkerService {
     @Override
     public String toString() {
         return String.format("[worker %s]", this.workerInfo.id());
+    }
+
+    private InetSocketAddress initManagers() {
+        // TODO: Start data-transport server and get its host and port.
+        InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
+                                        "127.0.0.1", 8004);
+
+        // Create managers
+        WorkerRpcManager rpcManager = new WorkerRpcManager();
+        this.managers.add(rpcManager);
+        rpcManager.init(this.config);
+
+        WorkerInputManager inputManager = new WorkerInputManager();
+        inputManager.service(rpcManager.inputSplitService());
+        this.managers.add(inputManager);
+
+        WorkerAggrManager aggregatorManager = this.config.createObject(
+                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
+        aggregatorManager.service(rpcManager.aggregateRpcService());
+        this.managers.add(aggregatorManager);
+
+        // Init managers
+        this.managers.initAll(this.config);
+
+        LOG.info("{} WorkerService initialized", this);
+
+        return dataAddress;
+    }
+
+    private void checkInited() {
+        E.checkArgument(this.inited, "The %s has not been initialized", this);
     }
 
     /**
@@ -185,17 +223,20 @@ public class WorkerService {
     private SuperstepStat inputstep() {
         LOG.info("{} WorkerService inputstep started", this);
         /*
-         * Load vertices and edges parallel.
+         * TODO: Load vertices and edges parallel.
          */
-        // TODO: calls LoadService to load vertices and edges parallel
+        WorkerInputManager manager = this.managers.get(WorkerInputManager.NAME);
+        manager.loadGraph();
+
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
 
         /*
-         * Merge vertices and edges in partitions parallel, and get workerStat.
+         * Merge vertices and edges in each partition parallel,
+         * and get the workerStat.
          */
-        // TODO: merge the data in partitions parallel, and get workerStat
-        WorkerStat workerStat = this.computePartitions();
+        WorkerStat workerStat = manager.mergeGraph();
+
         this.bsp4Worker.workerSuperstepDone(Constants.INPUT_SUPERSTEP,
                                             workerStat);
         SuperstepStat superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
@@ -219,13 +260,17 @@ public class WorkerService {
     }
 
     /**
-     * Compute all partitions parallel in this worker. Be called one time for
-     * a superstep.
+     * Compute vertices of all partitions parallel in this worker.
+     * Be called one time for a superstep.
      * @return WorkerStat
      */
-    protected WorkerStat computePartitions() {
+    private WorkerStat compute() {
         // TODO: compute partitions parallel and get workerStat
-        throw new ComputerException("Not implemented");
+        PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
+                                                50L, 60L, 70L);
+        WorkerStat workerStat = new WorkerStat();
+        workerStat.add(stat1);
+        return workerStat;
     }
 
     private class SuperstepContext implements WorkerContext {

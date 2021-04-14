@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.junit.Test;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -31,52 +32,89 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.master.MasterService;
+import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.util.Log;
 
 public class WorkerServiceTest {
+
+    private static final Logger LOG = Log.logger(WorkerServiceTest.class);
 
     @Test
     public void testServiceSuccess() throws InterruptedException {
         MasterService masterService = new MasterService();
         WorkerService workerService = new MockWorkerService();
         try {
-            UnitTestBase.updateWithRequiredOptions(
-                    ComputerOptions.JOB_ID, "local_001",
-                    ComputerOptions.JOB_WORKERS_COUNT, "1",
-                    ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                    ComputerOptions.WORKER_COMPUTATION_CLASS,
-                    MockComputation.class.getName(),
-                    ComputerOptions.MASTER_COMPUTATION_CLASS,
-                    MockMasterComputation.class.getName()
-            );
             ExecutorService pool = Executors.newFixedThreadPool(2);
             CountDownLatch countDownLatch = new CountDownLatch(2);
+            Throwable[] exceptions = new Throwable[2];
+
             pool.submit(() -> {
+                UnitTestBase.updateWithRequiredOptions(
+                        RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+                        ComputerOptions.JOB_ID, "local_001",
+                        ComputerOptions.JOB_WORKERS_COUNT, "1",
+                        ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                        ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                        ComputerOptions.WORKER_COMPUTATION_CLASS,
+                        MockComputation.class.getName(),
+                        ComputerOptions.MASTER_COMPUTATION_CLASS,
+                        MockMasterComputation.class.getName()
+                );
                 Config config = ComputerContext.instance().config();
                 try {
                     workerService.init(config);
                     workerService.execute();
+                } catch (Throwable e) {
+                    LOG.error("Failed to start worker", e);
+                    exceptions[0] = e;
                 } finally {
                     countDownLatch.countDown();
                 }
             });
+
             pool.submit(() -> {
+                UnitTestBase.updateWithRequiredOptions(
+                        RpcOptions.RPC_SERVER_HOST, "127.0.0.1",
+                        ComputerOptions.JOB_ID, "local_001",
+                        ComputerOptions.JOB_WORKERS_COUNT, "1",
+                        ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                        ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                        ComputerOptions.WORKER_COMPUTATION_CLASS,
+                        MockComputation.class.getName(),
+                        ComputerOptions.MASTER_COMPUTATION_CLASS,
+                        MockMasterComputation.class.getName()
+                );
                 Config config = ComputerContext.instance().config();
                 try {
                     masterService.init(config);
                     masterService.execute();
+                } catch (Throwable e) {
+                    LOG.error("Failed to start master", e);
+                    exceptions[1] = e;
                 } finally {
                     countDownLatch.countDown();
                 }
             });
+
             countDownLatch.await();
             pool.shutdownNow();
 
+            Assert.assertFalse(existError(exceptions));
         } finally {
             workerService.close();
             masterService.close();
         }
+    }
+
+    private boolean existError(Throwable[] exceptions) {
+        boolean error = false;
+        for (Throwable e : exceptions) {
+            if (e != null) {
+                error = true;
+            }
+        }
+        return error;
     }
 
     @Test
@@ -88,10 +126,12 @@ public class WorkerServiceTest {
                 ComputerOptions.JOB_ID, "local_001",
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                ComputerOptions.BSP_MAX_SUPER_STEP, "2"
+                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090"
         );
 
         Config config = ComputerContext.instance().config();
+
         Assert.assertThrows(ComputerException.class, () -> {
             workerService.init(config);
             workerService.execute();

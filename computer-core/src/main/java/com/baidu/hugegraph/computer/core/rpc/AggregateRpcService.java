@@ -17,29 +17,9 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.aggregator;
+package com.baidu.hugegraph.computer.core.rpc;
 
-import com.baidu.hugegraph.computer.core.manager.Manager;
-import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
+public interface AggregateRpcService {
 
-/**
- * Aggregator manager manages aggregators in master.
- * TODO: implement
- */
-public class MasterAggrManager implements Manager {
-
-    public static final String NAME = "master_aggr";
-
-    @Override
-    public String name() {
-        return NAME;
-    }
-
-    public AggregateRpcService handler() {
-        //E.checkNotNull(handler, "handler");
-        // TODO: implement
-        return new AggregateRpcService() {
-            // mock
-        };
-    }
+    // TODO: implement
 }

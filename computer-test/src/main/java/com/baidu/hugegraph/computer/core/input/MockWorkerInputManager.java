@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.input;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.worker.Manager;
+import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
@@ -41,8 +41,14 @@ public class MockWorkerInputManager implements Manager {
     }
 
     @Override
+    public String name() {
+        return "mock_worker_input";
+    }
+
+    @Override
     public void init(Config config) {
-        this.fetcher = InputSourceFactory.createGraphFetcher(config);
+        this.fetcher = InputSourceFactory.createGraphFetcher(config,
+                                                             this.rpcClient);
         this.vertexInputSplit = null;
         this.edgeInputSplit = null;
     }
@@ -54,7 +60,7 @@ public class MockWorkerInputManager implements Manager {
 
     public boolean fetchNextVertexInputSplit() {
         // Send request to master
-        this.vertexInputSplit = this.rpcClient.getNextVertexInputSplit();
+        this.vertexInputSplit = this.fetcher.nextVertexInputSplit();
         return this.vertexInputSplit != null &&
                !this.vertexInputSplit.equals(InputSplit.END_SPLIT);
     }
@@ -82,7 +88,7 @@ public class MockWorkerInputManager implements Manager {
 
     public boolean fetchNextEdgeInputSplit() {
         // Send request to master
-        this.edgeInputSplit = this.rpcClient.getNextEdgeInputSplit();
+        this.edgeInputSplit = this.fetcher.nextEdgeInputSplit();
         return this.edgeInputSplit != null &&
                !this.edgeInputSplit.equals(InputSplit.END_SPLIT);
     }

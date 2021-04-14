@@ -18,6 +18,10 @@
         </dependency>
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>hugegraph-rpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-client</artifactId>
         </dependency>
         <dependency>

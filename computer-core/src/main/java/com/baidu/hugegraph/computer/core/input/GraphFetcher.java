@@ -21,9 +21,13 @@ package com.baidu.hugegraph.computer.core.input;
 
 public interface GraphFetcher {
 
-    void close();
+    InputSplit nextVertexInputSplit();
+
+    InputSplit nextEdgeInputSplit();
 
     VertexFetcher vertexFetcher();
 
     EdgeFetcher edgeFetcher();
+
+    void close();
 }

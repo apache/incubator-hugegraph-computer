@@ -17,42 +17,44 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.input;
+package com.baidu.hugegraph.computer.core.rpc;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
+import com.baidu.hugegraph.rpc.RpcClientProvider;
+import com.baidu.hugegraph.rpc.RpcConsumerConfig;
 
-public class MockMasterInputManager implements Manager {
+public class WorkerRpcManager implements Manager {
 
-    private InputSplitFetcher fetcher;
-    private MasterInputHandler handler;
+    public static final String NAME = "worker_rpc";
 
-    public MockMasterInputManager() {
-        this.fetcher = null;
-        this.handler = null;
-    }
+    private RpcClientProvider rpcClient = null;
 
     @Override
     public String name() {
-        return "mock_master_input";
+        return NAME;
     }
 
     @Override
     public void init(Config config) {
-        this.fetcher = InputSourceFactory.createInputSplitFetcher(config);
-        this.handler = new MasterInputHandler(this.fetcher);
+        if (this.rpcClient != null) {
+            return;
+        }
+        this.rpcClient = new RpcClientProvider(config.hugeConfig());
     }
 
     @Override
     public void close(Config config) {
-        this.fetcher.close();
+        this.rpcClient.destroy();
     }
 
-    public InputSplitFetcher fetcher() {
-        return this.fetcher;
+    public InputSplitRpcService inputSplitService() {
+        RpcConsumerConfig clientConfig = this.rpcClient.config();
+        return clientConfig.serviceProxy(InputSplitRpcService.class);
     }
 
-    public MasterInputHandler handler() {
-        return this.handler;
+    public AggregateRpcService aggregateRpcService() {
+        RpcConsumerConfig clientConfig = this.rpcClient.config();
+        return clientConfig.serviceProxy(AggregateRpcService.class);
     }
 }

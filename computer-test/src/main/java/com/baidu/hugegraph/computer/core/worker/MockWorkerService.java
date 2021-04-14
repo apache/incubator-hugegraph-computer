@@ -20,30 +20,14 @@
 package com.baidu.hugegraph.computer.core.worker;
 
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 
 /**
  * This class used for test case. There are several managers mocked here.
  */
 public class MockWorkerService extends WorkerService {
 
-    public MockWorkerService() {
-        super();
-    }
-
+    @Override
     public void init(Config config) {
         super.init(config);
-    }
-
-    /**
-     * @return WorkerStat mocked
-     */
-    @Override
-    protected WorkerStat computePartitions() {
-        PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
-                                                50L, 60L, 70L);
-        WorkerStat workerStat = new WorkerStat();
-        workerStat.add(stat1);
-        return workerStat;
     }
 }

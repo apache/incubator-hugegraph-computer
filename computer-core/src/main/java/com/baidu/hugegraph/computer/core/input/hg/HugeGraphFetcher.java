@@ -23,7 +23,9 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.EdgeFetcher;
 import com.baidu.hugegraph.computer.core.input.GraphFetcher;
+import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
+import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.HugeClientBuilder;
 
@@ -32,13 +34,15 @@ public class HugeGraphFetcher implements GraphFetcher {
     private final HugeClient client;
     private final VertexFetcher vertexFetcher;
     private final EdgeFetcher edgeFetcher;
+    private final InputSplitRpcService rpcService;
 
-    public HugeGraphFetcher(Config config) {
+    public HugeGraphFetcher(Config config, InputSplitRpcService rpcService) {
         String url = config.get(ComputerOptions.HUGEGRAPH_URL);
         String graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
         this.client = new HugeClientBuilder(url, graph).build();
         this.vertexFetcher = new HugeVertexFetcher(config, this.client);
         this.edgeFetcher = new HugeEdgeFetcher(config, this.client);
+        this.rpcService = rpcService;
     }
 
     @Override
@@ -54,5 +58,15 @@ public class HugeGraphFetcher implements GraphFetcher {
     @Override
     public EdgeFetcher edgeFetcher() {
         return this.edgeFetcher;
+    }
+
+    @Override
+    public InputSplit nextVertexInputSplit() {
+        return this.rpcService.nextVertexInputSplit();
+    }
+
+    @Override
+    public InputSplit nextEdgeInputSplit() {
+        return this.rpcService.nextEdgeInputSplit();
     }
 }

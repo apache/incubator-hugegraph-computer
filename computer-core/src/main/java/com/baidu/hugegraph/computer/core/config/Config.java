@@ -79,6 +79,10 @@ public final class Config {
         return hotConfig;
     }
 
+    public HugeConfig hugeConfig() {
+        return this.allConfig;
+    }
+
     public <R> R get(TypedOption<?, R> option) {
         return this.allConfig.get(option);
     }
@@ -148,12 +152,21 @@ public final class Config {
     }
 
     /**
-     * Create object by class option. It throws ComputerException if failed
-     * to create object.
+     * Create object by class option.
+     * It throws ComputerException if failed to create object.
      */
     public <T> T createObject(ConfigOption<Class<?>> clazzOption) {
+        return createObject(clazzOption, true);
+    }
+
+    public <T> T createObject(ConfigOption<Class<?>> clazzOption,
+                              boolean requiredNotNull) {
         Class<?> clazz = this.get(clazzOption);
         if (clazz == Null.class) {
+            if (requiredNotNull) {
+                throw new ComputerException(
+                      "Please config required option '%s'", clazzOption.name());
+            }
             return null;
         }
         try {

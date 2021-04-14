@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
-import java.util.ArrayList;
+import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -36,7 +36,9 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-import com.baidu.hugegraph.computer.core.worker.Manager;
+import com.baidu.hugegraph.computer.core.input.MasterInputManager;
+import com.baidu.hugegraph.computer.core.manager.Managers;
+import com.baidu.hugegraph.computer.core.rpc.MasterRpcManager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
@@ -50,51 +52,50 @@ public class MasterService {
 
     private static final Logger LOG = Log.logger(MasterService.class);
 
+    private final Managers managers;
+
+    private boolean inited;
     private Config config;
     private Bsp4Master bsp4Master;
     private ContainerInfo masterInfo;
     private List<ContainerInfo> workers;
     private int maxSuperStep;
-    private List<Manager> managers;
     private MasterComputation masterComputation;
 
     public MasterService() {
-        this.managers = new ArrayList<>();
+        this.managers = new Managers();
     }
 
     /**
      * Init master service, create the managers used by master.
      */
     public void init(Config config) {
+        E.checkArgument(!this.inited, "The %s has been initialized", this);
+
         this.config = config;
+
         this.maxSuperStep = this.config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
-        /*
-         * TODO: start rpc server and get rpc port.
-         * TODO: start aggregator manager for master.
-         */
-        int rpcPort = 8001;
-        LOG.info("{} MasterService rpc port: {}", this, rpcPort);
+
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
-        MasterAggrManager aggregatorManager = this.config.createObject(
-                          ComputerOptions.MASTER_AGGREGATOR_MANAGER_CLASS);
-        this.managers.add(aggregatorManager);
 
-        for (Manager manager : this.managers) {
-            manager.init(this.config);
-        }
+        InetSocketAddress rpcAddress = this.initManagers();
 
-        // TODO: get hostname
-        String host = "localhost";
-        this.masterInfo = new ContainerInfo(-1, host, rpcPort);
+        this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
+                                            rpcAddress.getHostName(),
+                                            rpcAddress.getPort());
         this.bsp4Master.registerMaster(this.masterInfo);
         this.workers = this.bsp4Master.waitWorkersRegistered();
+
         LOG.info("{} MasterService worker count: {}",
                  this, this.workers.size());
+
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
         this.masterComputation.init(this.config);
+
         LOG.info("{} MasterService initialized", this);
+        this.inited = true;
     }
 
     /**
@@ -102,9 +103,10 @@ public class MasterService {
      * {@link #init(Config)}.
      */
     public void close() {
-        for (Manager manager : this.managers) {
-            manager.close(this.config);
-        }
+        this.checkInited();
+
+        this.managers.closeAll(this.config);
+
         this.bsp4Master.clean();
         this.bsp4Master.close();
         LOG.info("{} MasterService closed", this);
@@ -116,6 +118,8 @@ public class MasterService {
      * After the superstep iteration, output the result.
      */
     public void execute() {
+        this.checkInited();
+
         LOG.info("{} MasterService execute", this);
         /*
          * Step 1: Determines which superstep to start from, and resume this
@@ -166,9 +170,7 @@ public class MasterService {
              *    know whether to continue the next superstep iteration.
              */
             this.bsp4Master.waitWorkersSuperstepPrepared(superstep);
-            for (Manager manager : this.managers) {
-                manager.beforeSuperstep(this.config, superstep);
-            }
+            this.managers.beforeSuperstep(this.config, superstep);
             this.bsp4Master.masterSuperstepPrepared(superstep);
             List<WorkerStat> workerStats =
                     this.bsp4Master.waitWorkersSuperstepDone(superstep);
@@ -179,9 +181,7 @@ public class MasterService {
             if (this.finishedIteration(masterContinue, context)) {
                 superstepStat.inactivate();
             }
-            for (Manager manager : this.managers) {
-                manager.afterSuperstep(this.config, superstep);
-            }
+            this.managers.afterSuperstep(this.config, superstep);
             this.bsp4Master.masterSuperstepDone(superstep, superstepStat);
             LOG.info("{} MasterService superstep {} finished",
                      this, superstep);
@@ -194,6 +194,35 @@ public class MasterService {
     @Override
     public String toString() {
         return String.format("[master %s]", this.masterInfo.id());
+    }
+
+    private InetSocketAddress initManagers() {
+        // Create managers
+        MasterInputManager inputManager = new MasterInputManager();
+        this.managers.add(inputManager);
+
+        MasterAggrManager aggregatorManager = this.config.createObject(
+                          ComputerOptions.MASTER_AGGREGATOR_MANAGER_CLASS);
+        this.managers.add(aggregatorManager);
+
+        MasterRpcManager rpcManager = new MasterRpcManager();
+        this.managers.add(rpcManager);
+
+        // Init managers
+        this.managers.initAll(this.config);
+
+        // Register rpc service
+        rpcManager.registerInputSplitService(inputManager.handler());
+        rpcManager.registerAggregatorService(aggregatorManager.handler());
+
+        // Start rpc server
+        InetSocketAddress address = rpcManager.start();
+        LOG.info("{} MasterService started rpc server: {}", this, address);
+        return address;
+    }
+
+    private void checkInited() {
+        E.checkArgument(this.inited, "The %s has not been initialized", this);
     }
 
     private int superstepToResume() {
