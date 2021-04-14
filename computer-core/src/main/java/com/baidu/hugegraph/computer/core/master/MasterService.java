@@ -70,7 +70,10 @@ public class MasterService {
      * Init master service, create the managers used by master.
      */
     public void init(Config config) {
+        E.checkArgument(!this.inited, "The %s has been initialized", this);
+
         this.config = config;
+
         this.maxSuperStep = this.config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
 
         this.bsp4Master = new Bsp4Master(this.config);
@@ -219,7 +222,7 @@ public class MasterService {
     }
 
     private void checkInited() {
-        E.checkArgument(this.inited, "The %s has not been initialized ", this);
+        E.checkArgument(this.inited, "The %s has not been initialized", this);
     }
 
     private int superstepToResume() {

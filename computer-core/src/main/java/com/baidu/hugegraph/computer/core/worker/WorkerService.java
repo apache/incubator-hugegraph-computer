@@ -72,6 +72,8 @@ public class WorkerService {
      * Init worker service, create the managers used by worker service.
      */
     public void init(Config config) {
+        E.checkArgument(!this.inited, "The %s has been initialized", this);
+
         this.config = config;
 
         InetSocketAddress dataAddress = this.initManagers();
@@ -208,7 +210,7 @@ public class WorkerService {
     }
 
     private void checkInited() {
-        E.checkArgument(this.inited, "The %s has not been initialized ", this);
+        E.checkArgument(this.inited, "The %s has not been initialized", this);
     }
 
     /**

@@ -34,7 +34,7 @@ public class MockMasterInputManager implements Manager {
 
     @Override
     public String name() {
-        return "mack_master_input";
+        return "mock_master_input";
     }
 
     @Override

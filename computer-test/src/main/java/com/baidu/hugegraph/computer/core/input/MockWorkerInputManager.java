@@ -42,7 +42,7 @@ public class MockWorkerInputManager implements Manager {
 
     @Override
     public String name() {
-        return "mack_worker_input";
+        return "mock_worker_input";
     }
 
     @Override
