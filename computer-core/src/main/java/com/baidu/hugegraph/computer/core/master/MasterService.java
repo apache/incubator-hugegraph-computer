@@ -77,11 +77,10 @@ public class MasterService {
         this.bsp4Master.init();
 
         InetSocketAddress rpcAddress = this.initManagers();
-        String rpcHost = rpcAddress.getHostName();
-        int rpcPort = rpcAddress.getPort();
 
         this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
-                                            rpcHost, rpcPort);
+                                            rpcAddress.getHostName(),
+                                            rpcAddress.getPort());
         this.bsp4Master.registerMaster(this.masterInfo);
         this.workers = this.bsp4Master.waitWorkersRegistered();
 

@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
-import java.net.URL;
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,8 +73,11 @@ public class WorkerService {
      */
     public void init(Config config) {
         this.config = config;
-        // TODO: Start data-transport server and get its host and port.
-        this.workerInfo = new ContainerInfo(0, "localhost", 0, 8004);
+
+        InetSocketAddress dataAddress = this.initManagers();
+
+        this.workerInfo = new ContainerInfo(0, dataAddress.getHostName(),
+                                            0, dataAddress.getPort());
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
         this.bsp4Worker.init();
         this.bsp4Worker.registerWorker();
@@ -83,6 +86,9 @@ public class WorkerService {
                             this.bsp4Worker.waitWorkersRegistered();
         for (ContainerInfo container : containers) {
             this.workers.put(container.id(), container);
+            // TODO: Connect to other workers for data transport
+            //DataClientManager dm = this.managers.get(DataClientManager.NAME);
+            //dm.connect(container.hostname(), container.dataPort());
         }
 
         this.computation = this.config.createObject(
@@ -101,7 +107,6 @@ public class WorkerService {
                      this.combiner.name(), this.computation.name());
         }
 
-        this.initManagers();
         this.inited = true;
     }
 
@@ -175,7 +180,11 @@ public class WorkerService {
         return String.format("[worker %s]", this.workerInfo.id());
     }
 
-    private URL initManagers() {
+    private InetSocketAddress initManagers() {
+        // TODO: Start data-transport server and get its host and port.
+        InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
+                                        "127.0.0.1", 8004);
+
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
@@ -193,11 +202,9 @@ public class WorkerService {
         // Init managers
         this.managers.initAll(this.config);
 
-        // TODO: create connections to other workers for data transportation.
-
         LOG.info("{} WorkerService initialized", this);
 
-        return null;
+        return dataAddress;
     }
 
     private void checkInited() {
