@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
-import java.net.URL;
+import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -77,8 +77,8 @@ public class MasterService {
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.init();
 
-        URL rpcAddress = this.initManagers();
-        String rpcHost = rpcAddress.getHost();
+        InetSocketAddress rpcAddress = this.initManagers();
+        String rpcHost = rpcAddress.getHostName();
         int rpcPort = rpcAddress.getPort();
 
         this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
@@ -201,7 +201,7 @@ public class MasterService {
         return String.format("[master %s]", this.masterInfo.id());
     }
 
-    private URL initManagers() {
+    private InetSocketAddress initManagers() {
         // Create managers
         MasterInputManager inputManager = new MasterInputManager();
         this.managers.add(inputManager);
@@ -220,10 +220,10 @@ public class MasterService {
 
         // Register rpc service
         rpcManager.registerInputSplitService(inputManager.handler());
-        rpcManager.registerInputSplitService(aggregatorManager.handler());
+        rpcManager.registerAggregatorService(aggregatorManager.handler());
 
         // Start rpc server
-        URL address = rpcManager.start();
+        InetSocketAddress address = rpcManager.start();
         LOG.info("{} MasterService started rpc server: {}", this, address);
         return address;
     }

@@ -37,7 +37,9 @@ public class WorkerRpcManager implements Manager {
 
     @Override
     public void init(Config config) {
-        assert this.rpcClient == null;
+        if (this.rpcClient != null) {
+            return;
+        }
         this.rpcClient = new RpcClientProvider(config.hugeConfig());
     }
 
@@ -51,8 +53,8 @@ public class WorkerRpcManager implements Manager {
         return clientConfig.serviceProxy(InputSplitRpcService.class);
     }
 
-    public AggregatorRpcService aggregatorRpcService() {
+    public AggregateRpcService aggregateRpcService() {
         RpcConsumerConfig clientConfig = this.rpcClient.config();
-        return clientConfig.serviceProxy(AggregatorRpcService.class);
+        return clientConfig.serviceProxy(AggregateRpcService.class);
     }
 }

@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.rpc;
 
-public interface AggregatorRpcService {
+public interface AggregateRpcService {
 
     // TODO: implement
 }

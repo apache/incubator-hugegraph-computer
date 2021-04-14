@@ -61,7 +61,7 @@ public class ConfigTest {
     public void testNullClass() {
         Config config = ComputerContext.instance().config();
         Object combiner = config.createObject(
-                          ComputerOptions.WORKER_COMBINER_CLASS);
+                          ComputerOptions.WORKER_COMBINER_CLASS, false);
         Assert.assertNull(combiner);
     }
 }

@@ -20,7 +20,7 @@
 package com.baidu.hugegraph.computer.core.aggregator;
 
 import com.baidu.hugegraph.computer.core.manager.Manager;
-import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
+import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
 
 /**
  * Aggregator manager manages aggregators in master.
@@ -35,9 +35,11 @@ public class MasterAggrManager implements Manager {
         return NAME;
     }
 
-    public InputSplitRpcService handler() {
+    public AggregateRpcService handler() {
         //E.checkNotNull(handler, "handler");
         // TODO: implement
-        return null;
+        return new AggregateRpcService() {
+            // mock
+        };
     }
 }

@@ -63,11 +63,6 @@
                         <groupId>io.grpc</groupId>
                         <artifactId>grpc-netty-shaded</artifactId>
                     </exclusion>
-                    <!-- conflict with transport-netty  -->
-                    <exclusion>
-                        <groupId>io.netty</groupId>
-                        <artifactId>netty-all</artifactId>
-                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>

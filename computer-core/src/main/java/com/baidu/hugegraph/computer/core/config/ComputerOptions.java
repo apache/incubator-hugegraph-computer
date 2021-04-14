@@ -30,7 +30,6 @@ import com.baidu.hugegraph.computer.core.aggregator.MasterAggrManager;
 import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
-import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.google.common.collect.ImmutableSet;
@@ -278,7 +277,7 @@ public class ComputerOptions extends OptionHolder {
                     "worker-computation is used to compute each vertex " +
                     "in each superstep.",
                     disallowEmpty(),
-                    Computation.class
+                    Null.class
             );
 
     public static final ConfigOption<Class<?>> WORKER_COMBINER_CLASS =

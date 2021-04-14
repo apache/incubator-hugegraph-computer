@@ -85,6 +85,7 @@ public class WorkerService {
         for (ContainerInfo container : containers) {
             this.workers.put(container.id(), container);
         }
+
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
         this.computation.init(config);
@@ -92,7 +93,7 @@ public class WorkerService {
                  this.computation.name(), this.computation.category());
 
         this.combiner = this.config.createObject(
-                        ComputerOptions.WORKER_COMBINER_CLASS);
+                        ComputerOptions.WORKER_COMBINER_CLASS, false);
         if (this.combiner == null) {
             LOG.info("None combiner is provided for computation '{}'",
                      this.computation.name());
@@ -185,6 +186,7 @@ public class WorkerService {
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
+        rpcManager.init(this.config);
 
         WorkerInputManager inputManager = new WorkerInputManager();
         inputManager.service(rpcManager.inputSplitService());
@@ -192,7 +194,7 @@ public class WorkerService {
 
         WorkerAggrManager aggregatorManager = this.config.createObject(
                           ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
-        aggregatorManager.service(rpcManager.aggregatorRpcService());
+        aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
 
         // Init managers

@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.rpc;
 
-import java.net.URL;
+import java.net.InetSocketAddress;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -55,20 +55,18 @@ public class MasterRpcManager implements Manager {
         serverConfig.addService(InputSplitRpcService.class, service);
     }
 
-    public void registerAggregatorService(AggregatorRpcService service) {
+    public void registerAggregatorService(AggregateRpcService service) {
         RpcProviderConfig serverConfig = this.rpcServer.config();
-        serverConfig.addService(AggregatorRpcService.class, service);
+        serverConfig.addService(AggregateRpcService.class, service);
     }
 
-    public URL start() {
+    public InetSocketAddress start() {
         E.checkNotNull(this.rpcServer, "rpcServer");
         try {
             this.rpcServer.exportAll();
 
-            String address = String.format("%s:%s",
-                                           this.rpcServer.host(),
-                                           this.rpcServer.port());
-            return new URL(address);
+            return InetSocketAddress.createUnresolved(this.rpcServer.host(),
+                                                      this.rpcServer.port());
         } catch (Throwable e) {
             this.rpcServer.destroy();
             throw new ComputerException("Failed to start rpc-server", e);
