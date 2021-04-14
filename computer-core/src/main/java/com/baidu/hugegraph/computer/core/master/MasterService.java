@@ -37,7 +37,6 @@ import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.input.MasterInputManager;
-import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.rpc.MasterRpcManager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
@@ -104,9 +103,7 @@ public class MasterService {
     public void close() {
         this.checkInited();
 
-        for (Manager manager : this.managers) {
-            manager.close(this.config);
-        }
+        this.managers.closeAll(this.config);
 
         this.bsp4Master.clean();
         this.bsp4Master.close();
@@ -171,9 +168,7 @@ public class MasterService {
              *    know whether to continue the next superstep iteration.
              */
             this.bsp4Master.waitWorkersSuperstepPrepared(superstep);
-            for (Manager manager : this.managers) {
-                manager.beforeSuperstep(this.config, superstep);
-            }
+            this.managers.beforeSuperstep(this.config, superstep);
             this.bsp4Master.masterSuperstepPrepared(superstep);
             List<WorkerStat> workerStats =
                     this.bsp4Master.waitWorkersSuperstepDone(superstep);
@@ -184,9 +179,7 @@ public class MasterService {
             if (this.finishedIteration(masterContinue, context)) {
                 superstepStat.inactivate();
             }
-            for (Manager manager : this.managers) {
-                manager.afterSuperstep(this.config, superstep);
-            }
+            this.managers.afterSuperstep(this.config, superstep);
             this.bsp4Master.masterSuperstepDone(superstep, superstepStat);
             LOG.info("{} MasterService superstep {} finished",
                      this, superstep);
@@ -214,9 +207,7 @@ public class MasterService {
         this.managers.add(rpcManager);
 
         // Init managers
-        for (Manager manager : this.managers) {
-            manager.init(this.config);
-        }
+        this.managers.initAll(this.config);
 
         // Register rpc service
         rpcManager.registerInputSplitService(inputManager.handler());

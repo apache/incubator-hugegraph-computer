@@ -40,7 +40,6 @@ import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
-import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.util.E;
@@ -118,9 +117,7 @@ public class WorkerService {
          * TODO: stop the connection to the master
          * TODO: stop the data transportation server.
          */
-        for (Manager manager : this.managers) {
-            manager.close(this.config);
-        }
+        this.managers.closeAll(this.config);
         this.computation.close();
         this.bsp4Worker.close();
         LOG.info("{} WorkerService closed", this);
@@ -155,18 +152,14 @@ public class WorkerService {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
-            for (Manager manager : this.managers) {
-                manager.beforeSuperstep(this.config, superstep);
-            }
+            this.managers.beforeSuperstep(this.config, superstep);
             this.computation.beforeSuperstep(context);
             this.bsp4Worker.workerSuperstepPrepared(superstep);
             this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
 
             WorkerStat workerStat = this.compute();
 
-            for (Manager manager : this.managers) {
-                manager.afterSuperstep(this.config, superstep);
-            }
+            this.managers.afterSuperstep(this.config, superstep);
             this.computation.afterSuperstep(context);
             this.bsp4Worker.workerSuperstepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
@@ -198,9 +191,7 @@ public class WorkerService {
         this.managers.add(aggregatorManager);
 
         // Init managers
-        for (Manager manager : this.managers) {
-            manager.init(this.config);
-        }
+        this.managers.initAll(this.config);
 
         // TODO: create connections to other workers for data transportation.
 

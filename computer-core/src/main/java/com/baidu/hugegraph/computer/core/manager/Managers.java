@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.InsertionOrderUtil;
 
@@ -53,5 +54,29 @@ public class Managers implements Iterable<Manager> {
     @Override
     public Iterator<Manager> iterator() {
         return this.managers.values().iterator();
+    }
+
+    public void initAll(Config config) {
+        for (Manager manager : this.all()) {
+            manager.init(config);
+        }
+    }
+
+    public void closeAll(Config config) {
+        for (Manager manager : this.all()) {
+            manager.close(config);
+        }
+    }
+
+    public void beforeSuperstep(Config config, int superstep) {
+        for (Manager manager : this.all()) {
+            manager.beforeSuperstep(config, superstep);
+        }
+    }
+
+    public void afterSuperstep(Config config, int superstep) {
+        for (Manager manager : this.all()) {
+            manager.afterSuperstep(config, superstep);
+        }
     }
 }
