@@ -165,6 +165,15 @@ public abstract class AbstractMessage implements Message {
         }
     }
 
+    protected static void assertExtraHeader(ByteBuf buf) {
+        int sequenceNumber = buf.readInt();
+        assert sequenceNumber == 0;
+        int partition = buf.readInt();
+        assert partition == 0;
+        int bodyLength = buf.readInt();
+        assert bodyLength == 0;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)

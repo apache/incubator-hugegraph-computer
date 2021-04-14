@@ -34,10 +34,11 @@ public class FinishMessage extends AbstractMessage implements RequestMessage {
 
     public static FinishMessage parseFrom(ByteBuf buf) {
         int ackId = buf.readInt();
-        // Assert partition
-        assert buf.readInt() == 0;
-        // Assert body-length
-        assert buf.readInt() == 0;
+
+        int partition = buf.readInt();
+        assert partition == 0;
+        int bodyLength = buf.readInt();
+        assert bodyLength == 0;
         return new FinishMessage(ackId);
     }
 }

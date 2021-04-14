@@ -34,12 +34,7 @@ public class PongMessage extends AbstractMessage implements ResponseMessage  {
     }
 
     public static PongMessage parseFrom(ByteBuf buf) {
-        // Assert sequenceNumber
-        assert buf.readInt() == 0;
-        // Assert partition
-        assert buf.readInt() == 0;
-        // Assert body-length
-        assert buf.readInt() == 0;
+        assertExtraHeader(buf);
         return INSTANCE;
     }
 }

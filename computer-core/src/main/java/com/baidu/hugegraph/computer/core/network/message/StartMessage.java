@@ -35,12 +35,7 @@ public class StartMessage extends AbstractMessage implements RequestMessage {
     }
 
     public static StartMessage parseFrom(ByteBuf buf) {
-        // Assert sequenceNumber
-        assert buf.readInt() == 0;
-        // Assert partition
-        assert buf.readInt() == 0;
-        // Assert body-length
-        assert buf.readInt() == 0;
+        assertExtraHeader(buf);
         return INSTANCE;
     }
 }
