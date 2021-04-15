@@ -27,40 +27,21 @@ public abstract class TransportSession {
 
     protected volatile TransportStatus status;
     protected final AtomicInteger maxRequestId;
-    protected volatile int maxAckId;
 
     protected TransportSession() {
         this.status = TransportStatus.READY;
         this.maxRequestId = new AtomicInteger(-1);
-        this.maxAckId = -1;
     }
 
     public TransportStatus status() {
         return this.status;
     }
 
-    protected void ready() {
-        this.maxRequestId.set(-1);
+    public void ready() {
         this.status = TransportStatus.READY;
     }
-
-    protected void establish() {
+    
+    public void establish() {
         this.status = TransportStatus.ESTABLISH;
     }
-
-    public int maxRequestId() {
-        return this.maxRequestId.get();
-    }
-
-    public int nextRequestId() {
-        return this.maxRequestId.incrementAndGet();
-    }
-
-    public int incrementAckId() {
-        return this.maxRequestId.incrementAndGet();
-    }
-
-    abstract void startComplete();
-
-    abstract void finishComplete();
 }
