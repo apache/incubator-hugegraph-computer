@@ -118,6 +118,9 @@ public class BufferedFileTest {
                 output.writeInt(100, 4);
                 output.writeInt(Integer.MAX_VALUE);
                 output.writeInt(Integer.MIN_VALUE);
+                // Current buffer
+                output.writeInt(5);
+                output.writeInt(output.position() - Integer.BYTES, 6);
             }
 
             try (BufferedFileInput input = createInput(file)) {
@@ -126,7 +129,8 @@ public class BufferedFileTest {
                     int position = i * 4;
                     int readValue = input.readInt();
                     if (position != 0 && position != 12 &&
-                        position != 200 && position != 100) {
+                        position != 200 && position != 100 &&
+                        position != 1000) {
                         Assert.assertEquals(expectValue, readValue);
                     }
                 }
@@ -141,6 +145,7 @@ public class BufferedFileTest {
                 input.seek(256 * 4);
                 Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
                 Assert.assertEquals(Integer.MIN_VALUE, input.readInt());
+                Assert.assertEquals(6, input.readInt());
             }
         } finally {
             FileUtils.deleteQuietly(file);
@@ -617,6 +622,35 @@ public class BufferedFileTest {
         }
     }
 
+    @Test
+    public void testCompare() throws IOException {
+        // BufferedFileInput compare to BufferedFileInput
+        File file1 = createTempFile();
+        File file2 = createTempFile();
+        try (BufferedFileInput input1 = inputByString(file1, "apple");
+             BufferedFileInput input2 = inputByString(file2, "banana")) {
+            int result = input1.compare(0, input1.available(), input2, 0,
+                                        input2.available());
+            Assert.assertTrue(result < 0);
+        } finally {
+            FileUtils.deleteQuietly(file1);
+            FileUtils.deleteQuietly(file2);
+        }
+
+        // UnsafeByteArrayInput compare to BufferedFileInput
+        File file3 = createTempFile();
+        try (BufferedFileInput fileInput = inputByString(file3, "apple")) {
+            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+            output.writeBytes("banana");
+            RandomAccessInput input = new UnsafeByteArrayInput(output.buffer());
+            int result = input.compare(0, input.available(), fileInput, 0,
+                                        fileInput.available());
+            Assert.assertTrue(result > 0);
+        } finally {
+            FileUtils.deleteQuietly(file3);
+        }
+    }
+
     private static File createTempFile() throws IOException {
         return File.createTempFile(UUID.randomUUID().toString(), null);
     }
@@ -633,5 +667,13 @@ public class BufferedFileTest {
         return new BufferedFileInput(new RandomAccessFile(file,
                                      Constants.FILE_MODE_READ),
                                      BUFFER_SIZE);
+    }
+
+    private static BufferedFileInput inputByString(File file, String s)
+                                                   throws IOException {
+        BufferedFileOutput output = new BufferedFileOutput(file);
+        output.writeBytes(s);
+        output.close();
+        return new BufferedFileInput(file);
     }
 }

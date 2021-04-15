@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
 
@@ -208,13 +209,38 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
         return this.limit - this.position;
     }
 
-    public int remaining() {
+    protected int remaining() {
         return this.limit - this.position;
     }
 
     @Override
     public void close() throws IOException {
         // pass
+    }
+
+    @Override
+    public int compare(long offset, long length, RandomAccessInput other,
+                       long otherOffset, long otherLength) throws IOException {
+        E.checkArgument(offset < this.buffer.length,
+                        "Invalid offset parameter %s, expect < %s",
+                        offset, this.buffer.length);
+        E.checkArgument(length <= (this.buffer.length - offset),
+                        "Invalid length parameter %s, expect <= %s",
+                        length, this.buffer.length - offset);
+
+        if (other.getClass() == UnsafeByteArrayInput.class) {
+            return BytesUtil.compare(this.buffer, (int) offset, (int) length,
+                                     ((UnsafeByteArrayInput) other).buffer,
+                                     (int) otherOffset, (int) otherLength);
+        } else {
+            long otherPosition = other.position();
+            other.seek(otherOffset);
+            byte[] bytes = other.readBytes((int) otherLength);
+            other.seek(otherPosition);
+
+            return BytesUtil.compare(this.buffer, (int) offset, (int) length,
+                                     bytes, 0, bytes.length);
+        }
     }
 
     protected void require(int size) throws IOException {

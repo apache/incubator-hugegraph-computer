@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.util.E;
 
 public class BufferedFileInput extends UnsafeByteArrayInput {
@@ -153,5 +154,22 @@ public class BufferedFileInput extends UnsafeByteArrayInput {
         this.fileOffset += readLen;
         this.file.readFully(this.buffer(), this.limit(), readLen);
         this.limit(this.limit() + readLen);
+    }
+
+    @Override
+    public int compare(long offset, long length, RandomAccessInput other,
+                       long otherOffset, long otherLength) throws IOException {
+        long position = this.position();
+        this.seek(offset);
+        byte[] bytes1 = this.readBytes((int) length);
+        this.seek(position);
+
+        long otherPosition = other.position();
+        other.seek(otherOffset);
+        byte[] bytes2 = other.readBytes((int) otherLength);
+        other.seek(otherPosition);
+
+        return BytesUtil.compare(bytes1, 0, (int) length,
+                                 bytes2, 0, (int) otherLength);
     }
 }

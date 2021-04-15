@@ -19,9 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
+import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
@@ -408,5 +411,64 @@ public class UnsafeByteArrayTest {
             Assert.assertEquals(256 - i, input.available());
             input.readByte();
         }
+    }
+
+    @Test
+    public void testWriteByInput() throws IOException {
+        // Input class is UnsafeByteArrayInput
+        String uuid = UUID.randomUUID().toString();
+        UnsafeByteArrayInput input = inputByString(uuid);
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        output.write(input, 0, input.available());
+        Assert.assertEquals(uuid, new String(output.toByteArray()));
+
+        // Input class isn't  UnsafeByteArrayInput
+        File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
+        BufferedFileOutput fileOutput = null;
+        BufferedFileInput fileInput = null;
+        try {
+            fileOutput = new BufferedFileOutput(tempFile);
+            fileOutput.writeBytes(uuid);
+            fileOutput.close();
+            fileInput = new BufferedFileInput(tempFile);
+            output = new UnsafeByteArrayOutput();
+            output.write(fileInput, 0, fileInput.available());
+            Assert.assertEquals(uuid, new String(output.toByteArray()));
+        } finally {
+            if (fileInput != null) {
+                fileInput.close();
+            }
+            if (fileOutput != null) {
+                fileOutput.close();
+            }
+            FileUtils.deleteQuietly(tempFile);
+        }
+    }
+
+    @Test
+    public void testReadBytes() throws IOException {
+        String uuid = UUID.randomUUID().toString();
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        output.writeBytes(uuid);
+        UnsafeByteArrayInput input = new UnsafeByteArrayInput(
+                                         output.toByteArray());
+        byte[] bytes = input.readBytes(uuid.length());
+        Assert.assertEquals(uuid, new String(bytes));
+    }
+
+    @Test
+    public void testCompare() throws IOException {
+        UnsafeByteArrayInput apple = inputByString("apple");
+        UnsafeByteArrayInput egg = inputByString("egg");
+        Assert.assertTrue(apple.compare(0, 2, egg, 0, 2) < 0);
+        Assert.assertTrue(apple.compare(1, 3, egg, 0, 2) > 0);
+        Assert.assertEquals(0, apple.compare(4, 1, egg, 0, 1));
+    }
+
+    private static UnsafeByteArrayInput inputByString(String s)
+                                                      throws IOException {
+        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        output.writeBytes(s);
+        return new UnsafeByteArrayInput(output.toByteArray());
     }
 }
