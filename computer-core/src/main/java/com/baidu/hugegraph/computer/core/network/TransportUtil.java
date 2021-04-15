@@ -131,8 +131,10 @@ public class TransportUtil {
         return String.format("%s:%s", host, socketAddress.getPort());
     }
 
-    public static String readString(ByteBuf buf, int length) {
-        E.checkArgument(length >= 0, "The length must be >= 0");
+    public static String readString(ByteBuf buf) {
+        int length = buf.readInt();
+        E.checkArgument(length >= 0,
+                        "The length mast be >= 0, but got %s", length);
         if (length == 0) {
             return "";
         }
@@ -141,13 +143,10 @@ public class TransportUtil {
         return StringEncoding.decode(bytes);
     }
 
-    public static String readString(ByteBuf buf) {
-        return readString(buf, buf.readableBytes());
-    }
-
     public static void writeString(ByteBuf buf, String value) {
         E.checkArgumentNotNull(value, "value");
-        byte[] encode = StringEncoding.encode(value);
-        buf.writeBytes(encode);
+        byte[] encoded = StringEncoding.encode(value);
+        buf.writeInt(encoded.length);
+        buf.writeBytes(encoded);
     }
 }

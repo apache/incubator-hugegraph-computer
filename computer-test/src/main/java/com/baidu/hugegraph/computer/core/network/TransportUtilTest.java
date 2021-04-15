@@ -81,7 +81,9 @@ public class TransportUtilTest {
     @Test
     public void testReadString() {
         byte[] testData = StringEncoding.encode("test data");
-        ByteBuf buffer = Unpooled.wrappedBuffer(testData);
+        ByteBuf buffer = Unpooled.directBuffer(testData.length);
+        buffer.writeInt(testData.length);
+        buffer.writeBytes(testData);
         String readString = TransportUtil.readString(buffer);
         Assert.assertEquals("test data", readString);
     }

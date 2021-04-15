@@ -19,12 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network.message;
 
-import java.nio.ByteBuffer;
-
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
-import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.util.E;
 
 import io.netty.buffer.ByteBuf;
@@ -48,15 +44,9 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
 
     @Override
     protected ManagedBuffer encodeBody(ByteBuf buf) {
-        byte[] bytes = StringEncoding.encode(this.message);
-        int bodyLength = Integer.BYTES + bytes.length;
-        // Copy to direct memory
-        ByteBuffer buffer = ByteBuffer.allocateDirect(bodyLength)
-                                      .putInt(this.errorCode)
-                                      .put(bytes);
-        // Flip to make it readable
-        buffer.flip();
-        return new NioManagedBuffer(buffer);
+        buf.writeInt(this.errorCode);
+        TransportUtil.writeString(buf, this.message);
+        return null;
     }
 
     public static FailMessage parseFrom(ByteBuf buf) {
@@ -70,7 +60,7 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         int bodyLength = buf.readInt();
         if (bodyLength >= Integer.BYTES) {
             failCode = buf.readInt();
-            failMsg = TransportUtil.readString(buf, bodyLength - Integer.BYTES);
+            failMsg = TransportUtil.readString(buf);
         }
 
         return new FailMessage(failAckId, failCode, failMsg);
