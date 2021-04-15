@@ -44,8 +44,8 @@ public class ServerIdleHandler extends ChannelDuplexHandler {
                                    throws Exception {
         if (evt instanceof IdleStateEvent) {
             try {
-                LOG.info("Connection idle, close connection to '{}' from server" +
-                         "server side",
+                LOG.info("Connection idle, close connection to '{}' from " +
+                         "server server side",
                          TransportUtil.remoteAddress(ctx.channel()));
                 ctx.close();
             } catch (Exception e) {
