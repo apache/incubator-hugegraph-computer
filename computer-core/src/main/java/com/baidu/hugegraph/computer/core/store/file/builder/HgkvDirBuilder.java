@@ -17,17 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.file.builder;
 
-import java.util.List;
+import java.io.Closeable;
+import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.store.base.KvEntry;
 
-public interface SortCombiner {
+public interface HgkvDirBuilder extends Closeable {
 
     /**
-     * Combine the list of inputs, and write the combined result length and
-     * results to output.
+     * Write kvEntry to hgkvDir.
      */
-    void combine(List<Pointer> inputs, RandomAccessOutput output);
+    void write(KvEntry kvEntry) throws IOException;
+
+    /**
+     * Finish build hgkvDir.
+     * You can release resources or do some aftercare in this method.
+     */
+    void finish() throws IOException;
 }

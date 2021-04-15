@@ -19,14 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.store;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.Closeable;
+import java.util.Iterator;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    FileManagerTest.class
-})
-public class StoreTestSuite {
+public interface CloseableIterator<T> extends Iterator<T>, Closeable {
 }

@@ -17,16 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.file.reader;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.IOException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    FileManagerTest.class
-})
-public class StoreTestSuite {
+import com.baidu.hugegraph.computer.core.store.CloseableIterator;
+import com.baidu.hugegraph.computer.core.store.base.Pointer;
+
+public interface HgkvFileReader {
+
+    CloseableIterator<Pointer> iterator() throws IOException;
 }

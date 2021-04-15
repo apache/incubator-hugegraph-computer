@@ -17,16 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.select;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.util.List;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    FileManagerTest.class
-})
-public class StoreTestSuite {
+import com.google.common.collect.ImmutableList;
+
+public class DefaultSelectedFiles implements SelectedFiles {
+
+    private final List<String> inputs;
+    private final String output;
+
+    public DefaultSelectedFiles(String output, List<String> inputs) {
+        this.output = output;
+        this.inputs = ImmutableList.copyOf(inputs);
+    }
+
+    @Override
+    public List<String> inputs() {
+        return this.inputs;
+    }
+
+    @Override
+    public String output() {
+        return this.output;
+    }
 }

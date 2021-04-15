@@ -17,16 +17,34 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.base;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.util.Iterator;
+import java.util.List;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    FileManagerTest.class
-})
-public class StoreTestSuite {
+import com.google.common.collect.ImmutableList;
+
+public class DefaultKvEntry implements KvEntry {
+
+    private final Pointer key;
+    private final List<Pointer> values;
+
+    public DefaultKvEntry(Pointer key, ImmutableList<Pointer> values) {
+        this.key = key;
+        this.values = values;
+    }
+
+    public DefaultKvEntry(Pointer key, List<Pointer> values) {
+        this(key, ImmutableList.copyOf(values));
+    }
+
+    @Override
+    public Pointer key() {
+        return this.key;
+    }
+
+    @Override
+    public Iterator<Pointer> values() {
+        return this.values.iterator();
+    }
 }

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.base;
 
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 
-public interface Pointer extends Range {
+public interface Pointer extends Range, Comparable<Pointer> {
 
     RandomAccessInput input();
 }

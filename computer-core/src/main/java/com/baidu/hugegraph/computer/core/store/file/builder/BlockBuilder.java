@@ -17,19 +17,21 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.file.builder;
 
-import java.util.Iterator;
+import java.io.IOException;
 
-public interface KvEntry {
+import com.baidu.hugegraph.computer.core.store.base.Pointer;
 
-    Pointer key();
+public interface BlockBuilder {
 
-    /**
-     * Each pointer in iteration is values for a specific key. It mean's
-     * key's value in a file. It may be several fragments for a key in a file.
-     * The values in fragments are at increasing order. The upper layer read
-     * a fragment from a pointer each time.
-     */
-    Iterator<Pointer> values();
+    void add(Pointer key, Pointer value) throws IOException;
+
+    long sizeOfEntry(Pointer key, Pointer value) throws IOException;
+
+    long size();
+
+    void finish() throws IOException;
+
+    void reset() throws IOException;
 }

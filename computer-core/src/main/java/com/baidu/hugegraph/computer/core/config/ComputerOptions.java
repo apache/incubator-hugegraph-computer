@@ -548,4 +548,28 @@ public class ComputerOptions extends OptionHolder {
                     positiveInt(),
                     90
             );
+
+    public static final ConfigOption<Long> HGKVFILE_SIZE =
+            new ConfigOption<>(
+                    "hgkvfile.max_file_size",
+                    "The max byte size of hgkv-file data.",
+                    positiveInt(),
+                    4L << 30
+            );
+
+    public static final ConfigOption<Integer> DATABLOCK_SIZE =
+            new ConfigOption<>(
+                    "hgkvfile.max_data_block_size",
+                    "The max byte size of hgkv-file data block.",
+                    positiveInt(),
+                    64 << 10
+            );
+
+    public static final ConfigOption<Integer> MERGE_PATH_NUM =
+            new ConfigOption<>(
+                    "hgkvfile.merge_path_num",
+                    "Number of merge path.",
+                    positiveInt(),
+                    10
+            );
 }

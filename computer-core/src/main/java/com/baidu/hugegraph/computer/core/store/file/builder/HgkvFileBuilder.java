@@ -17,16 +17,39 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.file.builder;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.Closeable;
+import java.io.IOException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    FileManagerTest.class
-})
-public class StoreTestSuite {
+import com.baidu.hugegraph.computer.core.store.base.Pointer;
+
+public interface HgkvFileBuilder extends Closeable {
+
+    /**
+     * Add kv entry to file.
+     */
+    void add(Pointer key, Pointer value) throws IOException;
+
+    /**
+     * Return size of new entry.
+     */
+    long sizeOfEntry(Pointer key, Pointer value);
+
+    /**
+     * Finish build file.
+     */
+    void finish() throws IOException;
+
+    /**
+     * Returns the size of entry that has been written.
+     */
+    long entriesSize();
+
+    /**
+     * Returns the size of file.
+     * If build not finished, return he size of entry that has been written
+     * else return the file size.
+     */
+    long fileSize();
 }

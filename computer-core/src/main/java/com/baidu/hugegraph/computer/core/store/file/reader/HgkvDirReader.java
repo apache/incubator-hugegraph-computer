@@ -17,14 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorting;
+package com.baidu.hugegraph.computer.core.store.file.reader;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.store.CloseableIterator;
+import com.baidu.hugegraph.computer.core.store.base.KvEntry;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    InputsSortingTest.class
-})
-public class SortingTestSuite {
+public interface HgkvDirReader {
+
+    CloseableIterator<KvEntry> iterator();
 }

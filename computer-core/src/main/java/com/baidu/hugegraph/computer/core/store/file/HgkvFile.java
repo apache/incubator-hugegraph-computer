@@ -17,16 +17,36 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort;
+package com.baidu.hugegraph.computer.core.store.file;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.store.base.Pointer;
 
-import com.baidu.hugegraph.computer.core.sort.sorting.InputsSortingTest;
+public interface HgkvFile {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    InputsSortingTest.class
-})
-public class SortTestSuite {
+    /**
+     * The absolute path includes file name.
+     */
+    String path();
+
+    /**
+     * Number of entries in file.
+     */
+    long numEntries();
+
+    /**
+     * File version.
+     */
+    String version();
+
+    /**
+     * Max key in file.
+     */
+    Pointer max();
+
+    /**
+     * Min key in file.
+     */
+    Pointer min();
+
+    String magic();
 }

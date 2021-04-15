@@ -17,16 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.file;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.util.List;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    FileManagerTest.class
-})
-public class StoreTestSuite {
+/**
+ * A HgkvDir is a complete data file, It may consist of multiple segments.
+ * The data between segments is ordered.
+ */
+public interface HgkvDir extends HgkvFile {
+
+    /**
+     * Return the segments in HgkvDir.
+     * A HgkvDir is a complete file, HgkvDir consists of multiple HgkvFile.
+     */
+    List<HgkvFile> segments();
+
+    /**
+     * Return the path to the next segment.
+     */
+    String nextSegmentPath();
 }
