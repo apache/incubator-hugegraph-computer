@@ -37,7 +37,6 @@ import com.baidu.hugegraph.computer.core.sort.util.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.base.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.base.KvEntry;
 import com.baidu.hugegraph.computer.core.store.base.Pointer;
-import com.baidu.hugegraph.computer.core.store.file.HgkvFileImpl;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvFileBuilder;
@@ -110,7 +109,7 @@ public class StoreTestData {
         return entries;
     }
 
-    public static Map<Pointer, Pointer> kvPointerMapFromMap(List<Integer> map)
+    public static Map<Pointer, Pointer> kvMapFromMap(List<Integer> map)
                                                             throws IOException {
         List<Pointer> keys = keysFromMap(map);
         Map<Pointer, Pointer> result = new LinkedHashMap<>();
@@ -141,7 +140,7 @@ public class StoreTestData {
         File file = new File(path);
 
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path)) {
-            Map<Pointer, Pointer> kvMap = StoreTestData.kvPointerMapFromMap(map);
+            Map<Pointer, Pointer> kvMap = StoreTestData.kvMapFromMap(map);
             for (Map.Entry<Pointer, Pointer> entry : kvMap.entrySet()) {
                 builder.add(entry.getKey(), entry.getValue());
             }
