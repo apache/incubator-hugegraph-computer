@@ -46,7 +46,6 @@ public class ConnectionId {
 
     public static ConnectionId parseConnectionId(String host, int port,
                                                  int clientIndex) {
-
         String cacheKey = buildCacheKey(host, port, clientIndex);
 
         Function<String, ConnectionId> resolveAddress = key -> {

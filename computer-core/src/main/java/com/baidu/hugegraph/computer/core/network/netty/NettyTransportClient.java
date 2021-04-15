@@ -19,13 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
@@ -83,19 +83,20 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public synchronized void startSession() throws IOException {
+    public synchronized void startSession() throws TransportException {
         // TODO: startSession
     }
 
     @Override
     public synchronized boolean send(MessageType messageType, int partition,
-                                     ByteBuffer buffer) throws IOException {
+                                     ByteBuffer buffer)
+                                     throws TransportException {
         return false;
         // TODO: send message
     }
 
     @Override
-    public synchronized void finishSession() throws IOException {
+    public synchronized void finishSession() throws TransportException {
         // TODO: finishSession
     }
 

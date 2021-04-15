@@ -32,6 +32,7 @@ import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.NettyTransportProvider;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.google.common.collect.ImmutableSet;
@@ -337,18 +338,18 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.server_threads",
                     "The number of transport threads for server, the default " +
-                    "value is 0, which means CPUs * 2.",
+                    "value is 0, which means CPUs.",
                     nonNegativeInt(),
-                    0
+                    TransportConf.NUMBER_CPU_CORES
             );
 
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
             new ConfigOption<>(
                     "transport.client_threads",
                     "The number of transport threads for client, the default " +
-                    "value is 0, which means CPUs * 2.",
+                    "value is 0, which means CPUs.",
                     nonNegativeInt(),
-                    0
+                    TransportConf.NUMBER_CPU_CORES
             );
 
     public static final ConfigOption<Class<?>> TRANSPORT_PROVIDER_CLASS =

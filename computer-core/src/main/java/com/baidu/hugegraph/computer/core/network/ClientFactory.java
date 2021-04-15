@@ -20,7 +20,7 @@
 package com.baidu.hugegraph.computer.core.network;
 
 
-import java.io.IOException;
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 
 public interface ClientFactory {
 
@@ -36,7 +36,8 @@ public interface ClientFactory {
      * @return {@link TransportClient}
      */
     TransportClient createClient(ConnectionId connectionId,
-                                 ClientHandler handler) throws IOException;
+                                 ClientHandler handler)
+                                 throws TransportException;
 
     /**
      * Close the {@link ClientFactory}

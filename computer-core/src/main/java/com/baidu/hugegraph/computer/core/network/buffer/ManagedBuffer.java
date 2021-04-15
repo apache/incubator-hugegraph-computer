@@ -40,12 +40,12 @@ public interface ManagedBuffer {
     int length();
 
     /**
-     * Increment the reference count by one if applicable.
+     * Increase the reference count by one if applicable.
      */
     ManagedBuffer retain();
 
     /**
-     * If applicable, decrement the reference count by one and deallocates
+     * If applicable, decrease the reference count by one and deallocates
      * the buffer if the reference count reaches zero.
      */
     ManagedBuffer release();

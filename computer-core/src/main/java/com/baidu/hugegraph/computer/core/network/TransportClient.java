@@ -19,10 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
 /**
@@ -36,22 +36,22 @@ public interface TransportClient {
     /**
      * This method is called before an iteration of sending buffers.
      */
-    void startSession() throws IOException;
+    void startSession() throws TransportException;
 
     /**
      * Send the buffer to the server.
      * Return false if unable send data immediately.
      * This method is called zero or many times in iteration.
-     * @throws IOException if failed, the job will fail.
+     * @throws TransportException if failed, the job will fail.
      */
     boolean send(MessageType messageType, int partition, ByteBuffer buffer)
-                 throws IOException;
+                 throws TransportException;
 
     /**
      * This method is called after an iteration. It will block the caller to
      * make sure the buffers sent be received by target workers.
      */
-    void finishSession() throws IOException;
+    void finishSession() throws TransportException;
 
     /**
      * Get the {@link ConnectionId}

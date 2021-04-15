@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -114,7 +113,7 @@ public class NettyClientFactory implements ClientFactory {
     @Override
     public TransportClient createClient(ConnectionId connectionId,
                                         ClientHandler handler)
-                                        throws IOException {
+                                        throws TransportException {
         InetSocketAddress address = connectionId.socketAddress();
         LOG.debug("Creating new client connection to {}", connectionId);
 
@@ -132,7 +131,7 @@ public class NettyClientFactory implements ClientFactory {
      * Connect to the remote server.
      */
     protected Channel doConnect(InetSocketAddress address, int connectTimeoutMs)
-                                throws IOException {
+                                throws TransportException {
         E.checkArgumentNotNull(this.bootstrap,
                                "The NettyClientFactory has not been " +
                                "initialized yet");
@@ -183,13 +182,13 @@ public class NettyClientFactory implements ClientFactory {
     protected Channel doConnectWithRetries(InetSocketAddress address,
                                            int retryNumber,
                                            int connectTimeoutMs)
-                                           throws IOException {
+                                           throws TransportException {
         String formatAddress = TransportUtil.formatAddress(address);
         int tried = 0;
         while (true) {
             try {
                 return this.doConnect(address, connectTimeoutMs);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 tried++;
                 if (tried > retryNumber) {
                     LOG.warn("Failed to connect to {}, Giving up",

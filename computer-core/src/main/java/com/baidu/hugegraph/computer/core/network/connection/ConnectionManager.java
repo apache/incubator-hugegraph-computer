@@ -19,8 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.network.connection;
 
-import java.io.IOException;
-
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
@@ -45,7 +44,7 @@ public interface ConnectionManager {
      * @param connectionId {@link ConnectionId}
      */
     TransportClient getOrCreateClient(ConnectionId connectionId)
-                                      throws IOException;
+                                      throws TransportException;
 
     /**
      * Get a {@link TransportClient} instance from the connection pool first.
@@ -53,7 +52,8 @@ public interface ConnectionManager {
      * @param host the hostName or Ip
      * @param port the port
      */
-    TransportClient getOrCreateClient(String host, int port) throws IOException;
+    TransportClient getOrCreateClient(String host, int port)
+                                      throws TransportException;
 
     /**
      * Close a client from the {@link ConnectionManager}

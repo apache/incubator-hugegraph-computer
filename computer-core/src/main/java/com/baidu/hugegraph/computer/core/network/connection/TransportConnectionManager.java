@@ -19,11 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.network.connection;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientFactory;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
@@ -63,7 +63,7 @@ public class TransportConnectionManager implements ConnectionManager {
 
     @Override
     public TransportClient getOrCreateClient(ConnectionId connectionId)
-                                             throws IOException {
+                                             throws TransportException {
         E.checkArgument(this.clientFactory != null,
                         "The clientManager has not been initialized yet");
         TransportClient client = this.clients.get(connectionId);
@@ -80,7 +80,7 @@ public class TransportConnectionManager implements ConnectionManager {
 
     @Override
     public TransportClient getOrCreateClient(String host, int port)
-                                             throws IOException {
+                                             throws TransportException {
         E.checkArgument(this.clientFactory != null,
                         "The clientManager has not been initialized yet");
         ConnectionId connectionId = ConnectionId.parseConnectionId(host, port);
@@ -89,9 +89,8 @@ public class TransportConnectionManager implements ConnectionManager {
 
     @Override
     public void closeClient(ConnectionId connectionId) {
-        TransportClient client = this.clients.get(connectionId);
+        TransportClient client = this.clients.remove(connectionId);
         if (client != null) {
-            this.clients.remove(connectionId);
             client.close();
         }
     }

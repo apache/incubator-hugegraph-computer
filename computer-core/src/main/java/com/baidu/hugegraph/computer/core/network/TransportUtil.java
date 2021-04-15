@@ -41,6 +41,7 @@ import io.netty.channel.Channel;
 public class TransportUtil {
 
     private static final Logger LOG = Log.logger(TransportUtil.class);
+
     private static final long RESOLVE_TIMEOUT = 2000L;
 
     public static String remoteAddress(Channel channel) {
@@ -55,13 +56,13 @@ public class TransportUtil {
     }
 
     public static ConnectionId remoteConnectionId(Channel channel) {
-        if (channel != null && channel.remoteAddress() != null) {
-            InetSocketAddress address = (InetSocketAddress)
-                                        channel.remoteAddress();
-            return ConnectionId.parseConnectionId(address.getHostName(),
-                                                  address.getPort());
+        if (channel == null || channel.remoteAddress() == null) {
+            return null;
         }
-        return null;
+        InetSocketAddress address = (InetSocketAddress)
+                channel.remoteAddress();
+        return ConnectionId.parseConnectionId(address.getHostName(),
+                                              address.getPort());
     }
 
     public static InetAddress resolvedAddress(String host) {
@@ -120,7 +121,7 @@ public class TransportUtil {
      */
     public static String formatAddress(InetSocketAddress socketAddress) {
         E.checkNotNull(socketAddress, "socketAddress");
-        String host = "";
+        String host;
         InetAddress address = socketAddress.getAddress();
         if (address != null && !socketAddress.isUnresolved()) {
             host = address.getHostAddress();
@@ -131,11 +132,11 @@ public class TransportUtil {
     }
 
     public static String readString(ByteBuf buf, int length) {
-        if (length > 0) {
-            byte[] bytes = new byte[length];
-            buf.readBytes(bytes);
-            return StringEncoding.decode(bytes);
+        if (length <= 0) {
+            return null;
         }
-        return null;
+        byte[] bytes = new byte[length];
+        buf.readBytes(bytes);
+        return StringEncoding.decode(bytes);
     }
 }

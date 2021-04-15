@@ -107,15 +107,15 @@ public class TransportConf {
      * 0, which is CPUs.
      */
     public int serverThreads() {
-        int serverThreads = this.config.get(
-                            ComputerOptions.TRANSPORT_SERVER_THREADS);
-        return serverThreads == 0 ? NUMBER_CPU_CORES : serverThreads;
+        return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
     }
 
     public int clientThreads() {
-        int clientThreads = this.config.get(
-                            ComputerOptions.TRANSPORT_CLIENT_THREADS);
-        return clientThreads == 0 ? NUMBER_CPU_CORES : clientThreads;
+        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
+    }
+
+    public int sendBuf() {
+        return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 
     /**
@@ -176,9 +176,5 @@ public class TransportConf {
 
     public boolean tcpKeepAlive() {
         return this.config.get(ComputerOptions.TRANSPORT_TCP_KEEP_ALIVE);
-    }
-
-    public int sendBuf() {
-        return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 }
