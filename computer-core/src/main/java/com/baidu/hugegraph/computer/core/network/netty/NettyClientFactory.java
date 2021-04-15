@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
@@ -188,7 +189,7 @@ public class NettyClientFactory implements ClientFactory {
         while (true) {
             try {
                 return this.doConnect(address, connectTimeoutMs);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 tried++;
                 if (tried > retryNumber) {
                     LOG.warn("Failed to connect to {}, Giving up",
