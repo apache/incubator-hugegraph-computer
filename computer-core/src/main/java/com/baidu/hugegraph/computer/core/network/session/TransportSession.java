@@ -38,10 +38,15 @@ public abstract class TransportSession {
     }
 
     public void ready() {
+        this.maxRequestId.set(-1);
         this.status = TransportStatus.READY;
     }
-    
+
     public void establish() {
         this.status = TransportStatus.ESTABLISH;
+    }
+
+    public int maxRequestId() {
+        return this.maxRequestId.get();
     }
 }
