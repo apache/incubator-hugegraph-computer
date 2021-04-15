@@ -114,7 +114,7 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
     }
 
-    public int sendBuf() {
+    public int sendBuffer() {
         return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 
@@ -125,7 +125,7 @@ public class TransportConf {
      * Assuming latency = 1ms, network_bandwidth = 10Gbps
      * buffer size should be ~ 1.25MB
      */
-    public int receiveBuf() {
+    public int receiveBuffer() {
         return this.config.get(ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE);
     }
 

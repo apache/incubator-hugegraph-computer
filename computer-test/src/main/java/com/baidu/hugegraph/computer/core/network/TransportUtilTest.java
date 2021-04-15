@@ -23,8 +23,11 @@ import java.net.InetSocketAddress;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.testutil.Assert;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 
 public class TransportUtilTest {
@@ -73,5 +76,21 @@ public class TransportUtilTest {
                                      "127.0.0.1", 8089);
         String formatAddress2 = TransportUtil.formatAddress(address2);
         Assert.assertContains("127.0.0.1:8089", formatAddress2);
+    }
+
+    @Test
+    public void testReadString() {
+        byte[] testData = StringEncoding.encode("test data");
+        ByteBuf buffer = Unpooled.wrappedBuffer(testData);
+        String readString = TransportUtil.readString(buffer);
+        Assert.assertEquals("test data", readString);
+    }
+
+    @Test
+    public void testWriteString() {
+        ByteBuf buffer = Unpooled.buffer();
+        TransportUtil.writeString(buffer, "test data");
+        String readString = TransportUtil.readString(buffer);
+        Assert.assertEquals("test data", readString);
     }
 }

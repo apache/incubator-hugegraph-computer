@@ -93,7 +93,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
                            this.bindFuture.channel().localAddress();
 
         final long duration = System.currentTimeMillis() - start;
-        LOG.info("The TransportServer started on SocketAddress {}, took {} ms",
+        LOG.info("The TransportServer started on address {}, took {} ms",
                  TransportUtil.formatAddress(this.bindAddress), duration);
 
         return this.bindAddress.getPort();
@@ -138,14 +138,14 @@ public class NettyTransportServer implements TransportServer, Closeable {
                                   this.conf.backLog());
         }
 
-        if (this.conf.receiveBuf() > 0) {
+        if (this.conf.receiveBuffer() > 0) {
             this.bootstrap.childOption(ChannelOption.SO_RCVBUF,
-                                       this.conf.receiveBuf());
+                                       this.conf.receiveBuffer());
         }
 
-        if (this.conf.sendBuf() > 0) {
+        if (this.conf.sendBuffer() > 0) {
             this.bootstrap.childOption(ChannelOption.SO_SNDBUF,
-                                       this.conf.sendBuf());
+                                       this.conf.sendBuffer());
         }
     }
 

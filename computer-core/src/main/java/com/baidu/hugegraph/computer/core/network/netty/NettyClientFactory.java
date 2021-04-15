@@ -90,13 +90,13 @@ public class NettyClientFactory implements ClientFactory {
         this.bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
                               this.connectTimeoutMs);
 
-        if (this.conf.receiveBuf() > 0) {
+        if (this.conf.receiveBuffer() > 0) {
             this.bootstrap.option(ChannelOption.SO_RCVBUF,
-                                  this.conf.receiveBuf());
+                                  this.conf.receiveBuffer());
         }
 
-        if (this.conf.sendBuf() > 0) {
-            this.bootstrap.option(ChannelOption.SO_SNDBUF, this.conf.sendBuf());
+        if (this.conf.sendBuffer() > 0) {
+            this.bootstrap.option(ChannelOption.SO_SNDBUF, this.conf.sendBuffer());
         }
 
         this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
@@ -192,8 +192,8 @@ public class NettyClientFactory implements ClientFactory {
             } catch (IOException e) {
                 tried++;
                 if (tried > retryNumber) {
-                    LOG.warn("Failed to connect to {}, Giving up",
-                             formatAddress, e);
+                    LOG.warn("Failed to connect to '{}',Giving up after {} " +
+                             "retries", formatAddress, retryNumber, e);
                     throw e;
                 } else {
                     LOG.debug("Failed to connect to {} with retries times {}," +

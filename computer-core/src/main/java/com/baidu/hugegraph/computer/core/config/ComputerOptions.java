@@ -338,8 +338,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.server_threads",
                     "The number of transport threads for server, the default " +
-                    "value is 0, which means CPUs.",
-                    nonNegativeInt(),
+                    "value is CPUs.",
+                    positiveInt(),
                     TransportConf.NUMBER_CPU_CORES
             );
 
@@ -347,8 +347,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.client_threads",
                     "The number of transport threads for client, the default " +
-                    "value is 0, which means CPUs.",
-                    nonNegativeInt(),
+                    "value is CPUs.",
+                    positiveInt(),
                     TransportConf.NUMBER_CPU_CORES
             );
 

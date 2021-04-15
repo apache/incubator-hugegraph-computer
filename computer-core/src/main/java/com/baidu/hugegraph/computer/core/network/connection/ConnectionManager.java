@@ -33,6 +33,22 @@ import com.baidu.hugegraph.computer.core.network.TransportServer;
 public interface ConnectionManager {
 
     /**
+     * Start the server, return the port listened.
+     * This method is called only once.
+     */
+    int startServer(Config config, MessageHandler serverHandler);
+
+    /**
+     * Return the only one listened server.
+     */
+    TransportServer getServer();
+
+    /**
+     * Shutdown the server.
+     */
+    void shutdownServer();
+
+    /**
      * Initialize the client connection manager.
      * This method is called only once.
      */
@@ -64,26 +80,10 @@ public interface ConnectionManager {
     /**
      * Shutdown the client connection manager.
      */
-    void shutdownClientManager();
+    void shutdownClients();
 
     /**
-     * Start the server, return the port listened.
-     * This method is called only once.
-     */
-    int startServer(Config config, MessageHandler serverHandler);
-
-    /**
-     * Return the only one listened server.
-     */
-    TransportServer getServer();
-
-    /**
-     * Shutdown the server.
-     */
-    void shutdownServer();
-
-    /**
-     * Shutdown the ClientFactory and server.
+     * Shutdown the client connection manager and server.
      */
     void shutdown();
 }

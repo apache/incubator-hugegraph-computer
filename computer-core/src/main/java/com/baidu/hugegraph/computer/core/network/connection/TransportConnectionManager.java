@@ -47,6 +47,35 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
+    public synchronized int startServer(Config config,
+                                        MessageHandler serverHandler) {
+        E.checkArgument(this.server == null,
+                        "The TransportServer has already been listened");
+        E.checkArgumentNotNull(serverHandler,
+                               "The serverHandler param can't be null");
+        TransportConf conf = TransportConf.wrapConfig(config);
+        TransportServer server = conf.transportProvider().createServer(conf);
+        int bindPort = server.listen(config, serverHandler);
+        this.server = server;
+        return bindPort;
+    }
+
+    @Override
+    public TransportServer getServer() {
+        E.checkArgument(this.server != null && this.server.bound(),
+                        "The TransportServer has not been initialized yet");
+        return this.server;
+    }
+
+    @Override
+    public void shutdownServer() {
+        if (this.server != null) {
+            this.server.shutdown();
+            this.server = null;
+        }
+    }
+
+    @Override
     public synchronized void initClientManager(Config config,
                                                ClientHandler clientHandler) {
         E.checkArgument(this.clientFactory == null,
@@ -96,28 +125,7 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public synchronized int startServer(Config config,
-                                        MessageHandler serverHandler) {
-        E.checkArgument(this.server == null,
-                        "The TransportServer has already been listened");
-        E.checkArgumentNotNull(serverHandler,
-                               "The serverHandler param can't be null");
-        TransportConf conf = TransportConf.wrapConfig(config);
-        TransportServer server = conf.transportProvider().createServer(conf);
-        int bindPort = server.listen(config, serverHandler);
-        this.server = server;
-        return bindPort;
-    }
-
-    @Override
-    public TransportServer getServer() {
-        E.checkArgument(this.server != null && this.server.bound(),
-                        "The TransportServer has not been initialized yet");
-        return this.server;
-    }
-
-    @Override
-    public void shutdownClientManager() {
+    public void shutdownClients() {
         if (this.clientFactory != null) {
             this.clientFactory.close();
             this.clientFactory = null;
@@ -138,16 +146,8 @@ public class TransportConnectionManager implements ConnectionManager {
     }
 
     @Override
-    public void shutdownServer() {
-        if (this.server != null) {
-            this.server.shutdown();
-            this.server = null;
-        }
-    }
-
-    @Override
     public void shutdown() {
-        this.shutdownClientManager();
+        this.shutdownClients();
         this.shutdownServer();
     }
 }

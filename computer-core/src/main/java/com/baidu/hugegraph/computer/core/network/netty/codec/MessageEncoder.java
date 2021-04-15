@@ -85,9 +85,9 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
             }
             combiner.finish(promise);
         } catch (Throwable e) {
-            String msg = String.format("Encode message fail, messageType: %s",
-                                       message.type());
-            LOG.error(msg, e);
+            String msg = String.format("Failed to encode message, " +
+                                       "messageType: %s", message.type());
+            LOG.debug(msg, e);
             throw new TransportException(msg, e);
         } finally {
             if (bufHeader != null) {

@@ -31,14 +31,14 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
-class ChannelFutureListenerOnWrite implements ChannelFutureListener {
+public class ChannelFutureListenerOnWrite implements ChannelFutureListener {
 
     private static final Logger LOG =
                          Log.logger(ChannelFutureListenerOnWrite.class);
 
     private final TransportHandler handler;
 
-    ChannelFutureListenerOnWrite(TransportHandler handler) {
+    protected ChannelFutureListenerOnWrite(TransportHandler handler) {
         this.handler = handler;
     }
 

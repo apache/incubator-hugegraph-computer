@@ -59,14 +59,16 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
         int magicNumber = msg.readShort();
         if (magicNumber != AbstractMessage.MAGIC_NUMBER) {
             LOG.warn("Network stream corrupted: received incorrect " +
-                     "magic number: {}", magicNumber);
+                     "magic number: {}, remote address: {}",
+                     magicNumber, TransportUtil.remoteAddress(ctx.channel()));
             msg.release();
             return null;
         }
         int version = msg.readByte();
         if (version != AbstractMessage.PROTOCOL_VERSION) {
             LOG.warn("Network stream corrupted: received incorrect " +
-                     "protocol version: {}", version);
+                     "protocol version: {}, remote address: {}",
+                     version, TransportUtil.remoteAddress(ctx.channel()));
             msg.release();
             return null;
         }

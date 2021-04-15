@@ -130,7 +130,7 @@ public class ConnectionManagerTest {
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionId);
         Assert.assertTrue(client.active());
-        connectionManager.shutdownClientManager();
+        connectionManager.shutdownClients();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             connectionManager.getOrCreateClient(connectionId);
         }, e -> {

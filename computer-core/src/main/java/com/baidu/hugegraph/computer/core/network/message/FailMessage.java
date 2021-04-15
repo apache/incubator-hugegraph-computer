@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
+import com.baidu.hugegraph.util.E;
 
 import io.netty.buffer.ByteBuf;
 
@@ -35,6 +36,7 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
 
     public FailMessage(int ackId, int errorCode, String message) {
         super(ackId);
+        E.checkNotNull(message, "message");
         this.errorCode = errorCode;
         this.message = message;
     }

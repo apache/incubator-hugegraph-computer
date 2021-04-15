@@ -60,7 +60,7 @@ public class TransportUtil {
             return null;
         }
         InetSocketAddress address = (InetSocketAddress)
-                channel.remoteAddress();
+                                    channel.remoteAddress();
         return ConnectionId.parseConnectionId(address.getHostName(),
                                               address.getPort());
     }
@@ -121,8 +121,8 @@ public class TransportUtil {
      */
     public static String formatAddress(InetSocketAddress socketAddress) {
         E.checkNotNull(socketAddress, "socketAddress");
-        String host;
         InetAddress address = socketAddress.getAddress();
+        String host;
         if (address != null && !socketAddress.isUnresolved()) {
             host = address.getHostAddress();
         } else {
@@ -132,11 +132,22 @@ public class TransportUtil {
     }
 
     public static String readString(ByteBuf buf, int length) {
-        if (length <= 0) {
-            return null;
+        E.checkArgument(length >= 0, "The length must be >= 0");
+        if (length == 0) {
+            return "";
         }
         byte[] bytes = new byte[length];
         buf.readBytes(bytes);
         return StringEncoding.decode(bytes);
+    }
+
+    public static String readString(ByteBuf buf) {
+        return readString(buf, buf.readableBytes());
+    }
+
+    public static void writeString(ByteBuf buf, String value) {
+        E.checkArgumentNotNull(value, "value");
+        byte[] encode = StringEncoding.encode(value);
+        buf.writeBytes(encode);
     }
 }

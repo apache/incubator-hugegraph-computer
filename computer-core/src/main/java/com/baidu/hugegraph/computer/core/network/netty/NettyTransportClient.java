@@ -119,7 +119,11 @@ public class NettyTransportClient implements TransportClient {
 
     protected boolean checkSendAvailable() {
         // TODO: checkSendAvailable
-        return this.channel.isWritable();
+        if (!this.channel.isWritable()) {
+            return false;
+        }
+        this.handler.sendAvailable(this.connectionId);
+        return true;
     }
 
     private void initChannel(Channel channel, ConnectionId connectionId,
@@ -139,10 +143,7 @@ public class NettyTransportClient implements TransportClient {
         @Override
         public void onSuccess(Channel channel, ChannelFuture future) {
             super.onSuccess(channel, future);
-            NettyTransportClient client = NettyTransportClient.this;
-            if (client.checkSendAvailable()) {
-                client.handler.sendAvailable(client.connectionId);
-            }
+            NettyTransportClient.this.checkSendAvailable();
         }
     }
 }
