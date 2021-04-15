@@ -60,7 +60,7 @@ public class ChannelFutureListenerOnWrite implements ChannelFutureListener {
 
     public  void onSuccess(Channel channel, ChannelFuture future) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Write data success, to: {}",
+            LOG.debug("Successfully send data to '{}'",
                       TransportUtil.remoteAddress(channel));
         }
     }
@@ -71,8 +71,9 @@ public class ChannelFutureListenerOnWrite implements ChannelFutureListener {
             exception = (TransportException) cause;
         } else {
             exception = new TransportException(
-                        "Exception on write data to %s", cause,
-                        TransportUtil.remoteAddress(channel));
+                        "Failed to send data to '%s': %s",
+                        cause, TransportUtil.remoteAddress(channel),
+                        cause.getMessage());
         }
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
         this.handler.exceptionCaught(exception, connectionId);

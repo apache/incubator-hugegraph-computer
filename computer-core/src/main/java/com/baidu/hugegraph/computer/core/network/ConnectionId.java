@@ -105,7 +105,7 @@ public class ConnectionId {
 
     @Override
     public String toString() {
-        return String.format("%s [%d]",
+        return String.format("%s[%d]",
                              TransportUtil.formatAddress(this.address),
                              this.clientIndex);
     }

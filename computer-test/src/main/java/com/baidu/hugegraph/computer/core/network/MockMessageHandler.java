@@ -58,7 +58,7 @@ public class MockMessageHandler implements MessageHandler {
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionId connectionId) {
-        LOG.error("Server channel exception, connectionId: {}, cause: ",
-                  connectionId, cause);
+        LOG.info("Server channel exception, connectionId: {}, cause: {}",
+                 connectionId, cause);
     }
 }

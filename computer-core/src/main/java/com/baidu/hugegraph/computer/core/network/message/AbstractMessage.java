@@ -100,11 +100,19 @@ public abstract class AbstractMessage implements Message {
     @Override
     public ManagedBuffer encode(ByteBuf buf) {
         this.encodeHeader(buf);
+
+        int bodyStart = buf.writerIndex();
         ManagedBuffer managedBuffer = this.encodeBody(buf);
-        int bodyLength = 0;
+        int bodyEnd = buf.writerIndex();
+
+        int bodyLength;
         if (managedBuffer != null) {
+            assert bodyStart == bodyEnd;
             bodyLength = managedBuffer.length();
+        } else {
+            bodyLength = bodyEnd - bodyStart;
         }
+
         int lastWriteIndex = buf.writerIndex();
         try {
             buf.resetWriterIndex();
