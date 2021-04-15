@@ -96,7 +96,8 @@ public class NettyClientFactory implements ClientFactory {
         }
 
         if (this.conf.sendBuffer() > 0) {
-            this.bootstrap.option(ChannelOption.SO_SNDBUF, this.conf.sendBuffer());
+            this.bootstrap.option(ChannelOption.SO_SNDBUF,
+                                  this.conf.sendBuffer());
         }
 
         this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
