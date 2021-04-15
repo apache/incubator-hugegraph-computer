@@ -117,7 +117,7 @@ public class NettyClientFactory implements ClientFactory {
                                         ClientHandler handler)
                                         throws TransportException {
         InetSocketAddress address = connectionId.socketAddress();
-        LOG.debug("Creating new client connection to {}", connectionId);
+        LOG.debug("Creating new client connection to '{}'", connectionId);
 
         Channel channel = this.doConnectWithRetries(address,
                                                     this.conf.networkRetries(),
@@ -125,7 +125,7 @@ public class NettyClientFactory implements ClientFactory {
         NettyTransportClient client = new NettyTransportClient(channel,
                                                                connectionId,
                                                                this, handler);
-        LOG.debug("Successfully created a new client to {}", connectionId);
+        LOG.debug("Successfully created a new client to '{}'", connectionId);
         return client;
     }
 
@@ -150,12 +150,12 @@ public class NettyClientFactory implements ClientFactory {
 
         if (!future.isDone()) {
             throw new TransportException(
-                  "Create connection to %s timeout!", formatAddress);
+                  "Create connection to '%s' timeout!", formatAddress);
         }
 
         if (future.isCancelled()) {
             throw new TransportException(
-                  "Create connection to %s cancelled by user!",
+                  "Create connection to '%s' cancelled by user!",
                   formatAddress);
         }
 
@@ -173,7 +173,7 @@ public class NettyClientFactory implements ClientFactory {
 
         long postConnect = System.nanoTime();
 
-        LOG.info("Successfully created connection to {} after {} ms",
+        LOG.info("Successfully created connection to '{}' after {} ms",
                  formatAddress, (postConnect - preConnect) / 1000000L);
         return future.channel();
     }
@@ -193,12 +193,12 @@ public class NettyClientFactory implements ClientFactory {
             } catch (IOException e) {
                 tried++;
                 if (tried > retryNumber) {
-                    LOG.warn("Failed to connect to '{}',Giving up after {} " +
+                    LOG.warn("Failed to connect to '{}', Giving up after {} " +
                              "retries", formatAddress, retryNumber, e);
                     throw e;
                 } else {
-                    LOG.debug("Failed to connect to {} with retries times {}," +
-                              " Retrying...", formatAddress, tried, e);
+                    LOG.debug("Failed to connect to '{}' with retries times " +
+                              "{}, Retrying...", formatAddress, tried, e);
                 }
             }
         }
