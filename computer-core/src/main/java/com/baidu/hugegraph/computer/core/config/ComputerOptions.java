@@ -368,13 +368,12 @@ public class ComputerOptions extends OptionHolder {
                     "AUTO"
             );
 
-
     public static final ConfigOption<Boolean> TRANSPORT_EPOLL_LT =
             new ConfigOption<>(
                     "transport.transport_epoll_lt",
                     "Whether enable EPOLL level-trigger.",
                     allowValues(true, false),
-                    true
+                    false
             );
 
     public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
