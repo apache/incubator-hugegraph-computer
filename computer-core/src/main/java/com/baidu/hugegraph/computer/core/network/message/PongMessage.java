@@ -17,18 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import io.netty.buffer.ByteBuf;
 
-public interface MessageHandler extends TransportHandler {
+public class PongMessage extends AbstractMessage implements ResponseMessage  {
 
-    /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
-     */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    public static final PongMessage INSTANCE = new PongMessage();
+
+    private PongMessage() {
+    }
+
+    @Override
+    public MessageType type() {
+        return MessageType.PONG;
+    }
+
+    public static PongMessage parseFrom(ByteBuf buf) {
+        assertExtraHeader(buf);
+        return INSTANCE;
+    }
 }

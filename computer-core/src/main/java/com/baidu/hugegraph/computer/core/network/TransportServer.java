@@ -19,16 +19,43 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import java.net.InetSocketAddress;
 
-public interface MessageHandler extends TransportHandler {
+import com.baidu.hugegraph.computer.core.config.Config;
+
+/**
+ * This is used for worker that receives data.
+ */
+public interface TransportServer {
 
     /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
+     * Startup server, return the port listened.
      */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    int listen(Config config, MessageHandler serverHandler);
+
+    /**
+     * Stop the server.
+     */
+    void shutdown();
+
+    /**
+     * To check whether the server is bound to use.
+     * @return true if server is bound.
+     */
+    boolean bound();
+
+    /**
+     * Get the bind {@link InetSocketAddress}
+     */
+    InetSocketAddress bindAddress();
+
+    /**
+     * Get the bind IP
+     */
+    String ip();
+
+    /**
+     * Get the bind port
+     */
+    int port();
 }

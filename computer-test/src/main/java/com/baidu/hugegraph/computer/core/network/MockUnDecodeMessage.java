@@ -19,16 +19,31 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.network.message.RequestMessage;
+import com.baidu.hugegraph.computer.core.network.message.ResponseMessage;
 
-public interface MessageHandler extends TransportHandler {
+public class MockUnDecodeMessage extends AbstractMessage
+                                 implements RequestMessage, ResponseMessage {
 
-    /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
-     */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    @Override
+    public MessageType type() {
+        return MessageType.MSG;
+    }
+
+    @Override
+    public int requestId() {
+        return 0;
+    }
+
+    @Override
+    public int ackId() {
+        return 0;
+    }
+
+    @Override
+    public int sequenceNumber() {
+        return 0;
+    }
 }

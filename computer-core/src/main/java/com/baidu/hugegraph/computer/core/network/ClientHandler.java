@@ -19,16 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
-
-public interface MessageHandler extends TransportHandler {
+public interface ClientHandler extends TransportHandler {
 
     /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
+     * Invoked when the channel associated with the given connectionId channel
+     * is able to send data immediately.
      */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    void sendAvailable(ConnectionId connectionId);
 }

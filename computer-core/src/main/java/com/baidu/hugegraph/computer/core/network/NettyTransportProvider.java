@@ -19,16 +19,25 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.network.netty.BufAllocatorFactory;
+import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactory;
+import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServer;
 
-public interface MessageHandler extends TransportHandler {
+import io.netty.buffer.ByteBufAllocator;
 
-    /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
-     */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+public class NettyTransportProvider implements TransportProvider {
+
+    @Override
+    public TransportServer createServer(TransportConf conf) {
+        ByteBufAllocator bufAllocator = BufAllocatorFactory
+                                        .createBufAllocator();
+        return new NettyTransportServer(bufAllocator);
+    }
+
+    @Override
+    public ClientFactory createClientFactory(TransportConf conf) {
+        ByteBufAllocator bufAllocator = BufAllocatorFactory
+                                        .createBufAllocator();
+        return new NettyClientFactory(conf, bufAllocator);
+    }
 }

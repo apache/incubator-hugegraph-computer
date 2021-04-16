@@ -17,18 +17,51 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
-public interface MessageHandler extends TransportHandler {
+import io.netty.buffer.ByteBuf;
+
+public interface Message {
 
     /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
+     * Serializes this object by writing into the given ByteBuf.
+     *
+     * @param buf {@link ByteBuf} the header buffer, if use zero-copy.
+     * Otherwise it will contain header and body.
+     * @return {@link ManagedBuffer} body buffer, if use zero-copy
      */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    ManagedBuffer encode(ByteBuf buf);
+
+    /**
+     * Used to identify this message type.
+     */
+    MessageType type();
+
+    /**
+     * Whether to include the body of the message
+     * in the same frame as the message.
+     */
+    boolean hasBody();
+
+    /**
+     * An optional body for the message.
+     */
+    ManagedBuffer body();
+
+    /**
+     * The message sequence number
+     */
+    int sequenceNumber();
+
+    /**
+     * The partition id
+     */
+    int partition();
+
+    /**
+     * Release the message
+     */
+    void release();
 }

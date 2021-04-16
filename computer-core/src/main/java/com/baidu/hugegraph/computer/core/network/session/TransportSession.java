@@ -17,18 +17,36 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.session;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public interface MessageHandler extends TransportHandler {
+import com.baidu.hugegraph.computer.core.network.TransportStatus;
 
-    /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
-     */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+public abstract class TransportSession {
+
+    protected volatile TransportStatus status;
+    protected final AtomicInteger maxRequestId;
+
+    protected TransportSession() {
+        this.status = TransportStatus.READY;
+        this.maxRequestId = new AtomicInteger(-1);
+    }
+
+    public TransportStatus status() {
+        return this.status;
+    }
+
+    public void ready() {
+        this.maxRequestId.set(-1);
+        this.status = TransportStatus.READY;
+    }
+
+    public void establish() {
+        this.status = TransportStatus.ESTABLISH;
+    }
+
+    public int maxRequestId() {
+        return this.maxRequestId.get();
+    }
 }

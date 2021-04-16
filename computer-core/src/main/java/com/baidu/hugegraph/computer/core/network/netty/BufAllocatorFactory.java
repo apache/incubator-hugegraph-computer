@@ -17,18 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.netty;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 
-public interface MessageHandler extends TransportHandler {
+public class BufAllocatorFactory {
 
-    /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
-     */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    public static ByteBufAllocator createBufAllocator() {
+        // TODO: Pooled allocators
+        return PooledByteBufAllocator.DEFAULT;
+    }
 }

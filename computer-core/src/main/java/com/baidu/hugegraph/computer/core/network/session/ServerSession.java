@@ -17,18 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.session;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.network.TransportStatus;
 
-public interface MessageHandler extends TransportHandler {
+public class ServerSession extends TransportSession {
 
-    /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
-     */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    public ServerSession() {
+        super();
+    }
+
+    public void startRecv() {
+        this.maxRequestId.compareAndSet(-1, 0);
+        this.status = TransportStatus.START_RECV;
+    }
+
+    public void finishRecv() {
+        this.status = TransportStatus.FINISH_RECV;
+    }
 }

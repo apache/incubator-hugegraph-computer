@@ -17,24 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.session;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.TransportStatus;
 
-/**
- * This is used for worker that receives data.
- */
-public interface Transport4Server {
+public class ClientSession extends TransportSession {
 
-    /**
-     * Startup server, return the port listened. The port range in config is
-     * [{@link @ComputerOptions.WORKER_DATA_PORT_START #STATIC_FIELD},
-     * {@link @ComputerOptions.WORKER_DATA_PORT_END #STATIC_FIELD}].
-     */
-    int listen(Config config, MessageHandler handler);
+    public ClientSession() {
+        super();
+    }
 
-    /**
-     * Stop the server
-     */
-    void stop();
+    public void startSend() {
+        this.maxRequestId.compareAndSet(-1, 0);
+        this.status = TransportStatus.START_SEND;
+    }
+
+    public void finishSend() {
+        this.status = TransportStatus.FINISH_SEND;
+    }
 }

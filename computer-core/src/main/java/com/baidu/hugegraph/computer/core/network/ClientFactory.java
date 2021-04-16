@@ -19,16 +19,28 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
-public interface MessageHandler extends TransportHandler {
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+
+public interface ClientFactory {
 
     /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
+     * Initialize the {@link ClientFactory}
      */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    void init();
+
+    /**
+     * Create a TransportClient.
+     * @param connectionId {@link ConnectionId}
+     * @param handler
+     * @return {@link TransportClient}
+     */
+    TransportClient createClient(ConnectionId connectionId,
+                                 ClientHandler handler)
+                                 throws TransportException;
+
+    /**
+     * Close the {@link ClientFactory}
+     */
+    void close();
 }

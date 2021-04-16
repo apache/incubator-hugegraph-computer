@@ -19,16 +19,26 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 
-public interface MessageHandler extends TransportHandler {
+public interface TransportHandler {
 
     /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
+     * Invoked when the channel associated with the given connectionId is
+     * active.
      */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    void channelActive(ConnectionId connectionId);
+
+    /**
+     * Invoked when the channel associated with the given
+     * connectionId is inactive. No further requests will come from this
+     * channel.
+     */
+    void channelInactive(ConnectionId connectionId);
+
+    /**
+     * Invoked when the channel associated with the given connectionId has
+     * an exception is thrown processing message.
+     */
+    void exceptionCaught(TransportException cause, ConnectionId connectionId);
 }

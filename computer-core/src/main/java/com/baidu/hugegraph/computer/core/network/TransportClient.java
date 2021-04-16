@@ -19,11 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
-import com.baidu.hugegraph.computer.core.config.Config;
-
-import io.netty.buffer.ByteBuf;
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
 /**
  * This is used for worker to send buffer to other worker. The whole process
@@ -31,31 +31,49 @@ import io.netty.buffer.ByteBuf;
  * called only once. {@link #send} is called zero or more times.
  * {@link #finishSession()} is called only once.
  */
-public interface Transport4Client {
-
-    /**
-     * Init the connection from client to server. This method is called only
-     * once. MAX_PENDING_REQUESTS is set in config
-     * @throws IOException if can't create connection.
-     */
-    void init(Config config, String hostname, int port) throws IOException;
+public interface TransportClient {
 
     /**
      * This method is called before an iteration of sending buffers.
      */
-    void startSession();
+    void startSession() throws TransportException;
 
     /**
-     * Send the buffer to the server. Block the caller if busy.
+     * Send the buffer to the server.
+     * Return false if unable send data immediately.
      * This method is called zero or many times in iteration.
-     * @throws IOException if failed, the job will fail.
+     * @throws TransportException if failed, the job will fail.
      */
-    void send(byte messageType, int partition, ByteBuf buffer)
-              throws IOException;
+    boolean send(MessageType messageType, int partition, ByteBuffer buffer)
+                 throws TransportException;
 
     /**
      * This method is called after an iteration. It will block the caller to
      * make sure the buffers sent be received by target workers.
      */
-    void finishSession() throws IOException;
+    void finishSession() throws TransportException;
+
+    /**
+     * Get the {@link ConnectionId}
+     */
+    ConnectionId connectionId();
+
+    /**
+     * Get the remote SocketAddress
+     */
+    InetSocketAddress remoteAddress();
+
+    /**
+     * To check whether the connection is active to use
+     * @return true if connection is active
+     */
+    boolean active();
+
+    /**
+     * Close the client.
+     * NOTE: If the client is created with {@link ConnectionManager}, need to
+     * use {@link ConnectionManager#closeClient(ConnectionId)} to close it,
+     * otherwise there will be unsafe risks.
+     */
+    void close();
 }

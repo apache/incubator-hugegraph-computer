@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.config;
 
 import static com.baidu.hugegraph.config.OptionChecker.allowValues;
 import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
+import static com.baidu.hugegraph.config.OptionChecker.nonNegativeInt;
 import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 
 import java.util.Set;
@@ -30,6 +31,8 @@ import com.baidu.hugegraph.computer.core.aggregator.MasterAggrManager;
 import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.baidu.hugegraph.computer.core.network.NettyTransportProvider;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.google.common.collect.ImmutableSet;
@@ -241,26 +244,6 @@ public class ComputerOptions extends OptionHolder {
                     TimeUnit.SECONDS.toMillis(30L)
             );
 
-    public static final ConfigOption<Integer> WORKER_DATA_PORT_START =
-            new ConfigOption<>(
-                    "worker.data_port_start",
-                    "The start of range [data_port_start, data_port_end]. " +
-                    "The worker will choose one from small to large of the " +
-                    "range for data transportation.",
-                    positiveInt(),
-                    11000
-            );
-
-    public static final ConfigOption<Integer> WORKER_DATA_PORT_END =
-            new ConfigOption<>(
-                    "worker.data_port_end",
-                    "The end of range [data_port_start, data_port_end]. " +
-                    "The worker will choose one from small to large of the " +
-                    "range for data transportation.",
-                    positiveInt(),
-                    12000
-            );
-
     public static final ConfigOption<Class<?>> WORKER_PARTITIONER =
             new ConfigOption<>(
                     "worker.partitioner",
@@ -332,5 +315,178 @@ public class ComputerOptions extends OptionHolder {
                     "The graph name to load data and write results back.",
                     disallowEmpty(),
                     "hugegraph"
+            );
+
+    public static final ConfigOption<String> TRANSPORT_SERVER_HOST =
+            new ConfigOption<>(
+                    "transport.server_host",
+                    "The server bind host.",
+                    disallowEmpty(),
+                    "127.0.0.1"
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_SERVER_PORT =
+            new ConfigOption<>(
+                    "transport.server_port",
+                    "The server bind port, if it is zero " +
+                    "will let the system pick up an ephemeral port.",
+                    nonNegativeInt(),
+                    0
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_SERVER_THREADS =
+            new ConfigOption<>(
+                    "transport.server_threads",
+                    "The number of transport threads for server, the default " +
+                    "value is CPUs.",
+                    positiveInt(),
+                    TransportConf.NUMBER_CPU_CORES
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
+            new ConfigOption<>(
+                    "transport.client_threads",
+                    "The number of transport threads for client, the default " +
+                    "value is CPUs.",
+                    positiveInt(),
+                    TransportConf.NUMBER_CPU_CORES
+            );
+
+    public static final ConfigOption<Class<?>> TRANSPORT_PROVIDER_CLASS =
+            new ConfigOption<>(
+                    "transport.provider_class",
+                    "The transport provider, currently only supports Netty.",
+                    disallowEmpty(),
+                    NettyTransportProvider.class
+            );
+
+    public static final ConfigOption<String> TRANSPORT_IO_MODE =
+            new ConfigOption<>(
+                    "transport.io_mode",
+                    "The network IO Mode, either 'NIO', 'EPOLL', 'AUTO', the " +
+                    "'AUTO' means selecting the property mode automatically.",
+                    allowValues("NIO", "EPOLL", "AUTO"),
+                    "AUTO"
+            );
+
+    public static final ConfigOption<Boolean> TRANSPORT_EPOLL_LT =
+            new ConfigOption<>(
+                    "transport.transport_epoll_lt",
+                    "Whether enable EPOLL level-trigger.",
+                    allowValues(true, false),
+                    false
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
+            new ConfigOption<>(
+                    "transport.send_buffer_size",
+                    "The network send buffer size, 0 means using system " +
+                    "defaults.",
+                    nonNegativeInt(),
+                    0
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_RECEIVE_BUFFER_SIZE =
+            new ConfigOption<>(
+                    "transport.receive_buffer_size",
+                    "The network receive buffer size, 0 means using system " +
+                    "defaults.",
+                    nonNegativeInt(),
+                    0
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
+            new ConfigOption<>(
+                    "transport.backlog",
+                    "The server connection backlog, 0 means using system " +
+                    "defaults.",
+                    nonNegativeInt(),
+                    0
+            );
+
+    public static final ConfigOption<Long> TRANSPORT_CLIENT_CONNECT_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.client_connect_timeout",
+                    "The timeout(in ms) of client connect to server.",
+                    positiveInt(),
+                    3000L
+            );
+
+    public static final ConfigOption<Long> TRANSPORT_CLOSE_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.close_timeout",
+                    "The timeout(in ms) of close server or close client.",
+                    positiveInt(),
+                    10_000L
+            );
+
+    public static final ConfigOption<Long> TRANSPORT_SYNC_REQUEST_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.sync_request_timeout",
+                    "The timeout(in ms) to wait response after " +
+                    "sending sync-request.",
+                    positiveInt(),
+                    5_000L
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_NETWORK_RETRIES =
+            new ConfigOption<>(
+                    "transport.network_retries",
+                    "The number of retry attempts for network communication," +
+                    "if network unstable.",
+                    nonNegativeInt(),
+                    3
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_MAX_PENDING_REQUESTS =
+            new ConfigOption<>(
+                    "transport.max_pending_requests",
+                    "The max number of client unreceived ack, " +
+                    "if the number of unreceived ack greater than it, " +
+                    "it will block the client from calling send.",
+                    positiveInt(),
+                    50
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
+            new ConfigOption<>(
+                    "transport.min_pending_requests",
+                    "The minimum number of client unreceived ack, " +
+                    "if the number of unreceived ack less than it, " +
+                    "it will wake the client from calling send.",
+                    positiveInt(),
+                    5
+            );
+
+    public static final ConfigOption<Long> TRANSPORT_MIN_ACK_INTERVAL =
+            new ConfigOption<>(
+                    "transport.min_ack_interval",
+                    "The minimum interval(in ms) of server reply ack.",
+                    positiveInt(),
+                    200L
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_INTERVAL =
+            new ConfigOption<>(
+                    "transport.heartbeat_interval_seconds",
+                    "Time minimum interval(in seconds) of send heartbeat.",
+                    positiveInt(),
+                    60
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.heartbeat_timeout_seconds",
+                    "The max timeout(in seconds) of heartbeat.",
+                    positiveInt(),
+                    120
+            );
+
+    public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
+            new ConfigOption<>(
+                    "transport.transport_tcp_keep_alive",
+                    "Whether enable TCP keep-alive.",
+                    allowValues(true, false),
+                    true
             );
 }

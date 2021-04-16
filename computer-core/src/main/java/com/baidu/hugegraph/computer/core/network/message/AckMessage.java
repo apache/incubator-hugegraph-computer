@@ -17,18 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.message;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import io.netty.buffer.ByteBuf;
 
-public interface MessageHandler extends TransportHandler {
+public class AckMessage extends AbstractMessage implements ResponseMessage {
 
-    /**
-     * Handle the buffer received. There are two buffer list for a partition,
-     * one for sorting and one for receiving new buffers. It may block the
-     * caller if the receiving list reached threshold and the sorting list is
-     * sorting in process.
-     */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    public AckMessage(int ackId) {
+        super(ackId);
+    }
+
+    public AckMessage(int ackId, int partition) {
+        super(ackId, partition);
+    }
+
+    @Override
+    public MessageType type() {
+        return MessageType.ACK;
+    }
+
+    public static AckMessage parseFrom(ByteBuf buf) {
+        int ackId = buf.readInt();
+        int partition = buf.readInt();
+        // Skip body-length
+        buf.skipBytes(Integer.BYTES);
+        return new AckMessage(ackId, partition);
+    }
 }
