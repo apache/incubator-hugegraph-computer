@@ -420,6 +420,14 @@ public class ComputerOptions extends OptionHolder {
                     10_000L
             );
 
+    public static final ConfigOption<Long> TRANSPORT_SYNC_REQUEST_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.sync_request_timeout",
+                    "The timeout(in ms) of send sync request wait response.",
+                    positiveInt(),
+                    5_000L
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_NETWORK_RETRIES =
             new ConfigOption<>(
                     "transport.network_retries",

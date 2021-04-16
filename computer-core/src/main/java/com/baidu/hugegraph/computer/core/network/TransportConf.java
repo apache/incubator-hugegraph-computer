@@ -142,6 +142,10 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_CLOSE_TIMEOUT);
     }
 
+    public long syncRequestTimeout() {
+        return this.config.get(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT);
+    }
+
     /**
      * The max number of request allowed to unreceived ack.
      * Note: If the number of unreceived ack greater than
