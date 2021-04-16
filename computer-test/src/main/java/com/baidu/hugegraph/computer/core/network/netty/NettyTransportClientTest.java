@@ -70,13 +70,16 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testFinishSession() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        client.startSession();
         client.finishSession();
     }
 
     @Test
     public void testSend() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        client.startSession();
         client.send(MessageType.MSG, 1,
                     ByteBuffer.wrap(StringEncoding.encode("hello")));
+        client.finishSession();
     }
 }

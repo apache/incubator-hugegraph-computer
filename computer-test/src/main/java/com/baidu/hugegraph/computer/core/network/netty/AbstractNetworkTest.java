@@ -53,6 +53,7 @@ public abstract class AbstractNetworkTest {
 
     private static final Map<ConfigOption<?>, String> OPTIONS = new HashMap<>();
     protected static Config config;
+    protected static TransportConf conf;
     protected static MessageHandler serverHandler;
     protected static ClientHandler clientHandler;
     protected static ConnectionManager connectionManager;
@@ -99,6 +100,7 @@ public abstract class AbstractNetworkTest {
 
         UnitTestBase.updateWithRequiredOptions(objects);
         config = ComputerContext.instance().config();
+        conf = TransportConf.wrapConfig(config);
         serverHandler = Mockito.spy(new MockMessageHandler());
         clientHandler = Mockito.spy(new MockClientHandler());
         connectionManager = new TransportConnectionManager();

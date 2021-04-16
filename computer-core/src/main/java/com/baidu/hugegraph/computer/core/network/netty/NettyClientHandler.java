@@ -22,10 +22,13 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
-import com.baidu.hugegraph.computer.core.network.message.Message;
+import com.baidu.hugegraph.computer.core.network.message.AckMessage;
+import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.Log;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 public class NettyClientHandler extends AbstractNettyHandler {
@@ -39,14 +42,15 @@ public class NettyClientHandler extends AbstractNettyHandler {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx,
-                                Message message) throws Exception {
-        // TODO: handle client message
+    protected void processAckMessage(ChannelHandlerContext ctx,
+                                     Channel channel, AckMessage ackMessage) {
+        int ackId = ackMessage.ackId();
+        this.session().receiveAck(ackId);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        this.client.handler().channelInactive(this.client.connectionId());
+        this.transportHandler().channelInactive(this.client.connectionId());
         super.channelInactive(ctx);
     }
 
@@ -58,11 +62,22 @@ public class NettyClientHandler extends AbstractNettyHandler {
             exception = (TransportException) cause;
         } else {
             exception = new TransportException(
-                        "Exception on client receive data from %s",
-                        cause, TransportUtil.remoteAddress(ctx.channel()));
+                        "%s when the client receive data from '%s'",
+                        cause, cause.getMessage(),
+                        TransportUtil.remoteAddress(ctx.channel()));
         }
 
         this.client.handler().exceptionCaught(exception,
                                               this.client.connectionId());
+    }
+
+    @Override
+    protected ClientHandler transportHandler() {
+        return this.client.handler();
+    }
+
+    @Override
+    protected ClientSession session() {
+        return this.client.session();
     }
 }

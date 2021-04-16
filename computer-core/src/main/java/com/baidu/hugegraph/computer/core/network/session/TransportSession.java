@@ -19,34 +19,67 @@
 
 package com.baidu.hugegraph.computer.core.network.session;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportStatus;
 
 public abstract class TransportSession {
 
-    protected volatile TransportStatus status;
-    protected final AtomicInteger maxRequestId;
+    public static final int SEQ_INIT_VALUE = -1;
+    public static final int START_REQUEST_ID = 0;
 
-    protected TransportSession() {
+    protected static final AtomicIntegerFieldUpdater<TransportSession>
+              MAX_REQUEST_ID_UPDATER =
+              AtomicIntegerFieldUpdater.newUpdater(TransportSession.class,
+                                                   "maxRequestId");
+
+    protected final TransportConf conf;
+    protected volatile TransportStatus status;
+    protected volatile int maxRequestId;
+    protected volatile int maxAckId;
+    protected volatile int finishId;
+
+    protected TransportSession(TransportConf conf) {
+        this.conf = conf;
         this.status = TransportStatus.READY;
-        this.maxRequestId = new AtomicInteger(-1);
+        this.maxRequestId = SEQ_INIT_VALUE;
+        this.finishId = SEQ_INIT_VALUE;
+        this.maxAckId = SEQ_INIT_VALUE;
+    }
+
+    protected void ready() {
+        this.maxRequestId = SEQ_INIT_VALUE;
+        this.finishId = SEQ_INIT_VALUE;
+        this.maxAckId = SEQ_INIT_VALUE;
+        this.status = TransportStatus.READY;
+    }
+
+    protected void establish() {
+        this.status = TransportStatus.ESTABLISH;
     }
 
     public TransportStatus status() {
         return this.status;
     }
 
-    public void ready() {
-        this.maxRequestId.set(-1);
-        this.status = TransportStatus.READY;
-    }
-
-    public void establish() {
-        this.status = TransportStatus.ESTABLISH;
+    public int nextRequestId() {
+        return MAX_REQUEST_ID_UPDATER.incrementAndGet(this);
     }
 
     public int maxRequestId() {
-        return this.maxRequestId.get();
+        return this.finishId;
     }
+
+    public int maxAckId() {
+        return this.maxAckId;
+    }
+
+    public int finishId() {
+        return this.finishId;
+    }
+
+    public abstract void startComplete();
+
+    public abstract void finishComplete();
 }

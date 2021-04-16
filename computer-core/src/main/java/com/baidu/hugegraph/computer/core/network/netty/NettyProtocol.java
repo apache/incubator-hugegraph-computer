@@ -179,7 +179,7 @@ public class NettyProtocol {
     }
 
     private NettyServerHandler newNettyServerHandler(MessageHandler handler) {
-        ServerSession serverSession = new ServerSession();
+        ServerSession serverSession = new ServerSession(this.conf);
         return new NettyServerHandler(serverSession, handler);
     }
 

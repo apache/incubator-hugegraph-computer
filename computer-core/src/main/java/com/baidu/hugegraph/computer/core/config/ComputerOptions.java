@@ -426,7 +426,7 @@ public class ComputerOptions extends OptionHolder {
                     "The timeout(in ms) to wait response after " +
                     "sending sync-request.",
                     positiveInt(),
-                    5_000L
+                    50_000L
             );
 
     public static final ConfigOption<Integer> TRANSPORT_NETWORK_RETRIES =
