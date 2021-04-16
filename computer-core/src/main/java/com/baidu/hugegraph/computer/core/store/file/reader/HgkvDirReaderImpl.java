@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.sort.util.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.util.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.CloseableIterator;
-import com.baidu.hugegraph.computer.core.store.base.DefaultKvEntry;
-import com.baidu.hugegraph.computer.core.store.base.KvEntry;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.DefaultKvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
@@ -45,25 +45,23 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
 
     @Override
     public CloseableIterator<KvEntry> iterator() {
-        CloseableIterator<KvEntry> itr;
         try {
-            itr = new Itr(this.hgkvDir);
+            return new KvEntryIter(this.hgkvDir);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
-        return itr;
     }
 
-    private static class Itr implements CloseableIterator<KvEntry> {
+    private static class KvEntryIter implements CloseableIterator<KvEntry> {
 
         private final Iterator<HgkvFile> segments;
         private long numEntries;
-        private CloseableIterator<Pointer> keyItr;
+        private CloseableIterator<Pointer> keyIter;
         private Pointer last;
 
-        public Itr(HgkvDir hgkvDir) throws IOException {
+        public KvEntryIter(HgkvDir hgkvDir) throws IOException {
             this.segments = hgkvDir.segments().iterator();
-            this.numEntries = hgkvDir.numEntries();
+            this.numEntries = hgkvDir.entriesSize();
         }
 
         @Override
@@ -114,10 +112,10 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
 
         @Override
         public void close() throws IOException {
-            this.keyItr.close();
+            this.keyIter.close();
         }
 
-        private CloseableIterator<Pointer> nextKeyItr() throws IOException {
+        private CloseableIterator<Pointer> nextKeyIter() throws IOException {
             CloseableIterator<Pointer> iterator;
             while (this.segments.hasNext()) {
                 HgkvFile segment = this.segments.next();
@@ -133,15 +131,15 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
         }
 
         private Pointer nextKey() throws IOException {
-            if (this.keyItr == null) {
-                this.keyItr = this.nextKeyItr();
+            if (this.keyIter == null) {
+                this.keyIter = this.nextKeyIter();
             }
-            if (!this.keyItr.hasNext()) {
-                this.keyItr.close();
-                this.keyItr = this.nextKeyItr();
+            if (!this.keyIter.hasNext()) {
+                this.keyIter.close();
+                this.keyIter = this.nextKeyIter();
             }
             this.numEntries--;
-            return this.keyItr.next();
+            return this.keyIter.next();
         }
 
         private boolean hasNextKey() {

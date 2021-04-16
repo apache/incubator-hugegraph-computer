@@ -22,11 +22,13 @@ package com.baidu.hugegraph.computer.core.sort;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.core.sort.sorter.EntriesUtilTest;
 import com.baidu.hugegraph.computer.core.sort.sorting.InputsSortingTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    InputsSortingTest.class
+    InputsSortingTest.class,
+    EntriesUtilTest.class
 })
 public class SorterTestSuite {
 }

@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.store.file.builder;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public interface BlockBuilder {
 

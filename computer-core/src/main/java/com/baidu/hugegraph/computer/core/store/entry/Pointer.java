@@ -17,34 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.base;
+package com.baidu.hugegraph.computer.core.store.entry;
 
-import java.util.Iterator;
-import java.util.List;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 
-import com.google.common.collect.ImmutableList;
+public interface Pointer extends Range, Comparable<Pointer> {
 
-public class DefaultKvEntry implements KvEntry {
-
-    private final Pointer key;
-    private final List<Pointer> values;
-
-    public DefaultKvEntry(Pointer key, ImmutableList<Pointer> values) {
-        this.key = key;
-        this.values = values;
-    }
-
-    public DefaultKvEntry(Pointer key, List<Pointer> values) {
-        this(key, ImmutableList.copyOf(values));
-    }
-
-    @Override
-    public Pointer key() {
-        return this.key;
-    }
-
-    @Override
-    public Iterator<Pointer> values() {
-        return this.values.iterator();
-    }
+    RandomAccessInput input();
 }

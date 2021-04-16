@@ -22,32 +22,29 @@ package com.baidu.hugegraph.computer.core.store.file.builder;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.store.base.KvEntry;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirBuilderImpl implements HgkvDirBuilder {
 
+    private final Config config;
     // The max byte size of hgkv-file data
-    private static final long MAX_ENTRIES_SIZE;
+    private final long maxEntriesBytes;
 
     private HgkvFileBuilder segmentBuilder;
     private final HgkvDir dir;
     private boolean finished;
 
-    static {
-        Config config = ComputerContext.instance().config();
-        MAX_ENTRIES_SIZE = config.get(ComputerOptions.HGKVFILE_SIZE);
-    }
-
-    public HgkvDirBuilderImpl(String path) throws IOException {
+    public HgkvDirBuilderImpl(String path, Config config) throws IOException {
+        this.config = config;
+        this.maxEntriesBytes = config.get(ComputerOptions.HGKV_MAX_FILE_SIZE);
         this.dir = HgkvDirImpl.create(path);
-        this.segmentBuilder = this.nextSegmentBuilder(this.dir);
+        this.segmentBuilder = this.nextSegmentBuilder(this.dir, config);
         this.finished = false;
     }
 
@@ -66,11 +63,12 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
             // If the segment size is larger than FILE_MAX_SIZE after add entry
             // Stop build of the current segment and create a new segment.
             long entrySize = this.segmentBuilder.sizeOfEntry(key, value);
-            long segmentSize = this.segmentBuilder.entriesSize();
-            if ((entrySize + segmentSize) > MAX_ENTRIES_SIZE) {
+            long segmentSize = this.segmentBuilder.dataSize();
+            if ((entrySize + segmentSize) > this.maxEntriesBytes) {
                 this.segmentBuilder.finish();
                 // Create new hgkvFile.
-                this.segmentBuilder = this.nextSegmentBuilder(this.dir);
+                this.segmentBuilder = this.nextSegmentBuilder(this.dir,
+                                                              this.config);
             }
             this.segmentBuilder.add(key, value);
         }
@@ -90,7 +88,8 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
         this.finish();
     }
 
-    private HgkvFileBuilder nextSegmentBuilder(HgkvDir dir) throws IOException {
-        return new HgkvFileBuilderImpl(dir.nextSegmentPath());
+    private HgkvFileBuilder nextSegmentBuilder(HgkvDir dir, Config config)
+                                               throws IOException {
+        return new HgkvFileBuilderImpl(dir.nextSegmentPath(), config);
     }
 }

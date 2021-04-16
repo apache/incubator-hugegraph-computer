@@ -24,8 +24,8 @@ import java.util.ConcurrentModificationException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.store.base.DefaultPointer;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.DefaultPointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public class EntriesKeyInput implements InputIterator {
 
@@ -39,13 +39,11 @@ public class EntriesKeyInput implements InputIterator {
 
     @Override
     public boolean hasNext() {
-        boolean hasNext;
         try {
-            hasNext = this.input.available() > 0;
+            return this.input.available() > 0;
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
-        return hasNext;
     }
 
     @Override
@@ -63,10 +61,9 @@ public class EntriesKeyInput implements InputIterator {
             this.input.skip(this.input.readInt());
 
             this.position = this.input.position();
+            return new DefaultPointer(this.input, keyOffset, keyLength);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
-
-        return new DefaultPointer(this.input, keyOffset, keyLength);
     }
 }

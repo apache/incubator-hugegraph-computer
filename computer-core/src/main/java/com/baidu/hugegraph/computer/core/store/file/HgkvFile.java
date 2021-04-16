@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.store.file;
 
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public interface HgkvFile {
 
@@ -31,7 +31,7 @@ public interface HgkvFile {
     /**
      * Number of entries in file.
      */
-    long numEntries();
+    long entriesSize();
 
     /**
      * File version.
@@ -48,5 +48,8 @@ public interface HgkvFile {
      */
     Pointer min();
 
+    /**
+     * File verification string.
+     */
     String magic();
 }

@@ -26,8 +26,8 @@ import java.util.NoSuchElementException;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.computer.core.store.CloseableIterator;
-import com.baidu.hugegraph.computer.core.store.base.DefaultPointer;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.DefaultPointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFileImpl;
 
@@ -41,17 +41,17 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
 
     @Override
     public CloseableIterator<Pointer> iterator() throws IOException {
-        return new Itr(this.hgkvFile);
+        return new KeyIter(this.hgkvFile);
     }
 
-    private static class Itr implements CloseableIterator<Pointer> {
+    private static class KeyIter implements CloseableIterator<Pointer> {
 
         private final BufferedFileInput input;
         private long numEntries;
         private long position;
 
-        public Itr(HgkvFile hgkvFile) throws IOException {
-            this.numEntries = hgkvFile.numEntries();
+        public KeyIter(HgkvFile hgkvFile) throws IOException {
+            this.numEntries = hgkvFile.entriesSize();
             this.input = new BufferedFileInput(new File(hgkvFile.path()));
             this.position = 0;
         }

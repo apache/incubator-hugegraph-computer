@@ -25,8 +25,8 @@ import java.util.regex.Pattern;
 
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.store.base.DefaultPointer;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.DefaultPointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvFileImpl extends AbstractHgkvFile {
@@ -55,7 +55,7 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         File file = new File(path);
         E.checkArgument(file.getName().matches(NAME_REGEX),
                         "Illegal file name");
-        E.checkArgument(!file.exists(), "File already exists, path:[%s]",
+        E.checkArgument(!file.exists(), "File already exists, path: '%s'",
                         file.getPath());
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
@@ -74,75 +74,73 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         E.checkArgumentNotNull(file, "File must not be null");
         E.checkArgument(file.getName().matches(NAME_REGEX),
                         "Illegal file name");
-        E.checkArgument(file.exists(), "File not exists, path:[%s]",
+        E.checkArgument(file.exists(), "File not exists, path: '%s'",
                         file.getPath());
-        E.checkArgument(file.isFile(), "Path is not file, path:[%s]",
+        E.checkArgument(file.isFile(), "Path is not file, path: '%s'",
                         file.getPath());
 
-        return readFooter(file);
+        HgkvFileImpl hgkvFile = new HgkvFileImpl(file.getPath());
+        hgkvFile.readFooter();
+        return hgkvFile;
     }
 
-    private static HgkvFile readFooter(File file) throws IOException {
-        HgkvFileImpl hgkvFile = new HgkvFileImpl(file.getPath());
+    private void readFooter() throws IOException {
+        File file = new File(this.path);
         try (BufferedFileInput input = new BufferedFileInput(file)) {
             long fileSize = file.length();
 
             // Read magic
             long magicOffset = fileSize - HgkvFileImpl.MAGIC.length();
-            hgkvFile.magic = readMagic(input, magicOffset, file.getPath());
+            this.magic = this.readMagic(input, magicOffset, file.getPath());
 
             // Read footer length
             long footerLengthOffset = magicOffset - Integer.BYTES;
-            int footerLength = readFooterLength(input, footerLengthOffset);
+            int footerLength = this.readFooterLength(input, footerLengthOffset);
 
             // Read numEntries
             long numEntriesOffset = fileSize - footerLength;
-            hgkvFile.numEntries = readNumEntries(input, numEntriesOffset);
+            this.numEntries = this.readNumEntries(input, numEntriesOffset);
 
             // Read max key and min key
             long maxOffset = numEntriesOffset + Long.BYTES;
             long minOffset = maxOffset + Long.BYTES;
-            if (hgkvFile.numEntries > 0) {
-                hgkvFile.max = readMax(input, maxOffset);
-                hgkvFile.min = readMin(input, minOffset);
+            if (this.numEntries > 0) {
+                this.max = this.readMax(input, maxOffset);
+                this.min = this.readMin(input, minOffset);
             }
 
             // Read Version
             long dataBlockLengthOffset = minOffset + Long.BYTES;
             long indexBlockLengthOffset = dataBlockLengthOffset + Long.BYTES;
             long versionOffset = indexBlockLengthOffset + Long.BYTES;
-            hgkvFile.version = readVersion(input, versionOffset);
+            this.version = this.readVersion(input, versionOffset);
         }
-
-        return hgkvFile;
     }
 
-    private static String readMagic(RandomAccessInput input, long magicOffset,
-                                    String path) throws IOException {
+    private String readMagic(RandomAccessInput input, long magicOffset,
+                             String path) throws IOException {
         input.seek(magicOffset);
         byte[] magicBytes = input.readBytes(HgkvFileImpl.MAGIC.length());
         String fileMagic = new String(magicBytes);
-        E.checkArgument(HgkvFileImpl.MAGIC.equals(fileMagic), "Illegal file " +
-                                                              "[%s]", path);
+        E.checkArgument(HgkvFileImpl.MAGIC.equals(fileMagic),
+                        "Illegal file '%s'", path);
         return fileMagic;
     }
 
-    private static int readFooterLength(RandomAccessInput input,
-                                        long footerLengthOffset)
-                                        throws IOException {
+    private int readFooterLength(RandomAccessInput input,
+                                 long footerLengthOffset) throws IOException {
         input.seek(footerLengthOffset);
         return input.readInt();
     }
 
-    private static long readNumEntries(RandomAccessInput input,
-                                       long numEntriesOffset)
-                                       throws IOException {
+    private long readNumEntries(RandomAccessInput input,
+                                long numEntriesOffset) throws IOException {
         input.seek(numEntriesOffset);
         return input.readLong();
     }
 
-    private static Pointer readMax(RandomAccessInput input, long maxOffset)
-                                   throws IOException {
+    private Pointer readMax(RandomAccessInput input, long maxOffset)
+                            throws IOException {
         input.seek(maxOffset);
         long maxKeyOffset = input.readLong();
         input.seek(maxKeyOffset);
@@ -150,8 +148,8 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         return new DefaultPointer(input, input.position(), maxKeyLength);
     }
 
-    private static Pointer readMin(RandomAccessInput input, long minOffset)
-                                   throws IOException {
+    private Pointer readMin(RandomAccessInput input, long minOffset)
+                            throws IOException {
         input.seek(minOffset);
         long maxKeyOffset = input.readLong();
         input.seek(maxKeyOffset);
@@ -159,9 +157,8 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         return new DefaultPointer(input, input.position(), minKeyLength);
     }
 
-    private static String readVersion(RandomAccessInput input,
-                                      long versionOffset)
-                                      throws IOException {
+    private String readVersion(RandomAccessInput input, long versionOffset)
+                               throws IOException {
         input.seek(versionOffset);
         int versionLength = input.readInt();
         byte[] version = input.readBytes(versionLength);

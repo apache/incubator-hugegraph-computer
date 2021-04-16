@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.store.file.builder;
 import java.io.Closeable;
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.store.base.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
 public interface HgkvDirBuilder extends Closeable {
 

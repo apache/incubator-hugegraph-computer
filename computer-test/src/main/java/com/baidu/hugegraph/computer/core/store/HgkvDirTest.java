@@ -31,9 +31,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.store.base.KvEntry;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFileImpl;
@@ -46,11 +48,13 @@ import com.google.common.collect.ImmutableList;
 
 public class HgkvDirTest {
 
+    private static final Config CONFIG = ComputerContext.instance().config();
+
     @BeforeClass
     public static void setup() {
         UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.HGKVFILE_SIZE, "32",
-                ComputerOptions.DATABLOCK_SIZE, "16"
+                ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
+                ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
         );
     }
 
@@ -67,7 +71,7 @@ public class HgkvDirTest {
         String userDir = System.getProperty("user.home");
         String basePath = userDir + File.separator + "hgkv";
         String dirPath = basePath + File.separator + "test_dir";
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(dirPath)) {
+        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(dirPath, CONFIG)) {
             for (KvEntry kvEntry : kvEntries) {
                 builder.write(kvEntry);
             }
@@ -77,7 +81,7 @@ public class HgkvDirTest {
             HgkvDir dir = HgkvDirImpl.open(dirPath);
             Assert.assertEquals(HgkvFileImpl.MAGIC, dir.magic());
             Assert.assertEquals(HgkvFileImpl.VERSION, dir.version());
-            Assert.assertEquals(5, dir.numEntries());
+            Assert.assertEquals(5, dir.entriesSize());
 
             Pointer max = dir.max();
             max.input().seek(max.offset());
@@ -97,13 +101,15 @@ public class HgkvDirTest {
     public void testExceptionCase() throws IOException {
         // Path isn't directory
         File file = File.createTempFile(UUID.randomUUID().toString(), null);
-        Assert.assertThrows(IllegalArgumentException.class,
-                            () -> HgkvDirImpl.open(file.getPath()));
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            HgkvDirImpl.open(file.getPath());
+        }, e -> Assert.assertTrue(e.getMessage().contains("not directory")));
         FileUtils.deleteQuietly(file);
 
         // Open not exists file
-        Assert.assertThrows(IllegalArgumentException.class,
-                            () -> HgkvDirImpl.open(file.getPath()));
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            HgkvDirImpl.open(file.getPath());
+        }, e -> Assert.assertTrue(e.getMessage().contains("Path not exists")));
     }
 
     @Test

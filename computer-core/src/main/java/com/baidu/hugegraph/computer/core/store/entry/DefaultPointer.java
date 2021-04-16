@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.base;
+package com.baidu.hugegraph.computer.core.store.entry;
 
 import java.io.IOException;
 
@@ -53,13 +53,12 @@ public class DefaultPointer implements Pointer {
 
     @Override
     public int compareTo(Pointer other) {
-        int result;
         try {
-            result = this.input.compare(this.offset, this.length, other.input(),
-                                        other.offset(), other.length());
+            return this.input.compare(this.offset, this.length, other.input(),
+                                      other.offset(), other.length());
         } catch (IOException e) {
-            throw new ComputerException(e.getMessage(), e);
+            throw new ComputerException("Error when compare tow pointers: %s",
+                                        e.getMessage(), e);
         }
-        return result;
     }
 }

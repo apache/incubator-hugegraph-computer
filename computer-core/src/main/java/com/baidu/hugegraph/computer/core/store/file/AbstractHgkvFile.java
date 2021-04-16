@@ -19,15 +19,15 @@
 
 package com.baidu.hugegraph.computer.core.store.file;
 
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public abstract class AbstractHgkvFile implements HgkvFile {
 
-    protected String path;
+    protected final String path;
     protected long numEntries;
-    protected String version;
     protected Pointer max;
     protected Pointer min;
+    protected String version;
     protected String magic;
 
     public AbstractHgkvFile(String path) {
@@ -40,7 +40,7 @@ public abstract class AbstractHgkvFile implements HgkvFile {
     }
 
     @Override
-    public long numEntries() {
+    public long entriesSize() {
         return this.numEntries;
     }
 

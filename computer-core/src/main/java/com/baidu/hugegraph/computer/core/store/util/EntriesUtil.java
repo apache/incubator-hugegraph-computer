@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.util;
+package com.baidu.hugegraph.computer.core.store.util;
 
 
 import java.io.IOException;
@@ -26,10 +26,10 @@ import java.util.List;
 
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.store.EntriesKeyInput;
-import com.baidu.hugegraph.computer.core.store.base.DefaultPointer;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.DefaultPointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
-public class EntriesUtil {
+public final class EntriesUtil {
 
     private static final int DEFAULT_CAPACITY = 100000;
 

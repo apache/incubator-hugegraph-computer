@@ -22,8 +22,8 @@ package com.baidu.hugegraph.computer.core.store.file;
 import java.util.List;
 
 /**
- * A HgkvDir is a complete data file, It may consist of multiple segments.
- * The data between segments is ordered.
+ * One HgkvDir consists of segments, and each segment is a HgkvFile.
+ * one HgkvFile is a complete file, one HgkvDir consists of multiple HgkvFile.
  */
 public interface HgkvDir extends HgkvFile {
 

@@ -17,32 +17,35 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.file.builder;
+package com.baidu.hugegraph.computer.core.sort.sorter;
 
-import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.store.util.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
-public interface HgkvFileBuilder extends Closeable {
+public class EntriesUtilTest {
 
-    /**
-     * Add kv entry to file.
-     */
-    void add(Pointer key, Pointer value) throws IOException;
+    @Test
+    public void testSplit() throws IOException {
+        List<Integer> data = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            data.add(i);
+            data.add(i);
+        }
 
-    /**
-     * Return size of new entry.
-     */
-    long sizeOfEntry(Pointer key, Pointer value);
-
-    /**
-     * Finish build file.
-     */
-    void finish() throws IOException;
-
-    /**
-     * Returns the size of entry that has been written.
-     */
-    long dataSize();
+        RandomAccessInput input = TestData.inputFromMap(data);
+        List<Pointer> pointers = EntriesUtil.splitInput(input);
+        for (int i = 0, j = 0; i < pointers.size(); i++, j += 2) {
+            Pointer pointer = pointers.get(i);
+            Integer splitData = TestData.dataFromPointer(pointer);
+            Assert.assertEquals(data.get(j), splitData);
+        }
+    }
 }

@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.store.file.reader;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.store.CloseableIterator;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public interface HgkvFileReader {
 

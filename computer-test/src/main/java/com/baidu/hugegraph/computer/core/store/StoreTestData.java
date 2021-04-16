@@ -30,13 +30,15 @@ import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
-import com.baidu.hugegraph.computer.core.sort.util.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.base.DefaultKvEntry;
-import com.baidu.hugegraph.computer.core.store.base.KvEntry;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.util.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.DefaultKvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvFileBuilder;
@@ -45,6 +47,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class StoreTestData {
+
+    private static final Config CONFIG = ComputerContext.instance().config();
 
     public static List<Pointer> keysFromMap(List<Integer> map)
                                             throws IOException {
@@ -59,10 +63,10 @@ public class StoreTestData {
 
         RandomAccessInput input = new UnsafeByteArrayInput(data.buffer(),
                                                            data.position());
-        Iterator<Pointer> inputItr = new EntriesKeyInput(input);
+        Iterator<Pointer> inputIter = new EntriesKeyInput(input);
         List<Pointer> keys = new ArrayList<>();
-        while (inputItr.hasNext()) {
-            keys.add(inputItr.next());
+        while (inputIter.hasNext()) {
+            keys.add(inputIter.next());
         }
 
         return keys;
@@ -76,16 +80,16 @@ public class StoreTestData {
         }
 
         // Group by key
-        Iterator<Pointer> keysItr = keys.iterator();
-        Pointer last = keysItr.next();
+        Iterator<Pointer> keysIter = keys.iterator();
+        Pointer last = keysIter.next();
         List<Pointer> sameKeys = new ArrayList<>();
         sameKeys.add(last);
 
         List<KvEntry> entries = new ArrayList<>();
         while (true) {
             Pointer current = null;
-            if (keysItr.hasNext()) {
-                current = keysItr.next();
+            if (keysIter.hasNext()) {
+                current = keysIter.next();
                 if (last.compareTo(current) == 0) {
                     sameKeys.add(current);
                     continue;
@@ -122,7 +126,7 @@ public class StoreTestData {
     public static File hgkvDirFromMap(List<Integer> map, String path)
                                       throws IOException {
         File file = new File(path);
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path)) {
+        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
             List<KvEntry> entries = StoreTestData.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
                 builder.write(entry);
@@ -139,7 +143,7 @@ public class StoreTestData {
                                        throws IOException {
         File file = new File(path);
 
-        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path)) {
+        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path, CONFIG)) {
             Map<Pointer, Pointer> kvMap = StoreTestData.kvMapFromMap(map);
             for (Map.Entry<Pointer, Pointer> entry : kvMap.entrySet()) {
                 builder.add(entry.getKey(), entry.getValue());

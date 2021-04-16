@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import javax.ws.rs.NotSupportedException;
 
@@ -34,8 +33,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFileImpl;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvFileBuilder;
@@ -49,17 +50,18 @@ public class HgkvFileTest {
 
     private static final String FILE_DIR = System.getProperty("user.home") +
                                            File.separator + "hgkv";
+    private static final Config CONFIG = ComputerContext.instance().config();
 
     @BeforeClass
-    public static void setup() {
+    public static void init() {
         UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.HGKVFILE_SIZE, "32",
-                ComputerOptions.DATABLOCK_SIZE, "16"
+                ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
+                ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
         );
     }
 
     @AfterClass
-    public static void clean() throws IOException {
+    public static void clear() throws IOException {
         FileUtils.deleteDirectory(new File(FILE_DIR));
     }
 
@@ -88,7 +90,7 @@ public class HgkvFileTest {
             HgkvFile hgkvFile = HgkvFileImpl.open(file.getPath());
             Assert.assertEquals(HgkvFileImpl.MAGIC, hgkvFile.magic());
             Assert.assertEquals(HgkvFileImpl.VERSION, hgkvFile.version());
-            Assert.assertEquals(5, hgkvFile.numEntries());
+            Assert.assertEquals(5, hgkvFile.entriesSize());
             // Read max key
             Pointer max = hgkvFile.max();
             max.input().seek(max.offset());
@@ -108,17 +110,25 @@ public class HgkvFileTest {
     public void testExceptionCase() throws IOException {
         // Illegal file name.
         final String illName = FILE_DIR + File.separator + "file_1.hgkv";
-        Assert.assertThrows(IllegalArgumentException.class,
-                            () -> new HgkvFileBuilderImpl(illName));
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            new HgkvFileBuilderImpl(illName, CONFIG);
+        },
+        e -> Assert.assertTrue(e.getMessage().contains("Illegal file name")));
 
         // Exception to add key/value
         final String filePath = availableFilePath("1");
-        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(filePath)) {
-            Assert.assertThrows(NullPointerException.class,
-                                () -> builder.add(null, null));
+        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(filePath,
+                                                               CONFIG)) {
+            Assert.assertThrows(NullPointerException.class, () -> {
+                builder.add(null, null);
+            },
+            e -> Assert.assertEquals("The 'key' can't be null",
+                                     e.getMessage()));
             builder.finish();
-            Assert.assertThrows(NotSupportedException.class,
-                                () -> builder.add(null, null));
+            Assert.assertThrows(NotSupportedException.class, () -> {
+                builder.add(null, null);
+            },
+            e -> Assert.assertTrue(e.getMessage().contains("build finished")));
         } finally {
             FileUtils.deleteQuietly(new File(filePath));
         }
@@ -126,10 +136,12 @@ public class HgkvFileTest {
         // Open not exists file.
         File tempFile = null;
         try {
-            tempFile = File.createTempFile(UUID.randomUUID().toString(), null);
+            tempFile = new File(availableFilePath("1"));
             File finalTempFile = tempFile;
-            Assert.assertThrows(IllegalArgumentException.class,
-                                () -> HgkvFileImpl.open(finalTempFile));
+            Assert.assertThrows(IllegalArgumentException.class, () -> {
+                HgkvFileImpl.open(finalTempFile);
+            },
+            e -> Assert.assertTrue(e.getMessage().contains("File not exists")));
         } finally {
             FileUtils.deleteQuietly(tempFile);
         }

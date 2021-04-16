@@ -22,16 +22,16 @@ package com.baidu.hugegraph.computer.core.store.file.builder;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.store.base.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public class DataBlockBuilderImpl implements BlockBuilder {
 
     private final RandomAccessOutput output;
-    private long entriesSize;
+    private long entriesBytes;
 
     public DataBlockBuilderImpl(RandomAccessOutput output) {
         this.output = output;
-        this.entriesSize = 0;
+        this.entriesBytes = 0;
     }
 
     @Override
@@ -49,23 +49,23 @@ public class DataBlockBuilderImpl implements BlockBuilder {
 
     @Override
     public long size() {
-        return this.entriesSize;
+        return this.entriesBytes;
     }
 
     @Override
     public void finish() {
-        // Nothing to do.
+        // pass
     }
 
     @Override
     public void reset() {
-        this.entriesSize = 0;
+        this.entriesBytes = 0;
     }
 
     private void writePointer(RandomAccessOutput output, Pointer pointer)
                               throws IOException {
         output.writeInt((int) pointer.length());
         output.write(pointer.input(), pointer.offset(), pointer.length());
-        this.entriesSize += (Integer.BYTES + pointer.length());
+        this.entriesBytes += (Integer.BYTES + pointer.length());
     }
 }

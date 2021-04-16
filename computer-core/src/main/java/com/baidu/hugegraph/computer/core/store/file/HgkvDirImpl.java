@@ -46,22 +46,27 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     public static HgkvDir create(String path) throws IOException {
         File file = new File(path);
         E.checkArgument(!file.exists(),
-                        "Directory already exists, path:%s", file.getPath());
+                        "Can't create HgkvDir, because the directory" +
+                        " already exists. '%s'", file.getPath());
         file.mkdirs();
         return new HgkvDirImpl(path);
     }
 
     public static HgkvDir open(String path) throws IOException {
         File file = new File(path);
-        E.checkArgument(file.exists(), "Path not exists %s", file.getPath());
-        E.checkArgument(file.isDirectory(), "Path is not directory %s",
+        E.checkArgument(file.exists(), "Path not exists '%s'", file.getPath());
+        E.checkArgument(file.isDirectory(), "Path is not directory '%s'",
                         file.getPath());
-        return init(file);
+        return open(file);
     }
 
-    private static HgkvDir init(File file) throws IOException {
-        File[] files = file.listFiles(((dir, name) ->
-                                        name.matches(HgkvFileImpl.NAME_REGEX)));
+    private static File[] scanHgkvFiles(File dir) {
+        return dir.listFiles((dirName, name) ->
+                              name.matches(HgkvFileImpl.NAME_REGEX));
+    }
+
+    private static HgkvDir open(File file) throws IOException {
+        File[] files = scanHgkvFiles(file);
         assert files != null && files.length != 0;
 
         // Open segments
@@ -72,7 +77,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
         hgkvDir.magic = HgkvFileImpl.MAGIC;
         hgkvDir.version = HgkvFileImpl.VERSION;
         hgkvDir.numEntries = segments.stream()
-                                     .mapToLong(HgkvFile::numEntries)
+                                     .mapToLong(HgkvFile::entriesSize)
                                      .sum();
         hgkvDir.max = segments.stream()
                               .map(HgkvFile::max)
@@ -104,7 +109,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     private static int filePathToSegmentId(String path) {
         String fileName = path.substring(path.lastIndexOf(File.separator) + 1);
         Matcher matcher = HgkvFileImpl.FILE_NUM_PATTERN.matcher(fileName);
-        E.checkState(matcher.find(), "Illegal file name [%s]", fileName);
+        E.checkState(matcher.find(), "Illegal file name '%s'", fileName);
         return Integer.parseInt(matcher.group());
     }
 
