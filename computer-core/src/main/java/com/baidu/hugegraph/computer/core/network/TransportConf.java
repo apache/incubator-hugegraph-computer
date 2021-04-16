@@ -77,9 +77,6 @@ public class TransportConf {
         }
     }
 
-    /**
-     * The transport provider
-     */
     public TransportProvider transportProvider() {
         return this.config
                    .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
@@ -102,10 +99,6 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_BACKLOG);
     }
 
-    /**
-     * Number of threads used in the server EventLoop thread pool. Default to
-     * 0, which is CPUs.
-     */
     public int serverThreads() {
         return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
     }
@@ -146,26 +139,24 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT);
     }
 
-    /**
-     * The max number of request allowed to unreceived ack.
-     * Note: If the number of unreceived ack greater than
-     * TRANSPORT_MAX_PENDING_REQUESTS,
-     * {@link TransportClient#send} will unavailable
-     */
+    public int writeBufferHighMark() {
+        return this.config
+                   .get(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK);
+    }
+
+    public int writeBufferLowMark() {
+        return this.config
+                   .get(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK);
+    }
+
     public int maxPendingRequests() {
         return this.config.get(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS);
     }
 
-    /**
-     * The minimum number of client unreceived ack.
-     */
     public int minPendingRequests() {
         return this.config.get(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS);
     }
 
-    /**
-     * The minimum interval(in ms) of server reply ack.
-     */
     public long minAckInterval() {
         return this.config.get(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL);
     }

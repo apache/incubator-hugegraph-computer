@@ -39,8 +39,6 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     private static final int LENGTH_ADJUSTMENT = 0;
     private static final int INITIAL_BYTES_TO_STRIP = 0;
 
-    private ByteBuf frameHeaderBuf;
-
     public FrameDecoder() {
         super(AbstractMessage.MAX_MESSAGE_LENGTH,
               AbstractMessage.OFFSET_BODY_LENGTH,
@@ -80,8 +78,6 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("The FrameDecoder active from {}",
                   TransportUtil.remoteAddress(ctx.channel()));
-        this.frameHeaderBuf = ctx.alloc()
-                                 .directBuffer(AbstractMessage.HEADER_LENGTH);
         super.channelActive(ctx);
     }
 
@@ -92,7 +88,6 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         LOG.debug("The FrameDecoder inActive from {}",
                   TransportUtil.remoteAddress(ctx.channel()));
-        this.frameHeaderBuf.release();
         super.channelInactive(ctx);
     }
 }

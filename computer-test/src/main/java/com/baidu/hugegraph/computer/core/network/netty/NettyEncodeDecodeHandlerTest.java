@@ -25,28 +25,20 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.MockUnDecodeMessage;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
-import com.baidu.hugegraph.computer.core.network.message.FailMessage;
-import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.computer.core.network.message.PingMessage;
-import com.baidu.hugegraph.computer.core.network.message.PongMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.netty.codec.FrameDecoder;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.testutil.Whitebox;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.embedded.EmbeddedChannel;
 
 public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
@@ -56,29 +48,11 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testSendMsgWithMock() throws IOException {
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        int requestId = 99;
-        int partition = 1;
-        byte[] bytes = StringEncoding.encode("mock msg");
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        ManagedBuffer body = new NioManagedBuffer(buffer);
-        DataMessage dataMessage = new DataMessage(MessageType.MSG, requestId,
-                                                  partition, body);
-        client.channel().writeAndFlush(dataMessage)
-              .addListener(new ChannelFutureListenerOnWrite(clientHandler));
-
-        Mockito.verify(clientHandler, Mockito.timeout(2000L).times(1))
-               .channelActive(client.connectionId());
-
-        Mockito.verify(serverHandler, Mockito.timeout(2000L).times(1))
-               .channelActive(Mockito.any());
-    }
-
-    @Test
     public void testSendMsgWithEncoderExceptionMock() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        int requestId = 99;
+        client.startSession();
+
+        int requestId = 1;
         int partition = 1;
         byte[] bytes = StringEncoding.encode("mock msg");
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
@@ -92,7 +66,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
               .addListener(spyListener);
 
         Mockito.verify(clientHandler, Mockito.timeout(3000L).times(1))
-              .channelActive(Mockito.any());
+               .channelActive(Mockito.any());
         Mockito.verify(clientHandler, Mockito.timeout(3000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
         Mockito.verify(spyListener, Mockito.timeout(3000L).times(1))
@@ -165,62 +139,8 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
 
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
-        Mockito.verify(clientHandler, Mockito.timeout(5000L).times(1))
+        Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
-    }
-
-    @Test
-    public void testSendOtherMessageType() throws Exception {
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
-
-        Object listener = Whitebox.getInternalState(client, "listenerOnWrite");
-        ChannelFutureListener spyListener = (ChannelFutureListenerOnWrite)
-                                            Mockito.spy(listener);
-        Whitebox.setInternalState(client, "listenerOnWrite", spyListener);
-        int requestId = 99;
-        int partition = 1;
-        byte[] bytes = StringEncoding.encode("mock msg");
-        ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length).put(bytes);
-        // Flip to make it readable
-        buffer.flip();
-        DataMessage dataMessage = new DataMessage(MessageType.MSG,
-                                                  requestId, partition,
-                                                  new NioManagedBuffer(buffer));
-        FailMessage failMsg = new FailMessage(requestId,
-                                              TransportException.DEFAULT_CODE,
-                                              "mock fail msg");
-
-        Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
-                            "partition=1,hasBody=true,bodyLength=8]",
-                            dataMessage.toString());
-
-        final int times = 10;
-
-        for (int i = 0; i < times; i++) {
-            client.channel().writeAndFlush(dataMessage)
-                  .addListener(spyListener);
-
-            client.channel().writeAndFlush(new AckMessage(requestId))
-                  .addListener(spyListener);
-
-            client.channel().writeAndFlush(failMsg)
-                  .addListener(spyListener);
-
-            client.channel().writeAndFlush(PingMessage.INSTANCE)
-                  .addListener(spyListener);
-
-            client.channel().writeAndFlush(PongMessage.INSTANCE)
-                  .addListener(spyListener);
-
-            client.channel().writeAndFlush(StartMessage.INSTANCE)
-                  .addListener(spyListener);
-
-            client.channel().writeAndFlush(new FinishMessage(requestId))
-                  .addListener(spyListener);
-        }
-
-        Mockito.verify(spyListener, Mockito.timeout(10000L).times(times * 7))
-               .operationComplete(Mockito.any());
     }
 
     @Test
@@ -233,6 +153,9 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         DataMessage dataMessage = new DataMessage(MessageType.MSG,
                                                   requestId, partition,
                                                   managedBuffer);
+        Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
+                            "partition=1,hasBody=true,bodyLength=8]",
+                            dataMessage.toString());
         Assert.assertEquals(1, managedBuffer.referenceCount());
         dataMessage.release();
         Assert.assertEquals(0, managedBuffer.referenceCount());

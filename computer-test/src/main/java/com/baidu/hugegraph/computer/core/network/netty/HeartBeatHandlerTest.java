@@ -26,6 +26,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;
 
 public class HeartBeatHandlerTest extends AbstractNetworkTest {
@@ -53,12 +54,20 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
             return null;
         }).when(clientProtocol).initializeClientPipeline(Mockito.any());
 
-        TransportClient client = this.oneClient();
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        NettyClientHandler handler = new NettyClientHandler(client);
+        NettyClientHandler spyHandler = Mockito.spy(handler);
+        client.channel().pipeline().replace(NettyProtocol.CLIENT_HANDLER_NAME,
+                                            NettyProtocol.CLIENT_HANDLER_NAME,
+                                            spyHandler);
 
         long delay = (HEARTBEAT_INTERVAL + 1) * 1000L;
-        Mockito.verify(mockHeartBeatHandler, Mockito.timeout(delay).times(2))
+        Mockito.verify(mockHeartBeatHandler, Mockito.timeout(delay).times(1))
                .userEventTriggered(Mockito.any(),
                                    Mockito.any(IdleStateEvent.class));
+
+        Mockito.verify(spyHandler, Mockito.timeout(2000L).times(1))
+               .processPongMessage(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -73,6 +82,24 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
             return null;
         }).when(serverProtocol).initializeServerPipeline(Mockito.any(),
                                                          Mockito.any());
+
+        HeartBeatHandler beatHandler = new HeartBeatHandler();
+        HeartBeatHandler mockHeartBeatHandler = Mockito.spy(beatHandler);
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationOnMock.callRealMethod();
+            Channel channel = invocationOnMock.getArgument(0);
+            channel.pipeline().replace("heartBeatHandler", "heartBeatHandler",
+                                       mockHeartBeatHandler);
+            return null;
+        }).when(clientProtocol).initializeClientPipeline(Mockito.any());
+
+        Mockito.doAnswer(invocationOnMock -> {
+            ChannelHandlerContext ctx = invocationOnMock.getArgument(0);
+            Object event = invocationOnMock.getArgument(1);
+            ctx.fireUserEventTriggered(event);
+            return null;
+        }).when(mockHeartBeatHandler)
+          .userEventTriggered(Mockito.any(), Mockito.any(IdleStateEvent.class));
 
         TransportClient client = this.oneClient();
 

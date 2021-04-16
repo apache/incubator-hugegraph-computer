@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.slf4j.Logger;
 
@@ -29,6 +30,7 @@ import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.E;
@@ -45,8 +47,7 @@ public class NettyTransportClient implements TransportClient {
     private final ConnectionId connectionId;
     private final NettyClientFactory clientFactory;
     private final ClientHandler handler;
-    private final ClientSession clientSession;
-    private final ClientChannelListenerOnWrite listenerOnWrite;
+    private final ClientSession session;
 
     protected NettyTransportClient(Channel channel, ConnectionId connectionId,
                                    NettyClientFactory clientFactory,
@@ -59,8 +60,8 @@ public class NettyTransportClient implements TransportClient {
         this.connectionId = connectionId;
         this.clientFactory = clientFactory;
         this.handler = clientHandler;
-        this.clientSession = new ClientSession();
-        this.listenerOnWrite = new ClientChannelListenerOnWrite();
+        this.session = new ClientSession(this.clientFactory.conf(),
+                                         this.createSendFunction());
     }
 
     public Channel channel() {
@@ -82,22 +83,63 @@ public class NettyTransportClient implements TransportClient {
         return this.channel.isActive();
     }
 
-    @Override
-    public synchronized void startSession() throws TransportException {
-        // TODO: startSession
+    protected ClientSession session() {
+        return this.session;
+    }
+
+    public ClientHandler handler() {
+        return this.handler;
+    }
+
+    private void initChannel(Channel channel, ConnectionId connectionId,
+                             NettyProtocol protocol, ClientHandler handler) {
+        protocol.replaceClientHandler(channel, this);
+        // Client ready notice
+        handler.channelActive(connectionId);
+    }
+
+    private Function<Message, ?> createSendFunction() {
+        ClientChannelListenerOnWrite listenerOnWrite =
+        new ClientChannelListenerOnWrite();
+
+        return message -> this.channel.writeAndFlush(message)
+                              .addListener(listenerOnWrite);
+    }
+
+    protected boolean checkSendAvailable() {
+        if (!this.channel.isWritable() || this.session.flowControllerStatus()) {
+            return false;
+        }
+        this.handler.sendAvailable(this.connectionId);
+        return true;
     }
 
     @Override
-    public synchronized boolean send(MessageType messageType, int partition,
-                                     ByteBuffer buffer)
-                                     throws TransportException {
-        return false;
-        // TODO: send message
+    public void startSession() throws TransportException {
+        try {
+            this.session.syncStart();
+        } catch (InterruptedException e) {
+            throw new TransportException("Interrupted while start session", e);
+        }
     }
 
     @Override
-    public synchronized void finishSession() throws TransportException {
-        // TODO: finishSession
+    public boolean send(MessageType messageType, int partition,
+                        ByteBuffer buffer) throws TransportException {
+        if (!this.checkSendAvailable()) {
+            return false;
+        }
+        this.session.asyncSend(messageType, partition, buffer);
+        return true;
+    }
+
+    @Override
+    public void finishSession() throws TransportException {
+        try {
+            this.session.syncFinish();
+        } catch (InterruptedException e) {
+            throw new TransportException("Interrupted while finish session", e);
+        }
     }
 
     @Override
@@ -107,30 +149,6 @@ public class NettyTransportClient implements TransportClient {
             this.channel.close().awaitUninterruptibly(timeout,
                                                       TimeUnit.MILLISECONDS);
         }
-    }
-
-    public ClientSession clientSession() {
-        return this.clientSession;
-    }
-
-    public ClientHandler handler() {
-        return this.handler;
-    }
-
-    protected boolean checkSendAvailable() {
-        // TODO: checkSendAvailable
-        if (!this.channel.isWritable()) {
-            return false;
-        }
-        this.handler.sendAvailable(this.connectionId);
-        return true;
-    }
-
-    private void initChannel(Channel channel, ConnectionId connectionId,
-                             NettyProtocol protocol, ClientHandler handler) {
-        protocol.replaceClientHandler(channel, this);
-        // Client ready notice
-        handler.channelActive(connectionId);
     }
 
     private class ClientChannelListenerOnWrite

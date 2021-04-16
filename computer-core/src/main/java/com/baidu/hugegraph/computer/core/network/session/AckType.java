@@ -17,30 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network.message;
+package com.baidu.hugegraph.computer.core.network.session;
 
-import io.netty.buffer.ByteBuf;
+public enum AckType {
 
-public class StartMessage extends AbstractMessage implements RequestMessage {
-
-    public static final StartMessage INSTANCE = new StartMessage();
-
-    public StartMessage() {
-        super(START_SEQ);
-    }
-
-    @Override
-    public MessageType type() {
-        return MessageType.START;
-    }
-
-    public static StartMessage parseFrom(ByteBuf buf) {
-        int sequenceNumber = buf.readInt();
-        assert sequenceNumber == START_SEQ;
-        int partition = buf.readInt();
-        assert partition == 0;
-        int bodyLength = buf.readInt();
-        assert bodyLength == 0;
-        return INSTANCE;
-    }
+    NONE,
+    START,
+    FINISH,
+    DATA
 }

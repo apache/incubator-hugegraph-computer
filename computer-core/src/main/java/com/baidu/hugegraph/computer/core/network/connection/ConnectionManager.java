@@ -56,7 +56,7 @@ public interface ConnectionManager {
 
     /**
      * Get a {@link TransportClient} instance from the connection pool first.
-     * If {it is not found or not active, create a new one.
+     * If it is not found or not active, create a new one.
      * @param connectionId {@link ConnectionId}
      */
     TransportClient getOrCreateClient(ConnectionId connectionId)

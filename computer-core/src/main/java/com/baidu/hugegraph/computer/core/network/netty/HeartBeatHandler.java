@@ -22,15 +22,17 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
+import com.baidu.hugegraph.computer.core.network.message.PingMessage;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.IdleStateEvent;
 
 /**
  * Heart beat triggered.
- * send ping message
+ * Send ping message
  */
 @ChannelHandler.Sharable
 public class HeartBeatHandler extends ChannelDuplexHandler {
@@ -40,10 +42,15 @@ public class HeartBeatHandler extends ChannelDuplexHandler {
     @Override
     public void userEventTriggered(final ChannelHandlerContext ctx,
                                    Object event) throws Exception {
-        LOG.debug("HeartBeatHandler userEventTriggered, evt class: {} from: {}",
-                  event.getClass().getName(),
-                  TransportUtil.remoteAddress(ctx.channel()));
-        // TODO: handle heartBeat
-        super.userEventTriggered(ctx, event);
+        if (event instanceof IdleStateEvent) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("IdleStateEvent triggered, send ping to: {}",
+                          TransportUtil.remoteAddress(ctx.channel()));
+            }
+            ctx.writeAndFlush(PingMessage.INSTANCE);
+        } else {
+            super.userEventTriggered(ctx, event);
+        }
+
     }
 }
