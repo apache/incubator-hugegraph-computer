@@ -27,14 +27,13 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.iterator.MapperIterator;
 
 /**
- * FilterMapComputation is computation that can't combine the messages. When
+ * FilterComputation is computation that can't combine the messages. When
  * messages are received, it can be computed and decided whether to propagate
- * along the adjacent vertices. FilterMapComputation suit for computation like
+ * along the adjacent vertices. FilterComputation suit for computation like
  * ring detection.
  * @param <M> Message type
  */
-public interface FilterMapComputation<M extends Value<?>>
-       extends Computation<M> {
+public interface FilterComputation<M extends Value<?>> extends Computation<M> {
 
     /**
      * Set vertex's value and return initial message. The message will be
