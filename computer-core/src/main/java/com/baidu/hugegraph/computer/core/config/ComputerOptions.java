@@ -423,7 +423,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> TRANSPORT_SYNC_REQUEST_TIMEOUT =
             new ConfigOption<>(
                     "transport.sync_request_timeout",
-                    "The timeout(in ms) of send sync request wait response.",
+                    "The timeout(in ms) to wait response after " +
+                    "sending sync-request.",
                     positiveInt(),
                     5_000L
             );
