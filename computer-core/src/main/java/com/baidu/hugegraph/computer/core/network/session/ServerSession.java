@@ -54,6 +54,7 @@ public class ServerSession extends TransportSession {
 
     @Override
     public void startComplete() {
+        this.maxHandledId = START_REQUEST_ID;
         this.maxAckId = START_REQUEST_ID;
         this.establish();
     }

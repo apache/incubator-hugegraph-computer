@@ -42,6 +42,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.socket.SocketChannel;
 
 public class NettyClientFactory implements ClientFactory {
@@ -99,6 +100,13 @@ public class NettyClientFactory implements ClientFactory {
             this.bootstrap.option(ChannelOption.SO_SNDBUF,
                                   this.conf.sendBuffer());
         }
+
+        // Set low water mark and high water mark for the write buffer.
+        WriteBufferWaterMark bufferWaterMark = new WriteBufferWaterMark(
+                                               this.conf.writeBufferLowMark(),
+                                               this.conf.writeBufferHighMark());
+        this.bootstrap.option(ChannelOption.WRITE_BUFFER_WATER_MARK,
+                              bufferWaterMark);
 
         this.bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override

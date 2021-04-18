@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.TransportStatus;
 import com.baidu.hugegraph.computer.core.network.netty.AbstractNetworkTest;
 import com.baidu.hugegraph.testutil.Assert;
@@ -55,7 +56,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testSyncStart() throws InterruptedException {
+    public void testSyncStart() throws TransportException,
+                                       InterruptedException {
         ScheduledExecutorService executorService =
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
@@ -73,7 +75,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testSyncFinish() throws InterruptedException {
+    public void testSyncFinish() throws TransportException,
+                                        InterruptedException {
         ScheduledExecutorService executorService =
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
@@ -132,11 +135,12 @@ public class TransportSessionTest extends AbstractNetworkTest {
     //    Assert.assertEquals(TransportStatus.FINISH_RECV, serverSession.status);
     //}
 
-    private void syncStartWithAutoComplete(ScheduledExecutorService executorService,
+    private void syncStartWithAutoComplete(ScheduledExecutorService pool,
                                            ClientSession clientSession,
                                            List<Throwable> exceptions)
-                                           throws InterruptedException {
-        executorService.schedule(() -> {
+                                           throws TransportException,
+                                                  InterruptedException {
+        pool.schedule(() -> {
             Assert.assertEquals(TransportStatus.START_SEND,
                                 clientSession.status());
             try {
@@ -159,12 +163,13 @@ public class TransportSessionTest extends AbstractNetworkTest {
                             clientSession.finishId);
     }
 
-    private void syncFinishWithAutoComplete(ScheduledExecutorService executorService,
+    private void syncFinishWithAutoComplete(ScheduledExecutorService pool,
                                             ClientSession clientSession,
                                             int finishId,
                                             List<Throwable> exceptions)
-                                            throws InterruptedException {
-        executorService.schedule(() -> {
+                                            throws InterruptedException,
+                                                   TransportException {
+        pool.schedule(() -> {
             Assert.assertEquals(TransportStatus.FINISH_SEND,
                                 clientSession.status());
             try {

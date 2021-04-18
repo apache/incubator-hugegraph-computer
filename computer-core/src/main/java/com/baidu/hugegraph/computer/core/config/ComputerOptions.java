@@ -426,7 +426,7 @@ public class ComputerOptions extends OptionHolder {
                     "The timeout(in ms) to wait response after " +
                     "sending sync-request.",
                     positiveInt(),
-                    50_000L
+                    5_000L
             );
 
     public static final ConfigOption<Integer> TRANSPORT_NETWORK_RETRIES =
@@ -438,12 +438,32 @@ public class ComputerOptions extends OptionHolder {
                     3
             );
 
+    public static final ConfigOption<Integer> TRANSPORT_WRITE_BUFFER_HIGH_MARK =
+            new ConfigOption<>(
+                    "transport.write_buffer_high_mark",
+                    "The high water mark for write buffer in bytes, " +
+                    "if the number of bytes queued in the write buffer " +
+                    "greater than it, the send will unavailable.",
+                    nonNegativeInt(),
+                    64 * 1024
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_WRITE_BUFFER_LOW_MARK =
+            new ConfigOption<>(
+                    "transport.write_buffer_low_mark",
+                    "The low water mark for write buffer in bytes," +
+                    "if the number of bytes queued in the write buffer " +
+                    "dropped down below it, the send will available again." +
+                    nonNegativeInt(),
+                    32 * 1024
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_MAX_PENDING_REQUESTS =
             new ConfigOption<>(
                     "transport.max_pending_requests",
                     "The max number of client unreceived ack, " +
-                    "if the number of unreceived ack greater than it, " +
-                    "it will block the client from calling send.",
+                    "if the number of unreceived ack greater than or equal it, " +
+                    "the send will unavailable.",
                     positiveInt(),
                     50
             );
@@ -452,8 +472,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.min_pending_requests",
                     "The minimum number of client unreceived ack, " +
-                    "if the number of unreceived ack less than it, " +
-                    "it will wake the client from calling send.",
+                    "if the number of unreceived ack dropped down below it, " +
+                    "the send will available again.",
                     positiveInt(),
                     5
             );

@@ -1,5 +1,7 @@
 package com.baidu.hugegraph.computer.core.network.netty;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
@@ -13,6 +15,7 @@ import com.baidu.hugegraph.computer.core.network.message.PingMessage;
 import com.baidu.hugegraph.computer.core.network.message.PongMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.TransportSession;
+import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,10 +24,18 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public abstract class AbstractNettyHandler
        extends SimpleChannelInboundHandler<Message> {
 
+    private static final Logger LOG = Log.logger(AbstractNettyHandler.class);
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg)
                                 throws Exception {
         Channel channel = ctx.channel();
+
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Receive remote message from '{}', message: {}",
+                      TransportUtil.remoteAddress(channel), msg);
+        }
+
         if (msg instanceof StartMessage) {
             this.processStartMessage(ctx, channel, (StartMessage) msg);
         } else if (msg instanceof FinishMessage) {

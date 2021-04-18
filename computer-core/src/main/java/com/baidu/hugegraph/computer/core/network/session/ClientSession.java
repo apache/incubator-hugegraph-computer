@@ -20,9 +20,12 @@
 package com.baidu.hugegraph.computer.core.network.session;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportStatus;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
@@ -36,6 +39,8 @@ import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.util.E;
 
 public class ClientSession extends TransportSession {
+
+    private final Lock flowControlStatusLock = new ReentrantLock();
 
     private volatile boolean flowControlStatus;
     private final BarrierEvent startBarrierEvent;
@@ -87,7 +92,8 @@ public class ClientSession extends TransportSession {
         this.finishBarrierEvent.signalAll();
     }
 
-    public synchronized void syncStart() throws InterruptedException {
+    public synchronized void syncStart() throws TransportException,
+                                                InterruptedException {
         E.checkArgument(this.status == TransportStatus.READY,
                         "The status must be READY instead of %s " +
                         "on syncStart", this.status);
@@ -96,10 +102,15 @@ public class ClientSession extends TransportSession {
 
         this.startSent();
 
-        this.startBarrierEvent.await(this.conf.syncRequestTimeout());
+        long timeout = this.conf.syncRequestTimeout();
+        if (!this.startBarrierEvent.await(timeout)) {
+            throw new TransportException("Timeout(%sms) to wait start " +
+                                         "response", timeout);
+        }
     }
 
-    public synchronized void syncFinish() throws InterruptedException {
+    public synchronized void syncFinish() throws TransportException,
+                                                 InterruptedException {
         E.checkArgument(this.status == TransportStatus.ESTABLISH,
                         "The status must be ESTABLISH instead of %s " +
                         "on syncFinish", this.status);
@@ -111,7 +122,11 @@ public class ClientSession extends TransportSession {
 
         this.finishSent(finishId);
 
-        this.finishBarrierEvent.await(this.conf.syncRequestTimeout());
+        long timeout = this.conf.syncRequestTimeout();
+        if (!this.finishBarrierEvent.await(timeout)) {
+            throw new TransportException("Timeout(%sms) to wait finish " +
+                                         "response", timeout);
+        }
     }
 
     public synchronized void asyncSend(MessageType messageType, int partition,
@@ -127,7 +142,7 @@ public class ClientSession extends TransportSession {
 
         this.sendFunction.apply(dataMessage);
 
-        this.changeFlowControlStatus();
+        this.updateFlowControlStatus();
     }
 
     public void receiveAck(int ackId) {
@@ -143,7 +158,7 @@ public class ClientSession extends TransportSession {
             if (this.maxAckId < ackId) {
                 this.maxAckId = ackId;
             }
-            this.changeFlowControlStatus();
+            this.updateFlowControlStatus();
         } else {
             throw new ComputeException("Receive an ack message, but the " +
                                        "status not match, status: %s, ackId: " +
@@ -155,16 +170,22 @@ public class ClientSession extends TransportSession {
         return this.flowControlStatus;
     }
 
-    private synchronized void changeFlowControlStatus() {
+    private void updateFlowControlStatus() {
         int maxPendingRequests = this.conf.maxPendingRequests();
         int minPendingRequests = this.conf.minPendingRequests();
 
-        int pendingRequests = this.maxRequestId - this.maxAckId;
+        this.flowControlStatusLock.lock();
 
-        if (pendingRequests > maxPendingRequests) {
-            this.flowControlStatus = true;
-        } else if (pendingRequests < minPendingRequests){
-            this.flowControlStatus = false;
+        try {
+            int pendingRequests = this.maxRequestId - this.maxAckId;
+
+            if (pendingRequests >= maxPendingRequests) {
+                this.flowControlStatus = true;
+            } else if (pendingRequests < minPendingRequests){
+                this.flowControlStatus = false;
+            }
+        } finally {
+            this.flowControlStatusLock.unlock();
         }
     }
 }
