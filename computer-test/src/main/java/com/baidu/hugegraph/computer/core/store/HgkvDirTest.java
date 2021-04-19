@@ -35,7 +35,6 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFileImpl;
@@ -48,16 +47,17 @@ import com.google.common.collect.ImmutableList;
 
 public class HgkvDirTest {
 
-    private static final String FILE_DIR = System.getProperty("user.home") +
-                                           File.separator + "hgkv";
-    private static final Config CONFIG = ComputerContext.instance().config();
+    private static String FILE_DIR;
+    private static Config CONFIG;
 
     @BeforeClass
     public static void init() {
+        FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
         );
+        CONFIG = ComputerContext.instance().config();
     }
 
     @After
@@ -85,17 +85,13 @@ public class HgkvDirTest {
             // Open the file and determine the footer is as expected
             HgkvDir dir = HgkvDirImpl.open(path);
             Assert.assertEquals(HgkvFileImpl.MAGIC, dir.magic());
-            Assert.assertEquals(HgkvFileImpl.VERSION, dir.version());
+            String version = HgkvDirImpl.PRIMARY_VERSION + "." +
+                             HgkvDirImpl.MINOR_VERSION;
+            Assert.assertEquals(version, dir.version());
             Assert.assertEquals(5, dir.entriesSize());
-
-            Pointer max = dir.max();
-            max.input().seek(max.offset());
-            int maxKey = max.input().readInt();
+            int maxKey = StoreTestData.dataFromPointer(dir.max());
             Assert.assertEquals(6, maxKey);
-
-            Pointer min = dir.min();
-            min.input().seek(min.offset());
-            int minKey = min.input().readInt();
+            int minKey = StoreTestData.dataFromPointer(dir.min());
             Assert.assertEquals(2, minKey);
         } finally {
             FileUtils.deleteQuietly(new File(path));

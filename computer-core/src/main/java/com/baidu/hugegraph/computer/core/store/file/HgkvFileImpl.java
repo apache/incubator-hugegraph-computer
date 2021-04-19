@@ -22,24 +22,18 @@ package com.baidu.hugegraph.computer.core.store.file;
 import java.io.File;
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.store.entry.DefaultPointer;
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvFileImpl extends AbstractHgkvFile {
 
-    public static final String VERSION;
-    public static final String MAGIC;
+    private final BufferedFileInput input;
 
-    static {
-        VERSION = "1.0";
-        MAGIC = "hgkv";
-    }
-
-    public HgkvFileImpl(String path) {
+    public HgkvFileImpl(String path) throws IOException {
         super(path);
+        this.input = new BufferedFileInput(new File(path));
     }
 
     public static HgkvFile create(String path) throws IOException {
@@ -71,84 +65,66 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         return hgkvFile;
     }
 
+    @Override
+    public void close() throws IOException {
+        this.input.close();
+    }
+
     private void readFooter() throws IOException {
         File file = new File(this.path);
-        try (BufferedFileInput input = new BufferedFileInput(file)) {
-            long fileSize = file.length();
+        long versionOffset = file.length() - 2;
+        this.input.seek(versionOffset);
+        // Read Version
+        byte primaryVersion = this.input.readByte();
+        byte minorVersion = this.input.readByte();
+        String version = primaryVersion + "." + minorVersion;
 
-            // Read magic
-            long magicOffset = fileSize - HgkvFileImpl.MAGIC.length();
-            this.magic = this.readMagic(input, magicOffset, file.getPath());
-
-            // Read footer length
-            long footerLengthOffset = magicOffset - Integer.BYTES;
-            int footerLength = this.readFooterLength(input, footerLengthOffset);
-
-            // Read numEntries
-            long numEntriesOffset = fileSize - footerLength;
-            this.numEntries = this.readNumEntries(input, numEntriesOffset);
-
-            // Read max key and min key
-            long maxOffset = numEntriesOffset + Long.BYTES;
-            long minOffset = maxOffset + Long.BYTES;
-            if (this.numEntries > 0) {
-                this.max = this.readMax(input, maxOffset);
-                this.min = this.readMin(input, minOffset);
-            }
-
-            // Read Version
-            long dataBlockLengthOffset = minOffset + Long.BYTES;
-            long indexBlockLengthOffset = dataBlockLengthOffset + Long.BYTES;
-            long versionOffset = indexBlockLengthOffset + Long.BYTES;
-            this.version = this.readVersion(input, versionOffset);
+        switch (version) {
+            case "1.0":
+                this.readFooterVp1m0(this.input);
+                break;
+            default:
+                throw new ComputerException("Illegal HgkvFile version '%s'",
+                                            version);
         }
     }
 
-    private String readMagic(RandomAccessInput input, long magicOffset,
-                             String path) throws IOException {
-        input.seek(magicOffset);
-        byte[] magicBytes = input.readBytes(HgkvFileImpl.MAGIC.length());
-        String fileMagic = new String(magicBytes);
-        E.checkArgument(HgkvFileImpl.MAGIC.equals(fileMagic),
-                        "Illegal file '%s'", path);
-        return fileMagic;
-    }
+    private void readFooterVp1m0(BufferedFileInput input)
+                                 throws IOException {
+        final int footerLength = 46;
+        File file = new File(this.path);
+        input.seek(file.length() - footerLength);
 
-    private int readFooterLength(RandomAccessInput input,
-                                 long footerLengthOffset) throws IOException {
-        input.seek(footerLengthOffset);
-        return input.readInt();
-    }
-
-    private long readNumEntries(RandomAccessInput input,
-                                long numEntriesOffset) throws IOException {
-        input.seek(numEntriesOffset);
-        return input.readLong();
-    }
-
-    private Pointer readMax(RandomAccessInput input, long maxOffset)
-                            throws IOException {
-        input.seek(maxOffset);
+        // Read magic
+        String magic = new String(input.readBytes(MAGIC.length()));
+        E.checkArgument(HgkvFileImpl.MAGIC.equals(magic),
+                        "Illegal file '%s'", file.getPath());
+        this.magic = magic;
+        // Read entriesSize
+        this.entriesSize = input.readLong();
+        // Read dataBlock length
+        this.dataBlockSize = input.readLong();
+        // Read indexBlock length
+        this.indexBlockSize = input.readLong();
+        // Read max key and min key
         long maxKeyOffset = input.readLong();
-        input.seek(maxKeyOffset);
-        int maxKeyLength = input.readInt();
-        return new DefaultPointer(input, input.position(), maxKeyLength);
-    }
+        long minKeyOffset = input.readLong();
+        // Read version
+        byte primaryVersion = input.readByte();
+        byte minorVersion = input.readByte();
+        this.version = primaryVersion + "." + minorVersion;
 
-    private Pointer readMin(RandomAccessInput input, long minOffset)
-                            throws IOException {
-        input.seek(minOffset);
-        long maxKeyOffset = input.readLong();
-        input.seek(maxKeyOffset);
-        int minKeyLength = input.readInt();
-        return new DefaultPointer(input, input.position(), minKeyLength);
-    }
-
-    private String readVersion(RandomAccessInput input, long versionOffset)
-                               throws IOException {
-        input.seek(versionOffset);
-        int versionLength = input.readInt();
-        byte[] version = input.readBytes(versionLength);
-        return new String(version);
+        if (this.entriesSize > 0) {
+            // Read max key
+            input.seek(maxKeyOffset);
+            int maxKeyLength = input.readInt();
+            this.max = new DefaultPointer(input, input.position(),
+                                          maxKeyLength);
+            // Read min Key
+            input.seek(minKeyOffset);
+            int minKeyLength = input.readInt();
+            this.min = new DefaultPointer(input, input.position(),
+                                          minKeyLength);
+        }
     }
 }

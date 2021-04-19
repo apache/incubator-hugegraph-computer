@@ -155,4 +155,13 @@ public class StoreTestData {
         }
         return file;
     }
+
+    public static Integer dataFromPointer(Pointer pointer) throws IOException {
+        RandomAccessInput input = pointer.input();
+        long position = input.position();
+        input.seek(pointer.offset());
+        int result = input.readInt();
+        input.seek(position);
+        return result;
+    }
 }

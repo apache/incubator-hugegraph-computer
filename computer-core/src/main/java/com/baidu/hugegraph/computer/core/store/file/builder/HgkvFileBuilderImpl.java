@@ -148,47 +148,24 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         return indexBlockLength;
     }
 
-    private void writeFooter(RandomAccessOutput output, long numEntries,
+    private void writeFooter(RandomAccessOutput output, long entriesSize,
                              long maxKeyOffset, long minKeyOffset,
                              long dataBlockLength, long indexBlockLength)
-            throws IOException {
-        int footerLength = 0;
-        // Entries number
-        output.writeLong(numEntries);
-        footerLength += Long.BYTES;
-
-        // Max key offset
-        output.writeLong(maxKeyOffset);
-        footerLength += Long.BYTES;
-
-        // Min key offset
-        output.writeLong(minKeyOffset);
-        footerLength += Long.BYTES;
-
-        // Length of dataBlock
-        output.writeLong(dataBlockLength);
-        footerLength += Long.BYTES;
-
-        // Length of indexBlock
-        output.writeLong(indexBlockLength);
-        footerLength += Long.BYTES;
-
-        // Version
-        int versionLength = HgkvFileImpl.VERSION.length();
-        output.writeInt(versionLength);
-        footerLength += Integer.BYTES;
-        output.writeBytes(HgkvFileImpl.VERSION);
-        footerLength += versionLength;
-
-        // Footer Length
-        long position = output.position();
-        output.writeInt(0);
-        footerLength += Integer.BYTES;
-
-        // Magic
+                             throws IOException {
+        // Write magic
         output.writeBytes(HgkvFileImpl.MAGIC);
-        footerLength += HgkvFileImpl.MAGIC.length();
-
-        output.writeInt(position, footerLength);
+        // Write entriesSize
+        output.writeLong(entriesSize);
+        // Write length of dataBlock
+        output.writeLong(dataBlockLength);
+        // Write length of indexBlock
+        output.writeLong(indexBlockLength);
+        // Write max key offset
+        output.writeLong(maxKeyOffset);
+        // Write min key offset
+        output.writeLong(minKeyOffset);
+        // Write version
+        output.writeByte(HgkvFileImpl.PRIMARY_VERSION);
+        output.writeByte(HgkvFileImpl.MINOR_VERSION);
     }
 }

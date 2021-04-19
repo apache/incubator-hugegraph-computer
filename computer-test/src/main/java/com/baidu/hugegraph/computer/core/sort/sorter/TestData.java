@@ -22,10 +22,8 @@ package com.baidu.hugegraph.computer.core.sort.sorter;
 import java.io.IOException;
 import java.util.List;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public class TestData {
 
@@ -47,14 +45,5 @@ public class TestData {
                                                     throws IOException {
         UnsafeByteArrayOutput output = writeMapToOutput(map);
         return new UnsafeByteArrayInput(output.buffer(), output.position());
-    }
-
-    public static Integer dataFromPointer(Pointer pointer) throws IOException {
-        RandomAccessInput input = pointer.input();
-        long position = input.position();
-        input.seek(pointer.offset());
-        int result = input.readInt();
-        input.seek(position);
-        return result;
     }
 }

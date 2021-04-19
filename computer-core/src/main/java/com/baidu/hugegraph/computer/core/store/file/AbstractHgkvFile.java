@@ -23,12 +23,24 @@ import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public abstract class AbstractHgkvFile implements HgkvFile {
 
+    public static final byte PRIMARY_VERSION;
+    public static final byte MINOR_VERSION;
+    public static final String MAGIC;
+
+    static {
+        PRIMARY_VERSION = 1;
+        MINOR_VERSION = 0;
+        MAGIC = "hgkv";
+    }
+
     protected final String path;
-    protected long numEntries;
+    protected String magic;
+    protected long entriesSize;
+    protected long dataBlockSize;
+    protected long indexBlockSize;
     protected Pointer max;
     protected Pointer min;
     protected String version;
-    protected String magic;
 
     public AbstractHgkvFile(String path) {
         this.path = path;
@@ -41,7 +53,7 @@ public abstract class AbstractHgkvFile implements HgkvFile {
 
     @Override
     public long entriesSize() {
-        return this.numEntries;
+        return this.entriesSize;
     }
 
     @Override

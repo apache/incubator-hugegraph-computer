@@ -19,9 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.store.file;
 
+import java.io.Closeable;
+
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
-public interface HgkvFile {
+public interface HgkvFile extends Closeable {
 
     /**
      * The absolute path includes file name.

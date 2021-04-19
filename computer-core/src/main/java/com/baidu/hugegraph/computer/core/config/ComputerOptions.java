@@ -36,6 +36,7 @@ import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableList;
+import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableSet;
 
 public class ComputerOptions extends OptionHolder {
@@ -554,7 +555,7 @@ public class ComputerOptions extends OptionHolder {
                     "hgkv.max_file_size",
                     "The max number of bytes in each hgkv-file.",
                     positiveInt(),
-                    4L << 30
+                    Bytes.GB * 4
             );
 
     public static final ConfigOption<Integer> HGKV_DATABLOCK_SIZE =
@@ -562,7 +563,7 @@ public class ComputerOptions extends OptionHolder {
                     "hgkv.max_data_block_size",
                     "The max byte size of hgkv-file data block.",
                     positiveInt(),
-                    64 << 10
+                    (int) Bytes.KB * 64
             );
 
     public static final ConfigOption<Integer> HGKV_MERGE_PATH_NUM =

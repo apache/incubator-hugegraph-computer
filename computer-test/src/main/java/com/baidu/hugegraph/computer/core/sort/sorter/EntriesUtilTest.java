@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.store.StoreTestData;
 import com.baidu.hugegraph.computer.core.store.util.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
@@ -44,7 +45,7 @@ public class EntriesUtilTest {
         List<Pointer> pointers = EntriesUtil.splitInput(input);
         for (int i = 0, j = 0; i < pointers.size(); i++, j += 2) {
             Pointer pointer = pointers.get(i);
-            Integer splitData = TestData.dataFromPointer(pointer);
+            Integer splitData = StoreTestData.dataFromPointer(pointer);
             Assert.assertEquals(data.get(j), splitData);
         }
     }

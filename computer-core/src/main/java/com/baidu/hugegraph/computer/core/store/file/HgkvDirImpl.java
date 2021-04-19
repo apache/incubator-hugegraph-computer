@@ -27,6 +27,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
@@ -44,6 +45,8 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     }
 
     private final List<HgkvFile> segments;
+    private BufferedFileInput maxKeyInput;
+    private BufferedFileInput minKeyInput;
 
     private HgkvDirImpl(String path) {
         this(path, null);
@@ -89,21 +92,8 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
         // Set HgkvDir properties
         HgkvDirImpl hgkvDir = new HgkvDirImpl(file.getPath(), segments);
-        hgkvDir.magic = HgkvFileImpl.MAGIC;
-        hgkvDir.version = HgkvFileImpl.VERSION;
-        hgkvDir.numEntries = segments.stream()
-                                     .mapToLong(HgkvFile::entriesSize)
-                                     .sum();
-        hgkvDir.max = segments.stream()
-                              .map(HgkvFile::max)
-                              .filter(Objects::nonNull)
-                              .max(Comparable::compareTo)
-                              .orElse(null);
-        hgkvDir.min = segments.stream()
-                              .map(HgkvFile::min)
-                              .filter(Objects::nonNull)
-                              .min(Comparable::compareTo)
-                              .orElse(null);
+        hgkvDir.build();
+
         return hgkvDir;
     }
 
@@ -126,6 +116,51 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
         Matcher matcher = FILE_NUM_PATTERN.matcher(fileName);
         E.checkState(matcher.find(), "Illegal file name '%s'", fileName);
         return Integer.parseInt(matcher.group());
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (this.maxKeyInput != null) {
+            this.maxKeyInput.close();
+        }
+        if (this.minKeyInput != null) {
+            this.minKeyInput.close();
+        }
+    }
+
+    private void build() throws IOException {
+        this.magic = MAGIC;
+        this.version = PRIMARY_VERSION + "." + MINOR_VERSION;
+        this.entriesSize = this.segments.stream()
+                                      .mapToLong(HgkvFile::entriesSize)
+                                      .sum();
+
+        this.max = this.segments.stream()
+                              .filter(Objects::nonNull)
+                              .map(HgkvFile::max)
+                              .max(Comparable::compareTo)
+                              .orElse(null);
+        assert this.max != null;
+        this.maxKeyInput = (BufferedFileInput) this.max.input();
+
+        this.min = this.segments.stream()
+                              .filter(Objects::nonNull)
+                                .map(HgkvFile::max)
+                              .min(Comparable::compareTo)
+                              .orElse(null);
+        assert this.min != null;
+        this.minKeyInput = (BufferedFileInput) this.min.input();
+
+        // Close input that isn't max key input or min key input
+        for (HgkvFile file : this.segments) {
+            if (file.entriesSize() <= 0) {
+                continue;
+            }
+            BufferedFileInput input = (BufferedFileInput) file.max().input();
+            if (input != this.maxKeyInput && input != this.minKeyInput) {
+                input.close();
+            }
+        }
     }
 
     @Override

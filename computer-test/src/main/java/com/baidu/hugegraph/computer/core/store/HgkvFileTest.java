@@ -49,16 +49,17 @@ import com.google.common.collect.ImmutableList;
 
 public class HgkvFileTest {
 
-    private static final String FILE_DIR = System.getProperty("user.home") +
-                                           File.separator + "hgkv";
-    private static final Config CONFIG = ComputerContext.instance().config();
+    private static String FILE_DIR;
+    private static Config CONFIG;
 
     @BeforeClass
     public static void init() {
+        FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
         );
+        CONFIG = ComputerContext.instance().config();
     }
 
     @After
@@ -90,17 +91,15 @@ public class HgkvFileTest {
             // Open file
             HgkvFile hgkvFile = HgkvFileImpl.open(file.getPath());
             Assert.assertEquals(HgkvFileImpl.MAGIC, hgkvFile.magic());
-            Assert.assertEquals(HgkvFileImpl.VERSION, hgkvFile.version());
+            String version = HgkvFileImpl.PRIMARY_VERSION + "." +
+                             HgkvFileImpl.MINOR_VERSION;
+            Assert.assertEquals(version, hgkvFile.version());
             Assert.assertEquals(5, hgkvFile.entriesSize());
             // Read max key
-            Pointer max = hgkvFile.max();
-            max.input().seek(max.offset());
-            int maxKey = max.input().readInt();
+            int maxKey = StoreTestData.dataFromPointer(hgkvFile.max());
             Assert.assertEquals(6, maxKey);
             // Read min key
-            Pointer min = hgkvFile.min();
-            min.input().seek(min.offset());
-            int minKey = min.input().readInt();
+            int minKey = StoreTestData.dataFromPointer(hgkvFile.min());
             Assert.assertEquals(2, minKey);
         } finally {
             FileUtils.deleteQuietly(file);
