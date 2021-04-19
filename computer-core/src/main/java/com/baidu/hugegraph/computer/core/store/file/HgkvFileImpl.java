@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.store.file;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -33,18 +32,10 @@ public class HgkvFileImpl extends AbstractHgkvFile {
 
     public static final String VERSION;
     public static final String MAGIC;
-    public static final String NAME_PREFIX;
-    public static final String EXTEND_NAME;
-    public static final String NAME_REGEX;
-    public static final Pattern FILE_NUM_PATTERN;
 
     static {
         VERSION = "1.0";
         MAGIC = "hgkv";
-        NAME_PREFIX = "hgkv_";
-        EXTEND_NAME = ".hgkv";
-        NAME_REGEX = NAME_PREFIX + "[0-9]+" + EXTEND_NAME;
-        FILE_NUM_PATTERN = Pattern.compile("[0-9]+");
     }
 
     public HgkvFileImpl(String path) {
@@ -53,8 +44,6 @@ public class HgkvFileImpl extends AbstractHgkvFile {
 
     public static HgkvFile create(String path) throws IOException {
         File file = new File(path);
-        E.checkArgument(file.getName().matches(NAME_REGEX),
-                        "Illegal file name");
         E.checkArgument(!file.exists(), "File already exists, path: '%s'",
                         file.getPath());
         if (!file.getParentFile().exists()) {
@@ -72,8 +61,6 @@ public class HgkvFileImpl extends AbstractHgkvFile {
 
     public static HgkvFile open(File file) throws IOException {
         E.checkArgumentNotNull(file, "File must not be null");
-        E.checkArgument(file.getName().matches(NAME_REGEX),
-                        "Illegal file name");
         E.checkArgument(file.exists(), "File not exists, path: '%s'",
                         file.getPath());
         E.checkArgument(file.isFile(), "Path is not file, path: '%s'",

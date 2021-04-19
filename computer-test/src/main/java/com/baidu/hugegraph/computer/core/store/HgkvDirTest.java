@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -48,14 +48,21 @@ import com.google.common.collect.ImmutableList;
 
 public class HgkvDirTest {
 
+    private static final String FILE_DIR = System.getProperty("user.home") +
+                                           File.separator + "hgkv";
     private static final Config CONFIG = ComputerContext.instance().config();
 
     @BeforeClass
-    public static void setup() {
+    public static void init() {
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
         );
+    }
+
+    @After
+    public void teardown() {
+        FileUtils.deleteQuietly(new File(FILE_DIR));
     }
 
     @Test
@@ -68,17 +75,15 @@ public class HgkvDirTest {
                                               6, 2);
         List<KvEntry> kvEntries = StoreTestData.kvEntriesFromMap(data);
 
-        String userDir = System.getProperty("user.home");
-        String basePath = userDir + File.separator + "hgkv";
-        String dirPath = basePath + File.separator + "test_dir";
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(dirPath, CONFIG)) {
+        String path = availableDirPath("1");
+        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
             for (KvEntry kvEntry : kvEntries) {
                 builder.write(kvEntry);
             }
             builder.finish();
 
             // Open the file and determine the footer is as expected
-            HgkvDir dir = HgkvDirImpl.open(dirPath);
+            HgkvDir dir = HgkvDirImpl.open(path);
             Assert.assertEquals(HgkvFileImpl.MAGIC, dir.magic());
             Assert.assertEquals(HgkvFileImpl.VERSION, dir.version());
             Assert.assertEquals(5, dir.entriesSize());
@@ -93,19 +98,27 @@ public class HgkvDirTest {
             int minKey = min.input().readInt();
             Assert.assertEquals(2, minKey);
         } finally {
-            FileUtils.deleteQuietly(new File(basePath));
+            FileUtils.deleteQuietly(new File(path));
         }
     }
 
     @Test
     public void testExceptionCase() throws IOException {
+        // Illegal file name
+        String illegalName = availableDirPath("abc");
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            HgkvDirImpl.open(illegalName);
+        }, e -> Assert.assertTrue(e.getMessage().contains("Illegal file")));
+
         // Path isn't directory
-        File file = File.createTempFile(UUID.randomUUID().toString(), null);
+        File file = new File(availableDirPath("1"));
+        file.getParentFile().mkdirs();
+        file.createNewFile();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             HgkvDirImpl.open(file.getPath());
         }, e -> Assert.assertTrue(e.getMessage().contains("not directory")));
-        FileUtils.deleteQuietly(file);
 
+        FileUtils.deleteQuietly(file);
         // Open not exists file
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             HgkvDirImpl.open(file.getPath());
@@ -123,10 +136,8 @@ public class HgkvDirTest {
                                               6, 2);
         Iterator<Integer> result = ImmutableList.of(2, 5, 6).iterator();
 
-        String userDir = System.getProperty("user.home");
-        String basePath = userDir + File.separator + "hgkv";
-        String dirPath = basePath + File.separator + "dir_1";
-        File dir = StoreTestData.hgkvDirFromMap(data, dirPath);
+        String path = availableDirPath("1");
+        File dir = StoreTestData.hgkvDirFromMap(data, path);
         HgkvDirReader reader = new HgkvDirReaderImpl(dir.getPath());
         CloseableIterator<KvEntry> iterator;
 
@@ -144,5 +155,10 @@ public class HgkvDirTest {
         } finally {
             FileUtils.deleteQuietly(dir);
         }
+    }
+
+    private static String availableDirPath(String id) {
+        return FILE_DIR + File.separator + HgkvDirImpl.NAME_PREFIX + id +
+               HgkvDirImpl.EXTEND_NAME;
     }
 }

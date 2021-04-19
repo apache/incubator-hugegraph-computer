@@ -25,12 +25,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
-    private int segmentId;
+    public static final String NAME_PREFIX;
+    public static final String EXTEND_NAME;
+    private static final String NAME_REGEX;
+    private static final Pattern FILE_NUM_PATTERN;
+
+    static {
+        NAME_PREFIX = "hgkv_";
+        EXTEND_NAME = ".hgkv";
+        NAME_REGEX = NAME_PREFIX + "[0-9]+" + EXTEND_NAME;
+        FILE_NUM_PATTERN = Pattern.compile("[0-9]+");
+    }
+
     private final List<HgkvFile> segments;
 
     private HgkvDirImpl(String path) {
@@ -40,11 +52,12 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     private HgkvDirImpl(String path, List<HgkvFile> segments) {
         super(path);
         this.segments = segments;
-        this.segmentId = 0;
     }
 
     public static HgkvDir create(String path) throws IOException {
         File file = new File(path);
+        E.checkArgument(file.getName().matches(NAME_REGEX),
+                        "Illegal file name");
         E.checkArgument(!file.exists(),
                         "Can't create HgkvDir, because the directory" +
                         " already exists. '%s'", file.getPath());
@@ -54,6 +67,8 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     public static HgkvDir open(String path) throws IOException {
         File file = new File(path);
+        E.checkArgument(file.getName().matches(NAME_REGEX),
+                        "Illegal file name");
         E.checkArgument(file.exists(), "Path not exists '%s'", file.getPath());
         E.checkArgument(file.isDirectory(), "Path is not directory '%s'",
                         file.getPath());
@@ -62,7 +77,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     private static File[] scanHgkvFiles(File dir) {
         return dir.listFiles((dirName, name) ->
-                              name.matches(HgkvFileImpl.NAME_REGEX));
+                              name.matches(NAME_REGEX));
     }
 
     private static HgkvDir open(File file) throws IOException {
@@ -108,7 +123,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     private static int filePathToSegmentId(String path) {
         String fileName = path.substring(path.lastIndexOf(File.separator) + 1);
-        Matcher matcher = HgkvFileImpl.FILE_NUM_PATTERN.matcher(fileName);
+        Matcher matcher = FILE_NUM_PATTERN.matcher(fileName);
         E.checkState(matcher.find(), "Illegal file name '%s'", fileName);
         return Integer.parseInt(matcher.group());
     }
@@ -116,11 +131,5 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     @Override
     public List<HgkvFile> segments() {
         return this.segments;
-    }
-
-    @Override
-    public String nextSegmentPath() {
-        return this.path + File.separator + HgkvFileImpl.NAME_PREFIX +
-               (++this.segmentId) + HgkvFileImpl.EXTEND_NAME;
     }
 }

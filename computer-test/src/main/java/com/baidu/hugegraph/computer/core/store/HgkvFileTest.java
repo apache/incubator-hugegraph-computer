@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 import javax.ws.rs.NotSupportedException;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -37,6 +37,7 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFileImpl;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvFileBuilder;
@@ -60,8 +61,8 @@ public class HgkvFileTest {
         );
     }
 
-    @AfterClass
-    public static void clear() throws IOException {
+    @After
+    public void teardown() throws IOException {
         FileUtils.deleteDirectory(new File(FILE_DIR));
     }
 
@@ -108,13 +109,6 @@ public class HgkvFileTest {
 
     @Test
     public void testExceptionCase() throws IOException {
-        // Illegal file name.
-        final String illName = FILE_DIR + File.separator + "file_1.hgkv";
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            new HgkvFileBuilderImpl(illName, CONFIG);
-        },
-        e -> Assert.assertTrue(e.getMessage().contains("Illegal file name")));
-
         // Exception to add key/value
         final String filePath = availableFilePath("1");
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(filePath,
@@ -180,7 +174,7 @@ public class HgkvFileTest {
     }
 
     private static String availableFilePath(String id) {
-        return FILE_DIR + File.separator + HgkvFileImpl.NAME_PREFIX + id +
-               HgkvFileImpl.EXTEND_NAME;
+        return FILE_DIR + File.separator + HgkvDirImpl.NAME_PREFIX + id +
+               HgkvDirImpl.EXTEND_NAME;
     }
 }

@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.store.file.builder;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -36,14 +37,16 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
     // The max byte size of hgkv-file data
     private final long maxEntriesBytes;
 
-    private HgkvFileBuilder segmentBuilder;
     private final HgkvDir dir;
+    private int fileId;
+    private HgkvFileBuilder segmentBuilder;
     private boolean finished;
 
     public HgkvDirBuilderImpl(String path, Config config) throws IOException {
         this.config = config;
         this.maxEntriesBytes = config.get(ComputerOptions.HGKV_MAX_FILE_SIZE);
         this.dir = HgkvDirImpl.create(path);
+        this.fileId = 0;
         this.segmentBuilder = this.nextSegmentBuilder(this.dir, config);
         this.finished = false;
     }
@@ -90,6 +93,8 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
 
     private HgkvFileBuilder nextSegmentBuilder(HgkvDir dir, Config config)
                                                throws IOException {
-        return new HgkvFileBuilderImpl(dir.nextSegmentPath(), config);
+        String path = dir.path() + File.separator + HgkvDirImpl.NAME_PREFIX +
+                      (++this.fileId) + HgkvDirImpl.EXTEND_NAME;
+        return new HgkvFileBuilderImpl(path, config);
     }
 }

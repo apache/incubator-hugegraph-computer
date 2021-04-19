@@ -32,9 +32,4 @@ public interface HgkvDir extends HgkvFile {
      * A HgkvDir is a complete file, HgkvDir consists of multiple HgkvFile.
      */
     List<HgkvFile> segments();
-
-    /**
-     * Return the path to the next segment.
-     */
-    String nextSegmentPath();
 }
