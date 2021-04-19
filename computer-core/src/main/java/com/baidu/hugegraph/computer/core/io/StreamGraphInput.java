@@ -319,4 +319,9 @@ public class StreamGraphInput implements GraphInput {
     public String readUTF() throws IOException {
         return this.in.readUTF();
     }
+
+    @Override
+    public void close() throws IOException {
+        this.in.close();
+    }
 }

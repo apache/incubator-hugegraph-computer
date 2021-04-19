@@ -21,25 +21,23 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.Arrays;
 
-import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
+import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
 
 public class IdValue implements Value<IdValue> {
+
+    public static final byte[] EMPTY_BYTES = new byte[0];
 
     private byte[] bytes;
     private int length;
 
     public IdValue() {
-        this.bytes = Constants.EMPTY_BYTES;
+        this.bytes = EMPTY_BYTES;
         this.length = 0;
     }
 
@@ -48,13 +46,11 @@ public class IdValue implements Value<IdValue> {
         this.length = bytes.length;
     }
 
-    public Id id() {
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(this.bytes, 0,
-                                                                 this.length)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
-            return input.readId();
-        } catch (IOException e) {
-            throw new ComputerException("Failed to read Id", e);
+    public byte[] bytes() {
+        if (this.length == this.bytes.length) {
+            return this.bytes;
+        } else {
+            return Arrays.copyOf(this.bytes, this.length);
         }
     }
 
@@ -74,6 +70,10 @@ public class IdValue implements Value<IdValue> {
     @Override
     public void write(GraphOutput out) throws IOException {
         out.writeInt(this.length);
+        out.write(this.bytes, 0, this.length);
+    }
+
+    public void writeId(GraphOutput out) throws IOException {
         out.write(this.bytes, 0, this.length);
     }
 
@@ -101,6 +101,6 @@ public class IdValue implements Value<IdValue> {
 
     @Override
     public String toString() {
-        return this.id().toString();
+        return Bytes.toHex(this.bytes());
     }
 }

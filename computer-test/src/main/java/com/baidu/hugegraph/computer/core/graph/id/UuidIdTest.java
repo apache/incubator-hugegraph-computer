@@ -29,6 +29,7 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class UuidIdTest extends UnitTestBase {
@@ -44,7 +45,7 @@ public class UuidIdTest extends UnitTestBase {
         Assert.assertEquals(IdType.UUID, uuidId1.type());
         IdValue idValue = uuidId1.idValue();
         Assert.assertEquals(ValueType.ID_VALUE, idValue.type());
-        Assert.assertEquals(uuidId1, idValue.id());
+        Assert.assertEquals(uuidId1, IdValueUtil.toId(idValue));
 
         Assert.assertEquals(uuid1, uuidId1.asObject());
         Assert.assertThrows(ComputerException.class, () -> {

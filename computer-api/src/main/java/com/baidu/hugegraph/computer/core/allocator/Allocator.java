@@ -19,13 +19,17 @@
 
 package com.baidu.hugegraph.computer.core.allocator;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    RecyclersTest.class,
-    DefaultAllocatorTest.class
-})
-public class AllocatorTestSuite {
+
+public interface Allocator {
+
+    RecyclerReference<Vertex> newVertex();
+
+    void freeVertex(RecyclerReference<Vertex> reference);
+
+    RecyclerReference<Edge> newEdge();
+
+    void freeEdge(RecyclerReference<Edge> reference);
 }

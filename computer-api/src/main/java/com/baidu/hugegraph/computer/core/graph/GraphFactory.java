@@ -17,15 +17,32 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.allocator;
+package com.baidu.hugegraph.computer.core.graph;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.util.List;
+import java.util.Map;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    RecyclersTest.class,
-    DefaultAllocatorTest.class
-})
-public class AllocatorTestSuite {
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+
+public interface GraphFactory {
+
+    Vertex createVertex();
+
+    <V extends Value<?>> Vertex createVertex(Id id, V value);
+
+    Edges createEdges(int capacity);
+
+    Edge createEdge();
+
+    <V extends Value<?>> Edge createEdge(Id targetId, V value);
+
+    <V> List<V> createList();
+
+    <V> List<V> createList(int capacity);
+
+    <K, V> Map<K, V> createMap();
 }

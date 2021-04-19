@@ -23,27 +23,27 @@ import java.util.function.Supplier;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.BuiltinGraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 import io.netty.util.Recycler;
 
-public final class Allocator {
+public final class DefaultAllocator implements Allocator {
 
-    private final GraphFactory factory;
+    private final BuiltinGraphFactory factory;
     private final Recycler<RecyclerReference<Vertex>> vertexRecycler;
     private final Recycler<RecyclerReference<Edge>> edgeRecycler;
 
-    public Allocator(Config config) {
-        this.factory = new GraphFactory();
+    public DefaultAllocator(Config config) {
+        this.factory = new BuiltinGraphFactory();
 
         int capacityPerThread =
         config.get(ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD);
         this.vertexRecycler = this.newRecycler(capacityPerThread,
-                                               factory::createVertex);
+                                               this.factory::createVertex);
         this.edgeRecycler = this.newRecycler(capacityPerThread,
-                                             factory::createEdge);
+                                             this.factory::createEdge);
     }
 
     private <T extends Recyclable> Recycler<RecyclerReference<T>>
@@ -55,23 +55,27 @@ public final class Allocator {
             protected RecyclerReference<T> newObject(
                       Recycler.Handle<RecyclerReference<T>> handle) {
                 T recyclable = supplier.get();
-                return new RecyclerReference<T>(recyclable, handle);
+                return new RecyclerReference<>(recyclable, handle);
             }
         };
     }
 
+    @Override
     public RecyclerReference<Vertex> newVertex() {
         return this.vertexRecycler.get();
     }
 
+    @Override
     public void freeVertex(RecyclerReference<Vertex> reference) {
         reference.close();
     }
 
+    @Override
     public RecyclerReference<Edge> newEdge() {
         return this.edgeRecycler.get();
     }
 
+    @Override
     public void freeEdge(RecyclerReference<Edge> reference) {
         reference.close();
     }

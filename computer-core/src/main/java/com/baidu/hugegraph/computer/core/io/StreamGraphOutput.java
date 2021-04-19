@@ -279,4 +279,9 @@ public class StreamGraphOutput implements GraphOutput {
     public long skip(long n) throws IOException {
         return this.out.skip(n);
     }
+
+    @Override
+    public void close() throws IOException {
+        this.out.close();
+    }
 }

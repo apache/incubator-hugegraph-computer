@@ -25,10 +25,15 @@ import java.util.Map;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.FakeMasterComputation;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.baidu.hugegraph.computer.core.master.MasterComputation;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class ConfigTest {
+public class DefaultConfigTest {
 
     private static final String KEY = "algorithm.page_rank.key";
     private static final String KEY_TRUE = "algorithm.page_rank.key_true";
@@ -45,7 +50,7 @@ public class ConfigTest {
         Map<String, String> options = this.initialOptions();
         options.put(KEY_TRUE, Boolean.toString(Boolean.TRUE));
         options.put(KEY_FALSE, Boolean.toString(Boolean.FALSE));
-        Config config = new Config(options);
+        Config config = new DefaultConfig(options);
         Assert.assertTrue(config.getBoolean(KEY_TRUE, defaultValue));
         Assert.assertFalse(config.getBoolean(KEY_FALSE, defaultValue));
         Assert.assertFalse(config.getBoolean(KEY_EMPTY, defaultValue));
@@ -62,7 +67,7 @@ public class ConfigTest {
         Map<String, String> options = this.initialOptions();
         options.put(KEY_MAX, Integer.toString(Integer.MAX_VALUE));
         options.put(KEY_MIN, Integer.toString(Integer.MIN_VALUE));
-        Config config = new Config(options);
+        Config config = new DefaultConfig(options);
         Assert.assertEquals(Integer.MAX_VALUE,
                             config.getInt(KEY_MAX, defaultValue));
         Assert.assertEquals(Integer.MIN_VALUE,
@@ -82,7 +87,7 @@ public class ConfigTest {
         Map<String, String> options = this.initialOptions();
         options.put(KEY_MAX, Long.toString(Long.MAX_VALUE));
         options.put(KEY_MIN, Long.toString(Long.MIN_VALUE));
-        Config config = new Config(options);
+        Config config = new DefaultConfig(options);
         Assert.assertEquals(Long.MAX_VALUE,
                             config.getLong(KEY_MAX, defaultValue));
         Assert.assertEquals(Long.MIN_VALUE,
@@ -103,7 +108,7 @@ public class ConfigTest {
         Map<String, String> options = this.initialOptions();
         options.put(KEY_MAX, Double.toString(Double.MAX_VALUE));
         options.put(KEY_MIN, Double.toString(Double.MIN_VALUE));
-        Config config = new Config(options);
+        Config config = new DefaultConfig(options);
         Assert.assertEquals(Double.MAX_VALUE,
                             config.getDouble(KEY_MAX, defaultValue),
                             delta);
@@ -126,12 +131,46 @@ public class ConfigTest {
         final String defaultValue = "The default value of string";
         Map<String, String> options = this.initialOptions();
         options.put(KEY, value);
-        Config config = new Config(options);
+        Config config = new DefaultConfig(options);
         Assert.assertEquals(value, config.getString(KEY, defaultValue));
         Assert.assertEquals(value, config.getString(KEY, null));
         Assert.assertEquals(defaultValue,
                             config.getString(KEY_EMPTY, defaultValue));
         Assert.assertNull(config.getString(KEY_EMPTY, null));
+    }
+
+    @Test
+    public void testCreateObject() {
+        Config config = ComputerContext.instance().config();
+        MasterComputation masterComputation = config.createObject(
+                          ComputerOptions.MASTER_COMPUTATION_CLASS);
+        Assert.assertEquals(DefaultMasterComputation.class,
+                            masterComputation.getClass());
+    }
+
+    @Test
+    public void testCreateObjectFail() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.MASTER_COMPUTATION_CLASS,
+                FakeMasterComputation.class.getName()
+        );
+        Config config = ComputerContext.instance().config();
+        Assert.assertThrows(ComputerException.class, () -> {
+            config.createObject(ComputerOptions.MASTER_COMPUTATION_CLASS);
+        }, e -> {
+            Assert.assertContains("Failed to create object for option",
+                                  e.getMessage());
+            Assert.assertContains("with modifiers \"private\"",
+                                  e.getCause().getMessage());
+        });
+    }
+
+    @Test
+    public void testNullClass() {
+        Config config = ComputerContext.instance().config();
+        Object combiner = config.createObject(
+                          ComputerOptions.WORKER_COMBINER_CLASS, false);
+        Assert.assertNull(combiner);
     }
 
     private Map<String, String> initialOptions() {

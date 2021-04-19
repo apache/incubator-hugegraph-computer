@@ -19,10 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.Closeable;
 import java.io.DataInput;
 import java.io.IOException;
 
-public interface RandomAccessInput extends DataInput {
+public interface RandomAccessInput extends DataInput, Closeable {
 
     /**
      * @return The current position.

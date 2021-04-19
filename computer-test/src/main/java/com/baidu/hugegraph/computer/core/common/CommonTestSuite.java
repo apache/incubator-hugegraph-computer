@@ -25,8 +25,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     ExceptionTest.class,
-    ContainerInfoTest.class,
-    ConfigTest.class
+    ContainerInfoTest.class
 })
 public class CommonTestSuite {
 }

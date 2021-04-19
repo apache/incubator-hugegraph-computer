@@ -27,9 +27,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 
 public class UuidId implements Id {
 
@@ -54,14 +52,7 @@ public class UuidId implements Id {
     @Override
     public IdValue idValue() {
         // len = Byte.BYTES + Long.BYTES + Long.BYTES;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput(17)) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
-            output.writeId(this);
-            return new IdValue(bao.toByteArray());
-        } catch (IOException e) {
-            throw new ComputerException("Failed to get idValue from id '%s'",
-                                        e, this);
-        }
+        return IdValueUtil.toIdValue(this, 17);
     }
 
     @Override

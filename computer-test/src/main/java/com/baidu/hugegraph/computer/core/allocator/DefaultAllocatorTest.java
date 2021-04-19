@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class AllocatorTest {
+public class DefaultAllocatorTest {
 
     @Test
     public void testRecycle() {

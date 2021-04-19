@@ -19,13 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import java.util.Map;
-
 import com.baidu.hugegraph.computer.core.allocator.Allocator;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.util.E;
-
+import com.baidu.hugegraph.computer.core.config.Config;
 public final class ComputerContext {
 
     private static volatile ComputerContext INSTANCE;
@@ -34,16 +31,25 @@ public final class ComputerContext {
     private final GraphFactory factory;
     private final Allocator allocator;
 
-    private ComputerContext(Config config) {
+    /*
+     * Move ComputerContext to api.
+     * TODO: Pass factory and allocator as parameters.
+     * Add valueFactory. BuiltinValueFactory
+     * Make Allocator interface.
+     * DefaultAllocator
+     */
+    private ComputerContext(Config config,
+                            GraphFactory factory,
+                            Allocator allocator) {
         this.config = config;
-        this.factory = new GraphFactory();
-        this.allocator = new Allocator(config);
+        this.factory = factory;
+        this.allocator = allocator;
     }
 
-    public static synchronized void updateOptions(
-                                    Map<String, String> options) {
-        Config config = new Config(options);
-        INSTANCE = new ComputerContext(config);
+    public static synchronized void initContext(Config config,
+                                                GraphFactory factory,
+                                                Allocator allocator) {
+        INSTANCE = new ComputerContext(config, factory, allocator);
     }
 
     public static ComputerContext instance() {

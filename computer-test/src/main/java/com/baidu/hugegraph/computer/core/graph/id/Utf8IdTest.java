@@ -27,6 +27,7 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
+import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class Utf8IdTest extends UnitTestBase {
@@ -47,7 +48,7 @@ public class Utf8IdTest extends UnitTestBase {
         Assert.assertEquals(IdType.UTF8, utf8Id2.type());
         IdValue idValue = utf8Id2.idValue();
         Assert.assertEquals(ValueType.ID_VALUE, idValue.type());
-        Assert.assertEquals(utf8Id2, idValue.id());
+        Assert.assertEquals(utf8Id2, IdValueUtil.toId(idValue));
 
         Assert.assertEquals("abc", utf8Id2.asObject());
         Assert.assertThrows(NumberFormatException.class, () -> {

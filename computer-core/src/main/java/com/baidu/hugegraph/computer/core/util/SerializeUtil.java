@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
-public class ReadWriteUtil {
+public class SerializeUtil {
 
     public static byte[] toBytes(Writable obj) {
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {

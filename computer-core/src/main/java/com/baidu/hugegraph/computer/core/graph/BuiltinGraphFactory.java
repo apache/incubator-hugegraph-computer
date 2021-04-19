@@ -33,36 +33,44 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public final class GraphFactory {
+public final class BuiltinGraphFactory implements GraphFactory {
 
+    @Override
     public Vertex createVertex() {
         return new DefaultVertex();
     }
 
+    @Override
     public <V extends Value<?>> Vertex createVertex(Id id, V value) {
         return new DefaultVertex(id, value);
     }
 
+    @Override
     public Edges createEdges(int capacity) {
         return new DefaultEdges(capacity);
     }
 
+    @Override
     public Edge createEdge() {
         return new DefaultEdge();
     }
 
+    @Override
     public <V extends Value<?>> Edge createEdge(Id targetId, V value) {
         return new DefaultEdge(targetId, value);
     }
 
+    @Override
     public <V> List<V> createList() {
         return new ArrayList<>();
     }
 
+    @Override
     public <V> List<V> createList(int capacity) {
         return new ArrayList<>(capacity);
     }
 
+    @Override
     public <K, V> Map<K, V> createMap() {
         return new HashMap<>();
     }

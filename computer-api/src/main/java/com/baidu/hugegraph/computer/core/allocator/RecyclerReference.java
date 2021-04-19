@@ -28,6 +28,7 @@ public class RecyclerReference<T extends Recyclable> extends SoftReference<T>
 
     private final Recycler.Handle<RecyclerReference<T>> handle;
 
+    // TODO: create interface here and make parameter a interface.
     public RecyclerReference(T referent,
                              Recycler.Handle<RecyclerReference<T>> handle) {
         super(referent);
