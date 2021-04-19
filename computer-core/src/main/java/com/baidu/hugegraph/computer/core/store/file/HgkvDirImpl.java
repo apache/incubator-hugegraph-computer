@@ -23,11 +23,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
@@ -45,8 +44,8 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     }
 
     private final List<HgkvFile> segments;
-    private BufferedFileInput maxKeyInput;
-    private BufferedFileInput minKeyInput;
+    private HgkvFile minKeyFile;
+    private HgkvFile maxKeyFile;
 
     private HgkvDirImpl(String path) {
         this(path, null);
@@ -120,46 +119,34 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     @Override
     public void close() throws IOException {
-        if (this.maxKeyInput != null) {
-            this.maxKeyInput.close();
+        if (this.minKeyFile != null) {
+            this.minKeyFile.close();
         }
-        if (this.minKeyInput != null) {
-            this.minKeyInput.close();
+        if (this.maxKeyFile != null) {
+            this.maxKeyFile.close();
         }
+    }
+
+    @Override
+    public Pointer max() {
+        return this.maxKeyFile.max();
+    }
+
+    @Override
+    public Pointer min() {
+        return this.minKeyFile.min();
     }
 
     private void build() throws IOException {
         this.magic = MAGIC;
         this.version = PRIMARY_VERSION + "." + MINOR_VERSION;
         this.entriesSize = this.segments.stream()
-                                      .mapToLong(HgkvFile::entriesSize)
-                                      .sum();
-
-        this.max = this.segments.stream()
-                              .filter(Objects::nonNull)
-                              .map(HgkvFile::max)
-                              .max(Comparable::compareTo)
-                              .orElse(null);
-        assert this.max != null;
-        this.maxKeyInput = (BufferedFileInput) this.max.input();
-
-        this.min = this.segments.stream()
-                              .filter(Objects::nonNull)
-                                .map(HgkvFile::max)
-                              .min(Comparable::compareTo)
-                              .orElse(null);
-        assert this.min != null;
-        this.minKeyInput = (BufferedFileInput) this.min.input();
-
-        // Close input that isn't max key input or min key input
-        for (HgkvFile file : this.segments) {
-            if (file.entriesSize() <= 0) {
-                continue;
-            }
-            BufferedFileInput input = (BufferedFileInput) file.max().input();
-            if (input != this.maxKeyInput && input != this.minKeyInput) {
-                input.close();
-            }
+                                        .mapToLong(HgkvFile::entriesSize)
+                                        .sum();
+        this.minKeyFile = this.segments.get(0);
+        this.maxKeyFile = this.segments.get(this.segments.size() - 1);
+        for (int i = 1, j = this.segments.size() - 1; i < j; i++) {
+            this.segments.get(i).close();
         }
     }
 
