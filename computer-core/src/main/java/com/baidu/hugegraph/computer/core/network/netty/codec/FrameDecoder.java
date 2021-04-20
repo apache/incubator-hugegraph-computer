@@ -76,8 +76,10 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        LOG.debug("The FrameDecoder active from {}",
-                  TransportUtil.remoteAddress(ctx.channel()));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("The FrameDecoder active from {}",
+                      TransportUtil.remoteAddress(ctx.channel()));
+        }
         super.channelActive(ctx);
     }
 
@@ -86,8 +88,10 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        LOG.debug("The FrameDecoder inActive from {}",
-                  TransportUtil.remoteAddress(ctx.channel()));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("The FrameDecoder inActive from {}",
+                      TransportUtil.remoteAddress(ctx.channel()));
+        }
         super.channelInactive(ctx);
     }
 }

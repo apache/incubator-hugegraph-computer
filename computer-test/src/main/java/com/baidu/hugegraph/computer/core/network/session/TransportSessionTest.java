@@ -200,13 +200,18 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
             Whitebox.setInternalState(serverSession,
                                       "lastAckTimestamp", 0L);
-            Boolean checkRespondAck = Whitebox.invoke(serverSession.getClass(),
-                                                      "checkRespondAck",
-                                                      serverSession);
-            Assert.assertTrue(checkRespondAck);
+            Boolean respondAck = Whitebox.invoke(serverSession.getClass(),
+                                                 "checkRespondAck",
+                                                 serverSession);
+            Assert.assertTrue(respondAck);
 
             serverSession.respondedAck(i);
             Assert.assertEquals(i, serverSession.maxAckId);
+
+            Boolean repeatRespondAck = Whitebox.invoke(serverSession.getClass(),
+                                                       "checkRespondAck",
+                                                       serverSession);
+            Assert.assertFalse(repeatRespondAck);
         }
 
         serverSession.finishRecv(100);
@@ -224,6 +229,14 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             serverSession.dataRecv(1);
+        }, e -> {
+            Assert.assertContains("The status must be ESTABLISH " +
+                                  "instead of READY",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            serverSession.finishRecv(1);
         }, e -> {
             Assert.assertContains("The status must be ESTABLISH " +
                                   "instead of READY",
@@ -250,6 +263,35 @@ public class TransportSessionTest extends AbstractNetworkTest {
             Assert.assertContains("The ackId must be increasing",
                                   e.getMessage());
         });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            serverSession.finishRecv(1);
+        }, e -> {
+            Assert.assertContains("The finishId must be auto-increment",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testCheckFinishReady() {
+        ServerSession serverSession = new ServerSession(conf);
+        Assert.assertEquals(TransportStatus.READY, serverSession.status());
+
+        Boolean finishRead = Whitebox.invoke(serverSession.getClass(),
+                                             "checkFinishReady",
+                                             serverSession);
+        Assert.assertTrue(finishRead);
+
+        serverSession.startRecv();
+        serverSession.startComplete();
+
+        Boolean finishRead2 = Whitebox.invoke(serverSession.getClass(),
+                                              "checkFinishReady",
+                                              serverSession);
+        Assert.assertFalse(finishRead2);
+
+        serverSession.finishRecv(1);
+        serverSession.finishComplete();
     }
 
     @Test

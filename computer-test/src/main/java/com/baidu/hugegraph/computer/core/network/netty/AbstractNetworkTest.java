@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -86,6 +88,7 @@ public abstract class AbstractNetworkTest {
 
     @Before
     public void setup() {
+        Configurator.setAllLevels("com.baidu.hugegraph", Level.DEBUG);
         OPTIONS.put(ComputerOptions.TRANSPORT_SERVER_HOST, host);
         OPTIONS.put(ComputerOptions.TRANSPORT_IO_MODE, "AUTO");
         this.initOption();
