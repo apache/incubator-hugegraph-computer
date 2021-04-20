@@ -462,8 +462,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.max_pending_requests",
                     "The max number of client unreceived ack, " +
-                    "if the number of unreceived ack greater than or equal it, " +
-                    "the send will unavailable.",
+                    "if the number of unreceived ack greater than or equal " +
+                    "it, the send will unavailable.",
                     positiveInt(),
                     50
             );

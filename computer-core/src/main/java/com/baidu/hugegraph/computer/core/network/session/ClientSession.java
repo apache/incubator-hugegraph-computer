@@ -184,7 +184,7 @@ public class ClientSession extends TransportSession {
 
             if (pendingRequests >= this.maxPendingRequests) {
                 this.flowControlStatus = true;
-            } else if (pendingRequests < this.minPendingRequests){
+            } else if (pendingRequests < this.minPendingRequests) {
                 this.flowControlStatus = false;
             }
         } finally {

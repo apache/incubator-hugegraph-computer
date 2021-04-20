@@ -133,7 +133,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertEquals(TransportStatus.ESTABLISH, serverSession.status());
         Assert.assertEquals(AbstractMessage.START_SEQ, serverSession.maxAckId);
         Assert.assertEquals(AbstractMessage.START_SEQ,
-                            Whitebox.getInternalState(serverSession, "maxHandledId"));
+                            Whitebox.getInternalState(serverSession,
+                                                      "maxHandledId"));
 
         for (int i = 1; i < 100 ; i++) {
             serverSession.dataRecv(i);
@@ -154,7 +155,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
         }
 
         serverSession.finishRecv(100);
-        Assert.assertEquals(TransportStatus.FINISH_RECV, serverSession.status());
+        Assert.assertEquals(TransportStatus.FINISH_RECV,
+                            serverSession.status());
 
         serverSession.finishComplete();
         Assert.assertEquals(TransportStatus.READY, serverSession.status());
@@ -165,7 +167,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ServerSession serverSession = new ServerSession(conf);
         Assert.assertEquals(TransportStatus.READY, serverSession.status());
 
-        Assert.assertThrows(IllegalArgumentException.class, ()->{
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
             serverSession.dataRecv(1);
         }, e -> {
             Assert.assertContains("The status must be ESTABLISH " +
@@ -176,7 +178,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         serverSession.startRecv();
         serverSession.startComplete();
 
-        Assert.assertThrows(IllegalArgumentException.class, ()->{
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
             serverSession.dataRecv(2);
         }, e -> {
             Assert.assertContains("The requestId must be auto-increment",
@@ -187,7 +189,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         serverSession.handledData(1);
         serverSession.respondedAck(1);
 
-        Assert.assertThrows(IllegalArgumentException.class, ()->{
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
             serverSession.respondedAck(1);
         }, e -> {
             Assert.assertContains("The ackId must be increasing",
@@ -205,7 +207,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
                                 clientSession.status());
             try {
                 clientSession.ackRecv(AbstractMessage.START_SEQ);
-            }catch (Throwable e) {
+            } catch (Throwable e) {
                 LOG.error("Failed to call receiveAck", e);
                 exceptions.add(e);
             }
@@ -234,7 +236,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
                                 clientSession.status());
             try {
                 clientSession.ackRecv(finishId);
-            }catch (Throwable e) {
+            } catch (Throwable e) {
                 LOG.error("Failed to call receiveAck", e);
                 exceptions.add(e);
             }

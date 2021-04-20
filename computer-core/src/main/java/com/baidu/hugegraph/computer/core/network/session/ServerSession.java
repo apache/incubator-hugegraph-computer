@@ -84,8 +84,8 @@ public class ServerSession extends TransportSession {
                         "The status must be ESTABLISH instead of %s " +
                         "on dataRecv", this.status);
         E.checkArgument(requestId == this.maxRequestId + 1,
-                        "The requestId must be auto-increment, requestId: %s, " +
-                        "maxRequestId: %s", requestId, this.maxRequestId);
+                        "The requestId must be auto-increment, requestId: %s," +
+                        " maxRequestId: %s", requestId, this.maxRequestId);
         this.maxRequestId = requestId;
     }
 
