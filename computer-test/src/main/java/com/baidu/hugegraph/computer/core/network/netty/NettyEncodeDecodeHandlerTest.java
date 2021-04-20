@@ -144,7 +144,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
 
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
-        Mockito.verify(clientHandler, Mockito.timeout(5000L).times(1))
+        Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
     }
 

@@ -76,8 +76,13 @@ public abstract class AbstractNettyHandler
                                       Channel channel,
                                       FailMessage failMessage) {
         int errorCode = failMessage.errorCode();
-        String msg = failMessage.message();
-        TransportException exception = new TransportException(errorCode, msg);
+
+        TransportException exception = new TransportException(
+                                       errorCode,
+                                       "Remote error from '%s', cause: ",
+                                       TransportUtil.remoteAddress(channel),
+                                       failMessage.message());
+
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
         this.transportHandler().exceptionCaught(exception, connectionId);
     }
