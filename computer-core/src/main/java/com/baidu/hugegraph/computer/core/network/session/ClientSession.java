@@ -41,12 +41,12 @@ import com.baidu.hugegraph.util.E;
 
 public class ClientSession extends TransportSession {
 
-    private final Lock flowControlStatusLock = new ReentrantLock();
-
     private final int maxPendingRequests;
     private final int minPendingRequests;
     private final long syncRequestTimeout;
     private final long finishSessionTimeout;
+
+    private final Lock flowControlStatusLock;
     private volatile boolean flowControlStatus;
     private final BarrierEvent startBarrierEvent;
     private final BarrierEvent finishBarrierEvent;
@@ -59,6 +59,7 @@ public class ClientSession extends TransportSession {
         this.minPendingRequests = this.conf.minPendingRequests();
         this.syncRequestTimeout = this.conf.syncRequestTimeout();
         this.finishSessionTimeout = this.conf.finishSessionTimeout();
+        this.flowControlStatusLock = new ReentrantLock();
         this.flowControlStatus = false;
         this.startBarrierEvent = new BarrierEvent();
         this.finishBarrierEvent = new BarrierEvent();
