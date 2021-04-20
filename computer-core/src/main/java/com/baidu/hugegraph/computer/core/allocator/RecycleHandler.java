@@ -19,27 +19,19 @@
 
 package com.baidu.hugegraph.computer.core.allocator;
 
-import java.lang.ref.SoftReference;
+import io.netty.util.Recycler;
 
-public class RecyclerReference<T extends Recyclable> extends SoftReference<T>
-       implements AutoCloseable {
+public class RecycleHandler<T extends Recyclable>
+       implements RecyclerReference.Handle<RecyclerReference<T>> {
 
-    private final Handle<RecyclerReference<T>> handle;
+    private Recycler.Handle<RecyclerReference<T>> handle;
 
-    // TODO: create interface here and make parameter a interface.
-    public RecyclerReference(T referent,
-                             Handle<RecyclerReference<T>> handle) {
-        super(referent);
+    public RecycleHandler(Recycler.Handle<RecyclerReference<T>> handle) {
         this.handle = handle;
     }
 
     @Override
-    public void close() {
-        this.handle.recycle(this);
-    }
-
-    // Copy from io.netty.util.Recycler.Handle
-    public interface Handle<O> {
-        void recycle(O object);
+    public void recycle(RecyclerReference<T> object) {
+        this.handle.recycle(object);
     }
 }

@@ -55,7 +55,8 @@ public final class DefaultAllocator implements Allocator {
             protected RecyclerReference<T> newObject(
                       Recycler.Handle<RecyclerReference<T>> handle) {
                 T recyclable = supplier.get();
-                return new RecyclerReference<>(recyclable, handle);
+                return new RecyclerReference<>(recyclable,
+                                               new RecycleHandler(handle));
             }
         };
     }
