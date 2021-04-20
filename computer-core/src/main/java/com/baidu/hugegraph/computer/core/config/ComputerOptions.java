@@ -444,7 +444,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Long> TRANSPORT_WRITE_SOCKET_TIMEOUT =
             new ConfigOption<>(
-                    "transport.finish_session_timeout",
+                    "transport.write_socket_timeout",
                     "The timeout(in ms) to write data to socket buffer.",
                     positiveInt(),
                     3000L

@@ -46,6 +46,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, 2);
         super.updateOption(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT,
                            5_000L);
+        super.updateOption(ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT,
+                           6_000L);
     }
 
     @Test
