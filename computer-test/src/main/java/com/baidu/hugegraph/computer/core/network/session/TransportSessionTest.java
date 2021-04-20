@@ -19,19 +19,22 @@
 
 package com.baidu.hugegraph.computer.core.network.session;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.TransportStatus;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.netty.AbstractNetworkTest;
+import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.ExecutorUtil;
@@ -45,8 +48,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
     @Override
     protected void initOption() {
-        super.updateOption(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT,
-                           5_000L);
+        //super.updateOption(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT,
+        //                   5_000L);
     }
 
     @Test
@@ -85,15 +88,10 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ScheduledExecutorService executorService =
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
-        List<Throwable> exceptions = new CopyOnWriteArrayList<>();
-
         ClientSession clientSession = new ClientSession(conf, message -> true);
         Assert.assertEquals(TransportStatus.READY, clientSession.status());
 
-        this.syncStartWithAutoComplete(executorService, clientSession,
-                                       exceptions);
-
-        Assert.assertFalse(this.existError(exceptions));
+        this.syncStartWithAutoComplete(executorService, clientSession);
 
         executorService.shutdown();
     }
@@ -107,18 +105,75 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ClientSession clientSession = new ClientSession(conf, message -> true);
         Assert.assertEquals(TransportStatus.READY, clientSession.status());
 
-        List<Throwable> exceptions = new CopyOnWriteArrayList<>();
-
-        this.syncStartWithAutoComplete(executorService, clientSession,
-                                       exceptions);
+        this.syncStartWithAutoComplete(executorService, clientSession);
 
         int finishId = AbstractMessage.START_SEQ + 1;
         this.syncFinishWithAutoComplete(executorService, clientSession,
-                                        finishId, exceptions);
-
-        Assert.assertFalse(this.existError(exceptions));
+                                        finishId);
 
         executorService.shutdown();
+    }
+
+    @Test
+    public void testSyncStartWithException() throws InterruptedException,
+                                                    TransportException {
+        ScheduledExecutorService executorService =
+        ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
+
+        ClientSession clientSession = new ClientSession(conf, message -> true);
+        Assert.assertEquals(TransportStatus.READY, clientSession.status());
+
+        this.syncStartWithAutoComplete(executorService, clientSession);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            clientSession.syncStart();
+        }, e -> {
+            Assert.assertContains("The status must be READY " +
+                                  "instead of ESTABLISH on syncStart",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testAsyncSendWithException() throws InterruptedException,
+                                                     TransportException {
+        ScheduledExecutorService executorService =
+        ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
+
+        ClientSession clientSession = new ClientSession(conf, message -> true);
+        Assert.assertEquals(TransportStatus.READY, clientSession.status());
+
+        ByteBuffer buffer = ByteBuffer.wrap(StringEncoding.encode("test data"));
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            clientSession.asyncSend(MessageType.MSG, 1, buffer);
+        }, e -> {
+            Assert.assertContains("The status must be ESTABLISH " +
+                                  "instead of READY on asyncSend",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testSyncFinishWithException() throws InterruptedException,
+                                                    TransportException {
+        ScheduledExecutorService executorService =
+        ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
+
+        ClientSession clientSession = new ClientSession(conf, message -> true);
+        Assert.assertEquals(TransportStatus.READY, clientSession.status());
+
+        this.syncStartWithAutoComplete(executorService, clientSession);
+
+        this.syncFinishWithAutoComplete(executorService, clientSession, 1);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            clientSession.syncFinish();
+        }, e -> {
+            Assert.assertContains("The status must be ESTABLISH " +
+                                  "instead of READY on syncFinish",
+                                  e.getMessage());
+        });
     }
 
     @Test
@@ -197,11 +252,38 @@ public class TransportSessionTest extends AbstractNetworkTest {
         });
     }
 
+    @Test
+    public void testHandledData() {
+        ServerSession serverSession = new ServerSession(conf);
+        Assert.assertEquals(TransportStatus.READY, serverSession.status());
+
+        serverSession.startRecv();
+        serverSession.startComplete();
+        serverSession.dataRecv(1);
+
+        Pair<AckType, Integer> pair = serverSession.handledData(1);
+        Assert.assertEquals(AckType.DATA, pair.getKey());
+        Assert.assertEquals(1, pair.getValue());
+        serverSession.respondedAck(1);
+
+        Pair<AckType, Integer> pair2 = serverSession.handledData(1);
+        Assert.assertEquals(AckType.NONE, pair2.getKey());
+
+        serverSession.finishRecv(2);
+
+        Pair<AckType, Integer> pair3 = serverSession.handledData(1);
+        Assert.assertEquals(AckType.FINISH, pair3.getKey());
+        Assert.assertEquals(2, pair3.getValue());
+
+        serverSession.finishComplete();
+    }
+
     private void syncStartWithAutoComplete(ScheduledExecutorService pool,
-                                           ClientSession clientSession,
-                                           List<Throwable> exceptions)
+                                           ClientSession clientSession)
                                            throws TransportException,
                                                   InterruptedException {
+        List<Throwable> exceptions = new CopyOnWriteArrayList<>();
+
         pool.schedule(() -> {
             Assert.assertEquals(TransportStatus.START_SEND,
                                 clientSession.status());
@@ -223,14 +305,17 @@ public class TransportSessionTest extends AbstractNetworkTest {
                             clientSession.maxAckId);
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             clientSession.finishId);
+
+        Assert.assertFalse(this.existError(exceptions));
     }
 
     private void syncFinishWithAutoComplete(ScheduledExecutorService pool,
                                             ClientSession clientSession,
-                                            int finishId,
-                                            List<Throwable> exceptions)
+                                            int finishId)
                                             throws InterruptedException,
                                                    TransportException {
+        List<Throwable> exceptions = new CopyOnWriteArrayList<>();
+
         pool.schedule(() -> {
             Assert.assertEquals(TransportStatus.FINISH_SEND,
                                 clientSession.status());
@@ -253,6 +338,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             clientSession.maxRequestId);
         Assert.assertFalse(clientSession.flowControllerStatus());
+
+        Assert.assertFalse(this.existError(exceptions));
     }
 
     private boolean existError(List<Throwable> exceptions) {
