@@ -188,10 +188,10 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         boolean send = client.send(MessageType.MSG, 1, buffer);
         Assert.assertTrue(send);
 
-        Mockito.verify(serverHandler, Mockito.timeout(2000L).times(1))
+        Mockito.verify(serverHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
 
-        Mockito.verify(clientHandler, Mockito.timeout(2000L).times(1))
+        Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
     }
 }
