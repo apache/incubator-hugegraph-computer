@@ -41,6 +41,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.util.ReferenceCountUtil;
 
 public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
 
@@ -151,6 +152,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         int partition = 1;
         byte[] bytes = StringEncoding.encode("mock msg");
         ByteBuf buf = Unpooled.directBuffer().writeBytes(bytes);
+        buf = ReferenceCountUtil.releaseLater(buf);
         NettyManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
         DataMessage dataMessage = new DataMessage(MessageType.MSG,
                                                   requestId, partition,

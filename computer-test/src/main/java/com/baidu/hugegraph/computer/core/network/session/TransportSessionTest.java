@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.TransportStatus;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
@@ -48,8 +49,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
     @Override
     protected void initOption() {
-        //super.updateOption(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT,
-        //                   5_000L);
+        super.updateOption(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT,
+                           5_000L);
     }
 
     @Test

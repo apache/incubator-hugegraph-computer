@@ -178,9 +178,7 @@ public class ClientSession extends TransportSession {
     }
 
     private void updateFlowControlStatus() {
-
         this.flowControlStatusLock.lock();
-
         try {
             int pendingRequests = this.maxRequestId - this.maxAckId;
 
