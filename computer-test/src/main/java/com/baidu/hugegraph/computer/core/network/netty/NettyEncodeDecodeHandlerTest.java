@@ -68,14 +68,14 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         client.channel().writeAndFlush(dataMessage)
               .addListener(spyListener);
 
-        client.finishSession();
-
         Mockito.verify(clientHandler, Mockito.timeout(3000L).times(1))
               .channelActive(Mockito.any());
         Mockito.verify(clientHandler, Mockito.timeout(3000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
         Mockito.verify(spyListener, Mockito.timeout(3000L).times(1))
                .onFailure(Mockito.any(), Mockito.any());
+
+        client.finishSession();
     }
 
     @Test

@@ -79,7 +79,7 @@ public abstract class AbstractNettyHandler
 
         TransportException exception = new TransportException(
                                        errorCode,
-                                       "Remote error from '%s', cause: ",
+                                       "Remote error from '%s', cause: %s",
                                        TransportUtil.remoteAddress(channel),
                                        failMessage.message());
 

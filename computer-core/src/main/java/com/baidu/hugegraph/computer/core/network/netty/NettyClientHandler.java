@@ -39,12 +39,9 @@ public class NettyClientHandler extends AbstractNettyHandler {
     private static final Logger LOG = Log.logger(NettyClientHandler.class);
 
     private final NettyTransportClient client;
-    private final ChannelFutureListenerOnWrite listenerOnWrite;
 
     public NettyClientHandler(NettyTransportClient client) {
         this.client = client;
-        this.listenerOnWrite = new ChannelFutureListenerOnWrite(
-                               this.transportHandler());
     }
 
     @Override
@@ -70,7 +67,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
     @Override
     protected void respondFail(ChannelHandlerContext ctx, int failId,
                                int errorCode, String message) {
-        long timeout = this.clientSession().conf().syncRequestTimeout();
+        long timeout = this.clientSession().conf().syncRequestTimeout() / 2;
         FailMessage failMessage = new FailMessage(failId, errorCode, message);
         ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
     }
