@@ -83,7 +83,7 @@ public class NettyTransportClient implements TransportClient {
         return this.channel.isActive();
     }
 
-    public ClientSession session() {
+    protected ClientSession session() {
         return this.session;
     }
 

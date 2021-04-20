@@ -24,9 +24,12 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.AckMessage;
+import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.Log;
+import com.google.common.base.Throwables;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,16 +39,40 @@ public class NettyClientHandler extends AbstractNettyHandler {
     private static final Logger LOG = Log.logger(NettyClientHandler.class);
 
     private final NettyTransportClient client;
+    private final ChannelFutureListenerOnWrite listenerOnWrite;
 
     public NettyClientHandler(NettyTransportClient client) {
         this.client = client;
+        this.listenerOnWrite = new ChannelFutureListenerOnWrite(
+                               this.transportHandler());
     }
 
     @Override
     protected void processAckMessage(ChannelHandlerContext ctx,
                                      Channel channel, AckMessage ackMessage) {
         int ackId = ackMessage.ackId();
-        this.session().receiveAck(ackId);
+        assert ackId > AbstractMessage.UNKNOWN_SEQ;
+        this.clientSession().ackRecv(ackId);
+    }
+
+    @Override
+    protected void processFailMessage(ChannelHandlerContext ctx,
+                                      Channel channel,
+                                      FailMessage failMessage) {
+        int failId = failMessage.ackId();
+        if (failId > AbstractMessage.START_SEQ) {
+            this.clientSession().ackRecv(failId);
+        }
+
+        super.processFailMessage(ctx, channel, failMessage);
+    }
+
+    @Override
+    protected void respondFail(ChannelHandlerContext ctx, int failId,
+                               int errorCode, String message) {
+        long timeout = this.clientSession().conf().syncRequestTimeout();
+        FailMessage failMessage = new FailMessage(failId, errorCode, message);
+        ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
     }
 
     @Override
@@ -67,17 +94,21 @@ public class NettyClientHandler extends AbstractNettyHandler {
                         TransportUtil.remoteAddress(ctx.channel()));
         }
 
+        // Respond fail message to requester
+        this.respondFail(ctx, AbstractMessage.UNKNOWN_SEQ,
+                         exception.errorCode(),
+                         Throwables.getStackTraceAsString(exception));
+
         this.client.handler().exceptionCaught(exception,
                                               this.client.connectionId());
+    }
+
+    private ClientSession clientSession() {
+        return this.client.session();
     }
 
     @Override
     protected ClientHandler transportHandler() {
         return this.client.handler();
-    }
-
-    @Override
-    protected ClientSession session() {
-        return this.client.session();
     }
 }

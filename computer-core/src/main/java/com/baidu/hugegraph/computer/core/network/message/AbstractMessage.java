@@ -59,13 +59,16 @@ public abstract class AbstractMessage implements Message {
     public static final short MAGIC_NUMBER = 0x4847;
     public static final byte PROTOCOL_VERSION = 1;
 
+    public static final int UNKNOWN_SEQ = -1;
+    public static final int START_SEQ = 0;
+
     private final int sequenceNumber;
     private final int partition;
     private final int bodyLength;
     private final ManagedBuffer body;
 
     protected AbstractMessage() {
-        this(0);
+        this(UNKNOWN_SEQ);
     }
 
     protected AbstractMessage(int sequenceNumber) {
@@ -81,7 +84,7 @@ public abstract class AbstractMessage implements Message {
     }
 
     protected AbstractMessage(ManagedBuffer body) {
-        this(0, 0, body);
+        this(UNKNOWN_SEQ, 0, body);
     }
 
     protected AbstractMessage(int sequenceNumber, int partition,
@@ -175,7 +178,7 @@ public abstract class AbstractMessage implements Message {
 
     protected static void assertExtraHeader(ByteBuf buf) {
         int sequenceNumber = buf.readInt();
-        assert sequenceNumber == 0;
+        assert sequenceNumber == UNKNOWN_SEQ;
         int partition = buf.readInt();
         assert partition == 0;
         int bodyLength = buf.readInt();

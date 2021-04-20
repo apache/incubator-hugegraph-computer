@@ -23,39 +23,54 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportStatus;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.util.E;
 
 public class ServerSession extends TransportSession {
 
+    private final long minAckInterval;
     private volatile int maxHandledId;
     private volatile long lastAckTimestamp;
 
     public ServerSession(TransportConf conf) {
         super(conf);
-        this.maxHandledId = SEQ_INIT_VALUE;
+        this.minAckInterval = this.conf().minAckInterval();
+        this.maxHandledId = AbstractMessage.UNKNOWN_SEQ;
         this.lastAckTimestamp = 0;
-    }
-
-    private void startRecv() {
-        this.maxRequestId = START_REQUEST_ID;
-        this.status = TransportStatus.START_RECV;
-    }
-
-    private void finishRecv() {
-        this.status = TransportStatus.FINISH_RECV;
     }
 
     @Override
     protected void ready() {
-        this.maxHandledId = SEQ_INIT_VALUE;
+        this.maxHandledId = AbstractMessage.UNKNOWN_SEQ;
         this.lastAckTimestamp = 0;
         super.ready();
     }
 
+    public void startRecv() {
+        E.checkArgument(this.status == TransportStatus.READY,
+                        "The status must be READY instead of %s " +
+                        "on startRecv", this.status);
+        this.maxRequestId = AbstractMessage.START_SEQ;
+        this.status = TransportStatus.START_RECV;
+    }
+
+    public boolean finishRecv(int finishId) {
+        E.checkArgument(this.status == TransportStatus.ESTABLISH,
+                        "The status must be ESTABLISH instead of %s " +
+                        "on finishRecv", this.status);
+        E.checkArgument(finishId == this.maxRequestId + 1,
+                        "The finishId must be auto-increment, finishId: %s, " +
+                        "maxRequestId: %s", finishId, this.maxRequestId);
+
+        this.finishId = finishId;
+        this.status = TransportStatus.FINISH_RECV;
+        return this.checkFinishReady();
+    }
+
     @Override
     public void startComplete() {
-        this.maxHandledId = START_REQUEST_ID;
-        this.maxAckId = START_REQUEST_ID;
+        this.maxHandledId = AbstractMessage.START_SEQ;
+        this.maxAckId = AbstractMessage.START_SEQ;
         this.establish();
     }
 
@@ -64,32 +79,14 @@ public class ServerSession extends TransportSession {
         this.ready();
     }
 
-    public void receiveStart() {
-        E.checkArgument(this.status == TransportStatus.READY,
-                        "The status must be READY instead of %s " +
-                        "on receiveStart", this.status);
-        this.startRecv();
-    }
-
-    public boolean receiveFinish(int finishId) {
+    public void dataRecv(int requestId) {
         E.checkArgument(this.status == TransportStatus.ESTABLISH,
                         "The status must be ESTABLISH instead of %s " +
-                        "on receiveFinish", this.status);
-        this.finishId = finishId;
-        this.finishRecv();
-        return this.checkFinishReady();
-    }
-
-    public void receivedData(int requestId) {
-        E.checkArgument(this.status == TransportStatus.ESTABLISH,
-                        "The status must be ESTABLISH instead of %s " +
-                        "on receiveData", this.status);
+                        "on dataRecv", this.status);
+        E.checkArgument(requestId == this.maxRequestId + 1,
+                        "The requestId must be auto-increment, requestId: %s, " +
+                        "maxRequestId: %s", requestId, this.maxRequestId);
         this.maxRequestId = requestId;
-    }
-
-    public void respondedAck(int ackId) {
-        this.maxAckId = ackId;
-        this.lastAckTimestamp = System.currentTimeMillis();
     }
 
     public synchronized Pair<AckType, Integer> handledData(int requestId) {
@@ -111,7 +108,19 @@ public class ServerSession extends TransportSession {
             return Pair.of(AckType.DATA, this.maxHandledId);
         }
 
-        return Pair.of(AckType.NONE, SEQ_INIT_VALUE);
+        return Pair.of(AckType.NONE, AbstractMessage.UNKNOWN_SEQ);
+    }
+
+    public void respondedAck(int ackId) {
+        E.checkArgument(this.status == TransportStatus.ESTABLISH ||
+                        this.status == TransportStatus.FINISH_RECV,
+                        "The status must be ESTABLISH or FINISH_RECV instead " +
+                        "of %s on respondedAck", this.status);
+        E.checkArgument(ackId > this.maxAckId,
+                        "The ackId must be increasing, ackId: %s, " +
+                        "maxAckId: %s", ackId, this.maxAckId);
+        this.maxAckId = ackId;
+        this.lastAckTimestamp = System.currentTimeMillis();
     }
 
     private boolean checkFinishReady() {
@@ -125,8 +134,8 @@ public class ServerSession extends TransportSession {
     }
 
     private boolean checkRespondAck() {
-        long minAckInterval = this.conf.minAckInterval();
         long interval = System.currentTimeMillis() - this.lastAckTimestamp;
-        return interval >= minAckInterval;
+        return interval >= this.minAckInterval &&
+               this.maxHandledId > this.maxAckId;
     }
 }

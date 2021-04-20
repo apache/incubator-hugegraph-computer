@@ -26,7 +26,6 @@ import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
@@ -137,23 +136,5 @@ public abstract class AbstractNetworkTest {
         serverProtocol = Mockito.spy(protocol);
         Whitebox.setInternalState(channelInitializer, "protocol",
                                   serverProtocol);
-    }
-
-
-    @Test
-    public void testTransportConf() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO",
-                ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "20",
-                ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
-                ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
-        );
-        config = ComputerContext.instance().config();
-
-        TransportConf conf = TransportConf.wrapConfig(config);
-        Assert.assertEquals(20, conf.maxPendingRequests());
-        Assert.assertEquals(5, conf.minPendingRequests());
-        Assert.assertEquals(500L, conf.minAckInterval());
     }
 }

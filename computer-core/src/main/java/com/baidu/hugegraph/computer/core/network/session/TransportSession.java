@@ -23,11 +23,9 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportStatus;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 
 public abstract class TransportSession {
-
-    public static final int SEQ_INIT_VALUE = -1;
-    public static final int START_REQUEST_ID = 0;
 
     protected static final AtomicIntegerFieldUpdater<TransportSession>
               MAX_REQUEST_ID_UPDATER =
@@ -43,15 +41,15 @@ public abstract class TransportSession {
     protected TransportSession(TransportConf conf) {
         this.conf = conf;
         this.status = TransportStatus.READY;
-        this.maxRequestId = SEQ_INIT_VALUE;
-        this.finishId = SEQ_INIT_VALUE;
-        this.maxAckId = SEQ_INIT_VALUE;
+        this.maxRequestId = AbstractMessage.UNKNOWN_SEQ;
+        this.finishId = AbstractMessage.UNKNOWN_SEQ;
+        this.maxAckId = AbstractMessage.UNKNOWN_SEQ;
     }
 
     protected void ready() {
-        this.maxRequestId = SEQ_INIT_VALUE;
-        this.finishId = SEQ_INIT_VALUE;
-        this.maxAckId = SEQ_INIT_VALUE;
+        this.maxRequestId = AbstractMessage.UNKNOWN_SEQ;
+        this.finishId = AbstractMessage.UNKNOWN_SEQ;
+        this.maxAckId = AbstractMessage.UNKNOWN_SEQ;
         this.status = TransportStatus.READY;
     }
 
@@ -67,16 +65,8 @@ public abstract class TransportSession {
         return MAX_REQUEST_ID_UPDATER.incrementAndGet(this);
     }
 
-    public int maxRequestId() {
-        return this.finishId;
-    }
-
-    public int maxAckId() {
-        return this.maxAckId;
-    }
-
-    public int finishId() {
-        return this.finishId;
+    public TransportConf conf() {
+        return this.conf;
     }
 
     public abstract void startComplete();

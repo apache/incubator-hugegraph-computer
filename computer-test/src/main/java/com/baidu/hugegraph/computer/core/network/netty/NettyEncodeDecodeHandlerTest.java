@@ -50,15 +50,22 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     @Test
     public void testSendMsgWithMock() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        int requestId = 99;
+        client.startSession();
+
+        int requestId = 1;
         int partition = 1;
         byte[] bytes = StringEncoding.encode("mock msg");
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
         ManagedBuffer body = new NioManagedBuffer(buffer);
         DataMessage dataMessage = new DataMessage(MessageType.MSG, requestId,
                                                   partition, body);
+        Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=1," +
+                            "partition=1,hasBody=true,bodyLength=8]",
+                            dataMessage.toString());
         client.channel().writeAndFlush(dataMessage)
               .addListener(new ChannelFutureListenerOnWrite(clientHandler));
+
+        client.finishSession();
 
         Mockito.verify(clientHandler, Mockito.timeout(2000L).times(1))
                .channelActive(client.connectionId());
@@ -70,7 +77,9 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     @Test
     public void testSendMsgWithEncoderExceptionMock() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        int requestId = 99;
+        client.startSession();
+
+        int requestId = 1;
         int partition = 1;
         byte[] bytes = StringEncoding.encode("mock msg");
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
@@ -82,6 +91,8 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         ChannelFutureListenerOnWrite spyListener = Mockito.spy(listener);
         client.channel().writeAndFlush(dataMessage)
               .addListener(spyListener);
+
+        client.finishSession();
 
         Mockito.verify(clientHandler, Mockito.timeout(3000L).times(1))
               .channelActive(Mockito.any());
@@ -160,60 +171,6 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         Mockito.verify(clientHandler, Mockito.timeout(5000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
     }
-
-    //@Test
-    //public void testSendOtherMessageType() throws Exception {
-    //    NettyTransportClient client = (NettyTransportClient) this.oneClient();
-    //
-    //    Object listener = Whitebox.getInternalState(client, "listenerOnWrite");
-    //    ChannelFutureListener spyListener = (ChannelFutureListenerOnWrite)
-    //                                        Mockito.spy(listener);
-    //    Whitebox.setInternalState(client, "listenerOnWrite", spyListener);
-    //    int requestId = 99;
-    //    int partition = 1;
-    //    byte[] bytes = StringEncoding.encode("mock msg");
-    //    ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length).put(bytes);
-    //    // Flip to make it readable
-    //    buffer.flip();
-    //    DataMessage dataMessage = new DataMessage(MessageType.MSG,
-    //                                              requestId, partition,
-    //                                              new NioManagedBuffer(buffer));
-    //    FailMessage failMsg = new FailMessage(requestId,
-    //                                          TransportException.DEFAULT_CODE,
-    //                                          "mock fail msg");
-    //
-    //    Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
-    //                        "partition=1,hasBody=true,bodyLength=8]",
-    //                        dataMessage.toString());
-    //
-    //    final int times = 10;
-    //
-    //    for (int i = 0; i < times; i++) {
-    //        client.channel().writeAndFlush(dataMessage)
-    //              .addListener(spyListener);
-    //
-    //        client.channel().writeAndFlush(new AckMessage(requestId))
-    //              .addListener(spyListener);
-    //
-    //        client.channel().writeAndFlush(failMsg)
-    //              .addListener(spyListener);
-    //
-    //        client.channel().writeAndFlush(PingMessage.INSTANCE)
-    //              .addListener(spyListener);
-    //
-    //        client.channel().writeAndFlush(PongMessage.INSTANCE)
-    //              .addListener(spyListener);
-    //
-    //        client.channel().writeAndFlush(StartMessage.INSTANCE)
-    //              .addListener(spyListener);
-    //
-    //        client.channel().writeAndFlush(new FinishMessage(requestId))
-    //              .addListener(spyListener);
-    //    }
-    //
-    //    Mockito.verify(spyListener, Mockito.timeout(10000L).times(times * 4))
-    //           .operationComplete(Mockito.any());
-    //}
 
     @Test
     public void testMessageRelease() {

@@ -14,7 +14,6 @@ import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.PingMessage;
 import com.baidu.hugegraph.computer.core.network.message.PongMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
-import com.baidu.hugegraph.computer.core.network.session.TransportSession;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
@@ -86,6 +85,7 @@ public abstract class AbstractNettyHandler
     protected void processPingMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       PingMessage pingMessage) {
+        ctx.writeAndFlush(PongMessage.INSTANCE);
     }
 
     protected void processPongMessage(ChannelHandlerContext ctx,
@@ -93,7 +93,9 @@ public abstract class AbstractNettyHandler
                                       PongMessage pongMessage) {
     }
 
-    protected abstract TransportHandler transportHandler();
+    protected void respondFail(ChannelHandlerContext ctx, int failId,
+                               int errorCode, String message) {
+    }
 
-    protected abstract TransportSession session();
+    protected abstract TransportHandler transportHandler();
 }

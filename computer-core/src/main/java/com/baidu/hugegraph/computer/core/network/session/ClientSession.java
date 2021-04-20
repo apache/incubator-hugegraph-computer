@@ -30,6 +30,7 @@ import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportStatus;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
@@ -42,6 +43,8 @@ public class ClientSession extends TransportSession {
 
     private final Lock flowControlStatusLock = new ReentrantLock();
 
+    private final int maxPendingRequests;
+    private final int minPendingRequests;
     private volatile boolean flowControlStatus;
     private final BarrierEvent startBarrierEvent;
     private final BarrierEvent finishBarrierEvent;
@@ -50,6 +53,8 @@ public class ClientSession extends TransportSession {
     public ClientSession(TransportConf conf,
                          Function<Message, ?> sendFunction) {
         super(conf);
+        this.maxPendingRequests = this.conf.maxPendingRequests();
+        this.minPendingRequests = this.conf.minPendingRequests();
         this.flowControlStatus = false;
         this.startBarrierEvent = new BarrierEvent();
         this.finishBarrierEvent = new BarrierEvent();
@@ -62,13 +67,14 @@ public class ClientSession extends TransportSession {
         super.ready();
     }
 
-    private void startSent() {
-        MAX_REQUEST_ID_UPDATER.compareAndSet(this, SEQ_INIT_VALUE,
-                                             START_REQUEST_ID);
+    public void startSent() {
+        MAX_REQUEST_ID_UPDATER.compareAndSet(this,
+                                             AbstractMessage.UNKNOWN_SEQ,
+                                             AbstractMessage.START_SEQ);
         this.status = TransportStatus.START_SEND;
     }
 
-    private void finishSent(int finishId) {
+    public void finishSent(int finishId) {
         this.finishId = finishId;
         this.status = TransportStatus.FINISH_SEND;
     }
@@ -79,7 +85,7 @@ public class ClientSession extends TransportSession {
                         "The status must be START_SEND instead of %s " +
                         "on startComplete", this.status);
         this.establish();
-        this.maxAckId = START_REQUEST_ID;
+        this.maxAckId = AbstractMessage.START_SEQ;
         this.startBarrierEvent.signalAll();
     }
 
@@ -145,9 +151,8 @@ public class ClientSession extends TransportSession {
         this.updateFlowControlStatus();
     }
 
-    public void receiveAck(int ackId) {
-        // TODO: 进入 FINISH_SEND 后 收到 data 的 ackId
-        if (ackId == START_REQUEST_ID &&
+    public void ackRecv(int ackId) {
+        if (ackId == AbstractMessage.START_SEQ &&
             this.status == TransportStatus.START_SEND) {
             this.startComplete();
         } else if (ackId == this.finishId &&
@@ -171,17 +176,15 @@ public class ClientSession extends TransportSession {
     }
 
     private void updateFlowControlStatus() {
-        int maxPendingRequests = this.conf.maxPendingRequests();
-        int minPendingRequests = this.conf.minPendingRequests();
 
         this.flowControlStatusLock.lock();
 
         try {
             int pendingRequests = this.maxRequestId - this.maxAckId;
 
-            if (pendingRequests >= maxPendingRequests) {
+            if (pendingRequests >= this.maxPendingRequests) {
                 this.flowControlStatus = true;
-            } else if (pendingRequests < minPendingRequests){
+            } else if (pendingRequests < this.minPendingRequests){
                 this.flowControlStatus = false;
             }
         } finally {
