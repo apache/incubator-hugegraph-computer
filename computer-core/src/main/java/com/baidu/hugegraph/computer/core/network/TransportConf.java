@@ -139,6 +139,22 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT);
     }
 
+    /**
+     * Timeout of finish session, if less than or equal 0 the default value is
+     * TRANSPORT_SYNC_REQUEST_TIMEOUT * TRANSPORT_MAX_PENDING_REQUESTS
+     */
+    public long finishSessionTimeout() {
+        long timeout = this.config.get(
+                       ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT);
+        return timeout > 0 ? timeout :
+               this.config.get(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT) *
+               this.config.get(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS);
+    }
+
+    public long writeSocketTimeout() {
+        return this.config.get(ComputerOptions.TRANSPORT_WRITE_SOCKET_TIMEOUT);
+    }
+
     public int writeBufferHighMark() {
         return this.config
                    .get(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK);

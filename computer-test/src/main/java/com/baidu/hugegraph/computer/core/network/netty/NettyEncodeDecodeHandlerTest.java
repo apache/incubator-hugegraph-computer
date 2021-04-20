@@ -38,7 +38,6 @@ import com.baidu.hugegraph.testutil.Assert;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 
 public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
@@ -125,22 +124,6 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         embeddedChannel.writeInbound(buf);
         Assert.assertFalse(embeddedChannel.finish());
         Assert.assertNull(embeddedChannel.readInbound());
-    }
-
-    @Test
-    public void testClientDecodeException() throws Exception {
-        Mockito.doAnswer(invocationOnMock -> {
-            invocationOnMock.callRealMethod();
-            Channel channel = invocationOnMock.getArgument(0);
-            channel.writeAndFlush(new MockUnDecodeMessage());
-            return null;
-        }).when(serverProtocol).initializeServerPipeline(Mockito.any(),
-                                                         Mockito.any());
-
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
-
-        Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
-               .exceptionCaught(Mockito.any(), Mockito.any());
     }
 
     @Test

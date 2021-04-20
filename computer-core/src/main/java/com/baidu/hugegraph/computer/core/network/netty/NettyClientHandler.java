@@ -67,7 +67,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
     @Override
     protected void respondFail(ChannelHandlerContext ctx, int failId,
                                int errorCode, String message) {
-        long timeout = this.clientSession().conf().syncRequestTimeout() / 2;
+        long timeout = this.clientSession().conf().writeSocketTimeout();
         FailMessage failMessage = new FailMessage(failId, errorCode, message);
         ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
     }

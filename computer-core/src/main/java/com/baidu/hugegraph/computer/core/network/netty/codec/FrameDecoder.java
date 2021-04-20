@@ -83,9 +83,6 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
         super.channelActive(ctx);
     }
 
-    /**
-     * Releases resources when the channel is closed.
-     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         if (LOG.isDebugEnabled()) {

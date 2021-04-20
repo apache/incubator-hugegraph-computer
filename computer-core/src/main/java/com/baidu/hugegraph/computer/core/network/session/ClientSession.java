@@ -45,6 +45,8 @@ public class ClientSession extends TransportSession {
 
     private final int maxPendingRequests;
     private final int minPendingRequests;
+    private final long syncRequestTimeout;
+    private final long finishSessionTimeout;
     private volatile boolean flowControlStatus;
     private final BarrierEvent startBarrierEvent;
     private final BarrierEvent finishBarrierEvent;
@@ -55,6 +57,8 @@ public class ClientSession extends TransportSession {
         super(conf);
         this.maxPendingRequests = this.conf.maxPendingRequests();
         this.minPendingRequests = this.conf.minPendingRequests();
+        this.syncRequestTimeout = this.conf.syncRequestTimeout();
+        this.finishSessionTimeout = this.conf.finishSessionTimeout();
         this.flowControlStatus = false;
         this.startBarrierEvent = new BarrierEvent();
         this.finishBarrierEvent = new BarrierEvent();
@@ -108,10 +112,9 @@ public class ClientSession extends TransportSession {
 
         this.startSent();
 
-        long timeout = this.conf.syncRequestTimeout();
-        if (!this.startBarrierEvent.await(timeout)) {
+        if (!this.startBarrierEvent.await(this.syncRequestTimeout)) {
             throw new TransportException("Timeout(%sms) to wait start " +
-                                         "response", timeout);
+                                         "response", this.syncRequestTimeout);
         }
     }
 
@@ -128,10 +131,9 @@ public class ClientSession extends TransportSession {
 
         this.finishSent(finishId);
 
-        long timeout = this.conf.syncRequestTimeout();
-        if (!this.finishBarrierEvent.await(timeout)) {
+        if (!this.finishBarrierEvent.await(this.finishSessionTimeout)) {
             throw new TransportException("Timeout(%sms) to wait finish " +
-                                         "response", timeout);
+                                         "response", this.finishSessionTimeout);
         }
     }
 

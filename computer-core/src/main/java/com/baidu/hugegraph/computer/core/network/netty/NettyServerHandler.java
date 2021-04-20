@@ -123,7 +123,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
     protected void respondFail(ChannelHandlerContext ctx, int failId,
                                int errorCode, String message) {
         FailMessage failMessage = new FailMessage(failId, errorCode, message);
-        long timeout = this.serverSession.conf().syncRequestTimeout() / 2;
+        long timeout = this.serverSession.conf().writeSocketTimeout();
         ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
 
         if (failId > AbstractMessage.START_SEQ) {

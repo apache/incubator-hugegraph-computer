@@ -432,6 +432,24 @@ public class ComputerOptions extends OptionHolder {
                     5_000L
             );
 
+    public static final ConfigOption<Long> TRANSPORT_FINISH_SESSION_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.finish_session_timeout",
+                    "The timeout(in ms) to finish session, " +
+                    "0 means using (transport.sync_request_timeout * " +
+                    "transport.max_pending_requests).",
+                    nonNegativeInt(),
+                    0L
+            );
+
+    public static final ConfigOption<Long> TRANSPORT_WRITE_SOCKET_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.finish_session_timeout",
+                    "The timeout(in ms) to write data to socket buffer.",
+                    positiveInt(),
+                    3000L
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_NETWORK_RETRIES =
             new ConfigOption<>(
                     "transport.network_retries",

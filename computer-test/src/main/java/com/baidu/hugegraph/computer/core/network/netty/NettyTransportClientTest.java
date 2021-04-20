@@ -27,7 +27,6 @@ import java.util.function.Function;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
@@ -107,9 +106,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         Assert.assertThrows(TransportException.class, () -> {
             client.startSession();
-            UnitTestBase.sleep(5_000L);
         }, e -> {
-            Assert.assertContains("Timeout(5000ms) to wait start response",
+            Assert.assertContains("to wait start response",
                                   e.getMessage());
         });
     }
@@ -125,9 +123,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         Assert.assertThrows(TransportException.class, () -> {
             client.finishSession();
-            UnitTestBase.sleep(5_000L);
         }, e -> {
-            Assert.assertContains("Timeout(5000ms) to wait finish response",
+            Assert.assertContains("to wait finish response",
                                   e.getMessage());
         });
     }

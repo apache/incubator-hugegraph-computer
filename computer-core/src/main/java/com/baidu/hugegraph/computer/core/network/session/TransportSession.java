@@ -40,10 +40,10 @@ public abstract class TransportSession {
 
     protected TransportSession(TransportConf conf) {
         this.conf = conf;
-        this.status = TransportStatus.READY;
         this.maxRequestId = AbstractMessage.UNKNOWN_SEQ;
         this.finishId = AbstractMessage.UNKNOWN_SEQ;
         this.maxAckId = AbstractMessage.UNKNOWN_SEQ;
+        this.status = TransportStatus.READY;
     }
 
     protected void ready() {
