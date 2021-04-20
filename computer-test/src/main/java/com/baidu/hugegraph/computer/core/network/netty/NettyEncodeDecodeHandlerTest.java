@@ -48,33 +48,6 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testSendMsgWithMock() throws IOException {
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        client.startSession();
-
-        int requestId = 1;
-        int partition = 1;
-        byte[] bytes = StringEncoding.encode("mock msg");
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        ManagedBuffer body = new NioManagedBuffer(buffer);
-        DataMessage dataMessage = new DataMessage(MessageType.MSG, requestId,
-                                                  partition, body);
-        Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=1," +
-                            "partition=1,hasBody=true,bodyLength=8]",
-                            dataMessage.toString());
-        client.channel().writeAndFlush(dataMessage)
-              .addListener(new ChannelFutureListenerOnWrite(clientHandler));
-
-        client.finishSession();
-
-        Mockito.verify(clientHandler, Mockito.timeout(2000L).times(1))
-               .channelActive(client.connectionId());
-
-        Mockito.verify(serverHandler, Mockito.timeout(2000L).times(1))
-               .channelActive(Mockito.any());
-    }
-
-    @Test
     public void testSendMsgWithEncoderExceptionMock() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         client.startSession();
@@ -182,6 +155,9 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         DataMessage dataMessage = new DataMessage(MessageType.MSG,
                                                   requestId, partition,
                                                   managedBuffer);
+        Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
+                            "partition=1,hasBody=true,bodyLength=8]",
+                            dataMessage.toString());
         Assert.assertEquals(1, managedBuffer.referenceCount());
         dataMessage.release();
         Assert.assertEquals(0, managedBuffer.referenceCount());
