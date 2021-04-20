@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.MockUnDecodeMessage;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
@@ -45,6 +46,8 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
 
     @Override
     protected void initOption() {
+        super.updateOption(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT,
+                           10_000L);
     }
 
     @Test
