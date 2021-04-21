@@ -68,7 +68,7 @@ public class JsonStructGraphOutputTest {
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
             output.writeVertex(vertex);
-            dos.close();
+            output.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":999}" +
@@ -107,7 +107,7 @@ public class JsonStructGraphOutputTest {
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
             output.writeVertex(vertex);
-            dos.close();
+            output.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
@@ -162,7 +162,7 @@ public class JsonStructGraphOutputTest {
                                        GraphOutputFactory.create(
                                        OutputFormat.JSON, dos);
             output.writeVertex(vertex);
-            dos.close();
+            output.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[[66],[998,999]]," +

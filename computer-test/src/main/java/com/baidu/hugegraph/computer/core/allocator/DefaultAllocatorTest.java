@@ -27,13 +27,14 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class DefaultAllocatorTest {
 
     @Test
-    public void testRecycle() {
+    public void testVertexRecycle() {
         Allocator allocator = ComputerContext.instance().allocator();
         RecyclerReference<Vertex> reference1 = allocator.newVertex();
         allocator.freeVertex(reference1);
@@ -48,6 +49,24 @@ public class DefaultAllocatorTest {
 
         allocator.freeVertex(reference2);
         allocator.freeVertex(reference3);
+    }
+
+    @Test
+    public void testEdgeRecycle() {
+        Allocator allocator = ComputerContext.instance().allocator();
+        RecyclerReference<Edge> reference1 = allocator.newEdge();
+        allocator.freeEdge(reference1);
+
+        RecyclerReference<Edge> reference2 = allocator.newEdge();
+        Assert.assertSame(reference1, reference2);
+        Assert.assertSame(reference1.get(), reference2.get());
+
+        RecyclerReference<Edge> reference3 = allocator.newEdge();
+        Assert.assertNotSame(reference1, reference3);
+        Assert.assertNotSame(reference1.get(), reference3.get());
+
+        allocator.freeEdge(reference2);
+        allocator.freeEdge(reference3);
     }
 
     @Test

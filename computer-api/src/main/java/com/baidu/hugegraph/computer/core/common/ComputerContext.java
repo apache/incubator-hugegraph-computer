@@ -31,13 +31,6 @@ public final class ComputerContext {
     private final GraphFactory factory;
     private final Allocator allocator;
 
-    /*
-     * Move ComputerContext to api.
-     * TODO: Pass factory and allocator as parameters.
-     * Add valueFactory. BuiltinValueFactory
-     * Make Allocator interface.
-     * DefaultAllocator
-     */
     private ComputerContext(Config config,
                             GraphFactory factory,
                             Allocator allocator) {
