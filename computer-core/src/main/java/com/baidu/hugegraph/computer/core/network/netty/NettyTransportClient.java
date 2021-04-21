@@ -48,7 +48,6 @@ public class NettyTransportClient implements TransportClient {
     private final NettyClientFactory clientFactory;
     private final ClientHandler handler;
     private final ClientSession session;
-    //private volatile boolean availableSend;
 
     protected NettyTransportClient(Channel channel, ConnectionId connectionId,
                                    NettyClientFactory clientFactory,
@@ -61,7 +60,6 @@ public class NettyTransportClient implements TransportClient {
         this.connectionId = connectionId;
         this.clientFactory = clientFactory;
         this.handler = clientHandler;
-        //this.availableSend = false;
         this.session = new ClientSession(this.clientFactory.conf(),
                                          this.createSendFunction());
     }

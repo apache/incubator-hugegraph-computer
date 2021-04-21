@@ -72,14 +72,12 @@ public class ClientSession extends TransportSession {
         super.ready();
     }
 
-    public void startSent() {
-        MAX_REQUEST_ID_UPDATER.compareAndSet(this,
-                                             AbstractMessage.UNKNOWN_SEQ,
-                                             AbstractMessage.START_SEQ);
+    private void startSend() {
+        this.maxRequestId = AbstractMessage.START_SEQ;
         this.state = TransportState.START_SEND;
     }
 
-    public void finishSent(int finishId) {
+    private void finishSend(int finishId) {
         this.finishId = finishId;
         this.state = TransportState.FINISH_SEND;
     }
@@ -109,14 +107,15 @@ public class ClientSession extends TransportSession {
                         "The state must be READY instead of %s " +
                         "on syncStart", this.state);
 
-        this.sendFunction.apply(StartMessage.INSTANCE);
+        this.startSend();
 
-        this.startSent();
+        this.sendFunction.apply(StartMessage.INSTANCE);
 
         if (!this.startBarrierEvent.await(this.syncRequestTimeout)) {
             throw new TransportException("Timeout(%sms) to wait start " +
                                          "response", this.syncRequestTimeout);
         }
+        this.startBarrierEvent.reset();
     }
 
     public synchronized void syncFinish() throws TransportException,
@@ -125,17 +124,18 @@ public class ClientSession extends TransportSession {
                         "The state must be ESTABLISH instead of %s " +
                         "on syncFinish", this.state);
 
-        int finishId = this.maxRequestId + 1;
+        int finishId = this.genFinishId();
+
+        this.finishSend(finishId);
+
         FinishMessage finishMessage = new FinishMessage(finishId);
-
         this.sendFunction.apply(finishMessage);
-
-        this.finishSent(finishId);
 
         if (!this.finishBarrierEvent.await(this.finishSessionTimeout)) {
             throw new TransportException("Timeout(%sms) to wait finish " +
                                          "response", this.finishSessionTimeout);
         }
+        this.finishBarrierEvent.reset();
     }
 
     public synchronized void asyncSend(MessageType messageType, int partition,

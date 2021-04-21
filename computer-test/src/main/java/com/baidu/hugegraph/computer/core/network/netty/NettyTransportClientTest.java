@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import org.junit.Test;
@@ -47,17 +48,18 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     private static final Logger LOG =
             Log.logger(NettyTransportClientTest.class);
 
-    public final static BarrierEvent BARRIER_EVENT = new BarrierEvent();
-    public final static Object LOCK = new Object();
+    public static final BarrierEvent BARRIER_EVENT = new BarrierEvent();
 
     @Override
     protected void initOption() {
         super.updateOption(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS,
-                           100);
+                           500);
         super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS,
-                           50);
-        super.updateOption(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL,
-                           300L);
+                           300);
+        super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK,
+                           32 * 1024);
+        super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK,
+                           64 * 1024);
         super.updateOption(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL,
                            300L);
         super.updateOption(ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT,
@@ -103,14 +105,16 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testSend() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        client.startSession();
-        client.send(MessageType.MSG, 1,
-                    ByteBuffer.wrap(StringEncoding.encode("test1")));
-        client.send(MessageType.VERTEX, 2,
-                    ByteBuffer.wrap(StringEncoding.encode("test2")));
-        client.send(MessageType.EDGE, 3,
-                    ByteBuffer.wrap(StringEncoding.encode("test3")));
-        client.finishSession();
+        for (int i = 0; i < 3; i++) {
+            client.startSession();
+            client.send(MessageType.MSG, 1,
+                        ByteBuffer.wrap(StringEncoding.encode("test1")));
+            client.send(MessageType.VERTEX, 2,
+                        ByteBuffer.wrap(StringEncoding.encode("test2")));
+            client.send(MessageType.EDGE, 3,
+                        ByteBuffer.wrap(StringEncoding.encode("test3")));
+            client.finishSession();
+        }
     }
 
     @Test
@@ -217,6 +221,15 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 1024 * 10);
 
+        AtomicLong handledCnt = new AtomicLong(0L);
+
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationOnMock.callRealMethod();
+            handledCnt.getAndIncrement();
+            return null;
+        }).when(serverHandler).handle(Mockito.any(), Mockito.anyInt(),
+                                      Mockito.any());
+
         Mockito.doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
             BARRIER_EVENT.signalAll();
@@ -227,7 +240,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         client.startSession();
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 1024; i++) {
             boolean send = client.send(MessageType.MSG, 1, buffer);
             if (!send) {
                 LOG.info("Current send unavailable");
@@ -243,7 +256,9 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         long postTransport = System.nanoTime();
 
-        LOG.info("Transport 10 data packets total 10GB cost {}ms",
+        LOG.info("Transport 1024 data packets total 10GB, cost {}ms",
                  (postTransport - preTransport) / 1000_000L);
+
+        Assert.assertEquals(1024, handledCnt.get());
     }
 }

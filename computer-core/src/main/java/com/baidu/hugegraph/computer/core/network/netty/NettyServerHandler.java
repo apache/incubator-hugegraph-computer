@@ -68,7 +68,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
         this.serverSession.startRecv();
         this.respondStartAck(ctx);
 
-        // Add an Schedule task to check respond ack avoid client deadlock wait
+        // Add an schedule task to check respond ack
         ScheduledFuture<?> respondAckTask = channel.eventLoop()
                                                    .scheduleAtFixedRate(
                         () -> this.checkAndRespondAck(ctx),
@@ -93,6 +93,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
                                       Channel channel,
                                       DataMessage dataMessage) {
         int requestId = dataMessage.requestId();
+
         this.serverSession.dataRecv(requestId);
 
         this.handler.handle(dataMessage.type(), dataMessage.partition(),
@@ -113,7 +114,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
         ctx.writeAndFlush(finishAck).addListener(this.listenerOnWrite);
         this.serverSession.finishComplete();
 
-        // Remove the respond ack task
+        // Cancel and remove the task to check respond ack
         if (ctx.channel().hasAttr(RESPOND_ACK_TASK_KEY)) {
             ScheduledFuture<?> respondAckTask = ctx.channel()
                                                     .attr(RESPOND_ACK_TASK_KEY)

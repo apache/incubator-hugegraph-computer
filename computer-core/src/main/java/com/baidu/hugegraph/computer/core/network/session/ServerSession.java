@@ -45,6 +45,7 @@ public class ServerSession extends TransportSession {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
                         "on startRecv", this.state);
+
         this.maxRequestId = AbstractMessage.START_SEQ;
         this.state = TransportState.START_RECV;
     }
@@ -81,6 +82,7 @@ public class ServerSession extends TransportSession {
         E.checkArgument(requestId == this.maxRequestId + 1,
                         "The requestId must be auto-increment, requestId: %s," +
                         " maxRequestId: %s", requestId, this.maxRequestId);
+
         this.maxRequestId = requestId;
     }
 
@@ -89,6 +91,7 @@ public class ServerSession extends TransportSession {
                         this.state == TransportState.FINISH_RECV,
                         "The state must be ESTABLISH or FINISH_RECV instead " +
                         "of %s on handledData", this.state);
+
         synchronized (this) {
             if (requestId > this.maxHandledId) {
                 this.maxHandledId = requestId;
@@ -104,6 +107,7 @@ public class ServerSession extends TransportSession {
         E.checkArgument(ackId > this.maxAckId,
                         "The ackId must be increasing, ackId: %s, " +
                         "maxAckId: %s", ackId, this.maxAckId);
+
         this.maxAckId = ackId;
     }
 
@@ -121,7 +125,6 @@ public class ServerSession extends TransportSession {
         if (this.state != TransportState.ESTABLISH) {
             return false;
         }
-
         return this.maxHandledId > this.maxAckId;
     }
 
