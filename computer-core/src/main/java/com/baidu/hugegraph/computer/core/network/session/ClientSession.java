@@ -27,7 +27,7 @@ import java.util.function.Function;
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.TransportStatus;
+import com.baidu.hugegraph.computer.core.network.TransportState;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
@@ -76,19 +76,19 @@ public class ClientSession extends TransportSession {
         MAX_REQUEST_ID_UPDATER.compareAndSet(this,
                                              AbstractMessage.UNKNOWN_SEQ,
                                              AbstractMessage.START_SEQ);
-        this.status = TransportStatus.START_SEND;
+        this.state = TransportState.START_SEND;
     }
 
     public void finishSent(int finishId) {
         this.finishId = finishId;
-        this.status = TransportStatus.FINISH_SEND;
+        this.state = TransportState.FINISH_SEND;
     }
 
     @Override
     public void startComplete() {
-        E.checkArgument(this.status == TransportStatus.START_SEND,
-                        "The status must be START_SEND instead of %s " +
-                        "on startComplete", this.status);
+        E.checkArgument(this.state == TransportState.START_SEND,
+                        "The state must be START_SEND instead of %s " +
+                        "on startComplete", this.state);
         this.establish();
         this.maxAckId = AbstractMessage.START_SEQ;
         this.startBarrierEvent.signalAll();
@@ -96,18 +96,18 @@ public class ClientSession extends TransportSession {
 
     @Override
     public void finishComplete() {
-        E.checkArgument(this.status == TransportStatus.FINISH_SEND,
-                        "The status must be FINISH_SEND instead of %s " +
-                        "on finishComplete", this.status);
+        E.checkArgument(this.state == TransportState.FINISH_SEND,
+                        "The state must be FINISH_SEND instead of %s " +
+                        "on finishComplete", this.state);
         this.ready();
         this.finishBarrierEvent.signalAll();
     }
 
     public synchronized void syncStart() throws TransportException,
                                                 InterruptedException {
-        E.checkArgument(this.status == TransportStatus.READY,
-                        "The status must be READY instead of %s " +
-                        "on syncStart", this.status);
+        E.checkArgument(this.state == TransportState.READY,
+                        "The state must be READY instead of %s " +
+                        "on syncStart", this.state);
 
         this.sendFunction.apply(StartMessage.INSTANCE);
 
@@ -121,9 +121,9 @@ public class ClientSession extends TransportSession {
 
     public synchronized void syncFinish() throws TransportException,
                                                  InterruptedException {
-        E.checkArgument(this.status == TransportStatus.ESTABLISH,
-                        "The status must be ESTABLISH instead of %s " +
-                        "on syncFinish", this.status);
+        E.checkArgument(this.state == TransportState.ESTABLISH,
+                        "The state must be ESTABLISH instead of %s " +
+                        "on syncFinish", this.state);
 
         int finishId = this.maxRequestId + 1;
         FinishMessage finishMessage = new FinishMessage(finishId);
@@ -140,9 +140,9 @@ public class ClientSession extends TransportSession {
 
     public synchronized void asyncSend(MessageType messageType, int partition,
                                        ByteBuffer buffer) {
-        E.checkArgument(this.status == TransportStatus.ESTABLISH,
-                        "The status must be ESTABLISH instead of %s " +
-                        "on asyncSend", this.status);
+        E.checkArgument(this.state == TransportState.ESTABLISH,
+                        "The state must be ESTABLISH instead of %s " +
+                        "on asyncSend", this.state);
         int requestId = this.nextRequestId();
 
         ManagedBuffer managedBuffer = new NioManagedBuffer(buffer);
@@ -156,21 +156,21 @@ public class ClientSession extends TransportSession {
 
     public void ackRecv(int ackId) {
         if (ackId == AbstractMessage.START_SEQ &&
-            this.status == TransportStatus.START_SEND) {
+            this.state == TransportState.START_SEND) {
             this.startComplete();
         } else if (ackId == this.finishId &&
-                   this.status == TransportStatus.FINISH_SEND) {
+                   this.state == TransportState.FINISH_SEND) {
             this.finishComplete();
-        } else if (this.status == TransportStatus.ESTABLISH ||
-                   this.status == TransportStatus.FINISH_SEND) {
+        } else if (this.state == TransportState.ESTABLISH ||
+                   this.state == TransportState.FINISH_SEND) {
             if (this.maxAckId < ackId) {
                 this.maxAckId = ackId;
             }
             this.updateFlowControlStatus();
         } else {
             throw new ComputeException("Receive an ack message, but the " +
-                                       "status not match, status: %s, ackId: " +
-                                       "%s", this.status, ackId);
+                                       "state not match, state: %s, ackId: " +
+                                       "%s", this.state, ackId);
         }
     }
 

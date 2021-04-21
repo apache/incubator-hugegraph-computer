@@ -48,8 +48,9 @@ public class NettyClientHandler extends AbstractNettyHandler {
     protected void processAckMessage(ChannelHandlerContext ctx,
                                      Channel channel, AckMessage ackMessage) {
         int ackId = ackMessage.ackId();
-        assert ackId > AbstractMessage.UNKNOWN_SEQ;
+        assert ackId > AbstractMessage.UNKNOWN_SEQ: ackId;
         this.clientSession().ackRecv(ackId);
+        this.client.checkAndNoticeSendAvailable();
     }
 
     @Override
@@ -59,6 +60,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
         int failId = failMessage.ackId();
         if (failId > AbstractMessage.START_SEQ) {
             this.clientSession().ackRecv(failId);
+            this.client.checkAndNoticeSendAvailable();
         }
 
         super.processFailMessage(ctx, channel, failMessage);

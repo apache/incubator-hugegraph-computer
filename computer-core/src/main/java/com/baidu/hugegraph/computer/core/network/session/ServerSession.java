@@ -22,11 +22,14 @@ package com.baidu.hugegraph.computer.core.network.session;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.TransportStatus;
+import com.baidu.hugegraph.computer.core.network.TransportState;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.util.E;
 
 public class ServerSession extends TransportSession {
+
+    private static final Pair<AckType, Integer> UNKNOWN_ACK_PAIR =
+            Pair.of(AckType.NONE, AbstractMessage.UNKNOWN_SEQ);
 
     private final long minAckInterval;
     private volatile int maxHandledId;
@@ -47,23 +50,23 @@ public class ServerSession extends TransportSession {
     }
 
     public void startRecv() {
-        E.checkArgument(this.status == TransportStatus.READY,
-                        "The status must be READY instead of %s " +
-                        "on startRecv", this.status);
+        E.checkArgument(this.state == TransportState.READY,
+                        "The state must be READY instead of %s " +
+                        "on startRecv", this.state);
         this.maxRequestId = AbstractMessage.START_SEQ;
-        this.status = TransportStatus.START_RECV;
+        this.state = TransportState.START_RECV;
     }
 
     public boolean finishRecv(int finishId) {
-        E.checkArgument(this.status == TransportStatus.ESTABLISH,
-                        "The status must be ESTABLISH instead of %s " +
-                        "on finishRecv", this.status);
+        E.checkArgument(this.state == TransportState.ESTABLISH,
+                        "The state must be ESTABLISH instead of %s " +
+                        "on finishRecv", this.state);
         E.checkArgument(finishId == this.maxRequestId + 1,
                         "The finishId must be auto-increment, finishId: %s, " +
                         "maxRequestId: %s", finishId, this.maxRequestId);
 
         this.finishId = finishId;
-        this.status = TransportStatus.FINISH_RECV;
+        this.state = TransportState.FINISH_RECV;
         return this.checkFinishReady();
     }
 
@@ -80,9 +83,9 @@ public class ServerSession extends TransportSession {
     }
 
     public void dataRecv(int requestId) {
-        E.checkArgument(this.status == TransportStatus.ESTABLISH,
-                        "The status must be ESTABLISH instead of %s " +
-                        "on dataRecv", this.status);
+        E.checkArgument(this.state == TransportState.ESTABLISH,
+                        "The state must be ESTABLISH instead of %s " +
+                        "on dataRecv", this.state);
         E.checkArgument(requestId == this.maxRequestId + 1,
                         "The requestId must be auto-increment, requestId: %s," +
                         " maxRequestId: %s", requestId, this.maxRequestId);
@@ -90,32 +93,30 @@ public class ServerSession extends TransportSession {
     }
 
     public synchronized Pair<AckType, Integer> handledData(int requestId) {
-        E.checkArgument(this.status == TransportStatus.ESTABLISH ||
-                        this.status == TransportStatus.FINISH_RECV,
-                        "The status must be ESTABLISH or FINISH_RECV instead " +
-                        "of %s on handledData", this.status);
+        E.checkArgument(this.state == TransportState.ESTABLISH ||
+                        this.state == TransportState.FINISH_RECV,
+                        "The state must be ESTABLISH or FINISH_RECV instead " +
+                        "of %s on handledData", this.state);
         if (requestId > this.maxHandledId) {
             this.maxHandledId = requestId;
         }
 
-        if (this.status == TransportStatus.FINISH_RECV &&
-            this.checkFinishReady()) {
+        if (this.checkFinishReady()) {
             return Pair.of(AckType.FINISH, this.finishId);
         }
 
-        if (this.status == TransportStatus.ESTABLISH &&
-            this.checkRespondAck()) {
+        if (this.checkRespondDataAck()) {
             return Pair.of(AckType.DATA, this.maxHandledId);
         }
 
-        return Pair.of(AckType.NONE, AbstractMessage.UNKNOWN_SEQ);
+        return UNKNOWN_ACK_PAIR;
     }
 
     public void respondedAck(int ackId) {
-        E.checkArgument(this.status == TransportStatus.ESTABLISH ||
-                        this.status == TransportStatus.FINISH_RECV,
-                        "The status must be ESTABLISH or FINISH_RECV instead " +
-                        "of %s on respondedAck", this.status);
+        E.checkArgument(this.state == TransportState.ESTABLISH ||
+                        this.state == TransportState.FINISH_RECV,
+                        "The state must be ESTABLISH or FINISH_RECV instead " +
+                        "of %s on respondedAck", this.state);
         E.checkArgument(ackId > this.maxAckId,
                         "The ackId must be increasing, ackId: %s, " +
                         "maxAckId: %s", ackId, this.maxAckId);
@@ -124,18 +125,29 @@ public class ServerSession extends TransportSession {
     }
 
     private boolean checkFinishReady() {
-        if (this.status == TransportStatus.READY) {
+        if (this.state == TransportState.READY) {
             return true;
         }
-        if (this.status == TransportStatus.FINISH_RECV) {
+        if (this.state == TransportState.FINISH_RECV) {
             return this.maxHandledId == this.finishId - 1;
         }
         return false;
     }
 
-    private boolean checkRespondAck() {
+    private boolean checkRespondDataAck() {
+        if (this.state != TransportState.ESTABLISH) {
+            return false;
+        }
+
+        if (this.maxHandledId <= this.maxAckId) {
+            return false;
+        }
+
         long interval = System.currentTimeMillis() - this.lastAckTimestamp;
-        return interval >= this.minAckInterval &&
-               this.maxHandledId > this.maxAckId;
+        return interval >= this.minAckInterval;
+    }
+
+    public long minAckInterval() {
+        return this.minAckInterval;
     }
 }

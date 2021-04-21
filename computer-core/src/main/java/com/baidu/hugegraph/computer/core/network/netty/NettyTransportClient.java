@@ -48,6 +48,7 @@ public class NettyTransportClient implements TransportClient {
     private final NettyClientFactory clientFactory;
     private final ClientHandler handler;
     private final ClientSession session;
+    //private volatile boolean availableSend;
 
     protected NettyTransportClient(Channel channel, ConnectionId connectionId,
                                    NettyClientFactory clientFactory,
@@ -60,6 +61,7 @@ public class NettyTransportClient implements TransportClient {
         this.connectionId = connectionId;
         this.clientFactory = clientFactory;
         this.handler = clientHandler;
+        //this.availableSend = false;
         this.session = new ClientSession(this.clientFactory.conf(),
                                          this.createSendFunction());
     }
@@ -107,11 +109,14 @@ public class NettyTransportClient implements TransportClient {
     }
 
     protected boolean checkSendAvailable() {
-        if (!this.channel.isWritable() || this.session.flowControllerStatus()) {
-            return false;
+        return this.channel.isWritable() &&
+               !this.session.flowControllerStatus();
+    }
+
+    protected void checkAndNoticeSendAvailable() {
+        if (this.checkSendAvailable()) {
+            this.handler.sendAvailable(this.connectionId);
         }
-        this.handler.sendAvailable(this.connectionId);
-        return true;
     }
 
     @Override
@@ -161,7 +166,7 @@ public class NettyTransportClient implements TransportClient {
         @Override
         public void onSuccess(Channel channel, ChannelFuture future) {
             super.onSuccess(channel, future);
-            NettyTransportClient.this.checkSendAvailable();
+            NettyTransportClient.this.checkAndNoticeSendAvailable();
         }
     }
 }

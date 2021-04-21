@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
@@ -84,9 +86,13 @@ public class NettyServerHandler extends AbstractNettyHandler {
         this.handler.handle(dataMessage.type(), dataMessage.partition(),
                             dataMessage.body());
 
+        this.dataPostProcessor(ctx, channel, requestId);
+    }
+
+    private void dataPostProcessor(ChannelHandlerContext ctx,
+                                   Channel channel, int requestId) {
         Pair<AckType, Integer> ackTypePair = this.serverSession
                                                  .handledData(requestId);
-
         AckType ackType = ackTypePair.getKey();
         assert ackType != null;
         assert ackType != AckType.START;
@@ -97,6 +103,12 @@ public class NettyServerHandler extends AbstractNettyHandler {
         } else if (AckType.DATA == ackType) {
             int ackId = ackTypePair.getValue();
             this.respondDataAck(ctx, ackId);
+        } else if (AckType.NONE == ackType) {
+            // Schedule task to check respond ack avoid client deadlock wait
+            channel.eventLoop().schedule(
+                    () -> this.dataPostProcessor(ctx, channel, requestId),
+                    this.serverSession.minAckInterval(),
+                    TimeUnit.MILLISECONDS);
         }
     }
 

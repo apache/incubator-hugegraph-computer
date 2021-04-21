@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.network.TransportStatus;
+import com.baidu.hugegraph.computer.core.network.TransportState;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.netty.AbstractNetworkTest;
@@ -56,8 +56,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
     @Test
     public void testConstruct() {
         ServerSession serverSession = new ServerSession(conf);
-        Assert.assertEquals(TransportStatus.READY,
-                            serverSession.status());
+        Assert.assertEquals(TransportState.READY,
+                            serverSession.state());
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             serverSession.maxRequestId);
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
@@ -72,8 +72,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
                                                       "lastAckTimestamp"));
 
         ClientSession clientSession = new ClientSession(conf, message -> true);
-        Assert.assertEquals(TransportStatus.READY,
-                            clientSession.status());
+        Assert.assertEquals(TransportState.READY,
+                            clientSession.state());
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             clientSession.maxRequestId);
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
@@ -90,7 +90,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
         ClientSession clientSession = new ClientSession(conf, message -> true);
-        Assert.assertEquals(TransportStatus.READY, clientSession.status());
+        Assert.assertEquals(TransportState.READY, clientSession.state());
 
         this.syncStartWithAutoComplete(executorService, clientSession);
 
@@ -104,7 +104,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
         ClientSession clientSession = new ClientSession(conf, message -> true);
-        Assert.assertEquals(TransportStatus.READY, clientSession.status());
+        Assert.assertEquals(TransportState.READY, clientSession.state());
 
         this.syncStartWithAutoComplete(executorService, clientSession);
 
@@ -122,14 +122,14 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
         ClientSession clientSession = new ClientSession(conf, message -> true);
-        Assert.assertEquals(TransportStatus.READY, clientSession.status());
+        Assert.assertEquals(TransportState.READY, clientSession.state());
 
         this.syncStartWithAutoComplete(executorService, clientSession);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             clientSession.syncStart();
         }, e -> {
-            Assert.assertContains("The status must be READY " +
+            Assert.assertContains("The state must be READY " +
                                   "instead of ESTABLISH on syncStart",
                                   e.getMessage());
         });
@@ -142,14 +142,14 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
         ClientSession clientSession = new ClientSession(conf, message -> true);
-        Assert.assertEquals(TransportStatus.READY, clientSession.status());
+        Assert.assertEquals(TransportState.READY, clientSession.state());
 
         ByteBuffer buffer = ByteBuffer.wrap(StringEncoding.encode("test data"));
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             clientSession.asyncSend(MessageType.MSG, 1, buffer);
         }, e -> {
-            Assert.assertContains("The status must be ESTABLISH " +
+            Assert.assertContains("The state must be ESTABLISH " +
                                   "instead of READY on asyncSend",
                                   e.getMessage());
         });
@@ -162,7 +162,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
         ClientSession clientSession = new ClientSession(conf, message -> true);
-        Assert.assertEquals(TransportStatus.READY, clientSession.status());
+        Assert.assertEquals(TransportState.READY, clientSession.state());
 
         this.syncStartWithAutoComplete(executorService, clientSession);
 
@@ -180,13 +180,13 @@ public class TransportSessionTest extends AbstractNetworkTest {
     @Test
     public void testServerSession() {
         ServerSession serverSession = new ServerSession(conf);
-        Assert.assertEquals(TransportStatus.READY, serverSession.status());
+        Assert.assertEquals(TransportState.READY, serverSession.state());
 
         serverSession.startRecv();
-        Assert.assertEquals(TransportStatus.START_RECV, serverSession.status());
+        Assert.assertEquals(TransportState.START_RECV, serverSession.state());
 
         serverSession.startComplete();
-        Assert.assertEquals(TransportStatus.ESTABLISH, serverSession.status());
+        Assert.assertEquals(TransportState.ESTABLISH, serverSession.state());
         Assert.assertEquals(AbstractMessage.START_SEQ, serverSession.maxAckId);
         Assert.assertEquals(AbstractMessage.START_SEQ,
                             Whitebox.getInternalState(serverSession,
@@ -202,7 +202,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
             Whitebox.setInternalState(serverSession,
                                       "lastAckTimestamp", 0L);
             Boolean respondAck = Whitebox.invoke(serverSession.getClass(),
-                                                 "checkRespondAck",
+                                                 "checkRespondDataAck",
                                                  serverSession);
             Assert.assertTrue(respondAck);
 
@@ -210,28 +210,28 @@ public class TransportSessionTest extends AbstractNetworkTest {
             Assert.assertEquals(i, serverSession.maxAckId);
 
             Boolean repeatRespondAck = Whitebox.invoke(serverSession.getClass(),
-                                                       "checkRespondAck",
+                                                       "checkRespondDataAck",
                                                        serverSession);
             Assert.assertFalse(repeatRespondAck);
         }
 
         serverSession.finishRecv(100);
-        Assert.assertEquals(TransportStatus.FINISH_RECV,
-                            serverSession.status());
+        Assert.assertEquals(TransportState.FINISH_RECV,
+                            serverSession.state());
 
         serverSession.finishComplete();
-        Assert.assertEquals(TransportStatus.READY, serverSession.status());
+        Assert.assertEquals(TransportState.READY, serverSession.state());
     }
 
     @Test
     public void testServerSessionWithException() {
         ServerSession serverSession = new ServerSession(conf);
-        Assert.assertEquals(TransportStatus.READY, serverSession.status());
+        Assert.assertEquals(TransportState.READY, serverSession.state());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             serverSession.dataRecv(1);
         }, e -> {
-            Assert.assertContains("The status must be ESTABLISH " +
+            Assert.assertContains("The state must be ESTABLISH " +
                                   "instead of READY",
                                   e.getMessage());
         });
@@ -239,7 +239,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             serverSession.finishRecv(1);
         }, e -> {
-            Assert.assertContains("The status must be ESTABLISH " +
+            Assert.assertContains("The state must be ESTABLISH " +
                                   "instead of READY",
                                   e.getMessage());
         });
@@ -276,7 +276,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
     @Test
     public void testCheckFinishReady() {
         ServerSession serverSession = new ServerSession(conf);
-        Assert.assertEquals(TransportStatus.READY, serverSession.status());
+        Assert.assertEquals(TransportState.READY, serverSession.state());
 
         Boolean finishRead = Whitebox.invoke(serverSession.getClass(),
                                              "checkFinishReady",
@@ -298,7 +298,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
     @Test
     public void testHandledData() {
         ServerSession serverSession = new ServerSession(conf);
-        Assert.assertEquals(TransportStatus.READY, serverSession.status());
+        Assert.assertEquals(TransportState.READY, serverSession.state());
 
         serverSession.startRecv();
         serverSession.startComplete();
@@ -328,8 +328,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
         List<Throwable> exceptions = new CopyOnWriteArrayList<>();
 
         pool.schedule(() -> {
-            Assert.assertEquals(TransportStatus.START_SEND,
-                                clientSession.status());
+            Assert.assertEquals(TransportState.START_SEND,
+                                clientSession.state());
             try {
                 clientSession.ackRecv(AbstractMessage.START_SEQ);
             } catch (Throwable e) {
@@ -340,8 +340,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
         clientSession.syncStart();
 
-        Assert.assertEquals(TransportStatus.ESTABLISH,
-                            clientSession.status());
+        Assert.assertEquals(TransportState.ESTABLISH,
+                            clientSession.state());
         Assert.assertEquals(AbstractMessage.START_SEQ,
                             clientSession.maxRequestId);
         Assert.assertEquals(AbstractMessage.START_SEQ,
@@ -360,8 +360,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
         List<Throwable> exceptions = new CopyOnWriteArrayList<>();
 
         pool.schedule(() -> {
-            Assert.assertEquals(TransportStatus.FINISH_SEND,
-                                clientSession.status());
+            Assert.assertEquals(TransportState.FINISH_SEND,
+                                clientSession.state());
             try {
                 clientSession.ackRecv(finishId);
             } catch (Throwable e) {
@@ -372,8 +372,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
         clientSession.syncFinish();
 
-        Assert.assertEquals(TransportStatus.READY,
-                            clientSession.status());
+        Assert.assertEquals(TransportState.READY,
+                            clientSession.state());
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             clientSession.finishId);
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,

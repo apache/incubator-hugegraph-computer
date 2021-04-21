@@ -22,27 +22,20 @@ package com.baidu.hugegraph.computer.core.network;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBufferTest;
-import com.baidu.hugegraph.computer.core.network.connection.ConnectionManagerTest;
-import com.baidu.hugegraph.computer.core.network.netty.HeartBeatHandlerTest;
-import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactoryTest;
-import com.baidu.hugegraph.computer.core.network.netty.NettyEncodeDecodeHandlerTest;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportClientTest;
-import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServerTest;
-import com.baidu.hugegraph.computer.core.network.session.TransportSessionTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    NettyTransportServerTest.class,
-    ConnectionIdTest.class,
-    NettyClientFactoryTest.class,
-    ConnectionManagerTest.class,
-    TransportUtilTest.class,
-    TransportSessionTest.class,
+    //NettyTransportServerTest.class,
+    //ConnectionIdTest.class,
+    //NettyClientFactoryTest.class,
+    //ConnectionManagerTest.class,
+    //TransportUtilTest.class,
+    //TransportSessionTest.class,
     NettyTransportClientTest.class,
-    NettyEncodeDecodeHandlerTest.class,
-    HeartBeatHandlerTest.class,
-    ManagedBufferTest.class
+    //NettyEncodeDecodeHandlerTest.class,
+    //HeartBeatHandlerTest.class,
+    //ManagedBufferTest.class
 })
 public class NetworkTestSuite {
 }

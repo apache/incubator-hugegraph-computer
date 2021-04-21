@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.network.session;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.TransportStatus;
+import com.baidu.hugegraph.computer.core.network.TransportState;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 
 public abstract class TransportSession {
@@ -33,7 +33,7 @@ public abstract class TransportSession {
                                                    "maxRequestId");
 
     protected final TransportConf conf;
-    protected volatile TransportStatus status;
+    protected volatile TransportState state;
     protected volatile int maxRequestId;
     protected volatile int maxAckId;
     protected volatile int finishId;
@@ -43,22 +43,22 @@ public abstract class TransportSession {
         this.maxRequestId = AbstractMessage.UNKNOWN_SEQ;
         this.finishId = AbstractMessage.UNKNOWN_SEQ;
         this.maxAckId = AbstractMessage.UNKNOWN_SEQ;
-        this.status = TransportStatus.READY;
+        this.state = TransportState.READY;
     }
 
     protected void ready() {
         this.maxRequestId = AbstractMessage.UNKNOWN_SEQ;
         this.finishId = AbstractMessage.UNKNOWN_SEQ;
         this.maxAckId = AbstractMessage.UNKNOWN_SEQ;
-        this.status = TransportStatus.READY;
+        this.state = TransportState.READY;
     }
 
     protected void establish() {
-        this.status = TransportStatus.ESTABLISH;
+        this.state = TransportState.ESTABLISH;
     }
 
-    public TransportStatus status() {
-        return this.status;
+    public TransportState state() {
+        return this.state;
     }
 
     public int nextRequestId() {

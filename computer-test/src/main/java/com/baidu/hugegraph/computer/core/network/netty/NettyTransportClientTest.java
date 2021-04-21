@@ -26,28 +26,42 @@ import java.util.function.Function;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
+import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
+import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 
 public class NettyTransportClientTest extends AbstractNetworkTest {
 
+    private static final Logger LOG =
+            Log.logger(NettyTransportClientTest.class);
+
+    public final static BarrierEvent BARRIER_EVENT = new BarrierEvent();
+    public final static Object LOCK = new Object();
+
     @Override
     protected void initOption() {
-        super.updateOption(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, 5);
-        super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, 2);
-        super.updateOption(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT,
-                           5_000L);
+        super.updateOption(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS,
+                           100);
+        super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS,
+                           50);
+        super.updateOption(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL,
+                           300L);
+        super.updateOption(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL,
+                           300L);
         super.updateOption(ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT,
-                           6_000L);
+                           15_000L);
     }
 
     @Test
@@ -144,9 +158,9 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Function<Message, ?> sendFunc = message -> true;
         Whitebox.setInternalState(client.session(), "sendFunction", sendFunc);
 
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= conf.maxPendingRequests() * 2; i++) {
             boolean send = client.send(MessageType.MSG, 1, buffer);
-            if (i <= 5) {
+            if (i <= conf.maxPendingRequests()) {
                 Assert.assertTrue(send);
             } else {
                 Assert.assertFalse(send);
@@ -157,10 +171,11 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                                                      "maxRequestId");
         int maxAckId = Whitebox.getInternalState(client.session(),
                                                  "maxAckId");
-        Assert.assertEquals(5, maxRequestId);
+        Assert.assertEquals(conf.maxPendingRequests(), maxRequestId);
         Assert.assertEquals(0, maxAckId);
 
-        for (int i = 1; i <= 4; i++) {
+        int pendings = conf.maxPendingRequests() - conf.minPendingRequests();
+        for (int i = 1; i <= pendings + 1; i++) {
             Assert.assertFalse(client.checkSendAvailable());
             client.session().ackRecv(i);
         }
@@ -168,7 +183,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         maxAckId = Whitebox.getInternalState(client.session(),
                                              "maxAckId");
-        Assert.assertEquals(4, maxAckId);
+        Assert.assertEquals(pendings + 1, maxAckId);
 
         Whitebox.setInternalState(client.session(), "sendFunction",
                                   sendFuncBak);
@@ -194,5 +209,41 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testTransportPerformance() throws IOException,
+                                                  InterruptedException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 1024 * 10);
+
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationOnMock.callRealMethod();
+            BARRIER_EVENT.signalAll();
+            return null;
+        }).when(clientHandler).sendAvailable(Mockito.any());
+
+        long preTransport = System.nanoTime();
+
+        client.startSession();
+
+        for (int i = 0; i < 1000; i++) {
+            boolean send = client.send(MessageType.MSG, 1, buffer);
+            if (!send) {
+                LOG.info("Current send unavailable");
+                i--;
+                if (!BARRIER_EVENT.await(10_000L)) {
+                    throw new ComputeException("Timeout(%sms) to wait send");
+                }
+                BARRIER_EVENT.reset();
+            }
+        }
+
+        client.finishSession();
+
+        long postTransport = System.nanoTime();
+
+        LOG.info("Transport 10 data packets total 10GB cost {}ms",
+                 (postTransport - preTransport) / 1000_000L);
     }
 }
