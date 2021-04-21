@@ -127,7 +127,9 @@ public class WorkerServiceTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.BSP_LOG_INTERVAL, "30000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090"
+                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+                ComputerOptions.WORKER_COMPUTATION_CLASS,
+                MockComputation.class.getName()
         );
 
         Config config = ComputerContext.instance().config();

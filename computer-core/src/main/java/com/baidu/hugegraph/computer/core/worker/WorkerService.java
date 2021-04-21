@@ -82,17 +82,6 @@ public class WorkerService {
                                             0, dataAddress.getPort());
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
         this.bsp4Worker.init();
-        this.bsp4Worker.registerWorker();
-        this.masterInfo = this.bsp4Worker.waitMasterRegistered();
-        List<ContainerInfo> containers =
-                            this.bsp4Worker.waitWorkersRegistered();
-        for (ContainerInfo container : containers) {
-            this.workers.put(container.id(), container);
-            // TODO: Connect to other workers for data transport
-            //DataClientManager dm = this.managers.get(DataClientManager.NAME);
-            //dm.connect(container.hostname(), container.dataPort());
-        }
-
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
         this.computation.init(config);
@@ -109,6 +98,16 @@ public class WorkerService {
                      this.combiner.name(), this.computation.name());
         }
 
+        this.bsp4Worker.registerWorker();
+        this.masterInfo = this.bsp4Worker.waitMasterRegistered();
+        List<ContainerInfo> containers =
+                this.bsp4Worker.waitWorkersRegistered();
+        for (ContainerInfo container : containers) {
+            this.workers.put(container.id(), container);
+            // TODO: Connect to other workers for data transport
+            //DataClientManager dm = this.managers.get(DataClientManager.NAME);
+            //dm.connect(container.hostname(), container.dataPort());
+        }
         this.inited = true;
     }
 

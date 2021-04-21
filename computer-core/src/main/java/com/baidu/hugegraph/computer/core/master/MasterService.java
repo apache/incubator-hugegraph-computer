@@ -84,15 +84,15 @@ public class MasterService {
         this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
                                             rpcAddress.getHostName(),
                                             rpcAddress.getPort());
-        this.bsp4Master.registerMaster(this.masterInfo);
-        this.workers = this.bsp4Master.waitWorkersRegistered();
-
-        LOG.info("{} MasterService worker count: {}",
-                 this, this.workers.size());
 
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
         this.masterComputation.init(this.config);
+
+        this.bsp4Master.registerMaster(this.masterInfo);
+        this.workers = this.bsp4Master.waitWorkersRegistered();
+        LOG.info("{} MasterService worker count: {}",
+                 this, this.workers.size());
 
         LOG.info("{} MasterService initialized", this);
         this.inited = true;
