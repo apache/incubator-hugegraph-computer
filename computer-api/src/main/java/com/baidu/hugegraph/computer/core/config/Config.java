@@ -43,7 +43,7 @@ public interface Config {
     <T> T createObject(ConfigOption<Class<?>> clazzOption);
 
     <T> T createObject(ConfigOption<Class<?>> clazzOption,
-                              boolean requiredNotNull);
+                       boolean requiredNotNull);
 
     String vertexValueName();
 

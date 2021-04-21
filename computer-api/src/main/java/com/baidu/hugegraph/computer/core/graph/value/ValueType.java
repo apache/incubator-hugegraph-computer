@@ -41,7 +41,6 @@ public enum ValueType implements SerialEnum {
     // Is it a fixed value type, -1 means not fixed.
     private int byteSize;
 
-
     static {
         SerialEnum.register(ValueType.class);
     }

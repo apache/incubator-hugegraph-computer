@@ -32,7 +32,6 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.ConfigTestSuite;
 import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
 import com.baidu.hugegraph.computer.core.input.InputTestSuite;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.io.IOTestSuite;
 import com.baidu.hugegraph.computer.core.sort.SortTestSuite;
 import com.baidu.hugegraph.computer.core.network.NetworkTestSuite;
@@ -69,8 +68,6 @@ public class UnitTestSuite {
                              "ComputerOptions");
         OptionSpace.register("computer-rpc",
                              "com.baidu.hugegraph.config.RpcOptions");
-
-        LOG.info(ValueType.FLOAT.name());
 
         UnitTestBase.updateOptions(
             ComputerOptions.ALGORITHM_NAME, "test",

@@ -31,7 +31,7 @@ import com.baidu.hugegraph.util.E;
 
 public class IdValue implements Value<IdValue> {
 
-    public static final byte[] EMPTY_BYTES = new byte[0];
+    private static final byte[] EMPTY_BYTES = new byte[0];
 
     private byte[] bytes;
     private int length;
