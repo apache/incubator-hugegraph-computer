@@ -25,7 +25,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -67,9 +66,6 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             Whitebox.getInternalState(serverSession,
                                                       "maxHandledId"));
-        Assert.assertEquals(0L,
-                            Whitebox.getInternalState(serverSession,
-                                                      "lastAckTimestamp"));
 
         ClientSession clientSession = new ClientSession(conf, message -> true);
         Assert.assertEquals(TransportState.READY,
@@ -171,7 +167,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             clientSession.syncFinish();
         }, e -> {
-            Assert.assertContains("The status must be ESTABLISH " +
+            Assert.assertContains("The state must be ESTABLISH " +
                                   "instead of READY on syncFinish",
                                   e.getMessage());
         });
@@ -198,21 +194,8 @@ public class TransportSessionTest extends AbstractNetworkTest {
             serverSession.handledData(i);
             Assert.assertEquals(i, Whitebox.getInternalState(serverSession,
                                                              "maxHandledId"));
-
-            Whitebox.setInternalState(serverSession,
-                                      "lastAckTimestamp", 0L);
-            Boolean respondAck = Whitebox.invoke(serverSession.getClass(),
-                                                 "checkRespondDataAck",
-                                                 serverSession);
-            Assert.assertTrue(respondAck);
-
-            serverSession.respondedAck(i);
+            serverSession.respondedDataAck(i);
             Assert.assertEquals(i, serverSession.maxAckId);
-
-            Boolean repeatRespondAck = Whitebox.invoke(serverSession.getClass(),
-                                                       "checkRespondDataAck",
-                                                       serverSession);
-            Assert.assertFalse(repeatRespondAck);
         }
 
         serverSession.finishRecv(100);
@@ -256,10 +239,10 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
         serverSession.dataRecv(1);
         serverSession.handledData(1);
-        serverSession.respondedAck(1);
+        serverSession.respondedDataAck(1);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            serverSession.respondedAck(1);
+            serverSession.respondedDataAck(1);
         }, e -> {
             Assert.assertContains("The ackId must be increasing",
                                   e.getMessage());
@@ -292,32 +275,6 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertFalse(finishRead2);
 
         serverSession.finishRecv(1);
-        serverSession.finishComplete();
-    }
-
-    @Test
-    public void testHandledData() {
-        ServerSession serverSession = new ServerSession(conf);
-        Assert.assertEquals(TransportState.READY, serverSession.state());
-
-        serverSession.startRecv();
-        serverSession.startComplete();
-        serverSession.dataRecv(1);
-
-        Pair<AckType, Integer> pair = serverSession.handledData(1);
-        Assert.assertEquals(AckType.DATA, pair.getKey());
-        Assert.assertEquals(1, pair.getValue());
-        serverSession.respondedAck(1);
-
-        Pair<AckType, Integer> pair2 = serverSession.handledData(1);
-        Assert.assertEquals(AckType.NONE, pair2.getKey());
-
-        serverSession.finishRecv(2);
-
-        Pair<AckType, Integer> pair3 = serverSession.handledData(1);
-        Assert.assertEquals(AckType.FINISH, pair3.getKey());
-        Assert.assertEquals(2, pair3.getValue());
-
         serverSession.finishComplete();
     }
 

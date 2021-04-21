@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.session;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportState;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
@@ -28,24 +26,18 @@ import com.baidu.hugegraph.util.E;
 
 public class ServerSession extends TransportSession {
 
-    private static final Pair<AckType, Integer> UNKNOWN_ACK_PAIR =
-            Pair.of(AckType.NONE, AbstractMessage.UNKNOWN_SEQ);
-
     private final long minAckInterval;
     private volatile int maxHandledId;
-    private volatile long lastAckTimestamp;
 
     public ServerSession(TransportConf conf) {
         super(conf);
         this.minAckInterval = this.conf().minAckInterval();
         this.maxHandledId = AbstractMessage.UNKNOWN_SEQ;
-        this.lastAckTimestamp = 0;
     }
 
     @Override
     protected void ready() {
         this.maxHandledId = AbstractMessage.UNKNOWN_SEQ;
-        this.lastAckTimestamp = 0;
         super.ready();
     }
 
@@ -92,39 +84,30 @@ public class ServerSession extends TransportSession {
         this.maxRequestId = requestId;
     }
 
-    public synchronized Pair<AckType, Integer> handledData(int requestId) {
+    public void handledData(int requestId) {
         E.checkArgument(this.state == TransportState.ESTABLISH ||
                         this.state == TransportState.FINISH_RECV,
                         "The state must be ESTABLISH or FINISH_RECV instead " +
                         "of %s on handledData", this.state);
-        if (requestId > this.maxHandledId) {
-            this.maxHandledId = requestId;
+        synchronized (this) {
+            if (requestId > this.maxHandledId) {
+                this.maxHandledId = requestId;
+            }
         }
-
-        if (this.checkFinishReady()) {
-            return Pair.of(AckType.FINISH, this.finishId);
-        }
-
-        if (this.checkRespondDataAck()) {
-            return Pair.of(AckType.DATA, this.maxHandledId);
-        }
-
-        return UNKNOWN_ACK_PAIR;
     }
 
-    public void respondedAck(int ackId) {
+    public void respondedDataAck(int ackId) {
         E.checkArgument(this.state == TransportState.ESTABLISH ||
                         this.state == TransportState.FINISH_RECV,
                         "The state must be ESTABLISH or FINISH_RECV instead " +
-                        "of %s on respondedAck", this.state);
+                        "of %s on respondedDataAck", this.state);
         E.checkArgument(ackId > this.maxAckId,
                         "The ackId must be increasing, ackId: %s, " +
                         "maxAckId: %s", ackId, this.maxAckId);
         this.maxAckId = ackId;
-        this.lastAckTimestamp = System.currentTimeMillis();
     }
 
-    private boolean checkFinishReady() {
+    public boolean checkFinishReady() {
         if (this.state == TransportState.READY) {
             return true;
         }
@@ -134,17 +117,16 @@ public class ServerSession extends TransportSession {
         return false;
     }
 
-    private boolean checkRespondDataAck() {
+    public boolean checkRespondDataAck() {
         if (this.state != TransportState.ESTABLISH) {
             return false;
         }
 
-        if (this.maxHandledId <= this.maxAckId) {
-            return false;
-        }
+        return this.maxHandledId > this.maxAckId;
+    }
 
-        long interval = System.currentTimeMillis() - this.lastAckTimestamp;
-        return interval >= this.minAckInterval;
+    public int maxHandledId() {
+        return this.maxHandledId;
     }
 
     public long minAckInterval() {

@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
@@ -34,17 +33,22 @@ import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
-import com.baidu.hugegraph.computer.core.network.session.AckType;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
 import com.baidu.hugegraph.util.Log;
 import com.google.common.base.Throwables;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.AttributeKey;
+import io.netty.util.concurrent.ScheduledFuture;
 
 public class NettyServerHandler extends AbstractNettyHandler {
 
     private static final Logger LOG = Log.logger(NettyServerHandler.class);
+
+    private static final long INITIAL_DELAY = 0L;
+    private static final AttributeKey<ScheduledFuture<?>> RESPOND_ACK_TASK_KEY =
+            AttributeKey.valueOf("RESPOND_ACK_TASK_KEY");
 
     private final MessageHandler handler;
     private final ServerSession serverSession;
@@ -63,6 +67,14 @@ public class NettyServerHandler extends AbstractNettyHandler {
                                        StartMessage startMessage) {
         this.serverSession.startRecv();
         this.respondStartAck(ctx);
+
+        // Add an Schedule task to check respond ack avoid client deadlock wait
+        ScheduledFuture<?> respondAckTask = channel.eventLoop()
+                                                   .scheduleAtFixedRate(
+                        () -> this.checkAndRespondAck(ctx),
+                        INITIAL_DELAY, this.serverSession.minAckInterval(),
+                        TimeUnit.MILLISECONDS);
+        channel.attr(RESPOND_ACK_TASK_KEY).set(respondAckTask);
     }
 
     @Override
@@ -86,30 +98,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
         this.handler.handle(dataMessage.type(), dataMessage.partition(),
                             dataMessage.body());
 
-        this.dataPostProcessor(ctx, channel, requestId);
-    }
-
-    private void dataPostProcessor(ChannelHandlerContext ctx,
-                                   Channel channel, int requestId) {
-        Pair<AckType, Integer> ackTypePair = this.serverSession
-                                                 .handledData(requestId);
-        AckType ackType = ackTypePair.getKey();
-        assert ackType != null;
-        assert ackType != AckType.START;
-
-        if (AckType.FINISH == ackType) {
-            int finishId = ackTypePair.getValue();
-            this.respondFinishAck(ctx, finishId);
-        } else if (AckType.DATA == ackType) {
-            int ackId = ackTypePair.getValue();
-            this.respondDataAck(ctx, ackId);
-        } else if (AckType.NONE == ackType) {
-            // Schedule task to check respond ack avoid client deadlock wait
-            channel.eventLoop().schedule(
-                    () -> this.dataPostProcessor(ctx, channel, requestId),
-                    this.serverSession.minAckInterval(),
-                    TimeUnit.MILLISECONDS);
-        }
+        this.serverSession.handledData(requestId);
     }
 
     private void respondStartAck(ChannelHandlerContext ctx) {
@@ -123,12 +112,23 @@ public class NettyServerHandler extends AbstractNettyHandler {
         AckMessage finishAck = new AckMessage(finishId);
         ctx.writeAndFlush(finishAck).addListener(this.listenerOnWrite);
         this.serverSession.finishComplete();
+
+        // Remove the respond ack task
+        if (ctx.channel().hasAttr(RESPOND_ACK_TASK_KEY)) {
+            ScheduledFuture<?> respondAckTask = ctx.channel()
+                                                    .attr(RESPOND_ACK_TASK_KEY)
+                                                    .get();
+            if (respondAckTask != null) {
+                respondAckTask.cancel(false);
+            }
+            ctx.channel().attr(RESPOND_ACK_TASK_KEY).set(null);
+        }
     }
 
     private void respondDataAck(ChannelHandlerContext ctx, int ackId) {
         AckMessage ackMessage = new AckMessage(ackId);
         ctx.writeAndFlush(ackMessage).addListener(this.listenerOnWrite);
-        this.serverSession.respondedAck(ackId);
+        this.serverSession.respondedDataAck(ackId);
     }
 
     @Override
@@ -140,7 +140,15 @@ public class NettyServerHandler extends AbstractNettyHandler {
 
         if (failId > AbstractMessage.START_SEQ) {
             this.serverSession.handledData(failId);
-            this.serverSession.respondedAck(failId);
+            this.serverSession.respondedDataAck(failId);
+        }
+    }
+
+    private void checkAndRespondAck(ChannelHandlerContext ctx) {
+        if (this.serverSession.checkFinishReady()) {
+            this.respondFinishAck(ctx, this.serverSession.finishId());
+        } else if (this.serverSession.checkRespondDataAck()) {
+            this.respondDataAck(ctx, this.serverSession.maxHandledId());
         }
     }
 

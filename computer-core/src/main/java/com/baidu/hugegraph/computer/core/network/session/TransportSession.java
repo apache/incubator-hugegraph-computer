@@ -65,6 +65,10 @@ public abstract class TransportSession {
         return MAX_REQUEST_ID_UPDATER.incrementAndGet(this);
     }
 
+    public int finishId() {
+        return this.finishId;
+    }
+
     public TransportConf conf() {
         return this.conf;
     }
