@@ -29,10 +29,14 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
@@ -260,5 +264,24 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                  (postTransport - preTransport) / 1000_000L);
 
         Assert.assertEquals(1024, handledCnt.get());
+    }
+
+    @Test
+    public void testCheckMinPendingRequests() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "100",
+                ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "101"
+        );
+        config = ComputerContext.instance().config();
+
+        TransportConf conf = TransportConf.wrapConfig(config);
+
+        Assert.assertThrows(IllegalArgException.class, () -> {
+            int minPendingRequests = conf.minPendingRequests();
+        }, e -> {
+            Assert.assertContains("The minPendingRequests must be " +
+                                  "less than or equal to the " +
+                                  "maxPendingRequests", e.getMessage());
+        });
     }
 }
