@@ -20,31 +20,36 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.Date;
 
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 
-public class MockIntValue implements Value<MockIntValue> {
+public class MockCustomValue implements Value<MockCustomValue> {
 
-    private int value;
+    private Date value;
+
+    public MockCustomValue() {
+        this.value = new Date();
+    }
 
     @Override
     public ValueType type() {
-        return ValueType.USER_DEFINED;
+        return ValueType.CUSTOM_VALUE;
     }
 
     @Override
     public void read(GraphInput in) throws IOException {
-        this.value = in.readInt();
+        this.value.setTime(in.readLong());
     }
 
     @Override
     public void write(GraphOutput out) throws IOException {
-        out.writeInt(this.value);
+        out.writeLong(this.value.getTime());
     }
 
     @Override
-    public int compareTo(MockIntValue o) {
-        return Integer.compare(this.value, o.value);
+    public int compareTo(MockCustomValue o) {
+        return this.value.compareTo(o.value);
     }
 }

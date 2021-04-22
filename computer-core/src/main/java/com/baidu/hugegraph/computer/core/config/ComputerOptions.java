@@ -75,9 +75,9 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Class<?>> VALUE_CLASS =
             new ConfigOption<>(
                     "algorithm.value_class",
-                    "The value class of user defined value, used by " +
-                    "ValueFactory to create value if VALUE_TYPE is " +
-                    "USER_DEFINED",
+                    "The class of user defined value, the value is used as " +
+                    "the algorithm result. Used when VALUE_TYPE is " +
+                    "CUSTOM_VALUE",
                     disallowEmpty(),
                     Null.class
             );

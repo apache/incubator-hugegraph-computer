@@ -69,11 +69,11 @@ public class BuiltinValueFactoryTest {
     @Test
     public void testCreateUserDefinedValue() {
         UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.VALUE_TYPE, ValueType.USER_DEFINED.name(),
-                ComputerOptions.VALUE_CLASS, MockIntValue.class.getName()
+                ComputerOptions.VALUE_TYPE, ValueType.CUSTOM_VALUE.name(),
+                ComputerOptions.VALUE_CLASS, MockCustomValue.class.getName()
         );
         ValueFactory factory = ComputerContext.instance().valueFactory();
-        Assert.assertEquals(ValueType.USER_DEFINED,
-                            factory.createValue(ValueType.USER_DEFINED).type());
+        Assert.assertEquals(ValueType.CUSTOM_VALUE,
+                            factory.createValue(ValueType.CUSTOM_VALUE).type());
     }
 }

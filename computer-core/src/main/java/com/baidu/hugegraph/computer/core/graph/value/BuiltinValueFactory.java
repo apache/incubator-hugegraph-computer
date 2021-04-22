@@ -55,7 +55,7 @@ public final class BuiltinValueFactory implements ValueFactory {
                 return new IdValueListList();
             case LIST_VALUE:
                 return new ListValue<>();
-            case USER_DEFINED:
+            case CUSTOM_VALUE:
                 Config config  = ComputerContext.instance().config();
                 return config.createObject(ComputerOptions.VALUE_CLASS);
             default:
