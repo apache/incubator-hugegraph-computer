@@ -30,6 +30,7 @@ import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
@@ -49,6 +50,8 @@ public class NettyTransportClient implements TransportClient {
     private final NettyClientFactory clientFactory;
     private final ClientHandler handler;
     private final ClientSession session;
+    private final long syncRequestTimeout;
+    private final long finishSessionTimeout;
 
     protected NettyTransportClient(Channel channel, ConnectionId connectionId,
                                    NettyClientFactory clientFactory,
@@ -61,8 +64,11 @@ public class NettyTransportClient implements TransportClient {
         this.connectionId = connectionId;
         this.clientFactory = clientFactory;
         this.handler = clientHandler;
-        this.session = new ClientSession(this.clientFactory.conf(),
-                                         this.createSendFunction());
+
+        TransportConf conf = this.clientFactory.conf();
+        this.syncRequestTimeout = conf.syncRequestTimeout();
+        this.finishSessionTimeout = conf.finishSessionTimeout();
+        this.session = new ClientSession(conf, this.createSendFunction());
     }
 
     public Channel channel() {
@@ -115,23 +121,15 @@ public class NettyTransportClient implements TransportClient {
         };
     }
 
-    protected boolean checkSendAvailable() {
-        return !this.session.flowControllerStatus() &&
-               this.channel.isWritable();
-    }
-
-    protected boolean checkAndNoticeSendAvailable() {
-        if (this.checkSendAvailable()) {
-            this.handler.sendAvailable(this.connectionId);
-            return true;
-        }
-        return false;
+    @Override
+    public void startSession() throws TransportException {
+        this.startSession(this.syncRequestTimeout);
     }
 
     @Override
-    public void startSession() throws TransportException {
+    public void startSession(long timeout) throws TransportException {
         try {
-            this.session.syncStart();
+            this.session.syncStart(timeout);
         } catch (InterruptedException e) {
             throw new TransportException("Interrupted while start session", e);
         }
@@ -151,11 +149,29 @@ public class NettyTransportClient implements TransportClient {
 
     @Override
     public void finishSession() throws TransportException {
+        this.finishSession(this.finishSessionTimeout);
+    }
+
+    @Override
+    public void finishSession(long timeout) throws TransportException {
         try {
-            this.session.syncFinish();
+            this.session.syncFinish(timeout);
         } catch (InterruptedException e) {
             throw new TransportException("Interrupted while finish session", e);
         }
+    }
+
+    protected boolean checkSendAvailable() {
+        return !this.session.flowControllerStatus() &&
+               this.channel.isWritable();
+    }
+
+    protected boolean checkAndNoticeSendAvailable() {
+        if (this.checkSendAvailable()) {
+            this.handler.sendAvailable(this.connectionId);
+            return true;
+        }
+        return false;
     }
 
     @Override

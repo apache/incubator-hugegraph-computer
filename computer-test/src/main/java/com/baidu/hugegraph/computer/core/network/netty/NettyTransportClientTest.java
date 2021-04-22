@@ -148,7 +148,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Whitebox.setInternalState(client.session(), "sendFunction", sendFunc);
 
         Assert.assertThrows(TransportException.class, () -> {
-            client.finishSession();
+            client.finishSession(1000L);
         }, e -> {
             Assert.assertContains("to wait finish response",
                                   e.getMessage());
@@ -215,7 +215,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Assert.assertTrue(send);
 
         Assert.assertThrows(TransportException.class, () -> {
-            client.finishSession();
+            client.finishSession(1000L);
         }, e -> {
             Assert.assertContains("to wait finish response",
                                   e.getMessage());
@@ -226,8 +226,6 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
-
-
     }
 
     @Test

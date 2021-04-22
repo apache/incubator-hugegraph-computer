@@ -39,6 +39,11 @@ public interface TransportClient {
     void startSession() throws TransportException;
 
     /**
+     * This method is startSession with timeout parameter.
+     */
+    void startSession(long timeout) throws TransportException;
+
+    /**
      * Send the buffer to the server.
      * Return false if unable send data immediately.
      * This method is called zero or many times in iteration.
@@ -52,6 +57,11 @@ public interface TransportClient {
      * make sure the buffers sent be received by target workers.
      */
     void finishSession() throws TransportException;
+
+    /**
+     * This method is finishSession with timeout parameter.
+     */
+    void finishSession(long timeout) throws TransportException;
 
     /**
      * Get the {@link ConnectionId}

@@ -43,8 +43,6 @@ public class ClientSession extends TransportSession {
 
     private final int maxPendingRequests;
     private final int minPendingRequests;
-    private final long syncRequestTimeout;
-    private final long finishSessionTimeout;
 
     private final Lock flowControlStatusLock;
     private volatile boolean flowControlStatus;
@@ -57,8 +55,6 @@ public class ClientSession extends TransportSession {
         super(conf);
         this.maxPendingRequests = this.conf.maxPendingRequests();
         this.minPendingRequests = this.conf.minPendingRequests();
-        this.syncRequestTimeout = this.conf.syncRequestTimeout();
-        this.finishSessionTimeout = this.conf.finishSessionTimeout();
         this.flowControlStatusLock = new ReentrantLock();
         this.flowControlStatus = false;
         this.startBarrierEvent = new BarrierEvent();
@@ -101,8 +97,9 @@ public class ClientSession extends TransportSession {
         this.finishBarrierEvent.signalAll();
     }
 
-    public synchronized void syncStart() throws TransportException,
-                                                InterruptedException {
+    public synchronized void syncStart(long timeout)
+                                       throws TransportException,
+                                       InterruptedException {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
                         "on syncStart", this.state);
@@ -111,15 +108,16 @@ public class ClientSession extends TransportSession {
 
         this.sendFunction.apply(StartMessage.INSTANCE);
 
-        if (!this.startBarrierEvent.await(this.syncRequestTimeout)) {
+        if (!this.startBarrierEvent.await(timeout)) {
             throw new TransportException("Timeout(%sms) to wait start " +
-                                         "response", this.syncRequestTimeout);
+                                         "response", timeout);
         }
         this.startBarrierEvent.reset();
     }
 
-    public synchronized void syncFinish() throws TransportException,
-                                                 InterruptedException {
+    public synchronized void syncFinish(long timeout)
+                                        throws TransportException,
+                                        InterruptedException {
         E.checkArgument(this.state == TransportState.ESTABLISH,
                         "The state must be ESTABLISH instead of %s " +
                         "on syncFinish", this.state);
@@ -131,9 +129,9 @@ public class ClientSession extends TransportSession {
         FinishMessage finishMessage = new FinishMessage(finishId);
         this.sendFunction.apply(finishMessage);
 
-        if (!this.finishBarrierEvent.await(this.finishSessionTimeout)) {
+        if (!this.finishBarrierEvent.await(timeout)) {
             throw new TransportException("Timeout(%sms) to wait finish " +
-                                         "response", this.finishSessionTimeout);
+                                         "response", timeout);
         }
         this.finishBarrierEvent.reset();
     }
