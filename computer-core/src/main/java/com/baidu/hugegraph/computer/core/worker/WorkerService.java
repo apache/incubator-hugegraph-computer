@@ -101,7 +101,7 @@ public class WorkerService {
         this.bsp4Worker.registerWorker();
         this.masterInfo = this.bsp4Worker.waitMasterRegistered();
         List<ContainerInfo> containers =
-                this.bsp4Worker.waitWorkersRegistered();
+                            this.bsp4Worker.waitWorkersRegistered();
         for (ContainerInfo container : containers) {
             this.workers.put(container.id(), container);
             // TODO: Connect to other workers for data transport

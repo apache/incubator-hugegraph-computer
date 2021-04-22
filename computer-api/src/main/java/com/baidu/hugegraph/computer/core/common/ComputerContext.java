@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.common;
 
 import com.baidu.hugegraph.computer.core.allocator.Allocator;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.computer.core.config.Config;
 public final class ComputerContext {
@@ -28,21 +29,26 @@ public final class ComputerContext {
     private static volatile ComputerContext INSTANCE;
 
     private final Config config;
-    private final GraphFactory factory;
+    private final GraphFactory graphFactory;
+    private final ValueFactory valueFactory;
     private final Allocator allocator;
 
     private ComputerContext(Config config,
-                            GraphFactory factory,
+                            GraphFactory graphFactory,
+                            ValueFactory valueFactory,
                             Allocator allocator) {
         this.config = config;
-        this.factory = factory;
+        this.graphFactory = graphFactory;
+        this.valueFactory = valueFactory;
         this.allocator = allocator;
     }
 
     public static synchronized void initContext(Config config,
-                                                GraphFactory factory,
+                                                GraphFactory graphFactory,
+                                                ValueFactory valueFactory,
                                                 Allocator allocator) {
-        INSTANCE = new ComputerContext(config, factory, allocator);
+        INSTANCE = new ComputerContext(config, graphFactory,
+                                       valueFactory, allocator);
     }
 
     public static ComputerContext instance() {
@@ -55,7 +61,11 @@ public final class ComputerContext {
     }
 
     public GraphFactory graphFactory() {
-        return this.factory;
+        return this.graphFactory;
+    }
+
+    public ValueFactory valueFactory() {
+        return this.valueFactory;
     }
 
     public Allocator allocator() {

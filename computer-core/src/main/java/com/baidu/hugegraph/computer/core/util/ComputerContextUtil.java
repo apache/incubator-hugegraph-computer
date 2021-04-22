@@ -28,13 +28,17 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.DefaultConfig;
 import com.baidu.hugegraph.computer.core.graph.BuiltinGraphFactory;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.value.BuiltinValueFactory;
+import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 
 public class ComputerContextUtil {
 
     public static void initContext(Map<String, String> params) {
         Config config = new DefaultConfig(params);
         GraphFactory graphFactory = new BuiltinGraphFactory();
+        ValueFactory valueFactory = new BuiltinValueFactory();
         Allocator allocator = new DefaultAllocator(config);
-        ComputerContext.initContext(config, graphFactory, allocator);
+        ComputerContext.initContext(config, graphFactory,
+                                    valueFactory, allocator);
     }
 }

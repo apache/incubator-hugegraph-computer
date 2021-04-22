@@ -65,9 +65,21 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> VALUE_TYPE =
             new ConfigOption<>(
                     "algorithm.value_type",
-                    "The value type of current algorithm",
+                    "The value type of current algorithm, used by " +
+                    "ValueFactory to create value. If VALUE_TYPE is " +
+                    "USER_DEFINED, VALUE_CLASS is used to create value",
                     disallowEmpty(),
                     "NULL"
+            );
+
+    public static final ConfigOption<Class<?>> VALUE_CLASS =
+            new ConfigOption<>(
+                    "algorithm.value_class",
+                    "The value class of user defined value, used by " +
+                    "ValueFactory to create value if VALUE_TYPE is " +
+                    "USER_DEFINED",
+                    disallowEmpty(),
+                    Null.class
             );
 
     public static final ConfigOption<String> VALUE_NAME =

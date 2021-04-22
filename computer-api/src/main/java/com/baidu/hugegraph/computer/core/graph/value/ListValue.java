@@ -114,11 +114,12 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
             this.elemType = SerialEnum.fromCode(ValueType.class,
                                                 in.readByte());
         }
-        this.values = ComputerContext.instance().graphFactory()
-                                                .createList(size);
+        ComputerContext context = ComputerContext.instance();
+        this.values = context.graphFactory().createList(size);
+        ValueFactory valueFactory = context.valueFactory();
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
-            T value = (T) ValueFactory.createValue(this.elemType);
+            T value = (T) valueFactory.createValue(this.elemType);
             value.read(in);
             this.values.add(value);
         }

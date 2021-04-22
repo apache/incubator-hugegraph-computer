@@ -30,7 +30,6 @@ import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
@@ -134,7 +133,7 @@ public class StreamGraphInput implements GraphInput {
     public Value<?> readValue() throws IOException {
         ComputerContext context = ComputerContext.instance();
         ValueType valueType = context.config().valueType();
-        Value<?> value = ValueFactory.createValue(valueType);
+        Value<?> value = context.valueFactory().createValue(valueType);
         value.read(this);
         return value;
     }

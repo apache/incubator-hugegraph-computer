@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -74,8 +75,8 @@ public class UnitTestBase {
             oldValue.write(output);
             bytes = bao.toByteArray();
         }
-
-        Value<?> newValue = ValueFactory.createValue(oldValue.type());
+        ValueFactory valueFactory = ComputerContext.instance().valueFactory();
+        Value<?> newValue = valueFactory.createValue(oldValue.type());
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
             StreamGraphInput input = new OptimizedStreamGraphInput(bai);
             newValue.read(input);

@@ -121,13 +121,13 @@ public class WorkerServiceTest {
     public void testFailToConnectEtcd() {
         WorkerService workerService = new MockWorkerService();
         UnitTestBase.updateWithRequiredOptions(
+                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                 // Unavailable etcd endpoints
                 ComputerOptions.BSP_ETCD_ENDPOINTS, "http://abc:8098",
                 ComputerOptions.JOB_ID, "local_001",
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.BSP_LOG_INTERVAL, "30000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                 ComputerOptions.WORKER_COMPUTATION_CLASS,
                 MockComputation.class.getName()
         );

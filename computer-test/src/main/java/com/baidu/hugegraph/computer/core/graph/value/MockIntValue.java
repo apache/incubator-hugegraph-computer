@@ -19,9 +19,32 @@
 
 package com.baidu.hugegraph.computer.core.graph.value;
 
-public interface ValueFactory {
+import java.io.IOException;
 
-    Value<?> createValue(byte code);
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
 
-    Value<?> createValue(ValueType type);
+public class MockIntValue implements Value<MockIntValue> {
+
+    private int value;
+
+    @Override
+    public ValueType type() {
+        return ValueType.USER_DEFINED;
+    }
+
+    @Override
+    public void read(GraphInput in) throws IOException {
+        this.value = in.readInt();
+    }
+
+    @Override
+    public void write(GraphOutput out) throws IOException {
+        out.writeInt(this.value);
+    }
+
+    @Override
+    public int compareTo(MockIntValue o) {
+        return Integer.compare(this.value, o.value);
+    }
 }
