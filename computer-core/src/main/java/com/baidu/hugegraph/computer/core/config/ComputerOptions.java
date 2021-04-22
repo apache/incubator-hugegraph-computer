@@ -486,7 +486,7 @@ public class ComputerOptions extends OptionHolder {
                     "if the number of unreceived ack greater than or equal " +
                     "it, the send will unavailable.",
                     positiveInt(),
-                    500
+                    50
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
@@ -496,7 +496,7 @@ public class ComputerOptions extends OptionHolder {
                     "if the number of unreceived ack dropped down below it, " +
                     "the send will available again.",
                     positiveInt(),
-                    300
+                    5
             );
 
     public static final ConfigOption<Long> TRANSPORT_MIN_ACK_INTERVAL =

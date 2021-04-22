@@ -30,6 +30,7 @@ import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
@@ -102,19 +103,29 @@ public class NettyTransportClient implements TransportClient {
         ClientChannelListenerOnWrite listenerOnWrite =
         new ClientChannelListenerOnWrite();
 
-        return message -> this.channel.writeAndFlush(message)
-                              .addListener(listenerOnWrite);
+        return message -> {
+            ChannelFuture channelFuture;
+            if (message instanceof DataMessage) {
+                // Use accumulate flush
+                channelFuture = this.channel.write(message);
+            } else {
+                channelFuture = this.channel.writeAndFlush(message);
+            }
+            return channelFuture.addListener(listenerOnWrite);
+        };
     }
 
     protected boolean checkSendAvailable() {
-        return this.channel.isWritable() &&
-               !this.session.flowControllerStatus();
+        return !this.session.flowControllerStatus() &&
+               this.channel.isWritable();
     }
 
-    protected void checkAndNoticeSendAvailable() {
+    protected boolean checkAndNoticeSendAvailable() {
         if (this.checkSendAvailable()) {
             this.handler.sendAvailable(this.connectionId);
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -130,6 +141,8 @@ public class NettyTransportClient implements TransportClient {
     public boolean send(MessageType messageType, int partition,
                         ByteBuffer buffer) throws TransportException {
         if (!this.checkSendAvailable()) {
+            // Flush the channel prevent client deadlock wait
+            this.channel.flush();
             return false;
         }
         this.session.asyncSend(messageType, partition, buffer);

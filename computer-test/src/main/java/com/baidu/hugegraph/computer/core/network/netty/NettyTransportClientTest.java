@@ -22,9 +22,11 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -57,17 +59,17 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Override
     protected void initOption() {
         super.updateOption(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS,
-                           500);
+                           8000);
         super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS,
-                           300);
-        super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK,
-                           32 * 1024);
+                           6000);
         super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK,
-                           64 * 1024);
+                           1024 * 1024 * 1024);
+        super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK,
+                           512 * 1024 * 1024);
         super.updateOption(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL,
                            300L);
         super.updateOption(ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT,
-                           15_000L);
+                           35_000L);
     }
 
     @Test
@@ -156,7 +158,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testFlowController() throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(
-                            StringEncoding.encode("test data"));
+                StringEncoding.encode("test data"));
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
         client.startSession();
@@ -222,10 +224,18 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testTransportPerformance() throws IOException,
                                                   InterruptedException {
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 1024 * 10);
+        Configurator.setAllLevels("com.baidu.hugegraph", Level.WARN);
 
-        AtomicLong handledCnt = new AtomicLong(0L);
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        ByteBuffer buffer = ByteBuffer.allocateDirect(50 * 1024);
+
+        AtomicInteger handledCnt = new AtomicInteger(0);
+
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationOnMock.callRealMethod();
+            BARRIER_EVENT.signalAll();
+            return null;
+        }).when(clientHandler).sendAvailable(Mockito.any());
 
         Mockito.doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
@@ -234,17 +244,12 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         }).when(serverHandler).handle(Mockito.any(), Mockito.anyInt(),
                                       Mockito.any());
 
-        Mockito.doAnswer(invocationOnMock -> {
-            invocationOnMock.callRealMethod();
-            BARRIER_EVENT.signalAll();
-            return null;
-        }).when(clientHandler).sendAvailable(Mockito.any());
-
         long preTransport = System.nanoTime();
 
         client.startSession();
 
-        for (int i = 0; i < 1024; i++) {
+        int dataNum = 209716;
+        for (int i = 0; i < dataNum; i++) {
             boolean send = client.send(MessageType.MSG, 1, buffer);
             if (!send) {
                 LOG.info("Current send unavailable");
@@ -260,10 +265,10 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         long postTransport = System.nanoTime();
 
-        LOG.info("Transport 1024 data packets total 10GB, cost {}ms",
+        LOG.info("Transport {} data packets total 10GB, cost {}ms", dataNum,
                  (postTransport - preTransport) / 1000_000L);
 
-        Assert.assertEquals(1024, handledCnt.get());
+        Assert.assertEquals(dataNum, handledCnt.get());
     }
 
     @Test
