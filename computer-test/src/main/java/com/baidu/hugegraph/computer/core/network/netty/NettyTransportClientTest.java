@@ -69,7 +69,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         super.updateOption(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL,
                            300L);
         super.updateOption(ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT,
-                           35_000L);
+                           30_000L);
     }
 
     @Test
@@ -214,17 +214,28 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         boolean send = client.send(MessageType.MSG, 1, buffer);
         Assert.assertTrue(send);
 
+        Assert.assertThrows(TransportException.class, () -> {
+            client.finishSession();
+        }, e -> {
+            Assert.assertContains("to wait finish response",
+                                  e.getMessage());
+        });
+
         Mockito.verify(serverHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
 
         Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
+
+
     }
 
     @Test
     public void testTransportPerformance() throws IOException,
                                                   InterruptedException {
-        Configurator.setAllLevels("com.baidu.hugegraph", Level.WARN);
+        Configurator.setAllLevels("com.baidu.hugegraph", Level.INFO);
+        Configurator.setAllLevels("com.baidu.hugegraph.computer.core." +
+                                  "network.MockMessageHandler", Level.WARN);
 
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         ByteBuffer buffer = ByteBuffer.allocateDirect(50 * 1024);
