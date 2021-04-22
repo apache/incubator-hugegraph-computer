@@ -51,6 +51,5 @@ public class HeartBeatHandler extends ChannelDuplexHandler {
         } else {
             super.userEventTriggered(ctx, event);
         }
-
     }
 }

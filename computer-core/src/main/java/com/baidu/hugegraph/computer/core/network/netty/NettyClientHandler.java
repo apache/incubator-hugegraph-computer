@@ -49,7 +49,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
                                      Channel channel, AckMessage ackMessage) {
         int ackId = ackMessage.ackId();
         assert ackId > AbstractMessage.UNKNOWN_SEQ;
-        this.clientSession().ackRecv(ackId);
+        this.session().ackRecv(ackId);
         this.client.checkAndNoticeSendAvailable();
     }
 
@@ -59,19 +59,11 @@ public class NettyClientHandler extends AbstractNettyHandler {
                                       FailMessage failMessage) {
         int failId = failMessage.ackId();
         if (failId > AbstractMessage.START_SEQ) {
-            this.clientSession().ackRecv(failId);
+            this.session().ackRecv(failId);
             this.client.checkAndNoticeSendAvailable();
         }
 
         super.processFailMessage(ctx, channel, failMessage);
-    }
-
-    @Override
-    protected void respondFail(ChannelHandlerContext ctx, int failId,
-                               int errorCode, String message) {
-        long timeout = this.clientSession().conf().writeSocketTimeout();
-        FailMessage failMessage = new FailMessage(failId, errorCode, message);
-        ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
     }
 
     @Override
@@ -102,7 +94,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
                                               this.client.connectionId());
     }
 
-    private ClientSession clientSession() {
+    protected ClientSession session() {
         return this.client.session();
     }
 

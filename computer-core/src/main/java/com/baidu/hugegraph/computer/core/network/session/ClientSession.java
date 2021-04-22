@@ -46,8 +46,8 @@ public class ClientSession extends TransportSession {
 
     private final Lock flowControlStatusLock;
     private volatile boolean flowControlStatus;
-    private final BarrierEvent startBarrierEvent;
-    private final BarrierEvent finishBarrierEvent;
+    private final BarrierEvent startedBarrier;
+    private final BarrierEvent finishedBarrier;
     private final Function<Message, ?> sendFunction;
 
     public ClientSession(TransportConf conf,
@@ -57,8 +57,8 @@ public class ClientSession extends TransportSession {
         this.minPendingRequests = this.conf.minPendingRequests();
         this.flowControlStatusLock = new ReentrantLock();
         this.flowControlStatus = false;
-        this.startBarrierEvent = new BarrierEvent();
-        this.finishBarrierEvent = new BarrierEvent();
+        this.startedBarrier = new BarrierEvent();
+        this.finishedBarrier = new BarrierEvent();
         this.sendFunction = sendFunction;
     }
 
@@ -82,19 +82,19 @@ public class ClientSession extends TransportSession {
     public void startComplete() {
         E.checkArgument(this.state == TransportState.START_SEND,
                         "The state must be START_SEND instead of %s " +
-                        "on startComplete", this.state);
+                        "at startComplete()", this.state);
         this.establish();
         this.maxAckId = AbstractMessage.START_SEQ;
-        this.startBarrierEvent.signalAll();
+        this.startedBarrier.signalAll();
     }
 
     @Override
     public void finishComplete() {
         E.checkArgument(this.state == TransportState.FINISH_SEND,
                         "The state must be FINISH_SEND instead of %s " +
-                        "on finishComplete", this.state);
+                        "at finishComplete()", this.state);
         this.ready();
-        this.finishBarrierEvent.signalAll();
+        this.finishedBarrier.signalAll();
     }
 
     public synchronized void syncStart(long timeout)
@@ -102,17 +102,17 @@ public class ClientSession extends TransportSession {
                                        InterruptedException {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
-                        "on syncStart", this.state);
+                        "at syncStart()", this.state);
 
         this.startSend();
 
         this.sendFunction.apply(StartMessage.INSTANCE);
 
-        if (!this.startBarrierEvent.await(timeout)) {
+        if (!this.startedBarrier.await(timeout)) {
             throw new TransportException("Timeout(%sms) to wait start " +
                                          "response", timeout);
         }
-        this.startBarrierEvent.reset();
+        this.startedBarrier.reset();
     }
 
     public synchronized void syncFinish(long timeout)
@@ -120,7 +120,7 @@ public class ClientSession extends TransportSession {
                                         InterruptedException {
         E.checkArgument(this.state == TransportState.ESTABLISH,
                         "The state must be ESTABLISH instead of %s " +
-                        "on syncFinish", this.state);
+                        "at syncFinish()", this.state);
 
         int finishId = this.genFinishId();
 
@@ -129,18 +129,18 @@ public class ClientSession extends TransportSession {
         FinishMessage finishMessage = new FinishMessage(finishId);
         this.sendFunction.apply(finishMessage);
 
-        if (!this.finishBarrierEvent.await(timeout)) {
+        if (!this.finishedBarrier.await(timeout)) {
             throw new TransportException("Timeout(%sms) to wait finish " +
                                          "response", timeout);
         }
-        this.finishBarrierEvent.reset();
+        this.finishedBarrier.reset();
     }
 
     public synchronized void asyncSend(MessageType messageType, int partition,
                                        ByteBuffer buffer) {
         E.checkArgument(this.state == TransportState.ESTABLISH,
                         "The state must be ESTABLISH instead of %s " +
-                        "on asyncSend", this.state);
+                        "at asyncSend()", this.state);
         int requestId = this.nextRequestId();
 
         ManagedBuffer managedBuffer = new NioManagedBuffer(buffer);
@@ -153,26 +153,36 @@ public class ClientSession extends TransportSession {
     }
 
     public void ackRecv(int ackId) {
-        if (ackId == AbstractMessage.START_SEQ &&
-            this.state == TransportState.START_SEND) {
-            this.startComplete();
-        } else if (ackId == this.finishId &&
-                   this.state == TransportState.FINISH_SEND) {
-            this.finishComplete();
-        } else if (this.state == TransportState.ESTABLISH ||
-                   this.state == TransportState.FINISH_SEND) {
-            if (this.maxAckId < ackId) {
-                this.maxAckId = ackId;
-            }
-            this.updateFlowControlStatus();
-        } else {
-            throw new ComputeException("Receive an ack message, but the " +
-                                       "state not match, state: %s, ackId: " +
-                                       "%s", this.state, ackId);
+        switch (this.state) {
+            case READY:
+                if (ackId == AbstractMessage.START_SEQ) {
+                    this.startComplete();
+                    return;
+                }
+            case FINISH_SEND:
+                if (ackId == this.finishId) {
+                    this.finishComplete();
+                } else {
+                    this.dataAckRecv(ackId);
+                }
+                return;
+            case ESTABLISH:
+                this.dataAckRecv(ackId);
+            default:
+                throw new ComputeException("Receive an ack message, but the " +
+                                           "state not match, state: %s, " +
+                                           "ackId: %s", this.state, ackId);
         }
     }
 
-    public boolean flowControllerStatus() {
+    private void dataAckRecv(int ackId) {
+        if (this.maxAckId < ackId) {
+            this.maxAckId = ackId;
+        }
+        this.updateFlowControlStatus();
+    }
+
+    public boolean flowControlStatus() {
         return this.flowControlStatus;
     }
 

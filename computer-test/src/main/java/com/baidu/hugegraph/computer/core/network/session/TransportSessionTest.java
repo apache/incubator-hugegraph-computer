@@ -76,7 +76,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
                             clientSession.maxAckId);
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             clientSession.finishId);
-        Assert.assertFalse(clientSession.flowControllerStatus());
+        Assert.assertFalse(clientSession.flowControlStatus());
     }
 
     @Test
@@ -168,7 +168,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
             clientSession.syncFinish(conf.finishSessionTimeout());
         }, e -> {
             Assert.assertContains("The state must be ESTABLISH " +
-                                  "instead of READY on syncFinish",
+                                  "instead of READY at syncFinish()",
                                   e.getMessage());
         });
     }
@@ -337,7 +337,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
                             clientSession.maxAckId);
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             clientSession.maxRequestId);
-        Assert.assertFalse(clientSession.flowControllerStatus());
+        Assert.assertFalse(clientSession.flowControlStatus());
 
         Assert.assertFalse(this.existError(exceptions));
     }

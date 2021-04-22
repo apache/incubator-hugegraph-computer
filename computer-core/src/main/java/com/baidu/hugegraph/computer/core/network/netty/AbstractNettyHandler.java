@@ -2,6 +2,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
@@ -11,9 +12,11 @@ import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.message.PingMessage;
 import com.baidu.hugegraph.computer.core.network.message.PongMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
+import com.baidu.hugegraph.computer.core.network.session.TransportSession;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
@@ -35,36 +38,54 @@ public abstract class AbstractNettyHandler
                       TransportUtil.remoteAddress(channel), msg);
         }
 
-        if (msg instanceof StartMessage) {
-            this.processStartMessage(ctx, channel, (StartMessage) msg);
-        } else if (msg instanceof FinishMessage) {
-            this.processFinishMessage(ctx, channel, (FinishMessage) msg);
-        } else if (msg instanceof DataMessage) {
+        MessageType msgType = msg.type();
+
+        if (msgType.category() == MessageType.Category.DATA) {
             this.processDataMessage(ctx, channel, (DataMessage) msg);
-        } else if (msg instanceof AckMessage) {
-            this.processAckMessage(ctx, channel, (AckMessage) msg);
-        } else if (msg instanceof FailMessage) {
-            this.processFailMessage(ctx, channel, (FailMessage) msg);
-        } else if (msg instanceof PingMessage) {
-            this.processPingMessage(ctx, channel, (PingMessage) msg);
-        } else if (msg instanceof PongMessage) {
-            this.processPongMessage(ctx, channel, (PongMessage) msg);
+            return;
+        }
+
+        switch (msgType) {
+            case START:
+                this.processStartMessage(ctx, channel, (StartMessage) msg);
+                break;
+            case FAIL:
+                this.processFailMessage(ctx, channel, (FailMessage) msg);
+                break;
+            case ACK:
+                this.processAckMessage(ctx, channel, (AckMessage) msg);
+                break;
+            case FINISH:
+                this.processFinishMessage(ctx, channel, (FinishMessage) msg);
+                break;
+            case PING:
+                this.processPingMessage(ctx, channel, (PingMessage) msg);
+                break;
+            case PONG:
+                this.processPongMessage(ctx, channel, (PongMessage) msg);
+                break;
+            default:
+                throw new IllegalArgException("Unknown message type: %s",
+                                              msgType);
         }
     }
 
     protected void processStartMessage(ChannelHandlerContext ctx,
                                        Channel channel,
                                        StartMessage startMessage) {
+        // pass
     }
 
     protected void processFinishMessage(ChannelHandlerContext ctx,
                                         Channel channel,
                                         FinishMessage finishMessage) {
+        // pass
     }
 
     protected void processDataMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       DataMessage dataMessage) {
+        // pass
     }
 
     protected void processAckMessage(ChannelHandlerContext ctx,
@@ -96,11 +117,17 @@ public abstract class AbstractNettyHandler
     protected void processPongMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       PongMessage pongMessage) {
+        // pass
     }
 
     protected void respondFail(ChannelHandlerContext ctx, int failId,
                                int errorCode, String message) {
+        long timeout = this.session().conf().writeSocketTimeout();
+        FailMessage failMessage = new FailMessage(failId, errorCode, message);
+        ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
     }
+
+    protected abstract TransportSession session();
 
     protected abstract TransportHandler transportHandler();
 }

@@ -30,7 +30,6 @@ import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
-import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
@@ -68,7 +67,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
         this.serverSession.startRecv();
         this.respondStartAck(ctx);
 
-        // Add an schedule task to check respond ack
+        // Add an schedule task to check and respond ack
         ScheduledFuture<?> respondAckTask = channel.eventLoop()
                                                    .scheduleAtFixedRate(
                         () -> this.checkAndRespondAck(ctx),
@@ -135,9 +134,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
     @Override
     protected void respondFail(ChannelHandlerContext ctx, int failId,
                                int errorCode, String message) {
-        FailMessage failMessage = new FailMessage(failId, errorCode, message);
-        long timeout = this.serverSession.conf().writeSocketTimeout();
-        ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
+        super.respondFail(ctx, failId, errorCode, message);
 
         if (failId > AbstractMessage.START_SEQ) {
             this.serverSession.handledData(failId);
@@ -190,6 +187,11 @@ public class NettyServerHandler extends AbstractNettyHandler {
 
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
         this.handler.exceptionCaught(exception, connectionId);
+    }
+
+    @Override
+    protected ServerSession session() {
+        return this.serverSession;
     }
 
     @Override

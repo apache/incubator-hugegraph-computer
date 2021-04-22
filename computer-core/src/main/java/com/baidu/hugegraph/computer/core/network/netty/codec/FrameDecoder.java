@@ -73,22 +73,4 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
         // TODO: improve it use shard memory
         return msg;
     }
-
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The FrameDecoder active from {}",
-                      TransportUtil.remoteAddress(ctx.channel()));
-        }
-        super.channelActive(ctx);
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("The FrameDecoder inActive from {}",
-                      TransportUtil.remoteAddress(ctx.channel()));
-        }
-        super.channelInactive(ctx);
-    }
 }

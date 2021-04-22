@@ -31,7 +31,6 @@ import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
@@ -40,6 +39,7 @@ import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 
 public class NettyTransportClient implements TransportClient {
 
@@ -106,18 +106,10 @@ public class NettyTransportClient implements TransportClient {
     }
 
     private Function<Message, ?> createSendFunction() {
-        ClientChannelListenerOnWrite listenerOnWrite =
-        new ClientChannelListenerOnWrite();
-
+        ChannelFutureListener listener = new ClientChannelListenerOnWrite();
         return message -> {
-            ChannelFuture channelFuture;
-            if (message instanceof DataMessage) {
-                // Use accumulate flush
-                channelFuture = this.channel.write(message);
-            } else {
-                channelFuture = this.channel.writeAndFlush(message);
-            }
-            return channelFuture.addListener(listenerOnWrite);
+            ChannelFuture channelFuture = this.channel.writeAndFlush(message);
+            return channelFuture.addListener(listener);
         };
     }
 
@@ -126,7 +118,6 @@ public class NettyTransportClient implements TransportClient {
         this.startSession(this.syncRequestTimeout);
     }
 
-    @Override
     public void startSession(long timeout) throws TransportException {
         try {
             this.session.syncStart(timeout);
@@ -139,8 +130,6 @@ public class NettyTransportClient implements TransportClient {
     public boolean send(MessageType messageType, int partition,
                         ByteBuffer buffer) throws TransportException {
         if (!this.checkSendAvailable()) {
-            // Flush the channel prevent client deadlock wait
-            this.channel.flush();
             return false;
         }
         this.session.asyncSend(messageType, partition, buffer);
@@ -152,7 +141,6 @@ public class NettyTransportClient implements TransportClient {
         this.finishSession(this.finishSessionTimeout);
     }
 
-    @Override
     public void finishSession(long timeout) throws TransportException {
         try {
             this.session.syncFinish(timeout);
@@ -162,7 +150,7 @@ public class NettyTransportClient implements TransportClient {
     }
 
     protected boolean checkSendAvailable() {
-        return !this.session.flowControllerStatus() &&
+        return !this.session.flowControlStatus() &&
                this.channel.isWritable();
     }
 
