@@ -154,10 +154,10 @@ public class ClientSession extends TransportSession {
 
     public void ackRecv(int ackId) {
         switch (this.state) {
-            case READY:
+            case START_SEND:
                 if (ackId == AbstractMessage.START_SEQ) {
                     this.startComplete();
-                    return;
+                    break;
                 }
             case FINISH_SEND:
                 if (ackId == this.finishId) {
@@ -165,9 +165,10 @@ public class ClientSession extends TransportSession {
                 } else {
                     this.dataAckRecv(ackId);
                 }
-                return;
+                break;
             case ESTABLISH:
                 this.dataAckRecv(ackId);
+                break;
             default:
                 throw new ComputeException("Receive an ack message, but the " +
                                            "state not match, state: %s, " +

@@ -126,7 +126,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
             clientSession.syncStart(conf.syncRequestTimeout());
         }, e -> {
             Assert.assertContains("The state must be READY " +
-                                  "instead of ESTABLISH on syncStart",
+                                  "instead of ESTABLISH at syncStart()",
                                   e.getMessage());
         });
     }
@@ -146,7 +146,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
             clientSession.asyncSend(MessageType.MSG, 1, buffer);
         }, e -> {
             Assert.assertContains("The state must be ESTABLISH " +
-                                  "instead of READY on asyncSend",
+                                  "instead of READY at asyncSend()",
                                   e.getMessage());
         });
     }
@@ -251,7 +251,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             serverSession.finishRecv(1);
         }, e -> {
-            Assert.assertContains("The finishId must be auto-increment",
+            Assert.assertContains("The finishId must be maxRequestId + 1",
                                   e.getMessage());
         });
     }
