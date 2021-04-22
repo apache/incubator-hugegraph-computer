@@ -463,8 +463,9 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.write_buffer_high_mark",
                     "The high water mark for write buffer in bytes, " +
-                    "if the number of bytes queued in the write buffer " +
-                    "greater than it, the send will unavailable.",
+                    "it will trigger the sending unavailable, " +
+                    "if the number of bytes if the number of bytes queued in " +
+                    "the write buffer > write_buffer_high_mark.",
                     nonNegativeInt(),
                     64 * 1024
             );
@@ -472,9 +473,9 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_WRITE_BUFFER_LOW_MARK =
             new ConfigOption<>(
                     "transport.write_buffer_low_mark",
-                    "The low water mark for write buffer in bytes," +
-                    "if the number of bytes queued in the write buffer " +
-                    "dropped down below it, the send will available again." +
+                    "The low water mark for write buffer in bytes, it will " +
+                    "trigger the sending available, if the number of bytes " +
+                    "queued in the write buffer < write_buffer_low_mark." +
                     nonNegativeInt(),
                     32 * 1024
             );
@@ -483,8 +484,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.max_pending_requests",
                     "The max number of client unreceived ack, " +
-                    "if the number of unreceived ack greater than or equal " +
-                    "it, the send will unavailable.",
+                    "it will trigger the sending unavailable, if the number " +
+                    "of unreceived ack >= max_pending_requests.",
                     positiveInt(),
                     7500
             );
@@ -493,8 +494,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.min_pending_requests",
                     "The minimum number of client unreceived ack, " +
-                    "it will trigger the sending available " +
-                    "if the number of unreceived ack <= min_pending_requests.",
+                    "it will trigger the sending available, if the number of " +
+                    "unreceived ack < min_pending_requests.",
                     positiveInt(),
                     5500
             );

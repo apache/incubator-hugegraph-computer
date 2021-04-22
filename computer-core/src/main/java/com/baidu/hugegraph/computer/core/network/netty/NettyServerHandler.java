@@ -69,7 +69,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
 
         // Add an schedule task to check and respond ack
         ScheduledFuture<?> respondAckTask = channel.eventLoop()
-                                                   .scheduleAtFixedRate(
+                                                   .scheduleWithFixedDelay(
                         () -> this.checkAndRespondAck(ctx),
                         INITIAL_DELAY, this.serverSession.minAckInterval(),
                         TimeUnit.MILLISECONDS);

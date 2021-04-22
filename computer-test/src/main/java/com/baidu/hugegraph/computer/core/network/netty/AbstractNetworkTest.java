@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,6 +43,7 @@ import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.config.ConfigOption;
@@ -60,8 +62,17 @@ public abstract class AbstractNetworkTest {
     protected static ConnectionManager connectionManager;
     protected static NettyProtocol clientProtocol;
     protected static NettyProtocol serverProtocol;
-    protected static String host = "127.0.0.1";
+    protected static String host;
     protected static int port;
+
+    static {
+        List<String> localIPAddress = TransportUtil.getLocalIPAddress();
+        if (!localIPAddress.isEmpty()) {
+            host = localIPAddress.get(0);
+        } else {
+            host = "127.0.0.1";
+        }
+    }
 
     protected abstract void initOption();
 
