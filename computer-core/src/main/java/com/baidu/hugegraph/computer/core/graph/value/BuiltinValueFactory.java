@@ -19,13 +19,18 @@
 
 package com.baidu.hugegraph.computer.core.graph.value;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 
 public final class BuiltinValueFactory implements ValueFactory {
+
+    private final Config config;
+
+    public BuiltinValueFactory(Config config) {
+        this.config = config;
+    }
 
     public Value<?> createValue(byte code) {
         ValueType type = SerialEnum.fromCode(ValueType.class, code);
@@ -56,8 +61,7 @@ public final class BuiltinValueFactory implements ValueFactory {
             case LIST_VALUE:
                 return new ListValue<>();
             case CUSTOM_VALUE:
-                Config config  = ComputerContext.instance().config();
-                return config.createObject(ComputerOptions.VALUE_CLASS);
+                return this.config.createObject(ComputerOptions.VALUE_CLASS);
             default:
                 throw new ComputerException("Can't create Value for %s",
                                             type.name());
