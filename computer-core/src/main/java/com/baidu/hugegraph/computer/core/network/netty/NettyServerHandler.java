@@ -38,7 +38,6 @@ import com.google.common.base.Throwables;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.ScheduledFuture;
 
 public class NettyServerHandler extends AbstractNettyHandler {
@@ -46,12 +45,11 @@ public class NettyServerHandler extends AbstractNettyHandler {
     private static final Logger LOG = Log.logger(NettyServerHandler.class);
 
     private static final long INITIAL_DELAY = 0L;
-    private static final AttributeKey<ScheduledFuture<?>> RESPOND_ACK_TASK_KEY =
-            AttributeKey.valueOf("RESPOND_ACK_TASK_KEY");
 
     private final MessageHandler handler;
     private final ServerSession serverSession;
     private final ChannelFutureListenerOnWrite listenerOnWrite;
+    private ScheduledFuture<?> respondAckTask;
 
     public NettyServerHandler(ServerSession serverSession,
                               MessageHandler handler) {
@@ -66,14 +64,6 @@ public class NettyServerHandler extends AbstractNettyHandler {
                                        StartMessage startMessage) {
         this.serverSession.startRecv();
         this.respondStartAck(ctx);
-
-        // Add an schedule task to check and respond ack
-        ScheduledFuture<?> respondAckTask = channel.eventLoop()
-                                                   .scheduleWithFixedDelay(
-                        () -> this.checkAndRespondAck(ctx),
-                        INITIAL_DELAY, this.serverSession.minAckInterval(),
-                        TimeUnit.MILLISECONDS);
-        channel.attr(RESPOND_ACK_TASK_KEY).set(respondAckTask);
     }
 
     @Override
@@ -105,6 +95,13 @@ public class NettyServerHandler extends AbstractNettyHandler {
         AckMessage startAck = new AckMessage(AbstractMessage.START_SEQ);
         ctx.writeAndFlush(startAck).addListener(this.listenerOnWrite);
         this.serverSession.startComplete();
+
+        // Add an schedule task to check and respond ack
+        this.respondAckTask = ctx.channel().eventLoop().scheduleWithFixedDelay(
+                              () -> this.checkAndRespondAck(ctx),
+                              INITIAL_DELAY,
+                              this.serverSession.minAckInterval(),
+                              TimeUnit.MILLISECONDS);
     }
 
     private void respondFinishAck(ChannelHandlerContext ctx,
@@ -114,14 +111,9 @@ public class NettyServerHandler extends AbstractNettyHandler {
         this.serverSession.finishComplete();
 
         // Cancel and remove the task to check respond ack
-        if (ctx.channel().hasAttr(RESPOND_ACK_TASK_KEY)) {
-            ScheduledFuture<?> respondAckTask = ctx.channel()
-                                                    .attr(RESPOND_ACK_TASK_KEY)
-                                                    .get();
-            if (respondAckTask != null) {
-                respondAckTask.cancel(false);
-            }
-            ctx.channel().attr(RESPOND_ACK_TASK_KEY).set(null);
+        if (this.respondAckTask != null) {
+            this.respondAckTask.cancel(false);
+            this.respondAckTask = null;
         }
     }
 

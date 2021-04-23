@@ -113,9 +113,6 @@ public class ServerSession extends TransportSession {
     }
 
     public boolean checkFinishReady() {
-        if (this.state == TransportState.READY) {
-            return true;
-        }
         if (this.state == TransportState.FINISH_RECV) {
             return this.maxHandledId == this.finishId - 1;
         }

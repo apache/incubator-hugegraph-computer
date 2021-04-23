@@ -177,7 +177,7 @@ public class ClientSession extends TransportSession {
     }
 
     private void dataAckRecv(int ackId) {
-        if (this.maxAckId < ackId) {
+        if (ackId > this.maxAckId) {
             this.maxAckId = ackId;
         }
         this.updateFlowControlStatus();

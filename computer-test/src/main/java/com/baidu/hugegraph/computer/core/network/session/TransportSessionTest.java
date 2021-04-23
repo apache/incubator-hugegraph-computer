@@ -261,11 +261,6 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ServerSession serverSession = new ServerSession(conf);
         Assert.assertEquals(TransportState.READY, serverSession.state());
 
-        Boolean finishRead = Whitebox.invoke(serverSession.getClass(),
-                                             "checkFinishReady",
-                                             serverSession);
-        Assert.assertTrue(finishRead);
-
         serverSession.startRecv();
         serverSession.startComplete();
 
