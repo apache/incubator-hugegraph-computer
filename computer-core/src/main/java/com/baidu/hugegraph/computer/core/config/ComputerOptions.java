@@ -35,6 +35,7 @@ import com.baidu.hugegraph.computer.core.network.NettyTransportProvider;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
+import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableSet;
 
 public class ComputerOptions extends OptionHolder {
@@ -463,41 +464,40 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.write_buffer_high_mark",
                     "The high water mark for write buffer in bytes, " +
-                    "it will trigger the sending unavailable, " +
-                    "if the number of bytes if the number of bytes queued in " +
-                    "the write buffer > write_buffer_high_mark.",
+                    "it will trigger the sending unavailable if the number " +
+                    "of queued bytes > write_buffer_high_mark.",
                     nonNegativeInt(),
-                    64 * 1024
+                    64 * (int) Bytes.MB
             );
 
     public static final ConfigOption<Integer> TRANSPORT_WRITE_BUFFER_LOW_MARK =
             new ConfigOption<>(
                     "transport.write_buffer_low_mark",
                     "The low water mark for write buffer in bytes, it will " +
-                    "trigger the sending available, if the number of bytes " +
-                    "queued in the write buffer < write_buffer_low_mark." +
+                    "trigger the sending available if the number of queued " +
+                    "bytes < write_buffer_low_mark." +
                     nonNegativeInt(),
-                    32 * 1024
+                    32 * (int) Bytes.MB
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MAX_PENDING_REQUESTS =
             new ConfigOption<>(
                     "transport.max_pending_requests",
                     "The max number of client unreceived ack, " +
-                    "it will trigger the sending unavailable, if the number " +
+                    "it will trigger the sending unavailable if the number " +
                     "of unreceived ack >= max_pending_requests.",
                     positiveInt(),
-                    7500
+                    8000
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
             new ConfigOption<>(
                     "transport.min_pending_requests",
                     "The minimum number of client unreceived ack, " +
-                    "it will trigger the sending available, if the number of " +
+                    "it will trigger the sending available if the number of " +
                     "unreceived ack < min_pending_requests.",
                     positiveInt(),
-                    5500
+                    6000
             );
 
     public static final ConfigOption<Long> TRANSPORT_MIN_ACK_INTERVAL =

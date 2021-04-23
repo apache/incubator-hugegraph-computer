@@ -26,7 +26,11 @@ import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.AckMessage;
+import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FailMessage;
+import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
+import com.baidu.hugegraph.computer.core.network.message.PongMessage;
+import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.Log;
 import com.google.common.base.Throwables;
@@ -45,12 +49,40 @@ public class NettyClientHandler extends AbstractNettyHandler {
     }
 
     @Override
+    protected void processStartMessage(ChannelHandlerContext ctx,
+                                       Channel channel,
+                                       StartMessage startMessage) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void processFinishMessage(ChannelHandlerContext ctx,
+                                        Channel channel,
+                                        FinishMessage finishMessage) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void processDataMessage(ChannelHandlerContext ctx,
+                                      Channel channel,
+                                      DataMessage dataMessage) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     protected void processAckMessage(ChannelHandlerContext ctx,
                                      Channel channel, AckMessage ackMessage) {
         int ackId = ackMessage.ackId();
         assert ackId > AbstractMessage.UNKNOWN_SEQ;
         this.session().ackRecv(ackId);
         this.client.checkAndNoticeSendAvailable();
+    }
+
+    @Override
+    protected void processPongMessage(ChannelHandlerContext ctx,
+                                      Channel channel,
+                                      PongMessage pongMessage) {
+        // pass
     }
 
     @Override
@@ -86,9 +118,9 @@ public class NettyClientHandler extends AbstractNettyHandler {
         }
 
         // Respond fail message to requester
-        this.respondFail(ctx, AbstractMessage.UNKNOWN_SEQ,
-                         exception.errorCode(),
-                         Throwables.getStackTraceAsString(exception));
+        this.ackFail(ctx, AbstractMessage.UNKNOWN_SEQ,
+                     exception.errorCode(),
+                     Throwables.getStackTraceAsString(exception));
 
         this.client.handler().exceptionCaught(exception,
                                               this.client.connectionId());

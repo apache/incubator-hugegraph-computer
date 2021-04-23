@@ -45,6 +45,7 @@ import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
+import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
@@ -63,11 +64,11 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS,
                            6000);
         super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK,
-                           1024 * 1024 * 1024);
+                           64 * (int) Bytes.MB);
         super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK,
-                           512 * 1024 * 1024);
+                           32 * (int) Bytes.MB);
         super.updateOption(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL,
-                           300L);
+                           200L);
         super.updateOption(ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT,
                            30_000L);
     }

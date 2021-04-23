@@ -70,28 +70,25 @@ public abstract class AbstractNettyHandler
         }
     }
 
-    protected void processStartMessage(ChannelHandlerContext ctx,
-                                       Channel channel,
-                                       StartMessage startMessage) {
-        // pass
-    }
+    protected abstract void processStartMessage(ChannelHandlerContext ctx,
+                                                Channel channel,
+                                                StartMessage startMessage);
 
-    protected void processFinishMessage(ChannelHandlerContext ctx,
-                                        Channel channel,
-                                        FinishMessage finishMessage) {
-        // pass
-    }
+    protected abstract void processFinishMessage(ChannelHandlerContext ctx,
+                                                 Channel channel,
+                                                 FinishMessage finishMessage);
 
-    protected void processDataMessage(ChannelHandlerContext ctx,
-                                      Channel channel,
-                                      DataMessage dataMessage) {
-        // pass
-    }
+    protected abstract void processDataMessage(ChannelHandlerContext ctx,
+                                               Channel channel,
+                                               DataMessage dataMessage);
 
-    protected void processAckMessage(ChannelHandlerContext ctx,
-                                     Channel channel,
-                                     AckMessage ackMessage) {
-    }
+    protected abstract void processAckMessage(ChannelHandlerContext ctx,
+                                              Channel channel,
+                                              AckMessage ackMessage);
+
+    protected abstract void processPongMessage(ChannelHandlerContext ctx,
+                                               Channel channel,
+                                               PongMessage pongMessage);
 
     protected void processFailMessage(ChannelHandlerContext ctx,
                                       Channel channel,
@@ -114,13 +111,7 @@ public abstract class AbstractNettyHandler
         ctx.writeAndFlush(PongMessage.INSTANCE);
     }
 
-    protected void processPongMessage(ChannelHandlerContext ctx,
-                                      Channel channel,
-                                      PongMessage pongMessage) {
-        // pass
-    }
-
-    protected void respondFail(ChannelHandlerContext ctx, int failId,
+    protected void ackFail(ChannelHandlerContext ctx, int failId,
                                int errorCode, String message) {
         long timeout = this.session().conf().writeSocketTimeout();
         FailMessage failMessage = new FailMessage(failId, errorCode, message);

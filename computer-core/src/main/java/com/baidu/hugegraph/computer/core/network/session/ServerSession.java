@@ -55,9 +55,9 @@ public class ServerSession extends TransportSession {
                         "The state must be ESTABLISH instead of %s " +
                         "at finishRecv()", this.state);
         E.checkArgument(finishId == this.maxRequestId + 1,
-                        "The finishId must be maxRequestId + 1," +
-                        " finishId: %s, maxRequestId: %s", finishId,
-                        this.maxRequestId);
+                        "The finishId must be maxRequestId + 1 " +
+                        "at finishRecv(), but finishId: %s, maxRequestId: %s",
+                        finishId, this.maxRequestId);
 
         this.finishId = finishId;
         this.state = TransportState.FINISH_RECV;

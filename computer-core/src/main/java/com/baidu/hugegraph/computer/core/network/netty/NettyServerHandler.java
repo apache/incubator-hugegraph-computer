@@ -31,6 +31,7 @@ import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
+import com.baidu.hugegraph.computer.core.network.message.PongMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
 import com.baidu.hugegraph.util.Log;
@@ -63,7 +64,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
                                        Channel channel,
                                        StartMessage startMessage) {
         this.serverSession.startRecv();
-        this.respondStartAck(ctx);
+        this.ackStart(ctx);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
         int finishId = finishMessage.requestId();
         boolean readyFinish = this.serverSession.finishRecv(finishId);
         if (readyFinish) {
-            this.respondFinishAck(ctx, finishId);
+            this.ackFinish(ctx, finishId);
         }
     }
 
@@ -91,21 +92,37 @@ public class NettyServerHandler extends AbstractNettyHandler {
         this.serverSession.handledData(requestId);
     }
 
-    private void respondStartAck(ChannelHandlerContext ctx) {
+    @Override
+    protected void processAckMessage(ChannelHandlerContext ctx, Channel channel,
+                                     AckMessage ackMessage) {
+        // pass
+    }
+
+    @Override
+    protected void processPongMessage(ChannelHandlerContext ctx,
+                                      Channel channel,
+                                      PongMessage pongMessage) {
+        // pass
+    }
+
+    private void ackStart(ChannelHandlerContext ctx) {
         AckMessage startAck = new AckMessage(AbstractMessage.START_SEQ);
         ctx.writeAndFlush(startAck).addListener(this.listenerOnWrite);
         this.serverSession.startComplete();
 
         // Add an schedule task to check and respond ack
-        this.respondAckTask = ctx.channel().eventLoop().scheduleWithFixedDelay(
-                              () -> this.checkAndRespondAck(ctx),
-                              INITIAL_DELAY,
-                              this.serverSession.minAckInterval(),
-                              TimeUnit.MILLISECONDS);
+        if (this.respondAckTask == null) {
+            this.respondAckTask = ctx.channel().eventLoop()
+                                     .scheduleWithFixedDelay(
+                    () -> this.checkAndRespondAck(ctx),
+                    INITIAL_DELAY,
+                    this.serverSession.minAckInterval(),
+                    TimeUnit.MILLISECONDS);
+        }
     }
 
-    private void respondFinishAck(ChannelHandlerContext ctx,
-                                  int finishId) {
+    private void ackFinish(ChannelHandlerContext ctx,
+                           int finishId) {
         AckMessage finishAck = new AckMessage(finishId);
         ctx.writeAndFlush(finishAck).addListener(this.listenerOnWrite);
         this.serverSession.finishComplete();
@@ -117,16 +134,16 @@ public class NettyServerHandler extends AbstractNettyHandler {
         }
     }
 
-    private void respondDataAck(ChannelHandlerContext ctx, int ackId) {
+    private void ackData(ChannelHandlerContext ctx, int ackId) {
         AckMessage ackMessage = new AckMessage(ackId);
         ctx.writeAndFlush(ackMessage).addListener(this.listenerOnWrite);
         this.serverSession.respondedDataAck(ackId);
     }
 
     @Override
-    protected void respondFail(ChannelHandlerContext ctx, int failId,
-                               int errorCode, String message) {
-        super.respondFail(ctx, failId, errorCode, message);
+    protected void ackFail(ChannelHandlerContext ctx, int failId,
+                           int errorCode, String message) {
+        super.ackFail(ctx, failId, errorCode, message);
 
         if (failId > AbstractMessage.START_SEQ) {
             this.serverSession.handledData(failId);
@@ -136,9 +153,9 @@ public class NettyServerHandler extends AbstractNettyHandler {
 
     private void checkAndRespondAck(ChannelHandlerContext ctx) {
         if (this.serverSession.checkFinishReady()) {
-            this.respondFinishAck(ctx, this.serverSession.finishId());
+            this.ackFinish(ctx, this.serverSession.finishId());
         } else if (this.serverSession.checkRespondDataAck()) {
-            this.respondDataAck(ctx, this.serverSession.maxHandledId());
+            this.ackData(ctx, this.serverSession.maxHandledId());
         }
     }
 
@@ -173,9 +190,9 @@ public class NettyServerHandler extends AbstractNettyHandler {
         }
 
         // Respond fail message to requester
-        this.respondFail(ctx, AbstractMessage.UNKNOWN_SEQ,
-                         exception.errorCode(),
-                         Throwables.getStackTraceAsString(exception));
+        this.ackFail(ctx, AbstractMessage.UNKNOWN_SEQ,
+                     exception.errorCode(),
+                     Throwables.getStackTraceAsString(exception));
 
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
         this.handler.exceptionCaught(exception, connectionId);
