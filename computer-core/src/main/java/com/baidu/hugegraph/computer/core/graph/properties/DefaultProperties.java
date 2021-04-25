@@ -29,13 +29,13 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 public class DefaultProperties implements Properties {
 
     // TODO: try to reduce call ComputerContext.instance() directly.
-    private static GraphFactory valueFactory =
-            ComputerContext.instance().graphFactory();
+    private static final GraphFactory GRAPH_FACTORY =
+                                      ComputerContext.instance().graphFactory();
 
     private final Map<String, Value<?>> keyValues;
 
     public DefaultProperties() {
-        this(valueFactory.createMap());
+        this(GRAPH_FACTORY.createMap());
     }
 
     public DefaultProperties(Map<String, Value<?>> keyValues) {

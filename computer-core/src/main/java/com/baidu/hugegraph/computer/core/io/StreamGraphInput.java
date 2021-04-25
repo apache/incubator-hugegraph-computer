@@ -48,15 +48,14 @@ public class StreamGraphInput implements GraphInput {
     protected final boolean outputVertexProperties;
     protected final boolean outputEdgeProperties;
 
-    public StreamGraphInput(RandomAccessInput in,
-                            ComputerContext context) {
-        this.in = in;
+    public StreamGraphInput(ComputerContext context, RandomAccessInput in) {
         this.config = context.config();
+        this.graphFactory = context.graphFactory();
+        this.valueFactory = context.valueFactory();
         this.outputVertexAdjacentEdges = config.outputVertexAdjacentEdges();
         this.outputVertexProperties = config.outputVertexProperties();
         this.outputEdgeProperties = config.outputEdgeProperties();
-        this.graphFactory = context.graphFactory();
-        this.valueFactory = context.valueFactory();
+        this.in = in;
     }
 
     @Override

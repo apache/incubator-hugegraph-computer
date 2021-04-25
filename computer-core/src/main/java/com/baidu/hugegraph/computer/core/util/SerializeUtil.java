@@ -35,12 +35,12 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 public final class SerializeUtil {
 
     // TODO: try to reduce call ComputerContext.instance() directly.
-    private static ComputerContext context = ComputerContext.instance();
+    private static final ComputerContext CONTEXT = ComputerContext.instance();
 
     public static byte[] toBytes(Writable obj) {
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao,
-                                                                      context);
+            StreamGraphOutput output = new OptimizedStreamGraphOutput(CONTEXT,
+                                                                      bao);
             obj.write(output);
             return bao.toByteArray();
         } catch (IOException e) {
@@ -51,8 +51,8 @@ public final class SerializeUtil {
 
     public static void fromBytes(byte[] bytes, Readable obj) {
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bai,
-                                                                   context);
+            StreamGraphInput input = new OptimizedStreamGraphInput(CONTEXT,
+                                                                   bai);
             obj.read(input);
         } catch (IOException e) {
             throw new ComputeException("Failed to read from byte array", e);

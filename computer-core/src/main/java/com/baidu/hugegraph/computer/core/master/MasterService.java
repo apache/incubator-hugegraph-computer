@@ -89,17 +89,12 @@ public class MasterService {
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
         this.masterComputation.init(this.config);
 
-        /*
-         * Register master after initialized.
-         * If set inited = true after master worker, in the gap of two
-         * sentences, other workers may do request and fail conditional check.
-         */
-        this.inited = true;
         this.bsp4Master.registerMaster(this.masterInfo);
         this.workers = this.bsp4Master.waitWorkersRegistered();
         LOG.info("{} MasterService worker count: {}",
                  this, this.workers.size());
         LOG.info("{} MasterService initialized", this);
+        this.inited = true;
     }
 
     /**

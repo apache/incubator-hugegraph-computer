@@ -176,21 +176,21 @@ public class UnitTestBase {
 
     protected static StreamGraphInput newStreamGraphInput(
                                       UnsafeByteArrayInput bai) {
-        return new StreamGraphInput(bai, context());
+        return new StreamGraphInput(context(), bai);
     }
 
     protected static StreamGraphOutput newStreamGraphOutput(
                                        UnsafeByteArrayOutput bao) {
-        return new StreamGraphOutput(bao, context());
+        return new StreamGraphOutput(context(), bao);
     }
 
     protected static OptimizedStreamGraphInput newOptimizedStreamGraphInput(
                                                UnsafeByteArrayInput bai) {
-        return new OptimizedStreamGraphInput(bai, context());
+        return new OptimizedStreamGraphInput(context(), bai);
     }
 
     protected static OptimizedStreamGraphOutput newOptimizedStreamGraphOutput(
                                                 UnsafeByteArrayOutput bao) {
-        return new OptimizedStreamGraphOutput(bao, context());
+        return new OptimizedStreamGraphOutput(context(), bao);
     }
 }

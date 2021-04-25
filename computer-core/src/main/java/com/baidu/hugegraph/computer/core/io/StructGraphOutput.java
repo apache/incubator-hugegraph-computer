@@ -43,12 +43,12 @@ public abstract class StructGraphOutput implements GraphOutput {
     protected final boolean outputVertexProperties;
     protected final boolean outputEdgeProperties;
 
-    public StructGraphOutput(DataOutput out, ComputerContext context) {
-        this.out = out;
+    public StructGraphOutput(ComputerContext context, DataOutput out) {
         this.config = context.config();
         this.outputVertexAdjacentEdges = config.outputVertexAdjacentEdges();
         this.outputVertexProperties = config.outputVertexProperties();
         this.outputEdgeProperties = config.outputEdgeProperties();
+        this.out = out;
     }
 
     public abstract void writeObjectStart() throws IOException;

@@ -29,11 +29,11 @@ public class GraphOutputFactory {
                                      ComputerContext context) {
         switch (format) {
             case BIN:
-                return new OptimizedStreamGraphOutput(out, context);
+                return new OptimizedStreamGraphOutput(context, out);
             case CSV:
-                return new CsvStructGraphOutput(out, context);
+                return new CsvStructGraphOutput(context, out);
             case JSON:
-                return new JsonStructGraphOutput(out, context);
+                return new JsonStructGraphOutput(context, out);
             default:
                 throw new ComputerException("Can't create GraphOutput for %s",
                                             format);

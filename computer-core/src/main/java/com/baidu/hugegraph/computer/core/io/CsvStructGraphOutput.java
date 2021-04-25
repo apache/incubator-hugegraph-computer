@@ -32,9 +32,8 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class CsvStructGraphOutput extends StructGraphOutput {
 
-    public CsvStructGraphOutput(DataOutput out,
-                                ComputerContext computerContext) {
-        super(out, computerContext);
+    public CsvStructGraphOutput(ComputerContext context, DataOutput out) {
+        super(context, out);
     }
 
     @Override

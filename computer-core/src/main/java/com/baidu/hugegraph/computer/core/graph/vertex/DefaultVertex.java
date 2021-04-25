@@ -21,9 +21,8 @@ package com.baidu.hugegraph.computer.core.graph.vertex;
 
 import java.util.Objects;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
@@ -34,23 +33,25 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultVertex implements Vertex {
 
+    private static final ComputerContext CONTEXT = ComputerContext.instance();
+
     private Id id;
     private Value<?> value;
     private Edges edges;
     private Properties properties;
     private boolean active;
 
-    public DefaultVertex(Config config, GraphFactory graphFactory) {
-        this(null, null, config, graphFactory);
+    public DefaultVertex() {
+        this(null, null);
     }
 
-    public DefaultVertex(Id id, Value<?> value,
-                         Config config, GraphFactory graphFactory) {
+    public DefaultVertex(Id id, Value<?> value) {
         this.id = id;
         this.value = value;
 
-        int averageDegree = config.get(ComputerOptions.VERTEX_AVERAGE_DEGREE);
-        this.edges = new DefaultEdges(averageDegree, graphFactory);
+        int averageDegree = CONTEXT.config()
+                                   .get(ComputerOptions.VERTEX_AVERAGE_DEGREE);
+        this.edges = new DefaultEdges(averageDegree, CONTEXT.graphFactory());
         this.properties = new DefaultProperties();
         this.active = true;
     }

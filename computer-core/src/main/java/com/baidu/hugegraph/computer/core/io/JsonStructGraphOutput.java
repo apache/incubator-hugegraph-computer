@@ -32,8 +32,8 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class JsonStructGraphOutput extends StructGraphOutput {
 
-    public JsonStructGraphOutput(DataOutput out, ComputerContext context) {
-        super(out, context);
+    public JsonStructGraphOutput(ComputerContext context, DataOutput out) {
+        super(context, out);
     }
 
     @Override

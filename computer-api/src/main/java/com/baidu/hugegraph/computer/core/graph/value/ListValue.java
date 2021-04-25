@@ -36,9 +36,9 @@ import com.baidu.hugegraph.util.E;
 public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
     // TODO: try to reduce call ComputerContext.instance() directly.
-    private static GraphFactory graphFactory =
+    private static final GraphFactory GRAPH_FACTORY =
             ComputerContext.instance().graphFactory();
-    private static ValueFactory valueFactory =
+    private static final ValueFactory VALUE_FACTORY =
             ComputerContext.instance().valueFactory();
 
     private ValueType elemType;
@@ -49,7 +49,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public ListValue(ValueType elemType) {
-        this(elemType, graphFactory.createList());
+        this(elemType, GRAPH_FACTORY.createList());
     }
 
     public ListValue(ValueType elemType, List<T> values) {
@@ -83,7 +83,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public ListValue<T> copy() {
-        List<T> values = graphFactory.createList();
+        List<T> values = GRAPH_FACTORY.createList();
         values.addAll(this.values);
         return new ListValue<>(this.elemType, values);
     }
@@ -121,10 +121,10 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
             this.elemType = SerialEnum.fromCode(ValueType.class,
                                                 in.readByte());
         }
-        this.values = graphFactory.createList(size);
+        this.values = GRAPH_FACTORY.createList(size);
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
-            T value = (T) valueFactory.createValue(this.elemType);
+            T value = (T) VALUE_FACTORY.createValue(this.elemType);
             value.read(in);
             this.values.add(value);
         }

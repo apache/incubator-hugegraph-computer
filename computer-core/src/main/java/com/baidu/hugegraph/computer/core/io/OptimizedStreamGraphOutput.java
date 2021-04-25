@@ -25,9 +25,9 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 
 public class OptimizedStreamGraphOutput extends StreamGraphOutput {
 
-    public OptimizedStreamGraphOutput(RandomAccessOutput out,
-                                      ComputerContext context) {
-        super(out, context);
+    public OptimizedStreamGraphOutput(ComputerContext context,
+                                      RandomAccessOutput out) {
+        super(context, out);
     }
 
     @Override

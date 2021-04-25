@@ -44,12 +44,12 @@ public class StreamGraphOutput implements GraphOutput {
     protected final boolean outputVertexProperties;
     protected final boolean outputEdgeProperties;
 
-    public StreamGraphOutput(RandomAccessOutput out, ComputerContext context) {
-        this.out = out;
+    public StreamGraphOutput(ComputerContext context, RandomAccessOutput out) {
         this.config = context.config();
         this.outputVertexAdjacentEdges = config.outputVertexAdjacentEdges();
         this.outputVertexProperties = config.outputVertexProperties();
         this.outputEdgeProperties = config.outputEdgeProperties();
+        this.out = out;
     }
 
     @Override
