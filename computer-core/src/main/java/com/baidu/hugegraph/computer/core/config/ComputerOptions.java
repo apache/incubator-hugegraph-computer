@@ -67,7 +67,7 @@ public class ComputerOptions extends OptionHolder {
                     "algorithm.value_type",
                     "The value type of current algorithm, used by " +
                     "ValueFactory to create value. If value_type is " +
-                    "CUSTOM_VALUE, value_class is used to create value",
+                    "CUSTOM_VALUE, value_class is used to create value.",
                     disallowEmpty(),
                     "NULL"
             );
@@ -77,7 +77,7 @@ public class ComputerOptions extends OptionHolder {
                     "algorithm.value_class",
                     "The class of user defined value, the value is used as " +
                     "the algorithm result. Used when value_type is " +
-                    "CUSTOM_VALUE",
+                    "CUSTOM_VALUE.",
                     disallowEmpty(),
                     Null.class
             );

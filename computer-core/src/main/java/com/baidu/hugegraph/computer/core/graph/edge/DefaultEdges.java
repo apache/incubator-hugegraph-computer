@@ -30,6 +30,7 @@ public class DefaultEdges implements Edges {
     private final List<Edge> edges;
 
     public DefaultEdges(int capacity) {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         this.edges = ComputerContext.instance().graphFactory()
                                                .createList(capacity);
     }

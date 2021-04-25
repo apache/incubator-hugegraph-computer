@@ -75,6 +75,7 @@ public class UnitTestBase {
             oldValue.write(output);
             bytes = bao.toByteArray();
         }
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ValueFactory valueFactory = ComputerContext.instance().valueFactory();
         Value<?> newValue = valueFactory.createValue(oldValue.type());
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {

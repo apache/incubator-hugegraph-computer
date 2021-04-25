@@ -55,6 +55,7 @@ public class NettyClientFactoryTest {
                 ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE, "128",
                 ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE, "128"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
         serverHandler = new MockMessageHandler();
         clientHandler = new MockClientHandler();

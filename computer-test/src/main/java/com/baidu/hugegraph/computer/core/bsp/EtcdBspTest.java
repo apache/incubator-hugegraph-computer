@@ -56,6 +56,7 @@ public class EtcdBspTest {
             ComputerOptions.BSP_MAX_SUPER_STEP, "2"
         );
 
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         this.bsp4Master = new Bsp4Master(config);
         this.bsp4Master.init();

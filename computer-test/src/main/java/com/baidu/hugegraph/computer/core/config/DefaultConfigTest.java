@@ -141,6 +141,7 @@ public class DefaultConfigTest {
 
     @Test
     public void testCreateObject() {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         MasterComputation masterComputation = config.createObject(
                           ComputerOptions.MASTER_COMPUTATION_CLASS);
@@ -154,6 +155,7 @@ public class DefaultConfigTest {
                 ComputerOptions.MASTER_COMPUTATION_CLASS,
                 FakeMasterComputation.class.getName()
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         Assert.assertThrows(ComputerException.class, () -> {
             config.createObject(ComputerOptions.MASTER_COMPUTATION_CLASS);
@@ -167,6 +169,7 @@ public class DefaultConfigTest {
 
     @Test
     public void testNullClass() {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         Object combiner = config.createObject(
                           ComputerOptions.WORKER_COMBINER_CLASS, false);

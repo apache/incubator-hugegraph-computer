@@ -45,6 +45,7 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ComputerContext context = ComputerContext.instance();
         // Write necessary
         this.writeId(vertex.id());
@@ -76,6 +77,7 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ComputerContext context = ComputerContext.instance();
         // Write necessary
         this.writeId(edge.targetId());

@@ -46,8 +46,9 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Vertex readVertex() throws IOException {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ComputerContext context = ComputerContext.instance();
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        GraphFactory factory = context.graphFactory();
 
         Id id = this.readId();
         Value<?> value = this.readValue();
@@ -71,9 +72,13 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Edges readEdges() throws IOException {
-        // TODO: When the previous vertex is super vertex and has a few of
-        //  edges fragment. If the super vertex not read all the fragment,
-        //  the current vertex may read the super vertex's edges.
+        /*
+         * TODO: When the previous vertex is super vertex and has a few of
+         *  edges fragment. If the super vertex not read all the fragment,
+         *  the current vertex may read the super vertex's edges.
+         *
+         * TODO: try to reduce call ComputerContext.instance() directly.
+         */
         ComputerContext context = ComputerContext.instance();
         GraphFactory factory = context.graphFactory();
 
@@ -94,8 +99,9 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Edge readEdge() throws IOException {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ComputerContext context = ComputerContext.instance();
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        GraphFactory factory = context.graphFactory();
 
         // Write necessary
         Id targetId = this.readId();
@@ -131,6 +137,7 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Value<?> readValue() throws IOException {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ComputerContext context = ComputerContext.instance();
         ValueType valueType = context.config().valueType();
         Value<?> value = context.valueFactory().createValue(valueType);

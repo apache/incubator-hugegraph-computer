@@ -54,6 +54,7 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
@@ -88,6 +89,7 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
@@ -127,6 +129,7 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);

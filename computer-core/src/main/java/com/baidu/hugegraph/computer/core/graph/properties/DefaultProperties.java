@@ -30,6 +30,7 @@ public class DefaultProperties implements Properties {
     private final Map<String, Value<?>> keyValues;
 
     public DefaultProperties() {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         this(ComputerContext.instance().graphFactory().createMap());
     }
 

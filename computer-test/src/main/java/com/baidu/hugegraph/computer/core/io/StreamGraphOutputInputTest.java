@@ -51,6 +51,7 @@ public class StreamGraphOutputInputTest {
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         LongId longId = new LongId(100L);
@@ -79,6 +80,7 @@ public class StreamGraphOutputInputTest {
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         Edges edges1 = factory.createEdges(3);
@@ -109,6 +111,7 @@ public class StreamGraphOutputInputTest {
                 ComputerOptions.VALUE_NAME, "value",
                 ComputerOptions.EDGES_NAME, "value"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         GraphFactory factory = ComputerContext.instance().graphFactory();
 
         Edges edges1 = factory.createEdges(0);

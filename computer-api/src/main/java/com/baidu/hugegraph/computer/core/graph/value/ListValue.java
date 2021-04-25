@@ -42,6 +42,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public ListValue(ValueType elemType) {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         this(elemType, ComputerContext.instance().graphFactory().createList());
     }
 
@@ -76,6 +77,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public ListValue<T> copy() {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         List<T> values = ComputerContext.instance().graphFactory().createList();
         values.addAll(this.values);
         return new ListValue<>(this.elemType, values);
@@ -114,6 +116,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
             this.elemType = SerialEnum.fromCode(ValueType.class,
                                                 in.readByte());
         }
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ComputerContext context = ComputerContext.instance();
         this.values = context.graphFactory().createList(size);
         ValueFactory valueFactory = context.valueFactory();

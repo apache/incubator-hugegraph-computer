@@ -98,6 +98,7 @@ public abstract class AbstractNetworkTest {
         }
 
         UnitTestBase.updateWithRequiredOptions(objects);
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
         serverHandler = Mockito.spy(new MockMessageHandler());
         clientHandler = Mockito.spy(new MockClientHandler());
@@ -147,6 +148,7 @@ public abstract class AbstractNetworkTest {
                 ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
                 ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
 
         TransportConf conf = TransportConf.wrapConfig(config);

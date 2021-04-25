@@ -67,6 +67,7 @@ public class OverwriteCombinerTest {
 
     @Test
     public void testCombineVertex() {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         GraphFactory factory = ComputerContext.instance().graphFactory();
         LongId longId1 = new LongId(1L);
         DoubleValue value1 = new DoubleValue(0.1D);

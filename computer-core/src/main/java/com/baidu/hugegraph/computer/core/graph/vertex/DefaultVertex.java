@@ -46,6 +46,7 @@ public class DefaultVertex implements Vertex {
     public DefaultVertex(Id id, Value<?> value) {
         this.id = id;
         this.value = value;
+        // TODO: try to reduce call ComputerContext.instance() directly.
         int averageDegree = ComputerContext.instance().config().get(
                             ComputerOptions.VERTEX_AVERAGE_DEGREE);
         this.edges = new DefaultEdges(averageDegree);

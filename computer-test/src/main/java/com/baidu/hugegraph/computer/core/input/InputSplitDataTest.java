@@ -34,6 +34,7 @@ public class InputSplitDataTest {
 
     @BeforeClass
     public static void setup() {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         masterInputManager = new MockMasterInputManager();
         masterInputManager.init(config);
@@ -46,6 +47,7 @@ public class InputSplitDataTest {
 
     @AfterClass
     public static void teardown() {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         masterInputManager.close(ComputerContext.instance().config());
         workerInputManager.close(ComputerContext.instance().config());
     }

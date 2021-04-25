@@ -38,6 +38,7 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ComputerContext context = ComputerContext.instance();
 
         this.writeLineStart();
@@ -74,6 +75,7 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ComputerContext context = ComputerContext.instance();
 
         this.writeObjectStart();

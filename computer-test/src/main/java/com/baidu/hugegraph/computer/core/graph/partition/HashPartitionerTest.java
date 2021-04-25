@@ -44,6 +44,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "1"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
@@ -88,6 +89,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
@@ -132,6 +134,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "3"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
@@ -176,6 +179,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "3",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "1"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
@@ -224,6 +228,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_PARTITIONS_COUNT,
                 Integer.toString(partitionCount)
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);

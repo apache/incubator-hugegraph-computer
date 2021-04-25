@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
@@ -34,6 +35,12 @@ import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public final class BuiltinGraphFactory implements GraphFactory {
+
+    private final Config config;
+
+    public BuiltinGraphFactory(Config config) {
+        this.config = config;
+    }
 
     @Override
     public Vertex createVertex() {

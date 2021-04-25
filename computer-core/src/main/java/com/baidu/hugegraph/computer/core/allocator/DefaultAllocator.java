@@ -36,7 +36,7 @@ public final class DefaultAllocator implements Allocator {
     private final Recycler<RecyclerReference<Edge>> edgeRecycler;
 
     public DefaultAllocator(Config config) {
-        this.factory = new BuiltinGraphFactory();
+        this.factory = new BuiltinGraphFactory(config);
 
         int capacityPerThread =
         config.get(ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD);

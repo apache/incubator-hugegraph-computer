@@ -61,6 +61,7 @@ public class WorkerServiceTest {
                         ComputerOptions.MASTER_COMPUTATION_CLASS,
                         MockMasterComputation.class.getName()
                 );
+                // TODO: try to reduce call ComputerContext.instance() directly.
                 Config config = ComputerContext.instance().config();
                 try {
                     workerService.init(config);
@@ -85,6 +86,7 @@ public class WorkerServiceTest {
                         ComputerOptions.MASTER_COMPUTATION_CLASS,
                         MockMasterComputation.class.getName()
                 );
+                // TODO: try to reduce call ComputerContext.instance() directly.
                 Config config = ComputerContext.instance().config();
                 try {
                     masterService.init(config);
@@ -132,6 +134,7 @@ public class WorkerServiceTest {
                 MockComputation.class.getName()
         );
 
+        // TODO: try to reduce call ComputerContext.instance() directly.
         Config config = ComputerContext.instance().config();
 
         Assert.assertThrows(ComputerException.class, () -> {

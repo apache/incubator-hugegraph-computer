@@ -61,6 +61,7 @@ public class NettyTransportServerTest {
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO",
                 ComputerOptions.TRANSPORT_BACKLOG, "1024"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
         messageHandler = new MockMessageHandler();
         this.server = new NettyTransportServer();
@@ -103,6 +104,7 @@ public class NettyTransportServerTest {
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "localhost"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
         int port = this.server.listen(config, messageHandler);
 
@@ -123,6 +125,7 @@ public class NettyTransportServerTest {
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, hostName
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
         int port = this.server.listen(config, messageHandler);
 
@@ -143,6 +146,7 @@ public class NettyTransportServerTest {
             UnitTestBase.updateWithRequiredOptions(
                     ComputerOptions.TRANSPORT_SERVER_HOST, ip
             );
+            // TODO: try to reduce call ComputerContext.instance() directly.
             config = ComputerContext.instance().config();
             int port = this.server.listen(config, messageHandler);
             Assert.assertNotEquals(0, this.server.port());
@@ -157,6 +161,7 @@ public class NettyTransportServerTest {
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "0.0.0.0"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
         int port = this.server.listen(config, messageHandler);
 
@@ -176,6 +181,7 @@ public class NettyTransportServerTest {
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "9091"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
 
         int port = this.server.listen(config, messageHandler);
@@ -199,6 +205,7 @@ public class NettyTransportServerTest {
                 ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
 
         Assert.assertThrows(ComputeException.class, () -> {
@@ -216,6 +223,7 @@ public class NettyTransportServerTest {
                 ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
@@ -246,6 +254,7 @@ public class NettyTransportServerTest {
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_IO_MODE, "EPOLL"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
 
         if (Epoll.isAvailable()) {

@@ -56,6 +56,7 @@ public class ConnectionManagerTest {
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         config = ComputerContext.instance().config();
         serverHandler = new MockMessageHandler();
         clientHandler = new MockClientHandler();

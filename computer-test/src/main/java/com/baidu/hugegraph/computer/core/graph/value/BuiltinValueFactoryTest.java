@@ -31,6 +31,7 @@ public class BuiltinValueFactoryTest {
 
     @Test
     public void testCreateValue() {
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ValueFactory factory = ComputerContext.instance().valueFactory();
         Assert.assertEquals(ValueType.NULL,
                             factory.createValue(ValueType.NULL.code()).type());
@@ -72,6 +73,7 @@ public class BuiltinValueFactoryTest {
                 ComputerOptions.VALUE_TYPE, ValueType.CUSTOM_VALUE.name(),
                 ComputerOptions.VALUE_CLASS, MockCustomValue.class.getName()
         );
+        // TODO: try to reduce call ComputerContext.instance() directly.
         ValueFactory factory = ComputerContext.instance().valueFactory();
         Assert.assertEquals(ValueType.CUSTOM_VALUE,
                             factory.createValue(ValueType.CUSTOM_VALUE).type());
