@@ -27,14 +27,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.util.Log;
 
-public class HashPartitionerTest {
+public class HashPartitionerTest extends UnitTestBase {
 
     private static final Logger LOG = Log.logger(HashPartitionerTest.class);
 
@@ -44,8 +43,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "1"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -89,8 +87,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -134,8 +131,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "3"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -179,8 +175,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_WORKERS_COUNT, "3",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "1"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -228,8 +223,7 @@ public class HashPartitionerTest {
                 ComputerOptions.JOB_PARTITIONS_COUNT,
                 Integer.toString(partitionCount)
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);

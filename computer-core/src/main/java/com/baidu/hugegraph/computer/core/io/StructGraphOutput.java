@@ -25,7 +25,9 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
@@ -36,9 +38,17 @@ import com.baidu.hugegraph.computer.core.util.StringEncoding;
 public abstract class StructGraphOutput implements GraphOutput {
 
     protected final DataOutput out;
+    protected final Config config;
+    protected final boolean outputVertexAdjacentEdges;
+    protected final boolean outputVertexProperties;
+    protected final boolean outputEdgeProperties;
 
-    public StructGraphOutput(DataOutput out) {
+    public StructGraphOutput(DataOutput out, ComputerContext context) {
         this.out = out;
+        this.config = context.config();
+        this.outputVertexAdjacentEdges = config.outputVertexAdjacentEdges();
+        this.outputVertexProperties = config.outputVertexProperties();
+        this.outputEdgeProperties = config.outputEdgeProperties();
     }
 
     public abstract void writeObjectStart() throws IOException;

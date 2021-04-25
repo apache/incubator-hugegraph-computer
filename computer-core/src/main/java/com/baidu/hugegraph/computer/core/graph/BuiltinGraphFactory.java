@@ -44,17 +44,17 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Vertex createVertex() {
-        return new DefaultVertex();
+        return new DefaultVertex(this.config, this);
     }
 
     @Override
     public <V extends Value<?>> Vertex createVertex(Id id, V value) {
-        return new DefaultVertex(id, value);
+        return new DefaultVertex(id, value, this.config, this);
     }
 
     @Override
     public Edges createEdges(int capacity) {
-        return new DefaultEdges(capacity);
+        return new DefaultEdges(capacity, this);
     }
 
     @Override

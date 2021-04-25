@@ -98,6 +98,12 @@ public class WorkerService {
                      this.combiner.name(), this.computation.name());
         }
 
+        /*
+         * Register worker after initialized.
+         * If set inited = true after register worker, in the gap of two
+         * sentences, other workers may do request and fail conditional check.
+         */
+        this.inited = true;
         this.bsp4Worker.registerWorker();
         this.masterInfo = this.bsp4Worker.waitMasterRegistered();
         List<ContainerInfo> containers =
@@ -108,7 +114,6 @@ public class WorkerService {
             //DataClientManager dm = this.managers.get(DataClientManager.NAME);
             //dm.connect(container.hostname(), container.dataPort());
         }
-        this.inited = true;
     }
 
     /**

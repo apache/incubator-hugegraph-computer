@@ -41,7 +41,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public class CsvStructGraphOutputTest {
+public class CsvStructGraphOutputTest extends UnitTestBase {
 
     @Test
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
@@ -54,8 +54,8 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        ComputerContext context = context();
+        GraphFactory factory = context.graphFactory();
 
         LongId longId = new LongId(100L);
         IdValue idValue = new LongId(999L).idValue();
@@ -67,7 +67,7 @@ public class CsvStructGraphOutputTest {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos);
+                                       OutputFormat.CSV, dos, context);
             output.writeVertex(vertex);
             output.close();
 
@@ -89,8 +89,8 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        ComputerContext context = context();
+        GraphFactory factory = context.graphFactory();
 
         LongId longId = new LongId(100L);
         IdValueList idValueList = new IdValueList();
@@ -106,7 +106,7 @@ public class CsvStructGraphOutputTest {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos);
+                                       OutputFormat.CSV, dos, context);
             output.writeVertex(vertex);
             output.close();
 
@@ -129,8 +129,8 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        ComputerContext context = context();
+        GraphFactory factory = context.graphFactory();
 
         LongId longId = new LongId(100L);
         IdValueListList idValueListList = new IdValueListList();
@@ -158,7 +158,7 @@ public class CsvStructGraphOutputTest {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos);
+                                       OutputFormat.CSV, dos, context);
             output.writeVertex(vertex);
             output.close();
 

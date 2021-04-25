@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
@@ -37,7 +36,7 @@ import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 
-public class NettyClientFactoryTest {
+public class NettyClientFactoryTest extends UnitTestBase {
 
     private static Config config;
     private static MockMessageHandler serverHandler;
@@ -55,8 +54,7 @@ public class NettyClientFactoryTest {
                 ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE, "128",
                 ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE, "128"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        config = ComputerContext.instance().config();
+        config = context().config();
         serverHandler = new MockMessageHandler();
         clientHandler = new MockClientHandler();
         this.server = new NettyTransportServer();

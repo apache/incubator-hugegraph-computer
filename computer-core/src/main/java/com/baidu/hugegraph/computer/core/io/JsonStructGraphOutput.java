@@ -32,15 +32,12 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class JsonStructGraphOutput extends StructGraphOutput {
 
-    public JsonStructGraphOutput(DataOutput out) {
-        super(out);
+    public JsonStructGraphOutput(DataOutput out, ComputerContext context) {
+        super(out, context);
     }
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ComputerContext context = ComputerContext.instance();
-
         this.writeLineStart();
         this.writeObjectStart();
 
@@ -49,18 +46,18 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeId(vertex.id());
         this.writeSplitter();
 
-        String valueName = context.config().vertexValueName();
+        String valueName = this.config.vertexValueName();
         this.writeKey(valueName);
         this.writeJoiner();
         this.writeValue(vertex.value());
 
-        if (context.config().outputVertexAdjacentEdges()) {
+        if (this.outputVertexAdjacentEdges) {
             this.writeSplitter();
             this.writeKey("adjacent_edges");
             this.writeJoiner();
             this.writeEdges(vertex.edges());
         }
-        if (context.config().outputVertexProperties()) {
+        if (this.outputVertexProperties) {
             this.writeSplitter();
             this.writeKey("properties");
             this.writeJoiner();
@@ -86,8 +83,6 @@ public class JsonStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ComputerContext context = ComputerContext.instance();
 
         this.writeObjectStart();
 
@@ -96,11 +91,11 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeId(edge.targetId());
         this.writeSplitter();
 
-        String valueName = context.config().edgeValueName();
+        String valueName = this.config.edgeValueName();
         this.writeKey(valueName);
         this.writeJoiner();
         this.writeValue(edge.value());
-        if (context.config().outputEdgeProperties()) {
+        if (this.outputEdgeProperties) {
             this.writeSplitter();
             this.writeKey("properties");
             this.writeJoiner();

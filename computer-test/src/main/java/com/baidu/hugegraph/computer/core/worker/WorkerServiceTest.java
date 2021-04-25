@@ -22,12 +22,12 @@ package com.baidu.hugegraph.computer.core.worker;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -36,7 +36,7 @@ import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
-public class WorkerServiceTest {
+public class WorkerServiceTest extends UnitTestBase {
 
     private static final Logger LOG = Log.logger(WorkerServiceTest.class);
 
@@ -47,24 +47,35 @@ public class WorkerServiceTest {
         try {
             ExecutorService pool = Executors.newFixedThreadPool(2);
             CountDownLatch countDownLatch = new CountDownLatch(2);
+            Semaphore semaphore = new Semaphore(1);
             Throwable[] exceptions = new Throwable[2];
 
             pool.submit(() -> {
-                UnitTestBase.updateWithRequiredOptions(
-                        RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
-                        ComputerOptions.JOB_ID, "local_001",
-                        ComputerOptions.JOB_WORKERS_COUNT, "1",
-                        ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                        ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                        ComputerOptions.WORKER_COMPUTATION_CLASS,
-                        MockComputation.class.getName(),
-                        ComputerOptions.MASTER_COMPUTATION_CLASS,
-                        MockMasterComputation.class.getName()
-                );
-                // TODO: try to reduce call ComputerContext.instance() directly.
-                Config config = ComputerContext.instance().config();
+                Config config;
+                try {
+                    semaphore.acquire();
+                    UnitTestBase.updateWithRequiredOptions(
+                            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+                            ComputerOptions.JOB_ID, "local_001",
+                            ComputerOptions.JOB_WORKERS_COUNT, "1",
+                            ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                            ComputerOptions.WORKER_COMPUTATION_CLASS,
+                            MockComputation.class.getName(),
+                            ComputerOptions.MASTER_COMPUTATION_CLASS,
+                            MockMasterComputation.class.getName()
+                    );
+                    config = context().config();
+                } catch (InterruptedException e) {
+                    countDownLatch.countDown();
+                    throw new ComputerException("Current thread interrupted",
+                                                e);
+                } finally {
+                    semaphore.release();
+                }
                 try {
                     workerService.init(config);
+                    semaphore.release();
                     workerService.execute();
                 } catch (Throwable e) {
                     LOG.error("Failed to start worker", e);
@@ -75,19 +86,28 @@ public class WorkerServiceTest {
             });
 
             pool.submit(() -> {
-                UnitTestBase.updateWithRequiredOptions(
-                        RpcOptions.RPC_SERVER_HOST, "127.0.0.1",
-                        ComputerOptions.JOB_ID, "local_001",
-                        ComputerOptions.JOB_WORKERS_COUNT, "1",
-                        ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                        ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                        ComputerOptions.WORKER_COMPUTATION_CLASS,
-                        MockComputation.class.getName(),
-                        ComputerOptions.MASTER_COMPUTATION_CLASS,
-                        MockMasterComputation.class.getName()
-                );
-                // TODO: try to reduce call ComputerContext.instance() directly.
-                Config config = ComputerContext.instance().config();
+                Config config;
+                try {
+                    semaphore.acquire();
+                    UnitTestBase.updateWithRequiredOptions(
+                            RpcOptions.RPC_SERVER_HOST, "localhost",
+                            ComputerOptions.JOB_ID, "local_001",
+                            ComputerOptions.JOB_WORKERS_COUNT, "1",
+                            ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                            ComputerOptions.WORKER_COMPUTATION_CLASS,
+                            MockComputation.class.getName(),
+                            ComputerOptions.MASTER_COMPUTATION_CLASS,
+                            MockMasterComputation.class.getName()
+                    );
+                    config = context().config();
+                } catch (InterruptedException e) {
+                    countDownLatch.countDown();
+                    throw new ComputerException("Current thread interrupted",
+                                                e);
+                } finally {
+                    semaphore.release();
+                }
                 try {
                     masterService.init(config);
                     masterService.execute();
@@ -134,8 +154,8 @@ public class WorkerServiceTest {
                 MockComputation.class.getName()
         );
 
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        // TODO: try to reduce call context() directly.
+        Config config = context().config();
 
         Assert.assertThrows(ComputerException.class, () -> {
             workerService.init(config);

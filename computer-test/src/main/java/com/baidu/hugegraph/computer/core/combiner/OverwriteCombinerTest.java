@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.combiner;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class OverwriteCombinerTest {
+public class OverwriteCombinerTest extends UnitTestBase {
 
     @Test
     public void testCombineValue() {
@@ -67,8 +67,7 @@ public class OverwriteCombinerTest {
 
     @Test
     public void testCombineVertex() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        GraphFactory factory = context().graphFactory();
         LongId longId1 = new LongId(1L);
         DoubleValue value1 = new DoubleValue(0.1D);
         Vertex vertex1 = factory.createVertex(longId1, value1);

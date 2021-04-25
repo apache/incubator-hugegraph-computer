@@ -25,18 +25,16 @@ import java.util.Random;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class DefaultAllocatorTest {
+public class DefaultAllocatorTest extends UnitTestBase {
 
     @Test
     public void testVertexRecycle() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Allocator allocator = ComputerContext.instance().allocator();
+        Allocator allocator = context().allocator();
         RecyclerReference<Vertex> reference1 = allocator.newVertex();
         allocator.freeVertex(reference1);
 
@@ -54,8 +52,7 @@ public class DefaultAllocatorTest {
 
     @Test
     public void testEdgeRecycle() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Allocator allocator = ComputerContext.instance().allocator();
+        Allocator allocator = context().allocator();
         RecyclerReference<Edge> reference1 = allocator.newEdge();
         allocator.freeEdge(reference1);
 
@@ -73,8 +70,7 @@ public class DefaultAllocatorTest {
 
     @Test
     public void testMultiRecycle() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Allocator allocator = ComputerContext.instance().allocator();
+        Allocator allocator = context().allocator();
         RecyclerReference<Vertex> reference1 = allocator.newVertex();
         allocator.freeVertex(reference1);
 
@@ -88,8 +84,7 @@ public class DefaultAllocatorTest {
     @Test
     public void testMultiRecycleAtDifferentThread()
                 throws InterruptedException {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Allocator allocator = ComputerContext.instance().allocator();
+        Allocator allocator = context().allocator();
         RecyclerReference<Vertex> reference1 = allocator.newVertex();
         Thread thread1 = new Thread(() -> allocator.freeVertex(reference1));
         thread1.start();
@@ -104,8 +99,7 @@ public class DefaultAllocatorTest {
     @Test
     public void testRecycleMoreThanOnceAtDifferentThread()
                 throws InterruptedException {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Allocator allocator = ComputerContext.instance().allocator();
+        Allocator allocator = context().allocator();
         RecyclerReference<Vertex> reference1 = allocator.newVertex();
 
         Thread thread1 = new Thread(() -> allocator.freeVertex(reference1));
@@ -125,8 +119,7 @@ public class DefaultAllocatorTest {
 
     @Test
     public void testAutoRecycle() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Allocator allocator = ComputerContext.instance().allocator();
+        Allocator allocator = context().allocator();
         RecyclerReference<Vertex> reference;
         try (RecyclerReference<Vertex> reference1 = allocator.newVertex();
              RecyclerReference<Vertex> reference2 = allocator.newVertex()) {
@@ -161,8 +154,7 @@ public class DefaultAllocatorTest {
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD, capacityValue
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Allocator allocator = ComputerContext.instance().allocator();
+        Allocator allocator = context().allocator();
         @SuppressWarnings("unchecked")
         RecyclerReference<Vertex>[] references =
                                     new RecyclerReference[maxCapacity * 3];

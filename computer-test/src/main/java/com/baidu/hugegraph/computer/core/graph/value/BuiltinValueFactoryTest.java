@@ -23,16 +23,14 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class BuiltinValueFactoryTest {
+public class BuiltinValueFactoryTest extends UnitTestBase {
 
     @Test
     public void testCreateValue() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ValueFactory factory = ComputerContext.instance().valueFactory();
+        ValueFactory factory = context().valueFactory();
         Assert.assertEquals(ValueType.NULL,
                             factory.createValue(ValueType.NULL.code()).type());
         Assert.assertEquals(ValueType.LONG,
@@ -73,8 +71,7 @@ public class BuiltinValueFactoryTest {
                 ComputerOptions.VALUE_TYPE, ValueType.CUSTOM_VALUE.name(),
                 ComputerOptions.VALUE_CLASS, MockCustomValue.class.getName()
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ValueFactory factory = ComputerContext.instance().valueFactory();
+        ValueFactory factory = context().valueFactory();
         Assert.assertEquals(ValueType.CUSTOM_VALUE,
                             factory.createValue(ValueType.CUSTOM_VALUE).type());
     }

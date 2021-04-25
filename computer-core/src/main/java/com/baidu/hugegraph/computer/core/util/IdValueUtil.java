@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.util;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
@@ -33,10 +34,14 @@ import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 
 public class IdValueUtil {
 
+    // TODO: try to reduce call ComputerContext.instance() directly.
+    private static ComputerContext context = ComputerContext.instance();
+
     public static Id toId(IdValue idValue) {
         byte[] bytes = idValue.bytes();
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
-             StreamGraphInput input = new OptimizedStreamGraphInput(bai)) {
+             StreamGraphInput input = new OptimizedStreamGraphInput(
+                                          bai, context)) {
             return input.readId();
         } catch (IOException e) {
             throw new ComputerException("Failed to get id from idValue '%s'",
@@ -46,7 +51,8 @@ public class IdValueUtil {
 
     public static IdValue toIdValue(Id id, int len) {
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput(len);
-             StreamGraphOutput output = new OptimizedStreamGraphOutput(bao)) {
+             StreamGraphOutput output = new OptimizedStreamGraphOutput(
+                                            bao, context)) {
             output.writeId(id);
             return new IdValue(bao.toByteArray());
         } catch (IOException e) {

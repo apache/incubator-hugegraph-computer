@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
@@ -40,7 +39,7 @@ import com.baidu.hugegraph.computer.core.network.TransportServer;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
-public class ConnectionManagerTest {
+public class ConnectionManagerTest extends UnitTestBase {
 
     private static final Logger LOG = Log.logger(ConnectionManagerTest.class);
 
@@ -56,8 +55,7 @@ public class ConnectionManagerTest {
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        config = ComputerContext.instance().config();
+        config = context().config();
         serverHandler = new MockMessageHandler();
         clientHandler = new MockClientHandler();
         connectionManager = new TransportConnectionManager();

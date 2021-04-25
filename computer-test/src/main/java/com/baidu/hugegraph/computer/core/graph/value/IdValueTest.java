@@ -23,18 +23,17 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class IdValueTest {
+public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testCompare() {
@@ -52,14 +51,14 @@ public class IdValueTest {
         IdValue value2 = new Utf8Id("short").idValue();
         byte[] bytes;
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
-             StreamGraphOutput output = new OptimizedStreamGraphOutput(bao)) {
+             StreamGraphOutput output = newOptimizedStreamGraphOutput(bao)) {
             value1.write(output);
             value2.write(output);
             bytes = bao.toByteArray();
         }
         IdValue value3 = new Utf8Id().idValue();
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
-             StreamGraphInput input = new OptimizedStreamGraphInput(bai)) {
+             StreamGraphInput input = newOptimizedStreamGraphInput(bai)) {
             value3.read(input);
             Assert.assertEquals(value1, value3);
             value3.read(input);
@@ -75,13 +74,13 @@ public class IdValueTest {
         IdValue value2 = id2.idValue();
         byte[] bytes;
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
-             StreamGraphOutput output = new OptimizedStreamGraphOutput(bao)) {
+             StreamGraphOutput output = newOptimizedStreamGraphOutput(bao)) {
             value1.writeId(output);
             value2.writeId(output);
             bytes = bao.toByteArray();
         }
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
-             StreamGraphInput input = new OptimizedStreamGraphInput(bai)) {
+             StreamGraphInput input = newOptimizedStreamGraphInput(bai)) {
             Id id3 = input.readId();
             Assert.assertEquals(id1, id3);
             Id id4 = input.readId();

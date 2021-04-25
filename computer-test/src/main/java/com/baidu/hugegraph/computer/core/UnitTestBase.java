@@ -27,6 +27,7 @@ import java.util.Random;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -54,14 +55,14 @@ public class UnitTestBase {
                                                       throws IOException {
         byte[] bytes;
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            StreamGraphOutput output = newOptimizedStreamGraphOutput(bao);
             oldId.write(output);
             bytes = bao.toByteArray();
         }
 
         Id newId = IdFactory.createId(oldId.type());
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            StreamGraphInput input = newOptimizedStreamGraphInput(bai);
             newId.read(input);
             Assert.assertEquals(oldId, newId);
         }
@@ -71,15 +72,13 @@ public class UnitTestBase {
                                                          throws IOException {
         byte[] bytes;
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            StreamGraphOutput output = newOptimizedStreamGraphOutput(bao);
             oldValue.write(output);
             bytes = bao.toByteArray();
         }
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ValueFactory valueFactory = ComputerContext.instance().valueFactory();
-        Value<?> newValue = valueFactory.createValue(oldValue.type());
+        Value<?> newValue = valueFactory().createValue(oldValue.type());
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            StreamGraphInput input = newOptimizedStreamGraphInput(bai);
             newValue.read(input);
             Assert.assertEquals(oldValue, newValue);
         }
@@ -125,13 +124,13 @@ public class UnitTestBase {
                                                     throws IOException {
         byte[] bytes;
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+            StreamGraphOutput output = newOptimizedStreamGraphOutput(bao);
             writeObj.write(output);
             bytes = bao.toByteArray();
         }
 
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+            StreamGraphInput input = newOptimizedStreamGraphInput(bai);
             readObj.read(input);
             Assert.assertEquals(writeObj, readObj);
         }
@@ -161,5 +160,37 @@ public class UnitTestBase {
             sb.append(CHARS.charAt(random.nextInt(CHARS.length())));
         }
         return sb.toString();
+    }
+
+    protected static ComputerContext context() {
+        return ComputerContext.instance();
+    }
+
+    protected static ValueFactory valueFactory() {
+        return context().valueFactory();
+    }
+
+    protected static GraphFactory graphFactory() {
+        return context().graphFactory();
+    }
+
+    protected static StreamGraphInput newStreamGraphInput(
+                                      UnsafeByteArrayInput bai) {
+        return new StreamGraphInput(bai, context());
+    }
+
+    protected static StreamGraphOutput newStreamGraphOutput(
+                                       UnsafeByteArrayOutput bao) {
+        return new StreamGraphOutput(bao, context());
+    }
+
+    protected static OptimizedStreamGraphInput newOptimizedStreamGraphInput(
+                                               UnsafeByteArrayInput bai) {
+        return new OptimizedStreamGraphInput(bai, context());
+    }
+
+    protected static OptimizedStreamGraphOutput newOptimizedStreamGraphOutput(
+                                                UnsafeByteArrayOutput bao) {
+        return new OptimizedStreamGraphOutput(bao, context());
     }
 }

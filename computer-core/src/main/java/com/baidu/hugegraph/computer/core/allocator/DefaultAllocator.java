@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.BuiltinGraphFactory;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
@@ -31,12 +31,12 @@ import io.netty.util.Recycler;
 
 public final class DefaultAllocator implements Allocator {
 
-    private final BuiltinGraphFactory factory;
+    private final GraphFactory factory;
     private final Recycler<RecyclerReference<Vertex>> vertexRecycler;
     private final Recycler<RecyclerReference<Edge>> edgeRecycler;
 
-    public DefaultAllocator(Config config) {
-        this.factory = new BuiltinGraphFactory(config);
+    public DefaultAllocator(Config config, GraphFactory factory) {
+        this.factory = factory;
 
         int capacityPerThread =
         config.get(ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD);

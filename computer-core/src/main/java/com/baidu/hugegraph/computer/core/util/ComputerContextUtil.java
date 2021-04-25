@@ -37,7 +37,7 @@ public class ComputerContextUtil {
         Config config = new DefaultConfig(params);
         GraphFactory graphFactory = new BuiltinGraphFactory(config);
         ValueFactory valueFactory = new BuiltinValueFactory(config);
-        Allocator allocator = new DefaultAllocator(config);
+        Allocator allocator = new DefaultAllocator(config, graphFactory);
         ComputerContext.initContext(config, graphFactory,
                                     valueFactory, allocator);
     }

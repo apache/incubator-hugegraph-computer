@@ -23,16 +23,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 
 public class DefaultEdges implements Edges {
 
     private final List<Edge> edges;
 
-    public DefaultEdges(int capacity) {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        this.edges = ComputerContext.instance().graphFactory()
-                                               .createList(capacity);
+    public DefaultEdges(int capacity, GraphFactory graphFactory) {
+        this.edges = graphFactory.createList(capacity);
     }
 
     @Override

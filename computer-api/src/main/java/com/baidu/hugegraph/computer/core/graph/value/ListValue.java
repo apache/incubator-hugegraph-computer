@@ -28,11 +28,18 @@ import org.apache.commons.collections.ListUtils;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.util.E;
 
 public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
+
+    // TODO: try to reduce call ComputerContext.instance() directly.
+    private static GraphFactory graphFactory =
+            ComputerContext.instance().graphFactory();
+    private static ValueFactory valueFactory =
+            ComputerContext.instance().valueFactory();
 
     private ValueType elemType;
     private List<T> values;
@@ -42,8 +49,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public ListValue(ValueType elemType) {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        this(elemType, ComputerContext.instance().graphFactory().createList());
+        this(elemType, graphFactory.createList());
     }
 
     public ListValue(ValueType elemType, List<T> values) {
@@ -77,8 +83,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public ListValue<T> copy() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        List<T> values = ComputerContext.instance().graphFactory().createList();
+        List<T> values = graphFactory.createList();
         values.addAll(this.values);
         return new ListValue<>(this.elemType, values);
     }
@@ -116,10 +121,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
             this.elemType = SerialEnum.fromCode(ValueType.class,
                                                 in.readByte());
         }
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ComputerContext context = ComputerContext.instance();
-        this.values = context.graphFactory().createList(size);
-        ValueFactory valueFactory = context.valueFactory();
+        this.values = graphFactory.createList(size);
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
             T value = (T) valueFactory.createValue(this.elemType);

@@ -19,19 +19,21 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
 public class GraphOutputFactory {
 
     public static GraphOutput create(OutputFormat format,
-                                     RandomAccessOutput out) {
+                                     RandomAccessOutput out,
+                                     ComputerContext context) {
         switch (format) {
             case BIN:
-                return new OptimizedStreamGraphOutput(out);
+                return new OptimizedStreamGraphOutput(out, context);
             case CSV:
-                return new CsvStructGraphOutput(out);
+                return new CsvStructGraphOutput(out, context);
             case JSON:
-                return new JsonStructGraphOutput(out);
+                return new JsonStructGraphOutput(out, context);
             default:
                 throw new ComputerException("Can't create GraphOutput for %s",
                                             format);

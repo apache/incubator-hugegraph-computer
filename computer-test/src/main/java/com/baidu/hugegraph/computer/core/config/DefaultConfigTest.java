@@ -26,14 +26,13 @@ import java.util.Map;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.FakeMasterComputation;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.master.MasterComputation;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class DefaultConfigTest {
+public class DefaultConfigTest extends UnitTestBase {
 
     private static final String KEY = "algorithm.page_rank.key";
     private static final String KEY_TRUE = "algorithm.page_rank.key_true";
@@ -141,8 +140,7 @@ public class DefaultConfigTest {
 
     @Test
     public void testCreateObject() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         MasterComputation masterComputation = config.createObject(
                           ComputerOptions.MASTER_COMPUTATION_CLASS);
         Assert.assertEquals(DefaultMasterComputation.class,
@@ -155,8 +153,7 @@ public class DefaultConfigTest {
                 ComputerOptions.MASTER_COMPUTATION_CLASS,
                 FakeMasterComputation.class.getName()
         );
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         Assert.assertThrows(ComputerException.class, () -> {
             config.createObject(ComputerOptions.MASTER_COMPUTATION_CLASS);
         }, e -> {
@@ -169,8 +166,7 @@ public class DefaultConfigTest {
 
     @Test
     public void testNullClass() {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         Object combiner = config.createObject(
                           ComputerOptions.WORKER_COMBINER_CLASS, false);
         Assert.assertNull(combiner);

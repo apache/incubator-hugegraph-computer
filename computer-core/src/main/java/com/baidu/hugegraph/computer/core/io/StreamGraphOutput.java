@@ -26,6 +26,7 @@ import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -38,23 +39,29 @@ import com.baidu.hugegraph.util.E;
 public class StreamGraphOutput implements GraphOutput {
 
     private final RandomAccessOutput out;
+    protected final Config config;
+    protected final boolean outputVertexAdjacentEdges;
+    protected final boolean outputVertexProperties;
+    protected final boolean outputEdgeProperties;
 
-    public StreamGraphOutput(RandomAccessOutput out) {
+    public StreamGraphOutput(RandomAccessOutput out, ComputerContext context) {
         this.out = out;
+        this.config = context.config();
+        this.outputVertexAdjacentEdges = config.outputVertexAdjacentEdges();
+        this.outputVertexProperties = config.outputVertexProperties();
+        this.outputEdgeProperties = config.outputEdgeProperties();
     }
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ComputerContext context = ComputerContext.instance();
         // Write necessary
         this.writeId(vertex.id());
         this.writeValue(vertex.value());
 
-        if (context.config().outputVertexAdjacentEdges()) {
+        if (this.outputVertexAdjacentEdges) {
             this.writeEdges(vertex.edges());
         }
-        if (context.config().outputVertexProperties()) {
+        if (this.outputVertexProperties) {
             this.writeProperties(vertex.properties());
         }
     }
@@ -83,7 +90,7 @@ public class StreamGraphOutput implements GraphOutput {
         this.writeId(edge.targetId());
         this.writeValue(edge.value());
 
-        if (context.config().outputEdgeProperties()) {
+        if (this.outputEdgeProperties) {
             this.writeProperties(edge.properties());
         }
     }
