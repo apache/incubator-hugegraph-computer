@@ -49,6 +49,7 @@ import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 
 public class NettyTransportClientTest extends AbstractNetworkTest {
 
@@ -125,11 +126,12 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testStartSyncTimeout() throws IOException {
+    public void testStartSessionWithTimeout() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
-        Function<Message, ?> sendFunc = message -> true;
-        Whitebox.setInternalState(client.session(), "sendFunction", sendFunc);
+        Function<Message, ChannelFuture> sendFunc = message -> null;
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
 
         Assert.assertThrows(TransportException.class, () -> {
             client.startSession();
@@ -140,16 +142,20 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testFinishSyncTimeout() throws IOException {
+    public void testFinishSessionWithTimeout() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
         client.startSession();
 
-        Function<Message, ?> sendFunc = message -> true;
-        Whitebox.setInternalState(client.session(), "sendFunction", sendFunc);
+        Function<Message, ChannelFuture> sendFunc = message -> null;
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
+
+        Whitebox.setInternalState(client, "finishSessionTimeout",
+                                  1000L);
 
         Assert.assertThrows(TransportException.class, () -> {
-            client.finishSession(1000L);
+            client.finishSession();
         }, e -> {
             Assert.assertContains("to wait finish response",
                                   e.getMessage());
@@ -157,17 +163,18 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testFlowController() throws IOException {
+    public void testFlowControl() throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(
-                StringEncoding.encode("test data"));
+                            StringEncoding.encode("test data"));
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
         client.startSession();
 
-        Object sendFuncBak = Whitebox.getInternalState(client.session(),
+        Object sendFuncBak = Whitebox.getInternalState(client.clientSession(),
                                                        "sendFunction");
-        Function<Message, ?> sendFunc = message -> true;
-        Whitebox.setInternalState(client.session(), "sendFunction", sendFunc);
+        Function<Message, ChannelFuture> sendFunc = message -> null;
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
 
         for (int i = 1; i <= conf.maxPendingRequests() * 2; i++) {
             boolean send = client.send(MessageType.MSG, 1, buffer);
@@ -178,9 +185,9 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
             }
         }
 
-        int maxRequestId = Whitebox.getInternalState(client.session(),
+        int maxRequestId = Whitebox.getInternalState(client.clientSession(),
                                                      "maxRequestId");
-        int maxAckId = Whitebox.getInternalState(client.session(),
+        int maxAckId = Whitebox.getInternalState(client.clientSession(),
                                                  "maxAckId");
         Assert.assertEquals(conf.maxPendingRequests(), maxRequestId);
         Assert.assertEquals(0, maxAckId);
@@ -188,15 +195,15 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         int pendings = conf.maxPendingRequests() - conf.minPendingRequests();
         for (int i = 1; i <= pendings + 1; i++) {
             Assert.assertFalse(client.checkSendAvailable());
-            client.session().ackRecv(i);
+            client.clientSession().onRecvAck(i);
         }
         Assert.assertTrue(client.checkSendAvailable());
 
-        maxAckId = Whitebox.getInternalState(client.session(),
+        maxAckId = Whitebox.getInternalState(client.clientSession(),
                                              "maxAckId");
         Assert.assertEquals(pendings + 1, maxAckId);
 
-        Whitebox.setInternalState(client.session(), "sendFunction",
+        Whitebox.setInternalState(client.clientSession(), "sendFunction",
                                   sendFuncBak);
     }
 
@@ -215,8 +222,11 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         boolean send = client.send(MessageType.MSG, 1, buffer);
         Assert.assertTrue(send);
 
+        Whitebox.setInternalState(client, "finishSessionTimeout",
+                                  1000L);
+
         Assert.assertThrows(TransportException.class, () -> {
-            client.finishSession(1000L);
+            client.finishSession();
         }, e -> {
             Assert.assertContains("to wait finish response",
                                   e.getMessage());

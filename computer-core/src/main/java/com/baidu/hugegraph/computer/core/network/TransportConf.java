@@ -170,15 +170,15 @@ public class TransportConf {
     }
 
     public int minPendingRequests() {
-        int minPendingRequests = this.config.get(
-        ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS);
+        int minPendingReqs = this.config.get(
+                             ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS);
 
-        if (minPendingRequests > this.maxPendingRequests()) {
-            throw new IllegalArgException("The minPendingRequests must be " +
-                                          "less than or equal to the " +
-                                          "maxPendingRequests.");
+        if (minPendingReqs > this.maxPendingRequests()) {
+            throw new IllegalArgException(
+                  "The minPendingRequests must be less than or equal to the " +
+                  "maxPendingRequests.");
         }
-        return minPendingRequests;
+        return minPendingReqs;
     }
 
     public long minAckInterval() {

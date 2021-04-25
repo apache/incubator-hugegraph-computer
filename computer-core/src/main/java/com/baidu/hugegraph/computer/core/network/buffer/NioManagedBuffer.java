@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.network.buffer;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -27,9 +28,11 @@ import io.netty.buffer.Unpooled;
 public class NioManagedBuffer implements ManagedBuffer {
 
     private final ByteBuffer buffer;
+    private final AtomicInteger referenceCount;
 
     public NioManagedBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
+        this.referenceCount = new AtomicInteger(1);
     }
 
     @Override
@@ -39,17 +42,19 @@ public class NioManagedBuffer implements ManagedBuffer {
 
     @Override
     public ManagedBuffer retain() {
+        this.referenceCount.incrementAndGet();
         return this;
     }
 
     @Override
     public ManagedBuffer release() {
+        this.referenceCount.decrementAndGet();
         return this;
     }
 
     @Override
     public int referenceCount() {
-        return -1;
+        return this.referenceCount.get();
     }
 
     @Override

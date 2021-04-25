@@ -133,7 +133,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     public void testClientDecodeException() throws Exception {
         Mockito.doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
-            UnitTestBase.sleep(1000);
+            UnitTestBase.sleep(200L);
             Channel channel = invocationOnMock.getArgument(0);
             channel.writeAndFlush(new MockUnDecodeMessage());
             return null;

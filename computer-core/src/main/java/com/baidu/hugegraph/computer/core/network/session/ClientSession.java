@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.network.session;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -44,69 +45,50 @@ public class ClientSession extends TransportSession {
     private final int maxPendingRequests;
     private final int minPendingRequests;
 
-    private final Lock flowControlStatusLock;
-    private volatile boolean flowControlStatus;
+    private final Lock lock;
+    private volatile boolean blocking;
     private final BarrierEvent startedBarrier;
     private final BarrierEvent finishedBarrier;
-    private final Function<Message, ?> sendFunction;
+    private final Function<Message, Future<Void>> sendFunction;
 
     public ClientSession(TransportConf conf,
-                         Function<Message, ?> sendFunction) {
+                         Function<Message, Future<Void>> sendFunction) {
         super(conf);
         this.maxPendingRequests = this.conf.maxPendingRequests();
         this.minPendingRequests = this.conf.minPendingRequests();
-        this.flowControlStatusLock = new ReentrantLock();
-        this.flowControlStatus = false;
+        this.lock = new ReentrantLock();
+        this.blocking = false;
         this.startedBarrier = new BarrierEvent();
         this.finishedBarrier = new BarrierEvent();
         this.sendFunction = sendFunction;
     }
 
     @Override
-    protected void ready() {
-        this.flowControlStatus = false;
-        super.ready();
+    protected void stateReady() {
+        this.blocking = false;
+        super.stateReady();
     }
 
-    private void startSend() {
+    private void stateStartSent() {
         this.maxRequestId = AbstractMessage.START_SEQ;
-        this.state = TransportState.START_SEND;
+        this.state = TransportState.START_SENT;
     }
 
-    private void finishSend(int finishId) {
+    private void stateFinishSent(int finishId) {
         this.finishId = finishId;
-        this.state = TransportState.FINISH_SEND;
+        this.state = TransportState.FINISH_SENT;
     }
 
-    @Override
-    public void startComplete() {
-        E.checkArgument(this.state == TransportState.START_SEND,
-                        "The state must be START_SEND instead of %s " +
-                        "at startComplete()", this.state);
-        this.establish();
-        this.maxAckId = AbstractMessage.START_SEQ;
-        this.startedBarrier.signalAll();
-    }
-
-    @Override
-    public void finishComplete() {
-        E.checkArgument(this.state == TransportState.FINISH_SEND,
-                        "The state must be FINISH_SEND instead of %s " +
-                        "at finishComplete()", this.state);
-        this.ready();
-        this.finishedBarrier.signalAll();
-    }
-
-    public synchronized void syncStart(long timeout)
-                                       throws TransportException,
-                                       InterruptedException {
+    public synchronized void start(long timeout)
+                                   throws TransportException,
+                                          InterruptedException {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
-                        "at syncStart()", this.state);
-
-        this.startSend();
+                        "at start()", this.state);
 
         this.sendFunction.apply(StartMessage.INSTANCE);
+
+        this.stateStartSent();
 
         if (!this.startedBarrier.await(timeout)) {
             throw new TransportException("Timeout(%sms) to wait start " +
@@ -115,19 +97,19 @@ public class ClientSession extends TransportSession {
         this.startedBarrier.reset();
     }
 
-    public synchronized void syncFinish(long timeout)
-                                        throws TransportException,
-                                        InterruptedException {
-        E.checkArgument(this.state == TransportState.ESTABLISH,
-                        "The state must be ESTABLISH instead of %s " +
-                        "at syncFinish()", this.state);
+    public synchronized void finish(long timeout)
+                                    throws TransportException,
+                                           InterruptedException {
+        E.checkArgument(this.state == TransportState.ESTABLISHED,
+                        "The state must be ESTABLISHED instead of %s " +
+                        "at finish()", this.state);
 
         int finishId = this.genFinishId();
 
-        this.finishSend(finishId);
-
         FinishMessage finishMessage = new FinishMessage(finishId);
         this.sendFunction.apply(finishMessage);
+
+        this.stateFinishSent(finishId);
 
         if (!this.finishedBarrier.await(timeout)) {
             throw new TransportException("Timeout(%sms) to wait finish " +
@@ -136,11 +118,11 @@ public class ClientSession extends TransportSession {
         this.finishedBarrier.reset();
     }
 
-    public synchronized void asyncSend(MessageType messageType, int partition,
+    public synchronized void sendAsync(MessageType messageType, int partition,
                                        ByteBuffer buffer) {
-        E.checkArgument(this.state == TransportState.ESTABLISH,
-                        "The state must be ESTABLISH instead of %s " +
-                        "at asyncSend()", this.state);
+        E.checkArgument(this.state == TransportState.ESTABLISHED,
+                        "The state must be ESTABLISHED instead of %s " +
+                        "at sendAsync()", this.state);
         int requestId = this.nextRequestId();
 
         ManagedBuffer managedBuffer = new NioManagedBuffer(buffer);
@@ -149,56 +131,78 @@ public class ClientSession extends TransportSession {
 
         this.sendFunction.apply(dataMessage);
 
-        this.updateFlowControlStatus();
+        this.updateBlocking();
     }
 
-    public void ackRecv(int ackId) {
+    public void onRecvAck(int ackId) {
         switch (this.state) {
-            case START_SEND:
+            case START_SENT:
                 if (ackId == AbstractMessage.START_SEQ) {
-                    this.startComplete();
+                    this.recvStartAck();
                     break;
                 }
-            case FINISH_SEND:
+            case FINISH_SENT:
                 if (ackId == this.finishId) {
-                    this.finishComplete();
+                    this.recvFinishAck();
                 } else {
-                    this.dataAckRecv(ackId);
+                    this.recvDataAck(ackId);
                 }
                 break;
-            case ESTABLISH:
-                this.dataAckRecv(ackId);
+            case ESTABLISHED:
+                this.recvDataAck(ackId);
                 break;
             default:
-                throw new ComputeException("Receive an ack message, but the " +
+                throw new ComputeException("Receive one ack message, but the " +
                                            "state not match, state: %s, " +
                                            "ackId: %s", this.state, ackId);
         }
     }
 
-    private void dataAckRecv(int ackId) {
+    private void recvStartAck() {
+        E.checkArgument(this.state == TransportState.START_SENT,
+                        "The state must be START_SENT instead of %s " +
+                        "at completeStart()", this.state);
+
+        this.maxAckId = AbstractMessage.START_SEQ;
+
+        this.stateEstablished();
+
+        this.startedBarrier.signalAll();
+    }
+
+    private void recvFinishAck() {
+        E.checkArgument(this.state == TransportState.FINISH_SENT,
+                        "The state must be FINISH_SENT instead of %s " +
+                        "at completeFinish()", this.state);
+
+        this.stateReady();
+
+        this.finishedBarrier.signalAll();
+    }
+
+    private void recvDataAck(int ackId) {
         if (ackId > this.maxAckId) {
             this.maxAckId = ackId;
         }
-        this.updateFlowControlStatus();
+        this.updateBlocking();
     }
 
-    public boolean flowControlStatus() {
-        return this.flowControlStatus;
+    public boolean blocking() {
+        return this.blocking;
     }
 
-    private void updateFlowControlStatus() {
-        this.flowControlStatusLock.lock();
+    private void updateBlocking() {
+        this.lock.lock();
         try {
             int pendingRequests = this.maxRequestId - this.maxAckId;
 
             if (pendingRequests >= this.maxPendingRequests) {
-                this.flowControlStatus = true;
+                this.blocking = true;
             } else if (pendingRequests < this.minPendingRequests) {
-                this.flowControlStatus = false;
+                this.blocking = false;
             }
         } finally {
-            this.flowControlStatusLock.unlock();
+            this.lock.unlock();
         }
     }
 }

@@ -46,15 +46,15 @@ public abstract class TransportSession {
         this.state = TransportState.READY;
     }
 
-    protected void ready() {
+    protected void stateReady() {
         this.maxRequestId = AbstractMessage.UNKNOWN_SEQ;
         this.finishId = AbstractMessage.UNKNOWN_SEQ;
         this.maxAckId = AbstractMessage.UNKNOWN_SEQ;
         this.state = TransportState.READY;
     }
 
-    protected void establish() {
-        this.state = TransportState.ESTABLISH;
+    protected void stateEstablished() {
+        this.state = TransportState.ESTABLISHED;
     }
 
     public TransportState state() {
@@ -76,8 +76,4 @@ public abstract class TransportSession {
     public TransportConf conf() {
         return this.conf;
     }
-
-    public abstract void startComplete();
-
-    public abstract void finishComplete();
 }

@@ -22,9 +22,9 @@ package com.baidu.hugegraph.computer.core.network;
 public enum TransportState {
     
     READY,
-    START_SEND,
-    START_RECV,
-    ESTABLISH,
-    FINISH_SEND,
-    FINISH_RECV
+    START_SENT,
+    START_RCVD,
+    ESTABLISHED,
+    FINISH_SENT,
+    FINISH_RCVD
 }

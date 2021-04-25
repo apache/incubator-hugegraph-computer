@@ -86,9 +86,17 @@ public abstract class AbstractNettyHandler
                                               Channel channel,
                                               AckMessage ackMessage);
 
-    protected abstract void processPongMessage(ChannelHandlerContext ctx,
-                                               Channel channel,
-                                               PongMessage pongMessage);
+    protected void processPingMessage(ChannelHandlerContext ctx,
+                                      Channel channel,
+                                      PingMessage pingMessage) {
+        ctx.writeAndFlush(PongMessage.INSTANCE);
+    }
+
+    protected void processPongMessage(ChannelHandlerContext ctx,
+                                      Channel channel,
+                                      PongMessage pongMessage) {
+        // No need to deal with the pongMessage, it only for keep-alive
+    }
 
     protected void processFailMessage(ChannelHandlerContext ctx,
                                       Channel channel,
@@ -105,14 +113,8 @@ public abstract class AbstractNettyHandler
         this.transportHandler().exceptionCaught(exception, connectionId);
     }
 
-    protected void processPingMessage(ChannelHandlerContext ctx,
-                                      Channel channel,
-                                      PingMessage pingMessage) {
-        ctx.writeAndFlush(PongMessage.INSTANCE);
-    }
-
-    protected void ackFail(ChannelHandlerContext ctx, int failId,
-                               int errorCode, String message) {
+    protected void ackFailMessage(ChannelHandlerContext ctx, int failId,
+                                  int errorCode, String message) {
         long timeout = this.session().conf().writeSocketTimeout();
         FailMessage failMessage = new FailMessage(failId, errorCode, message);
         ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);

@@ -51,7 +51,7 @@ public interface ManagedBuffer {
     ManagedBuffer release();
 
     /**
-     * Returns the reference count if applicable, otherwise return -1.
+     * Returns the reference count.
      */
     int referenceCount();
 

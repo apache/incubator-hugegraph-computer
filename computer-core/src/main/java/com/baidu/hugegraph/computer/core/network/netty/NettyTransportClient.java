@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -57,7 +58,7 @@ public class NettyTransportClient implements TransportClient {
                                    NettyClientFactory clientFactory,
                                    ClientHandler clientHandler) {
         E.checkArgumentNotNull(clientHandler,
-                               "The handler param can't be null");
+                               "The clientHandler param can't be null");
         this.initChannel(channel, connectionId, clientFactory.protocol(),
                          clientHandler);
         this.channel = channel;
@@ -90,22 +91,22 @@ public class NettyTransportClient implements TransportClient {
         return this.channel.isActive();
     }
 
-    protected ClientSession session() {
+    protected ClientSession clientSession() {
         return this.session;
     }
 
-    public ClientHandler handler() {
+    public ClientHandler clientHandler() {
         return this.handler;
     }
 
     private void initChannel(Channel channel, ConnectionId connectionId,
                              NettyProtocol protocol, ClientHandler handler) {
         protocol.replaceClientHandler(channel, this);
-        // Client ready notice
+        // Client stateReady notice
         handler.channelActive(connectionId);
     }
 
-    private Function<Message, ?> createSendFunction() {
+    private Function<Message, Future<Void>> createSendFunction() {
         ChannelFutureListener listener = new ClientChannelListenerOnWrite();
         return message -> {
             ChannelFuture channelFuture = this.channel.writeAndFlush(message);
@@ -118,9 +119,9 @@ public class NettyTransportClient implements TransportClient {
         this.startSession(this.syncRequestTimeout);
     }
 
-    public void startSession(long timeout) throws TransportException {
+    private void startSession(long timeout) throws TransportException {
         try {
-            this.session.syncStart(timeout);
+            this.session.start(timeout);
         } catch (InterruptedException e) {
             throw new TransportException("Interrupted while start session", e);
         }
@@ -132,7 +133,7 @@ public class NettyTransportClient implements TransportClient {
         if (!this.checkSendAvailable()) {
             return false;
         }
-        this.session.asyncSend(messageType, partition, buffer);
+        this.session.sendAsync(messageType, partition, buffer);
         return true;
     }
 
@@ -141,16 +142,16 @@ public class NettyTransportClient implements TransportClient {
         this.finishSession(this.finishSessionTimeout);
     }
 
-    public void finishSession(long timeout) throws TransportException {
+    private void finishSession(long timeout) throws TransportException {
         try {
-            this.session.syncFinish(timeout);
+            this.session.finish(timeout);
         } catch (InterruptedException e) {
             throw new TransportException("Interrupted while finish session", e);
         }
     }
 
     protected boolean checkSendAvailable() {
-        return !this.session.flowControlStatus() &&
+        return !this.session.blocking() &&
                this.channel.isWritable();
     }
 

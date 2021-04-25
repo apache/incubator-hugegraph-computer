@@ -29,7 +29,6 @@ import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
-import com.baidu.hugegraph.computer.core.network.message.PongMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.Log;
@@ -52,21 +51,24 @@ public class NettyClientHandler extends AbstractNettyHandler {
     protected void processStartMessage(ChannelHandlerContext ctx,
                                        Channel channel,
                                        StartMessage startMessage) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(
+              "Client not support deal with the startMessage");
     }
 
     @Override
     protected void processFinishMessage(ChannelHandlerContext ctx,
                                         Channel channel,
                                         FinishMessage finishMessage) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(
+              "Client not support deal with the finishMessage");
     }
 
     @Override
     protected void processDataMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       DataMessage dataMessage) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(
+              "Client not support deal with the dataMessage");
     }
 
     @Override
@@ -74,15 +76,8 @@ public class NettyClientHandler extends AbstractNettyHandler {
                                      Channel channel, AckMessage ackMessage) {
         int ackId = ackMessage.ackId();
         assert ackId > AbstractMessage.UNKNOWN_SEQ;
-        this.session().ackRecv(ackId);
+        this.session().onRecvAck(ackId);
         this.client.checkAndNoticeSendAvailable();
-    }
-
-    @Override
-    protected void processPongMessage(ChannelHandlerContext ctx,
-                                      Channel channel,
-                                      PongMessage pongMessage) {
-        // pass
     }
 
     @Override
@@ -91,7 +86,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
                                       FailMessage failMessage) {
         int failId = failMessage.ackId();
         if (failId > AbstractMessage.START_SEQ) {
-            this.session().ackRecv(failId);
+            this.session().onRecvAck(failId);
             this.client.checkAndNoticeSendAvailable();
         }
 
@@ -118,20 +113,21 @@ public class NettyClientHandler extends AbstractNettyHandler {
         }
 
         // Respond fail message to requester
-        this.ackFail(ctx, AbstractMessage.UNKNOWN_SEQ,
-                     exception.errorCode(),
-                     Throwables.getStackTraceAsString(exception));
+        this.ackFailMessage(ctx, AbstractMessage.UNKNOWN_SEQ,
+                            exception.errorCode(),
+                            Throwables.getStackTraceAsString(exception));
 
-        this.client.handler().exceptionCaught(exception,
-                                              this.client.connectionId());
+        this.client.clientHandler().exceptionCaught(exception,
+                                                    this.client.connectionId());
     }
 
+    @Override
     protected ClientSession session() {
-        return this.client.session();
+        return this.client.clientSession();
     }
 
     @Override
     protected ClientHandler transportHandler() {
-        return this.client.handler();
+        return this.client.clientHandler();
     }
 }

@@ -70,7 +70,7 @@ public class FrameDecoder extends LengthFieldBasedFrameDecoder {
             msg.release();
             return null;
         }
-        // TODO: improve it use shard memory
+        // TODO: improve it use shared memory
         return msg;
     }
 }
