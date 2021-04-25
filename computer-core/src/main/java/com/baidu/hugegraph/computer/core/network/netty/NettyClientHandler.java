@@ -52,7 +52,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
                                        Channel channel,
                                        StartMessage startMessage) {
         throw new UnsupportedOperationException(
-              "Client not support deal with the startMessage");
+              "Client does not support processStartMessage()");
     }
 
     @Override
@@ -60,7 +60,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
                                         Channel channel,
                                         FinishMessage finishMessage) {
         throw new UnsupportedOperationException(
-              "Client not support deal with the finishMessage");
+              "Client does not support processFinishMessage()");
     }
 
     @Override
@@ -68,7 +68,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
                                       Channel channel,
                                       DataMessage dataMessage) {
         throw new UnsupportedOperationException(
-              "Client not support deal with the dataMessage");
+              "Client does not support processDataMessage()");
     }
 
     @Override

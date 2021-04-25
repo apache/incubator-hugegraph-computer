@@ -516,6 +516,16 @@ public class ComputerOptions extends OptionHolder {
                     60
             );
 
+    public static final ConfigOption<Integer> TRANSPORT_MAX_HEARTBEAT_TIMES =
+            new ConfigOption<>(
+                    "transport.max_heartbeat_times",
+                    "The max times of heartbeat, if the number of times of " +
+                    "not received heartbeat response continuously > " +
+                    "max_heartbeat_times the channel will be closed.",
+                    positiveInt(),
+                    3
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_TIMEOUT =
             new ConfigOption<>(
                     "transport.heartbeat_timeout_seconds",

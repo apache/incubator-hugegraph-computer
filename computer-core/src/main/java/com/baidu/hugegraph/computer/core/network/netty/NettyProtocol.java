@@ -169,6 +169,11 @@ public class NettyProtocol {
 
         // NOTE: It will be replaced when the client object is initialized!
         pipeline.addLast(CLIENT_HANDLER_NAME, SLOT_HANDLER);
+
+        // Init heartbeat times
+        channel.attr(HeartBeatHandler.HEARTBEAT_TIMES).set(0);
+        channel.attr(HeartBeatHandler.MAX_HEARTBEAT_TIMES)
+               .set(this.conf.maxHeartbeatTimes());
     }
 
     protected void replaceClientHandler(Channel channel,

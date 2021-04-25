@@ -25,10 +25,12 @@ import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.PingMessage;
 import com.baidu.hugegraph.util.Log;
 
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.util.AttributeKey;
 
 /**
  * Heart beat triggered.
@@ -39,15 +41,38 @@ public class HeartBeatHandler extends ChannelDuplexHandler {
 
     private static final Logger LOG = Log.logger(HeartBeatHandler.class);
 
+    public static final AttributeKey<Integer> HEARTBEAT_TIMES  =
+           AttributeKey.valueOf("heartbeatCount");
+    public static final AttributeKey<Integer> MAX_HEARTBEAT_TIMES  =
+           AttributeKey.valueOf("maxHeartbeatTimes");
+
     @Override
     public void userEventTriggered(final ChannelHandlerContext ctx,
                                    Object event) throws Exception {
         if (event instanceof IdleStateEvent) {
+            Channel channel = ctx.channel();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("IdleStateEvent triggered, send ping to: {}",
-                          TransportUtil.remoteAddress(ctx.channel()));
+                          TransportUtil.remoteAddress(channel));
             }
-            ctx.writeAndFlush(PingMessage.INSTANCE);
+            Integer maxHeartbeatTimes = channel.attr(MAX_HEARTBEAT_TIMES).get();
+            assert maxHeartbeatTimes != null;
+
+            Integer lastHeartbeatTimes = channel.attr(HEARTBEAT_TIMES).get();
+            assert lastHeartbeatTimes != null;
+
+            int heartbeatTimes = lastHeartbeatTimes  + 1;
+
+            if (heartbeatTimes > maxHeartbeatTimes) {
+                LOG.info("Heartbeat times more than the maxHeartbeatTimes, " +
+                         "close connection to '{}' from client side, times: {}",
+                         TransportUtil.remoteAddress(channel),
+                         heartbeatTimes);
+                ctx.close();
+            } else {
+                channel.attr(HEARTBEAT_TIMES).set(heartbeatTimes);
+                ctx.writeAndFlush(PingMessage.INSTANCE);
+            }
         } else {
             super.userEventTriggered(ctx, event);
         }

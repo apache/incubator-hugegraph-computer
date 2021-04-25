@@ -89,20 +89,20 @@ public class NettyServerHandler extends AbstractNettyHandler {
         this.handler.handle(dataMessage.type(), dataMessage.partition(),
                             dataMessage.body());
 
-        this.serverSession.onDataHandled(requestId);
+        this.serverSession.onHandledData(requestId);
     }
 
     @Override
     protected void processAckMessage(ChannelHandlerContext ctx, Channel channel,
                                      AckMessage ackMessage) {
         throw new UnsupportedOperationException(
-              "Server not support deal with the ackMessage");
+              "Server does not support processAckMessage()");
     }
 
     private void ackStartMessage(ChannelHandlerContext ctx) {
         AckMessage startAck = new AckMessage(AbstractMessage.START_SEQ);
         ctx.writeAndFlush(startAck).addListener(this.listenerOnWrite);
-        this.serverSession.completeStart();
+        this.serverSession.completeStateStart();
 
         // Add an schedule task to check and respond ack
         if (this.respondAckTask == null) {
@@ -119,7 +119,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
                                   int finishId) {
         AckMessage finishAck = new AckMessage(finishId);
         ctx.writeAndFlush(finishAck).addListener(this.listenerOnWrite);
-        this.serverSession.completeFinish();
+        this.serverSession.completeStateFinish();
 
         // Cancel and remove the task to check respond ack
         if (this.respondAckTask != null) {
@@ -140,7 +140,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
         super.ackFailMessage(ctx, failId, errorCode, message);
 
         if (failId > AbstractMessage.START_SEQ) {
-            this.serverSession.onDataHandled(failId);
+            this.serverSession.onHandledData(failId);
             this.serverSession.onDataAckSent(failId);
         }
     }

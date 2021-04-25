@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
-import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
@@ -301,7 +300,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         TransportConf conf = TransportConf.wrapConfig(config);
 
-        Assert.assertThrows(IllegalArgException.class, () -> {
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
             int minPendingRequests = conf.minPendingRequests();
         }, e -> {
             Assert.assertContains("The minPendingRequests must be " +

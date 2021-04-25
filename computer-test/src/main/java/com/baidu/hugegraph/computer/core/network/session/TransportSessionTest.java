@@ -111,7 +111,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
     @Test
     public void testStartWithException() throws InterruptedException,
-                                                    TransportException {
+                                                TransportException {
         ScheduledExecutorService executorService =
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
@@ -130,11 +130,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testSendAsyncWithException() throws InterruptedException,
-                                                     TransportException {
-        ScheduledExecutorService executorService =
-        ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
-
+    public void testSendAsyncWithException() {
         ClientSession clientSession = new ClientSession(conf, message -> null);
         Assert.assertEquals(TransportState.READY, clientSession.state());
 
@@ -151,7 +147,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
 
     @Test
     public void testFinishWithException() throws InterruptedException,
-                                                    TransportException {
+                                                 TransportException {
         ScheduledExecutorService executorService =
         ExecutorUtil.newScheduledThreadPool(1, TASK_SCHEDULER);
 
@@ -177,9 +173,9 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertEquals(TransportState.READY, serverSession.state());
 
         serverSession.onRecvStateStart();
-        Assert.assertEquals(TransportState.START_RCVD, serverSession.state());
+        Assert.assertEquals(TransportState.START_RECV, serverSession.state());
 
-        serverSession.completeStart();
+        serverSession.completeStateStart();
         Assert.assertEquals(TransportState.ESTABLISHED, serverSession.state());
         Assert.assertEquals(AbstractMessage.START_SEQ, serverSession.maxAckId);
         Assert.assertEquals(AbstractMessage.START_SEQ,
@@ -189,7 +185,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         for (int i = 1; i < 100 ; i++) {
             serverSession.onRecvData(i);
             Assert.assertEquals(i, serverSession.maxRequestId);
-            serverSession.onDataHandled(i);
+            serverSession.onHandledData(i);
             Assert.assertEquals(i, Whitebox.getInternalState(serverSession,
                                                              "maxHandledId"));
             serverSession.onDataAckSent(i);
@@ -197,10 +193,10 @@ public class TransportSessionTest extends AbstractNetworkTest {
         }
 
         serverSession.onRecvStateFinish(100);
-        Assert.assertEquals(TransportState.FINISH_RCVD,
+        Assert.assertEquals(TransportState.FINISH_RECV,
                             serverSession.state());
 
-        serverSession.completeFinish();
+        serverSession.completeStateFinish();
         Assert.assertEquals(TransportState.READY, serverSession.state());
     }
 
@@ -226,7 +222,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         });
 
         serverSession.onRecvStateStart();
-        serverSession.completeStart();
+        serverSession.completeStateStart();
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             serverSession.onRecvData(2);
@@ -236,7 +232,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         });
 
         serverSession.onRecvData(1);
-        serverSession.onDataHandled(1);
+        serverSession.onHandledData(1);
         serverSession.onDataAckSent(1);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
@@ -260,7 +256,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertEquals(TransportState.READY, serverSession.state());
 
         serverSession.onRecvStateStart();
-        serverSession.completeStart();
+        serverSession.completeStateStart();
 
         Boolean finishRead2 = Whitebox.invoke(serverSession.getClass(),
                                               "needAckFinish",
@@ -268,7 +264,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         Assert.assertFalse(finishRead2);
 
         serverSession.onRecvStateFinish(1);
-        serverSession.completeFinish();
+        serverSession.completeStateFinish();
     }
 
     private void syncStartWithAutoComplete(ScheduledExecutorService pool,

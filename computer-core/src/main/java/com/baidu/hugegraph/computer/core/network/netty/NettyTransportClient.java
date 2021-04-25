@@ -58,7 +58,7 @@ public class NettyTransportClient implements TransportClient {
                                    NettyClientFactory clientFactory,
                                    ClientHandler clientHandler) {
         E.checkArgumentNotNull(clientHandler,
-                               "The clientHandler param can't be null");
+                               "The clientHandler parameter can't be null");
         this.initChannel(channel, connectionId, clientFactory.protocol(),
                          clientHandler);
         this.channel = channel;
@@ -151,8 +151,7 @@ public class NettyTransportClient implements TransportClient {
     }
 
     protected boolean checkSendAvailable() {
-        return !this.session.blocking() &&
-               this.channel.isWritable();
+        return !this.session.blocking() && this.channel.isWritable();
     }
 
     protected boolean checkAndNoticeSendAvailable() {

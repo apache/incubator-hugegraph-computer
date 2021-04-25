@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
@@ -36,6 +37,11 @@ public abstract class AbstractNettyHandler
         if (LOG.isDebugEnabled()) {
             LOG.debug("Receive remote message from '{}', message: {}",
                       TransportUtil.remoteAddress(channel), msg);
+        }
+
+        // Reset client heartbeat times
+        if (this instanceof ClientHandler) {
+            this.resetHeartBeatTimes(channel);
         }
 
         MessageType msgType = msg.type();
@@ -118,6 +124,10 @@ public abstract class AbstractNettyHandler
         long timeout = this.session().conf().writeSocketTimeout();
         FailMessage failMessage = new FailMessage(failId, errorCode, message);
         ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
+    }
+
+    protected void resetHeartBeatTimes(Channel channel) {
+        channel.attr(HeartBeatHandler.HEARTBEAT_TIMES).set(0);
     }
 
     protected abstract TransportSession session();

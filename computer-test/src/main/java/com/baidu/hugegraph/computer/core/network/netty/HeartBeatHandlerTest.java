@@ -19,11 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
+import com.baidu.hugegraph.computer.core.network.session.ServerSession;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -33,6 +35,7 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
 
     private static final int HEARTBEAT_INTERVAL = 2;
     private static final int HEARTBEAT_TIME_OUT = 6;
+    private static final int MAX_HEARTBEAT_TIMES = 3;
 
     @Override
     protected void initOption() {
@@ -40,6 +43,8 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
                            HEARTBEAT_INTERVAL);
         super.updateOption(ComputerOptions.TRANSPORT_HEARTBEAT_TIMEOUT,
                            HEARTBEAT_TIME_OUT);
+        super.updateOption(ComputerOptions.TRANSPORT_MAX_HEARTBEAT_TIMES,
+                           MAX_HEARTBEAT_TIMES);
     }
 
     @Test
@@ -54,6 +59,25 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
             return null;
         }).when(clientProtocol).initializeClientPipeline(Mockito.any());
 
+        // Skip processPingMessage()
+        ServerSession serverSession = new ServerSession(conf);
+        NettyServerHandler handler2 = new NettyServerHandler(serverSession,
+                                                             serverHandler);
+        NettyServerHandler spyNettyServerHandler = Mockito.spy(handler2);
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationOnMock.callRealMethod();
+            Channel channel = invocationOnMock.getArgument(0);
+            channel.pipeline().replace(NettyProtocol.SERVER_HANDLER_NAME,
+                                       NettyProtocol.SERVER_HANDLER_NAME,
+                                       spyNettyServerHandler);
+            return null;
+        }).when(serverProtocol).initializeServerPipeline(Mockito.any(),
+                                                         Mockito.any());
+        Mockito.doAnswer(invocationOnMock -> null)
+               .when(spyNettyServerHandler).processPingMessage(Mockito.any(),
+                                                               Mockito.any(),
+                                                               Mockito.any());
+
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         NettyClientHandler handler = new NettyClientHandler(client);
         NettyClientHandler spyHandler = Mockito.spy(handler);
@@ -61,13 +85,14 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
                                             NettyProtocol.CLIENT_HANDLER_NAME,
                                             spyHandler);
 
-        long delay = (HEARTBEAT_INTERVAL + 1) * 1000L;
-        Mockito.verify(mockHeartBeatHandler, Mockito.timeout(delay).times(1))
+        int heartbeatTimesClose = MAX_HEARTBEAT_TIMES + 1;
+        long timout = ((HEARTBEAT_INTERVAL * heartbeatTimesClose)) * 1000L;
+        Mockito.verify(mockHeartBeatHandler,
+                       Mockito.timeout(timout).times(heartbeatTimesClose))
                .userEventTriggered(Mockito.any(),
                                    Mockito.any(IdleStateEvent.class));
 
-        Mockito.verify(spyHandler, Mockito.timeout(2000L).times(1))
-               .processPongMessage(Mockito.any(), Mockito.any(), Mockito.any());
+        Assert.assertFalse(client.active());
     }
 
     @Test

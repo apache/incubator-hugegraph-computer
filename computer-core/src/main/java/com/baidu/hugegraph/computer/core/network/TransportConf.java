@@ -25,6 +25,7 @@ import java.util.Locale;
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.util.E;
 
 import io.netty.channel.epoll.Epoll;
 
@@ -173,11 +174,9 @@ public class TransportConf {
         int minPendingReqs = this.config.get(
                              ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS);
 
-        if (minPendingReqs > this.maxPendingRequests()) {
-            throw new IllegalArgException(
-                  "The minPendingRequests must be less than or equal to the " +
-                  "maxPendingRequests.");
-        }
+        E.checkArgument(minPendingReqs <= this.maxPendingRequests(),
+                        "The minPendingRequests must be less than or equal " +
+                        "to the maxPendingRequests.");
         return minPendingReqs;
     }
 
@@ -187,6 +186,10 @@ public class TransportConf {
 
     public int heartbeatInterval() {
         return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_INTERVAL);
+    }
+
+    public int maxHeartbeatTimes() {
+        return this.config.get(ComputerOptions.TRANSPORT_MAX_HEARTBEAT_TIMES);
     }
 
     public int heartbeatTimeout() {

@@ -41,20 +41,20 @@ public class ServerSession extends TransportSession {
         super.stateReady();
     }
 
-    public void completeStart() {
-        E.checkArgument(this.state == TransportState.START_RCVD,
-                        "The state must be START_RCVD instead of %s " +
-                        "at completeStart()", this.state);
+    public void completeStateStart() {
+        E.checkArgument(this.state == TransportState.START_RECV,
+                        "The state must be START_RECV instead of %s " +
+                        "at completeStateStart()", this.state);
 
         this.maxHandledId = AbstractMessage.START_SEQ;
         this.maxAckId = AbstractMessage.START_SEQ;
         this.stateEstablished();
     }
 
-    public void completeFinish() {
-        E.checkArgument(this.state == TransportState.FINISH_RCVD,
-                        "The state must be FINISH_RCVD instead of %s " +
-                        "at completeFinish()", this.state);
+    public void completeStateFinish() {
+        E.checkArgument(this.state == TransportState.FINISH_RECV,
+                        "The state must be FINISH_RECV instead of %s " +
+                        "at completeStateFinish()", this.state);
 
         this.stateReady();
     }
@@ -65,7 +65,7 @@ public class ServerSession extends TransportSession {
                         "at onRecvStateStart()", this.state);
 
         this.maxRequestId = AbstractMessage.START_SEQ;
-        this.state = TransportState.START_RCVD;
+        this.state = TransportState.START_RECV;
     }
 
     public boolean onRecvStateFinish(int finishId) {
@@ -78,7 +78,7 @@ public class ServerSession extends TransportSession {
                         finishId, this.maxRequestId);
 
         this.finishId = finishId;
-        this.state = TransportState.FINISH_RCVD;
+        this.state = TransportState.FINISH_RECV;
         return this.needAckFinish();
     }
 
@@ -94,11 +94,11 @@ public class ServerSession extends TransportSession {
         this.maxRequestId = requestId;
     }
 
-    public void onDataHandled(int requestId) {
+    public void onHandledData(int requestId) {
         E.checkArgument(this.state == TransportState.ESTABLISHED ||
-                        this.state == TransportState.FINISH_RCVD,
-                        "The state must be ESTABLISHED or FINISH_RCVD " +
-                        "instead of %s at onDataHandled()", this.state);
+                        this.state == TransportState.FINISH_RECV,
+                        "The state must be ESTABLISHED or FINISH_RECV " +
+                        "instead of %s at onHandledData()", this.state);
 
         synchronized (this) {
             if (requestId > this.maxHandledId) {
@@ -109,8 +109,8 @@ public class ServerSession extends TransportSession {
 
     public void onDataAckSent(int ackId) {
         E.checkArgument(this.state == TransportState.ESTABLISHED ||
-                        this.state == TransportState.FINISH_RCVD,
-                        "The state must be ESTABLISHED or FINISH_RCVD " +
+                        this.state == TransportState.FINISH_RECV,
+                        "The state must be ESTABLISHED or FINISH_RECV " +
                         "instead of %s at onDataAckSent()", this.state);
         E.checkArgument(ackId > this.maxAckId,
                         "The ackId must be increasing at onDataAckSent(), " +
@@ -120,7 +120,7 @@ public class ServerSession extends TransportSession {
     }
 
     public boolean needAckFinish() {
-        if (this.state == TransportState.FINISH_RCVD) {
+        if (this.state == TransportState.FINISH_RECV) {
             return this.maxHandledId == this.finishId - 1;
         }
         return false;

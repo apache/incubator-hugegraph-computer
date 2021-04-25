@@ -81,7 +81,7 @@ public class TransportConnectionManager implements ConnectionManager {
         E.checkArgument(this.clientFactory == null,
                         "The clientManager has already been initialized");
         E.checkArgumentNotNull(clientHandler,
-                               "The clientHandler param can't be null");
+                               "The clientHandler parameter can't be null");
         TransportConf conf = TransportConf.wrapConfig(config);
         TransportProvider provider = conf.transportProvider();
         ClientFactory factory = provider.createClientFactory(conf);

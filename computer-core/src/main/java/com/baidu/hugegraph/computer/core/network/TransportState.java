@@ -23,8 +23,8 @@ public enum TransportState {
     
     READY,
     START_SENT,
-    START_RCVD,
+    START_RECV,
     ESTABLISHED,
     FINISH_SENT,
-    FINISH_RCVD
+    FINISH_RECV
 }

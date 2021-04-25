@@ -138,18 +138,18 @@ public class ClientSession extends TransportSession {
         switch (this.state) {
             case START_SENT:
                 if (ackId == AbstractMessage.START_SEQ) {
-                    this.recvStartAck();
+                    this.onRecvStartAck();
                     break;
                 }
             case FINISH_SENT:
                 if (ackId == this.finishId) {
-                    this.recvFinishAck();
+                    this.onRecvFinishAck();
                 } else {
-                    this.recvDataAck(ackId);
+                    this.onRecvDataAck(ackId);
                 }
                 break;
             case ESTABLISHED:
-                this.recvDataAck(ackId);
+                this.onRecvDataAck(ackId);
                 break;
             default:
                 throw new ComputeException("Receive one ack message, but the " +
@@ -158,10 +158,10 @@ public class ClientSession extends TransportSession {
         }
     }
 
-    private void recvStartAck() {
+    private void onRecvStartAck() {
         E.checkArgument(this.state == TransportState.START_SENT,
                         "The state must be START_SENT instead of %s " +
-                        "at completeStart()", this.state);
+                        "at completeStateStart()", this.state);
 
         this.maxAckId = AbstractMessage.START_SEQ;
 
@@ -170,17 +170,17 @@ public class ClientSession extends TransportSession {
         this.startedBarrier.signalAll();
     }
 
-    private void recvFinishAck() {
+    private void onRecvFinishAck() {
         E.checkArgument(this.state == TransportState.FINISH_SENT,
                         "The state must be FINISH_SENT instead of %s " +
-                        "at completeFinish()", this.state);
+                        "at completeStateFinish()", this.state);
 
         this.stateReady();
 
         this.finishedBarrier.signalAll();
     }
 
-    private void recvDataAck(int ackId) {
+    private void onRecvDataAck(int ackId) {
         if (ackId > this.maxAckId) {
             this.maxAckId = ackId;
         }
