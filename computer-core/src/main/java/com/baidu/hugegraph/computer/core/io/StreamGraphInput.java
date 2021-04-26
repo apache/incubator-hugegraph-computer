@@ -43,17 +43,11 @@ public class StreamGraphInput implements GraphInput {
     protected final Config config;
     protected final GraphFactory graphFactory;
     protected final ValueFactory valueFactory;
-    protected final boolean outputVertexAdjacentEdges;
-    protected final boolean outputVertexProperties;
-    protected final boolean outputEdgeProperties;
 
     public StreamGraphInput(ComputerContext context, RandomAccessInput in) {
         this.config = context.config();
         this.graphFactory = context.graphFactory();
         this.valueFactory = context.valueFactory();
-        this.outputVertexAdjacentEdges = config.outputVertexAdjacentEdges();
-        this.outputVertexProperties = config.outputVertexProperties();
-        this.outputEdgeProperties = config.outputEdgeProperties();
         this.in = in;
     }
 
@@ -69,11 +63,11 @@ public class StreamGraphInput implements GraphInput {
          */
         Vertex vertex = this.graphFactory.createVertex(id, value);
 
-        if (this.outputVertexAdjacentEdges) {
+        if (this.config.outputVertexAdjacentEdges()) {
             Edges edges = this.readEdges();
             vertex.edges(edges);
         }
-        if (this.outputVertexProperties) {
+        if (this.config.outputVertexProperties()) {
             Properties properties = this.readProperties();
             vertex.properties(properties);
         }
@@ -110,7 +104,7 @@ public class StreamGraphInput implements GraphInput {
         Value<?> value = this.readValue();
         Edge edge = this.graphFactory.createEdge(targetId, value);
 
-        if (this.outputEdgeProperties) {
+        if (this.config.outputEdgeProperties()) {
             Properties properties = this.readProperties();
             edge.properties(properties);
         }
