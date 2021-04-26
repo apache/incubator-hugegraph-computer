@@ -37,9 +37,9 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
     // TODO: try to reduce call ComputerContext.instance() directly.
     private static final GraphFactory GRAPH_FACTORY =
-            ComputerContext.instance().graphFactory();
+                                      ComputerContext.instance().graphFactory();
     private static final ValueFactory VALUE_FACTORY =
-            ComputerContext.instance().valueFactory();
+                                      ComputerContext.instance().valueFactory();
 
     private ValueType elemType;
     private List<T> values;
