@@ -25,7 +25,6 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -86,11 +85,11 @@ public class OverwriteCombinerTest extends UnitTestBase {
 
     @Test
     public void testCombineProperties() {
-        Properties properties1 = new DefaultProperties();
+        Properties properties1 = graphFactory().createProperties();
         properties1.put("name", new Utf8Id("marko").idValue());
         properties1.put("city", new Utf8Id("Beijing").idValue());
 
-        Properties properties2 = new DefaultProperties();
+        Properties properties2 = graphFactory().createProperties();
         properties1.put("name", new Utf8Id("josh").idValue());
 
         OverwriteCombiner<Properties> combiner = new OverwriteCombiner<>();

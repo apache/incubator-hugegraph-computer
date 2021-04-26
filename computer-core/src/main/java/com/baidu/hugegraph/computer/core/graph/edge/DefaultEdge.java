@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.graph.edge;
 
 import java.util.Objects;
 
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
@@ -32,14 +32,14 @@ public class DefaultEdge implements Edge {
     private Value<?> value;
     private Properties properties;
 
-    public DefaultEdge() {
-        this(null, null);
+    public DefaultEdge(GraphFactory graphFactory) {
+        this(graphFactory, null, null);
     }
 
-    public DefaultEdge(Id targetId, Value<?> value) {
+    public DefaultEdge(GraphFactory graphFactory, Id targetId, Value<?> value) {
         this.targetId = targetId;
         this.value = value;
-        this.properties = new DefaultProperties();
+        this.properties = graphFactory.createProperties();
     }
 
     @Override

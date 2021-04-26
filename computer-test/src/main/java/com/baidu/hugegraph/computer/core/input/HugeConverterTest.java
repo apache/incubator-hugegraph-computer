@@ -26,11 +26,11 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
 import com.baidu.hugegraph.computer.core.graph.id.UuidId;
-import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
@@ -43,7 +43,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
-public class HugeConverterTest {
+public class HugeConverterTest extends UnitTestBase {
 
     @Test
     public void testConvertId() {
@@ -109,7 +109,7 @@ public class HugeConverterTest {
         rawProperties.put("double-value", 0.4D);
         rawProperties.put("list-value", ImmutableList.of(1, 2));
 
-        Properties properties = new DefaultProperties();
+        Properties properties = graphFactory().createProperties();
         properties.put("null-value", NullValue.get());
         properties.put("boolean-value", new BooleanValue(true));
         properties.put("int-value", new IntValue(1));

@@ -32,7 +32,6 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -136,7 +135,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
          * Config is global singleton instance, so the ValueType should be same
          * in one Properties, it seems unreasonable
          */
-        Properties properties1 = new DefaultProperties();
+        Properties properties1 = graphFactory().createProperties();
         properties1.put("age", new LongValue(18L));
         properties1.put("salary", new LongValue(20000L));
 
@@ -162,7 +161,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
             ComputerOptions.EDGES_NAME, "value"
         );
 
-        properties1 = new DefaultProperties();
+        properties1 = graphFactory().createProperties();
         properties1.put("name", new Utf8Id("marko").idValue());
         properties1.put("city", new Utf8Id("Beijing").idValue());
 

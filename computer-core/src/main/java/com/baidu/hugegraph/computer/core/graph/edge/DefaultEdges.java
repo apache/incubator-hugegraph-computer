@@ -29,7 +29,7 @@ public class DefaultEdges implements Edges {
 
     private final List<Edge> edges;
 
-    public DefaultEdges(int capacity, GraphFactory graphFactory) {
+    public DefaultEdges(GraphFactory graphFactory, int capacity) {
         this.edges = graphFactory.createList(capacity);
     }
 

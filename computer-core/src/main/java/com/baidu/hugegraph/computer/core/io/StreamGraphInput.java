@@ -28,7 +28,6 @@ import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
-import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
@@ -120,7 +119,7 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Properties readProperties() throws IOException {
-        Properties properties = new DefaultProperties();
+        Properties properties = this.graphFactory.createProperties();
         int size = this.readInt();
         for (int i = 0; i < size; i++) {
             String key = this.readString();

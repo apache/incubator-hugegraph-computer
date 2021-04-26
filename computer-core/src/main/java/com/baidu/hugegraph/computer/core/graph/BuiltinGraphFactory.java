@@ -24,12 +24,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -44,27 +47,34 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Vertex createVertex() {
-        return new DefaultVertex();
+        return new DefaultVertex(this);
     }
 
     @Override
     public <V extends Value<?>> Vertex createVertex(Id id, V value) {
-        return new DefaultVertex(id, value);
+        return new DefaultVertex(this, id, value);
+    }
+
+    @Override
+    public Edges createEdges() {
+        int averageDegree = this.config.get(
+                            ComputerOptions.VERTEX_AVERAGE_DEGREE);
+        return createEdges(averageDegree);
     }
 
     @Override
     public Edges createEdges(int capacity) {
-        return new DefaultEdges(capacity, this);
+        return new DefaultEdges(this, capacity);
     }
 
     @Override
     public Edge createEdge() {
-        return new DefaultEdge();
+        return new DefaultEdge(this);
     }
 
     @Override
     public <V extends Value<?>> Edge createEdge(Id targetId, V value) {
-        return new DefaultEdge(targetId, value);
+        return new DefaultEdge(this, targetId, value);
     }
 
     @Override
@@ -80,5 +90,10 @@ public final class BuiltinGraphFactory implements GraphFactory {
     @Override
     public <K, V> Map<K, V> createMap() {
         return new HashMap<>();
+    }
+
+    @Override
+    public Properties createProperties() {
+        return new DefaultProperties(this);
     }
 }
