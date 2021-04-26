@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
@@ -41,7 +40,7 @@ public abstract class AbstractNettyHandler
         }
 
         // Reset client heartbeat times
-        if (this instanceof ClientHandler) {
+        if (this instanceof NettyClientHandler) {
             this.resetHeartBeatTimes(channel);
         }
 
