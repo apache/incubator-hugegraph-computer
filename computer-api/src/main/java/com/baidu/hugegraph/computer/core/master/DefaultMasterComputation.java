@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Master;
 import com.baidu.hugegraph.computer.core.config.Config;
 
 /**
@@ -28,7 +29,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 public class DefaultMasterComputation implements MasterComputation {
 
     @Override
-    public void init(Config config) {
+    public void init(Config config, Aggregator4Master aggregator4Master) {
         // pass
     }
 

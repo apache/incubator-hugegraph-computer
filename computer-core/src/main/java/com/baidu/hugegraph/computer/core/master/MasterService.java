@@ -87,7 +87,8 @@ public class MasterService {
 
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
-        this.masterComputation.init(this.config);
+        // TODO: pass aggregator4Master to init
+        this.masterComputation.init(this.config, null);
 
         this.bsp4Master.registerMaster(this.masterInfo);
         this.workers = this.bsp4Master.waitWorkersRegistered();

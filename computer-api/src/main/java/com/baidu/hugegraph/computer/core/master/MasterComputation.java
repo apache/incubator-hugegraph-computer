@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Master;
 import com.baidu.hugegraph.computer.core.config.Config;
 
 /**
@@ -39,11 +40,11 @@ public interface MasterComputation {
      * this method. Create resources used in compute. Be called before all
      * supersteps start.
      */
-    void init(Config config);
+    void init(Config config, Aggregator4Master aggregator4Master);
 
     /**
-     * Close the resource created in {@link #init(Config)}. Be called
-     * after all supersteps.
+     * Close the resource created in {@link #init(Config, Aggregator4Master)}.
+     * Be called after all supersteps.
      */
     void close();
 
