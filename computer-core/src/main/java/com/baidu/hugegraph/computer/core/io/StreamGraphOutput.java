@@ -40,15 +40,9 @@ public class StreamGraphOutput implements GraphOutput {
 
     private final RandomAccessOutput out;
     protected final Config config;
-    protected final boolean outputVertexAdjacentEdges;
-    protected final boolean outputVertexProperties;
-    protected final boolean outputEdgeProperties;
 
     public StreamGraphOutput(ComputerContext context, RandomAccessOutput out) {
         this.config = context.config();
-        this.outputVertexAdjacentEdges = config.outputVertexAdjacentEdges();
-        this.outputVertexProperties = config.outputVertexProperties();
-        this.outputEdgeProperties = config.outputEdgeProperties();
         this.out = out;
     }
 
@@ -58,10 +52,10 @@ public class StreamGraphOutput implements GraphOutput {
         this.writeId(vertex.id());
         this.writeValue(vertex.value());
 
-        if (this.outputVertexAdjacentEdges) {
+        if (this.config.outputVertexAdjacentEdges()) {
             this.writeEdges(vertex.edges());
         }
-        if (this.outputVertexProperties) {
+        if (this.config.outputVertexProperties()) {
             this.writeProperties(vertex.properties());
         }
     }
@@ -90,7 +84,7 @@ public class StreamGraphOutput implements GraphOutput {
         this.writeId(edge.targetId());
         this.writeValue(edge.value());
 
-        if (this.outputEdgeProperties) {
+        if (this.config.outputEdgeProperties()) {
             this.writeProperties(edge.properties());
         }
     }
