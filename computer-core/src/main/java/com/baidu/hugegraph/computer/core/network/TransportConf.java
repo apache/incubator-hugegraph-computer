@@ -70,7 +70,7 @@ public class TransportConf {
 
     public TransportProvider transportProvider() {
         return this.config
-                .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
+                   .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
     }
 
     /**
@@ -119,11 +119,11 @@ public class TransportConf {
      * Assuming latency = 1ms, network_bandwidth = 10Gbps
      * buffer size should be ~ 1.25MB
      */
-    public int receiveBuffer() {
+    public int sizeReceiveBuffer() {
         return this.config.get(ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE);
     }
 
-    public int sendBuffer() {
+    public int sizeSendBuffer() {
         return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 
@@ -191,15 +191,15 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL);
     }
 
+    public long serverIdleTimeout() {
+        return this.config.get(ComputerOptions.TRANSPORT_SERVER_IDLE_TIMEOUT);
+    }
+
     public long heartbeatInterval() {
         return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_INTERVAL);
     }
 
     public int maxHeartbeatTimes() {
         return this.config.get(ComputerOptions.TRANSPORT_MAX_HEARTBEAT_TIMES);
-    }
-
-    public long serverIdleTimeout() {
-        return this.config.get(ComputerOptions.TRANSPORT_SERVER_IDLE_TIMEOUT);
     }
 }

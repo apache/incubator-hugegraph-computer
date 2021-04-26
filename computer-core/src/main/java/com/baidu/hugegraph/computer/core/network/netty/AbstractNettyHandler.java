@@ -21,6 +21,7 @@ import com.baidu.hugegraph.computer.core.network.session.TransportSession;
 import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -95,7 +96,8 @@ public abstract class AbstractNettyHandler
     protected void processPingMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       PingMessage pingMessage) {
-        ctx.writeAndFlush(PongMessage.INSTANCE);
+        ctx.writeAndFlush(PongMessage.INSTANCE)
+           .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     protected void processPongMessage(ChannelHandlerContext ctx,

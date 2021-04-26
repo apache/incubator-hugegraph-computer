@@ -27,6 +27,7 @@ import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -51,10 +52,6 @@ public class HeartbeatHandler extends ChannelDuplexHandler {
                                    Object event) throws Exception {
         if (event instanceof IdleStateEvent) {
             Channel channel = ctx.channel();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("IdleStateEvent triggered, send ping to: {}",
-                          TransportUtil.remoteAddress(channel));
-            }
             Integer maxHeartbeatTimes = channel.attr(MAX_HEARTBEAT_TIMES).get();
             assert maxHeartbeatTimes != null;
 
@@ -70,8 +67,17 @@ public class HeartbeatHandler extends ChannelDuplexHandler {
                          heartbeatTimes);
                 ctx.close();
             } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Client IdleStateEvent triggered send ping to" +
+                              "'{}', heartbeatTimes: {}",
+                              TransportUtil.remoteAddress(channel),
+                              heartbeatTimes);
+                }
+
+                ctx.writeAndFlush(PingMessage.INSTANCE)
+                   .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+
                 channel.attr(HEARTBEAT_TIMES).set(heartbeatTimes);
-                ctx.writeAndFlush(PingMessage.INSTANCE);
             }
         } else {
             super.userEventTriggered(ctx, event);

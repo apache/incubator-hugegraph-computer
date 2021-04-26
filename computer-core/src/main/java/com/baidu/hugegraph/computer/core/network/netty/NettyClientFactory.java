@@ -91,14 +91,14 @@ public class NettyClientFactory implements ClientFactory {
         this.bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
                               this.connectTimeoutMs);
 
-        if (this.conf.receiveBuffer() > 0) {
+        if (this.conf.sizeReceiveBuffer() > 0) {
             this.bootstrap.option(ChannelOption.SO_RCVBUF,
-                                  this.conf.receiveBuffer());
+                                  this.conf.sizeReceiveBuffer());
         }
 
-        if (this.conf.sendBuffer() > 0) {
+        if (this.conf.sizeSendBuffer() > 0) {
             this.bootstrap.option(ChannelOption.SO_SNDBUF,
-                                  this.conf.sendBuffer());
+                                  this.conf.sizeSendBuffer());
         }
 
         // Set low water mark and high water mark for the write buffer.

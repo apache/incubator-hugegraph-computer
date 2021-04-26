@@ -401,8 +401,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_RECEIVE_BUFFER_SIZE =
             new ConfigOption<>(
                     "transport.receive_buffer_size",
-                    "The network receive buffer size, 0 means using system " +
-                    "defaults.",
+                    "The size of socket receive-buffer in bytes, 0 means " +
+                    "using system default value.",
                     nonNegativeInt(),
                     0
             );
@@ -410,8 +410,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
             new ConfigOption<>(
                     "transport.send_buffer_size",
-                    "The network send buffer size, 0 means using system " +
-                    "defaults.",
+                    "The size of socket send-buffer in bytes, 0 means using " +
+                    "system default value.",
                     nonNegativeInt(),
                     0
             );
@@ -516,6 +516,14 @@ public class ComputerOptions extends OptionHolder {
                     200L
             );
 
+    public static final ConfigOption<Long> TRANSPORT_SERVER_IDLE_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.server_idle_timeout",
+                    "The max timeout(in ms) of server idle.",
+                    positiveInt(),
+                    50_000L
+            );
+
     public static final ConfigOption<Long> TRANSPORT_HEARTBEAT_INTERVAL =
             new ConfigOption<>(
                     "transport.heartbeat_interval",
@@ -533,13 +541,5 @@ public class ComputerOptions extends OptionHolder {
                     "client side.",
                     positiveInt(),
                     3
-            );
-
-    public static final ConfigOption<Long> TRANSPORT_SERVER_IDLE_TIMEOUT =
-            new ConfigOption<>(
-                    "transport.server_idle_timeout",
-                    "The max timeout(in ms) of server idle.",
-                    positiveInt(),
-                    50_000L
             );
 }
