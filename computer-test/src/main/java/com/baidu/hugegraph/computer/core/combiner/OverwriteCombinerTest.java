@@ -66,7 +66,7 @@ public class OverwriteCombinerTest extends UnitTestBase {
 
     @Test
     public void testCombineVertex() {
-        GraphFactory factory = context().graphFactory();
+        GraphFactory factory = graphFactory();
         LongId longId1 = new LongId(1L);
         DoubleValue value1 = new DoubleValue(0.1D);
         Vertex vertex1 = factory.createVertex(longId1, value1);

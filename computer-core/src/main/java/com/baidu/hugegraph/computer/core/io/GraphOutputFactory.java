@@ -24,9 +24,9 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
 public class GraphOutputFactory {
 
-    public static GraphOutput create(OutputFormat format,
-                                     RandomAccessOutput out,
-                                     ComputerContext context) {
+    public static GraphOutput create(ComputerContext context,
+                                     OutputFormat format,
+                                     RandomAccessOutput out) {
         switch (format) {
             case BIN:
                 return new OptimizedStreamGraphOutput(context, out);

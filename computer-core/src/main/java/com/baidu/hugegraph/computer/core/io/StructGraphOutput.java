@@ -39,15 +39,9 @@ public abstract class StructGraphOutput implements GraphOutput {
 
     protected final DataOutput out;
     protected final Config config;
-    protected final boolean outputVertexAdjacentEdges;
-    protected final boolean outputVertexProperties;
-    protected final boolean outputEdgeProperties;
 
     public StructGraphOutput(ComputerContext context, DataOutput out) {
         this.config = context.config();
-        this.outputVertexAdjacentEdges = config.outputVertexAdjacentEdges();
-        this.outputVertexProperties = config.outputVertexProperties();
-        this.outputEdgeProperties = config.outputEdgeProperties();
         this.out = out;
     }
 

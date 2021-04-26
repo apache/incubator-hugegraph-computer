@@ -96,8 +96,7 @@ public abstract class AbstractNetworkTest extends UnitTestBase {
             objects[i++] = kv.getValue();
         }
 
-        UnitTestBase.updateWithRequiredOptions(objects);
-        config = context().config();
+        config = UnitTestBase.updateWithRequiredOptions(objects);
         serverHandler = Mockito.spy(new MockMessageHandler());
         clientHandler = Mockito.spy(new MockClientHandler());
         connectionManager = new TransportConnectionManager();
@@ -139,15 +138,13 @@ public abstract class AbstractNetworkTest extends UnitTestBase {
 
     @Test
     public void testTransportConf() {
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO",
                 ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "20",
                 ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
                 ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
         );
-        // TODO: try to reduce call context() directly.
-        config = context().config();
 
         TransportConf conf = TransportConf.wrapConfig(config);
         Assert.assertEquals(20, conf.maxPendingRequests());

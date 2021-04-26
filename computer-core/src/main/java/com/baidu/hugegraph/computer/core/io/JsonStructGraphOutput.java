@@ -51,13 +51,13 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeJoiner();
         this.writeValue(vertex.value());
 
-        if (this.outputVertexAdjacentEdges) {
+        if (this.config.outputVertexAdjacentEdges()) {
             this.writeSplitter();
             this.writeKey("adjacent_edges");
             this.writeJoiner();
             this.writeEdges(vertex.edges());
         }
-        if (this.outputVertexProperties) {
+        if (this.config.outputVertexProperties()) {
             this.writeSplitter();
             this.writeKey("properties");
             this.writeJoiner();
@@ -95,7 +95,7 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeKey(valueName);
         this.writeJoiner();
         this.writeValue(edge.value());
-        if (this.outputEdgeProperties) {
+        if (this.config.outputEdgeProperties()) {
             this.writeSplitter();
             this.writeKey("properties");
             this.writeJoiner();

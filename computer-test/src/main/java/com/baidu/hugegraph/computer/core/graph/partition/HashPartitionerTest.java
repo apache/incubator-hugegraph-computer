@@ -39,11 +39,10 @@ public class HashPartitionerTest extends UnitTestBase {
 
     @Test
     public void test1Worker1Partition() {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "1"
         );
-        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -83,11 +82,10 @@ public class HashPartitionerTest extends UnitTestBase {
 
     @Test
     public void test1Worker2Partition() {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2"
         );
-        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -127,11 +125,10 @@ public class HashPartitionerTest extends UnitTestBase {
 
     @Test
     public void test1Worker3Partition() {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "3"
         );
-        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -171,11 +168,10 @@ public class HashPartitionerTest extends UnitTestBase {
 
     @Test
     public void test3Worker1Partition() {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.JOB_WORKERS_COUNT, "3",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "1"
         );
-        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -217,13 +213,12 @@ public class HashPartitionerTest extends UnitTestBase {
     public void testDist() {
         int workerCount = 2;
         int partitionCount = 10;
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.JOB_WORKERS_COUNT,
                 Integer.toString(workerCount),
                 ComputerOptions.JOB_PARTITIONS_COUNT,
                 Integer.toString(partitionCount)
         );
-        Config config = context().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);

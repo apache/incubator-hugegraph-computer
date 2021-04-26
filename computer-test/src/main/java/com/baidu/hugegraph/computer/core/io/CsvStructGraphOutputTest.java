@@ -67,7 +67,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos, context);
+                                       context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
             output.close();
 
@@ -106,7 +106,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos, context);
+                                       context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
             output.close();
 
@@ -158,7 +158,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos, context);
+                                       context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
             output.close();
 

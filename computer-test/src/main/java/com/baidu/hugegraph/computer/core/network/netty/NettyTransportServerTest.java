@@ -53,15 +53,13 @@ public class NettyTransportServerTest extends UnitTestBase {
 
     @Before
     public void setup() {
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "0",
                 ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO",
                 ComputerOptions.TRANSPORT_BACKLOG, "1024"
         );
-        // TODO: try to reduce call context() directly.
-        config = context().config();
         messageHandler = new MockMessageHandler();
         this.server = new NettyTransportServer();
     }
@@ -100,11 +98,9 @@ public class NettyTransportServerTest extends UnitTestBase {
 
     @Test
     public void testListenWithLocalHost() {
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "localhost"
         );
-        // TODO: try to reduce call context() directly.
-        config = context().config();
         int port = this.server.listen(config, messageHandler);
 
         TransportConf conf = this.server.conf();
@@ -121,10 +117,9 @@ public class NettyTransportServerTest extends UnitTestBase {
         InetAddress localHost = InetAddress.getLocalHost();
         String hostName = localHost.getHostName();
         String ip = InetAddress.getLocalHost().getHostAddress();
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, hostName
         );
-        config = context().config();
         int port = this.server.listen(config, messageHandler);
 
         TransportConf conf = this.server.conf();
@@ -141,10 +136,9 @@ public class NettyTransportServerTest extends UnitTestBase {
         List<String> ips = TransportUtil.getLocalIPAddress();
         if (!ips.isEmpty()) {
             String ip = ips.get(0);
-            UnitTestBase.updateWithRequiredOptions(
+            config = UnitTestBase.updateWithRequiredOptions(
                     ComputerOptions.TRANSPORT_SERVER_HOST, ip
             );
-            config = context().config();
             int port = this.server.listen(config, messageHandler);
             Assert.assertNotEquals(0, this.server.port());
             Assert.assertNotEquals(0, port);
@@ -155,10 +149,9 @@ public class NettyTransportServerTest extends UnitTestBase {
 
     @Test
     public void testListenWithZeroIp() {
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "0.0.0.0"
         );
-        config = context().config();
         int port = this.server.listen(config, messageHandler);
 
         TransportConf conf = this.server.conf();
@@ -173,11 +166,10 @@ public class NettyTransportServerTest extends UnitTestBase {
 
     @Test
     public void testListenWithAssignPort() {
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "9091"
         );
-        config = context().config();
 
         int port = this.server.listen(config, messageHandler);
 
@@ -194,13 +186,12 @@ public class NettyTransportServerTest extends UnitTestBase {
 
     @Test
     public void testListenWithInvalidHost() {
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "abcdefd",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "0",
                 ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
-        config = context().config();
 
         Assert.assertThrows(ComputeException.class, () -> {
             this.server.listen(config, messageHandler);
@@ -211,13 +202,12 @@ public class NettyTransportServerTest extends UnitTestBase {
 
     @Test
     public void testListenWithInvalidPort() {
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "67899",
                 ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
                 ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
-        config = context().config();
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             this.server.listen(config, messageHandler);
@@ -243,11 +233,10 @@ public class NettyTransportServerTest extends UnitTestBase {
 
     @Test
     public void testEpollMode() {
-        UnitTestBase.updateWithRequiredOptions(
+        config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
                 ComputerOptions.TRANSPORT_IO_MODE, "EPOLL"
         );
-        config = context().config();
 
         if (Epoll.isAvailable()) {
             this.server.listen(config, messageHandler);

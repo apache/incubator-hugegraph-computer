@@ -43,11 +43,11 @@ public interface GraphFactory {
 
     <V extends Value<?>> Edge createEdge(Id targetId, V value);
 
+    Properties createProperties();
+
     <V> List<V> createList();
 
     <V> List<V> createList(int capacity);
 
     <K, V> Map<K, V> createMap();
-
-    Properties createProperties();
 }

@@ -38,9 +38,9 @@ public final class SerializeUtil {
     private static final ComputerContext CONTEXT = ComputerContext.instance();
 
     public static byte[] toBytes(Writable obj) {
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(CONTEXT,
-                                                                      bao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
+             StreamGraphOutput output = new OptimizedStreamGraphOutput(CONTEXT,
+                                                                       bao)) {
             obj.write(output);
             return bao.toByteArray();
         } catch (IOException e) {
@@ -50,9 +50,9 @@ public final class SerializeUtil {
     }
 
     public static void fromBytes(byte[] bytes, Readable obj) {
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(CONTEXT,
-                                                                   bai);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
+             StreamGraphInput input = new OptimizedStreamGraphInput(CONTEXT,
+                                                                    bai)) {
             obj.read(input);
         } catch (IOException e) {
             throw new ComputeException("Failed to read from byte array", e);

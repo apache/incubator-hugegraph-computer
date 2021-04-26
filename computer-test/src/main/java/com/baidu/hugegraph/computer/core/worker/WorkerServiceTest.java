@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.worker;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -47,35 +46,22 @@ public class WorkerServiceTest extends UnitTestBase {
         try {
             ExecutorService pool = Executors.newFixedThreadPool(2);
             CountDownLatch countDownLatch = new CountDownLatch(2);
-            Semaphore semaphore = new Semaphore(1);
             Throwable[] exceptions = new Throwable[2];
 
             pool.submit(() -> {
-                Config config;
-                try {
-                    semaphore.acquire();
-                    UnitTestBase.updateWithRequiredOptions(
-                            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
-                            ComputerOptions.JOB_ID, "local_001",
-                            ComputerOptions.JOB_WORKERS_COUNT, "1",
-                            ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                            ComputerOptions.WORKER_COMPUTATION_CLASS,
-                            MockComputation.class.getName(),
-                            ComputerOptions.MASTER_COMPUTATION_CLASS,
-                            MockMasterComputation.class.getName()
-                    );
-                    config = context().config();
-                } catch (InterruptedException e) {
-                    countDownLatch.countDown();
-                    throw new ComputerException("Current thread interrupted",
-                                                e);
-                } finally {
-                    semaphore.release();
-                }
+                Config config = UnitTestBase.updateWithRequiredOptions(
+                        RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+                        ComputerOptions.JOB_ID, "local_001",
+                        ComputerOptions.JOB_WORKERS_COUNT, "1",
+                        ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                        ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                        ComputerOptions.WORKER_COMPUTATION_CLASS,
+                        MockComputation.class.getName(),
+                        ComputerOptions.MASTER_COMPUTATION_CLASS,
+                        MockMasterComputation.class.getName()
+                );
                 try {
                     workerService.init(config);
-                    semaphore.release();
                     workerService.execute();
                 } catch (Throwable e) {
                     LOG.error("Failed to start worker", e);
@@ -86,28 +72,17 @@ public class WorkerServiceTest extends UnitTestBase {
             });
 
             pool.submit(() -> {
-                Config config;
-                try {
-                    semaphore.acquire();
-                    UnitTestBase.updateWithRequiredOptions(
-                            RpcOptions.RPC_SERVER_HOST, "localhost",
-                            ComputerOptions.JOB_ID, "local_001",
-                            ComputerOptions.JOB_WORKERS_COUNT, "1",
-                            ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                            ComputerOptions.WORKER_COMPUTATION_CLASS,
-                            MockComputation.class.getName(),
-                            ComputerOptions.MASTER_COMPUTATION_CLASS,
-                            MockMasterComputation.class.getName()
-                    );
-                    config = context().config();
-                } catch (InterruptedException e) {
-                    countDownLatch.countDown();
-                    throw new ComputerException("Current thread interrupted",
-                                                e);
-                } finally {
-                    semaphore.release();
-                }
+                Config config = UnitTestBase.updateWithRequiredOptions(
+                        RpcOptions.RPC_SERVER_HOST, "localhost",
+                        ComputerOptions.JOB_ID, "local_001",
+                        ComputerOptions.JOB_WORKERS_COUNT, "1",
+                        ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                        ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                        ComputerOptions.WORKER_COMPUTATION_CLASS,
+                        MockComputation.class.getName(),
+                        ComputerOptions.MASTER_COMPUTATION_CLASS,
+                        MockMasterComputation.class.getName()
+                );
                 try {
                     masterService.init(config);
                     masterService.execute();
@@ -122,7 +97,7 @@ public class WorkerServiceTest extends UnitTestBase {
             countDownLatch.await();
             pool.shutdownNow();
 
-            Assert.assertFalse(existError(exceptions));
+            Assert.assertFalse(this.existError(exceptions));
         } finally {
             workerService.close();
             masterService.close();
@@ -134,6 +109,7 @@ public class WorkerServiceTest extends UnitTestBase {
         for (Throwable e : exceptions) {
             if (e != null) {
                 error = true;
+                break;
             }
         }
         return error;
@@ -142,7 +118,7 @@ public class WorkerServiceTest extends UnitTestBase {
     @Test
     public void testFailToConnectEtcd() {
         WorkerService workerService = new MockWorkerService();
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
                 RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                 // Unavailable etcd endpoints
                 ComputerOptions.BSP_ETCD_ENDPOINTS, "http://abc:8098",
@@ -153,9 +129,6 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.WORKER_COMPUTATION_CLASS,
                 MockComputation.class.getName()
         );
-
-        // TODO: try to reduce call context() directly.
-        Config config = context().config();
 
         Assert.assertThrows(ComputerException.class, () -> {
             workerService.init(config);

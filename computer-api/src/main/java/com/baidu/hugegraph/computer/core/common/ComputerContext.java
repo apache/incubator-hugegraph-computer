@@ -51,7 +51,6 @@ public final class ComputerContext {
                                        valueFactory, allocator);
     }
 
-    // TODO: try to reduce call it directly.
     public static ComputerContext instance() {
         E.checkNotNull(INSTANCE, "ComputerContext INSTANCE");
         return INSTANCE;

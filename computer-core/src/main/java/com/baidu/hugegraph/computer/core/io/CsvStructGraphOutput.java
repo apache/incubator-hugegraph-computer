@@ -46,11 +46,11 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
         this.writeValue(vertex.value());
 
-        if (this.outputVertexAdjacentEdges) {
+        if (this.config.outputVertexAdjacentEdges()) {
             this.writeSplitter();
             this.writeEdges(vertex.edges());
         }
-        if (this.outputVertexProperties) {
+        if (this.config.outputVertexProperties()) {
             this.writeSplitter();
             this.writeProperties(vertex.properties());
         }
@@ -79,7 +79,7 @@ public class CsvStructGraphOutput extends StructGraphOutput {
         this.writeSplitter();
 
         this.writeValue(edge.value());
-        if (this.outputEdgeProperties) {
+        if (this.config.outputEdgeProperties()) {
             this.writeSplitter();
             this.writeProperties(edge.properties());
         }

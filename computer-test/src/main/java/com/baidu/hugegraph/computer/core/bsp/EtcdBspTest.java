@@ -48,14 +48,13 @@ public class EtcdBspTest extends UnitTestBase {
 
     @Before
     public void setup() {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.BSP_LOG_INTERVAL, "30000",
             ComputerOptions.BSP_MAX_SUPER_STEP, "2"
         );
 
-        Config config = context().config();
         this.bsp4Master = new Bsp4Master(config);
         this.bsp4Master.init();
         this.masterInfo = new ContainerInfo(-1, "localhost", 8001, 8002);

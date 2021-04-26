@@ -67,7 +67,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos, context);
+                                       context, OutputFormat.JSON, dos);
             output.writeVertex(vertex);
             output.close();
 
@@ -107,7 +107,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos, context);
+                                       context, OutputFormat.JSON, dos);
             output.writeVertex(vertex);
             output.close();
 
@@ -163,7 +163,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.JSON, dos, context);
+                                       context, OutputFormat.JSON, dos);
             output.writeVertex(vertex);
             output.close();
 

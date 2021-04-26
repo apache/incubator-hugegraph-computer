@@ -149,11 +149,10 @@ public class DefaultConfigTest extends UnitTestBase {
 
     @Test
     public void testCreateObjectFail() {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.MASTER_COMPUTATION_CLASS,
                 FakeMasterComputation.class.getName()
         );
-        Config config = context().config();
         Assert.assertThrows(ComputerException.class, () -> {
             config.createObject(ComputerOptions.MASTER_COMPUTATION_CLASS);
         }, e -> {
