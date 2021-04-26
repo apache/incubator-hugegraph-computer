@@ -44,7 +44,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadVertex() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "test",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"
@@ -71,7 +70,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadEdges() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "test",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"
@@ -100,7 +98,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadEmptyEdges() throws IOException {
         UnitTestBase.updateOptions(
-                ComputerOptions.ALGORITHM_NAME, "test",
                 ComputerOptions.VALUE_TYPE, "LONG",
                 ComputerOptions.VALUE_NAME, "value",
                 ComputerOptions.EDGES_NAME, "value"
@@ -125,7 +122,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadProperties() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "test",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"
@@ -155,7 +151,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
         // Let ValueType as ID_VALUE
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "test",
             ComputerOptions.VALUE_TYPE, "ID_VALUE",
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"
@@ -203,7 +198,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadValue() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "test",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"
@@ -229,7 +223,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
         // Test IdValueList
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "test",
             ComputerOptions.VALUE_TYPE, "ID_VALUE_LIST",
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"

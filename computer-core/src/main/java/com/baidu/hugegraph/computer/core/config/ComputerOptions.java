@@ -54,14 +54,6 @@ public class ComputerOptions extends OptionHolder {
         return INSTANCE;
     }
 
-    public static final ConfigOption<String> ALGORITHM_NAME =
-            new ConfigOption<>(
-                    "algorithm.name",
-                    "The name of current algorithm",
-                    disallowEmpty(),
-                    "unknown"
-            );
-
     public static final ConfigOption<String> VALUE_TYPE =
             new ConfigOption<>(
                     "algorithm.value_type",
@@ -174,7 +166,6 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
-            ALGORITHM_NAME.name(),
             VALUE_TYPE.name(),
             VALUE_NAME.name(),
             EDGES_NAME.name()

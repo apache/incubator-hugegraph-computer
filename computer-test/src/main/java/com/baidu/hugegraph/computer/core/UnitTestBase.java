@@ -108,7 +108,6 @@ public class UnitTestBase {
     public static synchronized Config updateWithRequiredOptions(
                                       Object... options) {
         Object[] requiredOptions = new Object[] {
-            ComputerOptions.ALGORITHM_NAME, "page_rank",
             ComputerOptions.VALUE_NAME, "rank",
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG"};

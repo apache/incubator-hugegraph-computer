@@ -173,7 +173,6 @@ public class DefaultConfigTest extends UnitTestBase {
 
     private Map<String, String> initialOptions() {
         Map<String, String> options = new HashMap<>();
-        options.put(ComputerOptions.ALGORITHM_NAME.name(), "page_rank");
         options.put(ComputerOptions.VALUE_NAME.name(), "rank");
         options.put(ComputerOptions.EDGES_NAME.name(), "value");
         options.put(ComputerOptions.VALUE_TYPE.name(), "LONG");

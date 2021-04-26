@@ -148,7 +148,6 @@ public class DefaultAllocatorTest extends UnitTestBase {
             throws InvocationTargetException, IllegalAccessException {
         String capacityValue = String.valueOf(maxCapacity);
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "test",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value",

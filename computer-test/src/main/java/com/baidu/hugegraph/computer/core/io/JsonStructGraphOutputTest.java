@@ -46,7 +46,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     @Test
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "page_rank",
             ComputerOptions.VALUE_NAME, "rank",
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
@@ -82,7 +81,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     @Test
     public void testWriteReadVertexWithEdges() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "page_rank",
             ComputerOptions.VALUE_NAME, "rank",
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
@@ -126,7 +124,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     @Test
     public void testWriteReadVertexWithProperties() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "page_rank",
             ComputerOptions.VALUE_NAME, "rank",
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",

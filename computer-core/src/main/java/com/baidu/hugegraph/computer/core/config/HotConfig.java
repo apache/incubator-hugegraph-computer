@@ -23,7 +23,6 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 
 public final class HotConfig {
 
-    private String algorithmName;
     private String vertexValueName;
     private String edgeValueName;
     private ValueType valueType;
@@ -31,14 +30,6 @@ public final class HotConfig {
     private boolean outputVertexAdjacentEdges;
     private boolean outputVertexProperties;
     private boolean outputEdgeProperties;
-
-    public String algorithmName() {
-        return this.algorithmName;
-    }
-
-    public void algorithmName(String algorithmName) {
-        this.algorithmName = algorithmName;
-    }
 
     public String vertexValueName() {
         return this.vertexValueName;

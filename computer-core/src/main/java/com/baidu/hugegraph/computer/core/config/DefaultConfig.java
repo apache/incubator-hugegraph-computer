@@ -62,7 +62,6 @@ public final class DefaultConfig implements Config {
     private HotConfig extractHotConfig(HugeConfig allConfig) {
         // Populate high frequency accessed options into HotConfig
         HotConfig hotConfig = new HotConfig();
-        hotConfig.algorithmName(allConfig.get(ComputerOptions.ALGORITHM_NAME));
         hotConfig.vertexValueName(
                   allConfig.get(ComputerOptions.VALUE_NAME));
         hotConfig.edgeValueName(
