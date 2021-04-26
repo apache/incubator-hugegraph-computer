@@ -413,6 +413,7 @@ public class ComputerOptions extends OptionHolder {
                     "The size of socket send-buffer in bytes, 0 means using " +
                     "system default value.",
                     nonNegativeInt(),
+                    // TODO: Test to get an best value
                     0
             );
 
@@ -532,12 +533,12 @@ public class ComputerOptions extends OptionHolder {
                     10_000L
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_MAX_HEARTBEAT_TIMES =
+    public static final ConfigOption<Integer> TRANSPORT_MAX_HEARTBEAT_TIMEOUTS =
             new ConfigOption<>(
-                    "transport.max_heartbeat_times",
+                    "transport.max_heartbeat_timeouts",
                     "The max times of client heartbeat, if the number of " +
-                    "times of trigger client heartbeat continuously > " +
-                    "max_heartbeat_times the channel will be closed from " +
+                    "timeouts waiting for heartbeat response continuously > " +
+                    "max_heartbeat_timeouts the channel will be closed from " +
                     "client side.",
                     positiveInt(),
                     3

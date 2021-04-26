@@ -39,11 +39,6 @@ public abstract class AbstractNettyHandler
                       TransportUtil.remoteAddress(channel), msg);
         }
 
-        // Reset client heartbeat times
-        if (this instanceof NettyClientHandler) {
-            this.resetHeartBeatTimes(channel);
-        }
-
         MessageType msgType = msg.type();
 
         if (msgType.category() == MessageType.Category.DATA) {
@@ -125,10 +120,6 @@ public abstract class AbstractNettyHandler
         long timeout = this.session().conf().writeSocketTimeout();
         FailMessage failMessage = new FailMessage(failId, errorCode, message);
         ctx.writeAndFlush(failMessage).awaitUninterruptibly(timeout);
-    }
-
-    protected void resetHeartBeatTimes(Channel channel) {
-        channel.attr(HeartbeatHandler.HEARTBEAT_TIMES).set(0);
     }
 
     protected abstract TransportSession session();

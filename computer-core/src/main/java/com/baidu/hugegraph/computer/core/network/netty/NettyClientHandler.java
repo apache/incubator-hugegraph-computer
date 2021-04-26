@@ -29,6 +29,7 @@ import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
+import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.Log;
@@ -45,6 +46,15 @@ public class NettyClientHandler extends AbstractNettyHandler {
 
     public NettyClientHandler(NettyTransportClient client) {
         this.client = client;
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, Message msg)
+                                throws Exception {
+        // Reset client heartbeat timeouts
+        ctx.channel().attr(HeartbeatHandler.HEARTBEAT_TIMEOUTS).set(0);
+
+        super.channelRead0(ctx, msg);
     }
 
     @Override
