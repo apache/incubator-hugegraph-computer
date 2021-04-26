@@ -302,10 +302,6 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             int minPendingRequests = conf.minPendingRequests();
-        }, e -> {
-            Assert.assertContains("The minPendingRequests must be " +
-                                  "less than or equal to the " +
-                                  "maxPendingRequests", e.getMessage());
         });
     }
 }

@@ -381,10 +381,18 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
+    public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
             new ConfigOption<>(
-                    "transport.send_buffer_size",
-                    "The network send buffer size, 0 means using system " +
+                    "transport.transport_tcp_keep_alive",
+                    "Whether enable TCP keep-alive.",
+                    allowValues(true, false),
+                    true
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
+            new ConfigOption<>(
+                    "transport.backlog",
+                    "The server connection backlog, 0 means using system " +
                     "defaults.",
                     nonNegativeInt(),
                     0
@@ -399,10 +407,10 @@ public class ComputerOptions extends OptionHolder {
                     0
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
+    public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
             new ConfigOption<>(
-                    "transport.backlog",
-                    "The server connection backlog, 0 means using system " +
+                    "transport.send_buffer_size",
+                    "The network send buffer size, 0 means using system " +
                     "defaults.",
                     nonNegativeInt(),
                     0
@@ -508,37 +516,30 @@ public class ComputerOptions extends OptionHolder {
                     200L
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_INTERVAL =
+    public static final ConfigOption<Long> TRANSPORT_HEARTBEAT_INTERVAL =
             new ConfigOption<>(
-                    "transport.heartbeat_interval_seconds",
-                    "Time minimum interval(in seconds) of send heartbeat.",
+                    "transport.heartbeat_interval",
+                    "Time minimum interval(in ms) of client send heartbeat.",
                     positiveInt(),
-                    60
+                    10_000L
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MAX_HEARTBEAT_TIMES =
             new ConfigOption<>(
                     "transport.max_heartbeat_times",
-                    "The max times of heartbeat, if the number of times of " +
-                    "not received heartbeat response continuously > " +
-                    "max_heartbeat_times the channel will be closed.",
+                    "The max times of client heartbeat, if the number of " +
+                    "times of trigger client heartbeat continuously > " +
+                    "max_heartbeat_times the channel will be closed from " +
+                    "client side.",
                     positiveInt(),
                     3
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_TIMEOUT =
+    public static final ConfigOption<Long> TRANSPORT_SERVER_IDLE_TIMEOUT =
             new ConfigOption<>(
-                    "transport.heartbeat_timeout_seconds",
-                    "The max timeout(in seconds) of heartbeat.",
+                    "transport.server_idle_timeout",
+                    "The max timeout(in ms) of server idle.",
                     positiveInt(),
-                    120
-            );
-
-    public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
-            new ConfigOption<>(
-                    "transport.transport_tcp_keep_alive",
-                    "Whether enable TCP keep-alive.",
-                    allowValues(true, false),
-                    true
+                    50_000L
             );
 }

@@ -37,12 +37,12 @@ import io.netty.util.AttributeKey;
  * Send ping message
  */
 @ChannelHandler.Sharable
-public class HeartBeatHandler extends ChannelDuplexHandler {
+public class HeartbeatHandler extends ChannelDuplexHandler {
 
-    private static final Logger LOG = Log.logger(HeartBeatHandler.class);
+    private static final Logger LOG = Log.logger(HeartbeatHandler.class);
 
     public static final AttributeKey<Integer> HEARTBEAT_TIMES  =
-           AttributeKey.valueOf("heartbeatCount");
+           AttributeKey.valueOf("heartbeatTimes");
     public static final AttributeKey<Integer> MAX_HEARTBEAT_TIMES  =
            AttributeKey.valueOf("maxHeartbeatTimes");
 
@@ -61,7 +61,7 @@ public class HeartBeatHandler extends ChannelDuplexHandler {
             Integer lastHeartbeatTimes = channel.attr(HEARTBEAT_TIMES).get();
             assert lastHeartbeatTimes != null;
 
-            int heartbeatTimes = lastHeartbeatTimes  + 1;
+            int heartbeatTimes = lastHeartbeatTimes + 1;
 
             if (heartbeatTimes > maxHeartbeatTimes) {
                 LOG.info("Heartbeat times more than the maxHeartbeatTimes, " +

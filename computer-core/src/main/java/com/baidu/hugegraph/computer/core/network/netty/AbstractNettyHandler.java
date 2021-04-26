@@ -127,7 +127,7 @@ public abstract class AbstractNettyHandler
     }
 
     protected void resetHeartBeatTimes(Channel channel) {
-        channel.attr(HeartBeatHandler.HEARTBEAT_TIMES).set(0);
+        channel.attr(HeartbeatHandler.HEARTBEAT_TIMES).set(0);
     }
 
     protected abstract TransportSession session();

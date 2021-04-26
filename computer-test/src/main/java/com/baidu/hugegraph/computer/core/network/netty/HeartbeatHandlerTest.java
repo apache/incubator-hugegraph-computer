@@ -31,31 +31,31 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;
 
-public class HeartBeatHandlerTest extends AbstractNetworkTest {
+public class HeartbeatHandlerTest extends AbstractNetworkTest {
 
-    private static final int HEARTBEAT_INTERVAL = 2;
-    private static final int HEARTBEAT_TIME_OUT = 6;
+    private static final long HEARTBEAT_INTERVAL = 2000L;
+    private static final long IDLE_TIMEOUT = 6000L;
     private static final int MAX_HEARTBEAT_TIMES = 3;
 
     @Override
     protected void initOption() {
         super.updateOption(ComputerOptions.TRANSPORT_HEARTBEAT_INTERVAL,
                            HEARTBEAT_INTERVAL);
-        super.updateOption(ComputerOptions.TRANSPORT_HEARTBEAT_TIMEOUT,
-                           HEARTBEAT_TIME_OUT);
+        super.updateOption(ComputerOptions.TRANSPORT_SERVER_IDLE_TIMEOUT,
+                           IDLE_TIMEOUT);
         super.updateOption(ComputerOptions.TRANSPORT_MAX_HEARTBEAT_TIMES,
                            MAX_HEARTBEAT_TIMES);
     }
 
     @Test
-    public void testHeartBeatHandler() throws Exception {
-        HeartBeatHandler beatHandler = new HeartBeatHandler();
-        HeartBeatHandler mockHeartBeatHandler = Mockito.spy(beatHandler);
+    public void testHeartbeatHandler() throws Exception {
+        HeartbeatHandler beatHandler = new HeartbeatHandler();
+        HeartbeatHandler mockHeartbeatHandler = Mockito.spy(beatHandler);
         Mockito.doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
             Channel channel = invocationOnMock.getArgument(0);
-            channel.pipeline().replace("heartBeatHandler", "heartBeatHandler",
-                                       mockHeartBeatHandler);
+            channel.pipeline().replace("heartbeatHandler", "heartbeatHandler",
+                                       mockHeartbeatHandler);
             return null;
         }).when(clientProtocol).initializeClientPipeline(Mockito.any());
 
@@ -86,8 +86,8 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
                                             spyHandler);
 
         int heartbeatTimesClose = MAX_HEARTBEAT_TIMES + 1;
-        long timout = ((HEARTBEAT_INTERVAL * heartbeatTimesClose)) * 1000L;
-        Mockito.verify(mockHeartBeatHandler,
+        long timout = HEARTBEAT_INTERVAL * heartbeatTimesClose;
+        Mockito.verify(mockHeartbeatHandler,
                        Mockito.timeout(timout).times(heartbeatTimesClose))
                .userEventTriggered(Mockito.any(),
                                    Mockito.any(IdleStateEvent.class));
@@ -108,13 +108,13 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
         }).when(serverProtocol).initializeServerPipeline(Mockito.any(),
                                                          Mockito.any());
 
-        HeartBeatHandler beatHandler = new HeartBeatHandler();
-        HeartBeatHandler mockHeartBeatHandler = Mockito.spy(beatHandler);
+        HeartbeatHandler beatHandler = new HeartbeatHandler();
+        HeartbeatHandler mockHeartbeatHandler = Mockito.spy(beatHandler);
         Mockito.doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
             Channel channel = invocationOnMock.getArgument(0);
-            channel.pipeline().replace("heartBeatHandler", "heartBeatHandler",
-                                       mockHeartBeatHandler);
+            channel.pipeline().replace("heartbeatHandler", "heartbeatHandler",
+                                       mockHeartbeatHandler);
             return null;
         }).when(clientProtocol).initializeClientPipeline(Mockito.any());
 
@@ -123,13 +123,13 @@ public class HeartBeatHandlerTest extends AbstractNetworkTest {
             Object event = invocationOnMock.getArgument(1);
             ctx.fireUserEventTriggered(event);
             return null;
-        }).when(mockHeartBeatHandler)
+        }).when(mockHeartbeatHandler)
           .userEventTriggered(Mockito.any(), Mockito.any(IdleStateEvent.class));
 
         TransportClient client = this.oneClient();
 
-        long delay = (HEARTBEAT_TIME_OUT + 1) * 1000L;
-        Mockito.verify(spyServerIdleHandler, Mockito.timeout(delay).times(1))
+        long timeout = IDLE_TIMEOUT + 1000L;
+        Mockito.verify(spyServerIdleHandler, Mockito.timeout(timeout).times(1))
                .userEventTriggered(Mockito.any(),
                                    Mockito.any(IdleStateEvent.class));
     }

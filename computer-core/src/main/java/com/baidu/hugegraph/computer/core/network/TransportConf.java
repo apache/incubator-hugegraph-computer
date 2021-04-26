@@ -60,6 +60,19 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
     }
 
+    public int serverThreads() {
+        return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
+    }
+
+    public int clientThreads() {
+        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
+    }
+
+    public TransportProvider transportProvider() {
+        return this.config
+                .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
+    }
+
     /**
      * IO mode: nio or epoll
      */
@@ -78,16 +91,15 @@ public class TransportConf {
         }
     }
 
-    public TransportProvider transportProvider() {
-        return this.config
-                   .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
-    }
-
     /**
-     * Enabled EPOLL level trigger
+     * Whether enabled EPOLL level trigger
      */
     public boolean epollLevelTriggered() {
         return this.config.get(ComputerOptions.TRANSPORT_EPOLL_LT);
+    }
+
+    public boolean tcpKeepAlive() {
+        return this.config.get(ComputerOptions.TRANSPORT_TCP_KEEP_ALIVE);
     }
 
     /**
@@ -100,18 +112,6 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_BACKLOG);
     }
 
-    public int serverThreads() {
-        return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
-    }
-
-    public int clientThreads() {
-        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
-    }
-
-    public int sendBuffer() {
-        return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
-    }
-
     /**
      * Receive buffer size (SO_RCVBUF).
      * Note: the optimal size for receive buffer and send buffer should be
@@ -121,6 +121,10 @@ public class TransportConf {
      */
     public int receiveBuffer() {
         return this.config.get(ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE);
+    }
+
+    public int sendBuffer() {
+        return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 
     public int networkRetries() {
@@ -174,9 +178,12 @@ public class TransportConf {
         int minPendingReqs = this.config.get(
                              ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS);
 
-        E.checkArgument(minPendingReqs <= this.maxPendingRequests(),
-                        "The minPendingRequests must be less than or equal " +
-                        "to the maxPendingRequests.");
+        int maxPendingRequests = this.maxPendingRequests();
+
+        E.checkArgument(minPendingReqs <= maxPendingRequests,
+                        "The min_pending_requests(%s) must be less than or " +
+                        "equal to the max_pending_requests(%s).",
+                        minPendingReqs, maxPendingRequests);
         return minPendingReqs;
     }
 
@@ -184,7 +191,7 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL);
     }
 
-    public int heartbeatInterval() {
+    public long heartbeatInterval() {
         return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_INTERVAL);
     }
 
@@ -192,11 +199,7 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_MAX_HEARTBEAT_TIMES);
     }
 
-    public int heartbeatTimeout() {
-        return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_TIMEOUT);
-    }
-
-    public boolean tcpKeepAlive() {
-        return this.config.get(ComputerOptions.TRANSPORT_TCP_KEEP_ALIVE);
+    public long serverIdleTimeout() {
+        return this.config.get(ComputerOptions.TRANSPORT_SERVER_IDLE_TIMEOUT);
     }
 }
