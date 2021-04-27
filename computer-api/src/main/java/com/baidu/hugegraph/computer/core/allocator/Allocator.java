@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.allocator;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-
 public interface Allocator {
 
     RecyclerReference<Vertex> newVertex();
