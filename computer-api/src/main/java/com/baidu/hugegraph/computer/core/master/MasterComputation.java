@@ -26,9 +26,9 @@ package com.baidu.hugegraph.computer.core.master;
  *
  * The communication between the master and workers is performed via
  * aggregators. The value of aggregators are collected by the master before
- * {@link #compute(MasterContext)} ()} is called. This means aggregator
- * values used by the workers are consistent with aggregator values from the
- * master in the same superstep.
+ * {@link #compute(MasterComputationContext)} ()} is called. This means
+ * aggregator values used by the workers are consistent with aggregator
+ * values from the master in the same superstep.
  */
 public interface MasterComputation {
 
@@ -37,13 +37,13 @@ public interface MasterComputation {
      * this method. Create resources used in compute. Be called before all
      * supersteps start.
      */
-    void init(MasterInitContext initContext);
+    void init(MasterContext context);
 
     /**
-     * Close the resource created in {@link #init(MasterInitContext)}.
+     * Close the resource created in {@link #init(MasterContext)}.
      * Be called after all supersteps.
      */
-    void close();
+    void close(MasterContext context);
 
     /**
      * The master-algorithm can use aggregators to determine whether to
@@ -51,5 +51,5 @@ public interface MasterComputation {
      * a superstep.
      * @return true if want to continue the next iteration.
      */
-    boolean compute(MasterContext context);
+    boolean compute(MasterComputationContext context);
 }

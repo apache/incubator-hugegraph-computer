@@ -20,8 +20,8 @@
 package com.baidu.hugegraph.computer.core.common;
 
 import com.baidu.hugegraph.computer.core.master.MasterComputation;
+import com.baidu.hugegraph.computer.core.master.MasterComputationContext;
 import com.baidu.hugegraph.computer.core.master.MasterContext;
-import com.baidu.hugegraph.computer.core.master.MasterInitContext;
 
 /**
  * Can't create instance, used for ObjectFactoryTest.
@@ -32,15 +32,17 @@ public class FakeMasterComputation implements MasterComputation {
     }
 
     @Override
-    public void init(MasterInitContext initContext) {
+    public void init(MasterContext context) {
+        // pass
     }
 
     @Override
-    public void close() {
+    public void close(MasterContext context) {
+        // pass
     }
 
     @Override
-    public boolean compute(MasterContext context) {
+    public boolean compute(MasterComputationContext context) {
         return false;
     }
 }

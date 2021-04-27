@@ -20,13 +20,13 @@
 package com.baidu.hugegraph.computer.core.worker;
 
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
-import com.baidu.hugegraph.computer.core.master.MasterContext;
+import com.baidu.hugegraph.computer.core.master.MasterComputationContext;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class MockMasterComputation extends DefaultMasterComputation {
 
     @Override
-    public boolean compute(MasterContext context) {
+    public boolean compute(MasterComputationContext context) {
         Assert.assertEquals(100L, context.totalVertexCount());
         Assert.assertEquals(200L, context.totalEdgeCount());
         Assert.assertEquals(50L, context.finishedVertexCount());

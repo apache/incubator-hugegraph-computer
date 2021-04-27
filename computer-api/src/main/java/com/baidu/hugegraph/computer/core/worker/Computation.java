@@ -80,7 +80,7 @@ public interface Computation<M extends Value<?>> {
      * Subclass can override this method if want to close the resources used
      * in the computation.
      */
-    default void close() {
+    default void close(Config config) {
         // pass
     }
 

@@ -26,7 +26,7 @@ package com.baidu.hugegraph.computer.core.master;
 public class DefaultMasterComputation implements MasterComputation {
 
     @Override
-    public void init(MasterInitContext initContext) {
+    public void init(MasterContext context) {
         // pass
     }
 
@@ -34,12 +34,12 @@ public class DefaultMasterComputation implements MasterComputation {
      * Compute until max superstep.
      */
     @Override
-    public boolean compute(MasterContext context) {
+    public boolean compute(MasterComputationContext context) {
         return true;
     }
 
     @Override
-    public void close() {
+    public void close(MasterContext context) {
         // pass
     }
 }

@@ -124,7 +124,7 @@ public class WorkerService {
          * TODO: stop the data transportation server.
          */
         this.managers.closeAll(this.config);
-        this.computation.close();
+        this.computation.close(this.config);
         this.bsp4Worker.close();
         LOG.info("{} WorkerService closed", this);
     }
