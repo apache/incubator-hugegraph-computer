@@ -536,10 +536,10 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_MAX_HEARTBEAT_TIMEOUTS =
             new ConfigOption<>(
                     "transport.max_heartbeat_timeouts",
-                    "The max times of client heartbeat, if the number of " +
-                    "timeouts waiting for heartbeat response continuously > " +
-                    "max_heartbeat_timeouts the channel will be closed from " +
-                    "client side.",
+                    "The maximum number of client heartbeat timeouts, if the " +
+                    "number of timeouts waiting for heartbeat response " +
+                    "continuously > max_heartbeat_timeouts the channel will " +
+                    "be closed from client side.",
                     positiveInt(),
                     3
             );
