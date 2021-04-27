@@ -522,7 +522,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.server_idle_timeout",
                     "The max timeout(in ms) of server idle.",
                     positiveInt(),
-                    50_000L
+                    120_000L
             );
 
     public static final ConfigOption<Long> TRANSPORT_HEARTBEAT_INTERVAL =
@@ -530,7 +530,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.heartbeat_interval",
                     "Time minimum interval(in ms) of client send heartbeat.",
                     positiveInt(),
-                    10_000L
+                    20_000L
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MAX_HEARTBEAT_TIMEOUTS =
@@ -541,6 +541,6 @@ public class ComputerOptions extends OptionHolder {
                     "continuously > max_heartbeat_timeouts the channel will " +
                     "be closed from client side.",
                     positiveInt(),
-                    3
+                    6
             );
 }

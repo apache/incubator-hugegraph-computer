@@ -196,8 +196,8 @@ public class NettyProtocol {
 
     private IdleStateHandler newClientIdleStateHandler() {
         long interval = this.conf.heartbeatInterval();
-        return new IdleStateHandler(interval, interval, DISABLE_IDLE_TIME,
-                                    TimeUnit.MILLISECONDS);
+        return new IdleStateHandler(interval, DISABLE_IDLE_TIME,
+                                    DISABLE_IDLE_TIME, TimeUnit.MILLISECONDS);
     }
 
     @ChannelHandler.Sharable
