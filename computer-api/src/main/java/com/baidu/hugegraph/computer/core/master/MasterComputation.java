@@ -19,9 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
-import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Master;
-import com.baidu.hugegraph.computer.core.config.Config;
-
 /**
  * Master-computation is computation that can determine whether to continue
  * next superstep. It runs on master. It can perform centralized computation
@@ -40,10 +37,10 @@ public interface MasterComputation {
      * this method. Create resources used in compute. Be called before all
      * supersteps start.
      */
-    void init(Config config, Aggregator4Master aggregator4Master);
+    void init(MasterInitContext initContext);
 
     /**
-     * Close the resource created in {@link #init(Config, Aggregator4Master)}.
+     * Close the resource created in {@link #init(MasterInitContext)}.
      * Be called after all supersteps.
      */
     void close();

@@ -19,27 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
-/**
- * The default master-computation, which can be used if there is no
- * algorithm-specific master-computation.
- */
-public class DefaultMasterComputation implements MasterComputation {
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator4Master;
+import com.baidu.hugegraph.computer.core.config.Config;
 
-    @Override
-    public void init(MasterInitContext initContext) {
-        // pass
-    }
+public interface MasterInitContext extends Aggregator4Master {
 
-    /**
-     * Compute until max superstep.
-     */
-    @Override
-    public boolean compute(MasterContext context) {
-        return true;
-    }
-
-    @Override
-    public void close() {
-        // pass
-    }
+    Config config();
 }
