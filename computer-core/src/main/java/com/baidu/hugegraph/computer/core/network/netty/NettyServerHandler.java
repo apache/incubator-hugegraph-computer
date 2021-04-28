@@ -82,14 +82,18 @@ public class NettyServerHandler extends AbstractNettyHandler {
     protected void processDataMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       DataMessage dataMessage) {
-        int requestId = dataMessage.requestId();
+        try {
+            int requestId = dataMessage.requestId();
 
-        this.serverSession.onRecvData(requestId);
+            this.serverSession.onRecvData(requestId);
 
-        this.handler.handle(dataMessage.type(), dataMessage.partition(),
-                            dataMessage.body());
+            this.handler.handle(dataMessage.type(), dataMessage.partition(),
+                                dataMessage.body());
 
-        this.serverSession.onHandledData(requestId);
+            this.serverSession.onHandledData(requestId);
+        } finally {
+            dataMessage.release();
+        }
     }
 
     @Override
