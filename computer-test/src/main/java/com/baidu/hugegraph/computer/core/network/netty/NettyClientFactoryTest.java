@@ -26,7 +26,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
@@ -37,7 +36,7 @@ import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 
-public class NettyClientFactoryTest {
+public class NettyClientFactoryTest extends UnitTestBase {
 
     private static Config config;
     private static MockMessageHandler serverHandler;
@@ -47,15 +46,14 @@ public class NettyClientFactoryTest {
 
     @Before
     public void setup() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-                ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
-                ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO",
-                ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE, "128",
-                ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE, "128"
+        config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+            ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
+            ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
+            ComputerOptions.TRANSPORT_IO_MODE, "NIO",
+            ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE, "128",
+            ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE, "128"
         );
-        config = ComputerContext.instance().config();
         serverHandler = new MockMessageHandler();
         clientHandler = new MockClientHandler();
         this.server = new NettyTransportServer();

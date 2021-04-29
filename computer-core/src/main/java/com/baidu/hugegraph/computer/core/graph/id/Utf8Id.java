@@ -23,15 +23,12 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.GraphOutput;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
+import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.util.E;
 
 public class Utf8Id implements Id {
@@ -66,14 +63,7 @@ public class Utf8Id implements Id {
     @Override
     public IdValue idValue() {
         int len = Byte.BYTES + Integer.BYTES + this.length;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput(len)) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
-            output.writeId(this);
-            return new IdValue(bao.toByteArray());
-        } catch (IOException e) {
-            throw new ComputerException("Failed to get idValue from id '%s'",
-                                        e, this);
-        }
+        return IdValueUtil.toIdValue(this, len);
     }
 
     @Override

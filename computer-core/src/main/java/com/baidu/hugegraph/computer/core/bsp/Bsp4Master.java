@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
-import com.baidu.hugegraph.computer.core.util.ReadWriteUtil;
+import com.baidu.hugegraph.computer.core.util.SerializeUtil;
 import com.baidu.hugegraph.util.Log;
 
 public class Bsp4Master extends BspBase {
@@ -46,7 +46,7 @@ public class Bsp4Master extends BspBase {
      */
     public void registerMaster(ContainerInfo masterInfo) {
         String path = this.constructPath(BspEvent.BSP_MASTER_REGISTERED);
-        this.bspClient().put(path, ReadWriteUtil.toBytes(masterInfo));
+        this.bspClient().put(path, SerializeUtil.toBytes(masterInfo));
         LOG.info("Master registered, masterInfo: {}", masterInfo);
     }
 
@@ -61,7 +61,7 @@ public class Bsp4Master extends BspBase {
         List<ContainerInfo> containers = new ArrayList<>(this.workerCount());
         for (byte[] serializedContainer : serializedContainers) {
             ContainerInfo container = new ContainerInfo();
-            ReadWriteUtil.fromBytes(serializedContainer, container);
+            SerializeUtil.fromBytes(serializedContainer, container);
             containers.add(container);
         }
         LOG.info("All workers registered, workers: {}", containers);
@@ -74,7 +74,7 @@ public class Bsp4Master extends BspBase {
     public void masterSuperstepResume(int superstep) {
         String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_RESUME);
         IntValue superstepWritable = new IntValue(superstep);
-        this.bspClient().put(path, ReadWriteUtil.toBytes(superstepWritable));
+        this.bspClient().put(path, SerializeUtil.toBytes(superstepWritable));
         LOG.info("Master resume superstep {}", superstep);
     }
 
@@ -113,7 +113,7 @@ public class Bsp4Master extends BspBase {
         List<WorkerStat> result = new ArrayList<>(this.workerCount());
         for (byte[] bytes : list) {
             WorkerStat workerStat = new WorkerStat();
-            ReadWriteUtil.fromBytes(bytes, workerStat);
+            SerializeUtil.fromBytes(bytes, workerStat);
             result.add(workerStat);
         }
         LOG.info("Workers superstep {} done, workers stat: {}",
@@ -152,7 +152,7 @@ public class Bsp4Master extends BspBase {
                                     SuperstepStat superstepStat) {
         String path = this.constructPath(BspEvent.BSP_MASTER_SUPERSTEP_DONE,
                                          superstep);
-        this.bspClient().put(path, ReadWriteUtil.toBytes(superstepStat));
+        this.bspClient().put(path, SerializeUtil.toBytes(superstepStat));
         LOG.info("Master superstep {} done, graph stat: {}",
                  superstep, superstepStat);
     }

@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
@@ -49,7 +48,7 @@ import com.baidu.hugegraph.testutil.Whitebox;
 
 import io.netty.bootstrap.ServerBootstrap;
 
-public abstract class AbstractNetworkTest {
+public abstract class AbstractNetworkTest extends UnitTestBase {
 
     private static final Map<ConfigOption<?>, String> OPTIONS = new HashMap<>();
     protected static Config config;
@@ -97,8 +96,7 @@ public abstract class AbstractNetworkTest {
             objects[i++] = kv.getValue();
         }
 
-        UnitTestBase.updateWithRequiredOptions(objects);
-        config = ComputerContext.instance().config();
+        config = UnitTestBase.updateWithRequiredOptions(objects);
         serverHandler = Mockito.spy(new MockMessageHandler());
         clientHandler = Mockito.spy(new MockClientHandler());
         connectionManager = new TransportConnectionManager();
@@ -140,14 +138,13 @@ public abstract class AbstractNetworkTest {
 
     @Test
     public void testTransportConf() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO",
-                ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "20",
-                ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
-                ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
+        config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+            ComputerOptions.TRANSPORT_IO_MODE, "NIO",
+            ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "20",
+            ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
+            ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
         );
-        config = ComputerContext.instance().config();
 
         TransportConf conf = TransportConf.wrapConfig(config);
         Assert.assertEquals(20, conf.maxPendingRequests());

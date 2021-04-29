@@ -21,11 +21,10 @@ package com.baidu.hugegraph.computer.core.combiner;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -34,7 +33,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class OverwriteCombinerTest {
+public class OverwriteCombinerTest extends UnitTestBase {
 
     @Test
     public void testCombineValue() {
@@ -67,7 +66,7 @@ public class OverwriteCombinerTest {
 
     @Test
     public void testCombineVertex() {
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        GraphFactory factory = graphFactory();
         LongId longId1 = new LongId(1L);
         DoubleValue value1 = new DoubleValue(0.1D);
         Vertex vertex1 = factory.createVertex(longId1, value1);
@@ -86,11 +85,11 @@ public class OverwriteCombinerTest {
 
     @Test
     public void testCombineProperties() {
-        Properties properties1 = new DefaultProperties();
+        Properties properties1 = graphFactory().createProperties();
         properties1.put("name", new Utf8Id("marko").idValue());
         properties1.put("city", new Utf8Id("Beijing").idValue());
 
-        Properties properties2 = new DefaultProperties();
+        Properties properties2 = graphFactory().createProperties();
         properties1.put("name", new Utf8Id("josh").idValue());
 
         OverwriteCombiner<Properties> combiner = new OverwriteCombiner<>();

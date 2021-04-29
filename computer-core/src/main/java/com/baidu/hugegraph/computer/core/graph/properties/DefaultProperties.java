@@ -22,15 +22,15 @@ package com.baidu.hugegraph.computer.core.graph.properties;
 import java.util.Map;
 import java.util.Objects;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultProperties implements Properties {
 
     private final Map<String, Value<?>> keyValues;
 
-    public DefaultProperties() {
-        this(ComputerContext.instance().graphFactory().createMap());
+    public DefaultProperties(GraphFactory graphFactory) {
+        this(graphFactory.createMap());
     }
 
     public DefaultProperties(Map<String, Value<?>> keyValues) {

@@ -54,20 +54,24 @@ public class ComputerOptions extends OptionHolder {
         return INSTANCE;
     }
 
-    public static final ConfigOption<String> ALGORITHM_NAME =
-            new ConfigOption<>(
-                    "algorithm.name",
-                    "The name of current algorithm",
-                    disallowEmpty(),
-                    "unknown"
-            );
-
     public static final ConfigOption<String> VALUE_TYPE =
             new ConfigOption<>(
                     "algorithm.value_type",
-                    "The value type of current algorithm",
+                    "The value type of current algorithm, used by " +
+                    "ValueFactory to create value. If value_type is " +
+                    "CUSTOM_VALUE, value_class is used to create value.",
                     disallowEmpty(),
                     "NULL"
+            );
+
+    public static final ConfigOption<Class<?>> VALUE_CLASS =
+            new ConfigOption<>(
+                    "algorithm.value_class",
+                    "The class of user defined value, the value is used as " +
+                    "the algorithm result. Used when value_type is " +
+                    "CUSTOM_VALUE.",
+                    disallowEmpty(),
+                    Null.class
             );
 
     public static final ConfigOption<String> VALUE_NAME =
@@ -162,7 +166,6 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
-            ALGORITHM_NAME.name(),
             VALUE_TYPE.name(),
             VALUE_NAME.name(),
             EDGES_NAME.name()

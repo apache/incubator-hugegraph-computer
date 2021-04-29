@@ -37,6 +37,7 @@
     </properties>
 
     <modules>
+        <module>computer-api</module>
         <module>computer-core</module>
         <module>computer-algorithm</module>
         <module>computer-driver</module>

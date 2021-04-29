@@ -32,13 +32,12 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class CsvStructGraphOutput extends StructGraphOutput {
 
-    public CsvStructGraphOutput(DataOutput out) {
-        super(out);
+    public CsvStructGraphOutput(ComputerContext context, DataOutput out) {
+        super(context, out);
     }
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
-        ComputerContext context = ComputerContext.instance();
 
         this.writeLineStart();
 
@@ -47,11 +46,11 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
         this.writeValue(vertex.value());
 
-        if (context.config().outputVertexAdjacentEdges()) {
+        if (this.config.outputVertexAdjacentEdges()) {
             this.writeSplitter();
             this.writeEdges(vertex.edges());
         }
-        if (context.config().outputVertexProperties()) {
+        if (this.config.outputVertexProperties()) {
             this.writeSplitter();
             this.writeProperties(vertex.properties());
         }
@@ -74,15 +73,13 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
-        ComputerContext context = ComputerContext.instance();
-
         this.writeObjectStart();
 
         this.writeId(edge.targetId());
         this.writeSplitter();
 
         this.writeValue(edge.value());
-        if (context.config().outputEdgeProperties()) {
+        if (this.config.outputEdgeProperties()) {
             this.writeSplitter();
             this.writeProperties(edge.properties());
         }

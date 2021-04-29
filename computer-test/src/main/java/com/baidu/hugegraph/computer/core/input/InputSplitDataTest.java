@@ -23,18 +23,18 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class InputSplitDataTest {
+public class InputSplitDataTest extends UnitTestBase {
 
     private static MockMasterInputManager masterInputManager;
     private static MockWorkerInputManager workerInputManager;
 
     @BeforeClass
     public static void setup() {
-        Config config = ComputerContext.instance().config();
+        Config config = context().config();
         masterInputManager = new MockMasterInputManager();
         masterInputManager.init(config);
 
@@ -46,8 +46,8 @@ public class InputSplitDataTest {
 
     @AfterClass
     public static void teardown() {
-        masterInputManager.close(ComputerContext.instance().config());
-        workerInputManager.close(ComputerContext.instance().config());
+        masterInputManager.close(context().config());
+        workerInputManager.close(context().config());
     }
 
     @Test

@@ -21,10 +21,13 @@ package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+
 public class OptimizedStreamGraphInput extends StreamGraphInput {
 
-    public OptimizedStreamGraphInput(RandomAccessInput in) {
-        super(in);
+    public OptimizedStreamGraphInput(ComputerContext context,
+                                     RandomAccessInput in) {
+        super(context, in);
     }
 
     @Override

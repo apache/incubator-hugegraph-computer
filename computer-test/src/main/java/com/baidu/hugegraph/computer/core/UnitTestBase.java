@@ -27,6 +27,8 @@ import java.util.Random;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -39,6 +41,7 @@ import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
@@ -52,15 +55,15 @@ public class UnitTestBase {
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
+             StreamGraphOutput output = newOptimizedStreamGraphOutput(bao)) {
             oldId.write(output);
             bytes = bao.toByteArray();
         }
 
         Id newId = IdFactory.createId(oldId.type());
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
+             StreamGraphInput input = newOptimizedStreamGraphInput(bai)) {
             newId.read(input);
             Assert.assertEquals(oldId, newId);
         }
@@ -69,15 +72,14 @@ public class UnitTestBase {
     public static void assertValueEqualAfterWriteAndRead(Value<?> oldValue)
                                                          throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
+             StreamGraphOutput output = newOptimizedStreamGraphOutput(bao)) {
             oldValue.write(output);
             bytes = bao.toByteArray();
         }
-
-        Value<?> newValue = ValueFactory.createValue(oldValue.type());
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+        Value<?> newValue = valueFactory().createValue(oldValue.type());
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
+             StreamGraphInput input = newOptimizedStreamGraphInput(bai)) {
             newValue.read(input);
             Assert.assertEquals(oldValue, newValue);
         }
@@ -100,12 +102,12 @@ public class UnitTestBase {
                             "The option value must be String class");
             map.put(((ConfigOption<?>) key).name(), (String) value);
         }
-        ComputerContext.updateOptions(map);
+        ComputerContextUtil.initContext(map);
     }
 
-    public static void updateWithRequiredOptions(Object... options) {
+    public static synchronized Config updateWithRequiredOptions(
+                                      Object... options) {
         Object[] requiredOptions = new Object[] {
-            ComputerOptions.ALGORITHM_NAME, "page_rank",
             ComputerOptions.VALUE_NAME, "rank",
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG"};
@@ -116,20 +118,21 @@ public class UnitTestBase {
         System.arraycopy(options, 0, allOptions,
                          requiredOptions.length, options.length);
         UnitTestBase.updateOptions(allOptions);
+        return ComputerContext.instance().config();
     }
 
     public static void assertEqualAfterWriteAndRead(Writable writeObj,
                                                     Readable readObj)
                                                     throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = new OptimizedStreamGraphOutput(bao);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
+             StreamGraphOutput output = newOptimizedStreamGraphOutput(bao)) {
             writeObj.write(output);
             bytes = bao.toByteArray();
         }
 
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = new OptimizedStreamGraphInput(bai);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
+             StreamGraphInput input = newOptimizedStreamGraphInput(bai)) {
             readObj.read(input);
             Assert.assertEquals(writeObj, readObj);
         }
@@ -159,5 +162,37 @@ public class UnitTestBase {
             sb.append(CHARS.charAt(random.nextInt(CHARS.length())));
         }
         return sb.toString();
+    }
+
+    protected static ComputerContext context() {
+        return ComputerContext.instance();
+    }
+
+    protected static ValueFactory valueFactory() {
+        return context().valueFactory();
+    }
+
+    protected static GraphFactory graphFactory() {
+        return context().graphFactory();
+    }
+
+    protected static StreamGraphInput newStreamGraphInput(
+                                      UnsafeByteArrayInput bai) {
+        return new StreamGraphInput(context(), bai);
+    }
+
+    protected static StreamGraphOutput newStreamGraphOutput(
+                                       UnsafeByteArrayOutput bao) {
+        return new StreamGraphOutput(context(), bao);
+    }
+
+    protected static OptimizedStreamGraphInput newOptimizedStreamGraphInput(
+                                               UnsafeByteArrayInput bai) {
+        return new OptimizedStreamGraphInput(context(), bai);
+    }
+
+    protected static OptimizedStreamGraphOutput newOptimizedStreamGraphOutput(
+                                                UnsafeByteArrayOutput bao) {
+        return new OptimizedStreamGraphOutput(context(), bao);
     }
 }

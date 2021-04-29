@@ -23,12 +23,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
 import com.baidu.hugegraph.computer.core.graph.id.UuidId;
-import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
@@ -41,6 +42,9 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.util.E;
 
 public final class HugeConverter {
+
+    private static final GraphFactory GRAPH_FACTORY =
+                                      ComputerContext.instance().graphFactory();
 
     public static Id convertId(Object rawId) {
         E.checkArgumentNotNull(rawId, "The rawId can't be null");
@@ -85,7 +89,7 @@ public final class HugeConverter {
 
     public static Properties convertProperties(
                              Map<String, Object> rawProperties) {
-        Properties properties = new DefaultProperties();
+        Properties properties = GRAPH_FACTORY.createProperties();
         for (Map.Entry<String, Object> entry : rawProperties.entrySet()) {
             String key = entry.getKey();
             Value<?> value = convertValue(entry.getValue());

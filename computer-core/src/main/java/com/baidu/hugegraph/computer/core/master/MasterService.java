@@ -84,16 +84,16 @@ public class MasterService {
         this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
                                             rpcAddress.getHostName(),
                                             rpcAddress.getPort());
-        this.bsp4Master.registerMaster(this.masterInfo);
-        this.workers = this.bsp4Master.waitWorkersRegistered();
-
-        LOG.info("{} MasterService worker count: {}",
-                 this, this.workers.size());
 
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
-        this.masterComputation.init(this.config);
+        // TODO: pass MasterInitContext to init
+        this.masterComputation.init(null);
 
+        this.bsp4Master.registerMaster(this.masterInfo);
+        this.workers = this.bsp4Master.waitWorkersRegistered();
+        LOG.info("{} MasterService worker count: {}",
+                 this, this.workers.size());
         LOG.info("{} MasterService initialized", this);
         this.inited = true;
     }
@@ -106,7 +106,8 @@ public class MasterService {
         this.checkInited();
 
         this.managers.closeAll(this.config);
-
+        // TODO: pass parameter MasterContext.
+        this.masterComputation.close(null);
         this.bsp4Master.clean();
         this.bsp4Master.close();
         LOG.info("{} MasterService closed", this);
@@ -175,7 +176,8 @@ public class MasterService {
             List<WorkerStat> workerStats =
                     this.bsp4Master.waitWorkersSuperstepDone(superstep);
             superstepStat = SuperstepStat.from(workerStats);
-            SuperstepContext context = new SuperstepContext(superstep,
+            SuperstepContext context = new SuperstepContext(this.config,
+                                                            superstep,
                                                             superstepStat);
             boolean masterContinue = this.masterComputation.compute(context);
             if (this.finishedIteration(masterContinue, context)) {
@@ -242,7 +244,7 @@ public class MasterService {
      * @return true if finish superstep iteration.
      */
     private boolean finishedIteration(boolean masterContinue,
-                                      MasterContext context) {
+                                      MasterComputationContext context) {
         if (!masterContinue) {
             return true;
         }
@@ -284,12 +286,15 @@ public class MasterService {
         LOG.info("{} MasterService outputstep finished", this);
     }
 
-    private static class SuperstepContext implements MasterContext {
+    private static class SuperstepContext implements MasterComputationContext {
 
+        private final Config config;
         private final int superstep;
         private final SuperstepStat superstepStat;
 
-        public SuperstepContext(int superstep, SuperstepStat superstepStat) {
+        public SuperstepContext(Config config, int superstep,
+                                SuperstepStat superstepStat) {
+            this.config = config;
             this.superstep = superstep;
             this.superstepStat = superstepStat;
         }
@@ -350,6 +355,11 @@ public class MasterService {
         public <V extends Value<?>> V aggregatedValue(String name) {
             // TODO: implement
             throw new ComputerException("Not implemented");
+        }
+
+        @Override
+        public Config config() {
+            return this.config;
         }
     }
 }

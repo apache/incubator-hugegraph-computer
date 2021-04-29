@@ -70,7 +70,6 @@ public class UnitTestSuite {
                              "com.baidu.hugegraph.config.RpcOptions");
 
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "test",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.EDGES_NAME, "value"

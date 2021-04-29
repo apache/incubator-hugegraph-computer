@@ -24,7 +24,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    ConfigTest.class
+    DefaultConfigTest.class
 })
 public class ConfigTestSuite {
 }

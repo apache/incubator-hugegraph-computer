@@ -27,24 +27,22 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.util.Log;
 
-public class HashPartitionerTest {
+public class HashPartitionerTest extends UnitTestBase {
 
     private static final Logger LOG = Log.logger(HashPartitionerTest.class);
 
     @Test
     public void test1Worker1Partition() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "1"
+        Config config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "1"
         );
-        Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -84,11 +82,10 @@ public class HashPartitionerTest {
 
     @Test
     public void test1Worker2Partition() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "2"
+        Config config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "2"
         );
-        Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -128,11 +125,10 @@ public class HashPartitionerTest {
 
     @Test
     public void test1Worker3Partition() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "3"
+        Config config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "3"
         );
-        Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -172,11 +168,10 @@ public class HashPartitionerTest {
 
     @Test
     public void test3Worker1Partition() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_WORKERS_COUNT, "3",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "1"
+        Config config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_WORKERS_COUNT, "3",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "1"
         );
-        Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
@@ -218,13 +213,11 @@ public class HashPartitionerTest {
     public void testDist() {
         int workerCount = 2;
         int partitionCount = 10;
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_WORKERS_COUNT,
-                Integer.toString(workerCount),
-                ComputerOptions.JOB_PARTITIONS_COUNT,
-                Integer.toString(partitionCount)
+        Config config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_WORKERS_COUNT, Integer.toString(workerCount),
+            ComputerOptions.JOB_PARTITIONS_COUNT,
+            Integer.toString(partitionCount)
         );
-        Config config = ComputerContext.instance().config();
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);

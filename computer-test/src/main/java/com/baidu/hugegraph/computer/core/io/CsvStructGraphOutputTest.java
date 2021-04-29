@@ -41,12 +41,11 @@ import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public class CsvStructGraphOutputTest {
+public class CsvStructGraphOutputTest extends UnitTestBase {
 
     @Test
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "page_rank",
             ComputerOptions.VALUE_NAME, "rank",
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
@@ -54,7 +53,8 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        ComputerContext context = context();
+        GraphFactory factory = context.graphFactory();
 
         LongId longId = new LongId(100L);
         IdValue idValue = new LongId(999L).idValue();
@@ -66,9 +66,9 @@ public class CsvStructGraphOutputTest {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos);
+                                       context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
-            dos.close();
+            output.close();
 
             String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,999" + System.lineSeparator(), text);
@@ -80,7 +80,6 @@ public class CsvStructGraphOutputTest {
     @Test
     public void testWriteReadVertexWithEdges() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "page_rank",
             ComputerOptions.VALUE_NAME, "rank",
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
@@ -88,7 +87,8 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        ComputerContext context = context();
+        GraphFactory factory = context.graphFactory();
 
         LongId longId = new LongId(100L);
         IdValueList idValueList = new IdValueList();
@@ -104,9 +104,9 @@ public class CsvStructGraphOutputTest {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos);
+                                       context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
-            dos.close();
+            output.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[998,999],[{200,1},{300,-1}]" +
@@ -119,7 +119,6 @@ public class CsvStructGraphOutputTest {
     @Test
     public void testWriteReadVertexWithProperties() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.ALGORITHM_NAME, "page_rank",
             ComputerOptions.VALUE_NAME, "rank",
             ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
@@ -127,7 +126,8 @@ public class CsvStructGraphOutputTest {
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
         );
-        GraphFactory factory = ComputerContext.instance().graphFactory();
+        ComputerContext context = context();
+        GraphFactory factory = context.graphFactory();
 
         LongId longId = new LongId(100L);
         IdValueListList idValueListList = new IdValueListList();
@@ -155,9 +155,9 @@ public class CsvStructGraphOutputTest {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       OutputFormat.CSV, dos);
+                                       context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
-            dos.close();
+            output.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[[66],[998,999]],{true,127,-0.01,16383," +

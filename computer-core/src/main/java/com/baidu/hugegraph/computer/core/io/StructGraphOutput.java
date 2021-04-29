@@ -19,23 +19,29 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.Closeable;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 
 public abstract class StructGraphOutput implements GraphOutput {
 
     protected final DataOutput out;
+    protected final Config config;
 
-    public StructGraphOutput(DataOutput out) {
+    public StructGraphOutput(ComputerContext context, DataOutput out) {
+        this.config = context.config();
         this.out = out;
     }
 
@@ -96,7 +102,7 @@ public abstract class StructGraphOutput implements GraphOutput {
          * The idValue is shown as bytes in computation,
          * but it's as id when output
          */
-        this.writeId(idValue.id());
+        this.writeId(IdValueUtil.toId(idValue));
     }
 
     private void writeListValue(ListValue<?> listValue) throws IOException {
@@ -182,6 +188,13 @@ public abstract class StructGraphOutput implements GraphOutput {
     @Override
     public void writeUTF(String s) throws IOException {
         this.writeString(s);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (this.out instanceof Closeable) {
+            ((Closeable) this.out).close();
+        }
     }
 
     protected void writeNumber(Number number) throws IOException {

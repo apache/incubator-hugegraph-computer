@@ -26,6 +26,7 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.NumericUtil;
 
@@ -40,7 +41,7 @@ public class LongIdTest extends UnitTestBase {
         Assert.assertEquals(IdType.LONG, longId1.type());
         IdValue idValue = longId1.idValue();
         Assert.assertEquals(ValueType.ID_VALUE, idValue.type());
-        Assert.assertEquals(longId1, idValue.id());
+        Assert.assertEquals(longId1, IdValueUtil.toId(idValue));
 
         Assert.assertEquals(new Long(-100L), longId1.asObject());
         Assert.assertEquals(-100L, longId1.asLong());
