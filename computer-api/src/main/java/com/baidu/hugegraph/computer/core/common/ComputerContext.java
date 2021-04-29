@@ -24,6 +24,7 @@ import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.computer.core.config.Config;
+
 public final class ComputerContext {
 
     private static volatile ComputerContext INSTANCE;

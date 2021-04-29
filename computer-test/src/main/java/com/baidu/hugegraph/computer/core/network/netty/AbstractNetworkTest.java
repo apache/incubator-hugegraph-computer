@@ -139,11 +139,11 @@ public abstract class AbstractNetworkTest extends UnitTestBase {
     @Test
     public void testTransportConf() {
         config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO",
-                ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "20",
-                ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
-                ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
+            ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+            ComputerOptions.TRANSPORT_IO_MODE, "NIO",
+            ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "20",
+            ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
+            ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
         );
 
         TransportConf conf = TransportConf.wrapConfig(config);

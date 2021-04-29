@@ -50,15 +50,15 @@ public class WorkerServiceTest extends UnitTestBase {
 
             pool.submit(() -> {
                 Config config = UnitTestBase.updateWithRequiredOptions(
-                        RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
-                        ComputerOptions.JOB_ID, "local_001",
-                        ComputerOptions.JOB_WORKERS_COUNT, "1",
-                        ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                        ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                        ComputerOptions.WORKER_COMPUTATION_CLASS,
-                        MockComputation.class.getName(),
-                        ComputerOptions.MASTER_COMPUTATION_CLASS,
-                        MockMasterComputation.class.getName()
+                    RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+                    ComputerOptions.JOB_ID, "local_001",
+                    ComputerOptions.JOB_WORKERS_COUNT, "1",
+                    ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                    ComputerOptions.WORKER_COMPUTATION_CLASS,
+                    MockComputation.class.getName(),
+                    ComputerOptions.MASTER_COMPUTATION_CLASS,
+                    MockMasterComputation.class.getName()
                 );
                 try {
                     workerService.init(config);
@@ -73,15 +73,15 @@ public class WorkerServiceTest extends UnitTestBase {
 
             pool.submit(() -> {
                 Config config = UnitTestBase.updateWithRequiredOptions(
-                        RpcOptions.RPC_SERVER_HOST, "localhost",
-                        ComputerOptions.JOB_ID, "local_001",
-                        ComputerOptions.JOB_WORKERS_COUNT, "1",
-                        ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                        ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                        ComputerOptions.WORKER_COMPUTATION_CLASS,
-                        MockComputation.class.getName(),
-                        ComputerOptions.MASTER_COMPUTATION_CLASS,
-                        MockMasterComputation.class.getName()
+                    RpcOptions.RPC_SERVER_HOST, "localhost",
+                    ComputerOptions.JOB_ID, "local_001",
+                    ComputerOptions.JOB_WORKERS_COUNT, "1",
+                    ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                    ComputerOptions.WORKER_COMPUTATION_CLASS,
+                    MockComputation.class.getName(),
+                    ComputerOptions.MASTER_COMPUTATION_CLASS,
+                    MockMasterComputation.class.getName()
                 );
                 try {
                     masterService.init(config);
@@ -119,15 +119,15 @@ public class WorkerServiceTest extends UnitTestBase {
     public void testFailToConnectEtcd() {
         WorkerService workerService = new MockWorkerService();
         Config config = UnitTestBase.updateWithRequiredOptions(
-                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
-                // Unavailable etcd endpoints
-                ComputerOptions.BSP_ETCD_ENDPOINTS, "http://abc:8098",
-                ComputerOptions.JOB_ID, "local_001",
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                ComputerOptions.WORKER_COMPUTATION_CLASS,
-                MockComputation.class.getName()
+            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+            // Unavailable etcd endpoints
+            ComputerOptions.BSP_ETCD_ENDPOINTS, "http://abc:8098",
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.BSP_LOG_INTERVAL, "30000",
+            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+            ComputerOptions.WORKER_COMPUTATION_CLASS,
+            MockComputation.class.getName()
         );
 
         Assert.assertThrows(ComputerException.class, () -> {

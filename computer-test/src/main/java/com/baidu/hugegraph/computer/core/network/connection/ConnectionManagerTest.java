@@ -52,8 +52,8 @@ public class ConnectionManagerTest extends UnitTestBase {
     @Before
     public void setup() {
         config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+            ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+            ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
         serverHandler = new MockMessageHandler();
         clientHandler = new MockClientHandler();

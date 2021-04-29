@@ -98,9 +98,9 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadEmptyEdges() throws IOException {
         UnitTestBase.updateOptions(
-                ComputerOptions.VALUE_TYPE, "LONG",
-                ComputerOptions.VALUE_NAME, "value",
-                ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.EDGES_NAME, "value"
         );
 
         Edges edges1 = graphFactory().createEdges(0);
@@ -558,5 +558,4 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
             Assert.assertEquals(Long.MIN_VALUE, input.readLong());
         }
     }
-
 }
