@@ -533,9 +533,10 @@ public class ComputerOptions extends OptionHolder {
                     20_000L
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_MAX_HEARTBEAT_TIMEOUTS =
+    public static final ConfigOption<Integer>
+            TRANSPORT_MAX_HEARTBEAT_TIMEOUTS_COUNT =
             new ConfigOption<>(
-                    "transport.max_heartbeat_timeouts",
+                    "transport.max_heartbeat_timeouts_count",
                     "The maximum number of client heartbeat timeouts, if the " +
                     "number of timeouts waiting for heartbeat response " +
                     "continuously > max_heartbeat_timeouts the channel will " +

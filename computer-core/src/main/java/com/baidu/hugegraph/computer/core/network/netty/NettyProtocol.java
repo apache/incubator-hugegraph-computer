@@ -171,9 +171,9 @@ public class NettyProtocol {
         pipeline.addLast(CLIENT_HANDLER_NAME, SLOT_HANDLER);
 
         // Init heartbeat times
-        channel.attr(HeartbeatHandler.HEARTBEAT_TIMEOUTS).set(0);
-        channel.attr(HeartbeatHandler.MAX_HEARTBEAT_TIMEOUTS)
-               .set(this.conf.maxHeartbeatTimeouts());
+        channel.attr(HeartbeatHandler.HEARTBEAT_TIMEOUTS_COUNT).set(0);
+        channel.attr(HeartbeatHandler.MAX_HEARTBEAT_TIMEOUTS_COUNT)
+               .set(this.conf.maxHeartbeatTimeoutsCount());
     }
 
     protected void replaceClientHandler(Channel channel,

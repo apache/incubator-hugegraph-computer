@@ -199,8 +199,8 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_INTERVAL);
     }
 
-    public int maxHeartbeatTimeouts() {
+    public int maxHeartbeatTimeoutsCount() {
         return this.config
-                   .get(ComputerOptions.TRANSPORT_MAX_HEARTBEAT_TIMEOUTS);
+                   .get(ComputerOptions.TRANSPORT_MAX_HEARTBEAT_TIMEOUTS_COUNT);
     }
 }
