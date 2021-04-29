@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.graph.partition;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
@@ -83,7 +83,7 @@ public class PartitionStat implements Readable, Writable {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         this.partitionId = in.readInt();
         this.vertexCount = in.readLong();
         this.edgeCount = in.readLong();
@@ -93,7 +93,7 @@ public class PartitionStat implements Readable, Writable {
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         out.writeInt(this.partitionId);
         out.writeLong(this.vertexCount);
         out.writeLong(this.edgeCount);

@@ -23,11 +23,7 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
@@ -38,10 +34,8 @@ public final class SerializeUtil {
     private static final ComputerContext CONTEXT = ComputerContext.instance();
 
     public static byte[] toBytes(Writable obj) {
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
-             StreamGraphOutput output = new OptimizedStreamGraphOutput(CONTEXT,
-                                                                       bao)) {
-            obj.write(output);
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            obj.write(bao);
             return bao.toByteArray();
         } catch (IOException e) {
             throw new ComputeException(
@@ -50,10 +44,8 @@ public final class SerializeUtil {
     }
 
     public static void fromBytes(byte[] bytes, Readable obj) {
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
-             StreamGraphInput input = new OptimizedStreamGraphInput(CONTEXT,
-                                                                    bai)) {
-            obj.read(input);
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            obj.read(bai);
         } catch (IOException e) {
             throw new ComputeException("Failed to read from byte array", e);
         }

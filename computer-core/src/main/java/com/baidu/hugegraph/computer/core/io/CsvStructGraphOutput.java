@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
 
@@ -32,7 +31,8 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class CsvStructGraphOutput extends StructGraphOutput {
 
-    public CsvStructGraphOutput(ComputerContext context, DataOutput out) {
+    public CsvStructGraphOutput(ComputerContext context,
+                                StructRandomAccessOutput out) {
         super(context, out);
     }
 
@@ -102,22 +102,22 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeObjectStart() throws IOException {
-        this.writeRawString("{");
+        this.out.writeRawString("{");
     }
 
     @Override
     public void writeObjectEnd() throws IOException {
-        this.writeRawString("}");
+        this.out.writeRawString("}");
     }
 
     @Override
     public void writeArrayStart() throws IOException {
-        this.writeRawString("[");
+        this.out.writeRawString("[");
     }
 
     @Override
     public void writeArrayEnd() throws IOException {
-        this.writeRawString("]");
+        this.out.writeRawString("]");
     }
 
     @Override
@@ -132,6 +132,11 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeSplitter() throws IOException {
-        this.writeRawString(",");
+        this.out.writeRawString(",");
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.out.close();
     }
 }

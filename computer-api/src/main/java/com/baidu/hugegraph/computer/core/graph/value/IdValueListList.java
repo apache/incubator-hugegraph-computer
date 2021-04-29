@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public class IdValueListList extends ListValue<IdValueList> {
 
@@ -36,12 +36,12 @@ public class IdValueListList extends ListValue<IdValueList> {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         this.read(in, false);
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         this.write(out, false);
     }
 }

@@ -23,12 +23,12 @@ import java.io.IOException;
 import java.util.List;
 
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
-import com.baidu.hugegraph.computer.core.util.JsonUtil;
-import com.baidu.hugegraph.computer.core.worker.WorkerStat;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.util.JsonUtil;
+import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.E;
 
 /**
@@ -93,7 +93,7 @@ public class SuperstepStat implements Readable, Writable {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         this.vertexCount = in.readLong();
         this.edgeCount = in.readLong();
         this.finishedVertexCount = in.readLong();
@@ -103,7 +103,7 @@ public class SuperstepStat implements Readable, Writable {
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         out.writeLong(this.vertexCount);
         out.writeLong(this.edgeCount);
         out.writeLong(this.finishedVertexCount);

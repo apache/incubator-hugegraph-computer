@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
 public class BooleanValue implements Value<BooleanValue> {
@@ -58,12 +58,12 @@ public class BooleanValue implements Value<BooleanValue> {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         this.value = in.readBoolean();
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         out.writeBoolean(this.value);
     }
 

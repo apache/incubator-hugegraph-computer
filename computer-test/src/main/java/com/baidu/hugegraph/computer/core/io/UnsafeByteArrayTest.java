@@ -414,6 +414,23 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
+    public void testPosition() throws IOException {
+        byte[] bytes;
+        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+            Assert.assertEquals(0L, bao.position());
+            bao.writeLong(Long.MAX_VALUE);
+            Assert.assertEquals(8L, bao.position());
+            bytes = bao.toByteArray();
+        }
+
+        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+            Assert.assertEquals(0L, bai.position());
+            Assert.assertEquals(Long.MAX_VALUE, bai.readLong());
+            Assert.assertEquals(8L, bai.position());
+        }
+    }
+
+    @Test
     public void testWriteByInput() throws IOException {
         // Input class is UnsafeByteArrayInput
         String uuid = UUID.randomUUID().toString();
@@ -463,6 +480,101 @@ public class UnsafeByteArrayTest {
         Assert.assertTrue(apple.compare(0, 2, egg, 0, 2) < 0);
         Assert.assertTrue(apple.compare(1, 3, egg, 0, 2) > 0);
         Assert.assertEquals(0, apple.compare(4, 1, egg, 0, 1));
+    }
+
+    @Test
+    public void testWriteReadVInt() throws IOException {
+        testBytesWriteReadVInt(new byte[]{0}, 0);
+        testBytesWriteReadVInt(new byte[]{1}, 1);
+        testBytesWriteReadVInt(new byte[]{(byte) 0x7f}, 127);
+        testBytesWriteReadVInt(new byte[]{(byte) 0x81, 0}, 128);
+        testBytesWriteReadVInt(new byte[]{(byte) 0xff, (byte) 0x7f}, 16383);
+        testBytesWriteReadVInt(new byte[]{(byte) 0x81, (byte) 0x80, 0}, 16384);
+        testBytesWriteReadVInt(new byte[]{(byte) 0x81, (byte) 0x80, 1}, 16385);
+        testBytesWriteReadVInt(new byte[]{-113, -1, -1, -1, 127}, -1);
+        testBytesWriteReadVInt(new byte[]{-121, -1, -1, -1, 127},
+                               Integer.MAX_VALUE);
+        testBytesWriteReadVInt(new byte[]{-120, -128, -128, -128, 0},
+                               Integer.MIN_VALUE);
+    }
+
+    @Test
+    public void testWriteReadVLong() throws IOException {
+        testBytesWriteReadVLong(new byte[]{0}, 0L);
+        testBytesWriteReadVLong(new byte[]{1}, 1L);
+        testBytesWriteReadVLong(new byte[]{(byte) 0x7f}, 127L);
+        testBytesWriteReadVLong(new byte[]{(byte) 0x81, 0}, 128L);
+        testBytesWriteReadVLong(new byte[]{(byte) 0xff, (byte) 0x7f}, 16383L);
+        testBytesWriteReadVLong(new byte[]{(byte) 0x81, (byte) 0x80, 0},
+                                16384L);
+        testBytesWriteReadVLong(new byte[]{(byte) 0x81, (byte) 0x80, 1},
+                                16385L);
+        testBytesWriteReadVLong(new byte[]{-127, -1, -1, -1, -1,
+                                           -1, -1, -1, -1, 127}, -1L);
+        testBytesWriteReadVLong(new byte[]{-121, -1, -1, -1, 127},
+                                Integer.MAX_VALUE);
+        testBytesWriteReadVLong(new byte[]{-127, -1, -1, -1, -1,
+                                           -8, -128, -128, -128, 0},
+                                Integer.MIN_VALUE);
+        testBytesWriteReadVLong(new byte[]{-1, -1, -1, -1, -1,
+                                           -1, -1, -1, 127},
+                                Long.MAX_VALUE);
+        testBytesWriteReadVLong(new byte[]{-127, -128, -128, -128, -128,
+                                           -128, -128, -128, -128, 0},
+                                Long.MIN_VALUE);
+    }
+
+    @Test
+    public void testWriteReadString() throws IOException {
+        testBytesWriteReadString(new byte[]{0}, "");
+        testBytesWriteReadString(new byte[]{1, 49}, "1");
+        testBytesWriteReadString(new byte[]{3, 55, 56, 57}, "789");
+        testBytesWriteReadString(new byte[]{5, 65, 66, 67, 68, 69}, "ABCDE");
+    }
+
+    public static void testBytesWriteReadVInt(byte[] bytes, int value)
+                                              throws IOException {
+        try (OptimizedUnsafeByteArrayOutput bao =
+             new OptimizedUnsafeByteArrayOutput(5)) {
+            bao.writeInt(value);
+            Assert.assertArrayEquals(bytes, bao.toByteArray());
+        }
+
+        try (OptimizedUnsafeByteArrayInput bai =
+             new OptimizedUnsafeByteArrayInput(bytes)) {
+            int readValue = bai.readInt();
+            Assert.assertEquals(value, readValue);
+        }
+    }
+
+    public static void testBytesWriteReadVLong(byte[] bytes, long value)
+                                               throws IOException {
+        try (OptimizedUnsafeByteArrayOutput bao =
+             new OptimizedUnsafeByteArrayOutput(9)) {
+            bao.writeLong(value);
+            Assert.assertArrayEquals(bytes, bao.toByteArray());
+        }
+
+        try (OptimizedUnsafeByteArrayInput bai =
+             new OptimizedUnsafeByteArrayInput(bytes)) {
+            long readValue = bai.readLong();
+            Assert.assertEquals(value, readValue);
+        }
+    }
+
+    public static void testBytesWriteReadString(byte[] bytes, String value)
+                                                throws IOException {
+        try (OptimizedUnsafeByteArrayOutput bao =
+             new OptimizedUnsafeByteArrayOutput()) {
+            bao.writeUTF(value);
+            Assert.assertArrayEquals(bytes, bao.toByteArray());
+        }
+
+        try (OptimizedUnsafeByteArrayInput bai =
+             new OptimizedUnsafeByteArrayInput(bytes)) {
+            String readValue = bai.readUTF();
+            Assert.assertEquals(value, readValue);
+        }
     }
 
     private static UnsafeByteArrayInput inputByString(String s)

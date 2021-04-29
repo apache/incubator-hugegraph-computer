@@ -29,8 +29,8 @@ import org.apache.commons.collections.ListUtils;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
 public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
@@ -110,11 +110,11 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         this.read(in, true);
     }
 
-    protected void read(GraphInput in, boolean readElemType)
+    protected void read(RandomAccessInput in, boolean readElemType)
                         throws IOException {
         int size = in.readInt();
         if (readElemType) {
@@ -131,11 +131,11 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         this.write(out, true);
     }
 
-    protected void write(GraphOutput out, boolean writeElemType)
+    protected void write(RandomAccessOutput out, boolean writeElemType)
                          throws IOException {
         out.writeInt(this.values.size());
         if (writeElemType) {

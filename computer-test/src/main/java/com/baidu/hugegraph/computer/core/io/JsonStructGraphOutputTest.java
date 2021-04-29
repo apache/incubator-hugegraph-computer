@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
@@ -40,6 +39,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.testutil.Assert;
 
 public class JsonStructGraphOutputTest extends UnitTestBase {
 
@@ -64,9 +64,10 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         File file = new File(fileName);
         try {
             BufferedFileOutput dos = new BufferedFileOutput(file);
+            StructRandomAccessOutput srao = new StructRandomAccessOutput(dos);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       context, OutputFormat.JSON, dos);
+                                       context, OutputFormat.JSON, srao);
             output.writeVertex(vertex);
             output.close();
 
@@ -103,9 +104,10 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         File file = new File(fileName);
         try {
             BufferedFileOutput dos = new BufferedFileOutput(file);
+            StructRandomAccessOutput srao = new StructRandomAccessOutput(dos);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       context, OutputFormat.JSON, dos);
+                                       context, OutputFormat.JSON, srao);
             output.writeVertex(vertex);
             output.close();
 
@@ -158,9 +160,10 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         File file = new File(fileName);
         try {
             BufferedFileOutput dos = new BufferedFileOutput(file);
+            StructRandomAccessOutput srao = new StructRandomAccessOutput(dos);
             StructGraphOutput output = (StructGraphOutput)
                                        GraphOutputFactory.create(
-                                       context, OutputFormat.JSON, dos);
+                                       context, OutputFormat.JSON, srao);
             output.writeVertex(vertex);
             output.close();
 
@@ -175,5 +178,27 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         } finally {
             FileUtils.deleteQuietly(file);
         }
+    }
+
+    @Test
+    public void testInvalidRandomAccessOutput() {
+        UnitTestBase.updateOptions(
+            ComputerOptions.VALUE_NAME, "rank",
+            ComputerOptions.EDGES_NAME, "value",
+            ComputerOptions.VALUE_TYPE, "LONG",
+            ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
+            ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
+            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
+        );
+
+        String fileName = "output.json";
+        File file = new File(fileName);
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            try (BufferedFileOutput dos = new BufferedFileOutput(file)) {
+                GraphOutputFactory.create(context(), OutputFormat.JSON, dos);
+            } finally {
+                FileUtils.deleteQuietly(file);
+            }
+        });
     }
 }

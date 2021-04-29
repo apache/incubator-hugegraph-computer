@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
@@ -64,7 +64,7 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         this.workerId = in.readInt();
         int size = in.readInt();
         this.partitionStats = new ArrayList<>(size);
@@ -76,7 +76,7 @@ public class WorkerStat implements Readable, Writable, Iterable<PartitionStat> {
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         out.writeInt(this.workerId);
         out.writeInt(this.partitionStats.size());
         for (PartitionStat stat : this.partitionStats) {

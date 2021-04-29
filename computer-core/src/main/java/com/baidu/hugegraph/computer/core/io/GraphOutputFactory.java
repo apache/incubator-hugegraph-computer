@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.io;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.util.E;
 
 public class GraphOutputFactory {
 
@@ -29,11 +30,21 @@ public class GraphOutputFactory {
                                      RandomAccessOutput out) {
         switch (format) {
             case BIN:
-                return new OptimizedStreamGraphOutput(context, out);
+                return new StreamGraphOutput(context, out);
             case CSV:
-                return new CsvStructGraphOutput(context, out);
+                E.checkArgument(out instanceof StructRandomAccessOutput,
+                                "The out object must be instance of " +
+                                "StructRandomAccessOutput, actual is %s",
+                                out.getClass());
+                return new CsvStructGraphOutput(context,
+                                                (StructRandomAccessOutput) out);
             case JSON:
-                return new JsonStructGraphOutput(context, out);
+                E.checkArgument(out instanceof StructRandomAccessOutput,
+                                "The out object must be instance of " +
+                                "StructRandomAccessOutput, actual is %s",
+                                out.getClass());
+                return new JsonStructGraphOutput(context,
+                           (StructRandomAccessOutput) out);
             default:
                 throw new ComputerException("Can't create GraphOutput for %s",
                                             format);
