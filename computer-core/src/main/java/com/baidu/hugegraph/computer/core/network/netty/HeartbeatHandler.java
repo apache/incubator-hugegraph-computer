@@ -42,33 +42,32 @@ public class HeartbeatHandler extends ChannelDuplexHandler {
 
     private static final Logger LOG = Log.logger(HeartbeatHandler.class);
 
-    public static final AttributeKey<Integer> HEARTBEAT_TIMEOUTS_COUNT =
-           AttributeKey.valueOf("HEARTBEAT_TIMEOUTS_COUNT");
-    public static final AttributeKey<Integer> MAX_HEARTBEAT_TIMEOUTS_COUNT =
-           AttributeKey.valueOf("MAX_HEARTBEAT_TIMEOUTS_COUNT");
+    public static final AttributeKey<Integer> TIMEOUT_HEARTBEAT_COUNT =
+           AttributeKey.valueOf("TIMEOUT_HEARTBEAT_COUNT");
+    public static final AttributeKey<Integer> MAX_TIMEOUT_HEARTBEAT_COUNT =
+           AttributeKey.valueOf("MAX_TIMEOUT_HEARTBEAT_COUNT");
 
     @Override
     public void userEventTriggered(final ChannelHandlerContext ctx,
                                    Object event) throws Exception {
         if (event instanceof IdleStateEvent) {
             Channel channel = ctx.channel();
-            Integer maxTimeoutsCount = channel
-                                       .attr(MAX_HEARTBEAT_TIMEOUTS_COUNT)
-                                       .get();
-            assert maxTimeoutsCount != null;
+            Integer maxTimeoutCount = channel.attr(MAX_TIMEOUT_HEARTBEAT_COUNT)
+                                             .get();
+            assert maxTimeoutCount != null;
 
-            Integer lastTimeoutsCount = channel.attr(HEARTBEAT_TIMEOUTS_COUNT)
-                                               .get();
-            assert lastTimeoutsCount != null;
+            Integer lastTimeoutCount = channel.attr(TIMEOUT_HEARTBEAT_COUNT)
+                                              .get();
+            assert lastTimeoutCount != null;
 
-            int heartbeatTimeoutsCount = lastTimeoutsCount + 1;
+            int timeoutHeartbeatCount = lastTimeoutCount + 1;
 
-            if (heartbeatTimeoutsCount > maxTimeoutsCount) {
+            if (timeoutHeartbeatCount > maxTimeoutCount) {
                 LOG.info("The number of timeouts for waiting heartbeat " +
-                         "response more than the max_heartbeat_timeouts_count" +
-                         ",close connection to '{} from client side, count: {}",
+                         "response more than the max_timeout_heartbeat_count," +
+                         "close connection to '{} from client side, count: {}",
                          TransportUtil.remoteAddress(channel),
-                         heartbeatTimeoutsCount);
+                         timeoutHeartbeatCount);
 
                 ctx.close();
             } else {
@@ -76,14 +75,14 @@ public class HeartbeatHandler extends ChannelDuplexHandler {
                     LOG.debug("Client IdleStateEvent triggered send ping to" +
                               "'{}', count: {}",
                               TransportUtil.remoteAddress(channel),
-                              heartbeatTimeoutsCount);
+                              timeoutHeartbeatCount);
                 }
 
                 ctx.writeAndFlush(PingMessage.INSTANCE)
                    .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
 
-                channel.attr(HEARTBEAT_TIMEOUTS_COUNT)
-                       .set(heartbeatTimeoutsCount);
+                channel.attr(TIMEOUT_HEARTBEAT_COUNT)
+                       .set(timeoutHeartbeatCount);
             }
         } else {
             super.userEventTriggered(ctx, event);

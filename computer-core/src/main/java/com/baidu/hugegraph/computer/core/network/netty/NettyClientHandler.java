@@ -51,8 +51,8 @@ public class NettyClientHandler extends AbstractNettyHandler {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg)
                                 throws Exception {
-        // Reset the number of client heartbeat timeouts
-        ctx.channel().attr(HeartbeatHandler.HEARTBEAT_TIMEOUTS_COUNT).set(0);
+        // Reset the number of client timeout heartbeat
+        ctx.channel().attr(HeartbeatHandler.TIMEOUT_HEARTBEAT_COUNT).set(0);
 
         super.channelRead0(ctx, msg);
     }
