@@ -20,11 +20,11 @@
 package com.baidu.hugegraph.computer.core.store.file;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
-import com.baidu.hugegraph.computer.core.store.entry.DefaultPointer;
+import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvFileImpl extends AbstractHgkvFile {
@@ -55,14 +55,19 @@ public class HgkvFileImpl extends AbstractHgkvFile {
 
     public static HgkvFile open(File file) throws IOException {
         E.checkArgumentNotNull(file, "File must not be null");
-        E.checkArgument(file.exists(), "File not exists, path: '%s'",
+        E.checkArgument(file.exists(), "Not exists hgkv file: '%s'",
                         file.getPath());
-        E.checkArgument(file.isFile(), "Path is not file, path: '%s'",
+        E.checkArgument(file.isFile(), "Not hgkv file path: '%s'",
                         file.getPath());
 
         HgkvFileImpl hgkvFile = new HgkvFileImpl(file.getPath());
         hgkvFile.readFooter();
         return hgkvFile;
+    }
+
+    @Override
+    public BufferedFileOutput output() throws FileNotFoundException {
+        return new BufferedFileOutput(new File(this.path));
     }
 
     @Override
@@ -72,16 +77,16 @@ public class HgkvFileImpl extends AbstractHgkvFile {
 
     private void readFooter() throws IOException {
         File file = new File(this.path);
-        long versionOffset = file.length() - 2;
+        long versionOffset = file.length() - Short.BYTES * 2;
         this.input.seek(versionOffset);
         // Read Version
-        byte primaryVersion = this.input.readByte();
-        byte minorVersion = this.input.readByte();
+        short primaryVersion = this.input.readShort();
+        short minorVersion = this.input.readShort();
         String version = primaryVersion + "." + minorVersion;
 
         switch (version) {
             case "1.0":
-                this.readFooterVp1m0(this.input);
+                this.readFooterV1d0(this.input);
                 break;
             default:
                 throw new ComputerException("Illegal HgkvFile version '%s'",
@@ -89,9 +94,9 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         }
     }
 
-    private void readFooterVp1m0(BufferedFileInput input)
+    private void readFooterV1d0(BufferedFileInput input)
                                  throws IOException {
-        final int footerLength = 46;
+        final int footerLength = 48;
         File file = new File(this.path);
         input.seek(file.length() - footerLength);
 
@@ -110,21 +115,17 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         long maxKeyOffset = input.readLong();
         long minKeyOffset = input.readLong();
         // Read version
-        byte primaryVersion = input.readByte();
-        byte minorVersion = input.readByte();
+        short primaryVersion = input.readShort();
+        short minorVersion = input.readShort();
         this.version = primaryVersion + "." + minorVersion;
 
         if (this.entriesSize > 0) {
             // Read max key
             input.seek(maxKeyOffset);
-            int maxKeyLength = input.readInt();
-            this.max = new DefaultPointer(input, input.position(),
-                                          maxKeyLength);
+            this.max = input.readBytes(input.readInt());
             // Read min Key
             input.seek(minKeyOffset);
-            int minKeyLength = input.readInt();
-            this.min = new DefaultPointer(input, input.position(),
-                                          minKeyLength);
+            this.min = input.readBytes(input.readInt());
         }
     }
 }

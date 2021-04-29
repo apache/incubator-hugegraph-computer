@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.store;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -42,6 +41,7 @@ import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDirReaderImpl;
+import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
@@ -73,12 +73,12 @@ public class HgkvDirTest {
                                               5, 2,
                                               5, 9,
                                               6, 2);
-        List<KvEntry> kvEntries = StoreTestData.kvEntriesFromMap(data);
+        List<KvEntry> kvEntries = StoreTestUtil.kvEntrysFromMap(data);
 
         String path = availableDirPath("1");
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
-            for (KvEntry kvEntry : kvEntries) {
-                builder.write(kvEntry);
+            for (KvEntry entry : kvEntries) {
+                builder.write(entry);
             }
             builder.finish();
 
@@ -88,10 +88,10 @@ public class HgkvDirTest {
             String version = HgkvDirImpl.PRIMARY_VERSION + "." +
                              HgkvDirImpl.MINOR_VERSION;
             Assert.assertEquals(version, dir.version());
-            Assert.assertEquals(5, dir.entriesSize());
-            int maxKey = StoreTestData.dataFromPointer(dir.max());
+            Assert.assertEquals(5, dir.numEntries());
+            int maxKey = StoreTestUtil.byteArrayToInt(dir.max());
             Assert.assertEquals(6, maxKey);
-            int minKey = StoreTestData.dataFromPointer(dir.min());
+            int minKey = StoreTestUtil.byteArrayToInt(dir.min());
             Assert.assertEquals(2, minKey);
         } finally {
             FileUtils.deleteQuietly(new File(path));
@@ -104,7 +104,7 @@ public class HgkvDirTest {
         String illegalName = availableDirPath("abc");
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             HgkvDirImpl.open(illegalName);
-        }, e -> Assert.assertTrue(e.getMessage().contains("Illegal file")));
+        }, e -> Assert.assertTrue(e.getMessage().contains("Illegal")));
 
         // Path isn't directory
         File file = new File(availableDirPath("1"));
@@ -130,20 +130,20 @@ public class HgkvDirTest {
                                               5, 5,
                                               5, 9,
                                               6, 2);
-        Iterator<Integer> result = ImmutableList.of(2, 5, 6).iterator();
 
         String path = availableDirPath("1");
-        File dir = StoreTestData.hgkvDirFromMap(data, path);
+        File dir = StoreTestUtil.hgkvDirFromMap(data, path);
         HgkvDirReader reader = new HgkvDirReaderImpl(dir.getPath());
         CloseableIterator<KvEntry> iterator;
-
         try {
             iterator = reader.iterator();
+            int i = 0;
             while (iterator.hasNext()) {
                 KvEntry entry = iterator.next();
                 entry.key().input().seek(entry.key().offset());
                 int key = entry.key().input().readInt();
-                Assert.assertEquals(result.next().intValue(), key);
+                Assert.assertEquals(data.get(i).intValue(), key);
+                i += 2;
             }
             Assert.assertThrows(NoSuchElementException.class,
                                 iterator::next);

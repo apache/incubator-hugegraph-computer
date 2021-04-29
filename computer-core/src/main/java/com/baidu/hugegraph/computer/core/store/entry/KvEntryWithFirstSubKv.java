@@ -19,9 +19,24 @@
 
 package com.baidu.hugegraph.computer.core.store.entry;
 
-public interface KvEntry extends Comparable<KvEntry> {
+public class KvEntryWithFirstSubKv extends DefaultKvEntry {
 
-    Pointer key();
+    private final KvEntry firstSubKv;
 
-    Pointer value();
+    public KvEntryWithFirstSubKv(Pointer key, Pointer value,
+                                 KvEntry firstSubKv) {
+        super(key, value);
+        this.firstSubKv = firstSubKv;
+    }
+
+    @Override
+    public int compareTo(KvEntry o) {
+        int result = this.key().compareTo(o.key());
+        if (result == 0) {
+            KvEntryWithFirstSubKv other = (KvEntryWithFirstSubKv) o;
+            result = this.firstSubKv.compareTo(other.firstSubKv);
+        }
+
+        return result;
+    }
 }

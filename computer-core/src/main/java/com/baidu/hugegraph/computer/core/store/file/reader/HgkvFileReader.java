@@ -21,10 +21,10 @@ package com.baidu.hugegraph.computer.core.store.file.reader;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.store.CloseableIterator;
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
 public interface HgkvFileReader {
 
-    CloseableIterator<Pointer> iterator() throws IOException;
+    CloseableIterator<KvEntry> iterator() throws IOException;
 }

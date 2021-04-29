@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.store.file.reader;
 
-import com.baidu.hugegraph.computer.core.store.CloseableIterator;
+import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
 public interface HgkvDirReader {

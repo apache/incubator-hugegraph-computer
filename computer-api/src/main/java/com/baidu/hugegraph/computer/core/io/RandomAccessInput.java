@@ -65,6 +65,11 @@ public interface RandomAccessInput extends DataInput, Closeable {
                 throws IOException;
 
     /**
+     * Creates a new input that shares this buffer's content.
+     */
+    RandomAccessInput duplicate();
+
+    /**
      * @return Read the byte array of size length from the current position
      * @throws IOException
      */

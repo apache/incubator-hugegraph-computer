@@ -19,9 +19,15 @@
 
 package com.baidu.hugegraph.computer.core.store.entry;
 
-public interface KvEntry extends Comparable<KvEntry> {
+import java.io.IOException;
 
-    Pointer key();
+import com.baidu.hugegraph.computer.core.io.Writable;
 
-    Pointer value();
+public interface KvEntryWriter {
+    
+    void writeSubKey(Writable subKey) throws IOException;
+
+    void writeSubValue(Writable subValue) throws IOException;
+
+    void writeFinish() throws IOException;
 }

@@ -20,30 +20,14 @@
 package com.baidu.hugegraph.computer.core.sort.sorter;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+public interface InputsSorter {
 
-public class TestData {
-
-    public static UnsafeByteArrayOutput writeMapToOutput(List<Integer> map)
-                                                         throws IOException {
-        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
-
-        for (int i = 0; i < map.size(); ) {
-            output.writeInt(Integer.BYTES);
-            output.writeInt(map.get(i++));
-            output.writeInt(Integer.BYTES);
-            output.writeInt(map.get(i++));
-        }
-
-        return output;
-    }
-
-    public static UnsafeByteArrayInput inputFromMap(List<Integer> map)
-                                                    throws IOException {
-        UnsafeByteArrayOutput output = writeMapToOutput(map);
-        return new UnsafeByteArrayInput(output.buffer(), output.position());
-    }
+    /**
+     * Sort multiple inputs from memory.
+     */
+    Iterator<KvEntry> sort(List<Iterator<KvEntry>> inputs) throws IOException;
 }

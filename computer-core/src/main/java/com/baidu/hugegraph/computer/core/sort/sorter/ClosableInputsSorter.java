@@ -17,11 +17,19 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.entry;
+package com.baidu.hugegraph.computer.core.sort.sorter;
 
-public interface KvEntry extends Comparable<KvEntry> {
+import java.io.IOException;
+import java.util.List;
 
-    Pointer key();
+import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
-    Pointer value();
+public interface ClosableInputsSorter {
+
+    /**
+     * Sort multiple hgkvDir and return sorted key iterator.
+     */
+    CloseableIterator<KvEntry> sort(List<CloseableIterator<KvEntry>> entries)
+                                    throws IOException;
 }

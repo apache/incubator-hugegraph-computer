@@ -558,19 +558,27 @@ public class ComputerOptions extends OptionHolder {
                     Bytes.GB * 4
             );
 
-    public static final ConfigOption<Integer> HGKV_DATABLOCK_SIZE =
+    public static final ConfigOption<Long> HGKV_DATABLOCK_SIZE =
             new ConfigOption<>(
                     "hgkv.max_data_block_size",
                     "The max byte size of hgkv-file data block.",
                     positiveInt(),
-                    (int) Bytes.KB * 64
+                    Bytes.KB * 64
             );
 
     public static final ConfigOption<Integer> HGKV_MERGE_PATH_NUM =
             new ConfigOption<>(
-                    "hgkv.merge_path_num",
+                    "hgkv.max_merge_files",
                     "The max number of files to merge at one time.",
                     positiveInt(),
-                    10
+                    200
+            );
+
+    public static final ConfigOption<String> HGKV_TEMP_DIR =
+            new ConfigOption<>(
+                    "hgkv.temp_file_dir",
+                    "Temporary files for merged files.",
+                    disallowEmpty(),
+                    "/tmp/hgkv"
             );
 }

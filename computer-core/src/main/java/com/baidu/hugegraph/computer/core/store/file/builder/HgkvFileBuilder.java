@@ -42,7 +42,17 @@ public interface HgkvFileBuilder extends Closeable {
     void finish() throws IOException;
 
     /**
-     * Returns the size of entry that has been written.
+     * Return the size of entry in bytes that has been written.
      */
-    long dataSize();
+    long dataLength();
+
+    /**
+     * Return the size of index block length.
+     */
+    long indexLength();
+
+    /**
+     * Return the size of header.
+     */
+    int headerLength();
 }

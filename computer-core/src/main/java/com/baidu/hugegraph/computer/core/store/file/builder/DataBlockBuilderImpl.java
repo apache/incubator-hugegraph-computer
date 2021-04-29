@@ -31,7 +31,7 @@ public class DataBlockBuilderImpl implements BlockBuilder {
 
     public DataBlockBuilderImpl(RandomAccessOutput output) {
         this.output = output;
-        this.entriesBytes = 0;
+        this.entriesBytes = 0L;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class DataBlockBuilderImpl implements BlockBuilder {
 
     @Override
     public void reset() {
-        this.entriesBytes = 0;
+        this.entriesBytes = 0L;
     }
 
     private void writePointer(RandomAccessOutput output, Pointer pointer)

@@ -17,11 +17,10 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.entry;
+package com.baidu.hugegraph.computer.core.store.iter;
 
-public interface KvEntry extends Comparable<KvEntry> {
+import java.io.Closeable;
+import java.util.Iterator;
 
-    Pointer key();
-
-    Pointer value();
+public interface CloseableIterator<T> extends Iterator<T>, Closeable {
 }

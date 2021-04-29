@@ -23,11 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -35,22 +32,26 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
-import com.baidu.hugegraph.computer.core.store.util.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.entry.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvFileBuilder;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvFileBuilderImpl;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.baidu.hugegraph.computer.core.store.iter.EntriesInput;
 
-public class StoreTestData {
+public class StoreTestUtil {
 
-    private static final Config CONFIG = ComputerContext.instance().config();
+    private static final Config CONFIG;
+    public static final String FILE_DIR;
 
-    public static List<Pointer> keysFromMap(List<Integer> map)
+    static {
+        CONFIG = ComputerContext.instance().config();
+        FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
+    }
+
+    public static List<KvEntry> kvEntrysFromMap(List<Integer> map)
                                             throws IOException {
         UnsafeByteArrayOutput data = new UnsafeByteArrayOutput();
         Iterator<Integer> iterator = map.iterator();
@@ -63,71 +64,20 @@ public class StoreTestData {
 
         RandomAccessInput input = new UnsafeByteArrayInput(data.buffer(),
                                                            data.position());
-        Iterator<Pointer> inputIter = new EntriesKeyInput(input);
-        List<Pointer> keys = new ArrayList<>();
-        while (inputIter.hasNext()) {
-            keys.add(inputIter.next());
-        }
-
-        return keys;
-    }
-
-    public static List<KvEntry> kvEntriesFromMap(List<Integer> map)
-                                                 throws IOException {
-        List<Pointer> keys = keysFromMap(map);
-        if (CollectionUtils.isEmpty(keys)) {
-            return Lists.newArrayList();
-        }
-
-        // Group by key
-        Iterator<Pointer> keysIter = keys.iterator();
-        Pointer last = keysIter.next();
-        List<Pointer> sameKeys = new ArrayList<>();
-        sameKeys.add(last);
-
+        Iterator<KvEntry> entriesIter = new EntriesInput(input);
         List<KvEntry> entries = new ArrayList<>();
-        while (true) {
-            Pointer current = null;
-            if (keysIter.hasNext()) {
-                current = keysIter.next();
-                if (last.compareTo(current) == 0) {
-                    sameKeys.add(current);
-                    continue;
-                }
-            }
-
-            List<Pointer> values = new ArrayList<>();
-            for (Pointer key : sameKeys) {
-                values.add(EntriesUtil.valuePointerByKeyPointer(key));
-            }
-            entries.add(new DefaultKvEntry(last, ImmutableList.copyOf(values)));
-
-            if (current == null) {
-                break;
-            }
-            sameKeys.clear();
-            sameKeys.add(current);
-            last = current;
+        while (entriesIter.hasNext()) {
+            entries.add(entriesIter.next());
         }
 
         return entries;
-    }
-
-    public static Map<Pointer, Pointer> kvMapFromMap(List<Integer> map)
-                                                            throws IOException {
-        List<Pointer> keys = keysFromMap(map);
-        Map<Pointer, Pointer> result = new LinkedHashMap<>();
-        for (Pointer key : keys) {
-            result.put(key, EntriesUtil.valuePointerByKeyPointer(key));
-        }
-        return result;
     }
 
     public static File hgkvDirFromMap(List<Integer> map, String path)
                                       throws IOException {
         File file = new File(path);
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
-            List<KvEntry> entries = StoreTestData.kvEntriesFromMap(map);
+            List<KvEntry> entries = StoreTestUtil.kvEntrysFromMap(map);
             for (KvEntry entry : entries) {
                 builder.write(entry);
             }
@@ -144,9 +94,9 @@ public class StoreTestData {
         File file = new File(path);
 
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path, CONFIG)) {
-            Map<Pointer, Pointer> kvMap = StoreTestData.kvMapFromMap(map);
-            for (Map.Entry<Pointer, Pointer> entry : kvMap.entrySet()) {
-                builder.add(entry.getKey(), entry.getValue());
+            List<KvEntry> entries = StoreTestUtil.kvEntrysFromMap(map);
+            for (KvEntry entry : entries) {
+                builder.add(entry.key(), entry.value());
             }
             builder.finish();
         } catch (Exception e) {
@@ -163,5 +113,17 @@ public class StoreTestData {
         int result = input.readInt();
         input.seek(position);
         return result;
+    }
+
+    public static String availablePathById(String id) {
+        return FILE_DIR + File.separator + HgkvDirImpl.NAME_PREFIX + id +
+               HgkvDirImpl.EXTEND_NAME;
+    }
+
+    public static int byteArrayToInt(byte[] bytes) {
+        return bytes[0] & 0xFF |
+               (bytes[1] & 0xFF) << 8 |
+               (bytes[2] & 0xFF) << 16 |
+               (bytes[3] & 0xFF) << 24;
     }
 }

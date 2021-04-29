@@ -17,11 +17,36 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.entry;
+package com.baidu.hugegraph.computer.core.store.file.builder;
 
-public interface KvEntry extends Comparable<KvEntry> {
+import java.io.IOException;
 
-    Pointer key();
+import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 
-    Pointer value();
+public class IndexBlockBuilderImpl implements IndexBlockBuilder {
+
+    private final BufferedFileOutput output;
+    private long blockSize;
+
+    public IndexBlockBuilderImpl(BufferedFileOutput output) {
+        this.output = output;
+        this.blockSize = 0L;
+    }
+
+    @Override
+    public void add(byte[] index) throws IOException {
+        this.output.writeInt(index.length);
+        this.output.write(index);
+        this.blockSize += Integer.SIZE + index.length;
+    }
+
+    @Override
+    public void finish() {
+        // pass
+    }
+
+    @Override
+    public long size() {
+        return this.blockSize;
+    }
 }

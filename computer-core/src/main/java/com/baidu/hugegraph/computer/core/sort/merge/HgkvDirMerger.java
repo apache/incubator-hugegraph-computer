@@ -17,10 +17,26 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.sort.merge;
 
-import java.io.Closeable;
-import java.util.Iterator;
+import java.io.IOException;
+import java.util.List;
+import java.util.function.Function;
 
-public interface CloseableIterator<T> extends Iterator<T>, Closeable {
+import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
+
+public interface HgkvDirMerger {
+
+    /**
+     * Merge inputs hgkvDirs to output hgkvDir
+     * @param inputs hgkv file that need to be merged
+     * @param inputToEntries key value pair read mode
+     * @param output write merge result to this file
+     * @param flusher combiner entries of same key
+     */
+    void merge(List<String> inputs,
+               Function<String, CloseableIterator<KvEntry>> inputToEntries,
+               String output, OuterSortFlusher flusher) throws IOException;
 }

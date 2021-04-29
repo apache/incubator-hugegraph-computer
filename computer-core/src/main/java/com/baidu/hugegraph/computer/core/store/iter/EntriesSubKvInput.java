@@ -17,51 +17,33 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.iter;
 
 import java.io.IOException;
-import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.store.entry.DefaultPointer;
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.util.EntriesUtil;
 
-public class EntriesKeyInput implements InputIterator {
+public class EntriesSubKvInput implements InputIterator {
 
-    private final RandomAccessInput input;
-    private long position;
+    private final Iterator<KvEntry> entries;
 
-    public EntriesKeyInput(RandomAccessInput input) {
-        this.input = input;
-        this.position = 0;
+    public EntriesSubKvInput(RandomAccessInput input) {
+        this.entries = new EntriesInput(input);
     }
 
     @Override
     public boolean hasNext() {
-        try {
-            return this.input.available() > 0;
-        } catch (IOException e) {
-            throw new ComputerException(e.getMessage(), e);
-        }
+        return this.entries.hasNext();
     }
 
     @Override
-    public Pointer next() {
-        if (this.position != this.input.position()) {
-            throw new ConcurrentModificationException();
-        }
-
-        int keyLength;
-        long keyOffset;
+    public KvEntry next() {
         try {
-            keyLength = this.input.readInt();
-            keyOffset = this.input.position();
-            this.input.skip(keyLength);
-            this.input.skip(this.input.readInt());
-
-            this.position = this.input.position();
-            return new DefaultPointer(this.input, keyOffset, keyLength);
+            return EntriesUtil.kvEntryWithFirstSubKv(this.entries.next());
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }

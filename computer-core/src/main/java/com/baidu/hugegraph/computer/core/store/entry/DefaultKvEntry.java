@@ -19,23 +19,14 @@
 
 package com.baidu.hugegraph.computer.core.store.entry;
 
-import java.util.Iterator;
-import java.util.List;
-
-import com.google.common.collect.ImmutableList;
-
 public class DefaultKvEntry implements KvEntry {
 
     private final Pointer key;
-    private final List<Pointer> values;
+    private final Pointer value;
 
-    public DefaultKvEntry(Pointer key, ImmutableList<Pointer> values) {
+    public DefaultKvEntry(Pointer key, Pointer value) {
         this.key = key;
-        this.values = values;
-    }
-
-    public DefaultKvEntry(Pointer key, List<Pointer> values) {
-        this(key, ImmutableList.copyOf(values));
+        this.value = value;
     }
 
     @Override
@@ -44,7 +35,12 @@ public class DefaultKvEntry implements KvEntry {
     }
 
     @Override
-    public Iterator<Pointer> values() {
-        return this.values.iterator();
+    public Pointer value() {
+        return this.value;
+    }
+
+    @Override
+    public int compareTo(KvEntry o) {
+        return this.key.compareTo(o.key());
     }
 }

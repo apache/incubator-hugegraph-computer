@@ -20,8 +20,9 @@
 package com.baidu.hugegraph.computer.core.store.file;
 
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 
 public interface HgkvFile extends Closeable {
 
@@ -33,7 +34,7 @@ public interface HgkvFile extends Closeable {
     /**
      * Number of entries in file.
      */
-    long entriesSize();
+    long numEntries();
 
     /**
      * File version.
@@ -43,15 +44,20 @@ public interface HgkvFile extends Closeable {
     /**
      * Max key in file.
      */
-    Pointer max();
+    byte[] max();
 
     /**
      * Min key in file.
      */
-    Pointer min();
+    byte[] min();
 
     /**
      * File verification string.
      */
     String magic();
+
+    /**
+     * Output of hgkv file.
+     */
+    BufferedFileOutput output() throws FileNotFoundException;
 }

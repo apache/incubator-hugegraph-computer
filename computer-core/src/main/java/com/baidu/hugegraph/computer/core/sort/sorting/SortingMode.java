@@ -17,11 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.entry;
+package com.baidu.hugegraph.computer.core.sort.sorting;
 
-public interface KvEntry extends Comparable<KvEntry> {
+/**
+ * Multi-way sorting algorithm type
+ */
+public enum SortingMode {
 
-    Pointer key();
-
-    Pointer value();
+    LOSER_TREE,
+    HEAP
 }

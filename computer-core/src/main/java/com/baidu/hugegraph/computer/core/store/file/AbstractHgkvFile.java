@@ -19,7 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.store.file;
 
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import java.io.FileNotFoundException;
+
+import javax.ws.rs.NotSupportedException;
+
+import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 
 public abstract class AbstractHgkvFile implements HgkvFile {
 
@@ -38,8 +42,8 @@ public abstract class AbstractHgkvFile implements HgkvFile {
     protected long entriesSize;
     protected long dataBlockSize;
     protected long indexBlockSize;
-    protected Pointer max;
-    protected Pointer min;
+    protected byte[] max;
+    protected byte[] min;
     protected String version;
 
     public AbstractHgkvFile(String path) {
@@ -52,7 +56,7 @@ public abstract class AbstractHgkvFile implements HgkvFile {
     }
 
     @Override
-    public long entriesSize() {
+    public long numEntries() {
         return this.entriesSize;
     }
 
@@ -62,17 +66,22 @@ public abstract class AbstractHgkvFile implements HgkvFile {
     }
 
     @Override
-    public Pointer max() {
+    public byte[] max() {
         return this.max;
     }
 
     @Override
-    public Pointer min() {
+    public byte[] min() {
         return this.min;
     }
 
     @Override
     public String magic() {
         return this.magic;
+    }
+
+    @Override
+    public BufferedFileOutput output() throws FileNotFoundException {
+        throw new NotSupportedException();
     }
 }

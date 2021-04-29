@@ -20,54 +20,53 @@
 package com.baidu.hugegraph.computer.core.store.file.builder;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.NotSupportedException;
 
-import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFileImpl;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvFileBuilderImpl implements HgkvFileBuilder {
 
     // Max entries size of a block
-    private final int maxDataBlockSize;
+    private final long maxDataBlockSize;
 
     private final BufferedFileOutput output;
     private final BlockBuilder dataBlockBuilder;
+    private final IndexBlockBuilder indexBlockBuilder;
     private boolean finished;
     private long entriesSize;
 
-    private final List<Pointer> indexBlock;
+    private final List<byte[]> indexBlock;
     private long numEntries;
     private long dataBlockLength;
-    private long indexBlockLength;
+    private int footerLength;
     private long maxKeyOffset;
     private final long minKeyOffset;
 
     public HgkvFileBuilderImpl(String path, Config config) throws IOException {
         this.maxDataBlockSize = config.get(ComputerOptions.HGKV_DATABLOCK_SIZE);
-        HgkvFileImpl.create(path);
-        RandomAccessFile file = new RandomAccessFile(path,
-                                                     Constants.FILE_MODE_WRITE);
-        this.output = new BufferedFileOutput(file, this.maxDataBlockSize);
+        HgkvFile hgkvFile = HgkvFileImpl.create(path);
+        this.output = hgkvFile.output();
         this.dataBlockBuilder = new DataBlockBuilderImpl(this.output);
+        this.indexBlockBuilder = new IndexBlockBuilderImpl(this.output);
         this.finished = false;
-        this.entriesSize = 0;
+        this.entriesSize = 0L;
 
         this.indexBlock = new ArrayList<>();
-        this.numEntries = 0;
-        this.dataBlockLength = 0;
-        this.indexBlockLength = 0;
-        this.maxKeyOffset = 0;
-        this.minKeyOffset = 0;
+        this.numEntries = 0L;
+        this.dataBlockLength = 0L;
+        this.footerLength = 0;
+        this.maxKeyOffset = 0L;
+        this.minKeyOffset = 0L;
     }
 
     @Override
@@ -79,7 +78,7 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         E.checkNotNull(key, "key");
         E.checkNotNull(value, "value");
 
-        this.blockAddEntry(this.dataBlockBuilder, this.indexBlock, key, value);
+        this.blockAddEntry(key, value);
         this.changeAfterAdd(key, value);
     }
 
@@ -97,18 +96,26 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         }
 
         this.dataBlockBuilder.finish();
-        this.indexBlockLength = this.writeIndexBlock(this.indexBlock);
-        this.writeFooter(this.output, this.numEntries, this.maxKeyOffset,
-                         this.minKeyOffset, this.dataBlockLength,
-                         this.indexBlockLength);
+        this.writeIndexBlock();
+        this.writeFooter();
         this.output.close();
         this.dataBlockLength = this.entriesSize;
         this.finished = true;
     }
 
     @Override
-    public long dataSize() {
+    public long dataLength() {
         return this.entriesSize;
+    }
+
+    @Override
+    public long indexLength() {
+        return this.indexBlockBuilder.size();
+    }
+
+    @Override
+    public int headerLength() {
+        return this.footerLength;
     }
 
     @Override
@@ -124,48 +131,52 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         this.dataBlockLength = this.entriesSize;
     }
 
-    private void blockAddEntry(BlockBuilder blockBuilder,
-                               List<Pointer> indexBlock, Pointer key,
-                               Pointer value) throws IOException {
+    private void blockAddEntry(Pointer key, Pointer value) throws IOException {
         // Finish and reset builder if the block is full.
-        long entrySize = blockBuilder.sizeOfEntry(key, value);
-        long blockSize = blockBuilder.size();
+        long entrySize = this.dataBlockBuilder.sizeOfEntry(key, value);
+        long blockSize = this.dataBlockBuilder.size();
         if ((entrySize + blockSize) >= this.maxDataBlockSize) {
-            blockBuilder.finish();
-            blockBuilder.reset();
-            indexBlock.add(key);
+            this.dataBlockBuilder.finish();
+            this.dataBlockBuilder.reset();
+
+            RandomAccessInput input = key.input();
+            long position = input.position();
+            input.seek(key.offset());
+            this.indexBlock.add(input.readBytes((int) key.length()));
+            input.seek(position);
         }
-        blockBuilder.add(key, value);
+        this.dataBlockBuilder.add(key, value);
     }
 
-    private long writeIndexBlock(List<Pointer> indexBlock) throws IOException {
-        long indexBlockLength = 0L;
-        for (Pointer key : indexBlock) {
-            this.output.writeInt((int) key.length());
-            this.output.write(key.input(), key.offset(), key.length());
-            indexBlockLength += (Integer.BYTES + key.length());
+    private void writeIndexBlock() throws IOException {
+        for (byte[] index : this.indexBlock) {
+            this.indexBlockBuilder.add(index);
         }
-        return indexBlockLength;
+        this.indexBlockBuilder.finish();
     }
 
-    private void writeFooter(RandomAccessOutput output, long entriesSize,
-                             long maxKeyOffset, long minKeyOffset,
-                             long dataBlockLength, long indexBlockLength)
-                             throws IOException {
+    private void writeFooter() throws IOException {
         // Write magic
-        output.writeBytes(HgkvFileImpl.MAGIC);
+        this.output.writeBytes(HgkvFileImpl.MAGIC);
+        this.footerLength += HgkvFileImpl.MAGIC.length();
         // Write entriesSize
-        output.writeLong(entriesSize);
+        this.output.writeLong(this.numEntries);
+        this.footerLength += Long.BYTES;
         // Write length of dataBlock
-        output.writeLong(dataBlockLength);
+        this.output.writeLong(this.dataBlockLength);
+        this.footerLength += Long.BYTES;
         // Write length of indexBlock
-        output.writeLong(indexBlockLength);
+        this.output.writeLong(this.indexBlockBuilder.size());
+        this.footerLength += Long.BYTES;
         // Write max key offset
-        output.writeLong(maxKeyOffset);
+        this.output.writeLong(this.maxKeyOffset);
+        this.footerLength += Long.BYTES;
         // Write min key offset
-        output.writeLong(minKeyOffset);
+        this.output.writeLong(this.minKeyOffset);
+        this.footerLength += Long.BYTES;
         // Write version
-        output.writeByte(HgkvFileImpl.PRIMARY_VERSION);
-        output.writeByte(HgkvFileImpl.MINOR_VERSION);
+        this.output.writeShort(HgkvFileImpl.PRIMARY_VERSION);
+        this.output.writeShort(HgkvFileImpl.MINOR_VERSION);
+        this.footerLength += Short.BYTES * 2;
     }
 }

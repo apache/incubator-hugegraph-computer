@@ -19,47 +19,42 @@
 
 package com.baidu.hugegraph.computer.core.store.file.reader;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.file.HgkvFile;
-import com.baidu.hugegraph.computer.core.store.file.HgkvFileImpl;
 import com.baidu.hugegraph.computer.core.store.util.EntriesUtil;
 
-public class HgkvFileReaderImpl implements HgkvFileReader {
+public class HgkvDir4SubKvReader implements HgkvDirReader {
 
-    private final HgkvFile hgkvFile;
+    private final HgkvDirReader reader;
 
-    public HgkvFileReaderImpl(String path) throws IOException {
-        this.hgkvFile = HgkvFileImpl.open(path);
+    public HgkvDir4SubKvReader(String path) {
+        this.reader = new HgkvDirReaderImpl(path);
     }
 
     @Override
-    public CloseableIterator<KvEntry> iterator() throws IOException {
-        return new EntryIter(this.hgkvFile);
+    public CloseableIterator<KvEntry> iterator() {
+        try {
+            return new KvEntryIter(this.reader);
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
     }
 
-    private static class EntryIter implements CloseableIterator<KvEntry> {
+    private static class KvEntryIter implements CloseableIterator<KvEntry> {
 
-        private final BufferedFileInput input;
-        private final BufferedFileInput externalInput;
-        private long numEntries;
+        private final CloseableIterator<KvEntry> entries;
 
-        public EntryIter(HgkvFile hgkvFile) throws IOException {
-            this.numEntries = hgkvFile.numEntries();
-            File file = new File(hgkvFile.path());
-            this.input = new BufferedFileInput(file);
-            this.externalInput = new BufferedFileInput(file);
+        public KvEntryIter(HgkvDirReader reader) throws IOException {
+            this.entries = reader.iterator();
         }
 
         @Override
         public boolean hasNext() {
-            return this.numEntries > 0;
+            return this.entries.hasNext();
         }
 
         @Override
@@ -67,10 +62,8 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
             if (!this.hasNext()) {
                 throw new NoSuchElementException();
             }
-
             try {
-                this.numEntries--;
-                return EntriesUtil.entryFromInput(this.input, this.externalInput);
+                return EntriesUtil.kvEntryWithFirstSubKv(this.entries.next());
             } catch (IOException e) {
                 throw new ComputerException(e.getMessage(), e);
             }
@@ -78,7 +71,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
 
         @Override
         public void close() throws IOException {
-            this.input.close();
+            this.entries.close();
         }
     }
 }

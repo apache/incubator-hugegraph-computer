@@ -17,11 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.entry;
+package com.baidu.hugegraph.computer.core.sort.flusher;
 
-public interface KvEntry extends Comparable<KvEntry> {
+import java.io.IOException;
+import java.util.Iterator;
 
-    Pointer key();
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
-    Pointer value();
+public interface InnerSortFlusher {
+
+    /**
+     * Flush result write to this output.
+     */
+    RandomAccessOutput output();
+
+    /**
+     * Combiner entries with the same key.
+     */
+    Combiner<KvEntry> combiner();
+
+    /**
+     * Combine the list of inputValues, and write the combined result length and
+     * results to output.
+     */
+    void flush(Iterator<KvEntry> entries) throws IOException;
 }

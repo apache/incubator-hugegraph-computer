@@ -19,9 +19,28 @@
 
 package com.baidu.hugegraph.computer.core.store.entry;
 
-public interface KvEntry extends Comparable<KvEntry> {
+import java.io.IOException;
 
-    Pointer key();
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.io.Writable;
 
-    Pointer value();
+public interface EntryOutput {
+
+    /**
+     * Write entry with multiple sub-key and sub-value.
+     * Used when write vertex with edges, each sub-key is target id of an edge,
+     * each sub-value is properties of an edge.
+     * The output format:
+     * | key length | key | total sub-entry length | sub-entry count |
+     * sub-key length | sub-key | sub-value length |
+     */
+    KvEntryWriter writeEntry(Id key) throws IOException;
+
+    /**
+     * Write entry with single value.
+     * Used when write vertex without edges and write message.
+     * The output format:
+     * | key length | key | value length | value |
+     */
+    void writeEntry(Id key, Writable value) throws IOException;
 }

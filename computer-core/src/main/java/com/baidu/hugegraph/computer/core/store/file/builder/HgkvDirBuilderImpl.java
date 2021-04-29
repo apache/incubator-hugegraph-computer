@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.store.file.builder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
@@ -42,39 +42,41 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
     private HgkvFileBuilder segmentBuilder;
     private boolean finished;
 
-    public HgkvDirBuilderImpl(String path, Config config) throws IOException {
-        this.config = config;
-        this.maxEntriesBytes = config.get(ComputerOptions.HGKV_MAX_FILE_SIZE);
-        this.dir = HgkvDirImpl.create(path);
-        this.fileId = 0;
-        this.segmentBuilder = this.nextSegmentBuilder(this.dir, config);
-        this.finished = false;
+    public HgkvDirBuilderImpl(String path, Config config) {
+        try {
+            this.config = config;
+            this.maxEntriesBytes = config.get(
+                                          ComputerOptions.HGKV_MAX_FILE_SIZE);
+            this.dir = HgkvDirImpl.create(path);
+            this.fileId = 0;
+            this.segmentBuilder = this.nextSegmentBuilder(this.dir, config);
+            this.finished = false;
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
     }
 
     @Override
-    public void write(KvEntry kvEntry) throws IOException {
+    public void write(KvEntry entry) throws IOException {
         E.checkState(!this.finished,
                      "build finished, can't continue to add data");
-        E.checkArgument(kvEntry != null && kvEntry.values() != null &&
-                        kvEntry.values().hasNext(),
+        E.checkArgument(entry != null && entry.key() != null &&
+                        entry.value() != null,
                         "entry or entry-values must not be empty");
 
-        Pointer key = kvEntry.key();
-        Iterator<Pointer> values = kvEntry.values();
-        while (values.hasNext()) {
-            Pointer value = values.next();
-            // If the segment size is larger than FILE_MAX_SIZE after add entry
-            // Stop build of the current segment and create a new segment.
-            long entrySize = this.segmentBuilder.sizeOfEntry(key, value);
-            long segmentSize = this.segmentBuilder.dataSize();
-            if ((entrySize + segmentSize) > this.maxEntriesBytes) {
-                this.segmentBuilder.finish();
-                // Create new hgkvFile.
-                this.segmentBuilder = this.nextSegmentBuilder(this.dir,
-                                                              this.config);
-            }
-            this.segmentBuilder.add(key, value);
+        Pointer key = entry.key();
+        Pointer value = entry.value();
+        // If the segment size is larger than FILE_MAX_SIZE after add entry
+        // Stop build of the current segment and create a new segment.
+        long entrySize = this.segmentBuilder.sizeOfEntry(key, value);
+        long segmentSize = this.segmentBuilder.dataLength();
+        if ((entrySize + segmentSize) > this.maxEntriesBytes) {
+            this.segmentBuilder.finish();
+            // Create new hgkvFile.
+            this.segmentBuilder = this.nextSegmentBuilder(this.dir,
+                                                          this.config);
         }
+        this.segmentBuilder.add(key, value);
     }
 
     @Override

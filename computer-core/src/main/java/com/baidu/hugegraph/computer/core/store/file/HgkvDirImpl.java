@@ -21,12 +21,13 @@ package com.baidu.hugegraph.computer.core.store.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
@@ -44,8 +45,6 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     }
 
     private final List<HgkvFile> segments;
-    private HgkvFile minKeyFile;
-    private HgkvFile maxKeyFile;
 
     private HgkvDirImpl(String path) {
         this(path, null);
@@ -59,10 +58,10 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     public static HgkvDir create(String path) throws IOException {
         File file = new File(path);
         E.checkArgument(file.getName().matches(NAME_REGEX),
-                        "Illegal file name");
+                        "Illegal hgkv file name '%s'", path);
         E.checkArgument(!file.exists(),
-                        "Can't create HgkvDir, because the directory" +
-                        " already exists. '%s'", file.getPath());
+                        "Can't create HgkvDir, because the " +
+                        "directory already exists '%s'", file.getPath());
         file.mkdirs();
         return new HgkvDirImpl(path);
     }
@@ -70,7 +69,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     public static HgkvDir open(String path) throws IOException {
         File file = new File(path);
         E.checkArgument(file.getName().matches(NAME_REGEX),
-                        "Illegal file name");
+                        "Illegal hgkv file name '%s'", path);
         E.checkArgument(file.exists(), "Path not exists '%s'", file.getPath());
         E.checkArgument(file.isDirectory(), "Path is not directory '%s'",
                         file.getPath());
@@ -78,8 +77,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     }
 
     private static File[] scanHgkvFiles(File dir) {
-        return dir.listFiles((dirName, name) ->
-                              name.matches(NAME_REGEX));
+        return dir.listFiles((dirName, name) -> name.matches(NAME_REGEX));
     }
 
     private static HgkvDir open(File file) throws IOException {
@@ -103,15 +101,15 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
             segments.add(HgkvFileImpl.open(file));
         }
         segments.sort((o1, o2) -> {
-            int id1 = filePathToSegmentId(o1.path());
-            int id2 = filePathToSegmentId(o2.path());
+            int id1 = fileNameToSegmentId(o1.path());
+            int id2 = fileNameToSegmentId(o2.path());
             return Integer.compare(id1, id2);
         });
         return segments;
     }
 
-    private static int filePathToSegmentId(String path) {
-        String fileName = path.substring(path.lastIndexOf(File.separator) + 1);
+    private static int fileNameToSegmentId(String path) {
+        String fileName = Paths.get(path).getFileName().toString();
         Matcher matcher = FILE_NUM_PATTERN.matcher(fileName);
         E.checkState(matcher.find(), "Illegal file name '%s'", fileName);
         return Integer.parseInt(matcher.group());
@@ -119,39 +117,41 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     @Override
     public void close() throws IOException {
-        if (this.minKeyFile != null) {
-            this.minKeyFile.close();
-        }
-        if (this.maxKeyFile != null) {
-            this.maxKeyFile.close();
-        }
+        // pass
     }
 
     @Override
-    public Pointer max() {
-        return this.maxKeyFile.max();
+    public byte[] max() {
+        return this.max;
     }
 
     @Override
-    public Pointer min() {
-        return this.minKeyFile.min();
+    public byte[] min() {
+        return this.min;
+    }
+
+    @Override
+    public List<HgkvFile> segments() {
+        return this.segments;
     }
 
     private void build() throws IOException {
         this.magic = MAGIC;
         this.version = PRIMARY_VERSION + "." + MINOR_VERSION;
         this.entriesSize = this.segments.stream()
-                                        .mapToLong(HgkvFile::entriesSize)
+                                        .mapToLong(HgkvFile::numEntries)
                                         .sum();
-        this.minKeyFile = this.segments.get(0);
-        this.maxKeyFile = this.segments.get(this.segments.size() - 1);
-        for (int i = 1, j = this.segments.size() - 1; i < j; i++) {
-            this.segments.get(i).close();
+        this.max = this.segments.stream()
+                                .map(HgkvFile::max)
+                                .max(BytesUtil::compare)
+                                .orElse(null);
+        this.min = this.segments.stream()
+                                .map(HgkvFile::min)
+                                .min(BytesUtil::compare)
+                                .orElse(null);
+        // Close segments
+        for (HgkvFile segment : this.segments) {
+            segment.close();
         }
-    }
-
-    @Override
-    public List<HgkvFile> segments() {
-        return this.segments;
     }
 }

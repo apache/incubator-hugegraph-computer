@@ -36,6 +36,7 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFile;
@@ -46,6 +47,7 @@ import com.baidu.hugegraph.computer.core.store.file.reader.HgkvFileReader;
 import com.baidu.hugegraph.computer.core.store.file.reader.HgkvFileReaderImpl;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
+import com.google.common.primitives.Bytes;
 
 public class HgkvFileTest {
 
@@ -74,7 +76,7 @@ public class HgkvFileTest {
         String filePath = availableFilePath("1");
         File file = null;
         try {
-            file = StoreTestData.hgkvFileFromMap(data, filePath);
+            file = StoreTestUtil.hgkvFileFromMap(data, filePath);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -87,19 +89,19 @@ public class HgkvFileTest {
         String filePath = availableFilePath("1");
         File file = null;
         try {
-            file = StoreTestData.hgkvFileFromMap(data, filePath);
+            file = StoreTestUtil.hgkvFileFromMap(data, filePath);
             // Open file
             HgkvFile hgkvFile = HgkvFileImpl.open(file.getPath());
             Assert.assertEquals(HgkvFileImpl.MAGIC, hgkvFile.magic());
             String version = HgkvFileImpl.PRIMARY_VERSION + "." +
                              HgkvFileImpl.MINOR_VERSION;
             Assert.assertEquals(version, hgkvFile.version());
-            Assert.assertEquals(5, hgkvFile.entriesSize());
+            Assert.assertEquals(5, hgkvFile.numEntries());
             // Read max key
-            int maxKey = StoreTestData.dataFromPointer(hgkvFile.max());
+            int maxKey = StoreTestUtil.byteArrayToInt(hgkvFile.max());
             Assert.assertEquals(6, maxKey);
             // Read min key
-            int minKey = StoreTestData.dataFromPointer(hgkvFile.min());
+            int minKey = StoreTestUtil.byteArrayToInt(hgkvFile.min());
             Assert.assertEquals(2, minKey);
         } finally {
             FileUtils.deleteQuietly(file);
@@ -134,7 +136,7 @@ public class HgkvFileTest {
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 HgkvFileImpl.open(finalTempFile);
             },
-            e -> Assert.assertTrue(e.getMessage().contains("File not exists")));
+            e -> Assert.assertTrue(e.getMessage().contains("Not exists")));
         } finally {
             FileUtils.deleteQuietly(tempFile);
         }
@@ -145,16 +147,17 @@ public class HgkvFileTest {
         // The keys in the data must be ordered
         List<Integer> data = testData();
         String filePath = availableFilePath("1");
-        File file = StoreTestData.hgkvFileFromMap(data, filePath);
+        File file = StoreTestUtil.hgkvFileFromMap(data, filePath);
         try {
             HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath());
-            Iterator<Pointer> iterator = reader.iterator();
+            Iterator<KvEntry> iterator = reader.iterator();
             int index = 0;
             while (iterator.hasNext()) {
-                Pointer next = iterator.next();
-                next.input().seek(next.offset());
-                int key = next.input().readInt();
-                Assert.assertEquals(data.get(index).intValue(), key);
+                KvEntry next = iterator.next();
+                Pointer key = next.key();
+                key.input().seek(key.offset());
+                int keyData = key.input().readInt();
+                Assert.assertEquals(data.get(index).intValue(), keyData);
                 index += 2;
             }
             Assert.assertThrows(NoSuchElementException.class,
