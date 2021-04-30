@@ -35,7 +35,7 @@ public class HeartbeatHandlerTest extends AbstractNetworkTest {
 
     private static final long HEARTBEAT_INTERVAL = 2000L;
     private static final long IDLE_TIMEOUT = 6000L;
-    private static final int MAX_HEARTBEAT_TIMEOUTS = 3;
+    private static final int MAX_TIMEOUT_HEARTBEAT_COUNT = 3;
 
     @Override
     protected void initOption() {
@@ -43,8 +43,9 @@ public class HeartbeatHandlerTest extends AbstractNetworkTest {
                            HEARTBEAT_INTERVAL);
         super.updateOption(ComputerOptions.TRANSPORT_SERVER_IDLE_TIMEOUT,
                            IDLE_TIMEOUT);
-        super.updateOption(ComputerOptions.TRANSPORT_MAX_HEARTBEAT_TIMEOUTS,
-                           MAX_HEARTBEAT_TIMEOUTS);
+        super.updateOption(ComputerOptions.
+                           TRANSPORT_MAX_TIMEOUT_HEARTBEAT_COUNT,
+                           MAX_TIMEOUT_HEARTBEAT_COUNT);
     }
 
     @Test
@@ -85,7 +86,7 @@ public class HeartbeatHandlerTest extends AbstractNetworkTest {
                                             NettyProtocol.CLIENT_HANDLER_NAME,
                                             spyHandler);
 
-        int heartbeatTimesClose = MAX_HEARTBEAT_TIMEOUTS + 1;
+        int heartbeatTimesClose = MAX_TIMEOUT_HEARTBEAT_COUNT + 1;
         long timout = HEARTBEAT_INTERVAL * heartbeatTimesClose;
         Mockito.verify(mockHeartbeatHandler,
                        Mockito.timeout(timout).times(heartbeatTimesClose))
