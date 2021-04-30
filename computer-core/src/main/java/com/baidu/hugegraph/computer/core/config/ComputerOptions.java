@@ -542,6 +542,6 @@ public class ComputerOptions extends OptionHolder {
                     "continuously > max_heartbeat_timeouts the channel will " +
                     "be closed from client side.",
                     positiveInt(),
-                    6
+                    90
             );
 }
