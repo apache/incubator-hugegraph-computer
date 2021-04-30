@@ -32,21 +32,20 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class DataDirManagerTest {
+public class DataDirManagerTest extends UnitTestBase {
 
     @Test
     public void testInitWithFile() throws IOException {
         File file = new File("exist");
         file.createNewFile();
         UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_ID, "local_001",
-                ComputerOptions.WORKER_DATA_DIRS,
-                "[" + file.getAbsolutePath() + "]"
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.WORKER_DATA_DIRS, "[" + file.getAbsolutePath() + "]"
         );
-        Config config = ComputerContext.instance().config();
-        DataDirManager dataDirManager = new DataDirManager();
+        Config config = context().config();
+        DataFileManager dataFileManager = new DataFileManager();
         Assert.assertThrows(ComputerException.class, () -> {
-            dataDirManager.init(config);
+            dataFileManager.init(config);
         }, e -> {
             Assert.assertContains("Can't create dir ", e.getMessage());
         });
@@ -56,13 +55,13 @@ public class DataDirManagerTest {
     @Test
     public void testInitWithReadOnlyDir() throws IOException {
         UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_ID, "local_001",
-                ComputerOptions.WORKER_DATA_DIRS, "[/etc]"
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.WORKER_DATA_DIRS, "[/etc]"
         );
         Config config = ComputerContext.instance().config();
-        DataDirManager dataDirManager = new DataDirManager();
+        DataFileManager dataFileManager = new DataFileManager();
         Assert.assertThrows(ComputerException.class, () -> {
-            dataDirManager.init(config);
+            dataFileManager.init(config);
         }, e -> {
             Assert.assertContains("Can't create dir", e.getMessage());
         });
@@ -71,60 +70,60 @@ public class DataDirManagerTest {
     @Test
     public void testNextDir() {
         UnitTestBase.updateWithRequiredOptions(
-                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
-                ComputerOptions.JOB_ID, "local_001",
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
-                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-                ComputerOptions.WORKER_RECEIVE_BUFFERS_SIZE_LIMIT, "300"
+            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "2",
+            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+            ComputerOptions.WORKER_RECEIVE_BUFFERS_SIZE_LIMIT, "300"
         );
         Config config = ComputerContext.instance().config();
-        DataDirManager dataDirManager = new DataDirManager();
+        DataFileManager dataFileManager = new DataFileManager();
 
-        dataDirManager.init(config);
+        dataFileManager.init(config);
 
-        File dir1 = dataDirManager.nextDir();
-        File dir2 = dataDirManager.nextDir();
-        File dir3 = dataDirManager.nextDir();
-        File dir4 = dataDirManager.nextDir();
-        File dir5 = dataDirManager.nextDir();
+        File dir1 = dataFileManager.nextDir();
+        File dir2 = dataFileManager.nextDir();
+        File dir3 = dataFileManager.nextDir();
+        File dir4 = dataFileManager.nextDir();
+        File dir5 = dataFileManager.nextDir();
         Assert.assertEquals(dir1, dir3);
         Assert.assertEquals(dir3, dir5);
         Assert.assertEquals(dir2, dir4);
 
-        dataDirManager.close(config);
+        dataFileManager.close(config);
     }
 
     @Test
     public void testNextFile() {
         UnitTestBase.updateWithRequiredOptions(
-                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
-                ComputerOptions.JOB_ID, "local_001",
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
-                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-                ComputerOptions.WORKER_RECEIVE_BUFFERS_SIZE_LIMIT, "300"
+            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "2",
+            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+            ComputerOptions.WORKER_RECEIVE_BUFFERS_SIZE_LIMIT, "300"
         );
         Config config = ComputerContext.instance().config();
-        DataDirManager dataDirManager = new DataDirManager();
+        DataFileManager dataFileManager = new DataFileManager();
 
-        dataDirManager.init(config);
+        dataFileManager.init(config);
 
-        File vertexFile = dataDirManager.nextFile("vertex", -1);
+        File vertexFile = dataFileManager.nextFile("vertex", -1);
         File vertexSuperstepDir = vertexFile.getParentFile();
         Assert.assertEquals("-1", vertexSuperstepDir.getName());
         File vertexRootDir = vertexSuperstepDir.getParentFile();
         Assert.assertEquals("vertex", vertexRootDir.getName());
 
-        File messageFile = dataDirManager.nextFile("message", 0);
+        File messageFile = dataFileManager.nextFile("message", 0);
         File messageSuperstepDir = messageFile.getParentFile();
         Assert.assertEquals("0", messageSuperstepDir.getName());
         File messageRootDir = messageSuperstepDir.getParentFile();
         Assert.assertEquals("message", messageRootDir.getName());
 
-        File messageFile2 = dataDirManager.nextFile("message", 0);
+        File messageFile2 = dataFileManager.nextFile("message", 0);
         Assert.assertNotEquals(messageFile, messageFile2);
 
-        dataDirManager.close(config);
+        dataFileManager.close(config);
     }
 }

@@ -35,16 +35,16 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.util.Log;
 
-public class DataDirManager implements DataDirHandler, Manager {
+public class DataFileManager implements DataFileGenerator, Manager {
 
-    private static final Logger LOG = Log.logger(DataDirManager.class);
+    private static final Logger LOG = Log.logger(DataFileManager.class);
 
     public static final String NAME = "data_dir";
 
     private List<File> dirs;
     private AtomicInteger sequence;
 
-    public DataDirManager() {
+    public DataFileManager() {
         this.dirs = new ArrayList<>();
         this.sequence = new AtomicInteger();
     }
@@ -83,14 +83,14 @@ public class DataDirManager implements DataDirHandler, Manager {
     @Override
     public File nextDir() {
         int index = this.sequence.incrementAndGet();
-        // Index can't be negative.
+        assert index >= 0;
         return this.dirs.get(index % this.dirs.size());
     }
 
     @Override
-    public File nextFile(String label, int superstep) {
+    public File nextFile(String type, int superstep) {
         File dir = this.nextDir();
-        File labelDir = new File(dir, label);
+        File labelDir = new File(dir, type);
         File superStepDir = new File(labelDir, Integer.toString(superstep));
         this.mkdirs(superStepDir);
         return new File(superStepDir, UUID.randomUUID().toString());

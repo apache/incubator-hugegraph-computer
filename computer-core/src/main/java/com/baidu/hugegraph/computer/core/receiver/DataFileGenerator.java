@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.receiver;
 
 import java.io.File;
 
-public interface DataDirHandler {
+public interface DataFileGenerator {
 
     /**
      * @return the next data dir to persist data like vertices, edges and
@@ -32,5 +32,5 @@ public interface DataDirHandler {
     /**
      * @return the next file to persist data like vertices, edges and messages.
      */
-    File nextFile(String label, int superstep);
+    File nextFile(String type, int superstep);
 }
