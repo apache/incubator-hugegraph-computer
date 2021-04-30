@@ -395,7 +395,7 @@ public class ComputerOptions extends OptionHolder {
                     "The capacity of SYN queue on server side, 0 means using " +
                     "system default value.",
                     nonNegativeInt(),
-                    0
+                    511
             );
 
     public static final ConfigOption<Integer> TRANSPORT_RECEIVE_BUFFER_SIZE =
