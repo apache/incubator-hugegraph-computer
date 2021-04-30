@@ -72,7 +72,7 @@ public class HeartbeatHandler extends ChannelDuplexHandler {
                 ctx.close();
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Client IdleStateEvent triggered send ping to" +
+                    LOG.debug("Client IdleStateEvent trigger to send ping to" +
                               "'{}', count: {}",
                               TransportUtil.remoteAddress(channel),
                               timeoutHeartbeatCount);

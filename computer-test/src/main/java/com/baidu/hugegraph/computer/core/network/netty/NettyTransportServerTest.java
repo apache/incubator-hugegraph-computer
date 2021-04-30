@@ -58,7 +58,7 @@ public class NettyTransportServerTest extends UnitTestBase {
             ComputerOptions.TRANSPORT_SERVER_PORT, "0",
             ComputerOptions.TRANSPORT_SERVER_THREADS, "3",
             ComputerOptions.TRANSPORT_IO_MODE, "NIO",
-            ComputerOptions.TRANSPORT_BACKLOG, "1024"
+            ComputerOptions.TRANSPORT_MAX_SYN_BACKLOG, "1024"
         );
         messageHandler = new MockMessageHandler();
         this.server = new NettyTransportServer();

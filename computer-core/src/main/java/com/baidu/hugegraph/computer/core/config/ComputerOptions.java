@@ -389,11 +389,11 @@ public class ComputerOptions extends OptionHolder {
                     true
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
+    public static final ConfigOption<Integer> TRANSPORT_MAX_SYN_BACKLOG =
             new ConfigOption<>(
-                    "transport.backlog",
-                    "The server connection backlog, 0 means using system " +
-                    "defaults.",
+                    "transport.max_syn_backlog",
+                    "The capacity of SYN queue on server side, 0 means using " +
+                    "system default value.",
                     nonNegativeInt(),
                     0
             );
@@ -528,7 +528,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> TRANSPORT_HEARTBEAT_INTERVAL =
             new ConfigOption<>(
                     "transport.heartbeat_interval",
-                    "Time minimum interval(in ms) of client send heartbeat.",
+                    "The minimum interval(in ms) between heartbeats on " +
+                    "client side.",
                     positiveInt(),
                     20_000L
             );
@@ -537,10 +538,10 @@ public class ComputerOptions extends OptionHolder {
             TRANSPORT_MAX_TIMEOUT_HEARTBEAT_COUNT =
             new ConfigOption<>(
                     "transport.max_timeout_heartbeat_count",
-                    "The maximum number of client timeout heartbeat, if the " +
-                    "number of timeouts waiting for heartbeat response " +
-                    "continuously > max_heartbeat_timeouts the channel will " +
-                    "be closed from client side.",
+                    "The maximum times of timeout heartbeat on client side, " +
+                    "if the number of timeouts waiting for heartbeat " +
+                    "response continuously > max_heartbeat_timeouts the " +
+                    "channel will be closed from client side.",
                     positiveInt(),
                     90
             );

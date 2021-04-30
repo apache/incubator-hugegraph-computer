@@ -108,8 +108,8 @@ public class TransportConf {
      * the default Netty value of {@link io.netty.util.NetUtil#SOMAXCONN} will
      * be used.
      */
-    public int backLog() {
-        return this.config.get(ComputerOptions.TRANSPORT_BACKLOG);
+    public int maxSynBacklog() {
+        return this.config.get(ComputerOptions.TRANSPORT_MAX_SYN_BACKLOG);
     }
 
     /**
