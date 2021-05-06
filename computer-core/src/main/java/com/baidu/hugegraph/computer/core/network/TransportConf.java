@@ -25,6 +25,7 @@ import java.util.Locale;
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.util.E;
 
 import io.netty.channel.epoll.Epoll;
 
@@ -59,6 +60,19 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
     }
 
+    public int serverThreads() {
+        return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
+    }
+
+    public int clientThreads() {
+        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
+    }
+
+    public TransportProvider transportProvider() {
+        return this.config
+                   .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
+    }
+
     /**
      * IO mode: nio or epoll
      */
@@ -78,18 +92,14 @@ public class TransportConf {
     }
 
     /**
-     * The transport provider
-     */
-    public TransportProvider transportProvider() {
-        return this.config
-                   .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
-    }
-
-    /**
-     * Enabled EPOLL level trigger
+     * Whether enabled EPOLL level trigger
      */
     public boolean epollLevelTriggered() {
         return this.config.get(ComputerOptions.TRANSPORT_EPOLL_LT);
+    }
+
+    public boolean tcpKeepAlive() {
+        return this.config.get(ComputerOptions.TRANSPORT_TCP_KEEP_ALIVE);
     }
 
     /**
@@ -98,24 +108,8 @@ public class TransportConf {
      * the default Netty value of {@link io.netty.util.NetUtil#SOMAXCONN} will
      * be used.
      */
-    public int backLog() {
-        return this.config.get(ComputerOptions.TRANSPORT_BACKLOG);
-    }
-
-    /**
-     * Number of threads used in the server EventLoop thread pool. Default to
-     * 0, which is CPUs.
-     */
-    public int serverThreads() {
-        return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
-    }
-
-    public int clientThreads() {
-        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
-    }
-
-    public int sendBuffer() {
-        return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
+    public int maxSynBacklog() {
+        return this.config.get(ComputerOptions.TRANSPORT_MAX_SYN_BACKLOG);
     }
 
     /**
@@ -125,8 +119,12 @@ public class TransportConf {
      * Assuming latency = 1ms, network_bandwidth = 10Gbps
      * buffer size should be ~ 1.25MB
      */
-    public int receiveBuffer() {
+    public int sizeReceiveBuffer() {
         return this.config.get(ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE);
+    }
+
+    public int sizeSendBuffer() {
+        return this.config.get(ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE);
     }
 
     public int networkRetries() {
@@ -147,38 +145,62 @@ public class TransportConf {
     }
 
     /**
-     * The max number of request allowed to unreceived ack.
-     * Note: If the number of unreceived ack greater than
-     * TRANSPORT_MAX_PENDING_REQUESTS,
-     * {@link TransportClient#send} will unavailable
+     * Timeout of finish session, if less than or equal 0 the default value is
+     * TRANSPORT_SYNC_REQUEST_TIMEOUT * TRANSPORT_MAX_PENDING_REQUESTS
      */
+    public long finishSessionTimeout() {
+        long timeout = this.config.get(
+                       ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT);
+        return timeout > 0 ? timeout :
+               this.config.get(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT) *
+               this.config.get(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS);
+    }
+
+    public long writeSocketTimeout() {
+        return this.config.get(ComputerOptions.TRANSPORT_WRITE_SOCKET_TIMEOUT);
+    }
+
+    public int writeBufferHighMark() {
+        return this.config
+                   .get(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK);
+    }
+
+    public int writeBufferLowMark() {
+        return this.config
+                   .get(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK);
+    }
+
     public int maxPendingRequests() {
         return this.config.get(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS);
     }
 
-    /**
-     * The minimum number of client unreceived ack.
-     */
     public int minPendingRequests() {
-        return this.config.get(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS);
+        int minPendingReqs = this.config.get(
+                             ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS);
+
+        int maxPendingRequests = this.maxPendingRequests();
+
+        E.checkArgument(minPendingReqs <= maxPendingRequests,
+                        "The min_pending_requests(%s) must be less than or " +
+                        "equal to the max_pending_requests(%s).",
+                        minPendingReqs, maxPendingRequests);
+        return minPendingReqs;
     }
 
-    /**
-     * The minimum interval(in ms) of server reply ack.
-     */
     public long minAckInterval() {
         return this.config.get(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL);
     }
 
-    public int heartbeatInterval() {
+    public long serverIdleTimeout() {
+        return this.config.get(ComputerOptions.TRANSPORT_SERVER_IDLE_TIMEOUT);
+    }
+
+    public long heartbeatInterval() {
         return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_INTERVAL);
     }
 
-    public int heartbeatTimeout() {
-        return this.config.get(ComputerOptions.TRANSPORT_HEARTBEAT_TIMEOUT);
-    }
-
-    public boolean tcpKeepAlive() {
-        return this.config.get(ComputerOptions.TRANSPORT_TCP_KEEP_ALIVE);
+    public int maxTimeoutHeartbeatCount() {
+        return this.config
+                   .get(ComputerOptions.TRANSPORT_MAX_TIMEOUT_HEARTBEAT_COUNT);
     }
 }

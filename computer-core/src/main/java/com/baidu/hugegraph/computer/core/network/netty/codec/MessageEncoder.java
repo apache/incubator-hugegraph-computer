@@ -93,8 +93,7 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
             if (bufHeader != null) {
                 bufHeader.release();
             }
-            // TODO: need to release the out reference?
-            // message.release();
+            message.release();
         }
     }
 }

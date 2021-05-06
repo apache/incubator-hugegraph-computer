@@ -22,20 +22,55 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
+import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.testutil.Whitebox;
+import com.baidu.hugegraph.util.Bytes;
+import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 
 public class NettyTransportClientTest extends AbstractNetworkTest {
 
+    private static final Logger LOG =
+            Log.logger(NettyTransportClientTest.class);
+
+    public static final BarrierEvent BARRIER_EVENT = new BarrierEvent();
+
     @Override
     protected void initOption() {
+        super.updateOption(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS,
+                           8000);
+        super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS,
+                           6000);
+        super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK,
+                           64 * (int) Bytes.MB);
+        super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK,
+                           32 * (int) Bytes.MB);
+        super.updateOption(ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL,
+                           200L);
+        super.updateOption(ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT,
+                           30_000L);
     }
 
     @Test
@@ -70,13 +105,203 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testFinishSession() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        client.startSession();
         client.finishSession();
     }
 
     @Test
     public void testSend() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        client.send(MessageType.MSG, 1,
-                    ByteBuffer.wrap(StringEncoding.encode("hello")));
+        for (int i = 0; i < 3; i++) {
+            client.startSession();
+            client.send(MessageType.MSG, 1,
+                        ByteBuffer.wrap(StringEncoding.encode("test1")));
+            client.send(MessageType.VERTEX, 2,
+                        ByteBuffer.wrap(StringEncoding.encode("test2")));
+            client.send(MessageType.EDGE, 3,
+                        ByteBuffer.wrap(StringEncoding.encode("test3")));
+            client.finishSession();
+        }
+    }
+
+    @Test
+    public void testStartSessionWithTimeout() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        Function<Message, ChannelFuture> sendFunc = message -> null;
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
+
+        Assert.assertThrows(TransportException.class, () -> {
+            client.startSession();
+        }, e -> {
+            Assert.assertContains("to wait start response",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testFinishSessionWithTimeout() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        client.startSession();
+
+        Function<Message, ChannelFuture> sendFunc = message -> null;
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
+
+        Whitebox.setInternalState(client, "finishSessionTimeout",
+                                  1000L);
+
+        Assert.assertThrows(TransportException.class, () -> {
+            client.finishSession();
+        }, e -> {
+            Assert.assertContains("to wait finish response",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testFlowControl() throws IOException {
+        ByteBuffer buffer = ByteBuffer.wrap(
+                            StringEncoding.encode("test data"));
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        client.startSession();
+
+        Object sendFuncBak = Whitebox.getInternalState(client.clientSession(),
+                                                       "sendFunction");
+        Function<Message, ChannelFuture> sendFunc = message -> null;
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
+
+        for (int i = 1; i <= conf.maxPendingRequests() * 2; i++) {
+            boolean send = client.send(MessageType.MSG, 1, buffer);
+            if (i <= conf.maxPendingRequests()) {
+                Assert.assertTrue(send);
+            } else {
+                Assert.assertFalse(send);
+            }
+        }
+
+        int maxRequestId = Whitebox.getInternalState(client.clientSession(),
+                                                     "maxRequestId");
+        int maxAckId = Whitebox.getInternalState(client.clientSession(),
+                                                 "maxAckId");
+        Assert.assertEquals(conf.maxPendingRequests(), maxRequestId);
+        Assert.assertEquals(0, maxAckId);
+
+        int pendings = conf.maxPendingRequests() - conf.minPendingRequests();
+        for (int i = 1; i <= pendings + 1; i++) {
+            Assert.assertFalse(client.checkSendAvailable());
+            client.clientSession().onRecvAck(i);
+        }
+        Assert.assertTrue(client.checkSendAvailable());
+
+        maxAckId = Whitebox.getInternalState(client.clientSession(),
+                                             "maxAckId");
+        Assert.assertEquals(pendings + 1, maxAckId);
+
+        Whitebox.setInternalState(client.clientSession(), "sendFunction",
+                                  sendFuncBak);
+    }
+
+    @Test
+    public void testHandlerException() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        client.startSession();
+
+        Mockito.doThrow(new RuntimeException("test exception"))
+               .when(serverHandler)
+               .handle(Mockito.any(), Mockito.anyInt(), Mockito.any());
+
+        ByteBuffer buffer = ByteBuffer.wrap(
+                            StringEncoding.encode("test data"));
+        boolean send = client.send(MessageType.MSG, 1, buffer);
+        Assert.assertTrue(send);
+
+        Whitebox.setInternalState(client, "finishSessionTimeout",
+                                  1000L);
+
+        Assert.assertThrows(TransportException.class, () -> {
+            client.finishSession();
+        }, e -> {
+            Assert.assertContains("to wait finish response",
+                                  e.getMessage());
+        });
+
+        Mockito.verify(serverHandler, Mockito.timeout(10_000L).times(1))
+               .exceptionCaught(Mockito.any(), Mockito.any());
+
+        Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
+               .exceptionCaught(Mockito.any(), Mockito.any());
+    }
+
+    @Test
+    public void testTransportPerformance() throws IOException,
+                                                  InterruptedException {
+        Configurator.setAllLevels("com.baidu.hugegraph", Level.INFO);
+        Configurator.setAllLevels("com.baidu.hugegraph.computer.core." +
+                                  "network.MockMessageHandler", Level.WARN);
+
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        ByteBuffer buffer = ByteBuffer.allocateDirect(50 * 1024);
+
+        AtomicInteger handledCnt = new AtomicInteger(0);
+
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationOnMock.callRealMethod();
+            BARRIER_EVENT.signalAll();
+            return null;
+        }).when(clientHandler).sendAvailable(Mockito.any());
+
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationOnMock.callRealMethod();
+            handledCnt.getAndIncrement();
+            return null;
+        }).when(serverHandler).handle(Mockito.any(), Mockito.anyInt(),
+                                      Mockito.any());
+
+        long preTransport = System.nanoTime();
+
+        client.startSession();
+
+        int dataNum = 209716;
+        for (int i = 0; i < dataNum; i++) {
+            boolean send = client.send(MessageType.MSG, 1, buffer);
+            if (!send) {
+                LOG.info("Current send unavailable");
+                i--;
+                if (!BARRIER_EVENT.await(10_000L)) {
+                    throw new ComputeException("Timeout(%sms) to wait send");
+                }
+                BARRIER_EVENT.reset();
+            }
+        }
+
+        client.finishSession();
+
+        long postTransport = System.nanoTime();
+
+        LOG.info("Transport {} data packets total 10GB, cost {}ms", dataNum,
+                 (postTransport - preTransport) / 1000_000L);
+
+        Assert.assertEquals(dataNum, handledCnt.get());
+    }
+
+    @Test
+    public void testCheckMinPendingRequests() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "100",
+                ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "101"
+        );
+        config = ComputerContext.instance().config();
+
+        TransportConf conf = TransportConf.wrapConfig(config);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            int minPendingRequests = conf.minPendingRequests();
+        });
     }
 }

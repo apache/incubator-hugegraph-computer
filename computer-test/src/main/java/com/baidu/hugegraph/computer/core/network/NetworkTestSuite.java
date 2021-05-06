@@ -24,7 +24,7 @@ import org.junit.runners.Suite;
 
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBufferTest;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManagerTest;
-import com.baidu.hugegraph.computer.core.network.netty.HeartBeatHandlerTest;
+import com.baidu.hugegraph.computer.core.network.netty.HeartbeatHandlerTest;
 import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactoryTest;
 import com.baidu.hugegraph.computer.core.network.netty.NettyEncodeDecodeHandlerTest;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportClientTest;
@@ -41,7 +41,7 @@ import com.baidu.hugegraph.computer.core.network.session.TransportSessionTest;
     TransportSessionTest.class,
     NettyTransportClientTest.class,
     NettyEncodeDecodeHandlerTest.class,
-    HeartBeatHandlerTest.class,
+    HeartbeatHandlerTest.class,
     ManagedBufferTest.class
 })
 public class NetworkTestSuite {

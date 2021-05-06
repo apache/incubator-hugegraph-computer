@@ -21,12 +21,14 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
@@ -40,6 +42,7 @@ import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.config.ConfigOption;
@@ -48,17 +51,27 @@ import com.baidu.hugegraph.testutil.Whitebox;
 
 import io.netty.bootstrap.ServerBootstrap;
 
-public abstract class AbstractNetworkTest extends UnitTestBase {
+public abstract class AbstractNetworkTest {
 
     private static final Map<ConfigOption<?>, String> OPTIONS = new HashMap<>();
     protected static Config config;
+    protected static TransportConf conf;
     protected static MessageHandler serverHandler;
     protected static ClientHandler clientHandler;
     protected static ConnectionManager connectionManager;
     protected static NettyProtocol clientProtocol;
     protected static NettyProtocol serverProtocol;
-    protected static String host = "127.0.0.1";
+    protected static String host;
     protected static int port;
+
+    static {
+        List<String> localIPAddress = TransportUtil.getLocalIPAddress();
+        if (!localIPAddress.isEmpty()) {
+            host = localIPAddress.get(0);
+        } else {
+            host = "127.0.0.1";
+        }
+    }
 
     protected abstract void initOption();
 
@@ -85,6 +98,7 @@ public abstract class AbstractNetworkTest extends UnitTestBase {
 
     @Before
     public void setup() {
+        Configurator.setAllLevels("com.baidu.hugegraph", Level.DEBUG);
         OPTIONS.put(ComputerOptions.TRANSPORT_SERVER_HOST, host);
         OPTIONS.put(ComputerOptions.TRANSPORT_IO_MODE, "AUTO");
         this.initOption();
@@ -97,6 +111,7 @@ public abstract class AbstractNetworkTest extends UnitTestBase {
         }
 
         config = UnitTestBase.updateWithRequiredOptions(objects);
+        conf = TransportConf.wrapConfig(config);
         serverHandler = Mockito.spy(new MockMessageHandler());
         clientHandler = Mockito.spy(new MockClientHandler());
         connectionManager = new TransportConnectionManager();
@@ -133,22 +148,5 @@ public abstract class AbstractNetworkTest extends UnitTestBase {
         serverProtocol = Mockito.spy(protocol);
         Whitebox.setInternalState(channelInitializer, "protocol",
                                   serverProtocol);
-    }
-
-
-    @Test
-    public void testTransportConf() {
-        config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-            ComputerOptions.TRANSPORT_IO_MODE, "NIO",
-            ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS, "20",
-            ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS, "5",
-            ComputerOptions.TRANSPORT_MIN_ACK_INTERVAL, "500"
-        );
-
-        TransportConf conf = TransportConf.wrapConfig(config);
-        Assert.assertEquals(20, conf.maxPendingRequests());
-        Assert.assertEquals(5, conf.minPendingRequests());
-        Assert.assertEquals(500L, conf.minAckInterval());
     }
 }

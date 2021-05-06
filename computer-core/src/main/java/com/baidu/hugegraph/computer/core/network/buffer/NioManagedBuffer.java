@@ -28,10 +28,11 @@ import io.netty.buffer.Unpooled;
 public class NioManagedBuffer implements ManagedBuffer {
 
     private final ByteBuffer buffer;
-    private final AtomicInteger referenceCount = new AtomicInteger(-1);
+    private final AtomicInteger referenceCount;
 
     public NioManagedBuffer(ByteBuffer buffer) {
         this.buffer = buffer;
+        this.referenceCount = new AtomicInteger(1);
     }
 
     @Override
@@ -41,11 +42,13 @@ public class NioManagedBuffer implements ManagedBuffer {
 
     @Override
     public ManagedBuffer retain() {
+        this.referenceCount.incrementAndGet();
         return this;
     }
 
     @Override
     public ManagedBuffer release() {
+        this.referenceCount.decrementAndGet();
         return this;
     }
 

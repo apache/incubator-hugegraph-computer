@@ -26,7 +26,7 @@ public class StartMessage extends AbstractMessage implements RequestMessage {
     public static final StartMessage INSTANCE = new StartMessage();
 
     public StartMessage() {
-        super(0);
+        super(START_SEQ);
     }
 
     @Override
@@ -35,7 +35,12 @@ public class StartMessage extends AbstractMessage implements RequestMessage {
     }
 
     public static StartMessage parseFrom(ByteBuf buf) {
-        assertExtraHeader(buf);
+        int sequenceNumber = buf.readInt();
+        assert sequenceNumber == START_SEQ;
+        int partition = buf.readInt();
+        assert partition == 0;
+        int bodyLength = buf.readInt();
+        assert bodyLength == 0;
         return INSTANCE;
     }
 }

@@ -19,34 +19,61 @@
 
 package com.baidu.hugegraph.computer.core.network.session;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-import com.baidu.hugegraph.computer.core.network.TransportStatus;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.TransportState;
+import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 
 public abstract class TransportSession {
 
-    protected volatile TransportStatus status;
-    protected final AtomicInteger maxRequestId;
+    protected static final AtomicIntegerFieldUpdater<TransportSession>
+              MAX_REQUEST_ID_UPDATER =
+              AtomicIntegerFieldUpdater.newUpdater(TransportSession.class,
+                                                   "maxRequestId");
 
-    protected TransportSession() {
-        this.status = TransportStatus.READY;
-        this.maxRequestId = new AtomicInteger(-1);
+    protected final TransportConf conf;
+    protected volatile TransportState state;
+    protected volatile int maxRequestId;
+    protected volatile int maxAckId;
+    protected volatile int finishId;
+
+    protected TransportSession(TransportConf conf) {
+        this.conf = conf;
+        this.maxRequestId = AbstractMessage.UNKNOWN_SEQ;
+        this.finishId = AbstractMessage.UNKNOWN_SEQ;
+        this.maxAckId = AbstractMessage.UNKNOWN_SEQ;
+        this.state = TransportState.READY;
     }
 
-    public TransportStatus status() {
-        return this.status;
+    protected void stateReady() {
+        this.maxRequestId = AbstractMessage.UNKNOWN_SEQ;
+        this.finishId = AbstractMessage.UNKNOWN_SEQ;
+        this.maxAckId = AbstractMessage.UNKNOWN_SEQ;
+        this.state = TransportState.READY;
     }
 
-    public void ready() {
-        this.maxRequestId.set(-1);
-        this.status = TransportStatus.READY;
+    protected void stateEstablished() {
+        this.state = TransportState.ESTABLISHED;
     }
 
-    public void establish() {
-        this.status = TransportStatus.ESTABLISH;
+    public TransportState state() {
+        return this.state;
     }
 
-    public int maxRequestId() {
-        return this.maxRequestId.get();
+    public int nextRequestId() {
+        return MAX_REQUEST_ID_UPDATER.incrementAndGet(this);
+    }
+
+    protected int genFinishId() {
+        return this.maxRequestId + 1;
+    }
+
+    public int finishId() {
+        return this.finishId;
+    }
+
+    public TransportConf conf() {
+        return this.conf;
     }
 }

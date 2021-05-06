@@ -133,19 +133,19 @@ public class NettyTransportServer implements TransportServer, Closeable {
                                                this.conf.epollLevelTriggered(),
                                                this.bootstrap);
 
-        if (this.conf.backLog() > 0) {
+        if (this.conf.maxSynBacklog() > 0) {
             this.bootstrap.option(ChannelOption.SO_BACKLOG,
-                                  this.conf.backLog());
+                                  this.conf.maxSynBacklog());
         }
 
-        if (this.conf.receiveBuffer() > 0) {
+        if (this.conf.sizeReceiveBuffer() > 0) {
             this.bootstrap.childOption(ChannelOption.SO_RCVBUF,
-                                       this.conf.receiveBuffer());
+                                       this.conf.sizeReceiveBuffer());
         }
 
-        if (this.conf.sendBuffer() > 0) {
+        if (this.conf.sizeSendBuffer() > 0) {
             this.bootstrap.childOption(ChannelOption.SO_SNDBUF,
-                                       this.conf.sendBuffer());
+                                       this.conf.sizeSendBuffer());
         }
     }
 

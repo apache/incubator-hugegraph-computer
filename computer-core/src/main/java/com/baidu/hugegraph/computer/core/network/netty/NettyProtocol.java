@@ -51,8 +51,8 @@ public class NettyProtocol {
     private static final MessageDecoder DECODER = MessageDecoder.INSTANCE;
     private static final ServerIdleHandler SERVER_IDLE_HANDLER =
                                            new ServerIdleHandler();
-    private static final HeartBeatHandler HEART_BEAT_HANDLER =
-                                          new HeartBeatHandler();
+    private static final HeartbeatHandler HEART_BEAT_HANDLER =
+                                          new HeartbeatHandler();
 
     protected static final String CLIENT_HANDLER_NAME = "networkClientHandler";
     protected static final String SERVER_HANDLER_NAME = "networkServerHandler";
@@ -110,7 +110,7 @@ public class NettyProtocol {
 
         pipeline.addLast("serverIdleStateHandler",
                          this.newServerIdleStateHandler());
-        // NOTE: The heartBeatHandler can reuse of a server
+        // NOTE: The heartbeatHandler can reuse of a server
         pipeline.addLast("serverIdleHandler", SERVER_IDLE_HANDLER);
 
         pipeline.addLast(SERVER_HANDLER_NAME,
@@ -164,11 +164,16 @@ public class NettyProtocol {
 
         pipeline.addLast("clientIdleStateHandler",
                          this.newClientIdleStateHandler());
-        // NOTE: The heartBeatHandler can reuse
-        pipeline.addLast("heartBeatHandler", HEART_BEAT_HANDLER);
+        // NOTE: The heartbeatHandler can reuse
+        pipeline.addLast("heartbeatHandler", HEART_BEAT_HANDLER);
 
         // NOTE: It will be replaced when the client object is initialized!
         pipeline.addLast(CLIENT_HANDLER_NAME, SLOT_HANDLER);
+
+        // Init heartbeat times
+        channel.attr(HeartbeatHandler.TIMEOUT_HEARTBEAT_COUNT).set(0);
+        channel.attr(HeartbeatHandler.MAX_TIMEOUT_HEARTBEAT_COUNT)
+               .set(this.conf.maxTimeoutHeartbeatCount());
     }
 
     protected void replaceClientHandler(Channel channel,
@@ -179,20 +184,20 @@ public class NettyProtocol {
     }
 
     private NettyServerHandler newNettyServerHandler(MessageHandler handler) {
-        ServerSession serverSession = new ServerSession();
+        ServerSession serverSession = new ServerSession(this.conf);
         return new NettyServerHandler(serverSession, handler);
     }
 
     private IdleStateHandler newServerIdleStateHandler() {
-        int timeout = this.conf.heartbeatTimeout();
+        long timeout = this.conf.serverIdleTimeout();
         return new IdleStateHandler(DISABLE_IDLE_TIME, DISABLE_IDLE_TIME,
-                                    timeout, TimeUnit.SECONDS);
+                                    timeout, TimeUnit.MILLISECONDS);
     }
 
     private IdleStateHandler newClientIdleStateHandler() {
-        int interval = this.conf.heartbeatInterval();
-        return new IdleStateHandler(interval, interval, DISABLE_IDLE_TIME,
-                                    TimeUnit.SECONDS);
+        long interval = this.conf.heartbeatInterval();
+        return new IdleStateHandler(interval, DISABLE_IDLE_TIME,
+                                    DISABLE_IDLE_TIME, TimeUnit.MILLISECONDS);
     }
 
     @ChannelHandler.Sharable

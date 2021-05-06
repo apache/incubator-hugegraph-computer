@@ -35,6 +35,7 @@ import com.baidu.hugegraph.computer.core.network.NettyTransportProvider;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
+import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableSet;
 
 public class ComputerOptions extends OptionHolder {
@@ -380,30 +381,39 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
+    public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
             new ConfigOption<>(
-                    "transport.send_buffer_size",
-                    "The network send buffer size, 0 means using system " +
-                    "defaults.",
+                    "transport.transport_tcp_keep_alive",
+                    "Whether enable TCP keep-alive.",
+                    allowValues(true, false),
+                    true
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_MAX_SYN_BACKLOG =
+            new ConfigOption<>(
+                    "transport.max_syn_backlog",
+                    "The capacity of SYN queue on server side, 0 means using " +
+                    "system default value.",
                     nonNegativeInt(),
-                    0
+                    511
             );
 
     public static final ConfigOption<Integer> TRANSPORT_RECEIVE_BUFFER_SIZE =
             new ConfigOption<>(
                     "transport.receive_buffer_size",
-                    "The network receive buffer size, 0 means using system " +
-                    "defaults.",
+                    "The size of socket receive-buffer in bytes, 0 means " +
+                    "using system default value.",
                     nonNegativeInt(),
                     0
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_BACKLOG =
+    public static final ConfigOption<Integer> TRANSPORT_SEND_BUFFER_SIZE =
             new ConfigOption<>(
-                    "transport.backlog",
-                    "The server connection backlog, 0 means using system " +
-                    "defaults.",
+                    "transport.send_buffer_size",
+                    "The size of socket send-buffer in bytes, 0 means using " +
+                    "system default value.",
                     nonNegativeInt(),
+                    // TODO: Test to get an best value
                     0
             );
 
@@ -432,6 +442,24 @@ public class ComputerOptions extends OptionHolder {
                     5_000L
             );
 
+    public static final ConfigOption<Long> TRANSPORT_FINISH_SESSION_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.finish_session_timeout",
+                    "The timeout(in ms) to finish session, " +
+                    "0 means using (transport.sync_request_timeout * " +
+                    "transport.max_pending_requests).",
+                    nonNegativeInt(),
+                    0L
+            );
+
+    public static final ConfigOption<Long> TRANSPORT_WRITE_SOCKET_TIMEOUT =
+            new ConfigOption<>(
+                    "transport.write_socket_timeout",
+                    "The timeout(in ms) to write data to socket buffer.",
+                    positiveInt(),
+                    3000L
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_NETWORK_RETRIES =
             new ConfigOption<>(
                     "transport.network_retries",
@@ -441,24 +469,44 @@ public class ComputerOptions extends OptionHolder {
                     3
             );
 
+    public static final ConfigOption<Integer> TRANSPORT_WRITE_BUFFER_HIGH_MARK =
+            new ConfigOption<>(
+                    "transport.write_buffer_high_mark",
+                    "The high water mark for write buffer in bytes, " +
+                    "it will trigger the sending unavailable if the number " +
+                    "of queued bytes > write_buffer_high_mark.",
+                    nonNegativeInt(),
+                    64 * (int) Bytes.MB
+            );
+
+    public static final ConfigOption<Integer> TRANSPORT_WRITE_BUFFER_LOW_MARK =
+            new ConfigOption<>(
+                    "transport.write_buffer_low_mark",
+                    "The low water mark for write buffer in bytes, it will " +
+                    "trigger the sending available if the number of queued " +
+                    "bytes < write_buffer_low_mark." +
+                    nonNegativeInt(),
+                    32 * (int) Bytes.MB
+            );
+
     public static final ConfigOption<Integer> TRANSPORT_MAX_PENDING_REQUESTS =
             new ConfigOption<>(
                     "transport.max_pending_requests",
                     "The max number of client unreceived ack, " +
-                    "if the number of unreceived ack greater than it, " +
-                    "it will block the client from calling send.",
+                    "it will trigger the sending unavailable if the number " +
+                    "of unreceived ack >= max_pending_requests.",
                     positiveInt(),
-                    50
+                    8000
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
             new ConfigOption<>(
                     "transport.min_pending_requests",
                     "The minimum number of client unreceived ack, " +
-                    "if the number of unreceived ack less than it, " +
-                    "it will wake the client from calling send.",
+                    "it will trigger the sending available if the number of " +
+                    "unreceived ack < min_pending_requests.",
                     positiveInt(),
-                    5
+                    6000
             );
 
     public static final ConfigOption<Long> TRANSPORT_MIN_ACK_INTERVAL =
@@ -469,27 +517,32 @@ public class ComputerOptions extends OptionHolder {
                     200L
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_INTERVAL =
+    public static final ConfigOption<Long> TRANSPORT_SERVER_IDLE_TIMEOUT =
             new ConfigOption<>(
-                    "transport.heartbeat_interval_seconds",
-                    "Time minimum interval(in seconds) of send heartbeat.",
+                    "transport.server_idle_timeout",
+                    "The max timeout(in ms) of server idle.",
                     positiveInt(),
-                    60
+                    120_000L
             );
 
-    public static final ConfigOption<Integer> TRANSPORT_HEARTBEAT_TIMEOUT =
+    public static final ConfigOption<Long> TRANSPORT_HEARTBEAT_INTERVAL =
             new ConfigOption<>(
-                    "transport.heartbeat_timeout_seconds",
-                    "The max timeout(in seconds) of heartbeat.",
+                    "transport.heartbeat_interval",
+                    "The minimum interval(in ms) between heartbeats on " +
+                    "client side.",
                     positiveInt(),
-                    120
+                    20_000L
             );
 
-    public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
+    public static final ConfigOption<Integer>
+            TRANSPORT_MAX_TIMEOUT_HEARTBEAT_COUNT =
             new ConfigOption<>(
-                    "transport.transport_tcp_keep_alive",
-                    "Whether enable TCP keep-alive.",
-                    allowValues(true, false),
-                    true
+                    "transport.max_timeout_heartbeat_count",
+                    "The maximum times of timeout heartbeat on client side, " +
+                    "if the number of timeouts waiting for heartbeat " +
+                    "response continuously > max_heartbeat_timeouts the " +
+                    "channel will be closed from client side.",
+                    positiveInt(),
+                    90
             );
 }
