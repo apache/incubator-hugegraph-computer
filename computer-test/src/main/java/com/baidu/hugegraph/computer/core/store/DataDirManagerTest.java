@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.receiver;
+package com.baidu.hugegraph.computer.core.store;
 
 import java.io.File;
 import java.io.IOException;

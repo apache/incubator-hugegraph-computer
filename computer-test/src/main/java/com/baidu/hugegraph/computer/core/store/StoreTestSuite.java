@@ -17,20 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.receiver;
+package com.baidu.hugegraph.computer.core.store;
 
-import java.io.File;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public interface DataFileGenerator {
-
-    /**
-     * @return the next data dir to persist data like vertices, edges and
-     * messages.
-     */
-    File nextDir();
-
-    /**
-     * @return the next file to persist data like vertices, edges and messages.
-     */
-    File nextFile(String type, int superstep);
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    DataDirManagerTest.class
+})
+public class StoreTestSuite {
 }

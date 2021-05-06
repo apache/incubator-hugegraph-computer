@@ -33,9 +33,9 @@ import com.baidu.hugegraph.computer.core.config.ConfigTestSuite;
 import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
 import com.baidu.hugegraph.computer.core.input.InputTestSuite;
 import com.baidu.hugegraph.computer.core.io.IOTestSuite;
-import com.baidu.hugegraph.computer.core.receiver.ReceiverTestSuite;
-import com.baidu.hugegraph.computer.core.sort.SortTestSuite;
 import com.baidu.hugegraph.computer.core.network.NetworkTestSuite;
+import com.baidu.hugegraph.computer.core.sort.SortTestSuite;
+import com.baidu.hugegraph.computer.core.store.StoreTestSuite;
 import com.baidu.hugegraph.computer.core.worker.WorkerTestSuite;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.util.Log;
@@ -54,7 +54,7 @@ import com.baidu.hugegraph.util.Log;
     WorkerTestSuite.class,
     SortTestSuite.class,
     NetworkTestSuite.class,
-    ReceiverTestSuite.class
+    StoreTestSuite.class
 })
 public class UnitTestSuite {
 
