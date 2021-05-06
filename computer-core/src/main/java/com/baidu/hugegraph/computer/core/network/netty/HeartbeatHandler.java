@@ -64,7 +64,7 @@ public class HeartbeatHandler extends ChannelDuplexHandler {
 
             if (timeoutHeartbeatCount > maxTimeoutCount) {
                 LOG.info("The number of timeouts for waiting " +
-                         "heartbeat response more than the" +
+                         "heartbeat response more than the " +
                          "max_timeout_heartbeat_count, close connection to " +
                          "'{}' from client side, count: {}",
                          TransportUtil.remoteAddress(channel),
