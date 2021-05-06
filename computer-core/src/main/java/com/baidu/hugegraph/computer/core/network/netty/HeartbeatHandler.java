@@ -63,16 +63,17 @@ public class HeartbeatHandler extends ChannelDuplexHandler {
             int timeoutHeartbeatCount = lastTimeoutCount + 1;
 
             if (timeoutHeartbeatCount > maxTimeoutCount) {
-                LOG.info("The number of timeouts for waiting heartbeat " +
-                         "response more than the max_timeout_heartbeat_count," +
-                         "close connection to '{} from client side, count: {}",
+                LOG.info("The number of timeouts for waiting " +
+                         "heartbeat response more than the" +
+                         "max_timeout_heartbeat_count, close connection to " +
+                         "'{}' from client side, count: {}",
                          TransportUtil.remoteAddress(channel),
                          timeoutHeartbeatCount);
 
                 ctx.close();
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Client IdleStateEvent trigger to send ping to" +
+                    LOG.debug("Client IdleStateEvent trigger to send ping to " +
                               "'{}', count: {}",
                               TransportUtil.remoteAddress(channel),
                               timeoutHeartbeatCount);

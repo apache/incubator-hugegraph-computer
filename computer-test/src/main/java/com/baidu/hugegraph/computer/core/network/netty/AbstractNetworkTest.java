@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
@@ -111,8 +110,7 @@ public abstract class AbstractNetworkTest {
             objects[i++] = kv.getValue();
         }
 
-        UnitTestBase.updateWithRequiredOptions(objects);
-        config = ComputerContext.instance().config();
+        config = UnitTestBase.updateWithRequiredOptions(objects);
         conf = TransportConf.wrapConfig(config);
         serverHandler = Mockito.spy(new MockMessageHandler());
         clientHandler = Mockito.spy(new MockClientHandler());
