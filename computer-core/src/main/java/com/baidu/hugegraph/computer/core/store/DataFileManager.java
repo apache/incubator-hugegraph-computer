@@ -75,8 +75,8 @@ public class DataFileManager implements DataFileGenerator, Manager {
 
     @Override
     public void close(Config config) {
-        for (File file : this.dirs) {
-            FileUtils.deleteQuietly(file);
+        for (File dir : this.dirs) {
+            FileUtils.deleteQuietly(dir);
         }
     }
 

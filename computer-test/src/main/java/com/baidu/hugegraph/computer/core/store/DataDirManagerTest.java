@@ -44,6 +44,7 @@ public class DataDirManagerTest extends UnitTestBase {
         );
         Config config = context().config();
         DataFileManager dataFileManager = new DataFileManager();
+        Assert.assertEquals(DataFileManager.NAME, dataFileManager.name());
         Assert.assertThrows(ComputerException.class, () -> {
             dataFileManager.init(config);
         }, e -> {
