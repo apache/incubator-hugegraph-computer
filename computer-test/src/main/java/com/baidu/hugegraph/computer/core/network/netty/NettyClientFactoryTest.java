@@ -39,7 +39,6 @@ import com.baidu.hugegraph.testutil.Whitebox;
 public class NettyClientFactoryTest extends UnitTestBase {
 
     private static Config config;
-    private static MockMessageHandler serverHandler;
     private static MockClientHandler clientHandler;
     private NettyTransportServer server;
     private TransportClient client;
@@ -54,7 +53,7 @@ public class NettyClientFactoryTest extends UnitTestBase {
             ComputerOptions.TRANSPORT_RECEIVE_BUFFER_SIZE, "128",
             ComputerOptions.TRANSPORT_SEND_BUFFER_SIZE, "128"
         );
-        serverHandler = new MockMessageHandler();
+        MockMessageHandler serverHandler = new MockMessageHandler();
         clientHandler = new MockClientHandler();
         this.server = new NettyTransportServer();
         this.server.listen(config, serverHandler);

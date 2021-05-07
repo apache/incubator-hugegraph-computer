@@ -101,6 +101,7 @@ public class ManagedBufferTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testCopyToByteArray() {
         String testData = "test data";
         byte[] bytesSource = StringEncoding.encode(testData);

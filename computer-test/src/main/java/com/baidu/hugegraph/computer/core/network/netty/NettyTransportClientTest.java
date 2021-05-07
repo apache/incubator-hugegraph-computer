@@ -302,8 +302,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         TransportConf conf = TransportConf.wrapConfig(config);
 
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            int minPendingRequests = conf.minPendingRequests();
-        });
+        Assert.assertThrows(IllegalArgumentException.class,
+                            conf::minPendingRequests);
     }
 }

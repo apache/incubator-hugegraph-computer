@@ -130,7 +130,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testClientDecodeException() throws Exception {
+    public void testClientDecodeException() throws IOException {
         Mockito.doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
             UnitTestBase.sleep(200L);
@@ -140,13 +140,14 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         }).when(serverProtocol).initializeServerPipeline(Mockito.any(),
                                                          Mockito.any());
 
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        this.oneClient();
 
         Mockito.verify(clientHandler, Mockito.timeout(15_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testMessageRelease() {
         int requestId = 99;
         int partition = 1;

@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
@@ -31,7 +29,6 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.message.PingMessage;
 import com.baidu.hugegraph.computer.core.network.message.PongMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
-import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
@@ -45,16 +42,13 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 @ChannelHandler.Sharable
 public class MessageDecoder extends ChannelInboundHandlerAdapter {
 
-    private static final Logger LOG = Log.logger(MessageDecoder.class);
-
     public static final MessageDecoder INSTANCE = new MessageDecoder();
 
     private MessageDecoder() {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg)
-                            throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (!(msg instanceof ByteBuf)) {
             ctx.fireChannelRead(msg);
             return;

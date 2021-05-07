@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
 
 import io.netty.channel.Channel;
@@ -127,7 +126,7 @@ public class HeartbeatHandlerTest extends AbstractNetworkTest {
         }).when(mockHeartbeatHandler)
           .userEventTriggered(Mockito.any(), Mockito.any(IdleStateEvent.class));
 
-        TransportClient client = this.oneClient();
+        this.oneClient();
 
         long timeout = IDLE_TIMEOUT + 1000L;
         Mockito.verify(spyServerIdleHandler, Mockito.timeout(timeout).times(1))

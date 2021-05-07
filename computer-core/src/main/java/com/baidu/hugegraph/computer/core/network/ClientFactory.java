@@ -32,7 +32,7 @@ public interface ClientFactory {
     /**
      * Create a TransportClient.
      * @param connectionId {@link ConnectionId}
-     * @param handler
+     * @param handler {@link ClientHandler}
      * @return {@link TransportClient}
      */
     TransportClient createClient(ConnectionId connectionId,

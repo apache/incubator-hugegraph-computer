@@ -17,11 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.network;
+package com.baidu.hugegraph.computer.core.network.netty;
 
-import com.baidu.hugegraph.computer.core.network.netty.BufAllocatorFactory;
-import com.baidu.hugegraph.computer.core.network.netty.NettyClientFactory;
-import com.baidu.hugegraph.computer.core.network.netty.NettyTransportServer;
+import com.baidu.hugegraph.computer.core.network.ClientFactory;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.TransportProvider;
+import com.baidu.hugegraph.computer.core.network.TransportServer;
 
 import io.netty.buffer.ByteBufAllocator;
 
@@ -29,15 +30,15 @@ public class NettyTransportProvider implements TransportProvider {
 
     @Override
     public TransportServer createServer(TransportConf conf) {
-        ByteBufAllocator bufAllocator = BufAllocatorFactory
-                                        .createBufAllocator();
+        ByteBufAllocator bufAllocator = BufAllocatorFactory.
+                                        createBufAllocator();
         return new NettyTransportServer(bufAllocator);
     }
 
     @Override
     public ClientFactory createClientFactory(TransportConf conf) {
-        ByteBufAllocator bufAllocator = BufAllocatorFactory
-                                        .createBufAllocator();
+        ByteBufAllocator bufAllocator = BufAllocatorFactory.
+                                        createBufAllocator();
         return new NettyClientFactory(conf, bufAllocator);
     }
 }

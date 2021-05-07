@@ -34,6 +34,7 @@ import io.netty.util.ReferenceCountUtil;
 public class TransportUtilTest {
 
     @Test
+    @SuppressWarnings("all")
     public void testRemoteAddressWithNull() {
         Channel channel = null;
         String address = TransportUtil.remoteAddress(channel);
@@ -41,6 +42,7 @@ public class TransportUtilTest {
     }
 
     @Test
+    @SuppressWarnings("all")
     public void testRemoteConnectionIDWithNull() {
         Channel channel = null;
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
@@ -80,6 +82,7 @@ public class TransportUtilTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testReadString() {
         byte[] testData = StringEncoding.encode("test data");
         ByteBuf buffer = Unpooled.directBuffer(testData.length);
@@ -91,6 +94,7 @@ public class TransportUtilTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testWriteString() {
         ByteBuf buffer = Unpooled.buffer();
         buffer = ReferenceCountUtil.releaseLater(buffer);

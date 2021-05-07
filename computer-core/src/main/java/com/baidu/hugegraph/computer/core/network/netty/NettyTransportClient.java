@@ -25,8 +25,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
@@ -36,15 +34,12 @@ import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 
 public class NettyTransportClient implements TransportClient {
-
-    private static final Logger LOG = Log.logger(NettyTransportClient.class);
 
     private final Channel channel;
     private final ConnectionId connectionId;
@@ -154,12 +149,10 @@ public class NettyTransportClient implements TransportClient {
         return !this.session.blocking() && this.channel.isWritable();
     }
 
-    protected boolean checkAndNoticeSendAvailable() {
+    protected void checkAndNoticeSendAvailable() {
         if (this.checkSendAvailable()) {
             this.handler.sendAvailable(this.connectionId);
-            return true;
         }
-        return false;
     }
 
     @Override
