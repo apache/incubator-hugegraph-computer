@@ -58,12 +58,12 @@ public class DataFileManager implements DataFileGenerator, Manager {
     public void init(Config config) {
         String jobId = config.get(ComputerOptions.JOB_ID);
         List<String> paths = config.get(ComputerOptions.WORKER_DATA_DIRS);
-        LOG.info("Worker data dirs: {}", paths);
+        LOG.info("The directories '{}' configured to persist data", paths);
         for (String path : paths) {
             File dir = new File(path);
             File jobDir = new File(dir, jobId);
             this.mkdirs(jobDir);
-            LOG.info("Added data dir: {}", jobDir);
+            LOG.info("Initialized directory {} to directory list", jobDir);
             this.dirs.add(jobDir);
         }
         /*

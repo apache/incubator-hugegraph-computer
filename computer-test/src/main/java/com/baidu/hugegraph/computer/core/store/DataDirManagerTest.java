@@ -76,7 +76,7 @@ public class DataDirManagerTest extends UnitTestBase {
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.JOB_PARTITIONS_COUNT, "2",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVE_BUFFERS_SIZE_LIMIT, "300"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_SIZE_LIMIT, "300"
         );
         Config config = ComputerContext.instance().config();
         DataFileManager dataFileManager = new DataFileManager();
@@ -103,7 +103,7 @@ public class DataDirManagerTest extends UnitTestBase {
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.JOB_PARTITIONS_COUNT, "2",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVE_BUFFERS_SIZE_LIMIT, "300"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_SIZE_LIMIT, "300"
         );
         Config config = ComputerContext.instance().config();
         DataFileManager dataFileManager = new DataFileManager();
