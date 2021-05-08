@@ -63,6 +63,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
     ListValueTest.class,
     ValueTypeTest.class,
     BuiltinValueFactoryTest.class,
+    BuiltinGraphFactoryTest.class,
     ContainerInfoTest.class,
     PartitionStatTest.class,
     HashPartitionerTest.class,
