@@ -22,9 +22,12 @@ package com.baidu.hugegraph.computer.core.aggregator;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
 
 public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
@@ -33,7 +36,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     private final Class<? extends Combiner<V>> combinerClass;
 
     private transient Combiner<V> combiner;
-    private transient ThreadLocal<V> combineValue;
+    private transient ThreadLocal<V> localValue;
 
     private V value;
 
@@ -56,37 +59,41 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     @Override
     public void aggregateValue(int value) {
         assert this.type == ValueType.INT;
-        V combineValue= this.combineValue.get();
-        // NOTE: the Value class must provide value(int) method to set value
-        Whitebox.invoke(combineValue.getClass(), "value", combineValue, value);
-        this.value = this.combiner.combine(combineValue, this.value);
+        V localValue = this.localValue.get();
+        ((IntValue) localValue).value(value);
+        this.combineAndSwapIfNeeded(localValue, this.value);
     }
 
     @Override
     public void aggregateValue(long value) {
         assert this.type == ValueType.LONG;
-        V combineValue= this.combineValue.get();
-        // NOTE: the Value class must provide value(long) method to set value
-        Whitebox.invoke(combineValue.getClass(), "value", combineValue, value);
-        this.value = this.combiner.combine(combineValue, this.value);
+        V localValue= this.localValue.get();
+        ((LongValue) localValue).value(value);
+        this.combineAndSwapIfNeeded(localValue, this.value);
     }
 
     @Override
     public void aggregateValue(float value) {
         assert this.type == ValueType.FLOAT;
-        V combineValue= this.combineValue.get();
-        // NOTE: the Value class must provide value(float) method to set value
-        Whitebox.invoke(combineValue.getClass(), "value", combineValue, value);
-        this.value = this.combiner.combine(combineValue, this.value);
+        V localValue= this.localValue.get();
+        ((FloatValue) localValue).value(value);
+        this.combineAndSwapIfNeeded(localValue, this.value);
     }
 
     @Override
     public void aggregateValue(double value) {
         assert this.type == ValueType.DOUBLE;
-        V combineValue= this.combineValue.get();
-        // NOTE: the Value class must provide value(double) method to set value
-        Whitebox.invoke(combineValue.getClass(), "value", combineValue, value);
-        this.value = this.combiner.combine(combineValue, this.value);
+        V localValue= this.localValue.get();
+        ((DoubleValue) localValue).value(value);
+        this.combineAndSwapIfNeeded(localValue, this.value);
+    }
+
+    private void combineAndSwapIfNeeded(V localValue, V value2) {
+        V tmp = this.combiner.combine(localValue, this.value);
+        if (tmp == localValue) {
+            this.localValue.set(this.value);
+        }
+        this.value = tmp;
     }
 
     @Override
@@ -102,20 +109,28 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     }
 
     @Override
+    public String toString() {
+        return this.value.toString();
+    }
+
+    @Override
     public Aggregator<V> copy() {
-//        DefaultAggregator<V> aggregator = new DefaultAggregator<>(
-//                                          null, this.type, this.combinerClass);
-//        aggregator.value = this.value;
-//        aggregator.combiner = this.combiner;
-//        aggregator.combineValue = this.combineValue;
-//        return aggregator;
-        try {
-            @SuppressWarnings("unchecked")
-            Aggregator<V> aggregator = (Aggregator<V>) this.clone();
-            return aggregator;
-        } catch (CloneNotSupportedException e) {
-            throw new ComputerException("Failed to copy Aggregator", e);
-        }
+        DefaultAggregator<V> aggregator = new DefaultAggregator<>(
+                                          null, this.type, this.combinerClass);
+        // Ensure deep copy the value
+        @SuppressWarnings("unchecked")
+        V deepCopyValue = (V) this.value.copy();
+        aggregator.value = deepCopyValue;
+        aggregator.combiner = this.combiner;
+        aggregator.localValue = this.localValue;
+        return aggregator;
+//        try {
+//            @SuppressWarnings("unchecked")
+//            Aggregator<V> aggregator = (Aggregator<V>) this.clone();
+//            return aggregator;
+//        } catch (CloneNotSupportedException e) {
+//            throw new ComputerException("Failed to copy Aggregator", e);
+//        }
     }
 
     @Override
@@ -127,7 +142,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
                                         e, this.combinerClass.getName());
         }
 
-        this.combineValue = ThreadLocal.withInitial(() -> {
+        this.localValue = ThreadLocal.withInitial(() -> {
             return this.newValue(context);
         });
 

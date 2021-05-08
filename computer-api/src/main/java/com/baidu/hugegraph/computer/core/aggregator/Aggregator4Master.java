@@ -37,16 +37,16 @@ public interface Aggregator4Master {
      * Register the aggregator with specified name. The name must be unique.
      * Used by algorithm's master-computation to register aggregators.
      */
-    void registerAggregator(String name, Class<? extends Aggregator<Value<?>>>
-                                         aggregatorClass);
+    <V extends Value<?>, C extends Aggregator<V>>
+    void registerAggregator(String name, Class<C> aggregator);
 
     /**
      * Register aggregator with specified value type and a combiner which can
      * combine values with specified value type. The name must be unique.
      * Used by algorithm's master-computation to register aggregators.
      */
-    void registerAggregator(String name, ValueType type,
-                            Class<? extends Combiner<Value<?>>> combinerClass);
+    <V extends Value<?>, C extends Combiner<V>>
+    void registerAggregator(String name, ValueType type, Class<C> combiner);
 
     /**
      * Set the aggregated value by master-computation. The value will be

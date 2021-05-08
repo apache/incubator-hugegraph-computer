@@ -57,9 +57,7 @@ public class WorkerServiceTest extends UnitTestBase {
                     ComputerOptions.BSP_LOG_INTERVAL, "30000",
                     ComputerOptions.BSP_MAX_SUPER_STEP, "2",
                     ComputerOptions.WORKER_COMPUTATION_CLASS,
-                    MockComputation.class.getName(),
-                    ComputerOptions.MASTER_COMPUTATION_CLASS,
-                    MockMasterComputation.class.getName()
+                    MockComputation.class.getName()
                 );
                 try {
                     workerService.init(config);
@@ -80,8 +78,6 @@ public class WorkerServiceTest extends UnitTestBase {
                     ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
                     ComputerOptions.BSP_LOG_INTERVAL, "30000",
                     ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                    ComputerOptions.WORKER_COMPUTATION_CLASS,
-                    MockComputation.class.getName(),
                     ComputerOptions.MASTER_COMPUTATION_CLASS,
                     MockMasterComputation.class.getName()
                 );

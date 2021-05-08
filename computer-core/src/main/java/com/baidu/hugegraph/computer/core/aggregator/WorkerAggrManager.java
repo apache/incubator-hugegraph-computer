@@ -92,16 +92,23 @@ public class WorkerAggrManager implements Manager {
     }
 
     public <V extends Value<?>> Aggregator<V> createAggregator(String name) {
-        // Create aggregator for current superstep
+        /*
+         * Create aggregator for the current superstep,
+         * Generally called when computation.beforeSuperstep()
+         */
         @SuppressWarnings("unchecked")
         Aggregator<V> aggr = (Aggregator<V>) this.registerAggregators.get(name);
         return aggr;
     }
 
     public <V extends Value<?>> void aggregateValue(String name, V value) {
-        // Update aggregator for the current superstep
+        /*
+         * Update aggregator for the current superstep,
+         * Generally called when computation.afterSuperstep()
+         */
         Aggregator<Value<?>> aggr = this.currentAggregators.get(name,
                                                                 this.service());
+        // May be executed in parallel by multiple threads in a worker
         synchronized (aggr) {
             aggr.aggregateValue(value);
         }

@@ -308,10 +308,9 @@ public class MasterService {
         }
 
         @Override
-        public void registerAggregator(String name,
-                                       Class<? extends Aggregator<Value<?>>>
-                                       aggregatorClass) {
-            Aggregator<Value<?>> aggr;
+        public <V extends Value<?>, C extends Aggregator<V>>
+        void registerAggregator(String name, Class<C> aggregatorClass) {
+            Aggregator<V> aggr;
             try {
                 aggr = aggregatorClass.newInstance();
             } catch (Exception e) {
@@ -322,12 +321,12 @@ public class MasterService {
         }
 
         @Override
-        public void registerAggregator(String name, ValueType type,
-                                       Class<? extends Combiner<Value<?>>>
-                                       combinerClass) {
-            Aggregator<Value<?>> aggr = new DefaultAggregator<>(
-                                        MasterService.this.context,
-                                        type, combinerClass);
+        public <V extends Value<?>, C extends Combiner<V>>
+        void registerAggregator(String name, ValueType type,
+                                Class<C> combinerClass) {
+            Aggregator<V> aggr = new DefaultAggregator<>(
+                                 MasterService.this.context,
+                                 type, combinerClass);
             this.aggrManager.registerAggregator(name, aggr);
         }
 

@@ -78,14 +78,14 @@ public class MasterAggrManager implements Manager {
     public <V extends Value<?>> void aggregatedAggregator(String name,
                                                           V value) {
         // Called when master compute()
-        Aggregator<V> aggregator = this.aggregatorsHandler.getAggregator(name);
-        aggregator.aggregatedValue(value);
+        Aggregator<V> aggr = this.aggregatorsHandler.getAggregator(name);
+        aggr.aggregatedValue(value);
     }
 
     public <V extends Value<?>> V aggregatedValue(String name) {
         // Called when master compute()
-        Aggregator<V> aggregator = this.aggregatorsHandler.getAggregator(name);
-        return aggregator.aggregatedValue();
+        Aggregator<V> aggr = this.aggregatorsHandler.getAggregator(name);
+        return aggr.aggregatedValue();
     }
 
     private class MasterAggregateHandler implements AggregateRpcService {
@@ -125,8 +125,10 @@ public class MasterAggrManager implements Manager {
         @Override
         public <V extends Value<?>> void aggregateAggregator(String name,
                                                              V value) {
-            Aggregator<V> aggregator = this.getAggregator(name);
-            aggregator.aggregateValue(value);
+            Aggregator<V> aggr = this.getAggregator(name);
+            synchronized (aggr) {
+                aggr.aggregateValue(value);
+            }
         }
 
         public void resetAggregators(RegisterAggregators register) {
