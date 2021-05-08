@@ -38,10 +38,24 @@ interface BspClient {
      */
     void clean();
 
+    /**
+     * Get endpoint of the bsp server.
+     */
+    String endpoint();
+
+    /**
+     * Put KV pair to the bsp server.
+     */
     void put(String key, byte[] value);
 
+    /**
+     * Get value by key from the bsp server.
+     */
     byte[] get(String key);
 
+    /**
+     * Get value by key from the bsp server with timout.
+     */
     byte[] get(String key, long timeout, long logInterval);
 
     /**

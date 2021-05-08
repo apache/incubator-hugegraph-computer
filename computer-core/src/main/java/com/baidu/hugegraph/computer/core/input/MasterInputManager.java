@@ -43,7 +43,10 @@ public class MasterInputManager implements Manager {
 
     @Override
     public void close(Config config) {
-        this.fetcher.close();
+        // Maybe fetcher=null if not successfully initialized
+        if (this.fetcher != null) {
+            this.fetcher.close();
+        }
     }
 
     public MasterInputHandler handler() {

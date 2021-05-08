@@ -135,7 +135,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Assert.assertThrows(TransportException.class, () -> {
             client.startSession();
         }, e -> {
-            Assert.assertContains("to wait start response",
+            Assert.assertContains("to wait start-response",
                                   e.getMessage());
         });
     }
@@ -156,7 +156,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Assert.assertThrows(TransportException.class, () -> {
             client.finishSession();
         }, e -> {
-            Assert.assertContains("to wait finish response",
+            Assert.assertContains("to wait finish-response",
                                   e.getMessage());
         });
     }
@@ -227,7 +227,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Assert.assertThrows(TransportException.class, () -> {
             client.finishSession();
         }, e -> {
-            Assert.assertContains("to wait finish response",
+            Assert.assertContains("to wait finish-response",
                                   e.getMessage());
         });
 
@@ -268,13 +268,15 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         client.startSession();
 
         int dataNum = 209716;
+        long timout = 10_000L;
         for (int i = 0; i < dataNum; i++) {
             boolean send = client.send(MessageType.MSG, 1, buffer);
             if (!send) {
                 LOG.info("Current send unavailable");
                 i--;
-                if (!BARRIER_EVENT.await(10_000L)) {
-                    throw new ComputeException("Timeout(%sms) to wait send");
+                if (!BARRIER_EVENT.await(timout)) {
+                    throw new ComputeException("Timeout(%sms) to wait sendable",
+                                               timout);
                 }
                 BARRIER_EVENT.reset();
             }

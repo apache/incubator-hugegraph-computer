@@ -45,7 +45,9 @@ public class MockMasterInputManager implements Manager {
 
     @Override
     public void close(Config config) {
-        this.fetcher.close();
+        if (this.fetcher != null) {
+            this.fetcher.close();
+        }
     }
 
     public InputSplitFetcher fetcher() {

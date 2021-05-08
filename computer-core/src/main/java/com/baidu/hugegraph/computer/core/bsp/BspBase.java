@@ -55,6 +55,7 @@ public abstract class BspBase {
         this.barrierOnMasterTimeout = this.config.get(
              ComputerOptions.BSP_WAIT_MASTER_TIMEOUT);
         this.logInterval = this.config.get(ComputerOptions.BSP_LOG_INTERVAL);
+        LOG.info("Connect to BSP server: {}", this.bspClient.endpoint());
     }
 
     /**
@@ -63,7 +64,7 @@ public abstract class BspBase {
      */
     public void close() {
         this.bspClient.close();
-        LOG.info("closed");
+        LOG.info("Closed the BSP connection: {}", this.bspClient.endpoint());
     }
 
     private BspClient createBspClient() {

@@ -91,8 +91,8 @@ public class ClientSession extends TransportSession {
         this.stateStartSent();
 
         if (!this.startedBarrier.await(timeout)) {
-            throw new TransportException("Timeout(%sms) to wait start " +
-                                         "response", timeout);
+            throw new TransportException(
+                      "Timeout(%sms) to wait start-response", timeout);
         }
         this.startedBarrier.reset();
     }
@@ -112,8 +112,8 @@ public class ClientSession extends TransportSession {
         this.stateFinishSent(finishId);
 
         if (!this.finishedBarrier.await(timeout)) {
-            throw new TransportException("Timeout(%sms) to wait finish " +
-                                         "response", timeout);
+            throw new TransportException(
+                      "Timeout(%sms) to wait finish-response", timeout);
         }
         this.finishedBarrier.reset();
     }

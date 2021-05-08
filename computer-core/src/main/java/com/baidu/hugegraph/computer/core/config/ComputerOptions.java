@@ -225,7 +225,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> BSP_WAIT_WORKERS_TIMEOUT =
             new ConfigOption<>(
                     "bsp.wait_workers_timeout",
-                    "The max timeout to wait for workers to sent bsp event.",
+                    "The max timeout to wait for workers bsp event.",
                     positiveInt(),
                     TimeUnit.HOURS.toMillis(24L)
             );
@@ -233,8 +233,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> BSP_WAIT_MASTER_TIMEOUT =
             new ConfigOption<>(
                     "bsp.wait_master_timeout",
-                    "The max timeout(in ms) to wait for master to sent bsp " +
-                    "event.",
+                    "The max timeout(in ms) to wait for master bsp event.",
                     positiveInt(),
                     TimeUnit.HOURS.toMillis(24L)
             );

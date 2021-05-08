@@ -219,7 +219,8 @@ public class EtcdClient {
         try (Watch.Watcher watcher = this.watch.watch(keySeq, watchOption,
                                                       consumer)) {
             return barrierEvent.await(timeout, logInterval, () -> {
-                LOG.info("Wait for key '{}'", keySeq.toString(ENCODING));
+                LOG.info("Wait for key '{}' with timeout {}ms",
+                         keySeq.toString(ENCODING), timeout);
             });
         }
     }
@@ -373,8 +374,10 @@ public class EtcdClient {
                                                       watchOption,
                                                       consumer)) {
             return barrierEvent.await(timeout, logInterval, () -> {
-                LOG.info("Wait for keys with prefix '{}', expect {} actual {}",
-                         prefixSeq.toString(ENCODING), count, keyValues.size());
+                LOG.info("Wait for keys with prefix '{}' and timeout {}ms, " +
+                         "expect {} keys bug actual got {} keys",
+                         prefixSeq.toString(ENCODING),
+                         timeout, count, keyValues.size());
             });
         }
     }
