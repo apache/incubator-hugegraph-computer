@@ -30,7 +30,16 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 public interface Aggregator4Worker {
 
     /**
-     * Set aggregate value after superstep. The value will be sent to
+     * Create aggregator by name in worker, the aggregator is registered by
+     * master. Can be called in each superstep.
+     * Throws ComputerException if master does not register the aggregator
+     * with specified name.
+     * @param value The value to be aggregated
+     */
+    <V extends Value<?>> Aggregator<V> createAggregator(String name);
+
+    /**
+     * Set aggregate value after a superstep. The value will be sent to
      * master when current superstep finish.
      * Throws ComputerException if master does not register the aggregator
      * with specified name.

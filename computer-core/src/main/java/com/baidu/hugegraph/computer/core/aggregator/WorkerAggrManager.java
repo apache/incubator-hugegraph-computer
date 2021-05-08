@@ -19,10 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.aggregator;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -39,11 +36,18 @@ public class WorkerAggrManager implements Manager {
     public static final String NAME = "worker_aggr";
 
     private AggregateRpcService service;
-    private WorkerAggregateCache aggregatorsCache;
+
+    private RegisterAggregators registerAggregators;
+    // Cache the aggregators of the previous superstep
+    private Map<String, Value<?>> lastAggregators;
+    // Cache the aggregators of the current superstep
+    private Aggregators currentAggregators;
 
     public WorkerAggrManager() {
         this.service = null;
-        this.aggregatorsCache = new WorkerAggregateCache(ImmutableMap.of());
+        this.registerAggregators = new RegisterAggregators();
+        this.lastAggregators = ImmutableMap.of();
+        this.currentAggregators = new Aggregators();
     }
 
     @Override
@@ -52,17 +56,27 @@ public class WorkerAggrManager implements Manager {
     }
 
     @Override
-    public void inited(Config config) {
-//        this.service().registeredAggregators();
+    public void init(Config config) {
+        this.registerAggregators = this.service().registeredAggregators();
     }
 
     @Override
     public void beforeSuperstep(Config config, int superstep) {
+        /*
+         * Reload aggregators from master
+         * The framework guaranteed to call this method before
+         * computation.beforeSuperstep()
+         */
         this.reloadAggregators();
     }
 
     @Override
     public void afterSuperstep(Config config, int superstep) {
+        /*
+         * Send aggregators to master
+         * The framework guaranteed to call this method after
+         * computation.afterSuperstep()
+         */
         this.flushAggregators();
     }
 
@@ -72,61 +86,45 @@ public class WorkerAggrManager implements Manager {
     }
 
     public <V extends Value<?>> Aggregator<V> createAggregator(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        // Create aggregator for current superstep
+        @SuppressWarnings("unchecked")
+        Aggregator<V> aggr = (Aggregator<V>) this.registerAggregators.get(name);
+        return aggr;
     }
 
-    public <V extends Value<?>> Aggregator<V> aggregator(String name) {
-        return this.aggregatorsCache.getAggregator(name, this.service());
+    public <V extends Value<?>> void aggregateValue(String name, V value) {
+        // Update aggregator for the current superstep
+        Aggregator<Value<?>> aggr = this.currentAggregators.get(name,
+                                                                this.service());
+        synchronized (aggr) {
+            aggr.aggregateValue(value);
+        }
+    }
+
+    public <V extends Value<?>> V aggregatedValue(String name) {
+        // Get aggregator value from the previous superstep
+        @SuppressWarnings("unchecked")
+        V value = (V) this.lastAggregators.get(name);
+        E.checkArgument(value != null,
+                        "Can't find aggregator value with name '%s'", name);
+        return value;
     }
 
     private void flushAggregators() {
-        Map<String, Value<?>> aggregators = this.aggregatorsCache
-                                                .aggregatorValues();
+        Map<String, Value<?>> aggregators = this.currentAggregators.values();
         this.service().aggregateAggregators(aggregators);
     }
 
     private void reloadAggregators() {
-        Map<String, Aggregator<Value<?>>> aggregators = this.service()
-                                                            .listAggregators();
-        this.aggregatorsCache = new WorkerAggregateCache(aggregators);
+        this.lastAggregators = this.service().listAggregators();
+        E.checkNotNull(this.lastAggregators, "lastAggregators");
+
+        this.currentAggregators = new Aggregators(
+                                  this.registerAggregators.copyAll());
     }
 
     private AggregateRpcService service() {
         E.checkArgumentNotNull(this.service, "Not init AggregateRpcService");
         return this.service;
-    }
-
-    private static class WorkerAggregateCache {
-
-        private final Map<String, Aggregator<Value<?>>> aggregators;
-
-        public WorkerAggregateCache(Map<String, Aggregator<Value<?>>> aggrs) {
-            this.aggregators = new ConcurrentHashMap<>(aggrs);
-        }
-
-        public Map<String, Value<?>> aggregatorValues() {
-            Map<String, Value<?>> values = new HashMap<>();
-            for (Entry<String, Aggregator<Value<?>>> aggr :
-                 this.aggregators.entrySet()) {
-                values.put(aggr.getKey(), aggr.getValue().aggregatedValue());
-            }
-            return values;
-        }
-
-        public <V extends Value<?>> Aggregator<V> getAggregator(
-                                                  String name,
-                                                  AggregateRpcService service) {
-            Aggregator<Value<?>> aggregator = this.aggregators.get(name);
-            if (aggregator == null) {
-                aggregator = service.getAggregator(name);
-                E.checkArgument(aggregator != null,
-                                "Can't get aggregator '%s'", name);
-                this.aggregators.put(name, aggregator);
-            }
-            @SuppressWarnings("unchecked")
-            Aggregator<V> result = (Aggregator<V>) aggregator;
-            return result;
-        }
     }
 }

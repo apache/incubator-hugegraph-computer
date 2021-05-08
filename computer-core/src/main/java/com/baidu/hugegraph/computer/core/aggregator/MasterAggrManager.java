@@ -19,16 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.aggregator;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
-import com.baidu.hugegraph.util.E;
 
 /**
  * Aggregator manager manages aggregators in master.
@@ -37,12 +34,12 @@ public class MasterAggrManager implements Manager {
 
     public static final String NAME = "master_aggr";
 
-    private final MasterAggregateHandler register;
-    private final MasterAggregateHandler handler;
+    private final RegisterAggregators registerAggregators;
+    private final MasterAggregateHandler aggregatorsHandler;
 
     public MasterAggrManager() {
-        this.register = new MasterAggregateHandler();
-        this.handler = new MasterAggregateHandler();
+        this.registerAggregators = new RegisterAggregators();
+        this.aggregatorsHandler = new MasterAggregateHandler();
     }
 
     @Override
@@ -53,14 +50,14 @@ public class MasterAggrManager implements Manager {
     @Override
     public void close(Config config) {
         // Called when master close()
-        this.handler.clearAggregators();
-        this.register.clearAggregators();
+        this.aggregatorsHandler.clearAggregators();
+        this.registerAggregators.clear();
     }
 
     @Override
     public void beforeSuperstep(Config config, int superstep) {
         // NOTE: rely on worker execute beforeSuperstep() before this call
-        this.handler.resetAggregators(this.register);
+        this.aggregatorsHandler.resetAggregators(this.registerAggregators);
     }
 
     @Override
@@ -69,39 +66,44 @@ public class MasterAggrManager implements Manager {
     }
 
     public AggregateRpcService handler() {
-        return this.handler;
+        return this.aggregatorsHandler;
     }
 
     public <V extends Value<?>> void registerAggregator(String name,
                                                         Aggregator<V> aggr) {
         // Called when master init()
-        this.register.setAggregator(name, aggr);
+        this.registerAggregators.put(name, aggr);
     }
 
     public <V extends Value<?>> void aggregatedAggregator(String name,
                                                           V value) {
         // Called when master compute()
-        Aggregator<V> aggregator = this.handler.getAggregator(name);
+        Aggregator<V> aggregator = this.aggregatorsHandler.getAggregator(name);
         aggregator.aggregatedValue(value);
     }
 
     public <V extends Value<?>> V aggregatedValue(String name) {
         // Called when master compute()
-        Aggregator<V> aggregator = this.handler.getAggregator(name);
+        Aggregator<V> aggregator = this.aggregatorsHandler.getAggregator(name);
         return aggregator.aggregatedValue();
     }
 
-    private static class MasterAggregateHandler implements AggregateRpcService {
+    private class MasterAggregateHandler implements AggregateRpcService {
 
-        private final Map<String, Aggregator<Value<?>>> aggregators;
+        private final Aggregators aggregators;
 
         public MasterAggregateHandler() {
-            this.aggregators = new ConcurrentHashMap<>();
+            this.aggregators = new Aggregators();
         }
 
         @Override
-        public Map<String, Aggregator<Value<?>>> listAggregators() {
-            return Collections.unmodifiableMap(this.aggregators);
+        public RegisterAggregators registeredAggregators() {
+            return MasterAggrManager.this.registerAggregators;
+        }
+
+        @Override
+        public Map<String, Value<?>> listAggregators() {
+            return this.aggregators.values();
         }
 
         @Override
@@ -113,12 +115,11 @@ public class MasterAggrManager implements Manager {
 
         @Override
         public <V extends Value<?>> Aggregator<V> getAggregator(String name) {
-            Aggregator<Value<?>> aggregator = this.aggregators.get(name);
-            E.checkArgument(aggregator != null,
-                            "Not found aggregator '%s'", name);
+            Aggregator<?> aggr = this.aggregators.get(name, null);
+            assert aggr != null;
             @SuppressWarnings("unchecked")
-            Aggregator<V> result = (Aggregator<V>) aggregator;
-            return result;
+            Aggregator<V> aggregator = (Aggregator<V>) aggr;
+            return aggregator;
         }
 
         @Override
@@ -128,20 +129,8 @@ public class MasterAggrManager implements Manager {
             aggregator.aggregateValue(value);
         }
 
-        public void resetAggregators(MasterAggregateHandler register) {
-            this.clearAggregators();
-
-            for (Entry<String, Aggregator<Value<?>>> aggr :
-                 register.aggregators.entrySet()) {
-                this.aggregators.put(aggr.getKey(), aggr.getValue().copy());
-            }
-        }
-
-        public <V extends Value<?>> void setAggregator(String name,
-                                                       Aggregator<V> aggr) {
-            @SuppressWarnings("unchecked")
-            Aggregator<Value<?>> aggregator = (Aggregator<Value<?>>) aggr;
-            this.aggregators.put(name, aggregator);
+        public void resetAggregators(RegisterAggregators register) {
+            this.aggregators.reset(register);
         }
 
         public void clearAggregators() {

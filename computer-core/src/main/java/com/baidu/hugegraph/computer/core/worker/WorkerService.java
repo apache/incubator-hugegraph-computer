@@ -335,22 +335,20 @@ public class WorkerService {
             return WorkerService.this.config;
         }
 
-//        @Override
-//        public <V extends Value<?>> Aggregator<V> createAggregator(
-//                                                  String name) {
-//            return this.aggrManager.createAggregator(name);
-//        }
+        @Override
+        public <V extends Value<?>> Aggregator<V> createAggregator(
+                                                  String name) {
+            return this.aggrManager.createAggregator(name);
+        }
 
         @Override
         public <V extends Value<?>> void aggregateValue(String name, V value) {
-            Aggregator<V> aggregator = this.aggrManager.aggregator(name);
-            aggregator.aggregatedValue(value);
+            this.aggrManager.aggregateValue(name, value);
         }
 
         @Override
         public <V extends Value<?>> V aggregatedValue(String name) {
-            Aggregator<V> aggregator = this.aggrManager.aggregator(name);
-            return aggregator.aggregatedValue();
+            return this.aggrManager.aggregatedValue(name);
         }
 
         @Override
