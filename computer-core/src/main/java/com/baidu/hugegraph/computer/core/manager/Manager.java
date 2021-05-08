@@ -43,14 +43,6 @@ public interface Manager {
     }
 
     /**
-     * Used to notify all managers and master inited. Be called only one
-     * time before all supersteps start.
-     */
-    default void inited(Config config) {
-        // pass
-    }
-
-    /**
      * Close the resources used in the computation. Be called only one time
      * after all supersteps ended.
      */

@@ -62,12 +62,6 @@ public class Managers implements Iterable<Manager> {
         }
     }
 
-    public void initedAll(Config config) {
-        for (Manager manager : this.all()) {
-            manager.inited(config);
-        }
-    }
-
     public void closeAll(Config config) {
         for (Manager manager : this.all()) {
             manager.close(config);

@@ -77,6 +77,12 @@ public class WorkerService {
 
         this.config = config;
 
+        /*
+         * Keep the waitMasterInitDone() before initManagers(),
+         * ensure master init() before worker managers init()
+         */
+        this.masterInfo = this.bsp4Worker.waitMasterInitDone();
+
         InetSocketAddress dataAddress = this.initManagers();
 
         this.workerInfo = new ContainerInfo(dataAddress.getHostName(),
@@ -98,8 +104,10 @@ public class WorkerService {
                      this.combiner.name(), this.computation.name());
         }
 
+        LOG.info("{} register WorkerService", this);
         this.bsp4Worker.workerInitDone();
         this.masterInfo = this.bsp4Worker.waitMasterInitDone();
+
         List<ContainerInfo> containers =
                             this.bsp4Worker.waitMasterAllInitDone();
         for (ContainerInfo container : containers) {
@@ -109,9 +117,7 @@ public class WorkerService {
             //dm.connect(container.hostname(), container.dataPort());
         }
 
-        // Notify managers inited
-        this.managers.initedAll(this.config);
-
+        LOG.info("{} WorkerService initialized", this);
         this.inited = true;
     }
 
@@ -164,16 +170,42 @@ public class WorkerService {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
+
+            /*
+             * Call beforeSuperstep() before all workers compute() called.
+             *
+             * NOTE: keep computation.beforeSuperstep() called after
+             * managers.beforeSuperstep().
+             */
             this.managers.beforeSuperstep(this.config, superstep);
             this.computation.beforeSuperstep(context);
+
+            /*
+             * Notify master by each worker, when the master received all
+             * workers signal, then notify all workers to do compute().
+             */
             this.bsp4Worker.workerStepPrepareDone(superstep);
             this.bsp4Worker.waitMasterStepPrepareDone(superstep);
 
             WorkerStat workerStat = this.compute();
+
+            /*
+             * Wait for all workers to do compute()
+             */
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
-            this.managers.afterSuperstep(this.config, superstep);
+
+            /*
+             * Call afterSuperstep() after all workers compute() is done.
+             *
+             * NOTE: keep managers.afterSuperstep() called after
+             * computation.afterSuperstep(), because managers may rely on
+             * computation, like WorkerAggrManager send aggregators to master
+             * after called aggregateValue(String name, V value) in computation.
+             */
             this.computation.afterSuperstep(context);
+            this.managers.afterSuperstep(this.config, superstep);
+
             this.bsp4Worker.workerStepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
 
@@ -196,6 +228,12 @@ public class WorkerService {
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
+        /*
+         * TODO: get rpc-server address from ContainerInfo masterInfo
+         *       config.hugeConfig().setProperty(this.masterInfo.hostname())
+         *       config.hugeConfig().setProperty(this.masterInfo.rpcPort())
+         * NOTE: this init() method will be called twice, ignore the 2nd call
+         */
         rpcManager.init(this.config);
 
         WorkerInputManager inputManager = new WorkerInputManager();
@@ -298,7 +336,8 @@ public class WorkerService {
         }
 
 //        @Override
-//        public <V extends Value<?>> Aggregator<V> createAggregator(String name) {
+//        public <V extends Value<?>> Aggregator<V> createAggregator(
+//                                                  String name) {
 //            return this.aggrManager.createAggregator(name);
 //        }
 

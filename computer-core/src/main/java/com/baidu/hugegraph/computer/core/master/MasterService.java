@@ -134,7 +134,7 @@ public class MasterService {
         int superstep = this.superstepToResume();
         LOG.info("{} MasterService resume from superstep: {}",
                  this, superstep);
-        
+
         /*
          * TODO: Get input splits from HugeGraph if resume from
          * Constants.INPUT_SUPERSTEP.
@@ -190,6 +190,7 @@ public class MasterService {
             SuperstepContext context = new SuperstepContext(this.config,
                                                             superstep,
                                                             superstepStat);
+            // Call master compute(), note the worker afterSuperstep() is done
             boolean masterContinue = this.masterComputation.compute(context);
             if (this.finishedIteration(masterContinue, context)) {
                 superstepStat.inactivate();
