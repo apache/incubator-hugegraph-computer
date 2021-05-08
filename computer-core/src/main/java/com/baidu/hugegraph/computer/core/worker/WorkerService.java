@@ -80,21 +80,26 @@ public class WorkerService {
 
         this.config = config;
 
+        InetSocketAddress dataAddress = this.initDataTransportManagers();
+
+        this.workerInfo = new ContainerInfo(0, dataAddress.getHostName(),
+                                            0, dataAddress.getPort());
+        LOG.info("{} Start to initialize worker", this);
+
+        this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
+
         /*
          * Keep the waitMasterInitDone() before initManagers(),
          * ensure master init() before worker managers init()
          */
         this.masterInfo = this.bsp4Worker.waitMasterInitDone();
 
-        InetSocketAddress dataAddress = this.initManagers();
+        this.initManagers();
 
-        this.workerInfo = new ContainerInfo(dataAddress.getHostName(),
-                                            0, dataAddress.getPort());
-        this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
         this.computation.init(config);
-        LOG.info("Computation name: {}, category: {}",
+        LOG.info("Loading computation '{}' in category '{}'",
                  this.computation.name(), this.computation.category());
 
         this.combiner = this.config.createObject(
@@ -109,12 +114,9 @@ public class WorkerService {
 
         LOG.info("{} register WorkerService", this);
         this.bsp4Worker.workerInitDone();
-        this.masterInfo = this.bsp4Worker.waitMasterInitDone();
-
-        List<ContainerInfo> containers =
-                            this.bsp4Worker.waitMasterAllInitDone();
-        for (ContainerInfo container : containers) {
-            this.workers.put(container.id(), container);
+        List<ContainerInfo> workers = this.bsp4Worker.waitMasterAllInitDone();
+        for (ContainerInfo worker : workers) {
+            this.workers.put(worker.id(), worker);
             // TODO: Connect to other workers for data transport
             //DataClientManager dm = this.managers.get(DataClientManager.NAME);
             //dm.connect(container.hostname(), container.dataPort());
@@ -220,14 +222,20 @@ public class WorkerService {
 
     @Override
     public String toString() {
-        return String.format("[worker %s]", this.workerInfo.id());
+        Object id = this.workerInfo == null ?
+                    "?" + this.hashCode() : this.workerInfo.id();
+        return String.format("[worker %s]", id);
     }
 
-    private InetSocketAddress initManagers() {
+    private InetSocketAddress initDataTransportManagers() {
         // TODO: Start data-transport server and get its host and port.
         InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
                                         "127.0.0.1", 8004);
 
+        return dataAddress;
+    }
+
+    private void initManagers() {
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
@@ -251,9 +259,7 @@ public class WorkerService {
         // Init managers
         this.managers.initAll(this.config);
 
-        LOG.info("{} WorkerService initialized", this);
-
-        return dataAddress;
+        LOG.info("{} WorkerService initialized managers", this);
     }
 
     private void checkInited() {

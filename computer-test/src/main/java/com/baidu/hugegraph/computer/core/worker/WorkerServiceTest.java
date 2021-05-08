@@ -53,6 +53,7 @@ public class WorkerServiceTest extends UnitTestBase {
                     RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                     ComputerOptions.JOB_ID, "local_001",
                     ComputerOptions.JOB_WORKERS_COUNT, "1",
+                    ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
                     ComputerOptions.BSP_LOG_INTERVAL, "30000",
                     ComputerOptions.BSP_MAX_SUPER_STEP, "2",
                     ComputerOptions.WORKER_COMPUTATION_CLASS,
@@ -76,6 +77,7 @@ public class WorkerServiceTest extends UnitTestBase {
                     RpcOptions.RPC_SERVER_HOST, "localhost",
                     ComputerOptions.JOB_ID, "local_001",
                     ComputerOptions.JOB_WORKERS_COUNT, "1",
+                    ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
                     ComputerOptions.BSP_LOG_INTERVAL, "30000",
                     ComputerOptions.BSP_MAX_SUPER_STEP, "2",
                     ComputerOptions.WORKER_COMPUTATION_CLASS,
@@ -134,7 +136,9 @@ public class WorkerServiceTest extends UnitTestBase {
             workerService.init(config);
             workerService.execute();
         }, e -> {
-            Assert.assertContains("Error while putting", e.getMessage());
+            Assert.assertContains("Error while getting with " +
+                                  "key='BSP_MASTER_INIT_DONE'",
+                                  e.getMessage());
             Assert.assertContains("UNAVAILABLE: unresolved address",
                                   e.getCause().getMessage());
         });

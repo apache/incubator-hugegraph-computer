@@ -75,18 +75,18 @@ public class MasterService {
      */
     public void init(Config config) {
         E.checkArgument(!this.inited, "The %s has been initialized", this);
+        LOG.info("{} Start to initialize master", this);
 
         this.config = config;
 
         this.maxSuperStep = this.config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
-
-        this.bsp4Master = new Bsp4Master(this.config);
 
         InetSocketAddress rpcAddress = this.initManagers();
 
         this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
                                             rpcAddress.getHostName(),
                                             rpcAddress.getPort());
+        this.bsp4Master = new Bsp4Master(this.config);
 
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
@@ -155,7 +155,7 @@ public class MasterService {
             superstepStat = null;
         }
         E.checkState(superstep <= this.maxSuperStep,
-                     "The superstep {} > maxSuperStep {}",
+                     "The superstep {} can't be > maxSuperStep {}",
                      superstep, this.maxSuperStep);
         // Step 3: Iteration computation of all supersteps.
         for (; superstepStat.active(); superstep++) {
@@ -206,7 +206,9 @@ public class MasterService {
 
     @Override
     public String toString() {
-        return String.format("[master %s]", this.masterInfo.id());
+        Object id = this.masterInfo == null ?
+                    "?" + this.hashCode() : this.masterInfo.id();
+        return String.format("[master %s]", id);
     }
 
     private InetSocketAddress initManagers() {
