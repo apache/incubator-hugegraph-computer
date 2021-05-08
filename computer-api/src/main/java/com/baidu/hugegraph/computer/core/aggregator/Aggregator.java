@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.aggregator;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
@@ -82,4 +83,9 @@ public interface Aggregator<V extends Value<?>> {
      * Return cloned object of this instance.
      */
     Aggregator<V> copy();
+
+    /**
+     * Repair the object because some fields may not be deserialized.
+     */
+    void repair(ComputerContext context);
 }

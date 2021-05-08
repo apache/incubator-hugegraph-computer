@@ -27,8 +27,6 @@ import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.baidu.hugegraph.computer.core.aggregator.MasterAggrManager;
-import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
@@ -37,7 +35,6 @@ import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.baidu.hugegraph.util.Bytes;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -279,15 +276,6 @@ public class ComputerOptions extends OptionHolder {
                     Null.class
             );
 
-    public static final ConfigOption<Class<?>> WORKER_AGGREGATOR_MANAGER_CLASS =
-            new ConfigOption<>(
-                    "worker.aggregator_manager_class",
-                    "Class to create aggregator manager that manages " +
-                    "aggregators in worker.",
-                    disallowEmpty(),
-                    WorkerAggrManager.class
-            );
-
     public static final ConfigOption<Long> WORKER_RECEIVED_BUFFERS_BYTES_LIMIT =
             new ConfigOption<>(
                     "worker.received_buffers_bytes_limit",
@@ -318,15 +306,6 @@ public class ComputerOptions extends OptionHolder {
                     "of each superstep on master.",
                     disallowEmpty(),
                     DefaultMasterComputation.class
-            );
-
-    public static final ConfigOption<Class<?>> MASTER_AGGREGATOR_MANAGER_CLASS =
-            new ConfigOption<>(
-                    "master.aggregator_manager_class",
-                    "Class to create aggregator manager that manages " +
-                    "aggregators in master.",
-                    disallowEmpty(),
-                    MasterAggrManager.class
             );
 
     public static final ConfigOption<String> HUGEGRAPH_URL =

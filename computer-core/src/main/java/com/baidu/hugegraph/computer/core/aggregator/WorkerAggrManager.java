@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.aggregator;
 
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Manager;
@@ -35,15 +36,19 @@ public class WorkerAggrManager implements Manager {
 
     public static final String NAME = "worker_aggr";
 
+    private final ComputerContext context;
+
     private AggregateRpcService service;
 
+    // Registered aggregators from master
     private RegisterAggregators registerAggregators;
     // Cache the aggregators of the previous superstep
     private Map<String, Value<?>> lastAggregators;
     // Cache the aggregators of the current superstep
     private Aggregators currentAggregators;
 
-    public WorkerAggrManager() {
+    public WorkerAggrManager(ComputerContext context) {
+        this.context = context;
         this.service = null;
         this.registerAggregators = new RegisterAggregators();
         this.lastAggregators = ImmutableMap.of();
@@ -58,6 +63,7 @@ public class WorkerAggrManager implements Manager {
     @Override
     public void init(Config config) {
         this.registerAggregators = this.service().registeredAggregators();
+        this.registerAggregators.repair(this.context);
     }
 
     @Override

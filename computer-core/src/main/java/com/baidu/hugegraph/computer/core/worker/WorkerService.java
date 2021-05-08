@@ -30,6 +30,7 @@ import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
 import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.bsp.Bsp4Worker;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -50,6 +51,7 @@ public class WorkerService {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 
+    private final ComputerContext context;
     private final Managers managers;
     private final Map<Integer, ContainerInfo> workers;
 
@@ -64,6 +66,7 @@ public class WorkerService {
     private ContainerInfo masterInfo;
 
     public WorkerService() {
+        this.context = ComputerContext.instance();
         this.managers = new Managers();
         this.workers = new HashMap<>();
         this.inited = false;
@@ -240,8 +243,8 @@ public class WorkerService {
         inputManager.service(rpcManager.inputSplitService());
         this.managers.add(inputManager);
 
-        WorkerAggrManager aggregatorManager = this.config.createObject(
-                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
+        WorkerAggrManager aggregatorManager = new WorkerAggrManager(
+                                              this.context);
         aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
 

@@ -215,8 +215,7 @@ public class MasterService {
         MasterInputManager inputManager = new MasterInputManager();
         this.managers.add(inputManager);
 
-        MasterAggrManager aggregatorManager = this.config.createObject(
-                          ComputerOptions.MASTER_AGGREGATOR_MANAGER_CLASS);
+        MasterAggrManager aggregatorManager = new MasterAggrManager();
         this.managers.add(aggregatorManager);
 
         MasterRpcManager rpcManager = new MasterRpcManager();

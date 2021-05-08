@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.util.E;
 
@@ -58,5 +59,11 @@ public class RegisterAggregators {
 
     public void clear() {
         this.aggregators.clear();
+    }
+
+    public void repair(ComputerContext context) {
+        for (Aggregator<? extends Value<?>> aggr : this.aggregators.values()) {
+            aggr.repair(context);
+        }
     }
 }

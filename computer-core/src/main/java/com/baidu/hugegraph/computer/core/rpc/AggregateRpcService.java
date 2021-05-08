@@ -36,5 +36,4 @@ public interface AggregateRpcService {
     <V extends Value<?>> Aggregator<V> getAggregator(String name);
 
     <V extends Value<?>> void aggregateAggregator(String name, V value);
-
 }

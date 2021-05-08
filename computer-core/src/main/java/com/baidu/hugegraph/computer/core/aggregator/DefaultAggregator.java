@@ -32,9 +32,8 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     private final ValueType type;
     private final Class<? extends Combiner<V>> combinerClass;
 
-    private final transient ComputerContext context;
-    private final transient Combiner<V> combiner;
-    private final transient ThreadLocal<V> combineValue;
+    private transient Combiner<V> combiner;
+    private transient ThreadLocal<V> combineValue;
 
     private V value;
 
@@ -43,25 +42,9 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
         this.type = type;
         this.combinerClass = combinerClass;
 
-        this.context = context;
-        try {
-            this.combiner = this.combinerClass.newInstance();
-        } catch (Exception e) {
-            throw new ComputerException("Can't new instance from class: %s",
-                                        e, this.combinerClass.getName());
+        if (context != null) {
+            this.repair(context);
         }
-
-        this.combineValue = ThreadLocal.withInitial(() -> {
-            return this.newValue(context);
-        });
-
-        this.value = this.newValue(context);
-    }
-
-    private V newValue(ComputerContext context) {
-        @SuppressWarnings("unchecked")
-        V val = (V) context.valueFactory().createValue(this.type);
-        return val;
     }
 
     @Override
@@ -120,7 +103,42 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
 
     @Override
     public Aggregator<V> copy() {
-        return new DefaultAggregator<>(this.context, this.type,
-                                       this.combinerClass);
+//        DefaultAggregator<V> aggregator = new DefaultAggregator<>(
+//                                          null, this.type, this.combinerClass);
+//        aggregator.value = this.value;
+//        aggregator.combiner = this.combiner;
+//        aggregator.combineValue = this.combineValue;
+//        return aggregator;
+        try {
+            @SuppressWarnings("unchecked")
+            Aggregator<V> aggregator = (Aggregator<V>) this.clone();
+            return aggregator;
+        } catch (CloneNotSupportedException e) {
+            throw new ComputerException("Failed to copy Aggregator", e);
+        }
+    }
+
+    @Override
+    public void repair(ComputerContext context) {
+        try {
+            this.combiner = this.combinerClass.newInstance();
+        } catch (Exception e) {
+            throw new ComputerException("Can't new instance from class: %s",
+                                        e, this.combinerClass.getName());
+        }
+
+        this.combineValue = ThreadLocal.withInitial(() -> {
+            return this.newValue(context);
+        });
+
+        if (this.value == null) {
+            this.value = this.newValue(context);
+        }
+    }
+
+    private V newValue(ComputerContext context) {
+        @SuppressWarnings("unchecked")
+        V val = (V) context.valueFactory().createValue(this.type);
+        return val;
     }
 }
