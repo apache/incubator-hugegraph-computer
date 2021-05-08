@@ -55,6 +55,19 @@ public class IntValue implements Value<IntValue> {
     }
 
     @Override
+    public void assign(Value<IntValue> other) {
+        E.checkArgument(other instanceof IntValue,
+                        "Can't assign '%s'(%s) to IntValue",
+                        other, other.getClass().getSimpleName());
+        this.value = ((IntValue) other).value;
+    }
+
+    @Override
+    public IntValue copy() {
+        return new IntValue(this.value);
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readInt();
     }

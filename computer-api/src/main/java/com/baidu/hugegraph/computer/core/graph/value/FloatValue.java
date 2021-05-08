@@ -55,6 +55,19 @@ public class FloatValue implements Value<FloatValue> {
     }
 
     @Override
+    public void assign(Value<FloatValue> other) {
+        E.checkArgument(other instanceof FloatValue,
+                        "Can't assign '%s'(%s) to FloatValue",
+                        other, other.getClass().getSimpleName());
+        this.value = ((FloatValue) other).value;
+    }
+
+    @Override
+    public FloatValue copy() {
+        return new FloatValue(this.value);
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readFloat();
     }

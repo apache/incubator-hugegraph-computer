@@ -82,12 +82,6 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
         return this.values.get(index);
     }
 
-    public ListValue<T> copy() {
-        List<T> values = GRAPH_FACTORY.createList();
-        values.addAll(this.values);
-        return new ListValue<>(this.elemType, values);
-    }
-
     public boolean contains(T obj) {
         return this.values.contains(obj);
     }
@@ -103,6 +97,21 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     @Override
     public ValueType type() {
         return ValueType.LIST_VALUE;
+    }
+
+    @Override
+    public void assign(Value<ListValue<T>> other) {
+        E.checkArgument(other instanceof ListValue,
+                        "Can't assign '%s'(%s) to ListValue",
+                        other, other.getClass().getSimpleName());
+        this.values = ((ListValue<T>) other).values;
+    }
+
+    @Override
+    public ListValue<T> copy() {
+        List<T> values = GRAPH_FACTORY.createList();
+        values.addAll(this.values);
+        return new ListValue<>(this.elemType, values);
     }
 
     public ValueType elemType() {

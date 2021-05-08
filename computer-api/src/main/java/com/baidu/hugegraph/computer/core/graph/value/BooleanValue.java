@@ -58,6 +58,19 @@ public class BooleanValue implements Value<BooleanValue> {
     }
 
     @Override
+    public void assign(Value<BooleanValue> other) {
+        E.checkArgument(other instanceof BooleanValue,
+                        "Can't assign '%s'(%s) to BooleanValue",
+                        other, other.getClass().getSimpleName());
+        this.value = ((BooleanValue) other).value;
+    }
+
+    @Override
+    public BooleanValue copy() {
+        return this.value ? TRUE : FALSE;
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readBoolean();
     }

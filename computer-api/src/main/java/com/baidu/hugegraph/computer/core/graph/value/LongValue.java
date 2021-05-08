@@ -55,6 +55,19 @@ public class LongValue implements Value<LongValue> {
     }
 
     @Override
+    public void assign(Value<LongValue> other) {
+        E.checkArgument(other instanceof LongValue,
+                        "Can't assign '%s'(%s) to LongValue",
+                        other, other.getClass().getSimpleName());
+        this.value = ((LongValue) other).value;
+    }
+
+    @Override
+    public LongValue copy() {
+        return new LongValue(this.value);
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readLong();
     }

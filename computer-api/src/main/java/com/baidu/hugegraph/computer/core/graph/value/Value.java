@@ -24,5 +24,19 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 
 public interface Value<T> extends Writable, Readable, Comparable<T> {
 
+    /**
+     * @return the value type of this instance
+     */
     ValueType type();
+
+    /**
+     * Assign a new value to this object
+     * @return the old value in this object
+     */
+    void assign(Value<T> value);
+
+    /**
+     * @return copy a value instance of this object
+     */
+    Value<T> copy();
 }
