@@ -247,6 +247,14 @@ public class ComputerOptions extends OptionHolder {
                     TimeUnit.SECONDS.toMillis(30L)
             );
 
+    public static final ConfigOption<Integer> WORKER_ID =
+            new ConfigOption<>(
+                    "worker.id",
+                    "The worker id used to uniquely identify the worker.",
+                    positiveInt(),
+                    1
+            );
+
     public static final ConfigOption<Class<?>> WORKER_PARTITIONER =
             new ConfigOption<>(
                     "worker.partitioner",

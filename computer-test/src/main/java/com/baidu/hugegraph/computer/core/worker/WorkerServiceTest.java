@@ -40,7 +40,7 @@ public class WorkerServiceTest extends UnitTestBase {
     private static final Logger LOG = Log.logger(WorkerServiceTest.class);
 
     @Test
-    public void testServiceSuccess() throws InterruptedException {
+    public void testServiceWith1Worker() throws InterruptedException {
         MasterService masterService = new MasterService();
         WorkerService workerService = new MockWorkerService();
         try {
@@ -51,7 +51,7 @@ public class WorkerServiceTest extends UnitTestBase {
             pool.submit(() -> {
                 Config config = UnitTestBase.updateWithRequiredOptions(
                     RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
-                    ComputerOptions.JOB_ID, "local_001",
+                    ComputerOptions.JOB_ID, "local_002",
                     ComputerOptions.JOB_WORKERS_COUNT, "1",
                     ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
                     ComputerOptions.BSP_LOG_INTERVAL, "30000",
@@ -73,7 +73,7 @@ public class WorkerServiceTest extends UnitTestBase {
             pool.submit(() -> {
                 Config config = UnitTestBase.updateWithRequiredOptions(
                     RpcOptions.RPC_SERVER_HOST, "localhost",
-                    ComputerOptions.JOB_ID, "local_001",
+                    ComputerOptions.JOB_ID, "local_002",
                     ComputerOptions.JOB_WORKERS_COUNT, "1",
                     ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
                     ComputerOptions.BSP_LOG_INTERVAL, "30000",
@@ -97,9 +97,98 @@ public class WorkerServiceTest extends UnitTestBase {
 
             Assert.assertFalse(this.existError(exceptions));
         } finally {
-            workerService.close();
-            masterService.close();
+            try {
+                workerService.close();
+            } finally {
+                masterService.close();
+            }
         }
+    }
+
+    @Test
+    public void testServiceWith2Workers() throws InterruptedException {
+        ExecutorService pool = Executors.newFixedThreadPool(3);
+        CountDownLatch countDownLatch = new CountDownLatch(3);
+        Throwable[] exceptions = new Throwable[3];
+
+        pool.submit(() -> {
+            Config config = UnitTestBase.updateWithRequiredOptions(
+                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+                ComputerOptions.JOB_ID, "local_003",
+                ComputerOptions.JOB_WORKERS_COUNT, "2",
+                ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
+                ComputerOptions.BSP_LOG_INTERVAL, "10000",
+                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                ComputerOptions.WORKER_ID, "1",
+                ComputerOptions.WORKER_COMPUTATION_CLASS,
+                MockComputation2.class.getName()
+            );
+            WorkerService workerService = new MockWorkerService();
+            try {
+                workerService.init(config);
+                workerService.execute();
+            } catch (Throwable e) {
+                LOG.error("Failed to start worker", e);
+                exceptions[0] = e;
+            } finally {
+                countDownLatch.countDown();
+                workerService.close();
+            }
+        });
+
+        pool.submit(() -> {
+            Config config = UnitTestBase.updateWithRequiredOptions(
+                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+                ComputerOptions.JOB_ID, "local_003",
+                ComputerOptions.JOB_WORKERS_COUNT, "2",
+                ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
+                ComputerOptions.BSP_LOG_INTERVAL, "10000",
+                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                ComputerOptions.WORKER_ID, "2",
+                ComputerOptions.WORKER_COMPUTATION_CLASS,
+                MockComputation2.class.getName()
+            );
+            WorkerService workerService = new MockWorkerService();
+            try {
+                workerService.init(config);
+                workerService.execute();
+            } catch (Throwable e) {
+                LOG.error("Failed to start worker", e);
+                exceptions[1] = e;
+            } finally {
+                countDownLatch.countDown();
+                workerService.close();
+            }
+        });
+
+        pool.submit(() -> {
+            Config config = UnitTestBase.updateWithRequiredOptions(
+                RpcOptions.RPC_SERVER_HOST, "localhost",
+                ComputerOptions.JOB_ID, "local_003",
+                ComputerOptions.JOB_WORKERS_COUNT, "2",
+                ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
+                ComputerOptions.BSP_LOG_INTERVAL, "10000",
+                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                ComputerOptions.MASTER_COMPUTATION_CLASS,
+                MockMasterComputation2.class.getName()
+            );
+            MasterService masterService = new MasterService();
+            try {
+                masterService.init(config);
+                masterService.execute();
+            } catch (Throwable e) {
+                LOG.error("Failed to start master", e);
+                exceptions[2] = e;
+            } finally {
+                countDownLatch.countDown();
+                masterService.close();
+            }
+        });
+
+        countDownLatch.await();
+        pool.shutdownNow();
+
+        Assert.assertFalse(this.existError(exceptions));
     }
 
     private boolean existError(Throwable[] exceptions) {

@@ -25,8 +25,10 @@ import com.baidu.hugegraph.computer.core.combiner.LongValueSumCombiner;
 import com.baidu.hugegraph.computer.core.combiner.ValueMaxCombiner;
 import com.baidu.hugegraph.computer.core.combiner.ValueMinCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.master.MasterComputationContext;
@@ -37,6 +39,7 @@ public class MockMasterComputation extends DefaultMasterComputation {
 
     public static final String AGGR_TEST_INT = "aggr_int";
     public static final String AGGR_TEST_FLOAT = "aggr_float";
+    public static final String AGGR_TEST_MASTER = "aggr_float_unstable";
 
     public static final String AGGR_TEST_LONG_SUM = "aggr_long_sum";
     public static final String AGGR_TEST_LONG_MAX = "aggr_long_max";
@@ -44,11 +47,12 @@ public class MockMasterComputation extends DefaultMasterComputation {
     public static final String AGGR_TEST_DOUBLE_SUM = "aggr_double_sum";
     public static final String AGGR_TEST_DOUBLE_MIN = "aggr_double_min";
 
-    @Override
     @SuppressWarnings("unchecked")
+    @Override
     public void init(MasterContext context) {
         context.registerAggregator(AGGR_TEST_INT, MockIntAggregator.class);
         context.registerAggregator(AGGR_TEST_FLOAT, MockFloatAggregator.class);
+        context.registerAggregator(AGGR_TEST_MASTER, MockFloatAggregator.class);
 
         context.registerAggregator(AGGR_TEST_LONG_SUM, ValueType.LONG,
                                    LongValueSumCombiner.class);
@@ -63,12 +67,45 @@ public class MockMasterComputation extends DefaultMasterComputation {
 
     @Override
     public boolean compute(MasterComputationContext context) {
+        this.assertStat(context);
+
+        if (context.superstep() == 1) {
+            this.assertStep0Aggregators(context);
+        }
+
+        return true;
+    }
+
+    protected void assertStat(MasterComputationContext context) {
         Assert.assertEquals(100L, context.totalVertexCount());
         Assert.assertEquals(200L, context.totalEdgeCount());
         Assert.assertEquals(50L, context.finishedVertexCount());
         Assert.assertEquals(60L, context.messageCount());
         Assert.assertEquals(70L, context.messageBytes());
-        return true;
+    }
+
+    protected void assertStep0Aggregators(MasterComputationContext context) {
+        Assert.assertEquals(new IntValue(5), context.aggregatedValue(
+                            MockMasterComputation.AGGR_TEST_INT));
+        Assert.assertEquals(new FloatValue(5.2f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_TEST_FLOAT));
+        Assert.assertEquals(new FloatValue(10.4f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_TEST_MASTER));
+
+        Assert.assertEquals(new LongValue(5L), context.aggregatedValue(
+                            MockMasterComputation.AGGR_TEST_LONG_SUM));
+        Assert.assertEquals(new LongValue(8L), context.aggregatedValue(
+                            MockMasterComputation.AGGR_TEST_LONG_MAX));
+
+        Assert.assertEquals(new DoubleValue(10.4), context.aggregatedValue(
+                            MockMasterComputation.AGGR_TEST_DOUBLE_SUM));
+        Assert.assertEquals(new DoubleValue(-10.0), context.aggregatedValue(
+                            MockMasterComputation.AGGR_TEST_DOUBLE_MIN));
+
+        context.aggregatedValue(MockMasterComputation.AGGR_TEST_MASTER,
+                                new FloatValue(8.8f));
+        Assert.assertEquals(new FloatValue(8.8f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_TEST_MASTER));
     }
 
     public static class MockIntAggregator implements Aggregator<IntValue> {

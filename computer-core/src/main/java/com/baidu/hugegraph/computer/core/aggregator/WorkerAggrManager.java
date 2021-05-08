@@ -126,6 +126,7 @@ public class WorkerAggrManager implements Manager {
     private void flushAggregators() {
         Map<String, Value<?>> aggregators = this.currentAggregators.values();
         this.service().aggregateAggregators(aggregators);
+        this.currentAggregators.clear();
     }
 
     private void reloadAggregators() {

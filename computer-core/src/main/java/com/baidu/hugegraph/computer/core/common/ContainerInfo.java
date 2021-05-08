@@ -30,7 +30,7 @@ import com.baidu.hugegraph.util.E;
 
 public class ContainerInfo implements Readable, Writable {
 
-    public static final int MASTER_ID = -1;
+    public static final int MASTER_ID = 0;
 
     /*
      * There is only 1 master, and the id of master is -1.

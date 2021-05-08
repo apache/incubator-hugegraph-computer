@@ -82,7 +82,8 @@ public class WorkerService {
 
         InetSocketAddress dataAddress = this.initDataTransportManagers();
 
-        this.workerInfo = new ContainerInfo(0, dataAddress.getHostName(),
+        int workerId = this.config.get(ComputerOptions.WORKER_ID);
+        this.workerInfo = new ContainerInfo(workerId, dataAddress.getHostName(),
                                             0, dataAddress.getPort());
         LOG.info("{} Start to initialize worker", this);
 

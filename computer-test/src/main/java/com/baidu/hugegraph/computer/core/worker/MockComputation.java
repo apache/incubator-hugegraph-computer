@@ -48,8 +48,7 @@ public class MockComputation implements Computation<DoubleValue> {
             this.assertStep0Aggregators(context);
         }
 
-        Assert.assertEquals(100L, context.totalVertexCount());
-        Assert.assertEquals(200L, context.totalEdgeCount());
+        this.assertStat(context);
     }
 
     @Override
@@ -57,6 +56,11 @@ public class MockComputation implements Computation<DoubleValue> {
         context.aggregateValue(MockMasterComputation.AGGR_TEST_INT,
                                this.aggrInt.aggregatedValue());
         context.aggregateValue(MockMasterComputation.AGGR_TEST_FLOAT,
+                               this.aggrFloat.aggregatedValue());
+
+        context.aggregateValue(MockMasterComputation.AGGR_TEST_MASTER,
+                               this.aggrFloat.aggregatedValue());
+        context.aggregateValue(MockMasterComputation.AGGR_TEST_MASTER,
                                this.aggrFloat.aggregatedValue());
 
         context.aggregateValue(MockMasterComputation.AGGR_TEST_LONG_SUM,
@@ -70,7 +74,12 @@ public class MockComputation implements Computation<DoubleValue> {
                                this.aggrDoubleMin.aggregatedValue());
     }
 
-    private void assertAggregators(WorkerContext context) {
+    protected void assertStat(WorkerContext context) {
+        Assert.assertEquals(100L, context.totalVertexCount());
+        Assert.assertEquals(200L, context.totalEdgeCount());
+    }
+
+    protected void assertAggregators(WorkerContext context) {
         // AGGR_TEST_INT
         this.aggrInt = context.createAggregator(
                        MockMasterComputation.AGGR_TEST_INT);
@@ -186,7 +195,7 @@ public class MockComputation implements Computation<DoubleValue> {
                             this.aggrDoubleMin.aggregatedValue());
     }
 
-    private void assertStep0Aggregators(WorkerContext context) {
+    protected void assertStep0Aggregators(WorkerContext context) {
         Assert.assertEquals(new IntValue(5), context.aggregatedValue(
                             MockMasterComputation.AGGR_TEST_INT));
         Assert.assertEquals(new FloatValue(5.2f), context.aggregatedValue(
