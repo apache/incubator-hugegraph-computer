@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -31,6 +32,9 @@ import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.id.UuidId;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -43,6 +47,21 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     public BuiltinGraphFactory(Config config) {
         this.config = config;
+    }
+
+    @Override
+    public Id createId(long id) {
+        return new LongId(id);
+    }
+
+    @Override
+    public Id createId(String id) {
+        return new Utf8Id(id);
+    }
+
+    @Override
+    public Id createId(UUID id) {
+        return new UuidId(id);
     }
 
     @Override
