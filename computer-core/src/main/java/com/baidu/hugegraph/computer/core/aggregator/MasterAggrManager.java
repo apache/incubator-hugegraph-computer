@@ -19,16 +19,28 @@
 
 package com.baidu.hugegraph.computer.core.aggregator;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
+import com.baidu.hugegraph.util.E;
 
 /**
  * Aggregator manager manages aggregators in master.
- * TODO: implement
  */
 public class MasterAggrManager implements Manager {
 
     public static final String NAME = "master_aggr";
+
+    private final MasterAggregateHandler handler;
+
+    public MasterAggrManager() {
+        this.handler = new MasterAggregateHandler();
+    }
 
     @Override
     public String name() {
@@ -36,10 +48,64 @@ public class MasterAggrManager implements Manager {
     }
 
     public AggregateRpcService handler() {
-        //E.checkNotNull(handler, "handler");
-        // TODO: implement
-        return new AggregateRpcService() {
-            // mock
-        };
+        return this.handler;
+    }
+
+    public <V extends Value<?>> void addAggregator(String name,
+                                                   Aggregator<V> aggr) {
+        this.handler.setAggregator(name, aggr);
+    }
+
+    public void clearAggregators() {
+        this.handler.clearAggregators();
+    }
+
+    private static class MasterAggregateHandler implements AggregateRpcService {
+
+        private final Map<String, Aggregator<Value<?>>> aggregators;
+
+        public MasterAggregateHandler() {
+            this.aggregators = new ConcurrentHashMap<>();
+        }
+
+        @Override
+        public Map<String, Aggregator<Value<?>>> listAggregators() {
+            return Collections.unmodifiableMap(this.aggregators);
+        }
+
+        @Override
+        public void aggregateAggregators(Map<String, Value<?>> aggregators) {
+            for (Entry<String, Value<?>> aggr : aggregators.entrySet()) {
+                this.aggregateAggregator(aggr.getKey(), aggr.getValue());
+            }
+        }
+
+        @Override
+        public <V extends Value<?>> Aggregator<V> getAggregator(String name) {
+            Aggregator<Value<?>> aggregator = this.aggregators.get(name);
+            E.checkArgument(aggregator != null,
+                            "Not found aggregator '%s'", name);
+            @SuppressWarnings("unchecked")
+            Aggregator<V> result = (Aggregator<V>) aggregator;
+            return result;
+        }
+
+        @Override
+        public <V extends Value<?>> void aggregateAggregator(String name,
+                                                             V value) {
+            Aggregator<V> aggregator = this.getAggregator(name);
+            aggregator.aggregateValue(value);
+        }
+
+        public <V extends Value<?>> void setAggregator(String name,
+                                                       Aggregator<V> aggr) {
+            @SuppressWarnings("unchecked")
+            Aggregator<Value<?>> aggregator = (Aggregator<Value<?>>) aggr;
+            this.aggregators.put(name, aggregator);
+        }
+
+        public void clearAggregators() {
+            this.aggregators.clear();
+        }
     }
 }
