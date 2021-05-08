@@ -67,7 +67,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     @Override
     public void aggregateValue(long value) {
         assert this.type == ValueType.LONG;
-        V localValue= this.localValue.get();
+        V localValue = this.localValue.get();
         ((LongValue) localValue).value(value);
         this.combineAndSwapIfNeeded(localValue, this.value);
     }
@@ -75,7 +75,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     @Override
     public void aggregateValue(float value) {
         assert this.type == ValueType.FLOAT;
-        V localValue= this.localValue.get();
+        V localValue = this.localValue.get();
         ((FloatValue) localValue).value(value);
         this.combineAndSwapIfNeeded(localValue, this.value);
     }
@@ -83,7 +83,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     @Override
     public void aggregateValue(double value) {
         assert this.type == ValueType.DOUBLE;
-        V localValue= this.localValue.get();
+        V localValue = this.localValue.get();
         ((DoubleValue) localValue).value(value);
         this.combineAndSwapIfNeeded(localValue, this.value);
     }
