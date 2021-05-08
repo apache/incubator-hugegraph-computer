@@ -30,15 +30,15 @@ public class NettyTransportProvider implements TransportProvider {
 
     @Override
     public TransportServer createServer(TransportConf conf) {
-        ByteBufAllocator bufAllocator = BufAllocatorFactory.
-                                        createBufAllocator();
+        ByteBufAllocator bufAllocator =
+                         BufAllocatorFactory.createBufAllocator();
         return new NettyTransportServer(bufAllocator);
     }
 
     @Override
     public ClientFactory createClientFactory(TransportConf conf) {
-        ByteBufAllocator bufAllocator = BufAllocatorFactory.
-                                        createBufAllocator();
+        ByteBufAllocator bufAllocator =
+                         BufAllocatorFactory.createBufAllocator();
         return new NettyClientFactory(conf, bufAllocator);
     }
 }
