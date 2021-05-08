@@ -33,9 +33,12 @@ import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.NettyTransportProvider;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.baidu.hugegraph.util.Bytes;
+
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class ComputerOptions extends OptionHolder {
@@ -284,6 +287,28 @@ public class ComputerOptions extends OptionHolder {
                     "aggregators in worker.",
                     disallowEmpty(),
                     WorkerAggrManager.class
+            );
+
+    public static final ConfigOption<Long> WORKER_RECEIVED_BUFFERS_BYTES_LIMIT =
+            new ConfigOption<>(
+                    "worker.received_buffers_bytes_limit",
+                    "The limit bytes of buffers of received data, " +
+                    "the total size of all buffers can't excess this limit. " +
+                    "If received buffers reach this limit, they will be " +
+                    "merged into a file.",
+                    positiveInt(),
+                    100 * Bytes.MB
+            );
+
+    public static final ConfigListOption<String> WORKER_DATA_DIRS =
+            new ConfigListOption<>(
+                    "worker.data_dirs",
+                    true,
+                    "The directories separated by ',' that received " +
+                    "vertices and messages can persist into.",
+                    disallowEmpty(),
+                    String.class,
+                    ImmutableList.of("jobs")
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
