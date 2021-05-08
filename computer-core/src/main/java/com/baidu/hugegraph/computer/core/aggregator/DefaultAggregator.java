@@ -50,12 +50,16 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
         }
 
         this.combineValue = ThreadLocal.withInitial(() -> {
-            @SuppressWarnings("unchecked")
-            V val = (V) context.valueFactory().createValue(this.type);
-            return val;
+            return this.newValue(context);
         });
 
-        this.value = null;
+        this.value = this.newValue(context);
+    }
+
+    private V newValue(ComputerContext context) {
+        @SuppressWarnings("unchecked")
+        V val = (V) context.valueFactory().createValue(this.type);
+        return val;
     }
 
     @Override
