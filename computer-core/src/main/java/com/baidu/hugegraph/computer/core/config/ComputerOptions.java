@@ -289,13 +289,13 @@ public class ComputerOptions extends OptionHolder {
                     WorkerAggrManager.class
             );
 
-    public static final ConfigOption<Long> WORKER_RECEIVED_BUFFERS_SIZE_LIMIT =
+    public static final ConfigOption<Long> WORKER_RECEIVED_BUFFERS_BYTES_LIMIT =
             new ConfigOption<>(
                     "worker.received_buffers_bytes_limit",
-                    "The limit bytes of buffers of received data, the " +
-                    "total size of all buffers can't excess this limit. If " +
-                    "received buffers reach this limit, they will be merged " +
-                    "into a file. ",
+                    "The limit bytes of buffers of received data, " +
+                    "the total size of all buffers can't excess this limit. " +
+                    "If received buffers reach this limit, they will be " +
+                    "merged into a file.",
                     positiveInt(),
                     100 * Bytes.MB
             );
@@ -305,7 +305,7 @@ public class ComputerOptions extends OptionHolder {
                     "worker.data_dirs",
                     true,
                     "The directories separated by ',' that received " +
-                    "vertices and messages can persist into. ",
+                    "vertices and messages can persist into.",
                     disallowEmpty(),
                     String.class,
                     ImmutableList.of("jobs")

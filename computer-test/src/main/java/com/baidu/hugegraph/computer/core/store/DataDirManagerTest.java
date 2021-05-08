@@ -25,7 +25,6 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -38,11 +37,10 @@ public class DataDirManagerTest extends UnitTestBase {
     public void testInitWithFile() throws IOException {
         File file = new File("exist");
         file.createNewFile();
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.WORKER_DATA_DIRS, "[" + file.getAbsolutePath() + "]"
         );
-        Config config = context().config();
         DataFileManager dataFileManager = new DataFileManager();
         Assert.assertEquals(DataFileManager.NAME, dataFileManager.name());
         Assert.assertThrows(ComputerException.class, () -> {
@@ -55,11 +53,10 @@ public class DataDirManagerTest extends UnitTestBase {
 
     @Test
     public void testInitWithReadOnlyDir() throws IOException {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.WORKER_DATA_DIRS, "[/etc]"
         );
-        Config config = ComputerContext.instance().config();
         DataFileManager dataFileManager = new DataFileManager();
         Assert.assertThrows(ComputerException.class, () -> {
             dataFileManager.init(config);
@@ -70,15 +67,14 @@ public class DataDirManagerTest extends UnitTestBase {
 
     @Test
     public void testNextDir() {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.JOB_PARTITIONS_COUNT, "2",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_SIZE_LIMIT, "300"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "300"
         );
-        Config config = ComputerContext.instance().config();
         DataFileManager dataFileManager = new DataFileManager();
 
         dataFileManager.init(config);
@@ -97,15 +93,14 @@ public class DataDirManagerTest extends UnitTestBase {
 
     @Test
     public void testNextFile() {
-        UnitTestBase.updateWithRequiredOptions(
+        Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.JOB_PARTITIONS_COUNT, "2",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_SIZE_LIMIT, "300"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "300"
         );
-        Config config = ComputerContext.instance().config();
         DataFileManager dataFileManager = new DataFileManager();
 
         dataFileManager.init(config);
