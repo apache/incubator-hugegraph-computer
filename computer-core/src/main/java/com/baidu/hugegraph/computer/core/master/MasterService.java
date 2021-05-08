@@ -25,9 +25,11 @@ import java.util.List;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
+import com.baidu.hugegraph.computer.core.aggregator.DefaultAggregator;
 import com.baidu.hugegraph.computer.core.aggregator.MasterAggrManager;
 import com.baidu.hugegraph.computer.core.bsp.Bsp4Master;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -52,6 +54,7 @@ public class MasterService {
 
     private static final Logger LOG = Log.logger(MasterService.class);
 
+    private final ComputerContext context;
     private final Managers managers;
 
     private boolean inited;
@@ -63,6 +66,7 @@ public class MasterService {
     private MasterComputation masterComputation;
 
     public MasterService() {
+        this.context = ComputerContext.instance();
         this.managers = new Managers();
     }
 
@@ -86,13 +90,15 @@ public class MasterService {
 
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
-        // TODO: pass MasterInitContext to init
-        this.masterComputation.init(null);
+        this.masterComputation.init(new DefaultMasterContext(this.config));
 
+        LOG.info("{} register MasterService", this);
         this.bsp4Master.masterInitDone(this.masterInfo);
+
         this.workers = this.bsp4Master.waitWorkersInitDone();
-        LOG.info("{} MasterService worker count: {}",
+        LOG.info("{} waited all workers registered, workers count: {}",
                  this, this.workers.size());
+
         LOG.info("{} MasterService initialized", this);
         this.inited = true;
     }
@@ -106,8 +112,7 @@ public class MasterService {
 
         this.bsp4Master.waitWorkersCloseDone();
         this.managers.closeAll(this.config);
-        // TODO: pass parameter MasterContext.
-        this.masterComputation.close(null);
+        this.masterComputation.close(new DefaultMasterContext(this.config));
         this.bsp4Master.clean();
         this.bsp4Master.close();
         LOG.info("{} MasterService closed", this);
@@ -127,9 +132,9 @@ public class MasterService {
          * superstep.
          */
         int superstep = this.superstepToResume();
-
         LOG.info("{} MasterService resume from superstep: {}",
                  this, superstep);
+        
         /*
          * TODO: Get input splits from HugeGraph if resume from
          * Constants.INPUT_SUPERSTEP.
@@ -292,15 +297,66 @@ public class MasterService {
         LOG.info("{} MasterService outputstep finished", this);
     }
 
-    private static class SuperstepContext implements MasterComputationContext {
+    private class DefaultMasterContext implements MasterContext {
 
         private final Config config;
+        private final MasterAggrManager aggrManager;
+
+        public DefaultMasterContext(Config config) {
+            this.config = config;
+            this.aggrManager = MasterService.this.managers.get(
+                               MasterAggrManager.NAME);
+        }
+
+        @Override
+        public void registerAggregator(String name,
+                                       Class<? extends Aggregator<Value<?>>>
+                                       aggregatorClass) {
+            Aggregator<Value<?>> aggr;
+            try {
+                aggr = aggregatorClass.newInstance();
+            } catch (Exception e) {
+                throw new ComputerException("Can't new instance from class: %s",
+                                            e, aggregatorClass.getName());
+            }
+            this.aggrManager.registerAggregator(name, aggr);
+        }
+
+        @Override
+        public void registerAggregator(String name, ValueType type,
+                                       Class<? extends Combiner<Value<?>>>
+                                       combinerClass) {
+            Aggregator<Value<?>> aggr = new DefaultAggregator<>(
+                                        MasterService.this.context,
+                                        type, combinerClass);
+            this.aggrManager.registerAggregator(name, aggr);
+        }
+
+        @Override
+        public <V extends Value<?>> void aggregatedValue(String name, V value) {
+            this.aggrManager.aggregatedAggregator(name, value);
+        }
+
+        @Override
+        public <V extends Value<?>> V aggregatedValue(String name) {
+            return this.aggrManager.aggregatedValue(name);
+        }
+
+        @Override
+        public Config config() {
+            return this.config;
+        }
+    }
+
+    private class SuperstepContext extends DefaultMasterContext
+                                   implements MasterComputationContext {
+
         private final int superstep;
         private final SuperstepStat superstepStat;
 
         public SuperstepContext(Config config, int superstep,
                                 SuperstepStat superstepStat) {
-            this.config = config;
+            super(config);
             this.superstep = superstep;
             this.superstepStat = superstepStat;
         }
@@ -333,39 +389,6 @@ public class MasterService {
         @Override
         public int superstep() {
             return this.superstep;
-        }
-
-        @Override
-        public void registerAggregator(
-                    String name,
-                    Class<? extends Aggregator<Value<?>>> aggregator) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
-        }
-
-        @Override
-        public void registerAggregator(
-                    String name, ValueType type,
-                    Class<? extends Combiner<Value<?>>> combiner) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
-        }
-
-        @Override
-        public <V extends Value<?>> void aggregatedValue(String name, V value) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
-        }
-
-        @Override
-        public <V extends Value<?>> V aggregatedValue(String name) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
-        }
-
-        @Override
-        public Config config() {
-            return this.config;
         }
     }
 }

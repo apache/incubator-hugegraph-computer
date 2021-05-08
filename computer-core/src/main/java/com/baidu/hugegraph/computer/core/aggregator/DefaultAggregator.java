@@ -32,6 +32,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     private final ValueType type;
     private final Class<? extends Combiner<V>> combinerClass;
 
+    private final transient ComputerContext context;
     private final transient Combiner<V> combiner;
     private final transient ThreadLocal<V> combineValue;
 
@@ -42,6 +43,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
         this.type = type;
         this.combinerClass = combinerClass;
 
+        this.context = context;
         try {
             this.combiner = this.combinerClass.newInstance();
         } catch (Exception e) {
@@ -72,7 +74,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     public void aggregateValue(int value) {
         assert this.type == ValueType.INT;
         V combineValue= this.combineValue.get();
-        // NOTE: must the Value provide value(int) method to set value
+        // NOTE: the Value class must provide value(int) method to set value
         Whitebox.invoke(combineValue.getClass(), "value", combineValue, value);
         this.value = this.combiner.combine(combineValue, this.value);
     }
@@ -81,7 +83,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     public void aggregateValue(long value) {
         assert this.type == ValueType.LONG;
         V combineValue= this.combineValue.get();
-        // NOTE: must the Value provide value(long) method to set value
+        // NOTE: the Value class must provide value(long) method to set value
         Whitebox.invoke(combineValue.getClass(), "value", combineValue, value);
         this.value = this.combiner.combine(combineValue, this.value);
     }
@@ -90,7 +92,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     public void aggregateValue(float value) {
         assert this.type == ValueType.FLOAT;
         V combineValue= this.combineValue.get();
-        // NOTE: must the Value provide value(float) method to set value
+        // NOTE: the Value class must provide value(float) method to set value
         Whitebox.invoke(combineValue.getClass(), "value", combineValue, value);
         this.value = this.combiner.combine(combineValue, this.value);
     }
@@ -99,7 +101,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     public void aggregateValue(double value) {
         assert this.type == ValueType.DOUBLE;
         V combineValue= this.combineValue.get();
-        // NOTE: must the Value provide value(double) method to set value
+        // NOTE: the Value class must provide value(double) method to set value
         Whitebox.invoke(combineValue.getClass(), "value", combineValue, value);
         this.value = this.combiner.combine(combineValue, this.value);
     }
@@ -114,5 +116,11 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     public void aggregatedValue(V value) {
         E.checkNotNull(value, "aggregator", "value");
         this.value = value;
+    }
+
+    @Override
+    public Aggregator<V> copy() {
+        return new DefaultAggregator<>(this.context, this.type,
+                                       this.combinerClass);
     }
 }

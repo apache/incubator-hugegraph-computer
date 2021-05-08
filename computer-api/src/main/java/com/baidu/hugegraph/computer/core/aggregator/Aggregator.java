@@ -77,4 +77,9 @@ public interface Aggregator<V extends Value<?>> {
      * next superstep.
      */
     void aggregatedValue(V value);
+
+    /**
+     * Return cloned object of this instance.
+     */
+    Aggregator<V> copy();
 }

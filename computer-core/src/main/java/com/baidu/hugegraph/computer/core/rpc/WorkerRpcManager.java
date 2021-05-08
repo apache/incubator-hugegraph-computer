@@ -40,6 +40,7 @@ public class WorkerRpcManager implements Manager {
         if (this.rpcClient != null) {
             return;
         }
+        // TODO: get rpc server address from ContainerInfo masterInfo
         this.rpcClient = new RpcClientProvider(config.hugeConfig());
     }
 

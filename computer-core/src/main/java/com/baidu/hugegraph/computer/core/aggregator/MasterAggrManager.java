@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
@@ -36,9 +37,11 @@ public class MasterAggrManager implements Manager {
 
     public static final String NAME = "master_aggr";
 
+    private final MasterAggregateHandler register;
     private final MasterAggregateHandler handler;
 
     public MasterAggrManager() {
+        this.register = new MasterAggregateHandler();
         this.handler = new MasterAggregateHandler();
     }
 
@@ -47,17 +50,45 @@ public class MasterAggrManager implements Manager {
         return NAME;
     }
 
+    @Override
+    public void close(Config config) {
+        // Called when master close()
+        this.handler.clearAggregators();
+        this.register.clearAggregators();
+    }
+
+    @Override
+    public void beforeSuperstep(Config config, int superstep) {
+        // NOTE: rely on worker execute beforeSuperstep() before this call
+        this.handler.resetAggregators(this.register);
+    }
+
+    @Override
+    public void afterSuperstep(Config config, int superstep) {
+        // pass
+    }
+
     public AggregateRpcService handler() {
         return this.handler;
     }
 
-    public <V extends Value<?>> void addAggregator(String name,
-                                                   Aggregator<V> aggr) {
-        this.handler.setAggregator(name, aggr);
+    public <V extends Value<?>> void registerAggregator(String name,
+                                                        Aggregator<V> aggr) {
+        // Called when master init()
+        this.register.setAggregator(name, aggr);
     }
 
-    public void clearAggregators() {
-        this.handler.clearAggregators();
+    public <V extends Value<?>> void aggregatedAggregator(String name,
+                                                          V value) {
+        // Called when master compute()
+        Aggregator<V> aggregator = this.handler.getAggregator(name);
+        aggregator.aggregatedValue(value);
+    }
+
+    public <V extends Value<?>> V aggregatedValue(String name) {
+        // Called when master compute()
+        Aggregator<V> aggregator = this.handler.getAggregator(name);
+        return aggregator.aggregatedValue();
     }
 
     private static class MasterAggregateHandler implements AggregateRpcService {
@@ -95,6 +126,15 @@ public class MasterAggrManager implements Manager {
                                                              V value) {
             Aggregator<V> aggregator = this.getAggregator(name);
             aggregator.aggregateValue(value);
+        }
+
+        public void resetAggregators(MasterAggregateHandler register) {
+            this.clearAggregators();
+
+            for (Entry<String, Aggregator<Value<?>>> aggr :
+                 register.aggregators.entrySet()) {
+                this.aggregators.put(aggr.getKey(), aggr.getValue().copy());
+            }
         }
 
         public <V extends Value<?>> void setAggregator(String name,

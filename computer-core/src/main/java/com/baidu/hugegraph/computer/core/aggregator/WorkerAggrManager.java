@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
@@ -50,25 +51,45 @@ public class WorkerAggrManager implements Manager {
         return NAME;
     }
 
+    @Override
+    public void inited(Config config) {
+//        this.service().registeredAggregators();
+    }
+
+    @Override
+    public void beforeSuperstep(Config config, int superstep) {
+        this.reloadAggregators();
+    }
+
+    @Override
+    public void afterSuperstep(Config config, int superstep) {
+        this.flushAggregators();
+    }
+
     public void service(AggregateRpcService service) {
         E.checkNotNull(service, "service");
         this.service = service;
     }
 
-    public void flushAggregators() {
+    public <V extends Value<?>> Aggregator<V> createAggregator(String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public <V extends Value<?>> Aggregator<V> aggregator(String name) {
+        return this.aggregatorsCache.getAggregator(name, this.service());
+    }
+
+    private void flushAggregators() {
         Map<String, Value<?>> aggregators = this.aggregatorsCache
                                                 .aggregatorValues();
         this.service().aggregateAggregators(aggregators);
     }
 
-    public void reloadAggregators() {
+    private void reloadAggregators() {
         Map<String, Aggregator<Value<?>>> aggregators = this.service()
                                                             .listAggregators();
         this.aggregatorsCache = new WorkerAggregateCache(aggregators);
-    }
-
-    public <V extends Value<?>> Aggregator<V> aggregator(String name) {
-        return this.aggregatorsCache.getAggregator(name, this.service());
     }
 
     private AggregateRpcService service() {

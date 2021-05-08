@@ -35,10 +35,18 @@ public interface Manager {
     String name();
 
     /**
-     * Used to add the resources the computation needed. Be called only one
+     * Used to add the resources needed by the computation. Be called only one
      * time before all supersteps start.
      */
     default void init(Config config) {
+        // pass
+    }
+
+    /**
+     * Used to notify all managers and master inited. Be called only one
+     * time before all supersteps start.
+     */
+    default void inited(Config config) {
         // pass
     }
 

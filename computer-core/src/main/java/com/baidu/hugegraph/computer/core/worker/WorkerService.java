@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
 import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.bsp.Bsp4Worker;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
@@ -107,6 +108,10 @@ public class WorkerService {
             //DataClientManager dm = this.managers.get(DataClientManager.NAME);
             //dm.connect(container.hostname(), container.dataPort());
         }
+
+        // Notify managers inited
+        this.managers.initedAll(this.config);
+
         this.inited = true;
     }
 
@@ -138,6 +143,7 @@ public class WorkerService {
         this.checkInited();
 
         LOG.info("{} WorkerService execute", this);
+
         // TODO: determine superstep if fail over is enabled.
         int superstep = this.bsp4Worker.waitMasterResumeDone();
         SuperstepStat superstepStat;
@@ -277,10 +283,13 @@ public class WorkerService {
 
         private final int superstep;
         private final SuperstepStat superstepStat;
+        private final WorkerAggrManager aggrManager;
 
         private SuperstepContext(int superstep, SuperstepStat superstepStat) {
             this.superstep = superstep;
             this.superstepStat = superstepStat;
+            this.aggrManager = WorkerService.this.managers.get(
+                               WorkerAggrManager.NAME);
         }
 
         @Override
@@ -288,16 +297,21 @@ public class WorkerService {
             return WorkerService.this.config;
         }
 
+//        @Override
+//        public <V extends Value<?>> Aggregator<V> createAggregator(String name) {
+//            return this.aggrManager.createAggregator(name);
+//        }
+
         @Override
         public <V extends Value<?>> void aggregateValue(String name, V value) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
+            Aggregator<V> aggregator = this.aggrManager.aggregator(name);
+            aggregator.aggregatedValue(value);
         }
 
         @Override
         public <V extends Value<?>> V aggregatedValue(String name) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
+            Aggregator<V> aggregator = this.aggrManager.aggregator(name);
+            return aggregator.aggregatedValue();
         }
 
         @Override
