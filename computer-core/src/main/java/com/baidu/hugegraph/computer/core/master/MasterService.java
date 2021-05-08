@@ -90,7 +90,7 @@ public class MasterService {
 
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
-        this.masterComputation.init(new DefaultMasterContext(this.config));
+        this.masterComputation.init(new DefaultMasterContext());
 
         LOG.info("{} register MasterService", this);
         this.bsp4Master.masterInitDone(this.masterInfo);
@@ -112,7 +112,7 @@ public class MasterService {
 
         this.bsp4Master.waitWorkersCloseDone();
         this.managers.closeAll(this.config);
-        this.masterComputation.close(new DefaultMasterContext(this.config));
+        this.masterComputation.close(new DefaultMasterContext());
         this.bsp4Master.clean();
         this.bsp4Master.close();
         LOG.info("{} MasterService closed", this);
@@ -187,8 +187,7 @@ public class MasterService {
             List<WorkerStat> workerStats =
                              this.bsp4Master.waitWorkersStepDone(superstep);
             superstepStat = SuperstepStat.from(workerStats);
-            SuperstepContext context = new SuperstepContext(this.config,
-                                                            superstep,
+            SuperstepContext context = new SuperstepContext(superstep,
                                                             superstepStat);
             // Call master compute(), note the worker afterSuperstep() is done
             boolean masterContinue = this.masterComputation.compute(context);
@@ -299,11 +298,9 @@ public class MasterService {
 
     private class DefaultMasterContext implements MasterContext {
 
-        private final Config config;
         private final MasterAggrManager aggrManager;
 
-        public DefaultMasterContext(Config config) {
-            this.config = config;
+        public DefaultMasterContext() {
             this.aggrManager = MasterService.this.managers.get(
                                MasterAggrManager.NAME);
         }
@@ -344,7 +341,7 @@ public class MasterService {
 
         @Override
         public Config config() {
-            return this.config;
+            return MasterService.this.config;
         }
     }
 
@@ -354,9 +351,7 @@ public class MasterService {
         private final int superstep;
         private final SuperstepStat superstepStat;
 
-        public SuperstepContext(Config config, int superstep,
-                                SuperstepStat superstepStat) {
-            super(config);
+        public SuperstepContext(int superstep, SuperstepStat superstepStat) {
             this.superstep = superstep;
             this.superstepStat = superstepStat;
         }
