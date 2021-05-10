@@ -375,7 +375,7 @@ public class EtcdClient {
                                                       consumer)) {
             return barrierEvent.await(timeout, logInterval, () -> {
                 LOG.info("Wait for keys with prefix '{}' and timeout {}ms, " +
-                         "expect {} keys bug actual got {} keys",
+                         "expect {} keys but actual got {} keys",
                          prefixSeq.toString(ENCODING),
                          timeout, count, keyValues.size());
             });

@@ -120,7 +120,7 @@ public class Bsp4Worker extends BspBase {
         String path = this.constructPath(BspEvent.BSP_WORKER_INPUT_DONE,
                                          this.workerInfo.id());
         this.bspClient().put(path, Constants.EMPTY_BYTES);
-        LOG.info("Worker({}) set input-done: {}", this.workerInfo.id());
+        LOG.info("Worker({}) set input-done", this.workerInfo.id());
     }
 
     /**
