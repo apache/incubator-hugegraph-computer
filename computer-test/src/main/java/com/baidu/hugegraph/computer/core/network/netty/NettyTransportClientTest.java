@@ -243,7 +243,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                                                   InterruptedException {
         Configurator.setAllLevels("com.baidu.hugegraph", Level.INFO);
         Configurator.setAllLevels("com.baidu.hugegraph.computer.core." +
-                                  "network.MockMessageHandler", Level.WARN);
+                                  "network", Level.WARN);
 
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         ByteBuffer buffer = ByteBuffer.allocateDirect(50 * 1024);
