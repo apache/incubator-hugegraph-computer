@@ -124,13 +124,6 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
         aggregator.combiner = this.combiner;
         aggregator.localValue = this.localValue;
         return aggregator;
-//        try {
-//            @SuppressWarnings("unchecked")
-//            Aggregator<V> aggregator = (Aggregator<V>) this.clone();
-//            return aggregator;
-//        } catch (CloneNotSupportedException e) {
-//            throw new ComputerException("Failed to copy Aggregator", e);
-//        }
     }
 
     @Override

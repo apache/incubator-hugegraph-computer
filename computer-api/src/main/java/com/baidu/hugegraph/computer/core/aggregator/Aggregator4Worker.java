@@ -34,7 +34,6 @@ public interface Aggregator4Worker {
      * master. Can be called in each superstep.
      * Throws ComputerException if master does not register the aggregator
      * with specified name.
-     * @param value The value to be aggregated
      */
     <V extends Value<?>> Aggregator<V> createAggregator(String name);
 

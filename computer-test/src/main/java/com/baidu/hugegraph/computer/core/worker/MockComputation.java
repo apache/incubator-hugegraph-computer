@@ -103,15 +103,15 @@ public class MockComputation implements Computation<DoubleValue> {
         this.aggrFloat = context.createAggregator(
                          MockMasterComputation.AGGR_TEST_FLOAT);
 
-        Assert.assertEquals(new FloatValue(0),
+        Assert.assertEquals(new FloatValue(0f),
                             this.aggrFloat.aggregatedValue());
 
         this.aggrFloat.aggregateValue(1f);
-        Assert.assertEquals(new FloatValue(1),
+        Assert.assertEquals(new FloatValue(1f),
                             this.aggrFloat.aggregatedValue());
 
-        this.aggrFloat.aggregateValue(new FloatValue(1));
-        Assert.assertEquals(new FloatValue(2),
+        this.aggrFloat.aggregateValue(new FloatValue(1f));
+        Assert.assertEquals(new FloatValue(2f),
                             this.aggrFloat.aggregatedValue());
 
         this.aggrFloat.aggregateValue(3.2f);
@@ -160,7 +160,7 @@ public class MockComputation implements Computation<DoubleValue> {
         this.aggrDoubleSum = context.createAggregator(
                              MockMasterComputation.AGGR_TEST_DOUBLE_SUM);
 
-        Assert.assertEquals(new DoubleValue(0),
+        Assert.assertEquals(new DoubleValue(0.0),
                             this.aggrDoubleSum.aggregatedValue());
 
         this.aggrDoubleSum.aggregateValue(1.1);
@@ -179,11 +179,11 @@ public class MockComputation implements Computation<DoubleValue> {
         this.aggrDoubleMin = context.createAggregator(
                              MockMasterComputation.AGGR_TEST_DOUBLE_MIN);
 
-        Assert.assertEquals(new DoubleValue(0),
+        Assert.assertEquals(new DoubleValue(0.0),
                             this.aggrDoubleMin.aggregatedValue());
 
         this.aggrDoubleMin.aggregateValue(1.1);
-        Assert.assertEquals(new DoubleValue(0),
+        Assert.assertEquals(new DoubleValue(0.0),
                             this.aggrDoubleMin.aggregatedValue());
 
         this.aggrDoubleMin.aggregateValue(-10.0);
