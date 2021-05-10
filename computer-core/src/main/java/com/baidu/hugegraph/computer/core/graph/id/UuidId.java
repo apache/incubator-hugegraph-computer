@@ -56,6 +56,11 @@ public class UuidId implements Id {
     }
 
     @Override
+    public int length() {
+        return 16;
+    }
+
+    @Override
     public Object asObject() {
         return new UUID(this.high, this.low);
     }

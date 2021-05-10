@@ -50,7 +50,6 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Vertex readVertex() throws IOException {
-
         Id id = this.readId();
         Value<?> value = this.readValue();
         /*

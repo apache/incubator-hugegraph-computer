@@ -33,6 +33,7 @@ import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class IdValueTest extends UnitTestBase {
@@ -42,9 +43,11 @@ public class IdValueTest extends UnitTestBase {
         IdValue value1 = new LongId(123L).idValue();
         IdValue value2 = new LongId(123L).idValue();
         IdValue value3 = new LongId(321L).idValue();
+        IdValue value4 = new LongId(322L).idValue();
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value2.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+        Assert.assertLt(0, value3.compareTo(value4));
     }
 
     @Test
@@ -59,7 +62,7 @@ public class IdValueTest extends UnitTestBase {
         }
         IdValue value3 = new Utf8Id().idValue();
         try (UnsafeByteArrayInput bai =
-             new OptimizedUnsafeByteArrayInput(bytes)) {
+                                  new OptimizedUnsafeByteArrayInput(bytes)) {
             value3.read(bai);
             Assert.assertEquals(value1, value3);
             value3.read(bai);
@@ -76,8 +79,8 @@ public class IdValueTest extends UnitTestBase {
         byte[] bytes;
         try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
              StreamGraphOutput output = newStreamGraphOutput(bao)) {
-            output.writeId(value1.toId());
-            output.writeId(value2.toId());
+            output.writeId(IdValueUtil.toId(value1));
+            output.writeId(IdValueUtil.toId(value2));
             bytes = bao.toByteArray();
         }
         try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);

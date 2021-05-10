@@ -97,6 +97,13 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeId(Id id) throws IOException {
+//        BytesBuffer buffer = BytesBuffer.allocate(1 + id.length());
+//        buffer.writeId(id);
+//        // write length
+//        this.out.writeInt(buffer.position());
+//        this.out.write(buffer.array(), 0, buffer.position());
+
+
         this.out.writeByte(id.type().code());
         id.write(this.out);
     }
@@ -120,11 +127,6 @@ public class StreamGraphOutput implements GraphOutput {
         long position = this.out.position();
         this.out.writeLong(v);
         return position;
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.out.close();
     }
 
     @Override

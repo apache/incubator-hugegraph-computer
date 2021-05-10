@@ -139,6 +139,11 @@ public class StructRandomAccessOutput implements RandomAccessOutput {
         this.writeString(s);
     }
 
+    @Override
+    public void close() throws IOException {
+        this.output.close();
+    }
+
     protected void writeNumber(Number number) throws IOException {
         this.output.writeBytes(number.toString());
     }

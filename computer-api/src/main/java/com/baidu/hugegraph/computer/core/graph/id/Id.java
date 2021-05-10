@@ -29,6 +29,8 @@ public interface Id extends Readable, Writable, Comparable<Id> {
 
     IdValue idValue();
 
+    int length();
+
     Object asObject();
 
     long asLong();

@@ -26,8 +26,12 @@ public class IdValueUtil {
 
     public static Id toId(IdValue idValue) {
         byte[] bytes = idValue.bytes();
+        /*
+         * NOTE: must use OptimizedUnsafeByteArrayInput, it make sure to
+         * write bytes in big-end-aligned way
+         */
         try (UnsafeByteArrayInput bai =
-             new OptimizedUnsafeByteArrayInput(bytes);
+                                  new OptimizedUnsafeByteArrayInput(bytes);
              GraphInput input = new StreamGraphInput(CONTEXT, bai)) {
             return input.readId();
         } catch (IOException e) {
@@ -38,7 +42,7 @@ public class IdValueUtil {
 
     public static IdValue toIdValue(Id id, int len) {
         try (UnsafeByteArrayOutput bao =
-             new OptimizedUnsafeByteArrayOutput(len);
+                                   new OptimizedUnsafeByteArrayOutput(len);
              GraphOutput output = new StreamGraphOutput(CONTEXT, bao)) {
             output.writeId(id);
             return new IdValue(bao.toByteArray());

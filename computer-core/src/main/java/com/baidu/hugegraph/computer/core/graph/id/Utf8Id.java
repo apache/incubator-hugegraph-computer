@@ -47,10 +47,17 @@ public class Utf8Id implements Id {
         this.length = this.bytes.length;
     }
 
+    public Utf8Id(byte[] bytes) {
+        E.checkArgument(bytes != null, "bytes can't be null");
+        this.bytes = bytes;
+        this.length = this.bytes.length;
+    }
+
     public byte[] bytes() {
         return this.bytes;
     }
 
+    @Override
     public int length() {
         return this.length;
     }

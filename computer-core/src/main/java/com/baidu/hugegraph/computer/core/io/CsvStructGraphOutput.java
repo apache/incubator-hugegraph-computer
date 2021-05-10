@@ -38,7 +38,6 @@ public class CsvStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
-
         this.writeLineStart();
 
         this.writeId(vertex.id());

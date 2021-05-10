@@ -22,8 +22,8 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import java.io.IOException;
 import java.util.Date;
 
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public class MockCustomValue implements Value<MockCustomValue> {
 
@@ -39,12 +39,12 @@ public class MockCustomValue implements Value<MockCustomValue> {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         this.value.setTime(in.readLong());
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         out.writeLong(this.value.getTime());
     }
 

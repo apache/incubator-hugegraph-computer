@@ -23,7 +23,6 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import java.io.IOException;
 import java.util.Arrays;
 
-import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
@@ -45,11 +44,6 @@ public class IdValue implements Value<IdValue> {
     public IdValue(byte[] bytes) {
         this.bytes = bytes;
         this.length = bytes.length;
-    }
-
-    public Id toId() {
-        // FIXME: here compile failed, can't access IdValueUtil
-        return IdValueUtil.toId(this);
     }
 
     public byte[] bytes() {
@@ -82,7 +76,8 @@ public class IdValue implements Value<IdValue> {
     @Override
     public int compareTo(IdValue other) {
         E.checkArgumentNotNull(other, "The compare argument can't be null");
-        return this.toId().compareTo(other.toId());
+        return BytesUtil.compare(this.bytes, this.length,
+                                 other.bytes, other.length);
     }
 
     @Override

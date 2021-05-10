@@ -640,8 +640,10 @@ public class BufferedFileTest {
         // UnsafeByteArrayInput compare to BufferedFileInput
         File file3 = createTempFile();
         try (BufferedFileInput fileInput = inputByString(file3, "apple")) {
+            @SuppressWarnings("resource")
             UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
             output.writeBytes("banana");
+            @SuppressWarnings("resource")
             RandomAccessInput input = new UnsafeByteArrayInput(output.buffer());
             int result = input.compare(0, input.available(), fileInput, 0,
                                         fileInput.available());
