@@ -86,9 +86,9 @@ public class ClientSession extends TransportSession {
                         "The state must be READY instead of %s " +
                         "at start()", this.state);
 
-        this.sendFunction.apply(StartMessage.INSTANCE);
-
         this.stateStartSent();
+
+        this.sendFunction.apply(StartMessage.INSTANCE);
 
         if (!this.startedBarrier.await(timeout)) {
             throw new TransportException(
@@ -106,10 +106,10 @@ public class ClientSession extends TransportSession {
 
         int finishId = this.genFinishId();
 
+        this.stateFinishSent(finishId);
+
         FinishMessage finishMessage = new FinishMessage(finishId);
         this.sendFunction.apply(finishMessage);
-
-        this.stateFinishSent(finishId);
 
         if (!this.finishedBarrier.await(timeout)) {
             throw new TransportException(
