@@ -80,6 +80,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
         @Override
         public void close() throws IOException {
             this.input.close();
+            this.externalInput.close();
         }
     }
 }
