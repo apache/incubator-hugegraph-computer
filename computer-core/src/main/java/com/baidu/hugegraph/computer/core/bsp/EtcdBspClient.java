@@ -34,8 +34,13 @@ public final class EtcdBspClient implements BspClient {
     }
 
     @Override
+    public String endpoint() {
+        return this.config.get(ComputerOptions.BSP_ETCD_ENDPOINTS);
+    }
+
+    @Override
     public void init() {
-        String endpoints = this.config.get(ComputerOptions.BSP_ETCD_ENDPOINTS);
+        String endpoints = this.endpoint();
         String jobId = this.config.get(ComputerOptions.JOB_ID);
         this.etcdClient = new EtcdClient(endpoints, jobId);
     }
