@@ -118,6 +118,7 @@ public abstract class AbstractNetworkTest {
             connectionManager.shutdown();
             connectionManager = null;
         }
+        Configurator.setAllLevels("com.baidu.hugegraph", Level.INFO);
     }
 
     private void mockSpyProtocol() {

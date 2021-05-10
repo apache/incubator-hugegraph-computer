@@ -242,8 +242,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     public void testTransportPerformance() throws IOException,
                                                   InterruptedException {
         Configurator.setAllLevels("com.baidu.hugegraph", Level.INFO);
-        Configurator.setAllLevels("com.baidu.hugegraph.computer.core." +
-                                  "network", Level.WARN);
+        Configurator.setAllLevels("com.baidu.hugegraph.computer.core.network",
+                                  Level.WARN);
 
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         ByteBuffer buffer = ByteBuffer.allocateDirect(50 * 1024);
@@ -290,6 +290,9 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                  (postTransport - preTransport) / 1000_000L);
 
         Assert.assertEquals(dataNum, handledCnt.get());
+
+        Configurator.setAllLevels("com.baidu.hugegraph.computer.core.network",
+                                  Level.INFO);
     }
 
     @Test
