@@ -25,8 +25,7 @@ import java.util.List;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
-import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 
 public interface Sorter {
 
@@ -108,5 +107,5 @@ public interface Sorter {
     /**
      * Get the iterator of <key, value> pair by increasing order of key.
      */
-    CloseableIterator<KvEntry> iterator(List<String> inputs) throws IOException;
+    InputIterator iterator(List<String> inputs) throws IOException;
 }

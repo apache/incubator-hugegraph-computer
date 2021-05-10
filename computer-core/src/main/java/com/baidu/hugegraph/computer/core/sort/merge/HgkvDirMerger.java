@@ -24,8 +24,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 
 public interface HgkvDirMerger {
 
@@ -37,6 +36,6 @@ public interface HgkvDirMerger {
      * @param flusher combiner entries of same key
      */
     void merge(List<String> inputs,
-               Function<String, CloseableIterator<KvEntry>> inputToEntries,
+               Function<String, InputIterator> inputToEntries,
                String output, OuterSortFlusher flusher) throws IOException;
 }

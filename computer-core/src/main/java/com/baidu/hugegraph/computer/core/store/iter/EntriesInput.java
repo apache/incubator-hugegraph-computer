@@ -53,4 +53,9 @@ public class EntriesInput implements InputIterator {
             throw new ComputerException(e.getMessage(), e);
         }
     }
+
+    @Override
+    public void close() throws IOException {
+        // pass
+    }
 }

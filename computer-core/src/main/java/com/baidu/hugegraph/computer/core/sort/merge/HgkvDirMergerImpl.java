@@ -32,13 +32,12 @@ import org.apache.commons.io.FileUtils;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.sort.sorter.ClosableInputsSorter;
-import com.baidu.hugegraph.computer.core.sort.sorter.ClosableInputsSorterImpl;
+import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
+import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
-import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirMergerImpl implements HgkvDirMerger {
@@ -59,8 +58,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
 
     @Override
     public void merge(List<String> inputs,
-                      Function<String,
-                               CloseableIterator<KvEntry>> inputToEntries,
+                      Function<String, InputIterator> inputToEntries,
                       String output, OuterSortFlusher flusher)
                       throws IOException {
         try {
@@ -110,7 +108,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
 
     private List<File> mergeSubInputs(List<List<String>> splitResult,
                                       int tempFileId,
-                                      Function<String, CloseableIterator<KvEntry>> inputToEntries,
+                                      Function<String, InputIterator> inputToEntries,
                                       OuterSortFlusher flusher)
                                       throws IOException {
         List<File> tempFiles = new ArrayList<>();
@@ -125,7 +123,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
     }
 
     private File mergeInputsToOutput(List<String> inputs,
-                                     Function<String, CloseableIterator<KvEntry>> inputToEntries,
+                                     Function<String, InputIterator> inputToEntries,
                                      String output,
                                      OuterSortFlusher flusher)
                                      throws IOException {
@@ -133,15 +131,15 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
          * File value format is different, upper layer is required to
          * provide the file reading mode
          */
-        List<CloseableIterator<KvEntry>> entries = new ArrayList<>();
+        List<InputIterator> entries = new ArrayList<>();
         for (String input : inputs) {
             entries.add(inputToEntries.apply(input));
         }
 
-        ClosableInputsSorter sorter = new ClosableInputsSorterImpl();
+        InputsSorter sorter = new InputsSorterImpl();
         File file = new File(output);
         // Merge inputs and write to output
-        try (CloseableIterator<KvEntry> sortedKv = sorter.sort(entries);
+        try (InputIterator sortedKv = sorter.sort(entries);
              HgkvDirBuilder builder = new HgkvDirBuilderImpl(file.getPath(),
                                                              this.config)) {
              flusher.flush(sortedKv, builder);

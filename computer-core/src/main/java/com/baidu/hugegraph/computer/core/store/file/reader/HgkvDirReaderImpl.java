@@ -25,10 +25,10 @@ import java.util.NoSuchElementException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 
 public class HgkvDirReaderImpl implements HgkvDirReader {
 
@@ -43,7 +43,7 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
     }
 
     @Override
-    public CloseableIterator<KvEntry> iterator() {
+    public InputIterator iterator() {
         try {
             return new KvEntryIter(this.hgkvDir);
         } catch (IOException e) {
@@ -51,11 +51,11 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
         }
     }
 
-    private static class KvEntryIter implements CloseableIterator<KvEntry> {
+    private static class KvEntryIter implements InputIterator {
 
         private final Iterator<HgkvFile> segments;
         private long numEntries;
-        private CloseableIterator<KvEntry> kvIter;
+        private InputIterator kvIter;
 
         public KvEntryIter(HgkvDir hgkvDir) throws IOException {
             this.segments = hgkvDir.segments().iterator();
@@ -93,8 +93,8 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
             this.kvIter.close();
         }
 
-        private CloseableIterator<KvEntry> nextKeyIter() throws IOException {
-            CloseableIterator<KvEntry> iterator;
+        private InputIterator nextKeyIter() throws IOException {
+            InputIterator iterator;
             while (this.segments.hasNext()) {
                 HgkvFile segment = this.segments.next();
                 HgkvFileReader reader = new HgkvFileReaderImpl(segment.path());

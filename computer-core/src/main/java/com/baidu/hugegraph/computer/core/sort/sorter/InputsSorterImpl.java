@@ -19,18 +19,53 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorter;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
+import com.baidu.hugegraph.computer.core.sort.sorting.InputsSorting;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortingFactory;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 
 public class InputsSorterImpl implements InputsSorter {
 
     @Override
-    public Iterator<KvEntry> sort(List<Iterator<KvEntry>> inputs)
-                                  throws IOException {
-        return SortingFactory.createSorting(inputs);
+    public InputIterator sort(List<InputIterator> entries) throws IOException {
+        return new Sorting(entries);
+    }
+
+    private static class Sorting implements InputIterator {
+
+        private final InputsSorting<KvEntry> inputsSorting;
+        private final List<InputIterator> sources;
+        private boolean closed;
+
+        public Sorting(List<InputIterator> sources) {
+            this.sources = sources;
+            this.inputsSorting = SortingFactory.createSorting(sources);
+            this.closed = false;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.inputsSorting.hasNext();
+        }
+
+        @Override
+        public KvEntry next() {
+            return this.inputsSorting.next();
+        }
+
+        @Override
+        public void close() throws IOException {
+            if (this.closed) {
+                return;
+            }
+            for (Closeable source : this.sources) {
+                source.close();
+            }
+            this.closed = true;
+        }
     }
 }

@@ -33,7 +33,6 @@ import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.merge.HgkvDirMerger;
 import com.baidu.hugegraph.computer.core.sort.merge.HgkvDirMergerImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
-import com.baidu.hugegraph.computer.core.sort.sorter.ClosableInputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
@@ -42,10 +41,10 @@ import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDir4SubKvReader;
-import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
 import com.baidu.hugegraph.computer.core.store.iter.EntriesInput;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.iter.EntriesSubKvInput;
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 import com.baidu.hugegraph.computer.core.store.select.DisperseEvenlySelector;
 import com.baidu.hugegraph.computer.core.store.select.InputFilesSelector;
 import com.baidu.hugegraph.computer.core.store.select.SelectedFiles;
@@ -70,7 +69,7 @@ public class SorterImpl implements Sorter {
     public void mergeBuffers(List<RandomAccessInput> inputs,
                              OuterSortFlusher flusher, String output,
                              boolean withSubKv) throws IOException {
-        List<Iterator<KvEntry>> entries;
+        List<InputIterator> entries;
         if (withSubKv) {
             entries = inputs.stream()
                             .map(EntriesSubKvInput::new)
@@ -86,7 +85,8 @@ public class SorterImpl implements Sorter {
 
     @Override
     public void mergeInputs(List<String> inputs, OuterSortFlusher flusher,
-                            List<String> outputs, boolean withSubKv) throws IOException {
+                            List<String> outputs, boolean withSubKv)
+                            throws IOException {
         if (withSubKv) {
             this.mergeInputs(inputs, o -> new HgkvDir4SubKvReader(o).iterator(),
                              flusher, outputs);
@@ -97,10 +97,9 @@ public class SorterImpl implements Sorter {
     }
 
     @Override
-    public CloseableIterator<KvEntry> iterator(List<String> inputs)
-                                               throws IOException {
-        ClosableInputsSorterImpl sorter = new ClosableInputsSorterImpl();
-        List<CloseableIterator<KvEntry>> entries = new ArrayList<>();
+    public InputIterator iterator(List<String> inputs) throws IOException {
+        InputsSorterImpl sorter = new InputsSorterImpl();
+        List<InputIterator> entries = new ArrayList<>();
         for (String input : inputs) {
             HgkvDirReader reader = new HgkvDirReaderImpl(input);
             entries.add(reader.iterator());
@@ -108,7 +107,7 @@ public class SorterImpl implements Sorter {
         return sorter.sort(entries);
     }
 
-    private void sortBuffers(List<Iterator<KvEntry>> entries,
+    private void sortBuffers(List<InputIterator> entries,
                              OuterSortFlusher flusher,
                              String output) throws IOException {
 
@@ -121,8 +120,7 @@ public class SorterImpl implements Sorter {
     }
 
     private void mergeInputs(List<String> inputs,
-                             Function<String,
-                                     CloseableIterator<KvEntry>> inputToEntries,
+                             Function<String, InputIterator> inputToEntries,
                              OuterSortFlusher flusher, List<String> outputs)
                              throws IOException {
         InputFilesSelector selector = new DisperseEvenlySelector();

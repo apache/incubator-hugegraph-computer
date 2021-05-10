@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 import com.baidu.hugegraph.computer.core.store.util.EntriesUtil;
 
 public class HgkvDir4SubKvReader implements HgkvDirReader {
@@ -36,7 +36,7 @@ public class HgkvDir4SubKvReader implements HgkvDirReader {
     }
 
     @Override
-    public CloseableIterator<KvEntry> iterator() {
+    public InputIterator iterator() {
         try {
             return new KvEntryIter(this.reader);
         } catch (IOException e) {
@@ -44,9 +44,9 @@ public class HgkvDir4SubKvReader implements HgkvDirReader {
         }
     }
 
-    private static class KvEntryIter implements CloseableIterator<KvEntry> {
+    private static class KvEntryIter implements InputIterator {
 
-        private final CloseableIterator<KvEntry> entries;
+        private final InputIterator entries;
 
         public KvEntryIter(HgkvDirReader reader) throws IOException {
             this.entries = reader.iterator();

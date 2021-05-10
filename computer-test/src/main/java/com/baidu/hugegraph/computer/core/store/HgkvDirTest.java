@@ -41,7 +41,7 @@ import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDirReaderImpl;
-import com.baidu.hugegraph.computer.core.store.iter.CloseableIterator;
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
@@ -130,13 +130,12 @@ public class HgkvDirTest {
                                               5, 5,
                                               5, 9,
                                               6, 2);
-
         String path = availableDirPath("1");
         File dir = StoreTestUtil.hgkvDirFromMap(data, path);
         HgkvDirReader reader = new HgkvDirReaderImpl(dir.getPath());
-        CloseableIterator<KvEntry> iterator;
+
         try {
-            iterator = reader.iterator();
+            InputIterator iterator = reader.iterator();
             int i = 0;
             while (iterator.hasNext()) {
                 KvEntry entry = iterator.next();

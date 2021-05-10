@@ -20,14 +20,14 @@
 package com.baidu.hugegraph.computer.core.sort.sorter;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
-import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+
+import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
 
 public interface InputsSorter {
 
     /**
      * Sort multiple inputs from memory.
      */
-    Iterator<KvEntry> sort(List<Iterator<KvEntry>> inputs) throws IOException;
+    InputIterator sort(List<InputIterator> inputs) throws IOException;
 }
