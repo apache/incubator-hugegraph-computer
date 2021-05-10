@@ -17,17 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.value.entry;
 
 import java.io.IOException;
-import java.util.List;
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.io.Writable;
 
-public interface InputsSorter {
+public interface EntryOutput {
 
     /**
-     * Sort multiple inputs from memory.
+     * Write entry with multiple sub-key and sub-value.
+     * Used when write vertex with edges, each sub-key is target id of an edge,
+     * each sub-value is properties of an edge.
+     * The output format:
+     * | key length | key | total sub-entry length | sub-entry count |
+     * sub-key length | sub-key | sub-value length |
      */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    KvEntryWriter writeEntry(Id key) throws IOException;
+
+    /**
+     * Write entry with single value.
+     * Used when write vertex without edges and write message.
+     * The output format:
+     * | key length | key | value length | value |
+     */
+    void writeEntry(Id key, Writable value) throws IOException;
 }

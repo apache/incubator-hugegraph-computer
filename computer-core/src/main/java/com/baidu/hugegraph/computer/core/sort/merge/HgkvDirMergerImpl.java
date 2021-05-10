@@ -34,10 +34,10 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
-import com.baidu.hugegraph.computer.core.store.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirMergerImpl implements HgkvDirMerger {

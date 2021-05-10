@@ -17,17 +17,19 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkv.file;
 
-import java.io.IOException;
 import java.util.List;
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
-
-public interface InputsSorter {
+/**
+ * One HgkvDir consists of segments, and each segment is a HgkvFile.
+ * one HgkvFile is a complete file, one HgkvDir consists of multiple HgkvFile.
+ */
+public interface HgkvDir extends HgkvFile {
 
     /**
-     * Sort multiple inputs from memory.
+     * Return the segments in HgkvDir.
+     * A HgkvDir is a complete file, HgkvDir consists of multiple HgkvFile.
      */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    List<HgkvFile> segments();
 }

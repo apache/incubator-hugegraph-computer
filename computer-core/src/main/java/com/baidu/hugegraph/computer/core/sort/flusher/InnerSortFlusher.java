@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
 
 public interface InnerSortFlusher {
 

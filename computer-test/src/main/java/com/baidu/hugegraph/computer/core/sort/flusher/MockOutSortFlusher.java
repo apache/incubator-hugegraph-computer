@@ -20,21 +20,18 @@
 package com.baidu.hugegraph.computer.core.sort.flusher;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.entry.DefaultKvEntry;
-import com.baidu.hugegraph.computer.core.store.entry.DefaultPointer;
-import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.entry.Pointer;
-import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.value.entry.DefaultKvEntry;
+import com.baidu.hugegraph.computer.core.store.value.entry.DefaultPointer;
+import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.value.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilder;
 
 public class MockOutSortFlusher implements OuterSortFlusher {
 

@@ -36,18 +36,18 @@ import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
-import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDirReaderImpl;
-import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDirReader;
-import com.baidu.hugegraph.computer.core.store.file.reader.HgkvDir4SubKvReader;
-import com.baidu.hugegraph.computer.core.store.iter.EntriesInput;
-import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.iter.EntriesSubKvInput;
-import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
-import com.baidu.hugegraph.computer.core.store.select.DisperseEvenlySelector;
-import com.baidu.hugegraph.computer.core.store.select.InputFilesSelector;
-import com.baidu.hugegraph.computer.core.store.select.SelectedFiles;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDirReaderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDirReader;
+import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDir4SubKvReader;
+import com.baidu.hugegraph.computer.core.store.value.iter.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.value.iter.EntriesSubKvInput;
+import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.hgkv.select.DisperseEvenlySelector;
+import com.baidu.hugegraph.computer.core.store.hgkv.select.InputFilesSelector;
+import com.baidu.hugegraph.computer.core.store.hgkv.select.SelectedFiles;
 
 public class SorterImpl implements Sorter {
 

@@ -17,17 +17,21 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkv.file.builder;
 
 import java.io.IOException;
-import java.util.List;
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.value.entry.Pointer;
 
-public interface InputsSorter {
+public interface BlockBuilder {
 
-    /**
-     * Sort multiple inputs from memory.
-     */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    void add(Pointer key, Pointer value) throws IOException;
+
+    long sizeOfEntry(Pointer key, Pointer value) throws IOException;
+
+    long size();
+
+    void finish() throws IOException;
+
+    void reset() throws IOException;
 }

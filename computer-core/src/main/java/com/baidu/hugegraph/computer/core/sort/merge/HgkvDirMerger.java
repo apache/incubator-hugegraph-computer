@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
 
 public interface HgkvDirMerger {
 

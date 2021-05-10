@@ -17,17 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkv.file.builder;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
 
-public interface InputsSorter {
+public interface HgkvDirBuilder extends Closeable {
 
     /**
-     * Sort multiple inputs from memory.
+     * Write kvEntry to hgkvDir.
      */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    void write(KvEntry entry) throws IOException;
+
+    /**
+     * Finish build hgkvDir.
+     * You can release resources or do some aftercare in this method.
+     */
+    void finish() throws IOException;
 }

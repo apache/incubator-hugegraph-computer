@@ -25,7 +25,7 @@ import java.util.List;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
 
 public interface Sorter {
 

@@ -17,33 +17,40 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
+package com.baidu.hugegraph.computer.core.store.value.iter;
 
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.EntriesUtil;
 
-public interface OuterSortFlusher {
+public class EntriesSubKvInput implements InputIterator {
 
-    /**
-     * Number of path to generate entries iterator in flush method.
-     */
-    void sources(int sources);
+    private final Iterator<KvEntry> entries;
 
-    /**
-     * Combiner entries with the same key.
-     */
-    Combiner<KvEntry> combiner();
+    public EntriesSubKvInput(RandomAccessInput input) {
+        this.entries = new EntriesInput(input);
+    }
 
-    /**
-     * Combine the list of inputValues, and write the inputKey and combined
-     * result length and results to HgkvDirWriter.
-     * The caller maybe needs to call the sources method before call this
-     * method.
-     */
-    void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
-               throws IOException;
+    @Override
+    public boolean hasNext() {
+        return this.entries.hasNext();
+    }
+
+    @Override
+    public KvEntry next() {
+        try {
+            return EntriesUtil.kvEntryWithFirstSubKv(this.entries.next());
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        // pass
+    }
 }

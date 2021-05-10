@@ -17,17 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkv.file.reader;
 
 import java.io.IOException;
-import java.util.List;
 
 import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
 
-public interface InputsSorter {
+public interface HgkvFileReader {
 
-    /**
-     * Sort multiple inputs from memory.
-     */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    InputIterator iterator() throws IOException;
 }

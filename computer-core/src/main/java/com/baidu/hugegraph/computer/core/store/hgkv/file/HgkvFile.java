@@ -17,17 +17,47 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkv.file;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.Closeable;
+import java.io.FileNotFoundException;
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 
-public interface InputsSorter {
+public interface HgkvFile extends Closeable {
 
     /**
-     * Sort multiple inputs from memory.
+     * The absolute path includes file name.
      */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    String path();
+
+    /**
+     * Number of entries in file.
+     */
+    long numEntries();
+
+    /**
+     * File version.
+     */
+    String version();
+
+    /**
+     * Max key in file.
+     */
+    byte[] max();
+
+    /**
+     * Min key in file.
+     */
+    byte[] min();
+
+    /**
+     * File verification string.
+     */
+    String magic();
+
+    /**
+     * Output of hgkv file.
+     */
+    BufferedFileOutput output() throws FileNotFoundException;
 }

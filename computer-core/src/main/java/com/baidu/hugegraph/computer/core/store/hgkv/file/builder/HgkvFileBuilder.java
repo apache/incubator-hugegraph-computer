@@ -17,17 +17,42 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkv.file.builder;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.List;
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.value.entry.Pointer;
 
-public interface InputsSorter {
+public interface HgkvFileBuilder extends Closeable {
 
     /**
-     * Sort multiple inputs from memory.
+     * Add kv entry to file.
      */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    void add(Pointer key, Pointer value) throws IOException;
+
+    /**
+     * Return size of new entry.
+     */
+    long sizeOfEntry(Pointer key, Pointer value);
+
+    /**
+     * Finish build file.
+     */
+    void finish() throws IOException;
+
+    /**
+     * Return the size of entry in bytes that has been written.
+     */
+    long dataLength();
+
+    /**
+     * Return the size of index block length.
+     */
+    long indexLength();
+
+    /**
+     * Return the size of header.
+     */
+    int headerLength();
 }

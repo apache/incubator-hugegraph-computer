@@ -17,17 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.value.entry;
 
-import java.io.IOException;
-import java.util.List;
+public interface Range {
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+    long offset();
 
-public interface InputsSorter {
-
-    /**
-     * Sort multiple inputs from memory.
-     */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    long length();
 }

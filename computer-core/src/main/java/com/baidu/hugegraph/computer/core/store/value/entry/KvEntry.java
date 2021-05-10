@@ -17,17 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.value.entry;
 
-import java.io.IOException;
-import java.util.List;
+public interface KvEntry extends Comparable<KvEntry> {
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+    Pointer key();
 
-public interface InputsSorter {
-
-    /**
-     * Sort multiple inputs from memory.
-     */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    Pointer value();
 }

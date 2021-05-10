@@ -17,17 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.value.entry;
 
 import java.io.IOException;
-import java.util.List;
 
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.io.Writable;
 
-public interface InputsSorter {
+public interface KvEntryWriter {
+    
+    void writeSubKey(Writable subKey) throws IOException;
 
-    /**
-     * Sort multiple inputs from memory.
-     */
-    InputIterator sort(List<InputIterator> inputs) throws IOException;
+    void writeSubValue(Writable subValue) throws IOException;
+
+    void writeFinish() throws IOException;
 }
