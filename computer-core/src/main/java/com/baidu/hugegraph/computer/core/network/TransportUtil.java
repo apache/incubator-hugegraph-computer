@@ -30,7 +30,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
@@ -69,8 +69,8 @@ public class TransportUtil {
         try {
             return InetAddress.getByName(host);
         } catch (UnknownHostException e) {
-            throw new ComputeException("Failed to parse address from '%s'", e,
-                                       host);
+            throw new ComputerException("Failed to parse address from '%s'", e,
+                                        host);
         }
     }
 
@@ -112,7 +112,7 @@ public class TransportUtil {
             }
             return ips;
         } catch (Exception e) {
-            throw new ComputeException("Failed to getLocalIPAddress", e);
+            throw new ComputerException("Failed to getLocalIPAddress", e);
         }
     }
 

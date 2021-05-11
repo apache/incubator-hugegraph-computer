@@ -51,6 +51,8 @@ public interface RandomAccessInput extends DataInput, Closeable {
      */
     long available() throws IOException;
 
+    RandomAccessInput duplicate() throws IOException;
+
     /**
      * Compare two inputs in the specified range.
      */
@@ -68,11 +70,11 @@ public interface RandomAccessInput extends DataInput, Closeable {
         return bytes;
     }
 
-    default int readFullInt() throws IOException {
+    default int readIntLength() throws IOException {
         return this.readInt();
     }
 
-    default long readFullLong() throws IOException {
+    default long readLongLength() throws IOException {
         return this.readLong();
     }
 }

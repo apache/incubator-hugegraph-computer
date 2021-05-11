@@ -63,13 +63,13 @@ public class StreamGraphOutput implements GraphOutput {
         if (size == 0) {
             return;
         }
-        long startPosition = this.out.writeFullInt(0);
+        long startPosition = this.out.writeIntLength(0);
         for (Edge edge : edges) {
             this.writeEdge(edge);
         }
         long endPosition = this.out.position();
         long length = endPosition - startPosition - Constants.INT_LEN;
-        this.out.writeFullInt(startPosition, (int) length);
+        this.out.writeIntLength(startPosition, (int) length);
     }
 
     @Override

@@ -40,17 +40,17 @@ public interface RandomAccessOutput extends DataOutput, Closeable {
     void write(RandomAccessInput input, long offset, long length)
                throws IOException;
 
-    default long writeFullInt(int v) throws IOException {
+    default long writeIntLength(int v) throws IOException {
         long position = this.position();
         this.writeInt(v);
         return position;
     }
 
-    default void writeFullInt(long position, int v) throws IOException {
+    default void writeIntLength(long position, int v) throws IOException {
         this.writeInt(position, v);
     }
 
-    default long writeFullLong(long v) throws IOException {
+    default long writeLongLength(long v) throws IOException {
         long position = this.position();
         this.writeLong(v);
         return position;

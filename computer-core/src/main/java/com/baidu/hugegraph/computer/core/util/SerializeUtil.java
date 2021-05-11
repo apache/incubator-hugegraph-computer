@@ -22,7 +22,9 @@ package com.baidu.hugegraph.computer.core.util;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
@@ -34,20 +36,20 @@ public final class SerializeUtil {
     private static final ComputerContext CONTEXT = ComputerContext.instance();
 
     public static byte[] toBytes(Writable obj) {
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
             obj.write(bao);
             return bao.toByteArray();
         } catch (IOException e) {
-            throw new ComputeException(
+            throw new ComputerException(
                       "Failed to create byte array with writable '%s'", e, obj);
         }
     }
 
     public static void fromBytes(byte[] bytes, Readable obj) {
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
+        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
             obj.read(bai);
         } catch (IOException e) {
-            throw new ComputeException("Failed to read from byte array", e);
+            throw new ComputerException("Failed to read from byte array", e);
         }
     }
 }

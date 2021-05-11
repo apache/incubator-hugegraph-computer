@@ -61,7 +61,7 @@ public class TransportException extends IOException {
     }
 
     public Throwable rootCause() {
-        return ComputeException.rootCause(this);
+        return ComputerException.rootCause(this);
     }
 
     public int errorCode() {

@@ -464,16 +464,16 @@ public class UnsafeByteArrayTest {
     public void testReadWriteFullInt() throws IOException {
         byte[] bytes;
         try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
-            bao.writeFullInt(Integer.MIN_VALUE);
-            bao.writeFullInt(Integer.MAX_VALUE);
-            bao.writeFullInt(0);
+            bao.writeIntLength(Integer.MIN_VALUE);
+            bao.writeIntLength(Integer.MAX_VALUE);
+            bao.writeIntLength(0);
             bytes = bao.toByteArray();
         }
 
         try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
-            Assert.assertEquals(Integer.MIN_VALUE, bai.readFullInt());
-            Assert.assertEquals(Integer.MAX_VALUE, bai.readFullInt());
-            Assert.assertEquals(0, bai.readFullInt());
+            Assert.assertEquals(Integer.MIN_VALUE, bai.readIntLength());
+            Assert.assertEquals(Integer.MAX_VALUE, bai.readIntLength());
+            Assert.assertEquals(0, bai.readIntLength());
         }
     }
 
@@ -481,16 +481,16 @@ public class UnsafeByteArrayTest {
     public void testReadWriteFullLong() throws IOException {
         byte[] bytes;
         try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
-            bao.writeFullLong(Long.MIN_VALUE);
-            bao.writeFullLong(Long.MAX_VALUE);
-            bao.writeFullLong(0L);
+            bao.writeLongLength(Long.MIN_VALUE);
+            bao.writeLongLength(Long.MAX_VALUE);
+            bao.writeLongLength(0L);
             bytes = bao.toByteArray();
         }
 
         try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
-            Assert.assertEquals(Long.MIN_VALUE, bai.readFullLong());
-            Assert.assertEquals(Long.MAX_VALUE, bai.readFullLong());
-            Assert.assertEquals(0L, bai.readFullLong());
+            Assert.assertEquals(Long.MIN_VALUE, bai.readLongLength());
+            Assert.assertEquals(Long.MAX_VALUE, bai.readLongLength());
+            Assert.assertEquals(0L, bai.readLongLength());
         }
     }
 

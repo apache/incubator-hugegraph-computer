@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
@@ -275,8 +275,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                 LOG.info("Current send unavailable");
                 i--;
                 if (!BARRIER_EVENT.await(timout)) {
-                    throw new ComputeException("Timeout(%sms) to wait sendable",
-                                               timout);
+                    throw new ComputerException("Timeout(%sms) to wait " +
+                                                "sendable", timout);
                 }
                 BARRIER_EVENT.reset();
             }

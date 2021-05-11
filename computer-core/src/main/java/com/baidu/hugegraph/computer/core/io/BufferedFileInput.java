@@ -26,6 +26,7 @@ import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
+import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
 
 public class BufferedFileInput extends UnsafeBytesInput {
@@ -154,6 +155,14 @@ public class BufferedFileInput extends UnsafeBytesInput {
         this.fileOffset += readLen;
         this.file.readFully(this.buffer(), this.limit(), readLen);
         this.limit(this.limit() + readLen);
+    }
+
+    @Override
+    public RandomAccessInput duplicate() throws IOException {
+        String path = Whitebox.getInternalState(this.file, "path");
+        BufferedFileInput input = new BufferedFileInput(new File(path));
+        input.seek(this.position());
+        return input;
     }
 
     @Override

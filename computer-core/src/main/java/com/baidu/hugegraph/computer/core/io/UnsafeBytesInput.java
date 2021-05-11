@@ -219,6 +219,11 @@ public class UnsafeBytesInput implements RandomAccessInput, Closeable {
     }
 
     @Override
+    public RandomAccessInput duplicate() throws IOException {
+        return new UnsafeBytesInput(this.buffer, this.position, this.limit);
+    }
+
+    @Override
     public int compare(long offset, long length, RandomAccessInput other,
                        long otherOffset, long otherLength) throws IOException {
         E.checkArgument(offset < this.buffer.length,
