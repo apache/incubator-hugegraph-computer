@@ -46,8 +46,7 @@ public class ClientSession extends TransportSession {
     private final int minPendingRequests;
 
     private final Lock lock;
-    // Flow control mark
-    private volatile boolean blocking;
+    private volatile boolean flowBlocking;
     private final BarrierEvent startedBarrier;
     private final BarrierEvent finishedBarrier;
     private final Function<Message, Future<Void>> sendFunction;
@@ -58,7 +57,7 @@ public class ClientSession extends TransportSession {
         this.maxPendingRequests = this.conf.maxPendingRequests();
         this.minPendingRequests = this.conf.minPendingRequests();
         this.lock = new ReentrantLock();
-        this.blocking = false;
+        this.flowBlocking = false;
         this.startedBarrier = new BarrierEvent();
         this.finishedBarrier = new BarrierEvent();
         this.sendFunction = sendFunction;
@@ -66,7 +65,7 @@ public class ClientSession extends TransportSession {
 
     @Override
     protected void stateReady() {
-        this.blocking = false;
+        this.flowBlocking = false;
         super.stateReady();
     }
 
@@ -92,7 +91,7 @@ public class ClientSession extends TransportSession {
 
             if (!this.startedBarrier.await(timeout)) {
                 throw new TransportException(
-                      "Timeout(%sms) to wait start-response", timeout);
+                          "Timeout(%sms) to wait start-response", timeout);
             }
         } catch (Throwable e) {
             this.stateReady();
@@ -117,7 +116,7 @@ public class ClientSession extends TransportSession {
 
             if (!this.finishedBarrier.await(timeout)) {
                 throw new TransportException(
-                      "Timeout(%sms) to wait finish-response", timeout);
+                          "Timeout(%sms) to wait finish-response", timeout);
             }
         } catch (Throwable e) {
             this.stateEstablished();
@@ -140,7 +139,7 @@ public class ClientSession extends TransportSession {
 
         this.sendFunction.apply(dataMessage);
 
-        this.updateBlocking();
+        this.updateFlowBlocking();
     }
 
     public void onRecvAck(int ackId) {
@@ -193,22 +192,22 @@ public class ClientSession extends TransportSession {
         if (ackId > this.maxAckId) {
             this.maxAckId = ackId;
         }
-        this.updateBlocking();
+        this.updateFlowBlocking();
     }
 
-    public boolean blocking() {
-        return this.blocking;
+    public boolean flowBlocking() {
+        return this.flowBlocking;
     }
 
-    private void updateBlocking() {
+    private void updateFlowBlocking() {
         this.lock.lock();
         try {
             int pendingRequests = this.maxRequestId - this.maxAckId;
 
             if (pendingRequests >= this.maxPendingRequests) {
-                this.blocking = true;
+                this.flowBlocking = true;
             } else if (pendingRequests < this.minPendingRequests) {
-                this.blocking = false;
+                this.flowBlocking = false;
             }
         } finally {
             this.lock.unlock();

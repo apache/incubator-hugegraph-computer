@@ -146,7 +146,7 @@ public class NettyTransportClient implements TransportClient {
     }
 
     protected boolean checkSendAvailable() {
-        return !this.session.blocking() && this.channel.isWritable();
+        return !this.session.flowBlocking() && this.channel.isWritable();
     }
 
     protected void checkAndNoticeSendAvailable() {
