@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.sort.sorter;
 
 import java.io.IOException;
 import java.util.Iterator;
-import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public interface InputSorter {
 

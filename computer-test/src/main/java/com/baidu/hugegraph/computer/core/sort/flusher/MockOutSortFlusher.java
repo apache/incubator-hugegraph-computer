@@ -27,11 +27,11 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.value.entry.DefaultKvEntry;
-import com.baidu.hugegraph.computer.core.store.value.entry.DefaultPointer;
-import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.value.entry.Pointer;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultPointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 
 public class MockOutSortFlusher implements OuterSortFlusher {
 

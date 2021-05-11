@@ -17,17 +17,26 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-import java.io.IOException;
-import java.util.List;
+public class KvEntryWithFirstSubKv extends DefaultKvEntry {
 
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+    private final KvEntry firstSubKv;
 
-public interface InputsSorter {
+    public KvEntryWithFirstSubKv(Pointer key, Pointer value,
+                                 KvEntry firstSubKv) {
+        super(key, value);
+        this.firstSubKv = firstSubKv;
+    }
 
-    /**
-     * Sort multiple inputs from memory.
-     */
-    EntryIterator sort(List<EntryIterator> inputs) throws IOException;
+    @Override
+    public int compareTo(KvEntry o) {
+        int result = this.key().compareTo(o.key());
+        if (result == 0) {
+            KvEntryWithFirstSubKv other = (KvEntryWithFirstSubKv) o;
+            result = this.firstSubKv.compareTo(other.firstSubKv);
+        }
+
+        return result;
+    }
 }

@@ -32,14 +32,14 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
-import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.value.entry.Pointer;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvFileBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvFileBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.value.iter.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
 
 public class StoreTestUtil {
 

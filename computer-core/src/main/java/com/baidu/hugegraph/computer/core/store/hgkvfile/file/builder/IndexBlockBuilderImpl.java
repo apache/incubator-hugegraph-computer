@@ -17,17 +17,36 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 
 import java.io.IOException;
-import java.util.List;
 
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 
-public interface InputsSorter {
+public class IndexBlockBuilderImpl implements IndexBlockBuilder {
 
-    /**
-     * Sort multiple inputs from memory.
-     */
-    EntryIterator sort(List<EntryIterator> inputs) throws IOException;
+    private final BufferedFileOutput output;
+    private long blockSize;
+
+    public IndexBlockBuilderImpl(BufferedFileOutput output) {
+        this.output = output;
+        this.blockSize = 0L;
+    }
+
+    @Override
+    public void add(byte[] index) throws IOException {
+        this.output.writeInt(index.length);
+        this.output.write(index);
+        this.blockSize += Integer.SIZE + index.length;
+    }
+
+    @Override
+    public void finish() {
+        // pass
+    }
+
+    @Override
+    public long size() {
+        return this.blockSize;
+    }
 }

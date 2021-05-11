@@ -17,33 +17,42 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.Iterator;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
-public interface OuterSortFlusher {
+public interface HgkvFileBuilder extends Closeable {
 
     /**
-     * Number of path to generate entries iterator in flush method.
+     * Add kv entry to file.
      */
-    void sources(int sources);
+    void add(Pointer key, Pointer value) throws IOException;
 
     /**
-     * Combiner entries with the same key.
+     * Return size of new entry.
      */
-    Combiner<KvEntry> combiner();
+    long sizeOfEntry(Pointer key, Pointer value);
 
     /**
-     * Combine the list of inputValues, and write the inputKey and combined
-     * result length and results to HgkvDirWriter.
-     * The caller maybe needs to call the sources method before call this
-     * method.
+     * Finish build file.
      */
-    void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
-               throws IOException;
+    void finish() throws IOException;
+
+    /**
+     * Return the size of entry in bytes that has been written.
+     */
+    long dataLength();
+
+    /**
+     * Return the size of index block length.
+     */
+    long indexLength();
+
+    /**
+     * Return the size of header.
+     */
+    int headerLength();
 }

@@ -17,17 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-import java.io.IOException;
-import java.util.List;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+public interface Pointer extends Range, Comparable<Pointer> {
 
-public interface InputsSorter {
-
-    /**
-     * Sort multiple inputs from memory.
-     */
-    EntryIterator sort(List<EntryIterator> inputs) throws IOException;
+    RandomAccessInput input();
 }

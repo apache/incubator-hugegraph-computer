@@ -25,23 +25,23 @@ import java.util.List;
 
 import com.baidu.hugegraph.computer.core.sort.sorting.InputsSorting;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortingFactory;
-import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 
 public class InputsSorterImpl implements InputsSorter {
 
     @Override
-    public InputIterator sort(List<InputIterator> entries) throws IOException {
+    public EntryIterator sort(List<EntryIterator> entries) throws IOException {
         return new Sorting(entries);
     }
 
-    private static class Sorting implements InputIterator {
+    private static class Sorting implements EntryIterator {
 
         private final InputsSorting<KvEntry> inputsSorting;
-        private final List<InputIterator> sources;
+        private final List<EntryIterator> sources;
         private boolean closed;
 
-        public Sorting(List<InputIterator> sources) {
+        public Sorting(List<EntryIterator> sources) {
             this.sources = sources;
             this.inputsSorting = SortingFactory.createSorting(sources);
             this.closed = false;
@@ -58,11 +58,11 @@ public class InputsSorterImpl implements InputsSorter {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() throws Exception {
             if (this.closed) {
                 return;
             }
-            for (Closeable source : this.sources) {
+            for (AutoCloseable source : this.sources) {
                 source.close();
             }
             this.closed = true;

@@ -577,7 +577,9 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> HGKV_TEMP_DIR =
             new ConfigOption<>(
                     "hgkv.temp_file_dir",
-                    "Temporary files for merged files.",
+                    "Temporary files will be generated during the file " +
+                    "merging process, This folder is used to store temporary " +
+                    "files",
                     disallowEmpty(),
                     "/tmp/hgkv"
             );

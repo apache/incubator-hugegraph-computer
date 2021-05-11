@@ -17,33 +17,47 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
 
-import java.io.IOException;
-import java.util.Iterator;
+import java.io.Closeable;
+import java.io.FileNotFoundException;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 
-public interface OuterSortFlusher {
+public interface HgkvFile extends Closeable {
 
     /**
-     * Number of path to generate entries iterator in flush method.
+     * The absolute path includes file name.
      */
-    void sources(int sources);
+    String path();
 
     /**
-     * Combiner entries with the same key.
+     * Number of entries in file.
      */
-    Combiner<KvEntry> combiner();
+    long numEntries();
 
     /**
-     * Combine the list of inputValues, and write the inputKey and combined
-     * result length and results to HgkvDirWriter.
-     * The caller maybe needs to call the sources method before call this
-     * method.
+     * File version.
      */
-    void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
-               throws IOException;
+    String version();
+
+    /**
+     * Max key in file.
+     */
+    byte[] max();
+
+    /**
+     * Min key in file.
+     */
+    byte[] min();
+
+    /**
+     * File verification string.
+     */
+    String magic();
+
+    /**
+     * Output of hgkv file.
+     */
+    BufferedFileOutput output() throws FileNotFoundException;
 }

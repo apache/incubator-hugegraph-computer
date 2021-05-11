@@ -44,10 +44,10 @@ import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.MockInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.MockOutSortFlusher;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDirReader;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDirReaderImpl;
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
@@ -103,7 +103,7 @@ public class SorterTest {
     }
 
     @Test
-    public void testSortBuffers() throws IOException {
+    public void testSortBuffers() throws Exception {
         List<Integer> map1 = ImmutableList.of(2, 3,
                                               2, 1,
                                               5, 2,
@@ -116,7 +116,7 @@ public class SorterTest {
                                               8, 2);
         String path = StoreTestUtil.availablePathById("1");
         File file = new File(path);
-        InputIterator iterator = null;
+        EntryIterator iterator = null;
         try {
             // Merge 4 sorted input
             List<RandomAccessInput> inputs = ImmutableList.of(
@@ -146,7 +146,7 @@ public class SorterTest {
     }
 
     @Test
-    public void testMergeInputs() throws IOException {
+    public void testMergeInputs() throws Exception {
         List<Integer> map1 = ImmutableList.of(2, 3,
                                               2, 1,
                                               5, 2,
@@ -204,7 +204,7 @@ public class SorterTest {
                                                     5, 10,
                                                     6, 55);
             Iterator<Integer> resultIter = result.iterator();
-            InputIterator iterator = sorter.iterator(outputs);
+            EntryIterator iterator = sorter.iterator(outputs);
             KvEntry last = iterator.next();
             int value = StoreTestUtil.dataFromPointer(last.value());
             while (true) {

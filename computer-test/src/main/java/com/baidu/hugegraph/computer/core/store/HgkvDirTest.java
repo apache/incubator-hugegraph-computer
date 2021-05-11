@@ -33,15 +33,15 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.HgkvDir;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.HgkvFileImpl;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDirReader;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDirReaderImpl;
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
@@ -116,7 +116,7 @@ public class HgkvDirTest {
     }
 
     @Test
-    public void testHgkvDirReader() throws IOException {
+    public void testHgkvDirReader() throws Exception {
         // The keys in the data must be ordered
         List<Integer> data = ImmutableList.of(2, 3,
                                               2, 1,
@@ -129,7 +129,7 @@ public class HgkvDirTest {
         HgkvDirReader reader = new HgkvDirReaderImpl(dir.getPath());
 
         try {
-            InputIterator iterator = reader.iterator();
+            EntryIterator iterator = reader.iterator();
             int i = 0;
             while (iterator.hasNext()) {
                 KvEntry entry = iterator.next();

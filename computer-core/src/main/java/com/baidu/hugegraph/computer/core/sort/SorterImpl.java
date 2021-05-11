@@ -36,18 +36,18 @@ import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDirReaderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDirReader;
-import com.baidu.hugegraph.computer.core.store.hgkv.file.reader.HgkvDir4SubKvReader;
-import com.baidu.hugegraph.computer.core.store.value.iter.EntriesInput;
-import com.baidu.hugegraph.computer.core.store.value.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.value.iter.EntriesSubKvInput;
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
-import com.baidu.hugegraph.computer.core.store.hgkv.select.DisperseEvenlySelector;
-import com.baidu.hugegraph.computer.core.store.hgkv.select.InputFilesSelector;
-import com.baidu.hugegraph.computer.core.store.hgkv.select.SelectedFiles;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDir4SubKvReaderImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesSubKvInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.DisperseEvenlySelector;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.InputFilesSelector;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.SelectedFiles;
 
 public class SorterImpl implements Sorter {
 
@@ -69,7 +69,7 @@ public class SorterImpl implements Sorter {
     public void mergeBuffers(List<RandomAccessInput> inputs,
                              OuterSortFlusher flusher, String output,
                              boolean withSubKv) throws IOException {
-        List<InputIterator> entries;
+        List<EntryIterator> entries;
         if (withSubKv) {
             entries = inputs.stream()
                             .map(EntriesSubKvInput::new)
@@ -86,9 +86,9 @@ public class SorterImpl implements Sorter {
     @Override
     public void mergeInputs(List<String> inputs, OuterSortFlusher flusher,
                             List<String> outputs, boolean withSubKv)
-                            throws IOException {
+                            throws Exception {
         if (withSubKv) {
-            this.mergeInputs(inputs, o -> new HgkvDir4SubKvReader(o).iterator(),
+            this.mergeInputs(inputs, o -> new HgkvDir4SubKvReaderImpl(o).iterator(),
                              flusher, outputs);
         } else {
             this.mergeInputs(inputs, o -> new HgkvDirReaderImpl(o).iterator(),
@@ -97,9 +97,9 @@ public class SorterImpl implements Sorter {
     }
 
     @Override
-    public InputIterator iterator(List<String> inputs) throws IOException {
+    public EntryIterator iterator(List<String> inputs) throws IOException {
         InputsSorterImpl sorter = new InputsSorterImpl();
-        List<InputIterator> entries = new ArrayList<>();
+        List<EntryIterator> entries = new ArrayList<>();
         for (String input : inputs) {
             HgkvDirReader reader = new HgkvDirReaderImpl(input);
             entries.add(reader.iterator());
@@ -107,7 +107,7 @@ public class SorterImpl implements Sorter {
         return sorter.sort(entries);
     }
 
-    private void sortBuffers(List<InputIterator> entries,
+    private void sortBuffers(List<EntryIterator> entries,
                              OuterSortFlusher flusher,
                              String output) throws IOException {
 
@@ -120,9 +120,9 @@ public class SorterImpl implements Sorter {
     }
 
     private void mergeInputs(List<String> inputs,
-                             Function<String, InputIterator> inputToEntries,
+                             Function<String, EntryIterator> inputToEntries,
                              OuterSortFlusher flusher, List<String> outputs)
-                             throws IOException {
+                             throws Exception {
         InputFilesSelector selector = new DisperseEvenlySelector();
         // Each SelectedFiles include some input files per output.
         List<SelectedFiles> results = selector.selectedOfOutputs(inputs,

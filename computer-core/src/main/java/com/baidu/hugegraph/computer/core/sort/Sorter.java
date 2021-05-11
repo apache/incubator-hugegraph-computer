@@ -25,7 +25,7 @@ import java.util.List;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.value.iter.InputIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 
 public interface Sorter {
 
@@ -102,10 +102,10 @@ public interface Sorter {
      */
     void mergeInputs(List<String> inputs, OuterSortFlusher flusher,
                      List<String> outputs, boolean withSubKv)
-                     throws IOException;
+                     throws Exception;
 
     /**
      * Get the iterator of <key, value> pair by increasing order of key.
      */
-    InputIterator iterator(List<String> inputs) throws IOException;
+    EntryIterator iterator(List<String> inputs) throws IOException;
 }

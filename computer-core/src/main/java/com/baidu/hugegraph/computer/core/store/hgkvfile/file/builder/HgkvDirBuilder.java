@@ -17,33 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.Iterator;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 
-public interface OuterSortFlusher {
-
-    /**
-     * Number of path to generate entries iterator in flush method.
-     */
-    void sources(int sources);
+public interface HgkvDirBuilder extends Closeable {
 
     /**
-     * Combiner entries with the same key.
+     * Write kvEntry to hgkvDir.
      */
-    Combiner<KvEntry> combiner();
+    void write(KvEntry entry) throws IOException;
 
     /**
-     * Combine the list of inputValues, and write the inputKey and combined
-     * result length and results to HgkvDirWriter.
-     * The caller maybe needs to call the sources method before call this
-     * method.
+     * Finish build hgkvDir.
+     * You can release resources or do some aftercare in this method.
      */
-    void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
-               throws IOException;
+    void finish() throws IOException;
 }

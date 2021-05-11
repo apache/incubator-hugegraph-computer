@@ -17,33 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 import java.io.IOException;
-import java.util.Iterator;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.io.Writable;
 
-public interface OuterSortFlusher {
+public interface EntryOutput {
 
     /**
-     * Number of path to generate entries iterator in flush method.
+     * Write entry with multiple sub-key and sub-value.
+     * Used when write vertex with edges, each sub-key is target id of an edge,
+     * each sub-value is properties of an edge.
+     * The output format:
+     * | key length | key | total sub-entry length | sub-entry count |
+     * sub-key length | sub-key | sub-value length |
      */
-    void sources(int sources);
+    KvEntryWriter writeEntry(Id key) throws IOException;
 
     /**
-     * Combiner entries with the same key.
+     * Write entry with single value.
+     * Used when write vertex without edges and write message.
+     * The output format:
+     * | key length | key | value length | value |
      */
-    Combiner<KvEntry> combiner();
-
-    /**
-     * Combine the list of inputValues, and write the inputKey and combined
-     * result length and results to HgkvDirWriter.
-     * The caller maybe needs to call the sources method before call this
-     * method.
-     */
-    void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
-               throws IOException;
+    void writeEntry(Id key, Writable value) throws IOException;
 }

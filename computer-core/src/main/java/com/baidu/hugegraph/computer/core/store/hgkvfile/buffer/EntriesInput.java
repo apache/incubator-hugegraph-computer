@@ -17,39 +17,45 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.sorter;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.buffer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
-import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 
-public class EntriesUtilTest {
+public class EntriesInput implements EntryIterator {
 
-    @Test
-    public void testSplit() throws IOException {
-        List<Integer> data = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            data.add(i);
-            data.add(i);
-        }
+    private final RandomAccessInput input;
+    private final RandomAccessInput userAccessInput;
 
-        RandomAccessInput input = SorterTestUtil.inputFromMap(data);
-        List<KvEntry> entries = EntriesUtil.readInput(input);
-        for (int i = 0, j = 0; i < entries.size(); i++) {
-            KvEntry entry = entries.get(i);
-            int key = StoreTestUtil.dataFromPointer(entry.key());
-            int value = StoreTestUtil.dataFromPointer(entry.value());
-            Assert.assertEquals(data.get(j++).intValue(), key);
-            Assert.assertEquals(data.get(j++).intValue(), value);
+    public EntriesInput(RandomAccessInput input) {
+        this.input = input;
+        this.userAccessInput = input.duplicate();
+    }
+
+    @Override
+    public boolean hasNext() {
+        try {
+            return this.input.available() > 0;
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public KvEntry next() {
+        try {
+            return EntriesUtil.entryFromInput(this.input, this.userAccessInput);
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        // pass
     }
 }
