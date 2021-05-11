@@ -151,8 +151,8 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
     }
 
     private String filePathFromId(int fileId) {
-        return this.tempDir + File.separator + HgkvDirImpl.NAME_PREFIX +
-               fileId + HgkvDirImpl.EXTEND_NAME;
+        return this.tempDir + File.separator + HgkvDirImpl.FILE_NAME_PREFIX +
+               fileId + HgkvDirImpl.FILE_EXTEND_NAME;
     }
 
     @Override

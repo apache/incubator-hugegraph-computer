@@ -100,12 +100,6 @@ public class HgkvDirTest {
 
     @Test
     public void testExceptionCase() throws IOException {
-        // Illegal file name
-        String illegalName = availableDirPath("abc");
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            HgkvDirImpl.open(illegalName);
-        }, e -> Assert.assertTrue(e.getMessage().contains("Illegal")));
-
         // Path isn't directory
         File file = new File(availableDirPath("1"));
         file.getParentFile().mkdirs();
@@ -153,7 +147,7 @@ public class HgkvDirTest {
     }
 
     private static String availableDirPath(String id) {
-        return FILE_DIR + File.separator + HgkvDirImpl.NAME_PREFIX + id +
-               HgkvDirImpl.EXTEND_NAME;
+        return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
+               HgkvDirImpl.FILE_EXTEND_NAME;
     }
 }

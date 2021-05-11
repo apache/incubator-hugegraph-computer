@@ -175,7 +175,7 @@ public class HgkvFileTest {
     }
 
     private static String availableFilePath(String id) {
-        return FILE_DIR + File.separator + HgkvDirImpl.NAME_PREFIX + id +
-               HgkvDirImpl.EXTEND_NAME;
+        return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
+               HgkvDirImpl.FILE_EXTEND_NAME;
     }
 }

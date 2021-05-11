@@ -116,8 +116,8 @@ public class StoreTestUtil {
     }
 
     public static String availablePathById(String id) {
-        return FILE_DIR + File.separator + HgkvDirImpl.NAME_PREFIX + id +
-               HgkvDirImpl.EXTEND_NAME;
+        return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
+               HgkvDirImpl.FILE_EXTEND_NAME;
     }
 
     public static int byteArrayToInt(byte[] bytes) {

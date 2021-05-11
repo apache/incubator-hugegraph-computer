@@ -32,15 +32,15 @@ import com.baidu.hugegraph.util.E;
 
 public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
-    public static final String NAME_PREFIX;
-    public static final String EXTEND_NAME;
-    private static final String NAME_REGEX;
+    public static final String FILE_NAME_PREFIX;
+    public static final String FILE_EXTEND_NAME;
+    private static final String FILE_NAME_REGEX;
     private static final Pattern FILE_NUM_PATTERN;
 
     static {
-        NAME_PREFIX = "hgkv_";
-        EXTEND_NAME = ".hgkv";
-        NAME_REGEX = NAME_PREFIX + "[0-9]+" + EXTEND_NAME;
+        FILE_NAME_PREFIX = "hgkv_";
+        FILE_EXTEND_NAME = ".hgkv";
+        FILE_NAME_REGEX = FILE_NAME_PREFIX + "[0-9]+" + FILE_EXTEND_NAME;
         FILE_NUM_PATTERN = Pattern.compile("[0-9]+");
     }
 
@@ -57,8 +57,6 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     public static HgkvDir create(String path) throws IOException {
         File file = new File(path);
-        E.checkArgument(file.getName().matches(NAME_REGEX),
-                        "Illegal hgkv file name '%s'", path);
         E.checkArgument(!file.exists(),
                         "Can't create HgkvDir, because the " +
                         "directory already exists '%s'", file.getPath());
@@ -68,8 +66,6 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     public static HgkvDir open(String path) throws IOException {
         File file = new File(path);
-        E.checkArgument(file.getName().matches(NAME_REGEX),
-                        "Illegal hgkv file name '%s'", path);
         E.checkArgument(file.exists(), "Path not exists '%s'", file.getPath());
         E.checkArgument(file.isDirectory(), "Path is not directory '%s'",
                         file.getPath());
@@ -77,7 +73,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     }
 
     private static File[] scanHgkvFiles(File dir) {
-        return dir.listFiles((dirName, name) -> name.matches(NAME_REGEX));
+        return dir.listFiles((dirName, name) -> name.matches(FILE_NAME_REGEX));
     }
 
     private static HgkvDir open(File file) throws IOException {
