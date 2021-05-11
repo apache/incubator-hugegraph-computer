@@ -216,8 +216,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         Assert.assertArrayEquals(expect, bytes);
 
         LongValue longValue2;
-        try (UnsafeBytesInput bai =
-             new OptimizedUnsafeBytesInput(bytes)) {
+        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             longValue2 = (LongValue) input.readValue();
         }
@@ -245,8 +244,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         Assert.assertArrayEquals(expect, bytes);
 
         IdValueList idValueList2;
-        try (UnsafeBytesInput bai =
-             new OptimizedUnsafeBytesInput(bytes)) {
+        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             idValueList2 = (IdValueList) input.readValue();
         }

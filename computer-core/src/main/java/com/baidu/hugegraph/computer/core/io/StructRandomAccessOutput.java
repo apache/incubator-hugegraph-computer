@@ -51,6 +51,7 @@ public class StructRandomAccessOutput implements RandomAccessOutput {
 
     @Override
     public void writeInt(long position, int v) throws IOException {
+        this.output.seek(position);
         this.writeNumber(v);
     }
 

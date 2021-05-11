@@ -51,6 +51,9 @@ public interface RandomAccessInput extends DataInput, Closeable {
      */
     long available() throws IOException;
 
+    /**
+     * Creates a new input that shares this buffer's position.
+     */
     RandomAccessInput duplicate() throws IOException;
 
     /**

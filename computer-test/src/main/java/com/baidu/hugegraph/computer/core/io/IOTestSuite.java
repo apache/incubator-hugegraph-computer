@@ -28,6 +28,7 @@ import org.junit.runners.Suite;
     StreamGraphOutputInputTest.class,
     JsonStructGraphOutputTest.class,
     CsvStructGraphOutputTest.class,
+    StructRandomAccessOutputTest.class,
     UnsafeByteArrayTest.class,
     BufferedFileTest.class,
     BufferedStreamTest.class

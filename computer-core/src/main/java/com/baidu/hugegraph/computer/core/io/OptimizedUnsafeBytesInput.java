@@ -28,19 +28,18 @@ import com.baidu.hugegraph.util.E;
 public class OptimizedUnsafeBytesInput extends UnsafeBytesInput {
 
     public OptimizedUnsafeBytesInput(byte[] buffer) {
-        super(buffer);
+        this(buffer, buffer.length);
     }
 
     public OptimizedUnsafeBytesInput(byte[] buffer, int limit) {
-        super(buffer, limit);
+        this(buffer, 0, limit);
     }
 
     public OptimizedUnsafeBytesInput(byte[] buffer, long limit) {
-        super(buffer, limit);
+        this(buffer, 0, (int) limit);
     }
 
-    public OptimizedUnsafeBytesInput(byte[] buffer, int position,
-                                     int limit) {
+    public OptimizedUnsafeBytesInput(byte[] buffer, int position, int limit) {
         super(buffer, position, limit);
     }
 
@@ -57,6 +56,13 @@ public class OptimizedUnsafeBytesInput extends UnsafeBytesInput {
     @Override
     public String readUTF() throws IOException {
         return this.readString();
+    }
+
+    @Override
+    public OptimizedUnsafeBytesInput duplicate() throws IOException {
+        return new OptimizedUnsafeBytesInput(this.buffer(),
+                                             (int) this.position(),
+                                             this.limit());
     }
 
     private int readVInt() throws IOException {

@@ -158,7 +158,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
     }
 
     @Override
-    public RandomAccessInput duplicate() throws IOException {
+    public BufferedFileInput duplicate() throws IOException {
         String path = Whitebox.getInternalState(this.file, "path");
         BufferedFileInput input = new BufferedFileInput(new File(path));
         input.seek(this.position());
