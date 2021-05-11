@@ -133,9 +133,4 @@ public class CsvStructGraphOutput extends StructGraphOutput {
     public void writeSplitter() throws IOException {
         this.out.writeRawString(",");
     }
-
-    @Override
-    public void close() throws IOException {
-        this.out.close();
-    }
 }

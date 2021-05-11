@@ -83,7 +83,7 @@ public class StreamGraphInput implements GraphInput {
             return this.graphFactory.createEdges(0);
         }
         @SuppressWarnings("unused")
-        int bytes = this.readFullInt();
+        int bytes = this.in.readFullInt();
         Edges edges = this.graphFactory.createEdges(numEdges);
         // TODO: lazy deserialization
         for (int i = 0; i < numEdges; ++i) {
@@ -133,14 +133,6 @@ public class StreamGraphInput implements GraphInput {
         Value<?> value = this.valueFactory.createValue(valueType);
         value.read(this.in);
         return value;
-    }
-
-    protected final int readFullInt() throws IOException {
-        return this.in.readInt();
-    }
-
-    protected final long readFullLong() throws IOException {
-        return this.in.readLong();
     }
 
     @Override

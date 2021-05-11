@@ -26,13 +26,13 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
 
-public class OptimizedUnsafeByteArrayOutput extends UnsafeByteArrayOutput {
+public class OptimizedUnsafeBytesOutput extends UnsafeBytesOutput {
 
-    public OptimizedUnsafeByteArrayOutput() {
+    public OptimizedUnsafeBytesOutput() {
         super();
     }
 
-    public OptimizedUnsafeByteArrayOutput(int size) {
+    public OptimizedUnsafeBytesOutput(int size) {
         super(size);
     }
 

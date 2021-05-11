@@ -67,4 +67,12 @@ public interface RandomAccessInput extends DataInput, Closeable {
         this.readFully(bytes);
         return bytes;
     }
+
+    default int readFullInt() throws IOException {
+        return this.readInt();
+    }
+
+    default long readFullLong() throws IOException {
+        return this.readLong();
+    }
 }

@@ -32,7 +32,7 @@ import com.baidu.hugegraph.util.E;
 import sun.misc.Unsafe;
 
 @SuppressWarnings("deprecation") // Unsafe.getXx
-public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
+public class UnsafeBytesInput implements RandomAccessInput, Closeable {
 
     private static final sun.misc.Unsafe UNSAFE;
 
@@ -50,19 +50,19 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
         }
     }
 
-    public UnsafeByteArrayInput(byte[] buffer) {
+    public UnsafeBytesInput(byte[] buffer) {
         this(buffer, buffer.length);
     }
 
-    public UnsafeByteArrayInput(byte[] buffer, int limit) {
+    public UnsafeBytesInput(byte[] buffer, int limit) {
         this(buffer, 0, limit);
     }
 
-    public UnsafeByteArrayInput(byte[] buffer, long limit) {
+    public UnsafeBytesInput(byte[] buffer, long limit) {
         this(buffer, 0, (int) limit);
     }
 
-    public UnsafeByteArrayInput(byte[] buffer, int position, int limit) {
+    public UnsafeBytesInput(byte[] buffer, int position, int limit) {
         E.checkArgumentNotNull(buffer, "The buffer can't be null");
         this.buffer = buffer;
         this.limit = limit;
@@ -228,9 +228,9 @@ public class UnsafeByteArrayInput implements RandomAccessInput, Closeable {
                         "Invalid length parameter %s, expect <= %s",
                         length, this.buffer.length - offset);
 
-        if (other.getClass() == UnsafeByteArrayInput.class) {
+        if (other.getClass() == UnsafeBytesInput.class) {
             return BytesUtil.compare(this.buffer, (int) offset, (int) length,
-                                     ((UnsafeByteArrayInput) other).buffer,
+                                     ((UnsafeBytesInput) other).buffer,
                                      (int) otherOffset, (int) otherLength);
         } else {
             long otherPosition = other.position();

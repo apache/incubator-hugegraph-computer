@@ -33,8 +33,6 @@ public final class Constants {
     public static final int CHAR_LEN = Character.BYTES;
     public static final int FLOAT_LEN = Float.BYTES;
     public static final int DOUBLE_LEN = Double.BYTES;
-    public static final int BLOB_LEN = 4;
-    public static final int UUID_LENGTH = 16;
 
     public static final int UINT8_MAX = 0xff;
     public static final int UINT16_MAX = 0xffff;

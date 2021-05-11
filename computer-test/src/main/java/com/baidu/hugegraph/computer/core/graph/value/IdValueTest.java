@@ -27,12 +27,12 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -55,14 +55,13 @@ public class IdValueTest extends UnitTestBase {
         IdValue value1 = new Utf8Id("long id").idValue();
         IdValue value2 = new Utf8Id("short").idValue();
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new OptimizedUnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
             value1.write(bao);
             value2.write(bao);
             bytes = bao.toByteArray();
         }
         IdValue value3 = new Utf8Id().idValue();
-        try (UnsafeByteArrayInput bai =
-                                  new OptimizedUnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
             value3.read(bai);
             Assert.assertEquals(value1, value3);
             value3.read(bai);
@@ -77,13 +76,13 @@ public class IdValueTest extends UnitTestBase {
         IdValue value1 = id1.idValue();
         IdValue value2 = id2.idValue();
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput();
              StreamGraphOutput output = newStreamGraphOutput(bao)) {
             output.writeId(IdValueUtil.toId(value1));
             output.writeId(IdValueUtil.toId(value2));
             bytes = bao.toByteArray();
         }
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes);
              StreamGraphInput input = newStreamGraphInput(bai)) {
             Id id3 = input.readId();
             Assert.assertEquals(id1, id3);

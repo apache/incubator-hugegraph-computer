@@ -36,8 +36,8 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.config.ConfigOption;
@@ -53,13 +53,13 @@ public class UnitTestBase {
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             oldId.write(bao);
             bytes = bao.toByteArray();
         }
 
         Id newId = IdFactory.createId(oldId.type());
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             newId.read(bai);
             Assert.assertEquals(oldId, newId);
         }
@@ -68,13 +68,13 @@ public class UnitTestBase {
     public static void assertValueEqualAfterWriteAndRead(Value<?> oldValue)
                                                          throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             oldValue.write(bao);
             bytes = bao.toByteArray();
         }
 
         Value<?> newValue = valueFactory().createValue(oldValue.type());
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             newValue.read(bai);
             Assert.assertEquals(oldValue, newValue);
         }
@@ -120,12 +120,12 @@ public class UnitTestBase {
                                                     Readable readObj)
                                                     throws IOException {
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             writeObj.write(bao);
             bytes = bao.toByteArray();
         }
 
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             readObj.read(bai);
             Assert.assertEquals(writeObj, readObj);
         }
@@ -170,12 +170,12 @@ public class UnitTestBase {
     }
 
     protected static StreamGraphInput newStreamGraphInput(
-                                      UnsafeByteArrayInput bai) {
+                                      UnsafeBytesInput bai) {
         return new StreamGraphInput(context(), bai);
     }
 
     protected static StreamGraphOutput newStreamGraphOutput(
-                                       UnsafeByteArrayOutput bao) {
+                                       UnsafeBytesOutput bao) {
         return new StreamGraphOutput(context(), bao);
     }
 }

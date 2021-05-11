@@ -53,14 +53,14 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         LongValue longValue = new LongValue(999L);
         Vertex vertex1 = graphFactory().createVertex(longId, longValue);
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeVertex(vertex1);
             bytes = bao.toByteArray();
         }
 
         Vertex vertex2;
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             vertex2 = input.readVertex();
         }
@@ -81,14 +81,14 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         edges1.add(factory.createEdge(new LongId(300), new LongValue(-1)));
 
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeEdges(edges1);
             bytes = bao.toByteArray();
         }
 
         Edges edges2;
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             edges2 = input.readEdges();
         }
@@ -105,14 +105,14 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
         Edges edges1 = graphFactory().createEdges(0);
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeEdges(edges1);
             bytes = bao.toByteArray();
         }
 
         Edges edges2;
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             edges2 = input.readEdges();
         }
@@ -136,14 +136,14 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         properties1.put("salary", new LongValue(20000L));
 
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeProperties(properties1);
             bytes = bao.toByteArray();
         }
 
         Properties properties2;
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             properties2 = input.readProperties();
         }
@@ -160,13 +160,13 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         properties1.put("name", new Utf8Id("marko").idValue());
         properties1.put("city", new Utf8Id("Beijing").idValue());
 
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeProperties(properties1);
             bytes = bao.toByteArray();
         }
 
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             properties2 = input.readProperties();
         }
@@ -177,7 +177,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     public void testWriteReadId() throws IOException {
         LongId longId1 = new LongId(100L);
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new OptimizedUnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeId(longId1);
             bytes = bao.toByteArray();
@@ -188,8 +188,8 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
         Id longId2 = new LongId();
         Assert.assertEquals(0L, longId2.asLong());
-        try (UnsafeByteArrayInput bai =
-             new OptimizedUnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai =
+             new OptimizedUnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             longId2 = input.readId();
         }
@@ -206,7 +206,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
         LongValue longValue1 = new LongValue(100L);
         byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new OptimizedUnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeValue(longValue1);
             bytes = bao.toByteArray();
@@ -216,8 +216,8 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         Assert.assertArrayEquals(expect, bytes);
 
         LongValue longValue2;
-        try (UnsafeByteArrayInput bai =
-             new OptimizedUnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai =
+             new OptimizedUnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             longValue2 = (LongValue) input.readValue();
         }
@@ -235,7 +235,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         IdValueList idValueList1 = new IdValueList();
         idValueList1.add(longId1.idValue());
         idValueList1.add(longId2.idValue());
-        try (UnsafeByteArrayOutput bao = new OptimizedUnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeValue(idValueList1);
             bytes = bao.toByteArray();
@@ -245,8 +245,8 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         Assert.assertArrayEquals(expect, bytes);
 
         IdValueList idValueList2;
-        try (UnsafeByteArrayInput bai =
-             new OptimizedUnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai =
+             new OptimizedUnsafeBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
             idValueList2 = (IdValueList) input.readValue();
         }
@@ -254,43 +254,5 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
                           Lists.newArrayList(longId1.idValue(),
                                              longId2.idValue()),
                           idValueList2.values()));
-    }
-
-    @Test
-    public void testReadWriteFullInt() throws IOException {
-        byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = newStreamGraphOutput(bao);
-            output.writeFullInt(Integer.MIN_VALUE);
-            output.writeFullInt(Integer.MAX_VALUE);
-            output.writeFullInt(0);
-            bytes = bao.toByteArray();
-        }
-
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = newStreamGraphInput(bai);
-            Assert.assertEquals(Integer.MIN_VALUE, input.readFullInt());
-            Assert.assertEquals(Integer.MAX_VALUE, input.readFullInt());
-            Assert.assertEquals(0, input.readFullInt());
-        }
-    }
-
-    @Test
-    public void testReadWriteFullLong() throws IOException {
-        byte[] bytes;
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
-            StreamGraphOutput output = newStreamGraphOutput(bao);
-            output.writeFullLong(Long.MIN_VALUE);
-            output.writeFullLong(Long.MAX_VALUE);
-            output.writeFullLong(0L);
-            bytes = bao.toByteArray();
-        }
-
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
-            StreamGraphInput input = newStreamGraphInput(bai);
-            Assert.assertEquals(Long.MIN_VALUE, input.readFullLong());
-            Assert.assertEquals(Long.MAX_VALUE, input.readFullLong());
-            Assert.assertEquals(0L, input.readFullLong());
-        }
     }
 }

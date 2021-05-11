@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.util.E;
 
-public class BufferedFileInput extends UnsafeByteArrayInput {
+public class BufferedFileInput extends UnsafeBytesInput {
 
     private final int bufferCapacity;
     private final RandomAccessFile file;

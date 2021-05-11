@@ -51,11 +51,6 @@ public class LongId implements Id {
     }
 
     @Override
-    public int length() {
-        return 8;
-    }
-
-    @Override
     public Object asObject() {
         return this.id;
     }

@@ -93,6 +93,11 @@ public abstract class StructGraphOutput implements GraphOutput {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        this.out.close();
+    }
+
     private void writeIdValue(IdValue idValue) throws IOException {
         /*
          * The idValue is shown as bytes in computation,

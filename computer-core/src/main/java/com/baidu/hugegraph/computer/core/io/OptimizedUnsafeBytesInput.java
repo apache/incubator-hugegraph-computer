@@ -25,22 +25,22 @@ import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
 
-public class OptimizedUnsafeByteArrayInput extends UnsafeByteArrayInput {
+public class OptimizedUnsafeBytesInput extends UnsafeBytesInput {
 
-    public OptimizedUnsafeByteArrayInput(byte[] buffer) {
+    public OptimizedUnsafeBytesInput(byte[] buffer) {
         super(buffer);
     }
 
-    public OptimizedUnsafeByteArrayInput(byte[] buffer, int limit) {
+    public OptimizedUnsafeBytesInput(byte[] buffer, int limit) {
         super(buffer, limit);
     }
 
-    public OptimizedUnsafeByteArrayInput(byte[] buffer, long limit) {
+    public OptimizedUnsafeBytesInput(byte[] buffer, long limit) {
         super(buffer, limit);
     }
 
-    public OptimizedUnsafeByteArrayInput(byte[] buffer, int position,
-                                         int limit) {
+    public OptimizedUnsafeBytesInput(byte[] buffer, int position,
+                                     int limit) {
         super(buffer, position, limit);
     }
 

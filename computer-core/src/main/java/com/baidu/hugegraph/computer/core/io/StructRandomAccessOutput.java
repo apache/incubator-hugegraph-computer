@@ -57,7 +57,7 @@ public class StructRandomAccessOutput implements RandomAccessOutput {
     @Override
     public void write(RandomAccessInput input, long offset, long length)
                       throws IOException {
-        if (UnsafeByteArrayInput.class == input.getClass()) {
+        if (UnsafeBytesInput.class == input.getClass()) {
             byte[] buffer = Whitebox.getInternalState(input, "buffer");
             this.write(buffer, (int) offset, (int) length);
         } else {

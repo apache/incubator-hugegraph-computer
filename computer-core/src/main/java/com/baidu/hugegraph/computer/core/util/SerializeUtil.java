@@ -24,8 +24,8 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
 public final class SerializeUtil {
@@ -34,7 +34,7 @@ public final class SerializeUtil {
     private static final ComputerContext CONTEXT = ComputerContext.instance();
 
     public static byte[] toBytes(Writable obj) {
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             obj.write(bao);
             return bao.toByteArray();
         } catch (IOException e) {
@@ -44,7 +44,7 @@ public final class SerializeUtil {
     }
 
     public static void fromBytes(byte[] bytes, Readable obj) {
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes)) {
+        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
             obj.read(bai);
         } catch (IOException e) {
             throw new ComputeException("Failed to read from byte array", e);

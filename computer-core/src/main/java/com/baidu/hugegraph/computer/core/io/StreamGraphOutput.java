@@ -63,13 +63,13 @@ public class StreamGraphOutput implements GraphOutput {
         if (size == 0) {
             return;
         }
-        long startPosition = this.writeFullInt(0);
+        long startPosition = this.out.writeFullInt(0);
         for (Edge edge : edges) {
             this.writeEdge(edge);
         }
         long endPosition = this.out.position();
         long length = endPosition - startPosition - Constants.INT_LEN;
-        this.writeFullInt(startPosition, (int) length);
+        this.out.writeFullInt(startPosition, (int) length);
     }
 
     @Override
@@ -97,13 +97,6 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeId(Id id) throws IOException {
-//        BytesBuffer buffer = BytesBuffer.allocate(1 + id.length());
-//        buffer.writeId(id);
-//        // write length
-//        this.out.writeInt(buffer.position());
-//        this.out.write(buffer.array(), 0, buffer.position());
-
-
         this.out.writeByte(id.type().code());
         id.write(this.out);
     }
@@ -111,22 +104,6 @@ public class StreamGraphOutput implements GraphOutput {
     @Override
     public void writeValue(Value<?> value) throws IOException {
         value.write(this.out);
-    }
-
-    protected final long writeFullInt(int v) throws IOException {
-        long position = this.out.position();
-        this.out.writeInt(v);
-        return position;
-    }
-
-    protected final void writeFullInt(long position, int v) throws IOException {
-        this.out.writeInt(position, v);
-    }
-
-    protected final long writeFullLong(long v) throws IOException {
-        long position = this.out.position();
-        this.out.writeLong(v);
-        return position;
     }
 
     @Override

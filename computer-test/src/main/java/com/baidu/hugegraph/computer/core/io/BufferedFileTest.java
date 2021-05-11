@@ -641,10 +641,10 @@ public class BufferedFileTest {
         File file3 = createTempFile();
         try (BufferedFileInput fileInput = inputByString(file3, "apple")) {
             @SuppressWarnings("resource")
-            UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+            UnsafeBytesOutput output = new UnsafeBytesOutput();
             output.writeBytes("banana");
             @SuppressWarnings("resource")
-            RandomAccessInput input = new UnsafeByteArrayInput(output.buffer());
+            RandomAccessInput input = new UnsafeBytesInput(output.buffer());
             int result = input.compare(0, input.available(), fileInput, 0,
                                         fileInput.available());
             Assert.assertTrue(result > 0);

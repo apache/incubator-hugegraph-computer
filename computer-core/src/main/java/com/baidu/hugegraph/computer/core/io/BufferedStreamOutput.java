@@ -29,7 +29,7 @@ import com.baidu.hugegraph.util.E;
  * This is used to buffer and output the buffer to output stream when buffer
  * is full.
  */
-public class BufferedStreamOutput extends UnsafeByteArrayOutput {
+public class BufferedStreamOutput extends UnsafeBytesOutput {
 
     private final int bufferCapacity;
     private final OutputStream output;

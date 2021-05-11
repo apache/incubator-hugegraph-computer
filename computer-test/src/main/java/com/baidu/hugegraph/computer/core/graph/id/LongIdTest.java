@@ -39,6 +39,10 @@ public class LongIdTest extends UnitTestBase {
         LongId longId3 = new LongId(123L);
         LongId longId4 = new LongId(322L);
 
+        LongId longId5 = new LongId(-100L);
+        LongId longId6 = new LongId();
+        LongId longId7 = new LongId(-100L);
+
         Assert.assertEquals(IdType.LONG, longId1.type());
         IdValue idValue = longId1.idValue();
         Assert.assertEquals(ValueType.ID_VALUE, idValue.type());
@@ -49,14 +53,24 @@ public class LongIdTest extends UnitTestBase {
         Assert.assertArrayEquals(NumericUtil.longToBytes(123L),
                                  longId1.asBytes());
 
+        Assert.assertEquals(new Long(-100L), longId5.asObject());
+        Assert.assertEquals(-100L, longId5.asLong());
+        Assert.assertArrayEquals(NumericUtil.longToBytes(-100L),
+                                 longId5.asBytes());
+
         Assert.assertTrue(longId1.compareTo(longId2) < 0);
         Assert.assertTrue(longId2.compareTo(longId1) > 0);
         Assert.assertTrue(longId1.compareTo(longId3) == 0);
         Assert.assertTrue(longId2.compareTo(longId4) < 0);
 
+        Assert.assertTrue(longId5.compareTo(longId6) < 0);
+        Assert.assertTrue(longId6.compareTo(longId5) > 0);
+        Assert.assertTrue(longId5.compareTo(longId7) == 0);
+
         Assert.assertEquals(longId1, longId3);
         Assert.assertNotEquals(longId1, longId2);
         Assert.assertEquals(Long.hashCode(123L), longId1.hashCode());
+        Assert.assertEquals(Long.hashCode(-100L), longId5.hashCode());
         Assert.assertEquals(longId1, new LongId(longId1.asLong()));
     }
 
