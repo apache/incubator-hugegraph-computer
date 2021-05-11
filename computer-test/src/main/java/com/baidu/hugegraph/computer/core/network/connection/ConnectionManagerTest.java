@@ -24,7 +24,6 @@ import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -37,26 +36,20 @@ import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
 import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
 
 public class ConnectionManagerTest extends UnitTestBase {
 
-    private static final Logger LOG = Log.logger(ConnectionManagerTest.class);
-
-    private static Config config;
-    private static MessageHandler serverHandler;
-    private static ClientHandler clientHandler;
     private static ConnectionManager connectionManager;
     private static int port;
 
     @Before
     public void setup() {
-        config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
-            ComputerOptions.TRANSPORT_IO_MODE, "NIO"
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_SERVER_HOST, "127.0.0.1",
+                ComputerOptions.TRANSPORT_IO_MODE, "NIO"
         );
-        serverHandler = new MockMessageHandler();
-        clientHandler = new MockClientHandler();
+        MessageHandler serverHandler = new MockMessageHandler();
+        ClientHandler clientHandler = new MockClientHandler();
         connectionManager = new TransportConnectionManager();
         port = connectionManager.startServer(config, serverHandler);
         connectionManager.initClientManager(config, clientHandler);
@@ -80,9 +73,8 @@ public class ConnectionManagerTest extends UnitTestBase {
     @Test
     public void testGetServerWithNoStart() {
         ConnectionManager connectionManager1 = new TransportConnectionManager();
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            TransportServer server = connectionManager1.getServer();
-        }, e -> {
+        Assert.assertThrows(IllegalArgumentException.class,
+                            connectionManager1::getServer, e -> {
             Assert.assertContains("has not been initialized yet",
                                   e.getMessage());
         });
@@ -94,6 +86,14 @@ public class ConnectionManagerTest extends UnitTestBase {
                                     "127.0.0.1", port);
         TransportClient client = connectionManager.getOrCreateClient(
                                  connectionId);
+        Assert.assertTrue(client.active());
+    }
+
+
+    @Test
+    public void testCloseClientWithHostAndPort() throws IOException {
+        TransportClient client = connectionManager.getOrCreateClient(
+                                 "127.0.0.1", port);
         Assert.assertTrue(client.active());
     }
 
@@ -137,7 +137,7 @@ public class ConnectionManagerTest extends UnitTestBase {
         });
         connectionManager.shutdownServer();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            TransportServer server = connectionManager.getServer();
+            connectionManager.getServer();
         }, e -> {
             Assert.assertContains("has not been initialized yet",
                                   e.getMessage());

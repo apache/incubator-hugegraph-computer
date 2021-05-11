@@ -28,7 +28,6 @@ import com.baidu.hugegraph.testutil.Assert;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.util.ReferenceCountUtil;
 
 public class ManagedBufferTest {
 
@@ -93,6 +92,7 @@ public class ManagedBufferTest {
         Assert.assertSame(nioManagedBuffer.nettyByteBuf().array(),
                           byteBuffer.array());
         nioManagedBuffer.release();
+        Assert.assertEquals(0, nioManagedBuffer.referenceCount());
 
         ByteBuf byteBuf = Unpooled.buffer(10);
         ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
@@ -122,19 +122,27 @@ public class ManagedBufferTest {
         Assert.assertNotSame(bytesSource, bytes2);
 
         ByteBuf buf3 = Unpooled.directBuffer(bytesSource.length);
-        buf3 = ReferenceCountUtil.releaseLater(buf3);
-        buf3 = buf3.writeBytes(bytesSource);
-        NettyManagedBuffer nettyManagedBuffer3 = new NettyManagedBuffer(buf3);
-        byte[] bytes3 = nettyManagedBuffer3.copyToByteArray();
-        Assert.assertArrayEquals(bytesSource, bytes3);
-        Assert.assertNotSame(bytesSource, bytes3);
+        try {
+            buf3 = buf3.writeBytes(bytesSource);
+            NettyManagedBuffer nettyManagedBuffer3 =
+                               new NettyManagedBuffer(buf3);
+            byte[] bytes3 = nettyManagedBuffer3.copyToByteArray();
+            Assert.assertArrayEquals(bytesSource, bytes3);
+            Assert.assertNotSame(bytesSource, bytes3);
+        } finally {
+            buf3.release();
+        }
 
         ByteBuf buf4 = Unpooled.buffer(bytesSource.length);
-        buf4 = ReferenceCountUtil.releaseLater(buf4);
-        buf4 = buf4.writeBytes(bytesSource);
-        NettyManagedBuffer nettyManagedBuffer4 = new NettyManagedBuffer(buf4);
-        byte[] bytes4 = nettyManagedBuffer4.copyToByteArray();
-        Assert.assertArrayEquals(bytesSource, bytes4);
-        Assert.assertNotSame(bytesSource, bytes4);
+        try {
+            buf4 = buf4.writeBytes(bytesSource);
+            NettyManagedBuffer nettyManagedBuffer4 =
+                               new NettyManagedBuffer(buf4);
+            byte[] bytes4 = nettyManagedBuffer4.copyToByteArray();
+            Assert.assertArrayEquals(bytesSource, bytes4);
+            Assert.assertNotSame(bytesSource, bytes4);
+        } finally {
+            buf4.release();
+        }
     }
 }

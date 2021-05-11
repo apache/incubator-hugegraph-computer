@@ -87,15 +87,6 @@ public abstract class AbstractNetworkTest {
         return client;
     }
 
-    protected TransportClient oneClient(int clintIndex) throws IOException {
-        ConnectionId connectionId = ConnectionId.parseConnectionId(host, port,
-                                                                   clintIndex);
-        TransportClient client = connectionManager.getOrCreateClient(
-                                 connectionId);
-        Assert.assertTrue(client.active());
-        return client;
-    }
-
     @Before
     public void setup() {
         Configurator.setAllLevels("com.baidu.hugegraph", Level.DEBUG);
@@ -127,6 +118,7 @@ public abstract class AbstractNetworkTest {
             connectionManager.shutdown();
             connectionManager = null;
         }
+        Configurator.setAllLevels("com.baidu.hugegraph", Level.INFO);
     }
 
     private void mockSpyProtocol() {

@@ -21,8 +21,6 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
@@ -33,7 +31,6 @@ import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
-import com.baidu.hugegraph.util.Log;
 import com.google.common.base.Throwables;
 
 import io.netty.channel.Channel;
@@ -42,8 +39,6 @@ import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.ScheduledFuture;
 
 public class NettyServerHandler extends AbstractNettyHandler {
-
-    private static final Logger LOG = Log.logger(NettyServerHandler.class);
 
     private static final long INITIAL_DELAY = 0L;
 
@@ -174,8 +169,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx,
-                                Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         TransportException exception;
         Channel channel = ctx.channel();
         if (cause instanceof TransportException) {

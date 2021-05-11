@@ -21,15 +21,12 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.codec.FrameDecoder;
 import com.baidu.hugegraph.computer.core.network.netty.codec.MessageDecoder;
 import com.baidu.hugegraph.computer.core.network.netty.codec.MessageEncoder;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
-import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -41,8 +38,6 @@ import io.netty.handler.timeout.IdleStateHandler;
  * Defines the server and client channel handlers, i.e. the protocol.
  */
 public class NettyProtocol {
-
-    private static final Logger LOG = Log.logger(NettyProtocol.class);
 
     private static final ChannelHandler SLOT_HANDLER = new SLOT_HANDLER();
     private static final int DISABLE_IDLE_TIME = 0;

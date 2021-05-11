@@ -76,7 +76,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
                             clientSession.maxAckId);
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             clientSession.finishId);
-        Assert.assertFalse(clientSession.blocking());
+        Assert.assertFalse(clientSession.flowBlocking());
     }
 
     @Test
@@ -326,7 +326,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
                             clientSession.maxAckId);
         Assert.assertEquals(AbstractMessage.UNKNOWN_SEQ,
                             clientSession.maxRequestId);
-        Assert.assertFalse(clientSession.blocking());
+        Assert.assertFalse(clientSession.flowBlocking());
 
         Assert.assertFalse(this.existError(exceptions));
     }

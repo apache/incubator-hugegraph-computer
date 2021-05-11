@@ -38,7 +38,7 @@ public class MockMessageHandler implements MessageHandler {
                  buffer != null ? buffer.length() : null);
 
         if (buffer != null) {
-            byte[] bytes = buffer.copyToByteArray();
+            buffer.copyToByteArray();
         }
     }
 

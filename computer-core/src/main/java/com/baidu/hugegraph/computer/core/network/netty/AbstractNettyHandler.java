@@ -87,6 +87,7 @@ public abstract class AbstractNettyHandler
                                               Channel channel,
                                               AckMessage ackMessage);
 
+    @SuppressWarnings("unused")
     protected void processPingMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       PingMessage pingMessage) {
@@ -94,6 +95,7 @@ public abstract class AbstractNettyHandler
            .addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
+    @SuppressWarnings("unused")
     protected void processPongMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       PongMessage pongMessage) {

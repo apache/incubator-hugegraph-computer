@@ -41,7 +41,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.util.ReferenceCountUtil;
 
 public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
 
@@ -130,7 +129,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     }
 
     @Test
-    public void testClientDecodeException() throws Exception {
+    public void testClientDecodeException() throws IOException {
         Mockito.doAnswer(invocationOnMock -> {
             invocationOnMock.callRealMethod();
             UnitTestBase.sleep(200L);
@@ -140,7 +139,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         }).when(serverProtocol).initializeServerPipeline(Mockito.any(),
                                                          Mockito.any());
 
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        this.oneClient();
 
         Mockito.verify(clientHandler, Mockito.timeout(15_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
@@ -152,16 +151,21 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         int partition = 1;
         byte[] bytes = StringEncoding.encode("mock msg");
         ByteBuf buf = Unpooled.directBuffer().writeBytes(bytes);
-        buf = ReferenceCountUtil.releaseLater(buf);
-        NettyManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
-        DataMessage dataMessage = new DataMessage(MessageType.MSG,
-                                                  requestId, partition,
-                                                  managedBuffer);
-        Assert.assertEquals("DataMessage[messageType=MSG,sequenceNumber=99," +
-                            "partition=1,hasBody=true,bodyLength=8]",
-                            dataMessage.toString());
-        Assert.assertEquals(1, managedBuffer.referenceCount());
-        dataMessage.release();
-        Assert.assertEquals(0, managedBuffer.referenceCount());
+        try {
+            NettyManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
+            DataMessage dataMessage = new DataMessage(MessageType.MSG,
+                                                      requestId, partition,
+                                                      managedBuffer);
+            Assert.assertEquals("DataMessage[messageType=MSG," +
+                                "sequenceNumber=99,partition=1,hasBody=true," +
+                                "bodyLength=8]", dataMessage.toString());
+            Assert.assertEquals(1, managedBuffer.referenceCount());
+            dataMessage.release();
+            Assert.assertEquals(0, managedBuffer.referenceCount());
+        } finally {
+            if (buf.refCnt() > 0) {
+                buf.release();
+            }
+        }
     }
 }

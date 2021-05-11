@@ -53,6 +53,7 @@ public enum MessageType implements SerialEnum {
         this.category = category;
     }
 
+    @Override
     public byte code() {
         return this.code;
     }

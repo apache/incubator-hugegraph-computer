@@ -29,7 +29,6 @@ import com.baidu.hugegraph.testutil.Assert;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import io.netty.util.ReferenceCountUtil;
 
 public class TransportUtilTest {
 
@@ -83,19 +82,37 @@ public class TransportUtilTest {
     public void testReadString() {
         byte[] testData = StringEncoding.encode("test data");
         ByteBuf buffer = Unpooled.directBuffer(testData.length);
-        buffer = ReferenceCountUtil.releaseLater(buffer);
-        buffer.writeInt(testData.length);
-        buffer.writeBytes(testData);
-        String readString = TransportUtil.readString(buffer);
-        Assert.assertEquals("test data", readString);
+        try {
+            buffer.writeInt(testData.length);
+            buffer.writeBytes(testData);
+            String readString = TransportUtil.readString(buffer);
+            Assert.assertEquals("test data", readString);
+        } finally {
+            buffer.release();
+        }
     }
 
     @Test
     public void testWriteString() {
         ByteBuf buffer = Unpooled.buffer();
-        buffer = ReferenceCountUtil.releaseLater(buffer);
-        TransportUtil.writeString(buffer, "test data");
-        String readString = TransportUtil.readString(buffer);
-        Assert.assertEquals("test data", readString);
+        try {
+            TransportUtil.writeString(buffer, "test data");
+            String readString = TransportUtil.readString(buffer);
+            Assert.assertEquals("test data", readString);
+        } finally {
+            buffer.release();
+        }
+    }
+
+    @Test
+    public void testWriteStringWithEmptyString() {
+        ByteBuf buffer = Unpooled.buffer();
+        try {
+            TransportUtil.writeString(buffer, "");
+            String readString = TransportUtil.readString(buffer);
+            Assert.assertEquals("", readString);
+        } finally {
+            buffer.release();
+        }
     }
 }
