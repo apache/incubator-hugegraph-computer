@@ -33,7 +33,11 @@ public class EntriesInput implements EntryIterator {
 
     public EntriesInput(RandomAccessInput input) {
         this.input = input;
-        this.userAccessInput = input.duplicate();
+        try {
+            this.userAccessInput = input.duplicate();
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
     }
 
     @Override

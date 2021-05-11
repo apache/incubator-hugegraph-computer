@@ -54,7 +54,7 @@ public class EntryOutputImpl implements EntryOutput {
         this.output.writeInt(0);
         long position = this.output.position();
         // Write data
-        //data.write(this.output);
+        data.write(this.output);
         // Fill data length placeholder
         int dataLength = (int) (this.output.position() - position);
         this.output.writeInt(position - Integer.BYTES, dataLength);

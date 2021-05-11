@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorter;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 
@@ -32,16 +31,16 @@ public class InputsSorterImpl implements InputsSorter {
 
     @Override
     public EntryIterator sort(List<EntryIterator> entries) throws IOException {
-        return new Sorting(entries);
+        return new EntriesSorting(entries);
     }
 
-    private static class Sorting implements EntryIterator {
+    private static class EntriesSorting implements EntryIterator {
 
         private final InputsSorting<KvEntry> inputsSorting;
         private final List<EntryIterator> sources;
         private boolean closed;
 
-        public Sorting(List<EntryIterator> sources) {
+        public EntriesSorting(List<EntryIterator> sources) {
             this.sources = sources;
             this.inputsSorting = SortingFactory.createSorting(sources);
             this.closed = false;

@@ -95,8 +95,9 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
 
     private HgkvFileBuilder nextSegmentBuilder(HgkvDir dir, Config config)
                                                throws IOException {
-        String path = dir.path() + File.separator + HgkvDirImpl.FILE_NAME_PREFIX +
-                      (++this.fileId) + HgkvDirImpl.FILE_EXTEND_NAME;
+        String path = dir.path() + File.separator +
+                      HgkvDirImpl.FILE_NAME_PREFIX + (++this.fileId) +
+                      HgkvDirImpl.FILE_EXTEND_NAME;
         return new HgkvFileBuilderImpl(path, config);
     }
 }

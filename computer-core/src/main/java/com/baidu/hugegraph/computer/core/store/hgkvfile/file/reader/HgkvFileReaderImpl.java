@@ -54,7 +54,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
             this.numEntries = hgkvFile.numEntries();
             File file = new File(hgkvFile.path());
             this.input = new BufferedFileInput(file);
-            this.userAccessInput = new BufferedFileInput(file);
+            this.userAccessInput = (BufferedFileInput) this.input.duplicate();
         }
 
         @Override

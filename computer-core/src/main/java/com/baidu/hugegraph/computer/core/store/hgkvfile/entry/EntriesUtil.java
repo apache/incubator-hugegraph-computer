@@ -137,15 +137,18 @@ public final class EntriesUtil {
         return new DefaultKvEntry(key, value);
     }
 
-    public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry)
-                                        throws IOException {
-        RandomAccessInput input = entry.value().input();
-        input.seek(entry.value().offset());
-        // Skip sub-entry size
-        input.skip(Integer.BYTES);
-        KvEntry firstSubKv = EntriesUtil.entryFromInput(input);
+    public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry) {
+        try {
+            RandomAccessInput input = entry.value().input();
+            input.seek(entry.value().offset());
+            // Skip sub-entry size
+            input.skip(Integer.BYTES);
+            KvEntry firstSubKv = EntriesUtil.entryFromInput(input);
 
-        return new KvEntryWithFirstSubKv(entry.key(), entry.value(),
-                                         firstSubKv);
+            return new KvEntryWithFirstSubKv(entry.key(), entry.value(),
+                                             firstSubKv);
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
     }
 }

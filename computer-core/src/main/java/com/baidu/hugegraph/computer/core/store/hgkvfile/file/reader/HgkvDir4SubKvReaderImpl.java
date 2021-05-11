@@ -19,13 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader;
 
-import java.io.IOException;
-import java.util.NoSuchElementException;
-
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
+import com.baidu.hugegraph.iterator.CIter;
+import com.baidu.hugegraph.iterator.MapperIterator;
 
 public class HgkvDir4SubKvReaderImpl implements HgkvDirReader {
 
@@ -37,19 +35,17 @@ public class HgkvDir4SubKvReaderImpl implements HgkvDirReader {
 
     @Override
     public EntryIterator iterator() {
-        try {
-            return new KvEntryIter(this.reader);
-        } catch (IOException e) {
-            throw new ComputerException(e.getMessage(), e);
-        }
+        return new KvEntryWithFirstSubKvIter(this.reader);
     }
 
-    private static class KvEntryIter implements EntryIterator {
+    private static class KvEntryWithFirstSubKvIter implements EntryIterator {
 
-        private final EntryIterator entries;
+        private final CIter<KvEntry> entries;
 
-        public KvEntryIter(HgkvDirReader reader) throws IOException {
-            this.entries = reader.iterator();
+        public KvEntryWithFirstSubKvIter(HgkvDirReader reader) {
+            this.entries = new MapperIterator<>(reader.iterator(), entry -> {
+                return EntriesUtil.kvEntryWithFirstSubKv(entry);
+            });
         }
 
         @Override
@@ -59,14 +55,7 @@ public class HgkvDir4SubKvReaderImpl implements HgkvDirReader {
 
         @Override
         public KvEntry next() {
-            if (!this.hasNext()) {
-                throw new NoSuchElementException();
-            }
-            try {
-                return EntriesUtil.kvEntryWithFirstSubKv(this.entries.next());
-            } catch (IOException e) {
-                throw new ComputerException(e.getMessage(), e);
-            }
+            return this.entries.next();
         }
 
         @Override

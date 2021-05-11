@@ -19,20 +19,19 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.buffer;
 
-import java.io.IOException;
-import java.util.Iterator;
-
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
+import com.baidu.hugegraph.iterator.CIter;
+import com.baidu.hugegraph.iterator.MapperIterator;
 
 public class EntriesSubKvInput implements EntryIterator {
 
-    private final Iterator<KvEntry> entries;
+    private final CIter<KvEntry> entries;
 
     public EntriesSubKvInput(RandomAccessInput input) {
-        this.entries = new EntriesInput(input);
+        this.entries = new MapperIterator<>(new EntriesInput(input),
+                                            EntriesUtil::kvEntryWithFirstSubKv);
     }
 
     @Override
@@ -42,15 +41,11 @@ public class EntriesSubKvInput implements EntryIterator {
 
     @Override
     public KvEntry next() {
-        try {
-            return EntriesUtil.kvEntryWithFirstSubKv(this.entries.next());
-        } catch (IOException e) {
-            throw new ComputerException(e.getMessage(), e);
-        }
+        return EntriesUtil.kvEntryWithFirstSubKv(this.entries.next());
     }
 
     @Override
-    public void close() throws IOException {
-        // pass
+    public void close() throws Exception {
+        this.entries.close();
     }
 }

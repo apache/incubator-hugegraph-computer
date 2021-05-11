@@ -45,19 +45,19 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
     @Override
     public EntryIterator iterator() {
         try {
-            return new KvEntryIter(this.hgkvDir);
+            return new HgkvDirEntryIter(this.hgkvDir);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
     }
 
-    private static class KvEntryIter implements EntryIterator {
+    private static class HgkvDirEntryIter implements EntryIterator {
 
         private final Iterator<HgkvFile> segments;
         private long numEntries;
         private EntryIterator kvIter;
 
-        public KvEntryIter(HgkvDir hgkvDir) throws IOException {
+        public HgkvDirEntryIter(HgkvDir hgkvDir) throws IOException {
             this.segments = hgkvDir.segments().iterator();
             this.numEntries = hgkvDir.numEntries();
         }

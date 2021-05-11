@@ -181,4 +181,5 @@ public class BufferedFileInput extends UnsafeBytesInput {
         return BytesUtil.compare(bytes1, 0, (int) length,
                                  bytes2, 0, (int) otherLength);
     }
+
 }

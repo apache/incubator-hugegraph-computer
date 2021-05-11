@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -36,6 +35,7 @@ import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InputToEntries;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
@@ -88,7 +88,8 @@ public class SorterImpl implements Sorter {
                             List<String> outputs, boolean withSubKv)
                             throws Exception {
         if (withSubKv) {
-            this.mergeInputs(inputs, o -> new HgkvDir4SubKvReaderImpl(o).iterator(),
+            this.mergeInputs(inputs,
+                             o -> new HgkvDir4SubKvReaderImpl(o).iterator(),
                              flusher, outputs);
         } else {
             this.mergeInputs(inputs, o -> new HgkvDirReaderImpl(o).iterator(),
@@ -110,7 +111,6 @@ public class SorterImpl implements Sorter {
     private void sortBuffers(List<EntryIterator> entries,
                              OuterSortFlusher flusher,
                              String output) throws IOException {
-
         InputsSorter sorter = new InputsSorterImpl();
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(output,
                                                              this.config)) {
@@ -119,8 +119,7 @@ public class SorterImpl implements Sorter {
         }
     }
 
-    private void mergeInputs(List<String> inputs,
-                             Function<String, EntryIterator> inputToEntries,
+    private void mergeInputs(List<String> inputs, InputToEntries inputToEntries,
                              OuterSortFlusher flusher, List<String> outputs)
                              throws Exception {
         InputFilesSelector selector = new DisperseEvenlySelector();

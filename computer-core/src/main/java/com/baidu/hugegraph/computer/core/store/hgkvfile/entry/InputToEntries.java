@@ -17,22 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.merge;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-import java.util.List;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 
-import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InputToEntries;
+public interface InputToEntries {
 
-public interface HgkvDirMerger {
-
-    /**
-     * Merge inputs hgkvDirs to output hgkvDir
-     * @param inputs hgkv file that need to be merged
-     * @param inputToEntries key value pair read mode
-     * @param output write merge result to this file
-     * @param flusher combiner entries of same key
-     */
-    void merge(List<String> inputs, InputToEntries inputToEntries,
-               String output, OuterSortFlusher flusher) throws Exception;
+    EntryIterator inputToEntries(String path);
 }

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -34,6 +33,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InputToEntries;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
@@ -57,8 +57,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
     }
 
     @Override
-    public void merge(List<String> inputs,
-                      Function<String, EntryIterator> inputToEntries,
+    public void merge(List<String> inputs, InputToEntries inputToEntries,
                       String output, OuterSortFlusher flusher)
                       throws Exception {
         try {
@@ -108,7 +107,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
 
     private List<File> mergeSubInputs(List<List<String>> splitResult,
                                       int tempFileId,
-                                      Function<String, EntryIterator> inputToEntries,
+                                      InputToEntries inputToEntries,
                                       OuterSortFlusher flusher)
                                       throws Exception {
         List<File> tempFiles = new ArrayList<>();
@@ -123,7 +122,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
     }
 
     private File mergeInputsToOutput(List<String> inputs,
-                                     Function<String, EntryIterator> inputToEntries,
+                                     InputToEntries inputToEntries,
                                      String output,
                                      OuterSortFlusher flusher)
                                      throws Exception {
@@ -133,7 +132,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
          */
         List<EntryIterator> entries = new ArrayList<>();
         for (String input : inputs) {
-            entries.add(inputToEntries.apply(input));
+            entries.add(inputToEntries.inputToEntries(input));
         }
 
         InputsSorter sorter = new InputsSorterImpl();
