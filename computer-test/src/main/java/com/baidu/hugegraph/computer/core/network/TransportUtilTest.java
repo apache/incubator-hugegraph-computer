@@ -102,4 +102,14 @@ public class TransportUtilTest {
         String readString = TransportUtil.readString(buffer);
         Assert.assertEquals("test data", readString);
     }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testWriteStringWithEmptyString() {
+        ByteBuf buffer = Unpooled.buffer();
+        buffer = ReferenceCountUtil.releaseLater(buffer);
+        TransportUtil.writeString(buffer, "");
+        String readString = TransportUtil.readString(buffer);
+        Assert.assertEquals("", readString);
+    }
 }
