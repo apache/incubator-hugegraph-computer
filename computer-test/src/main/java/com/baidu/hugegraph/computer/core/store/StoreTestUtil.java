@@ -108,11 +108,8 @@ public class StoreTestUtil {
 
     public static Integer dataFromPointer(Pointer pointer) throws IOException {
         RandomAccessInput input = pointer.input();
-        long position = input.position();
         input.seek(pointer.offset());
-        int result = input.readInt();
-        input.seek(position);
-        return result;
+        return input.readInt();
     }
 
     public static String availablePathById(String id) {
