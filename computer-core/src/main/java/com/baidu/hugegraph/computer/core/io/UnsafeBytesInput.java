@@ -219,7 +219,7 @@ public class UnsafeBytesInput implements RandomAccessInput, Closeable {
     }
 
     @Override
-    public RandomAccessInput duplicate() throws IOException {
+    public UnsafeBytesInput duplicate() throws IOException {
         return new UnsafeBytesInput(this.buffer, this.position, this.limit);
     }
 

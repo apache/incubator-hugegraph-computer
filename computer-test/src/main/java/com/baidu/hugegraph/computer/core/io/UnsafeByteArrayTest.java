@@ -461,6 +461,39 @@ public class UnsafeByteArrayTest {
     }
 
     @Test
+    public void testDuplicate() throws IOException {
+        UnsafeBytesInput raw = inputByString("apple");
+        UnsafeBytesInput dup = raw.duplicate();
+        raw.readByte();
+        Assert.assertEquals(1, raw.position());
+        Assert.assertEquals(0, dup.position());
+
+        String uuid = UUID.randomUUID().toString();
+        File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
+        BufferedFileOutput fileOutput = null;
+        BufferedFileInput fileInput = null;
+        try {
+            fileOutput = new BufferedFileOutput(tempFile);
+            fileOutput.writeBytes(uuid);
+            fileOutput.close();
+            fileInput = new BufferedFileInput(tempFile);
+            dup = fileInput.duplicate();
+
+            fileInput.readChar();
+            Assert.assertEquals(2, fileInput.position());
+            Assert.assertEquals(0, dup.position());
+        } finally {
+            if (fileInput != null) {
+                fileInput.close();
+            }
+            if (fileOutput != null) {
+                fileOutput.close();
+            }
+            FileUtils.deleteQuietly(tempFile);
+        }
+    }
+
+    @Test
     public void testReadWriteFullInt() throws IOException {
         byte[] bytes;
         try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {

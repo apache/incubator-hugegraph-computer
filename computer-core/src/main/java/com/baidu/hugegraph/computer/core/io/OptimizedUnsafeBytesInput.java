@@ -44,6 +44,13 @@ public class OptimizedUnsafeBytesInput extends UnsafeBytesInput {
     }
 
     @Override
+    public OptimizedUnsafeBytesInput duplicate() throws IOException {
+        return new OptimizedUnsafeBytesInput(this.buffer(),
+                                             (int) this.position(),
+                                             this.limit());
+    }
+
+    @Override
     public int readInt() throws IOException {
         return this.readVInt();
     }
@@ -56,13 +63,6 @@ public class OptimizedUnsafeBytesInput extends UnsafeBytesInput {
     @Override
     public String readUTF() throws IOException {
         return this.readString();
-    }
-
-    @Override
-    public OptimizedUnsafeBytesInput duplicate() throws IOException {
-        return new OptimizedUnsafeBytesInput(this.buffer(),
-                                             (int) this.position(),
-                                             this.limit());
     }
 
     private int readVInt() throws IOException {

@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 import com.baidu.hugegraph.testutil.Assert;
@@ -40,5 +42,21 @@ public class OptimizedUnsafeByteArrayTest {
         UnsafeBytesInput input2 = new OptimizedUnsafeBytesInput(output.buffer(),
                                                                 4L);
         Assert.assertEquals(0, input2.position());
+    }
+
+    @Test
+    public void testDuplicate() throws IOException {
+        OptimizedUnsafeBytesInput raw = inputByString("apple");
+        OptimizedUnsafeBytesInput dup = raw.duplicate();
+        raw.readByte();
+        Assert.assertEquals(1, raw.position());
+        Assert.assertEquals(0, dup.position());
+    }
+
+    private static OptimizedUnsafeBytesInput inputByString(String s)
+                                                           throws IOException {
+        OptimizedUnsafeBytesOutput output = new OptimizedUnsafeBytesOutput();
+        output.writeBytes(s);
+        return new OptimizedUnsafeBytesInput(output.toByteArray());
     }
 }

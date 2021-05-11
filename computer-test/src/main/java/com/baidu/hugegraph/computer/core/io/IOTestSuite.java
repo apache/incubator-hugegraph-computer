@@ -30,6 +30,7 @@ import org.junit.runners.Suite;
     CsvStructGraphOutputTest.class,
     StructRandomAccessOutputTest.class,
     UnsafeByteArrayTest.class,
+    OptimizedUnsafeByteArrayTest.class,
     BufferedFileTest.class,
     BufferedStreamTest.class
 })

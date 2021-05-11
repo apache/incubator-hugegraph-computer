@@ -33,6 +33,8 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
+import com.baidu.hugegraph.computer.core.io.GraphOutputFactory;
+import com.baidu.hugegraph.computer.core.io.OutputFormat;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
@@ -176,6 +178,8 @@ public class UnitTestBase {
 
     protected static StreamGraphOutput newStreamGraphOutput(
                                        UnsafeBytesOutput bao) {
-        return new StreamGraphOutput(context(), bao);
+        return (StreamGraphOutput) GraphOutputFactory.create(context(),
+                                                             OutputFormat.BIN,
+                                                             bao);
     }
 }
