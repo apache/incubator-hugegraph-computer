@@ -46,6 +46,7 @@ public class ClientSession extends TransportSession {
     private final int minPendingRequests;
 
     private final Lock lock;
+    // Flow control mark
     private volatile boolean blocking;
     private final BarrierEvent startedBarrier;
     private final BarrierEvent finishedBarrier;
@@ -79,27 +80,30 @@ public class ClientSession extends TransportSession {
         this.state = TransportState.FINISH_SENT;
     }
 
-    public synchronized void start(long timeout)
-                                   throws TransportException,
-                                          InterruptedException {
+    public synchronized void start(long timeout) throws TransportException,
+                                                        InterruptedException {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
                         "at start()", this.state);
 
         this.stateStartSent();
+        try {
+            this.sendFunction.apply(StartMessage.INSTANCE);
 
-        this.sendFunction.apply(StartMessage.INSTANCE);
-
-        if (!this.startedBarrier.await(timeout)) {
-            throw new TransportException(
+            if (!this.startedBarrier.await(timeout)) {
+                throw new TransportException(
                       "Timeout(%sms) to wait start-response", timeout);
+            }
+        } catch (Throwable e) {
+            this.stateReady();
+            throw e;
+        } finally {
+            this.startedBarrier.reset();
         }
-        this.startedBarrier.reset();
     }
 
-    public synchronized void finish(long timeout)
-                                    throws TransportException,
-                                           InterruptedException {
+    public synchronized void finish(long timeout) throws TransportException,
+                                                         InterruptedException {
         E.checkArgument(this.state == TransportState.ESTABLISHED,
                         "The state must be ESTABLISHED instead of %s " +
                         "at finish()", this.state);
@@ -107,15 +111,20 @@ public class ClientSession extends TransportSession {
         int finishId = this.genFinishId();
 
         this.stateFinishSent(finishId);
+        try {
+            FinishMessage finishMessage = new FinishMessage(finishId);
+            this.sendFunction.apply(finishMessage);
 
-        FinishMessage finishMessage = new FinishMessage(finishId);
-        this.sendFunction.apply(finishMessage);
-
-        if (!this.finishedBarrier.await(timeout)) {
-            throw new TransportException(
+            if (!this.finishedBarrier.await(timeout)) {
+                throw new TransportException(
                       "Timeout(%sms) to wait finish-response", timeout);
+            }
+        } catch (Throwable e) {
+            this.stateEstablished();
+            throw e;
+        } finally {
+            this.finishedBarrier.reset();
         }
-        this.finishedBarrier.reset();
     }
 
     public synchronized void sendAsync(MessageType messageType, int partition,
