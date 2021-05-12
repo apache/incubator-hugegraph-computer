@@ -19,9 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
+import java.io.IOException;
+
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public interface Pointer extends Range, Comparable<Pointer> {
 
     RandomAccessInput input();
+
+    byte[] bytes();
+
+    void write(RandomAccessOutput output) throws IOException;
 }

@@ -30,8 +30,8 @@ import org.apache.commons.io.FileUtils;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
@@ -53,7 +53,7 @@ public class StoreTestUtil {
 
     public static List<KvEntry> kvEntrysFromMap(List<Integer> map)
                                             throws IOException {
-        UnsafeByteArrayOutput data = new UnsafeByteArrayOutput();
+        UnsafeBytesOutput data = new UnsafeBytesOutput();
         Iterator<Integer> iterator = map.iterator();
         while (iterator.hasNext()) {
             data.writeInt(Integer.BYTES);
@@ -62,7 +62,7 @@ public class StoreTestUtil {
             data.writeInt(iterator.next());
         }
 
-        RandomAccessInput input = new UnsafeByteArrayInput(data.buffer(),
+        RandomAccessInput input = new UnsafeBytesInput(data.buffer(),
                                                            data.position());
         Iterator<KvEntry> entriesIter = new EntriesInput(input);
         List<KvEntry> entries = new ArrayList<>();
@@ -122,5 +122,10 @@ public class StoreTestUtil {
                (bytes[1] & 0xFF) << 8 |
                (bytes[2] & 0xFF) << 16 |
                (bytes[3] & 0xFF) << 24;
+    }
+
+    public static UnsafeBytesInput inputFromOutput(
+                                       UnsafeBytesOutput output) {
+        return new UnsafeBytesInput(output.buffer(), output.position());
     }
 }

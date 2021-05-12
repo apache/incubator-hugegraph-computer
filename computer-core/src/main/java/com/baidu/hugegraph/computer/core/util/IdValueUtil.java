@@ -42,7 +42,7 @@ public class IdValueUtil {
     public static Id toId(IdValue idValue) {
         byte[] bytes = idValue.bytes();
         /*
-         * NOTE: must use OptimizedUnsafeByteArrayInput, it make sure to
+         * NOTE: must use OptimizedUnsafeBytesInput, it make sure to
          * write bytes in big-end-aligned way
          */
         try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes);

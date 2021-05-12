@@ -24,22 +24,41 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.util.BytesUtil;
 
-public class DefaultPointer implements Pointer {
+public class OptimizedPointer implements Pointer {
 
     private final RandomAccessInput input;
     private final long offset;
     private final long length;
+    private final byte[] bytes;
 
-    public DefaultPointer(RandomAccessInput input, long offset, long length) {
+    public OptimizedPointer(RandomAccessInput input, long offset, long length) {
         this.input = input;
         this.offset = offset;
         this.length = length;
+        try {
+            input.seek(offset);
+            this.bytes = input.readBytes((int) length);
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
     }
 
     @Override
     public RandomAccessInput input() {
         return this.input;
+    }
+
+    @Override
+    public byte[] bytes() {
+        return this.bytes;
+    }
+
+    @Override
+    public void write(RandomAccessOutput output) throws IOException {
+        output.writeInt((int) this.length);
+        output.write(this.bytes);
     }
 
     @Override
@@ -53,29 +72,7 @@ public class DefaultPointer implements Pointer {
     }
 
     @Override
-    public byte[] bytes() {
-        try {
-            this.input.seek(this.offset);
-            return this.input.readBytes((int) this.length);
-        } catch (IOException e) {
-            throw new ComputerException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void write(RandomAccessOutput output) throws IOException {
-        output.writeInt((int) this.length);
-        output.write(this.input, this.offset, this.length);
-    }
-
-    @Override
     public int compareTo(Pointer other) {
-        try {
-            return this.input.compare(this.offset, this.length, other.input(),
-                                      other.offset(), other.length());
-        } catch (IOException e) {
-            throw new ComputerException("Error when compare tow pointers: %s",
-                                        e.getMessage(), e);
-        }
+        return BytesUtil.compare(this.bytes, other.bytes());
     }
 }

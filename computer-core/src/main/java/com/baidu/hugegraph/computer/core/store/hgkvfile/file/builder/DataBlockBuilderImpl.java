@@ -36,8 +36,8 @@ public class DataBlockBuilderImpl implements BlockBuilder {
 
     @Override
     public void add(Pointer key, Pointer value) throws IOException {
-        this.writePointer(this.output, key);
-        this.writePointer(this.output, value);
+        key.write(this.output);
+        value.write(this.output);
     }
 
     @Override
@@ -60,12 +60,5 @@ public class DataBlockBuilderImpl implements BlockBuilder {
     @Override
     public void reset() {
         this.entriesBytes = 0L;
-    }
-
-    private void writePointer(RandomAccessOutput output, Pointer pointer)
-                              throws IOException {
-        output.writeInt((int) pointer.length());
-        output.write(pointer.input(), pointer.offset(), pointer.length());
-        this.entriesBytes += (Integer.BYTES + pointer.length());
     }
 }

@@ -411,14 +411,14 @@ public class UnsafeBytesTest {
 
     @Test
     public void testWriteByInput() throws IOException {
-        // Input class is UnsafeByteArrayInput
+        // Input class is UnsafeBytesInput
         String uuid = UUID.randomUUID().toString();
         UnsafeBytesInput input = inputByString(uuid);
         UnsafeBytesOutput output = new UnsafeBytesOutput();
         output.write(input, 0, input.available());
         Assert.assertEquals(uuid, new String(output.toByteArray()));
 
-        // Input class isn't  UnsafeByteArrayInput
+        // Input class isn't  UnsafeBytesInput
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
         BufferedFileOutput fileOutput = null;
         BufferedFileInput fileInput = null;

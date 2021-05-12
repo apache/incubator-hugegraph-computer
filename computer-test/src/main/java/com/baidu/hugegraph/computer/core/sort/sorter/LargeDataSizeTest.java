@@ -27,9 +27,12 @@ import java.util.List;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
@@ -37,10 +40,11 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.combiner.MockIntSumCombiner;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.MockOutSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
@@ -59,11 +63,13 @@ import com.google.common.collect.Lists;
 
 public class LargeDataSizeTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+                                                       LargeDataSizeTest.class);
     private static String FILE_DIR;
+    private static StopWatch watcher;
 
     @BeforeClass
     public static void init() {
-        Watcher.start("init");
         // Don't forget to register options
         OptionSpace.register("computer",
                              "com.baidu.hugegraph.computer.core.config." +
@@ -73,14 +79,12 @@ public class LargeDataSizeTest {
                 ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB)
         );
         FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
-        Watcher.stop();
+        watcher = new StopWatch();
     }
 
     @After
     public void teardown() {
-        Watcher.start("teardown");
         FileUtils.deleteQuietly(new File(FILE_DIR));
-        Watcher.stop();
     }
 
     @Test
@@ -91,13 +95,13 @@ public class LargeDataSizeTest {
         long value = 0;
 
         Random random = new Random();
-        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput();
         List<RandomAccessInput> buffers = new ArrayList<>(mergeBufferNum);
         List<String> mergeBufferFiles = new ArrayList<>();
         int fileNum = 10;
         Sorter sorter = new SorterImpl(ComputerContext.instance().config());
 
-        Watcher.start("sort");
+        watcher.start();
         for (int i = 0; i < dataSize; i++) {
             output.writeInt(Integer.BYTES);
             output.writeInt(random.nextInt(dataSize));
@@ -108,9 +112,10 @@ public class LargeDataSizeTest {
 
             // Write data to buffer and sort buffer
             if (output.position() >= bufferSize || (i + 1) == dataSize) {
-                UnsafeByteArrayInput input = inputFromOutput(output);
+                UnsafeBytesInput input = StoreTestUtil.inputFromOutput(
+                                                           output);
                 buffers.add(sortBuffer(sorter, input));
-                output = new UnsafeByteArrayOutput();
+                output = new UnsafeBytesOutput();
             }
 
             // Merge buffers to HgkvDir
@@ -126,21 +131,21 @@ public class LargeDataSizeTest {
         String resultFile1 = availableDirPath("0");
         mergeFiles(sorter, mergeBufferFiles, Lists.newArrayList(resultFile1));
 
-        Watcher.stop();
+        watcher.stop();
+        LOGGER.info(String.format("LargeDataSizeTest sort time: %s",
+                                  watcher.getTime()));
 
         long result = getFileValue(resultFile1);
-        System.out.println("expected:" + value);
-        System.out.println("actual:" + result);
         Assert.assertEquals(value, result);
     }
 
     private static RandomAccessInput sortBuffer(Sorter sorter,
                                                 RandomAccessInput input)
                                                 throws IOException {
-        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput();
         InnerSortFlusher combiner = new MockInnerSortFlusher(output);
         sorter.sortBuffer(input, combiner);
-        return inputFromOutput(output);
+        return StoreTestUtil.inputFromOutput(output);
     }
 
     private static int getBufferValue(RandomAccessInput input)
@@ -158,7 +163,6 @@ public class LargeDataSizeTest {
     }
 
     private static long getFileValue(String file) throws IOException {
-        Watcher.start("getFileValue");
         HgkvDirReader reader = new HgkvDirReaderImpl(file);
         EntryIterator iterator = reader.iterator();
         long result = 0;
@@ -166,16 +170,17 @@ public class LargeDataSizeTest {
             KvEntry next = iterator.next();
             result += StoreTestUtil.dataFromPointer(next.value());
         }
-        Watcher.stop();
         return result;
     }
 
-    static class MockInnerSortFlusher implements InnerSortFlusher {
+    private static class MockInnerSortFlusher implements InnerSortFlusher {
 
         private final RandomAccessOutput output;
+        private final Combiner<Pointer> combiner;
 
         public MockInnerSortFlusher(RandomAccessOutput output) {
             this.output = output;
+            this.combiner = new MockIntSumCombiner();
         }
 
         @Override
@@ -184,8 +189,8 @@ public class LargeDataSizeTest {
         }
 
         @Override
-        public Combiner<KvEntry> combiner() {
-            return null;
+        public Combiner<Pointer> combiner() {
+            return this.combiner;
         }
 
         @Override
@@ -205,15 +210,17 @@ public class LargeDataSizeTest {
                 }
 
                 Pointer key = sameKeyEntries.get(0).key();
-                this.output.writeInt(Integer.BYTES);
-                this.output.write(key.input(), key.offset(), key.length());
-                int valueSum = 0;
+                key.write(this.output);
+                Pointer value = null;
                 for (KvEntry entry : sameKeyEntries) {
-                    Pointer value = entry.value();
-                    valueSum += StoreTestUtil.dataFromPointer(value);
+                    if (value == null) {
+                        value = entry.value();
+                        continue;
+                    }
+                    value = this.combiner.combine(value, entry.value());
                 }
-                this.output.writeInt(Integer.BYTES);
-                this.output.writeInt(valueSum);
+                assert value != null;
+                value.write(this.output);
 
                 if (current == null) {
                     break;
@@ -241,28 +248,8 @@ public class LargeDataSizeTest {
                            false);
     }
 
-    private static UnsafeByteArrayInput inputFromOutput(UnsafeByteArrayOutput output) {
-        return new UnsafeByteArrayInput(output.buffer(), output.position());
-    }
-
     private static String availableDirPath(String id) {
         return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
                HgkvDirImpl.FILE_EXTEND_NAME;
-    }
-
-    private static class Watcher {
-
-        private static String doWhat;
-        private static long time;
-
-        public static void start(String doWhat) {
-            Watcher.doWhat = doWhat;
-            time = System.currentTimeMillis();
-        }
-
-        public static void stop() {
-            long current = System.currentTimeMillis();
-            System.out.printf("%s time:" + (current - time) + "\n", doWhat);
-        }
     }
 }

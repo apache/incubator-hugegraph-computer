@@ -24,6 +24,7 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 
 public interface OuterSortFlusher {
@@ -36,7 +37,7 @@ public interface OuterSortFlusher {
     /**
      * Combiner entries with the same key.
      */
-    Combiner<KvEntry> combiner();
+    Combiner<Pointer> combiner();
 
     /**
      * Combine the list of inputValues, and write the inputKey and combined

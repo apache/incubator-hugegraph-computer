@@ -637,7 +637,7 @@ public class BufferedFileTest {
             FileUtils.deleteQuietly(file2);
         }
 
-        // UnsafeByteArrayInput compare to BufferedFileInput
+        // UnsafeBytesInput compare to BufferedFileInput
         File file3 = createTempFile();
         try (BufferedFileInput fileInput = inputByString(file3, "apple")) {
             @SuppressWarnings("resource")

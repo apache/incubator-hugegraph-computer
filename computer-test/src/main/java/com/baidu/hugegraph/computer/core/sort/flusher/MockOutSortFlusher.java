@@ -24,25 +24,25 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultPointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.OptimizedPointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 
 public class MockOutSortFlusher implements OuterSortFlusher {
 
-    private final UnsafeByteArrayOutput output;
+    private final UnsafeBytesOutput output;
 
     public MockOutSortFlusher() {
-        this.output = new UnsafeByteArrayOutput();
+        this.output = new UnsafeBytesOutput();
     }
 
     @Override
-    public Combiner<KvEntry> combiner() {
+    public Combiner<Pointer> combiner() {
         return null;
     }
 
@@ -75,8 +75,7 @@ public class MockOutSortFlusher implements OuterSortFlusher {
 
             this.output.seek(0);
             this.output.writeInt(Integer.BYTES);
-            this.output.write(last.key().input(), last.key().offset(),
-                              last.key().length());
+            this.output.write(last.key().bytes());
             this.output.writeInt(Integer.BYTES);
             this.output.writeInt(value);
             writer.write(this.entryFromOutput());
@@ -88,19 +87,20 @@ public class MockOutSortFlusher implements OuterSortFlusher {
             last = current;
             value = StoreTestUtil.dataFromPointer(last.value());
         }
+        writer.finish();
     }
 
     private KvEntry entryFromOutput() throws IOException {
         byte[] buffer = this.output.buffer();
         long position = this.output.position();
-        RandomAccessInput input = new UnsafeByteArrayInput(buffer, position);
+        RandomAccessInput input = new UnsafeBytesInput(buffer, position);
         int keyLength = input.readInt();
         long keyPosition = input.position();
         input.skip(keyLength);
-        Pointer key = new DefaultPointer(input, keyPosition, keyLength);
+        Pointer key = new OptimizedPointer(input, keyPosition, keyLength);
         int valueLength = input.readInt();
         long valuePosition = input.position();
-        Pointer value = new DefaultPointer(input, valuePosition, valueLength);
+        Pointer value = new OptimizedPointer(input, valuePosition, valueLength);
         return new DefaultKvEntry(key, value);
     }
 }

@@ -51,7 +51,7 @@ public final class EntriesUtil {
         input.skip(keyPointer.length());
         // Read value
         int valueLength = input.readInt();
-        DefaultPointer value = new DefaultPointer(input, input.position(),
+        Pointer value = new DefaultPointer(input, input.position(),
                                                   valueLength);
         input.seek(position);
         return value;
@@ -131,9 +131,10 @@ public final class EntriesUtil {
         long valueOffset = input.position();
         input.skip(valueLength);
 
-        Pointer key = new DefaultPointer(userAccessInput, keyOffset, keyLength);
-        Pointer value = new DefaultPointer(userAccessInput, valueOffset,
-                                           valueLength);
+        Pointer key = new OptimizedPointer(userAccessInput, keyOffset,
+                                           keyLength);
+        Pointer value = new OptimizedPointer(userAccessInput, valueOffset,
+                                             valueLength);
         return new DefaultKvEntry(key, value);
     }
 

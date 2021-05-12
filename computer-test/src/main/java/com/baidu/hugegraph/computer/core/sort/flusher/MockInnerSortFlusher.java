@@ -43,7 +43,7 @@ public class MockInnerSortFlusher implements InnerSortFlusher {
     }
 
     @Override
-    public Combiner<KvEntry> combiner() {
+    public Combiner<Pointer> combiner() {
         return null;
     }
 

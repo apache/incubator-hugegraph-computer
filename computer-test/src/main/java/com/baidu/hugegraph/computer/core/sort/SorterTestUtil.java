@@ -25,17 +25,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class SorterTestUtil {
 
-    public static UnsafeByteArrayOutput writeMapToOutput(List<Integer> map)
+    public static UnsafeBytesOutput writeMapToOutput(List<Integer> map)
                                                          throws IOException {
-        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput();
 
         for (int i = 0; i < map.size(); ) {
             output.writeInt(Integer.BYTES);
@@ -47,17 +47,17 @@ public class SorterTestUtil {
         return output;
     }
 
-    public static UnsafeByteArrayInput inputFromMap(List<Integer> map)
+    public static UnsafeBytesInput inputFromMap(List<Integer> map)
                                                     throws IOException {
-        UnsafeByteArrayOutput output = writeMapToOutput(map);
-        return new UnsafeByteArrayInput(output.buffer(), output.position());
+        UnsafeBytesOutput output = writeMapToOutput(map);
+        return new UnsafeBytesInput(output.buffer(), output.position());
     }
 
-    public static void assertOutputEqualsMap(UnsafeByteArrayOutput output,
+    public static void assertOutputEqualsMap(UnsafeBytesOutput output,
                                              Map<Integer, List<Integer>> map)
                                              throws IOException {
         byte[] buffer = output.buffer();
-        RandomAccessInput input = new UnsafeByteArrayInput(buffer);
+        RandomAccessInput input = new UnsafeBytesInput(buffer);
         for (Map.Entry<Integer, List<Integer>> entry : map.entrySet()) {
             input.readInt();
             int key = input.readInt();

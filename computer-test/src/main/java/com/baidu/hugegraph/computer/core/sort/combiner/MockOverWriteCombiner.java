@@ -17,20 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort;
+package com.baidu.hugegraph.computer.core.sort.combiner;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
-import com.baidu.hugegraph.computer.core.sort.sorter.EntriesUtilTest;
-import com.baidu.hugegraph.computer.core.sort.sorter.SorterTest;
-import com.baidu.hugegraph.computer.core.sort.sorting.InputsSortingTest;
+public class MockOverWriteCombiner implements Combiner<Pointer> {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    InputsSortingTest.class,
-    EntriesUtilTest.class,
-    SorterTest.class
-})
-public class SorterTestSuite {
+    @Override
+    public Pointer combine(Pointer v1, Pointer v2) {
+        return v2;
+    }
 }

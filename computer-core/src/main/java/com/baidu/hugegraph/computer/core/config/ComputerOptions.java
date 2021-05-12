@@ -36,7 +36,6 @@ import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableList;
-import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableSet;
 
 public class ComputerOptions extends OptionHolder {

@@ -36,8 +36,8 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
@@ -85,13 +85,13 @@ public class SorterTest {
                                              2, 2,
                                              6, 1,
                                              1, 20);
-        UnsafeByteArrayOutput data = SorterTestUtil.writeMapToOutput(map);
+        UnsafeBytesOutput data = SorterTestUtil.writeMapToOutput(map);
 
-        RandomAccessInput input = new UnsafeByteArrayInput(data.buffer(),
+        RandomAccessInput input = new UnsafeBytesInput(data.buffer(),
                                                            data.position());
 
         SorterImpl sorter = new SorterImpl(CONFIG);
-        UnsafeByteArrayOutput output = new UnsafeByteArrayOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput();
         sorter.sortBuffer(input, new MockInnerSortFlusher(output));
 
         Map<Integer, List<Integer>> result = ImmutableMap.of(
