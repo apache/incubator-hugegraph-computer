@@ -114,7 +114,10 @@ public class StreamGraphInput implements GraphInput {
         int size = this.in.readInt();
         for (int i = 0; i < size; i++) {
             String key = this.in.readUTF();
-            Value<?> value = this.readValue();
+            ValueType valueType = SerialEnum.fromCode(ValueType.class,
+                                                      this.in.readByte());
+            Value<?> value = this.valueFactory.createValue(valueType);
+            value.read(this.in);
             properties.put(key, value);
         }
         return properties;
@@ -130,8 +133,7 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Value<?> readValue() throws IOException {
-        ValueType valueType = SerialEnum.fromCode(ValueType.class,
-                                                  this.in.readByte());
+        ValueType valueType = this.config.valueType();
         Value<?> value = this.valueFactory.createValue(valueType);
         value.read(this.in);
         return value;

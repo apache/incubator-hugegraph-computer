@@ -207,7 +207,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        byte[] expect = new byte[]{4, 100};
+        byte[] expect = new byte[]{100};
         Assert.assertArrayEquals(expect, bytes);
 
         LongValue longValue2;
@@ -235,7 +235,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        expect = new byte[]{30, 2, 2, 1, 100, 3, 1, -127, 72};
+        expect = new byte[]{2, 2, 1, 100, 3, 1, -127, 72};
         Assert.assertArrayEquals(expect, bytes);
 
         IdValueList idValueList2;
