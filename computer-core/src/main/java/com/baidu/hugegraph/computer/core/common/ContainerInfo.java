@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.common;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
@@ -74,7 +74,7 @@ public class ContainerInfo implements Readable, Writable {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         this.id = in.readInt();
         this.hostname = in.readUTF();
         this.rpcPort = in.readInt();
@@ -82,7 +82,7 @@ public class ContainerInfo implements Readable, Writable {
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         out.writeInt(this.id);
         out.writeUTF(this.hostname);
         out.writeInt(this.rpcPort);

@@ -23,8 +23,8 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import java.io.IOException;
 import java.util.Arrays;
 
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
@@ -60,7 +60,7 @@ public class IdValue implements Value<IdValue> {
     }
 
     @Override
-    public void read(GraphInput in) throws IOException {
+    public void read(RandomAccessInput in) throws IOException {
         int len = in.readInt();
         this.bytes = BytesUtil.ensureCapacityWithoutCopy(this.bytes, len);
         in.readFully(this.bytes, 0, len);
@@ -68,20 +68,16 @@ public class IdValue implements Value<IdValue> {
     }
 
     @Override
-    public void write(GraphOutput out) throws IOException {
+    public void write(RandomAccessOutput out) throws IOException {
         out.writeInt(this.length);
         out.write(this.bytes, 0, this.length);
     }
 
-    public void writeId(GraphOutput out) throws IOException {
-        out.write(this.bytes, 0, this.length);
-    }
-
     @Override
-    public int compareTo(IdValue obj) {
-        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+    public int compareTo(IdValue other) {
+        E.checkArgumentNotNull(other, "The compare argument can't be null");
         return BytesUtil.compare(this.bytes, this.length,
-                                 obj.bytes, obj.length);
+                                 other.bytes, other.length);
     }
 
     @Override

@@ -22,14 +22,12 @@ package com.baidu.hugegraph.computer.core.util;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
 public final class SerializeUtil {
@@ -38,24 +36,20 @@ public final class SerializeUtil {
     private static final ComputerContext CONTEXT = ComputerContext.instance();
 
     public static byte[] toBytes(Writable obj) {
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput();
-             StreamGraphOutput output = new OptimizedStreamGraphOutput(CONTEXT,
-                                                                       bao)) {
-            obj.write(output);
+        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
+            obj.write(bao);
             return bao.toByteArray();
         } catch (IOException e) {
-            throw new ComputeException(
+            throw new ComputerException(
                       "Failed to create byte array with writable '%s'", e, obj);
         }
     }
 
     public static void fromBytes(byte[] bytes, Readable obj) {
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
-             StreamGraphInput input = new OptimizedStreamGraphInput(CONTEXT,
-                                                                    bai)) {
-            obj.read(input);
+        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
+            obj.read(bai);
         } catch (IOException e) {
-            throw new ComputeException("Failed to read from byte array", e);
+            throw new ComputerException("Failed to read from byte array", e);
         }
     }
 }

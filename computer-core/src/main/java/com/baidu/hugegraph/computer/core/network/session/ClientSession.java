@@ -25,7 +25,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportState;
@@ -160,9 +160,9 @@ public class ClientSession extends TransportSession {
                 this.onRecvDataAck(ackId);
                 break;
             default:
-                throw new ComputeException("Receive one ack message, but the " +
-                                           "state not match, state: %s, " +
-                                           "ackId: %s", this.state, ackId);
+                throw new ComputerException("Receive one ack message, but " +
+                                            "the state not match, state: %s, " +
+                                            "ackId: %s", this.state, ackId);
         }
     }
 

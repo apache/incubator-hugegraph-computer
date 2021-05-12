@@ -19,11 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.Closeable;
-import java.io.DataOutput;
 import java.io.IOException;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -33,14 +29,14 @@ import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.util.IdValueUtil;
-import com.baidu.hugegraph.computer.core.util.StringEncoding;
 
 public abstract class StructGraphOutput implements GraphOutput {
 
-    protected final DataOutput out;
     protected final Config config;
+    protected final StructRandomAccessOutput out;
 
-    public StructGraphOutput(ComputerContext context, DataOutput out) {
+    public StructGraphOutput(ComputerContext context,
+                             StructRandomAccessOutput out) {
         this.config = context.config();
         this.out = out;
     }
@@ -64,12 +60,12 @@ public abstract class StructGraphOutput implements GraphOutput {
     }
 
     public void writeLineEnd() throws IOException {
-        this.writeRawString(System.lineSeparator());
+        this.out.writeRawString(System.lineSeparator());
     }
 
     @Override
     public void writeId(Id id) throws IOException {
-        id.write(this);
+        id.write(this.out);
     }
 
     @Override
@@ -89,12 +85,17 @@ public abstract class StructGraphOutput implements GraphOutput {
             case LONG:
             case FLOAT:
             case DOUBLE:
-                value.write(this);
+                value.write(this.out);
                 break;
             default:
                 throw new ComputerException("Unexpected value type %s",
                                             value.type());
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.out.close();
     }
 
     private void writeIdValue(IdValue idValue) throws IOException {
@@ -116,98 +117,5 @@ public abstract class StructGraphOutput implements GraphOutput {
             }
         }
         this.writeArrayEnd();
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-        this.writeNumber(b);
-    }
-
-    @Override
-    public void write(byte[] b) throws IOException {
-        this.writeString(StringEncoding.encodeBase64(b));
-    }
-
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        byte[] dest = new byte[len];
-        System.arraycopy(b, off, dest, 0, len);
-        this.writeString(StringEncoding.encodeBase64(dest));
-    }
-
-    @Override
-    public void writeBoolean(boolean v) throws IOException {
-        this.writeRawString(v ? "true" : "false");
-    }
-
-    @Override
-    public void writeByte(int v) throws IOException {
-        this.writeNumber(v);
-    }
-
-    @Override
-    public void writeShort(int v) throws IOException {
-        this.writeNumber(v);
-    }
-
-    @Override
-    public void writeChar(int v) throws IOException {
-        this.writeNumber(v);
-    }
-
-    @Override
-    public void writeInt(int v) throws IOException {
-        this.writeNumber(v);
-    }
-
-    @Override
-    public void writeLong(long v) throws IOException {
-        this.writeNumber(v);
-    }
-
-    @Override
-    public void writeFloat(float v) throws IOException {
-        this.writeNumber(v);
-    }
-
-    @Override
-    public void writeDouble(double v) throws IOException {
-        this.writeNumber(v);
-    }
-
-    @Override
-    public void writeBytes(String s) throws IOException {
-        this.writeString(s);
-    }
-
-    @Override
-    public void writeChars(String s) throws IOException {
-        this.writeString(s);
-    }
-
-    @Override
-    public void writeUTF(String s) throws IOException {
-        this.writeString(s);
-    }
-
-    @Override
-    public void close() throws IOException {
-        if (this.out instanceof Closeable) {
-            ((Closeable) this.out).close();
-        }
-    }
-
-    protected void writeNumber(Number number) throws IOException {
-        this.out.writeBytes(number.toString());
-    }
-
-    protected void writeRawString(String s) throws IOException {
-        this.out.writeBytes(s);
-    }
-
-    protected void writeString(String s) throws IOException {
-        this.out.writeBytes("\"");
-        this.out.writeBytes(StringEscapeUtils.escapeJson(s));
-        this.out.writeBytes("\"");
     }
 }

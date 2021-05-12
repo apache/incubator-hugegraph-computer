@@ -29,11 +29,14 @@ public class GraphOutputFactory {
                                      RandomAccessOutput out) {
         switch (format) {
             case BIN:
-                return new OptimizedStreamGraphOutput(context, out);
+                return new StreamGraphOutput(context, out);
             case CSV:
-                return new CsvStructGraphOutput(context, out);
+                StructRandomAccessOutput srao;
+                srao = new StructRandomAccessOutput(out);
+                return new CsvStructGraphOutput(context, srao);
             case JSON:
-                return new JsonStructGraphOutput(context, out);
+                srao = new StructRandomAccessOutput(out);
+                return new JsonStructGraphOutput(context, srao);
             default:
                 throw new ComputerException("Can't create GraphOutput for %s",
                                             format);

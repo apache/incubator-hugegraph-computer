@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
 
@@ -32,7 +31,8 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class JsonStructGraphOutput extends StructGraphOutput {
 
-    public JsonStructGraphOutput(ComputerContext context, DataOutput out) {
+    public JsonStructGraphOutput(ComputerContext context,
+                                 StructRandomAccessOutput out) {
         super(context, out);
     }
 
@@ -122,36 +122,36 @@ public class JsonStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeObjectStart() throws IOException {
-        this.writeRawString("{");
+        this.out.writeRawString("{");
     }
 
     @Override
     public void writeObjectEnd() throws IOException {
-        this.writeRawString("}");
+        this.out.writeRawString("}");
     }
 
     @Override
     public void writeArrayStart() throws IOException {
-        this.writeRawString("[");
+        this.out.writeRawString("[");
     }
 
     @Override
     public void writeArrayEnd() throws IOException {
-        this.writeRawString("]");
+        this.out.writeRawString("]");
     }
 
     @Override
     public void writeKey(String key) throws IOException {
-        this.writeString(key);
+        this.out.writeString(key);
     }
 
     @Override
     public void writeJoiner() throws IOException {
-        this.writeRawString(":");
+        this.out.writeRawString(":");
     }
 
     @Override
     public void writeSplitter() throws IOException {
-        this.writeRawString(",");
+        this.out.writeRawString(",");
     }
 }

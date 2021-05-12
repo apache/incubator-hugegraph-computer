@@ -37,7 +37,7 @@ import sun.misc.Unsafe;
  * Use unsafe method to write the value to the buffer to improve the write
  * performance. The buffer is auto extendable.
  */
-public class UnsafeByteArrayOutput implements RandomAccessOutput, Closeable {
+public class UnsafeBytesOutput implements RandomAccessOutput, Closeable {
 
     private static final sun.misc.Unsafe UNSAFE;
     private static final int DEFAULT_SIZE = 32;
@@ -55,11 +55,11 @@ public class UnsafeByteArrayOutput implements RandomAccessOutput, Closeable {
         }
     }
 
-    public UnsafeByteArrayOutput() {
+    public UnsafeBytesOutput() {
         this(DEFAULT_SIZE);
     }
 
-    public UnsafeByteArrayOutput(int size) {
+    public UnsafeBytesOutput(int size) {
         this.buffer = new byte[size];
         this.position = 0;
     }
@@ -212,7 +212,7 @@ public class UnsafeByteArrayOutput implements RandomAccessOutput, Closeable {
     @Override
     public void write(RandomAccessInput input, long offset, long length)
                       throws IOException {
-        if (UnsafeByteArrayInput.class == input.getClass()) {
+        if (UnsafeBytesInput.class == input.getClass()) {
             byte[] buffer = Whitebox.getInternalState(input, "buffer");
             this.write(buffer, (int) offset, (int) length);
         } else {

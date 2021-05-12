@@ -52,6 +52,12 @@ public interface RandomAccessInput extends DataInput, Closeable {
     long available() throws IOException;
 
     /**
+     * Creates a new input that shares content like buffer or file,
+     * but use independent position
+     */
+    RandomAccessInput duplicate() throws IOException;
+
+    /**
      * Compare two inputs in the specified range.
      */
     int compare(long offset, long length,
@@ -66,5 +72,13 @@ public interface RandomAccessInput extends DataInput, Closeable {
         byte[] bytes = new byte[size];
         this.readFully(bytes);
         return bytes;
+    }
+
+    default int readIntLength() throws IOException {
+        return this.readInt();
+    }
+
+    default long readLongLength() throws IOException {
+        return this.readLong();
     }
 }

@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import static com.baidu.hugegraph.computer.core.common.Constants.UINT16_MAX;
-
 import java.io.IOException;
 import java.util.Map;
 
@@ -33,8 +31,6 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.util.CoderUtil;
-import com.baidu.hugegraph.util.E;
 
 public class StreamGraphOutput implements GraphOutput {
 
@@ -63,17 +59,17 @@ public class StreamGraphOutput implements GraphOutput {
     @Override
     public void writeEdges(Edges edges) throws IOException {
         int size = edges.size();
-        this.writeInt(size);
+        this.out.writeInt(size);
         if (size == 0) {
             return;
         }
-        long startPosition = this.writeFullInt(0);
+        long startPosition = this.out.writeIntLength(0);
         for (Edge edge : edges) {
             this.writeEdge(edge);
         }
-        long endPosition = this.position();
+        long endPosition = this.out.position();
         long length = endPosition - startPosition - Constants.INT_LEN;
-        this.writeFullInt(startPosition, (int) length);
+        this.out.writeIntLength(startPosition, (int) length);
     }
 
     @Override
@@ -92,195 +88,24 @@ public class StreamGraphOutput implements GraphOutput {
     @Override
     public void writeProperties(Properties properties) throws IOException {
         Map<String, Value<?>> keyValues = properties.get();
-        this.writeInt(keyValues.size());
+        this.out.writeInt(keyValues.size());
         for (Map.Entry<String, Value<?>> entry : keyValues.entrySet()) {
-            this.writeString(entry.getKey());
-            this.writeValue(entry.getValue());
+            this.out.writeUTF(entry.getKey());
+            Value<?> value = entry.getValue();
+            this.out.writeByte(value.type().code());
+            value.write(this.out);
         }
     }
 
     @Override
     public void writeId(Id id) throws IOException {
-        this.writeByte(id.type().code());
-        id.write(this);
+        this.out.writeByte(id.type().code());
+        id.write(this.out);
     }
 
     @Override
     public void writeValue(Value<?> value) throws IOException {
-        value.write(this);
-    }
-
-    public void writeVInt(int value) throws IOException {
-        // NOTE: negative numbers are not compressed
-        if (value > 0x0fffffff || value < 0) {
-            this.writeByte(0x80 | ((value >>> 28) & 0x7f));
-        }
-        if (value > 0x1fffff || value < 0) {
-            this.writeByte(0x80 | ((value >>> 21) & 0x7f));
-        }
-        if (value > 0x3fff || value < 0) {
-            this.writeByte(0x80 | ((value >>> 14) & 0x7f));
-        }
-        if (value > 0x7f || value < 0) {
-            this.writeByte(0x80 | ((value >>> 7) & 0x7f));
-        }
-        this.writeByte(value & 0x7f);
-    }
-
-    public void writeVLong(long value) throws IOException {
-        if (value < 0) {
-            this.writeByte((byte) 0x81);
-        }
-        if (value > 0xffffffffffffffL || value < 0L) {
-            this.writeByte(0x80 | ((int) (value >>> 56) & 0x7f));
-        }
-        if (value > 0x1ffffffffffffL || value < 0L) {
-            this.writeByte(0x80 | ((int) (value >>> 49) & 0x7f));
-        }
-        if (value > 0x3ffffffffffL || value < 0L) {
-            this.writeByte(0x80 | ((int) (value >>> 42) & 0x7f));
-        }
-        if (value > 0x7ffffffffL || value < 0L) {
-            this.writeByte(0x80 | ((int) (value >>> 35) & 0x7f));
-        }
-        if (value > 0xfffffffL || value < 0L) {
-            this.writeByte(0x80 | ((int) (value >>> 28) & 0x7f));
-        }
-        if (value > 0x1fffffL || value < 0L) {
-            this.writeByte(0x80 | ((int) (value >>> 21) & 0x7f));
-        }
-        if (value > 0x3fffL || value < 0L) {
-            this.writeByte(0x80 | ((int) (value >>> 14) & 0x7f));
-        }
-        if (value > 0x7fL || value < 0L) {
-            this.writeByte(0x80 | ((int) (value >>> 7) & 0x7f));
-        }
-        this.write((int) value & 0x7f);
-    }
-
-    public void writeUInt8(int val) throws IOException {
-        assert val <= Constants.UINT8_MAX;
-        this.write(val);
-    }
-
-    public void writeUInt16(int val) throws IOException {
-        assert val <= UINT16_MAX;
-        this.writeShort(val);
-    }
-
-    public void writeUInt32(long val) throws IOException {
-        assert val <= Constants.UINT32_MAX;
-        this.writeInt((int) val);
-    }
-
-    public void writeString(String val) throws IOException {
-        this.writeBytes(CoderUtil.encode(val));
-    }
-
-    public void writeBytes(byte[] bytes) throws IOException {
-        E.checkArgument(bytes.length <= UINT16_MAX,
-                        "The max length of bytes is %s, but got %s",
-                        UINT16_MAX, bytes.length);
-        this.writeVInt(bytes.length);
-        this.write(bytes);
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-        this.out.write(b);
-    }
-
-    @Override
-    public void write(byte[] b) throws IOException {
-        this.out.write(b);
-    }
-
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-        this.out.write(b, off, len);
-    }
-
-    @Override
-    public void writeBoolean(boolean v) throws IOException {
-        this.out.writeBoolean(v);
-    }
-
-    @Override
-    public void writeByte(int v) throws IOException {
-        this.out.writeByte(v);
-    }
-
-    @Override
-    public void writeShort(int v) throws IOException {
-        this.out.writeShort(v);
-    }
-
-    @Override
-    public void writeChar(int v) throws IOException {
-        this.out.writeChar(v);
-    }
-
-    @Override
-    public void writeInt(int v) throws IOException {
-        this.out.writeInt(v);
-    }
-
-    public final long writeFullInt(int v) throws IOException {
-        long position = this.position();
-        this.out.writeInt(v);
-        return position;
-    }
-
-    public final void writeFullInt(long position, int v) throws IOException {
-        this.out.writeInt(position, v);
-    }
-
-    @Override
-    public void writeLong(long v) throws IOException {
-        this.out.writeLong(v);
-    }
-
-    public final long writeFullLong(long v) throws IOException {
-        long position = this.position();
-        this.out.writeLong(v);
-        return position;
-    }
-
-    @Override
-    public void writeFloat(float v) throws IOException {
-        this.out.writeFloat(v);
-    }
-
-    @Override
-    public void writeDouble(double v) throws IOException {
-        this.out.writeDouble(v);
-    }
-
-    @Override
-    public void writeBytes(String s) throws IOException {
-        this.out.writeBytes(s);
-    }
-
-    @Override
-    public void writeChars(String s) throws IOException {
-        this.out.writeChars(s);
-    }
-
-    @Override
-    public void writeUTF(String s) throws IOException {
-        this.out.writeUTF(s);
-    }
-
-    public long position() {
-        return this.out.position();
-    }
-
-    public void seek(long position) throws IOException {
-        this.out.seek(position);
-    }
-
-    public long skip(long n) throws IOException {
-        return this.out.skip(n);
+        value.write(this.out);
     }
 
     @Override

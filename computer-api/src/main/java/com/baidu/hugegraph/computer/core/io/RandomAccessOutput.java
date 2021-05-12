@@ -19,24 +19,40 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.Closeable;
+import java.io.DataOutput;
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
+public interface RandomAccessOutput extends DataOutput, Closeable {
 
-public class OptimizedStreamGraphOutput extends StreamGraphOutput {
+    long position();
 
-    public OptimizedStreamGraphOutput(ComputerContext context,
-                                      RandomAccessOutput out) {
-        super(context, out);
+    void seek(long position) throws IOException;
+
+    /**
+     * Skip {@code n} bytes.
+     * @return the position before skip.
+     */
+    long skip(long n) throws IOException;
+
+    void writeInt(long position, int v) throws IOException;
+
+    void write(RandomAccessInput input, long offset, long length)
+               throws IOException;
+
+    default long writeIntLength(int v) throws IOException {
+        long position = this.position();
+        this.writeInt(v);
+        return position;
     }
 
-    @Override
-    public void writeInt(int v) throws IOException {
-        this.writeVInt(v);
+    default void writeIntLength(long position, int v) throws IOException {
+        this.writeInt(position, v);
     }
 
-    @Override
-    public void writeLong(long v) throws IOException {
-        this.writeVLong(v);
+    default long writeLongLength(long v) throws IOException {
+        long position = this.position();
+        this.writeLong(v);
+        return position;
     }
 }

@@ -25,7 +25,7 @@ import java.io.InputStream;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.util.E;
 
-public class BufferedStreamInput extends UnsafeByteArrayInput {
+public class BufferedStreamInput extends UnsafeBytesInput {
 
     private final int bufferCapacity;
     private final InputStream input;

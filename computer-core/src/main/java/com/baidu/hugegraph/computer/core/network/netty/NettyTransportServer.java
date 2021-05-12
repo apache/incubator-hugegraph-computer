@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.IOMode;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
@@ -176,7 +176,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
         try {
             this.close();
         } catch (IOException e) {
-            throw new ComputeException("Failed to shutdown server", e);
+            throw new ComputerException("Failed to shutdown server", e);
         }
     }
 

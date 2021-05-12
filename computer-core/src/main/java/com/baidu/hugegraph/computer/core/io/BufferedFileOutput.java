@@ -33,7 +33,7 @@ import com.baidu.hugegraph.util.E;
  * buffer is full. The second is unsafe data output.
  * This class is not thread safe.
  */
-public class BufferedFileOutput extends UnsafeByteArrayOutput {
+public class BufferedFileOutput extends UnsafeBytesOutput {
 
     private final int bufferCapacity;
     private final RandomAccessFile file;

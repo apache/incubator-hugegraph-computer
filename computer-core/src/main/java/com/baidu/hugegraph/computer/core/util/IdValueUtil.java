@@ -25,12 +25,14 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedStreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeByteArrayOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 
 public class IdValueUtil {
 
@@ -39,9 +41,12 @@ public class IdValueUtil {
 
     public static Id toId(IdValue idValue) {
         byte[] bytes = idValue.bytes();
-        try (UnsafeByteArrayInput bai = new UnsafeByteArrayInput(bytes);
-             StreamGraphInput input = new OptimizedStreamGraphInput(CONTEXT,
-                                                                    bai)) {
+        /*
+         * NOTE: must use OptimizedUnsafeByteArrayInput, it make sure to
+         * write bytes in big-end-aligned way
+         */
+        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes);
+             GraphInput input = new StreamGraphInput(CONTEXT, bai)) {
             return input.readId();
         } catch (IOException e) {
             throw new ComputerException("Failed to get id from idValue '%s'",
@@ -50,9 +55,8 @@ public class IdValueUtil {
     }
 
     public static IdValue toIdValue(Id id, int len) {
-        try (UnsafeByteArrayOutput bao = new UnsafeByteArrayOutput(len);
-             StreamGraphOutput output = new OptimizedStreamGraphOutput(
-                                            CONTEXT, bao)) {
+        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput(len);
+             GraphOutput output = new StreamGraphOutput(CONTEXT, bao)) {
             output.writeId(id);
             return new IdValue(bao.toByteArray());
         } catch (IOException e) {
