@@ -97,10 +97,10 @@ public class WorkerService {
                      this.combiner.name(), this.computation.name());
         }
 
-        this.bsp4Worker.registerWorker();
-        this.masterInfo = this.bsp4Worker.waitMasterRegistered();
+        this.bsp4Worker.workerInitDone();
+        this.masterInfo = this.bsp4Worker.waitMasterInitDone();
         List<ContainerInfo> containers =
-                            this.bsp4Worker.waitWorkersRegistered();
+                            this.bsp4Worker.waitWorkersInitDone();
         for (ContainerInfo container : containers) {
             this.workers.put(container.id(), container);
             // TODO: Connect to other workers for data transport
@@ -138,7 +138,7 @@ public class WorkerService {
 
         LOG.info("{} WorkerService execute", this);
         // TODO: determine superstep if fail over is enabled.
-        int superstep = this.bsp4Worker.waitMasterSuperstepResume();
+        int superstep = this.bsp4Worker.waitMasterResume();
         SuperstepStat superstepStat;
         if (superstep == Constants.INPUT_SUPERSTEP) {
             superstepStat = this.inputstep();
@@ -159,8 +159,8 @@ public class WorkerService {
             LOG.info("Start computation of superstep {}", superstep);
             this.managers.beforeSuperstep(this.config, superstep);
             this.computation.beforeSuperstep(context);
-            this.bsp4Worker.workerSuperstepPrepared(superstep);
-            this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
+            this.bsp4Worker.workerStepPrepareDone(superstep);
+            this.bsp4Worker.waitMasterStepPrepareDone(superstep);
 
             WorkerStat workerStat = this.compute();
 
@@ -169,7 +169,7 @@ public class WorkerService {
             this.bsp4Worker.workerSuperstepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
 
-            superstepStat = this.bsp4Worker.waitMasterSuperstepDone(superstep);
+            superstepStat = this.bsp4Worker.waitMasterStepDone(superstep);
             superstep++;
         }
         this.outputstep();
@@ -237,7 +237,7 @@ public class WorkerService {
 
         this.bsp4Worker.workerSuperstepDone(Constants.INPUT_SUPERSTEP,
                                             workerStat);
-        SuperstepStat superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
+        SuperstepStat superstepStat = this.bsp4Worker.waitMasterStepDone(
                                       Constants.INPUT_SUPERSTEP);
         LOG.info("{} WorkerService inputstep finished", this);
         return superstepStat;

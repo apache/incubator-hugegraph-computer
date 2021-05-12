@@ -74,19 +74,19 @@ public class EtcdBspTest extends UnitTestBase {
         // If both two threads reach countDown, it means no exception is thrown.
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
-            this.bsp4Master.registerMaster(this.masterInfo);
+            this.bsp4Master.masterInitDone(this.masterInfo);
             List<ContainerInfo> workers = this.bsp4Master
-                                              .waitWorkersRegistered();
+                                              .waitWorkersInitDone();
             Assert.assertEquals(1, workers.size());
             Assert.assertEquals(this.workerInfo, workers.get(0));
             countDownLatch.countDown();
         });
         this.executorService.submit(() -> {
-            this.bsp4Worker.registerWorker();
-            ContainerInfo master = this.bsp4Worker.waitMasterRegistered();
+            this.bsp4Worker.workerInitDone();
+            ContainerInfo master = this.bsp4Worker.waitMasterInitDone();
             Assert.assertEquals(this.masterInfo, master);
             List<ContainerInfo> workers = this.bsp4Worker
-                                              .waitWorkersRegistered();
+                                              .waitWorkersInitDone();
             Assert.assertEquals(1, workers.size());
             Assert.assertEquals(this.workerInfo, workers.get(0));
             countDownLatch.countDown();
@@ -102,7 +102,7 @@ public class EtcdBspTest extends UnitTestBase {
         workerStat.add(new PartitionStat(1, 200L, 300L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
-            this.bsp4Master.masterSuperstepResume(-1);
+            this.bsp4Master.masterResume(-1);
             this.bsp4Master.waitWorkersInputDone();
             this.bsp4Master.masterInputDone();
             List<WorkerStat> workerStats = this.bsp4Master
@@ -112,7 +112,7 @@ public class EtcdBspTest extends UnitTestBase {
             countDownLatch.countDown();
         });
         this.executorService.submit(() -> {
-            int firstSuperStep = this.bsp4Worker.waitMasterSuperstepResume();
+            int firstSuperStep = this.bsp4Worker.waitMasterResume();
             Assert.assertEquals(-1, firstSuperStep);
             this.bsp4Worker.workerInputDone();
             this.bsp4Worker.waitMasterInputDone();
@@ -131,8 +131,8 @@ public class EtcdBspTest extends UnitTestBase {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
             for (int i = 0; i < this.maxSuperStep; i++) {
-                this.bsp4Master.waitWorkersSuperstepPrepared(i);
-                this.bsp4Master.masterSuperstepPrepared(i);
+                this.bsp4Master.waitWorkersStepPrepareDone(i);
+                this.bsp4Master.masterStepPrepareDone(i);
                 List<WorkerStat> list = this.bsp4Master
                                             .waitWorkersSuperstepDone(i);
                 SuperstepStat superstepStat = new SuperstepStat();
@@ -142,7 +142,7 @@ public class EtcdBspTest extends UnitTestBase {
                 if (i == this.maxSuperStep - 1) {
                     superstepStat.inactivate();
                 }
-                this.bsp4Master.masterSuperstepDone(i, superstepStat);
+                this.bsp4Master.masterStepDone(i, superstepStat);
             }
             countDownLatch.countDown();
         });
@@ -151,8 +151,8 @@ public class EtcdBspTest extends UnitTestBase {
             SuperstepStat superstepStat = null;
             while (superstepStat == null || superstepStat.active()) {
                 superstep++;
-                this.bsp4Worker.workerSuperstepPrepared(superstep);
-                this.bsp4Worker.waitMasterSuperstepPrepared(superstep);
+                this.bsp4Worker.workerStepPrepareDone(superstep);
+                this.bsp4Worker.waitMasterStepPrepareDone(superstep);
                 PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
                                                         50L, 60L, 70L);
                 PartitionStat stat2 = new PartitionStat(1, 200L, 300L,
@@ -164,7 +164,7 @@ public class EtcdBspTest extends UnitTestBase {
                 UnitTestBase.sleep(100L);
                 this.bsp4Worker.workerSuperstepDone(superstep,
                                                     workerStatInSuperstep);
-                superstepStat = this.bsp4Worker.waitMasterSuperstepDone(
+                superstepStat = this.bsp4Worker.waitMasterStepDone(
                                                 superstep);
             }
             countDownLatch.countDown();

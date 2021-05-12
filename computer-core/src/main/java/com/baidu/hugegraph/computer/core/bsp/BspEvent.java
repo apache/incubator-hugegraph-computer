@@ -22,16 +22,17 @@ package com.baidu.hugegraph.computer.core.bsp;
 public enum BspEvent {
 
     // The WORKER or MASTER after "BSP_" indicates who set the flag.
-    BSP_MASTER_REGISTERED(1, "/master"),
-    BSP_WORKER_REGISTERED(2, "/worker"),
-    BSP_MASTER_SUPERSTEP_RESUME(3, "/master/superstep_resume"),
+    BSP_MASTER_INIT_DONE(1, "/master"),
+    BSP_WORKER_INIT_DONE(2, "/worker"),
+    BSP_MASTER_RESUME(3, "/master/superstep_resume"),
     BSP_WORKER_INPUT_DONE(4, "/worker/input_done"),
     BSP_MASTER_INPUT_DONE(5, "/master/input_done"),
-    BSP_WORKER_SUPERSTEP_PREPARED(6, "/worker/superstep_prepared"),
-    BSP_MASTER_SUPERSTEP_PREPARED(7, "/master/superstep_prepared"),
-    BSP_WORKER_SUPERSTEP_DONE(8, "/worker/superstep_done"),
-    BSP_MASTER_SUPERSTEP_DONE(9, "/master/superstep_done"),
-    BSP_WORKER_OUTPUT_DONE(10, "/worker/output_done");
+    BSP_WORKER_STEP_PREPARE_DONE(6, "/worker/superstep_prepared"),
+    BSP_MASTER_STEP_PREPARE_DONE(7, "/master/superstep_prepared"),
+    BSP_WORKER_STEP_DONE(8, "/worker/superstep_done"),
+    BSP_MASTER_STEP_DONE(9, "/master/superstep_done"),
+    BSP_WORKER_OUTPUT_DONE(10, "/worker/output_done"),
+    BSP_WORKER_CLOSE_DONE(11, "/worker/close_done");
 
     private byte code;
     private String key;
