@@ -26,7 +26,7 @@ import org.junit.Test;
 import com.baidu.hugegraph.testutil.Assert;
 
 @SuppressWarnings("resource")
-public class OptimizedUnsafeByteArrayTest {
+public class OptimizedUnsafeBytesTest {
 
     @Test
     public void testConstructor() {

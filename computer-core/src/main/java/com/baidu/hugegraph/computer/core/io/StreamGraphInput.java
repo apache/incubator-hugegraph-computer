@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
@@ -129,7 +130,8 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Value<?> readValue() throws IOException {
-        ValueType valueType = this.config.valueType();
+        ValueType valueType = SerialEnum.fromCode(ValueType.class,
+                                                  this.in.readByte());
         Value<?> value = this.valueFactory.createValue(valueType);
         value.read(this.in);
         return value;

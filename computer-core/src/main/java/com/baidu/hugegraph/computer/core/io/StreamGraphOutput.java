@@ -103,6 +103,7 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeValue(Value<?> value) throws IOException {
+        this.out.writeByte(value.type().code());
         value.write(this.out);
     }
 

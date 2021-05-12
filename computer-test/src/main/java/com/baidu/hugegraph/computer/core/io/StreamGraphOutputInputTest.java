@@ -33,7 +33,9 @@ import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
@@ -133,7 +135,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
          */
         Properties properties1 = graphFactory().createProperties();
         properties1.put("age", new LongValue(18L));
-        properties1.put("salary", new LongValue(20000L));
+        properties1.put("salary", new DoubleValue(20000.50D));
 
         byte[] bytes;
         try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
@@ -149,16 +151,9 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         }
         Assert.assertEquals(properties1, properties2);
 
-        // Let ValueType as ID_VALUE
-        UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "ID_VALUE",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
-        );
-
         properties1 = graphFactory().createProperties();
         properties1.put("name", new Utf8Id("marko").idValue());
-        properties1.put("city", new Utf8Id("Beijing").idValue());
+        properties1.put("age", new IntValue(18));
 
         try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
@@ -212,7 +207,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        byte[] expect = new byte[]{100};
+        byte[] expect = new byte[]{4, 100};
         Assert.assertArrayEquals(expect, bytes);
 
         LongValue longValue2;
@@ -240,7 +235,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        expect = new byte[]{2, 2, 1, 100, 3, 1, -127, 72};
+        expect = new byte[]{30, 2, 2, 1, 100, 3, 1, -127, 72};
         Assert.assertArrayEquals(expect, bytes);
 
         IdValueList idValueList2;
