@@ -34,20 +34,30 @@ public class MockComputation2 extends MockComputation {
     }
 
     @Override
-    protected void assertStep0Aggregators(WorkerContext context) {
+    protected void assertStep1Aggregators(WorkerContext context) {
         Assert.assertEquals(new IntValue(10), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_INT));
+                            MockMasterComputation.AGGR_CUSTOM_INT));
         Assert.assertEquals(new FloatValue(10.4f), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_FLOAT));
+                            MockMasterComputation.AGGR_CUSTOM_FLOAT));
+
+        Assert.assertEquals(new IntValue(10), context.aggregatedValue(
+                            MockMasterComputation.AGGR_INT_SUM));
+        Assert.assertEquals(new IntValue(8), context.aggregatedValue(
+                            MockMasterComputation.AGGR_INT_MAX));
 
         Assert.assertEquals(new LongValue(10L), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_LONG_SUM));
+                            MockMasterComputation.AGGR_LONG_SUM));
         Assert.assertEquals(new LongValue(8L), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_LONG_MAX));
+                            MockMasterComputation.AGGR_LONG_MAX));
+
+        Assert.assertEquals(new FloatValue(20.8f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_FLOAT_SUM));
+        Assert.assertEquals(new FloatValue(-10.0f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_FLOAT_MIN));
 
         Assert.assertEquals(new DoubleValue(20.8), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_DOUBLE_SUM));
+                            MockMasterComputation.AGGR_DOUBLE_SUM));
         Assert.assertEquals(new DoubleValue(-10.0), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_DOUBLE_MIN));
+                            MockMasterComputation.AGGR_DOUBLE_MIN));
     }
 }

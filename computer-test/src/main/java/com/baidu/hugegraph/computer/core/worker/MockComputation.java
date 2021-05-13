@@ -32,20 +32,29 @@ import com.baidu.hugegraph.testutil.Assert;
 
 public class MockComputation implements Computation<DoubleValue> {
 
-    private Aggregator<Value<?>> aggrInt;
-    private Aggregator<Value<?>> aggrFloat;
+    private Aggregator<Value<?>> aggrCustomInt;
+    private Aggregator<Value<?>> aggrCustomFloat;
+
+    private Aggregator<Value<?>> aggrIntSum;
+    private Aggregator<Value<?>> aggrIntMax;
 
     private Aggregator<Value<?>> aggrLongSum;
     private Aggregator<Value<?>> aggrLongMax;
+
+    private Aggregator<Value<?>> aggrFloatSum;
+    private Aggregator<Value<?>> aggrFloatMin;
 
     private Aggregator<Value<?>> aggrDoubleSum;
     private Aggregator<Value<?>> aggrDoubleMin;
 
     @Override
     public void beforeSuperstep(WorkerContext context) {
-        this.assertAggregators(context);
-        if (context.superstep() == 1) {
+        this.createAndRunAggregators(context);
+
+        if (context.superstep() == 0) {
             this.assertStep0Aggregators(context);
+        } else if (context.superstep() == 1) {
+            this.assertStep1Aggregators(context);
         }
 
         this.assertStat(context);
@@ -53,25 +62,71 @@ public class MockComputation implements Computation<DoubleValue> {
 
     @Override
     public void afterSuperstep(WorkerContext context) {
-        context.aggregateValue(MockMasterComputation.AGGR_TEST_INT,
-                               this.aggrInt.aggregatedValue());
-        context.aggregateValue(MockMasterComputation.AGGR_TEST_FLOAT,
-                               this.aggrFloat.aggregatedValue());
+        context.aggregateValue(MockMasterComputation.AGGR_CUSTOM_INT,
+                               this.aggrCustomInt.aggregatedValue());
+        context.aggregateValue(MockMasterComputation.AGGR_CUSTOM_FLOAT,
+                               this.aggrCustomFloat.aggregatedValue());
 
-        context.aggregateValue(MockMasterComputation.AGGR_TEST_MASTER,
-                               this.aggrFloat.aggregatedValue());
-        context.aggregateValue(MockMasterComputation.AGGR_TEST_MASTER,
-                               this.aggrFloat.aggregatedValue());
+        context.aggregateValue(MockMasterComputation.AGGR_FLOAT_UNSTABLE,
+                               new FloatValue(3.14f));
+        context.aggregateValue(MockMasterComputation.AGGR_INT_UNSTABLE,
+                               new IntValue(10 - context.superstep()));
 
-        context.aggregateValue(MockMasterComputation.AGGR_TEST_LONG_SUM,
+        context.aggregateValue(MockMasterComputation.AGGR_INT_SUM,
+                               this.aggrIntSum.aggregatedValue());
+        context.aggregateValue(MockMasterComputation.AGGR_INT_MAX,
+                               this.aggrIntMax.aggregatedValue());
+
+        context.aggregateValue(MockMasterComputation.AGGR_LONG_SUM,
                                this.aggrLongSum.aggregatedValue());
-        context.aggregateValue(MockMasterComputation.AGGR_TEST_LONG_MAX,
+        context.aggregateValue(MockMasterComputation.AGGR_LONG_MAX,
                                this.aggrLongMax.aggregatedValue());
 
-        context.aggregateValue(MockMasterComputation.AGGR_TEST_DOUBLE_SUM,
+        context.aggregateValue(MockMasterComputation.AGGR_FLOAT_SUM,
+                               this.aggrFloatSum.aggregatedValue());
+        context.aggregateValue(MockMasterComputation.AGGR_FLOAT_MIN,
+                               this.aggrFloatMin.aggregatedValue());
+
+        context.aggregateValue(MockMasterComputation.AGGR_DOUBLE_SUM,
                                this.aggrDoubleSum.aggregatedValue());
-        context.aggregateValue(MockMasterComputation.AGGR_TEST_DOUBLE_MIN,
+        context.aggregateValue(MockMasterComputation.AGGR_DOUBLE_MIN,
                                this.aggrDoubleMin.aggregatedValue());
+
+        this.assertAggregateValueWithError(context);
+    }
+
+    private void assertAggregateValueWithError(WorkerContext context) {
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            context.aggregateValue(MockMasterComputation.AGGR_INT_SUM,
+                                   this.aggrLongSum.aggregatedValue());
+        }, e -> {
+            Assert.assertContains("Can't set long value '5' to int aggregator",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            context.aggregateValue(MockMasterComputation.AGGR_LONG_SUM,
+                                   this.aggrIntSum.aggregatedValue());
+        }, e -> {
+            Assert.assertContains("Can't set int value '5' to long aggregator",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            context.aggregateValue(MockMasterComputation.AGGR_DOUBLE_SUM,
+                                   this.aggrFloatSum.aggregatedValue());
+        }, e -> {
+            Assert.assertContains("Can't set float value '10.4' to double ",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(ClassCastException.class, () -> {
+            context.aggregateValue(MockMasterComputation.AGGR_CUSTOM_FLOAT,
+                                   new IntValue(7));
+        }, e -> {
+            Assert.assertContains("IntValue cannot be cast to", e.getMessage());
+            Assert.assertContains("FloatValue", e.getMessage());
+        });
     }
 
     protected void assertStat(WorkerContext context) {
@@ -79,48 +134,86 @@ public class MockComputation implements Computation<DoubleValue> {
         Assert.assertEquals(200L, context.totalEdgeCount());
     }
 
-    protected void assertAggregators(WorkerContext context) {
-        // AGGR_TEST_INT
-        this.aggrInt = context.createAggregator(
-                       MockMasterComputation.AGGR_TEST_INT);
+    protected void createAndRunAggregators(WorkerContext context) {
+        // AGGR_CUSTOM_INT
+        this.aggrCustomInt = context.createAggregator(
+                             MockMasterComputation.AGGR_CUSTOM_INT);
 
         Assert.assertEquals(new IntValue(0),
-                            this.aggrInt.aggregatedValue());
+                            this.aggrCustomInt.aggregatedValue());
 
-        this.aggrInt.aggregateValue(1);
+        this.aggrCustomInt.aggregateValue(1);
         Assert.assertEquals(new IntValue(1),
-                            this.aggrInt.aggregatedValue());
+                            this.aggrCustomInt.aggregatedValue());
 
-        this.aggrInt.aggregateValue(new IntValue(1));
+        this.aggrCustomInt.aggregateValue(new IntValue(1));
         Assert.assertEquals(new IntValue(2),
-                            this.aggrInt.aggregatedValue());
+                            this.aggrCustomInt.aggregatedValue());
 
-        this.aggrInt.aggregateValue(3);
+        this.aggrCustomInt.aggregateValue(3);
         Assert.assertEquals(new IntValue(5),
-                            this.aggrInt.aggregatedValue());
+                            this.aggrCustomInt.aggregatedValue());
 
-        // AGGR_TEST_FLOAT
-        this.aggrFloat = context.createAggregator(
-                         MockMasterComputation.AGGR_TEST_FLOAT);
+        // AGGR_CUSTOM_FLOAT
+        this.aggrCustomFloat = context.createAggregator(
+                               MockMasterComputation.AGGR_CUSTOM_FLOAT);
 
         Assert.assertEquals(new FloatValue(0f),
-                            this.aggrFloat.aggregatedValue());
+                            this.aggrCustomFloat.aggregatedValue());
 
-        this.aggrFloat.aggregateValue(1f);
+        this.aggrCustomFloat.aggregateValue(1f);
         Assert.assertEquals(new FloatValue(1f),
-                            this.aggrFloat.aggregatedValue());
+                            this.aggrCustomFloat.aggregatedValue());
 
-        this.aggrFloat.aggregateValue(new FloatValue(1f));
+        this.aggrCustomFloat.aggregateValue(new FloatValue(1f));
         Assert.assertEquals(new FloatValue(2f),
-                            this.aggrFloat.aggregatedValue());
+                            this.aggrCustomFloat.aggregatedValue());
 
-        this.aggrFloat.aggregateValue(3.2f);
+        this.aggrCustomFloat.aggregateValue(3.2f);
         Assert.assertEquals(new FloatValue(5.2f),
-                            this.aggrFloat.aggregatedValue());
+                            this.aggrCustomFloat.aggregatedValue());
 
-        // AGGR_TEST_LONG_SUM
+        // AGGR_INT_SUM
+        this.aggrIntSum = context.createAggregator(
+                          MockMasterComputation.AGGR_INT_SUM);
+
+        Assert.assertEquals(new IntValue(0),
+                            this.aggrIntSum.aggregatedValue());
+
+        this.aggrIntSum.aggregateValue(1);
+        Assert.assertEquals(new IntValue(1),
+                            this.aggrIntSum.aggregatedValue());
+
+        this.aggrIntSum.aggregateValue(new IntValue(1));
+        Assert.assertEquals(new IntValue(2),
+                            this.aggrIntSum.aggregatedValue());
+
+        this.aggrIntSum.aggregateValue(3);
+        Assert.assertEquals(new IntValue(5),
+                            this.aggrIntSum.aggregatedValue());
+
+        // AGGR_INT_MAX
+        this.aggrIntMax = context.createAggregator(
+                          MockMasterComputation.AGGR_INT_MAX);
+
+        Assert.assertEquals(new IntValue(0),
+                            this.aggrIntMax.aggregatedValue());
+
+        this.aggrIntMax.aggregateValue(1);
+        Assert.assertEquals(new IntValue(1),
+                            this.aggrIntMax.aggregatedValue());
+
+        this.aggrIntMax.aggregateValue(8);
+        Assert.assertEquals(new IntValue(8),
+                            this.aggrIntMax.aggregatedValue());
+
+        this.aggrIntMax.aggregateValue(3);
+        Assert.assertEquals(new IntValue(8),
+                            this.aggrIntMax.aggregatedValue());
+
+        // AGGR_LONG_SUM
         this.aggrLongSum = context.createAggregator(
-                           MockMasterComputation.AGGR_TEST_LONG_SUM);
+                           MockMasterComputation.AGGR_LONG_SUM);
 
         Assert.assertEquals(new LongValue(0L),
                             this.aggrLongSum.aggregatedValue());
@@ -137,9 +230,9 @@ public class MockComputation implements Computation<DoubleValue> {
         Assert.assertEquals(new LongValue(5L),
                             this.aggrLongSum.aggregatedValue());
 
-        // AGGR_TEST_LONG_MAX
+        // AGGR_LONG_MAX
         this.aggrLongMax = context.createAggregator(
-                           MockMasterComputation.AGGR_TEST_LONG_MAX);
+                           MockMasterComputation.AGGR_LONG_MAX);
 
         Assert.assertEquals(new LongValue(0L),
                             this.aggrLongMax.aggregatedValue());
@@ -156,9 +249,47 @@ public class MockComputation implements Computation<DoubleValue> {
         Assert.assertEquals(new LongValue(8L),
                             this.aggrLongMax.aggregatedValue());
 
-        // AGGR_TEST_DOUBLE_SUM
+        // AGGR_FLOAT_SUM
+        this.aggrFloatSum = context.createAggregator(
+                            MockMasterComputation.AGGR_FLOAT_SUM);
+
+        Assert.assertEquals(new FloatValue(0.0f),
+                            this.aggrFloatSum.aggregatedValue());
+
+        this.aggrFloatSum.aggregateValue(1.1f);
+        Assert.assertEquals(new FloatValue(1.1f),
+                            this.aggrFloatSum.aggregatedValue());
+
+        this.aggrFloatSum.aggregateValue(2.3f);
+        Assert.assertEquals(new FloatValue(3.4f),
+                            this.aggrFloatSum.aggregatedValue());
+
+        this.aggrFloatSum.aggregateValue(7.0f);
+        Assert.assertEquals(new FloatValue(10.4f),
+                            this.aggrFloatSum.aggregatedValue());
+
+        // AGGR_FLOAT_MIN
+        this.aggrFloatMin = context.createAggregator(
+                            MockMasterComputation.AGGR_FLOAT_MIN);
+
+        Assert.assertEquals(new FloatValue(0.0f),
+                            this.aggrFloatMin.aggregatedValue());
+
+        this.aggrFloatMin.aggregateValue(1.1f);
+        Assert.assertEquals(new FloatValue(0.0f),
+                            this.aggrFloatMin.aggregatedValue());
+
+        this.aggrFloatMin.aggregateValue(-10.0f);
+        Assert.assertEquals(new FloatValue(-10.0f),
+                            this.aggrFloatMin.aggregatedValue());
+
+        this.aggrFloatMin.aggregateValue(-4.0f);
+        Assert.assertEquals(new FloatValue(-10.0f),
+                            this.aggrFloatMin.aggregatedValue());
+
+        // AGGR_DOUBLE_SUM
         this.aggrDoubleSum = context.createAggregator(
-                             MockMasterComputation.AGGR_TEST_DOUBLE_SUM);
+                             MockMasterComputation.AGGR_DOUBLE_SUM);
 
         Assert.assertEquals(new DoubleValue(0.0),
                             this.aggrDoubleSum.aggregatedValue());
@@ -175,9 +306,9 @@ public class MockComputation implements Computation<DoubleValue> {
         Assert.assertEquals(new DoubleValue(10.4),
                             this.aggrDoubleSum.aggregatedValue());
 
-        // AGGR_TEST_DOUBLE_MIN
+        // AGGR_DOUBLE_MIN
         this.aggrDoubleMin = context.createAggregator(
-                             MockMasterComputation.AGGR_TEST_DOUBLE_MIN);
+                             MockMasterComputation.AGGR_DOUBLE_MIN);
 
         Assert.assertEquals(new DoubleValue(0.0),
                             this.aggrDoubleMin.aggregatedValue());
@@ -196,20 +327,68 @@ public class MockComputation implements Computation<DoubleValue> {
     }
 
     protected void assertStep0Aggregators(WorkerContext context) {
+        Assert.assertEquals(new IntValue(0), context.aggregatedValue(
+                            MockMasterComputation.AGGR_CUSTOM_INT));
+        Assert.assertEquals(new FloatValue(0f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_CUSTOM_FLOAT));
+
+        Assert.assertEquals(new FloatValue(0f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_FLOAT_UNSTABLE));
+        Assert.assertEquals(new IntValue(Integer.MAX_VALUE),
+                            context.aggregatedValue(
+                            MockMasterComputation.AGGR_INT_UNSTABLE));
+
+        Assert.assertEquals(new IntValue(0), context.aggregatedValue(
+                            MockMasterComputation.AGGR_INT_SUM));
+        Assert.assertEquals(new IntValue(0), context.aggregatedValue(
+                            MockMasterComputation.AGGR_INT_MAX));
+
+        Assert.assertEquals(new LongValue(0L), context.aggregatedValue(
+                            MockMasterComputation.AGGR_LONG_SUM));
+        Assert.assertEquals(new LongValue(0L), context.aggregatedValue(
+                            MockMasterComputation.AGGR_LONG_MAX));
+
+        Assert.assertEquals(new FloatValue(0f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_FLOAT_SUM));
+        Assert.assertEquals(new FloatValue(0f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_FLOAT_MIN));
+
+        Assert.assertEquals(new DoubleValue(0d), context.aggregatedValue(
+                            MockMasterComputation.AGGR_DOUBLE_SUM));
+        Assert.assertEquals(new DoubleValue(0d), context.aggregatedValue(
+                            MockMasterComputation.AGGR_DOUBLE_MIN));
+    }
+
+    protected void assertStep1Aggregators(WorkerContext context) {
         Assert.assertEquals(new IntValue(5), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_INT));
+                            MockMasterComputation.AGGR_CUSTOM_INT));
         Assert.assertEquals(new FloatValue(5.2f), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_FLOAT));
+                            MockMasterComputation.AGGR_CUSTOM_FLOAT));
+
+        Assert.assertEquals(new FloatValue(8.8f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_FLOAT_UNSTABLE));
+        Assert.assertEquals(new IntValue(888), context.aggregatedValue(
+                            MockMasterComputation.AGGR_INT_UNSTABLE));
+
+        Assert.assertEquals(new IntValue(5), context.aggregatedValue(
+                            MockMasterComputation.AGGR_INT_SUM));
+        Assert.assertEquals(new IntValue(8), context.aggregatedValue(
+                            MockMasterComputation.AGGR_INT_MAX));
 
         Assert.assertEquals(new LongValue(5L), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_LONG_SUM));
+                            MockMasterComputation.AGGR_LONG_SUM));
         Assert.assertEquals(new LongValue(8L), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_LONG_MAX));
+                            MockMasterComputation.AGGR_LONG_MAX));
+
+        Assert.assertEquals(new FloatValue(10.4f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_FLOAT_SUM));
+        Assert.assertEquals(new FloatValue(-10.0f), context.aggregatedValue(
+                            MockMasterComputation.AGGR_FLOAT_MIN));
 
         Assert.assertEquals(new DoubleValue(10.4), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_DOUBLE_SUM));
+                            MockMasterComputation.AGGR_DOUBLE_SUM));
         Assert.assertEquals(new DoubleValue(-10.0), context.aggregatedValue(
-                            MockMasterComputation.AGGR_TEST_DOUBLE_MIN));
+                            MockMasterComputation.AGGR_DOUBLE_MIN));
     }
 
     @Override
