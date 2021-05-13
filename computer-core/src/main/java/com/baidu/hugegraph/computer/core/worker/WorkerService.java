@@ -81,7 +81,6 @@ public class WorkerService {
         this.workerInfo = new ContainerInfo(0, dataAddress.getHostName(),
                                             0, dataAddress.getPort());
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
-        this.bsp4Worker.init();
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
         this.computation.init(config);

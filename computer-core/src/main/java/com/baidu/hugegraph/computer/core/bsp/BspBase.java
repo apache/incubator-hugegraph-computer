@@ -29,8 +29,6 @@ public abstract class BspBase {
 
     private static final Logger LOG = Log.logger(BspBase.class);
 
-    private BspClient bspClient;
-
     private final Config config;
 
     private final String jobId;
@@ -39,6 +37,8 @@ public abstract class BspBase {
     private final long barrierOnMasterTimeout;
     private final long barrierOnWorkersTimeout;
     private final long logInterval;
+
+    private final BspClient bspClient;
 
     public BspBase(Config config) {
         this.config = config;
@@ -52,17 +52,19 @@ public abstract class BspBase {
         this.barrierOnMasterTimeout = this.config.get(
              ComputerOptions.BSP_WAIT_MASTER_TIMEOUT);
         this.logInterval = this.config.get(ComputerOptions.BSP_LOG_INTERVAL);
-        LOG.info("Connect to BSP server: {}", this.bspClient.endpoint());
+
+        this.bspClient = this.init();
     }
 
     /**
      * Do initialization operation, like connect to etcd or ZooKeeper cluster.
      */
-    public void init() {
-        this.bspClient = this.createBspClient();
-        this.bspClient.init(this.jobId);
+    private BspClient init() {
+        BspClient bspClient = this.createBspClient();
+        bspClient.init(this.jobId);
         LOG.info("Init {} BSP connection to '{}' for job '{}'",
-                 this.bspClient.type(), this.bspClient.endpoint(), this.jobId);
+                 bspClient.type(), bspClient.endpoint(), this.jobId);
+        return bspClient;
     }
 
     /**
@@ -76,7 +78,7 @@ public abstract class BspBase {
     }
 
     private BspClient createBspClient() {
-        // TODO: the type of bsp client can be get from config
+        // TODO: create from factory. the type of bsp can be get from config
         return new EtcdBspClient(this.config);
     }
 
