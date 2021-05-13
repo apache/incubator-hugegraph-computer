@@ -22,10 +22,14 @@ package com.baidu.hugegraph.computer.core.aggregator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
+import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.Log;
 
 /**
  * Aggregator manager manages aggregators in master.
@@ -33,6 +37,8 @@ import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
 public class MasterAggrManager implements Manager {
 
     public static final String NAME = "master_aggr";
+
+    private static final Logger LOG = Log.logger(MasterAggrManager.class);
 
     private final RegisterAggregators registerAggregators;
     private final MasterAggregateHandler aggregatorsHandler;
@@ -56,7 +62,10 @@ public class MasterAggrManager implements Manager {
 
     @Override
     public void beforeSuperstep(Config config, int superstep) {
-        // NOTE: rely on worker execute beforeSuperstep() before this call
+        /*
+         * NOTE: rely on worker execute beforeSuperstep() to get all the
+         * aggregators before this master beforeSuperstep() call.
+         */
         this.aggregatorsHandler.resetAggregators(this.registerAggregators);
     }
 
@@ -75,9 +84,15 @@ public class MasterAggrManager implements Manager {
         this.registerAggregators.put(name, aggr);
     }
 
+    public void applyAggregators() {
+        this.aggregatorsHandler.resetAggregators(this.registerAggregators);
+    }
+
     public <V extends Value<?>> void aggregatedAggregator(String name,
                                                           V value) {
         // Called when master compute()
+        E.checkArgument(value != null,
+                        "Can't set value to null for aggregator '%s'", name);
         Aggregator<V> aggr = this.aggregatorsHandler.getAggregator(name);
         aggr.aggregatedValue(value);
     }
@@ -111,6 +126,7 @@ public class MasterAggrManager implements Manager {
             for (Entry<String, Value<?>> aggr : aggregators.entrySet()) {
                 this.aggregateAggregator(aggr.getKey(), aggr.getValue());
             }
+            LOG.info("Master aggregate aggregators: {}", aggregators);
         }
 
         @Override

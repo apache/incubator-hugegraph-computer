@@ -134,13 +134,16 @@ public class WorkerService {
     public void close() {
         this.checkInited();
 
+        this.computation.close(this.config);
+
         /*
+         * Seems managers.closeAll() would do the following actions:
          * TODO: close the connection to other workers.
          * TODO: stop the connection to the master
          * TODO: stop the data transportation server.
          */
         this.managers.closeAll(this.config);
-        this.computation.close(this.config);
+
         this.bsp4Worker.workerCloseDone();
         this.bsp4Worker.close();
         LOG.info("{} WorkerService closed", this);

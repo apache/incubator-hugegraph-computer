@@ -106,6 +106,8 @@ public class WorkerAggrManager implements Manager {
          * Update aggregator for the current superstep,
          * Generally called when computation.afterSuperstep()
          */
+        E.checkArgument(value != null,
+                        "Can't set value to null for aggregator '%s'", name);
         Aggregator<Value<?>> aggr = this.currentAggregators.get(name,
                                                                 this.service());
         // May be executed in parallel by multiple threads in a worker

@@ -86,11 +86,22 @@ public class MasterService {
         this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
                                             rpcAddress.getHostName(),
                                             rpcAddress.getPort());
+        /*
+         * Connect to BSP server and clean the old data may be left by the
+         * previous job with same job id.
+         */
         this.bsp4Master = new Bsp4Master(this.config);
+        this.bsp4Master.clean();
 
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
         this.masterComputation.init(new DefaultMasterContext());
+        /*
+         * Apply aggregators registerd by master init(), so that workers can
+         * get aggregators from master.
+         */
+        MasterAggrManager manager = this.managers.get(MasterAggrManager.NAME);
+        manager.applyAggregators();
 
         LOG.info("{} register MasterService", this);
         this.bsp4Master.masterInitDone(this.masterInfo);
@@ -110,9 +121,12 @@ public class MasterService {
     public void close() {
         this.checkInited();
 
-        this.bsp4Master.waitWorkersCloseDone();
-        this.managers.closeAll(this.config);
         this.masterComputation.close(new DefaultMasterContext());
+
+        this.bsp4Master.waitWorkersCloseDone();
+
+        this.managers.closeAll(this.config);
+
         this.bsp4Master.clean();
         this.bsp4Master.close();
         LOG.info("{} MasterService closed", this);
@@ -196,6 +210,7 @@ public class MasterService {
             }
             this.managers.afterSuperstep(this.config, superstep);
             this.bsp4Master.masterStepDone(superstep, superstepStat);
+
             LOG.info("{} MasterService superstep {} finished",
                      this, superstep);
         }

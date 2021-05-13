@@ -36,6 +36,12 @@ public class RegisterAggregators {
     }
 
     public void put(String name, Aggregator<? extends Value<?>> aggregator) {
+        E.checkArgument(name != null,
+                        "The registered aggregator name can't be null");
+        E.checkArgument(!name.isEmpty(),
+                        "The registered aggregator name can't be empty");
+        E.checkArgument(aggregator != null,
+                        "The registered aggregator can't be null");
         this.aggregators.put(name, aggregator);
     }
 

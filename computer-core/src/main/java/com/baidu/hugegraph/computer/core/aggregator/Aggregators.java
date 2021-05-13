@@ -53,12 +53,16 @@ public class Aggregators {
     public <V extends Value<?>> Aggregator<V> get(String name,
                                                   AggregateRpcService service) {
         Aggregator<?> aggregator = this.aggregators.get(name);
-        if (aggregator == null && service != null) {
-            // Try to get the aggregator maybe created dynamic
-            aggregator = service.getAggregator(name);
+        if (aggregator == null) {
+            if (service != null) {
+                // Try to get the aggregator maybe created dynamic
+                aggregator = service.getAggregator(name);
+                if (aggregator != null) {
+                    this.aggregators.put(name, aggregator);
+                }
+            }
             E.checkArgument(aggregator != null,
                             "Can't get aggregator '%s'", name);
-            this.aggregators.put(name, aggregator);
         }
         @SuppressWarnings("unchecked")
         Aggregator<V> result = (Aggregator<V>) aggregator;
