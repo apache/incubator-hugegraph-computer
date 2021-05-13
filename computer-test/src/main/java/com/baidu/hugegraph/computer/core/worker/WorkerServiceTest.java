@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,6 +44,21 @@ public class WorkerServiceTest extends UnitTestBase {
     public void testServiceWith1Worker() throws InterruptedException {
         MasterService masterService = new MasterService();
         WorkerService workerService = new MockWorkerService();
+
+//        Config configm = UnitTestBase.updateWithRequiredOptions(
+//           RpcOptions.RPC_SERVER_HOST, "localhost",
+//           ComputerOptions.JOB_ID, "local_002",
+//           ComputerOptions.JOB_WORKERS_COUNT, "1",
+//           ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
+//           ComputerOptions.BSP_LOG_INTERVAL, "30000",
+//           ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+//           ComputerOptions.MASTER_COMPUTATION_CLASS,
+//           MockMasterComputation.class.getName()
+//       );
+//        Bsp4Master bsp = new Bsp4Master(configm);
+//        bsp.init();
+//        bsp.clean();
+
         try {
             ExecutorService pool = Executors.newFixedThreadPool(2);
             CountDownLatch countDownLatch = new CountDownLatch(2);
@@ -95,12 +111,17 @@ public class WorkerServiceTest extends UnitTestBase {
             countDownLatch.await();
             pool.shutdownNow();
 
-            Assert.assertFalse(this.existError(exceptions));
+            Assert.assertFalse(Arrays.asList(exceptions).toString(),
+                               this.existError(exceptions));
         } finally {
             try {
-                workerService.close();
-            } finally {
-                masterService.close();
+                try {
+                    workerService.close();
+                } finally {
+                    masterService.close();
+                }
+            } catch (Exception e) {
+                LOG.warn("Error when closing service", e);
             }
         }
     }
@@ -110,6 +131,20 @@ public class WorkerServiceTest extends UnitTestBase {
         ExecutorService pool = Executors.newFixedThreadPool(3);
         CountDownLatch countDownLatch = new CountDownLatch(3);
         Throwable[] exceptions = new Throwable[3];
+
+//        Config configm = UnitTestBase.updateWithRequiredOptions(
+//            RpcOptions.RPC_SERVER_HOST, "localhost",
+//            ComputerOptions.JOB_ID, "local_003",
+//            ComputerOptions.JOB_WORKERS_COUNT, "1",
+//            ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
+//            ComputerOptions.BSP_LOG_INTERVAL, "30000",
+//            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+//            ComputerOptions.MASTER_COMPUTATION_CLASS,
+//            MockMasterComputation.class.getName()
+//        );
+//         Bsp4Master bsp = new Bsp4Master(configm);
+//         bsp.init();
+//         bsp.clean();
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
@@ -131,8 +166,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
             } finally {
-                countDownLatch.countDown();
                 workerService.close();
+                countDownLatch.countDown();
             }
         });
 
@@ -156,8 +191,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start worker", e);
                 exceptions[1] = e;
             } finally {
-                countDownLatch.countDown();
                 workerService.close();
+                countDownLatch.countDown();
             }
         });
 
@@ -180,15 +215,16 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start master", e);
                 exceptions[2] = e;
             } finally {
-                countDownLatch.countDown();
                 masterService.close();
+                countDownLatch.countDown();
             }
         });
 
         countDownLatch.await();
         pool.shutdownNow();
 
-        Assert.assertFalse(this.existError(exceptions));
+        Assert.assertFalse(Arrays.asList(exceptions).toString(),
+                           this.existError(exceptions));
     }
 
     private boolean existError(Throwable[] exceptions) {
@@ -196,6 +232,7 @@ public class WorkerServiceTest extends UnitTestBase {
         for (Throwable e : exceptions) {
             if (e != null) {
                 error = true;
+                LOG.warn("There exist error:", e);
                 break;
             }
         }
@@ -209,7 +246,7 @@ public class WorkerServiceTest extends UnitTestBase {
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             // Unavailable etcd endpoints
             ComputerOptions.BSP_ETCD_ENDPOINTS, "http://abc:8098",
-            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_ID, "local_004",
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.BSP_LOG_INTERVAL, "30000",
             ComputerOptions.BSP_MAX_SUPER_STEP, "2",
@@ -219,7 +256,11 @@ public class WorkerServiceTest extends UnitTestBase {
 
         Assert.assertThrows(ComputerException.class, () -> {
             workerService.init(config);
-            workerService.execute();
+            try {
+                workerService.execute();
+            } finally {
+                workerService.close();
+            }
         }, e -> {
             Assert.assertContains("Error while getting with " +
                                   "key='BSP_MASTER_INIT_DONE'",
