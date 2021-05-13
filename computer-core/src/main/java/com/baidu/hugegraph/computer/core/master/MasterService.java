@@ -89,8 +89,8 @@ public class MasterService {
         // TODO: pass MasterInitContext to init
         this.masterComputation.init(null);
 
-        this.bsp4Master.registerMaster(this.masterInfo);
-        this.workers = this.bsp4Master.waitWorkersRegistered();
+        this.bsp4Master.masterInitDone(this.masterInfo);
+        this.workers = this.bsp4Master.waitWorkersInitDone();
         LOG.info("{} MasterService worker count: {}",
                  this, this.workers.size());
         LOG.info("{} MasterService initialized", this);
@@ -104,6 +104,7 @@ public class MasterService {
     public void close() {
         this.checkInited();
 
+        this.bsp4Master.waitWorkersCloseDone();
         this.managers.closeAll(this.config);
         // TODO: pass parameter MasterContext.
         this.masterComputation.close(null);
@@ -133,7 +134,7 @@ public class MasterService {
          * TODO: Get input splits from HugeGraph if resume from
          * Constants.INPUT_SUPERSTEP.
          */
-        this.bsp4Master.masterSuperstepResume(superstep);
+        this.bsp4Master.masterResumeDone(superstep);
 
         /*
          * Step 2: Input superstep for loading vertices and edges.
@@ -161,19 +162,25 @@ public class MasterService {
              * 2) All managers call beforeSuperstep.
              * 3) Master signals the workers that the master prepared
              *    superstep.
-             * 4) Master waits the workers do vertex computation, and get
+             * 4) Master waits the workers do vertex computation.
+             * 5) Master signal the workers that all workers have finished
+             *    vertex computation.
+             * 6) Master waits the workers end the superstep, and get
              *    superstepStat.
-             * 5) Master compute whether to continue the next superstep
+             * 7) Master compute whether to continue the next superstep
              *    iteration.
-             * 6) All managers call afterSuperstep.
-             * 7) Master signals the workers with superstepStat, and workers
+             * 8) All managers call afterSuperstep.
+             * 9) Master signals the workers with superstepStat, and workers
              *    know whether to continue the next superstep iteration.
              */
-            this.bsp4Master.waitWorkersSuperstepPrepared(superstep);
+            this.bsp4Master.waitWorkersStepPrepareDone(superstep);
             this.managers.beforeSuperstep(this.config, superstep);
-            this.bsp4Master.masterSuperstepPrepared(superstep);
+            this.bsp4Master.masterStepPrepareDone(superstep);
+
+            this.bsp4Master.waitWorkersStepComputeDone(superstep);
+            this.bsp4Master.masterStepComputeDone(superstep);
             List<WorkerStat> workerStats =
-                    this.bsp4Master.waitWorkersSuperstepDone(superstep);
+                             this.bsp4Master.waitWorkersStepDone(superstep);
             superstepStat = SuperstepStat.from(workerStats);
             SuperstepContext context = new SuperstepContext(this.config,
                                                             superstep,
@@ -183,7 +190,7 @@ public class MasterService {
                 superstepStat.inactivate();
             }
             this.managers.afterSuperstep(this.config, superstep);
-            this.bsp4Master.masterSuperstepDone(superstep, superstepStat);
+            this.bsp4Master.masterStepDone(superstep, superstepStat);
             LOG.info("{} MasterService superstep {} finished",
                      this, superstep);
         }
@@ -266,11 +273,11 @@ public class MasterService {
         LOG.info("{} MasterService inputstep started", this);
         this.bsp4Master.waitWorkersInputDone();
         this.bsp4Master.masterInputDone();
-        List<WorkerStat> workerStats = this.bsp4Master.waitWorkersSuperstepDone(
+        List<WorkerStat> workerStats = this.bsp4Master.waitWorkersStepDone(
                                        Constants.INPUT_SUPERSTEP);
         SuperstepStat superstepStat = SuperstepStat.from(workerStats);
-        this.bsp4Master.masterSuperstepDone(Constants.INPUT_SUPERSTEP,
-                                            superstepStat);
+        this.bsp4Master.masterStepDone(Constants.INPUT_SUPERSTEP,
+                                       superstepStat);
         LOG.info("{} MasterService inputstep finished", this);
         return superstepStat;
     }

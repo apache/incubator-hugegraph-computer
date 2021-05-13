@@ -46,7 +46,11 @@ public class ContainerInfo implements Readable, Writable {
     }
 
     public ContainerInfo(int id, String hostname, int rpcPort) {
-        this(id, hostname, rpcPort, 0);
+        this(0, hostname, rpcPort, 0);
+    }
+
+    public ContainerInfo(String hostname, int rpcPort, int dataPort) {
+        this(0, hostname, rpcPort, dataPort);
     }
 
     public ContainerInfo(int id, String hostname, int rpcPort, int dataPort) {
@@ -61,6 +65,10 @@ public class ContainerInfo implements Readable, Writable {
         return this.id;
     }
 
+    public void id(int id) {
+        this.id = id;
+    }
+
     public String hostname() {
         return this.hostname;
     }
@@ -71,6 +79,14 @@ public class ContainerInfo implements Readable, Writable {
 
     public int dataPort() {
         return this.dataPort;
+    }
+
+    public String uniqueName() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.hostname)
+          .append(":")
+          .append(this.dataPort);
+        return sb.toString();
     }
 
     @Override
