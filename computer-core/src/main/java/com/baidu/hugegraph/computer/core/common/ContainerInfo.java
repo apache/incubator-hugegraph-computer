@@ -82,7 +82,11 @@ public class ContainerInfo implements Readable, Writable {
     }
 
     public String uniqueName() {
-        return String.format("%s:%s", this.hostname, this.dataPort);
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.hostname)
+          .append(":")
+          .append(this.dataPort);
+        return sb.toString();
     }
 
     @Override
