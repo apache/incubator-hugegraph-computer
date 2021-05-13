@@ -30,12 +30,26 @@ public class MockCustomValue implements Value<MockCustomValue> {
     private Date value;
 
     public MockCustomValue() {
-        this.value = new Date();
+        this(new Date());
+    }
+
+    public MockCustomValue(Date value) {
+        this.value = value;
     }
 
     @Override
     public ValueType type() {
         return ValueType.CUSTOM_VALUE;
+    }
+
+    @Override
+    public void assign(Value<MockCustomValue> other) {
+        this.value = ((MockCustomValue) other).value;
+    }
+
+    @Override
+    public MockCustomValue copy() {
+        return new MockCustomValue((Date) this.value.clone());
     }
 
     @Override
