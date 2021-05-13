@@ -99,7 +99,7 @@ public class WorkerService {
 
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
-        this.computation.init(config);
+        this.computation.init(this.config);
         LOG.info("Loading computation '{}' in category '{}'",
                  this.computation.name(), this.computation.category());
 
@@ -123,6 +123,7 @@ public class WorkerService {
             //dm.connect(container.hostname(), container.dataPort());
         }
 
+        this.managers.initedAll(this.config);
         LOG.info("{} WorkerService initialized", this);
         this.inited = true;
     }

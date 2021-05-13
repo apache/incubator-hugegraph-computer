@@ -96,12 +96,7 @@ public class MasterService {
         this.masterComputation = this.config.createObject(
                                  ComputerOptions.MASTER_COMPUTATION_CLASS);
         this.masterComputation.init(new DefaultMasterContext());
-        /*
-         * Apply aggregators registerd by master init(), so that workers can
-         * get aggregators from master.
-         */
-        MasterAggrManager manager = this.managers.get(MasterAggrManager.NAME);
-        manager.applyAggregators();
+        this.managers.initedAll(config);
 
         LOG.info("{} register MasterService", this);
         this.bsp4Master.masterInitDone(this.masterInfo);

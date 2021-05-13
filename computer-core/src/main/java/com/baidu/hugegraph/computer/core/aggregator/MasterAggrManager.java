@@ -54,6 +54,15 @@ public class MasterAggrManager implements Manager {
     }
 
     @Override
+    public void inited(Config config) {
+        /*
+         * Apply aggregators registerd by master init(), so that workers can
+         * get aggregators from master.
+         */
+        this.aggregatorsHandler.resetAggregators(this.registerAggregators);
+    }
+
+    @Override
     public void close(Config config) {
         // Called when master close()
         this.aggregatorsHandler.clearAggregators();
@@ -69,11 +78,6 @@ public class MasterAggrManager implements Manager {
         this.aggregatorsHandler.resetAggregators(this.registerAggregators);
     }
 
-    @Override
-    public void afterSuperstep(Config config, int superstep) {
-        // pass
-    }
-
     public AggregateRpcService handler() {
         return this.aggregatorsHandler;
     }
@@ -82,10 +86,6 @@ public class MasterAggrManager implements Manager {
                                                         Aggregator<V> aggr) {
         // Called when master init()
         this.registerAggregators.put(name, aggr);
-    }
-
-    public void applyAggregators() {
-        this.aggregatorsHandler.resetAggregators(this.registerAggregators);
     }
 
     public <V extends Value<?>> void aggregatedAggregator(String name,

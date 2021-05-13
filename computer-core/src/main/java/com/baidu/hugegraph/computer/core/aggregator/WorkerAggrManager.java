@@ -62,8 +62,17 @@ public class WorkerAggrManager implements Manager {
 
     @Override
     public void init(Config config) {
+        // Called when worker init(), this is called after master inited()
         this.registerAggregators = this.service().registeredAggregators();
         this.registerAggregators.repair(this.context);
+    }
+
+    @Override
+    public void close(Config config) {
+        // Called when worker close()
+        this.registerAggregators.clear();
+        this.lastAggregators.clear();
+        this.currentAggregators.clear();
     }
 
     @Override
