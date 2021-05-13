@@ -45,20 +45,6 @@ public class WorkerServiceTest extends UnitTestBase {
         MasterService masterService = new MasterService();
         WorkerService workerService = new MockWorkerService();
 
-//        Config configm = UnitTestBase.updateWithRequiredOptions(
-//           RpcOptions.RPC_SERVER_HOST, "localhost",
-//           ComputerOptions.JOB_ID, "local_002",
-//           ComputerOptions.JOB_WORKERS_COUNT, "1",
-//           ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
-//           ComputerOptions.BSP_LOG_INTERVAL, "30000",
-//           ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-//           ComputerOptions.MASTER_COMPUTATION_CLASS,
-//           MockMasterComputation.class.getName()
-//       );
-//        Bsp4Master bsp = new Bsp4Master(configm);
-//        bsp.init();
-//        bsp.clean();
-
         try {
             ExecutorService pool = Executors.newFixedThreadPool(2);
             CountDownLatch countDownLatch = new CountDownLatch(2);
@@ -131,20 +117,6 @@ public class WorkerServiceTest extends UnitTestBase {
         ExecutorService pool = Executors.newFixedThreadPool(3);
         CountDownLatch countDownLatch = new CountDownLatch(3);
         Throwable[] exceptions = new Throwable[3];
-
-//        Config configm = UnitTestBase.updateWithRequiredOptions(
-//            RpcOptions.RPC_SERVER_HOST, "localhost",
-//            ComputerOptions.JOB_ID, "local_003",
-//            ComputerOptions.JOB_WORKERS_COUNT, "1",
-//            ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
-//            ComputerOptions.BSP_LOG_INTERVAL, "30000",
-//            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-//            ComputerOptions.MASTER_COMPUTATION_CLASS,
-//            MockMasterComputation.class.getName()
-//        );
-//         Bsp4Master bsp = new Bsp4Master(configm);
-//         bsp.init();
-//         bsp.clean();
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
