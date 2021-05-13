@@ -41,18 +41,31 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     private V value;
 
     public DefaultAggregator(ComputerContext context, ValueType type,
-                             Class<? extends Combiner<V>> combinerClass) {
+                             Class<? extends Combiner<V>> combinerClass,
+                             V defaultValue) {
+        E.checkArgument(type != null,
+                        "The value type of aggregator can't be null");
+        E.checkArgument(combinerClass != null,
+                        "The combiner of aggregator can't be null");
         this.type = type;
         this.combinerClass = combinerClass;
+
+        if (defaultValue != null) {
+            this.checkValue(defaultValue);
+        }
+        this.value = defaultValue;
 
         if (context != null) {
             this.repair(context);
         }
+
+        E.checkArgument(this.value != null,
+                        "Must provide default value for aggregator");
     }
 
     @Override
     public void aggregateValue(V value) {
-        E.checkNotNull(value, "aggregator", "value");
+        this.checkValue(value);
         this.value = this.combiner.combine(value, this.value);
     }
 
@@ -104,8 +117,15 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
 
     @Override
     public void aggregatedValue(V value) {
-        E.checkNotNull(value, "aggregator", "value");
+        this.checkValue(value);
         this.value = value;
+    }
+
+    private void checkValue(V value) {
+        E.checkNotNull(value, "aggregator", "value");
+        E.checkArgument(value.type() == this.type,
+                        "Can't set %s value '%s' to %s aggregator",
+                        value.type().string(), value, this.type.string());
     }
 
     @Override
@@ -116,7 +136,9 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     @Override
     public Aggregator<V> copy() {
         DefaultAggregator<V> aggregator = new DefaultAggregator<>(
-                                          null, this.type, this.combinerClass);
+                                          null, this.type,
+                                          this.combinerClass,
+                                          this.value);
         // Ensure deep copy the value
         @SuppressWarnings("unchecked")
         V deepCopyValue = (V) this.value.copy();

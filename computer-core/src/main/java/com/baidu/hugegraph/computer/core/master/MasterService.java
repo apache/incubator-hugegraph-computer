@@ -310,6 +310,8 @@ public class MasterService {
         @Override
         public <V extends Value<?>, C extends Aggregator<V>>
         void registerAggregator(String name, Class<C> aggregatorClass) {
+            E.checkArgument(aggregatorClass != null,
+                            "The aggregator class can't be null");
             Aggregator<V> aggr;
             try {
                 aggr = aggregatorClass.newInstance();
@@ -324,9 +326,28 @@ public class MasterService {
         public <V extends Value<?>, C extends Combiner<V>>
         void registerAggregator(String name, ValueType type,
                                 Class<C> combinerClass) {
+            this.registerAggregator(name, type, combinerClass, null);
+        }
+
+        @Override
+        public <V extends Value<?>, C extends Combiner<V>>
+        void registerAggregator(String name, V defaultValue,
+                                Class<C> combinerClass) {
+            E.checkArgument(defaultValue != null,
+                            "The aggregator default value can't be null: %s," +
+                            " or call another register method if necessary: " +
+                            "registerAggregator(String name,ValueType type," +
+                            "Class<C> combiner)", name);
+            this.registerAggregator(name, defaultValue.type(),
+                                    combinerClass, defaultValue);
+        }
+
+        private <V extends Value<?>, C extends Combiner<V>>
+        void registerAggregator(String name, ValueType type,
+                                Class<C> combinerClass, V defaultValue) {
             Aggregator<V> aggr = new DefaultAggregator<>(
                                  MasterService.this.context,
-                                 type, combinerClass);
+                                 type, combinerClass, defaultValue);
             this.aggrManager.registerAggregator(name, aggr);
         }
 

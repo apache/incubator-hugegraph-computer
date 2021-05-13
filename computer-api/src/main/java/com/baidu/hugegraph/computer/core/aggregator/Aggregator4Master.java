@@ -49,6 +49,15 @@ public interface Aggregator4Master {
     void registerAggregator(String name, ValueType type, Class<C> combiner);
 
     /**
+     * Register aggregator with specified default value(include type) and
+     * a combiner which can combine values with specified value type.
+     * The name must be unique.
+     * Used by algorithm's master-computation to register aggregators.
+     */
+    <V extends Value<?>, C extends Combiner<V>>
+    void registerAggregator(String name, V defaultValue, Class<C> combiner);
+
+    /**
      * Set the aggregated value by master-computation. The value will be
      * received by workers at next superstep.
      * Throws ComputerException if master does not register the aggregator
