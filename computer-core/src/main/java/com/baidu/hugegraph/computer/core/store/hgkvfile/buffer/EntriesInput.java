@@ -51,15 +51,11 @@ public class EntriesInput implements EntryIterator {
 
     @Override
     public KvEntry next() {
-        try {
-            return EntriesUtil.entryFromInput(this.input, this.userAccessInput);
-        } catch (IOException e) {
-            throw new ComputerException(e.getMessage(), e);
-        }
+        return EntriesUtil.entryFromInput(this.input, this.userAccessInput);
     }
 
     @Override
     public void close() throws IOException {
-        // pass
+        this.userAccessInput.close();
     }
 }

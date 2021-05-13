@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import com.baidu.hugegraph.computer.core.sort.sorter.EntriesUtilTest;
+import com.baidu.hugegraph.computer.core.sort.sorter.LargeDataSizeTest;
 import com.baidu.hugegraph.computer.core.sort.sorter.SorterTest;
 import com.baidu.hugegraph.computer.core.sort.sorting.InputsSortingTest;
 
@@ -30,7 +31,8 @@ import com.baidu.hugegraph.computer.core.sort.sorting.InputsSortingTest;
 @Suite.SuiteClasses({
     InputsSortingTest.class,
     EntriesUtilTest.class,
-    SorterTest.class
+    SorterTest.class,
+    LargeDataSizeTest.class
 })
 public class SorterTestSuite {
 }

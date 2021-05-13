@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
@@ -54,7 +53,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
             this.numEntries = hgkvFile.numEntries();
             File file = new File(hgkvFile.path());
             this.input = new BufferedFileInput(file);
-            this.userAccessInput = (BufferedFileInput) this.input.duplicate();
+            this.userAccessInput = this.input.duplicate();
         }
 
         @Override
@@ -68,13 +67,9 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
                 throw new NoSuchElementException();
             }
 
-            try {
-                this.numEntries--;
-                return EntriesUtil.entryFromInput(this.input,
-                                                  this.userAccessInput);
-            } catch (IOException e) {
-                throw new ComputerException(e.getMessage(), e);
-            }
+            this.numEntries--;
+            return EntriesUtil.entryFromInput(this.input,
+                                              this.userAccessInput);
         }
 
         @Override

@@ -42,7 +42,7 @@ public class EntriesUtilTest {
             data.add(i);
         }
 
-        RandomAccessInput input = SorterTestUtil.inputFromMap(data);
+        RandomAccessInput input = SorterTestUtil.inputFromKvMap(data);
         List<KvEntry> entries = EntriesUtil.readInput(input);
         for (int i = 0, j = 0; i < entries.size(); i++) {
             KvEntry entry = entries.get(i);

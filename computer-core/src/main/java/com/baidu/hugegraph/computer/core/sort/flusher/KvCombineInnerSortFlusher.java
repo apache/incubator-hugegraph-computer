@@ -24,16 +24,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.util.E;
 
-public class MockInnerSortFlusher implements InnerSortFlusher {
+public class KvCombineInnerSortFlusher implements InnerSortFlusher {
 
     private final RandomAccessOutput output;
+    private final Combiner<Pointer> combiner;
 
-    public MockInnerSortFlusher(RandomAccessOutput output) {
+    public KvCombineInnerSortFlusher(RandomAccessOutput output,
+                                     Combiner<Pointer> combiner) {
         this.output = output;
+        this.combiner = combiner;
     }
 
     @Override
@@ -42,13 +47,17 @@ public class MockInnerSortFlusher implements InnerSortFlusher {
     }
 
     @Override
-    public void flush(Iterator<KvEntry> entries) throws IOException {
-        if (!entries.hasNext()) {
-            return;
-        }
+    public Combiner<Pointer> combiner() {
+        return this.combiner;
+    }
 
-        List<KvEntry> sameKeyEntries = new ArrayList<>();
+    @Override
+    public void flush(Iterator<KvEntry> entries) throws IOException {
+        E.checkArgument(entries.hasNext(),
+                        "Parameter entries must not be empty.");
+
         KvEntry last = entries.next();
+        List<KvEntry> sameKeyEntries = new ArrayList<>();
         sameKeyEntries.add(last);
 
         while (true) {
@@ -61,31 +70,26 @@ public class MockInnerSortFlusher implements InnerSortFlusher {
                 }
             }
 
-            // Write same key
-            Pointer key = last.key();
-            this.output.writeInt((int) key.length());
-            this.output.write(key.input(), key.offset(), key.length());
-            // Write value length placeholder
-            long position = this.output.position();
-            this.output.writeInt(0);
-            // Write values of the same key in sequence
-            int valueLength = 0;
+            Pointer key = sameKeyEntries.get(0).key();
+            key.write(this.output);
+            Pointer value = null;
             for (KvEntry entry : sameKeyEntries) {
-                Pointer value = entry.value();
-                this.output.write(value.input(), value.offset(),
-                                  value.length());
-                valueLength += value.length();
+                if (value == null) {
+                    value = entry.value();
+                    continue;
+                }
+                value = this.combiner.combine(value, entry.value());
             }
-            // Fill value length placeholder
-            this.output.writeInt(position, valueLength);
+            assert value != null;
+            value.write(this.output);
 
             if (current == null) {
                 break;
             }
 
-            last = current;
             sameKeyEntries.clear();
-            sameKeyEntries.add(last);
+            sameKeyEntries.add(current);
+            last = current;
         }
     }
 }

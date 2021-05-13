@@ -22,32 +22,21 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 import java.io.IOException;
 import java.util.Iterator;
 
-import javax.ws.rs.NotSupportedException;
-
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.util.E;
 
-public interface InnerSortFlusher {
+public class KvOuterSortFlusher implements OuterSortFlusher {
 
-    /**
-     * Flush result write to this output.
-     */
-    default RandomAccessOutput output() {
-        throw new NotSupportedException();
+    @Override
+    public void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
+                      throws IOException {
+        E.checkArgument(entries.hasNext(),
+                        "Parameter entries must not be empty.");
+        while (entries.hasNext()) {
+            KvEntry entry = entries.next();
+            writer.write(entry);
+        }
+        writer.finish();
     }
-
-    /**
-     * Combiner entries with the same key.
-     */
-    default Combiner<Pointer> combiner() {
-        throw new NotSupportedException();
-    }
-
-    /**
-     * Combine the list of inputValues, and write the combined result length and
-     * results to output.
-     */
-    void flush(Iterator<KvEntry> entries) throws IOException;
 }

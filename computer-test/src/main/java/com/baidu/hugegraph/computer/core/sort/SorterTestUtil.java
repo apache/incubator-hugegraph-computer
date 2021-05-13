@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.sort;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -28,13 +29,14 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class SorterTestUtil {
 
-    public static UnsafeBytesOutput writeMapToOutput(List<Integer> map)
-                                                         throws IOException {
+    public static UnsafeBytesOutput writeKvMapToOutput(List<Integer> map)
+                                                       throws IOException {
         UnsafeBytesOutput output = new UnsafeBytesOutput();
 
         for (int i = 0; i < map.size(); ) {
@@ -47,10 +49,52 @@ public class SorterTestUtil {
         return output;
     }
 
-    public static UnsafeBytesInput inputFromMap(List<Integer> map)
-                                                    throws IOException {
-        UnsafeBytesOutput output = writeMapToOutput(map);
+    public static UnsafeBytesOutput writeSubKvMapToOutput(
+                                    List<List<Integer>> data)
+                                    throws IOException {
+        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        for (List<Integer> entry : data) {
+            Integer key = entry.get(0);
+            // Write key
+            output.writeInt(Integer.BYTES);
+            output.writeInt(key);
+            // Write subKv
+            long position = output.position();
+            int count = 0;
+            // Write value length placeholder
+            output.writeInt(0);
+            // Write subKv count placeholder
+            output.writeInt(0);
+            for (int i = 1; i < entry.size(); ) {
+                Integer subKey = entry.get(i++);
+                Integer subValue = entry.get(i++);
+                output.writeInt(Integer.BYTES);
+                output.writeInt(subKey);
+                output.writeInt(Integer.BYTES);
+                output.writeInt(subValue);
+                count++;
+            }
+            long currentPosition = output.position();
+            output.seek(position);
+            output.writeInt((int) (currentPosition - position - 4));
+            output.writeInt(count);
+            output.seek(currentPosition);
+        }
+        return output;
+    }
+
+    public static UnsafeBytesInput inputFromOutput(UnsafeBytesOutput output) {
         return new UnsafeBytesInput(output.buffer(), output.position());
+    }
+
+    public static UnsafeBytesInput inputFromKvMap(List<Integer> map)
+                                                  throws IOException {
+        return inputFromOutput(writeKvMapToOutput(map));
+    }
+
+    public static UnsafeBytesInput inputFromSubKvMap(List<List<Integer>> map)
+                                                     throws IOException {
+        return inputFromOutput(writeSubKvMapToOutput(map));
     }
 
     public static void assertOutputEqualsMap(UnsafeBytesOutput output,
@@ -79,5 +123,21 @@ public class SorterTestUtil {
                             StoreTestUtil.dataFromPointer(entry.key()));
         Assert.assertEquals(expectValues,
                             StoreTestUtil.dataFromPointer(entry.value()));
+    }
+
+    public static void assertSubKvByKv(KvEntry entry, int... expect)
+                                       throws IOException {
+        int index = 0;
+        Assert.assertEquals(expect[index++],
+                            StoreTestUtil.dataFromPointer(entry.key()));
+
+        Iterator<KvEntry> subKvs = EntriesUtil.subKvIterFromEntry(entry);
+        while (subKvs.hasNext()) {
+            KvEntry subKv = subKvs.next();
+            Assert.assertEquals(expect[index++],
+                                StoreTestUtil.dataFromPointer(subKv.key()));
+            Assert.assertEquals(expect[index++],
+                                StoreTestUtil.dataFromPointer(subKv.value()));
+        }
     }
 }

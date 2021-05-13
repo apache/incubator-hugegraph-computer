@@ -22,6 +22,8 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 import java.io.IOException;
 import java.util.Iterator;
 
+import javax.ws.rs.NotSupportedException;
+
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
@@ -31,13 +33,18 @@ public interface OuterSortFlusher {
 
     /**
      * Number of path to generate entries iterator in flush method.
+     * This method must be called before flush if sort with subKv.
      */
-    void sources(int sources);
+    default void sources(int sources) {
+        throw new NotSupportedException();
+    }
 
     /**
      * Combiner entries with the same key.
      */
-    Combiner<Pointer> combiner();
+    default Combiner<Pointer> combiner() {
+        throw new NotSupportedException();
+    }
 
     /**
      * Combine the list of inputValues, and write the inputKey and combined

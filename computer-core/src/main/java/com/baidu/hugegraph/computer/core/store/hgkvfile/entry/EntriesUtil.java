@@ -22,13 +22,14 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 
 public final class EntriesUtil {
 
@@ -43,51 +44,24 @@ public final class EntriesUtil {
         return pointers;
     }
 
-    public static Pointer valuePointerByKeyPointer(Pointer keyPointer)
-                                                   throws IOException {
-        RandomAccessInput input = keyPointer.input();
-        long position = input.position();
-        input.seek(keyPointer.offset());
-        input.skip(keyPointer.length());
-        // Read value
-        int valueLength = input.readInt();
-        Pointer value = new DefaultPointer(input, input.position(),
-                                                  valueLength);
-        input.seek(position);
-        return value;
-    }
-
-    public static List<KvEntry> subKvsFromEntry(KvEntry kvEntry)
-                                                throws IOException {
-        Pointer value = kvEntry.value();
-        RandomAccessInput input = value.input();
-        input.seek(value.offset());
-        int subKvSize = input.readInt();
-        List<KvEntry> subKvs = new ArrayList<>(subKvSize);
-        for (int i = 0; i < subKvSize; i++) {
-            subKvs.add(EntriesUtil.entryFromInput(input));
-        }
-        return subKvs;
-    }
-
-    public static Iterator<KvEntry> subKvIterFromEntry(KvEntry entry)
-                                                       throws IOException {
+    public static EntryIterator subKvIterFromEntry(KvEntry entry) {
         return new SubKvIterator(entry);
     }
 
-    private static class SubKvIterator implements Iterator<KvEntry> {
+    private static class SubKvIterator implements EntryIterator {
 
         private final RandomAccessInput input;
-        private long position;
-        private final long size;
+        private final RandomAccessInput userAccessInput;
+        private long size;
 
-        public SubKvIterator(KvEntry kvEntry) throws IOException {
-            Pointer value = kvEntry.value();
-            this.input = value.input();
-            this.position = 0L;
-            this.input.seek(value.offset());
-            this.size = this.input.readInt();
-            this.position = this.input.position();
+        public SubKvIterator(KvEntry kvEntry) {
+            try {
+                this.input = new UnsafeBytesInput(kvEntry.value().bytes());
+                this.userAccessInput = this.input.duplicate();
+                this.size = this.input.readInt();
+            } catch (IOException e) {
+                throw new ComputerException(e.getMessage(), e);
+            }
         }
 
         @Override
@@ -101,41 +75,42 @@ public final class EntriesUtil {
                 throw new NoSuchElementException();
             }
 
-            try {
-                this.input.seek(this.position);
-                KvEntry entry = EntriesUtil.entryFromInput(this.input);
-                this.position = this.input.position();
+            this.size--;
+            return EntriesUtil.entryFromInput(this.input, this.userAccessInput);
+        }
 
-                return entry;
-            } catch (IOException e) {
-                throw new ComputerException(e.getMessage(), e);
-            }
+        @Override
+        public void close() throws Exception {
+            this.input.close();
+            this.userAccessInput.close();
         }
     }
 
-    public static KvEntry entryFromInput(RandomAccessInput input)
-                                         throws IOException {
+    public static KvEntry entryFromInput(RandomAccessInput input) {
         return entryFromInput(input, input);
     }
 
     public static KvEntry entryFromInput(RandomAccessInput input,
-                                         RandomAccessInput userAccessInput)
-                                         throws IOException {
-        // Read key
-        int keyLength = input.readInt();
-        long keyOffset = input.position();
-        input.skip(keyLength);
+                                         RandomAccessInput userAccessInput) {
+        try {
+            // Read key
+            int keyLength = input.readInt();
+            long keyOffset = input.position();
+            input.skip(keyLength);
 
-        // Read value
-        int valueLength = input.readInt();
-        long valueOffset = input.position();
-        input.skip(valueLength);
+            // Read value
+            int valueLength = input.readInt();
+            long valueOffset = input.position();
+            input.skip(valueLength);
 
-        Pointer key = new OptimizedPointer(userAccessInput, keyOffset,
-                                           keyLength);
-        Pointer value = new OptimizedPointer(userAccessInput, valueOffset,
-                                             valueLength);
-        return new DefaultKvEntry(key, value);
+            Pointer key = new OptimizedPointer(userAccessInput, keyOffset,
+                                               keyLength);
+            Pointer value = new OptimizedPointer(userAccessInput, valueOffset,
+                                                 valueLength);
+            return new DefaultKvEntry(key, value);
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
     }
 
     public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry) {

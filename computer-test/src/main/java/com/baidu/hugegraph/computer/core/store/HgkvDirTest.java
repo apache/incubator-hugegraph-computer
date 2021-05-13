@@ -73,7 +73,7 @@ public class HgkvDirTest {
                                               5, 2,
                                               5, 9,
                                               6, 2);
-        List<KvEntry> kvEntries = StoreTestUtil.kvEntrysFromMap(data);
+        List<KvEntry> kvEntries = StoreTestUtil.kvEntriesFromMap(data);
 
         String path = availableDirPath("1");
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
@@ -125,25 +125,21 @@ public class HgkvDirTest {
                                               5, 9,
                                               6, 2);
         String path = availableDirPath("1");
-        File dir = StoreTestUtil.hgkvDirFromMap(data, path);
-        HgkvDirReader reader = new HgkvDirReaderImpl(dir.getPath());
+        StoreTestUtil.hgkvDirFromMap(data, path);
+        HgkvDirReader reader = new HgkvDirReaderImpl(path);
 
-        try {
-            EntryIterator iterator = reader.iterator();
-            int i = 0;
-            while (iterator.hasNext()) {
-                KvEntry entry = iterator.next();
-                entry.key().input().seek(entry.key().offset());
-                int key = entry.key().input().readInt();
-                Assert.assertEquals(data.get(i).intValue(), key);
-                i += 2;
-            }
-            Assert.assertThrows(NoSuchElementException.class,
-                                iterator::next);
-            iterator.close();
-        } finally {
-            FileUtils.deleteQuietly(dir);
+        EntryIterator iterator = reader.iterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            KvEntry entry = iterator.next();
+            entry.key().input().seek(entry.key().offset());
+            int key = entry.key().input().readInt();
+            Assert.assertEquals(data.get(i).intValue(), key);
+            i += 2;
         }
+        Assert.assertThrows(NoSuchElementException.class,
+                            iterator::next);
+        iterator.close();
     }
 
     private static String availableDirPath(String id) {

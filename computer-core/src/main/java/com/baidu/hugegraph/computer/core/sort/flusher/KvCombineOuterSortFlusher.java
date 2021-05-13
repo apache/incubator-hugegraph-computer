@@ -20,87 +20,71 @@
 package com.baidu.hugegraph.computer.core.sort.flusher;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
-import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.OptimizedPointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.util.E;
 
-public class MockOutSortFlusher implements OuterSortFlusher {
+public class KvCombineOuterSortFlusher implements OuterSortFlusher {
 
-    private final UnsafeBytesOutput output;
+    private final Combiner<Pointer> combiner;
 
-    public MockOutSortFlusher() {
-        this.output = new UnsafeBytesOutput();
+    public KvCombineOuterSortFlusher(Combiner<Pointer> combiner) {
+        this.combiner = combiner;
     }
 
     @Override
     public Combiner<Pointer> combiner() {
-        return null;
-    }
-
-    @Override
-    public void sources(int sources) {
-        // pass
+        return this.combiner;
     }
 
     @Override
     public void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
                       throws IOException {
-        if (!entries.hasNext()) {
-            return;
-        }
+        E.checkArgument(entries.hasNext(),
+                        "Parameter entries must not be empty.");
 
-        int value = 0;
         KvEntry last = entries.next();
-        value += StoreTestUtil.dataFromPointer(last.value());
+        List<KvEntry> sameKeyEntries = new ArrayList<>();
+        sameKeyEntries.add(last);
 
         while (true) {
             KvEntry current = null;
             if (entries.hasNext()) {
                 current = entries.next();
                 if (last.compareTo(current) == 0) {
-                    value += StoreTestUtil.dataFromPointer(current.value());
-                    last = current;
+                    sameKeyEntries.add(current);
                     continue;
                 }
             }
 
-            this.output.seek(0);
-            this.output.writeInt(Integer.BYTES);
-            this.output.write(last.key().bytes());
-            this.output.writeInt(Integer.BYTES);
-            this.output.writeInt(value);
-            writer.write(this.entryFromOutput());
+            Pointer key = sameKeyEntries.get(0).key();
+            Pointer value = null;
+            for (KvEntry entry : sameKeyEntries) {
+                if (value == null) {
+                    value = entry.value();
+                    continue;
+                }
+                value = this.combiner.combine(value, entry.value());
+            }
+
+            assert value != null;
+            writer.write(new DefaultKvEntry(key, value));
 
             if (current == null) {
                 break;
             }
 
+            sameKeyEntries.clear();
+            sameKeyEntries.add(current);
             last = current;
-            value = StoreTestUtil.dataFromPointer(last.value());
         }
         writer.finish();
-    }
-
-    private KvEntry entryFromOutput() throws IOException {
-        byte[] buffer = this.output.buffer();
-        long position = this.output.position();
-        RandomAccessInput input = new UnsafeBytesInput(buffer, position);
-        int keyLength = input.readInt();
-        long keyPosition = input.position();
-        input.skip(keyLength);
-        Pointer key = new OptimizedPointer(input, keyPosition, keyLength);
-        int valueLength = input.readInt();
-        long valuePosition = input.position();
-        Pointer value = new OptimizedPointer(input, valuePosition, valueLength);
-        return new DefaultKvEntry(key, value);
     }
 }

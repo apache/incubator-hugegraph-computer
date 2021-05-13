@@ -51,8 +51,8 @@ public class StoreTestUtil {
         FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
     }
 
-    public static List<KvEntry> kvEntrysFromMap(List<Integer> map)
-                                            throws IOException {
+    public static List<KvEntry> kvEntriesFromMap(List<Integer> map)
+                                                 throws IOException {
         UnsafeBytesOutput data = new UnsafeBytesOutput();
         Iterator<Integer> iterator = map.iterator();
         while (iterator.hasNext()) {
@@ -63,7 +63,7 @@ public class StoreTestUtil {
         }
 
         RandomAccessInput input = new UnsafeBytesInput(data.buffer(),
-                                                           data.position());
+                                                       data.position());
         Iterator<KvEntry> entriesIter = new EntriesInput(input);
         List<KvEntry> entries = new ArrayList<>();
         while (entriesIter.hasNext()) {
@@ -73,11 +73,11 @@ public class StoreTestUtil {
         return entries;
     }
 
-    public static File hgkvDirFromMap(List<Integer> map, String path)
+    public static void hgkvDirFromMap(List<Integer> map, String path)
                                       throws IOException {
         File file = new File(path);
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
-            List<KvEntry> entries = StoreTestUtil.kvEntrysFromMap(map);
+            List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
                 builder.write(entry);
             }
@@ -86,7 +86,6 @@ public class StoreTestUtil {
             FileUtils.deleteQuietly(file);
             throw e;
         }
-        return file;
     }
 
     public static File hgkvFileFromMap(List<Integer> map, String path)
@@ -94,7 +93,7 @@ public class StoreTestUtil {
         File file = new File(path);
 
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path, CONFIG)) {
-            List<KvEntry> entries = StoreTestUtil.kvEntrysFromMap(map);
+            List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
                 builder.add(entry.key(), entry.value());
             }
@@ -124,8 +123,7 @@ public class StoreTestUtil {
                (bytes[3] & 0xFF) << 24;
     }
 
-    public static UnsafeBytesInput inputFromOutput(
-                                       UnsafeBytesOutput output) {
+    public static UnsafeBytesInput inputFromOutput(UnsafeBytesOutput output) {
         return new UnsafeBytesInput(output.buffer(), output.position());
     }
 }

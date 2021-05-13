@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.sort.sorter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -39,23 +38,22 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.combiner.MockIntSumCombiner;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
-import com.baidu.hugegraph.computer.core.sort.flusher.MockOutSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.KvCombineInnerSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.KvCombineOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Bytes;
@@ -141,25 +139,29 @@ public class LargeDataSizeTest {
 
     private static RandomAccessInput sortBuffer(Sorter sorter,
                                                 RandomAccessInput input)
-                                                throws IOException {
+            throws IOException {
         UnsafeBytesOutput output = new UnsafeBytesOutput();
-        InnerSortFlusher combiner = new MockInnerSortFlusher(output);
-        sorter.sortBuffer(input, combiner);
+        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        InnerSortFlusher flusher = new KvCombineInnerSortFlusher(output,
+                                                                 combiner);
+        sorter.sortBuffer(input, flusher);
         return StoreTestUtil.inputFromOutput(output);
     }
 
-    private static int getBufferValue(RandomAccessInput input)
-                                      throws IOException {
-        input.seek(0);
+    private static void mergeBuffers(Sorter sorter,
+                                     List<RandomAccessInput> buffers,
+                                     String output) throws IOException {
+        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        OuterSortFlusher flusher = new KvCombineOuterSortFlusher(combiner);
+        sorter.mergeBuffers(buffers, flusher, output, false);
+    }
 
-        int value = 0;
-        for (KvEntry kvEntry : EntriesUtil.readInput(input)) {
-            value += StoreTestUtil.dataFromPointer(kvEntry.value());
-        }
-
-        input.seek(0);
-
-        return value;
+    private static void mergeFiles(Sorter sorter, List<String> files,
+                                   List<String> outputs) throws Exception {
+        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        OuterSortFlusher flusher = new KvCombineOuterSortFlusher(combiner);
+        sorter.mergeInputs(files, flusher, Lists.newArrayList(outputs),
+                           false);
     }
 
     private static long getFileValue(String file) throws IOException {
@@ -171,81 +173,6 @@ public class LargeDataSizeTest {
             result += StoreTestUtil.dataFromPointer(next.value());
         }
         return result;
-    }
-
-    private static class MockInnerSortFlusher implements InnerSortFlusher {
-
-        private final RandomAccessOutput output;
-        private final Combiner<Pointer> combiner;
-
-        public MockInnerSortFlusher(RandomAccessOutput output) {
-            this.output = output;
-            this.combiner = new MockIntSumCombiner();
-        }
-
-        @Override
-        public RandomAccessOutput output() {
-            return this.output;
-        }
-
-        @Override
-        public Combiner<Pointer> combiner() {
-            return this.combiner;
-        }
-
-        @Override
-        public void flush(Iterator<KvEntry> entries) throws IOException {
-            KvEntry last = entries.next();
-            List<KvEntry> sameKeyEntries = new ArrayList<>();
-            sameKeyEntries.add(last);
-
-            while (true) {
-                KvEntry current = null;
-                if (entries.hasNext()) {
-                    current = entries.next();
-                    if (last.compareTo(current) == 0) {
-                        sameKeyEntries.add(current);
-                        continue;
-                    }
-                }
-
-                Pointer key = sameKeyEntries.get(0).key();
-                key.write(this.output);
-                Pointer value = null;
-                for (KvEntry entry : sameKeyEntries) {
-                    if (value == null) {
-                        value = entry.value();
-                        continue;
-                    }
-                    value = this.combiner.combine(value, entry.value());
-                }
-                assert value != null;
-                value.write(this.output);
-
-                if (current == null) {
-                    break;
-                }
-
-                sameKeyEntries.clear();
-                sameKeyEntries.add(current);
-                last = current;
-            }
-        }
-    }
-
-    private static void mergeBuffers(Sorter sorter,
-                                     List<RandomAccessInput> buffers,
-                                     String output)
-                                     throws IOException {
-        OuterSortFlusher combiner = new MockOutSortFlusher();
-        sorter.mergeBuffers(buffers, combiner, output, false);
-    }
-
-    private static void mergeFiles(Sorter sorter, List<String> files,
-                                   List<String> outputs) throws Exception {
-        OuterSortFlusher combiner = new MockOutSortFlusher();
-        sorter.mergeInputs(files, combiner, Lists.newArrayList(outputs),
-                           false);
     }
 
     private static String availableDirPath(String id) {

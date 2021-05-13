@@ -17,15 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.combiner;
+package com.baidu.hugegraph.computer.core.sort.flusher;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import java.util.Iterator;
 
-public class MockOverWriteCombiner implements Combiner<Pointer> {
+public interface PeekNextIter<T> extends Iterator<T> {
 
-    @Override
-    public Pointer combine(Pointer v1, Pointer v2) {
-        return v2;
-    }
+    T peekNext();
 }

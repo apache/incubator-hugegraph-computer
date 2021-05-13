@@ -147,6 +147,14 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
+    public static final ConfigOption<Integer> EDGE_BATCH_SIZE =
+            new ConfigOption<>(
+                    "output.entry.edge_batch_size",
+                    "The number of edges of a vertex in kvEntry.",
+                    positiveInt(),
+                    500
+            );
+
     public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
             new ConfigOption<>(
                     "computer.vertex_average_degree",

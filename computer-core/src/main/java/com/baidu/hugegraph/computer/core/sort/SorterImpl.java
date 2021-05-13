@@ -58,8 +58,8 @@ public class SorterImpl implements Sorter {
     }
 
     @Override
-    public void sortBuffer(RandomAccessInput input,
-                           InnerSortFlusher flusher) throws IOException {
+    public void sortBuffer(RandomAccessInput input, InnerSortFlusher flusher)
+                           throws IOException {
         Iterator<KvEntry> entries = new EntriesInput(input);
         InputSorter sorter = new JavaInputSorter();
         flusher.flush(sorter.sort(entries));

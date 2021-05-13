@@ -17,37 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
-
-import java.io.IOException;
-import java.util.Iterator;
-
-import javax.ws.rs.NotSupportedException;
+package com.baidu.hugegraph.computer.core.sort.combiner;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
-public interface InnerSortFlusher {
+public class OverrideCombiner implements Combiner<Pointer> {
 
-    /**
-     * Flush result write to this output.
-     */
-    default RandomAccessOutput output() {
-        throw new NotSupportedException();
+    @Override
+    public Pointer combine(Pointer v1, Pointer v2) {
+        return v2;
     }
-
-    /**
-     * Combiner entries with the same key.
-     */
-    default Combiner<Pointer> combiner() {
-        throw new NotSupportedException();
-    }
-
-    /**
-     * Combine the list of inputValues, and write the combined result length and
-     * results to output.
-     */
-    void flush(Iterator<KvEntry> entries) throws IOException;
 }
