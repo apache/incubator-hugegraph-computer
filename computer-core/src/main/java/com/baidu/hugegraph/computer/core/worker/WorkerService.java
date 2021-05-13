@@ -163,7 +163,8 @@ public class WorkerService {
             this.bsp4Worker.waitMasterStepPrepareDone(superstep);
 
             WorkerStat workerStat = this.compute();
-
+            this.bsp4Worker.workerStepComputeDone(superstep);
+            this.bsp4Worker.waitMasterStepComputeDone(superstep);
             this.managers.afterSuperstep(this.config, superstep);
             this.computation.afterSuperstep(context);
             this.bsp4Worker.workerStepDone(superstep, workerStat);

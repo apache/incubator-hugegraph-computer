@@ -30,10 +30,12 @@ public enum BspEvent {
     BSP_MASTER_INPUT_DONE(6, "/master/input_done"),
     BSP_WORKER_STEP_PREPARE_DONE(7, "/worker/step_prepared"),
     BSP_MASTER_STEP_PREPARE_DONE(8, "/master/step_prepared"),
-    BSP_WORKER_STEP_DONE(9, "/worker/step_done"),
-    BSP_MASTER_STEP_DONE(10, "/master/step_done"),
-    BSP_WORKER_OUTPUT_DONE(11, "/worker/output_done"),
-    BSP_WORKER_CLOSE_DONE(12, "/worker/close_done");
+    BSP_WORKER_STEP_COMPUTE_DONE(9, "/worker/step_compute_done"),
+    BSP_MASTER_STEP_COMPUTE_DONE(10, "/master/step_compute_done"),
+    BSP_WORKER_STEP_DONE(11, "/worker/step_done"),
+    BSP_MASTER_STEP_DONE(12, "/master/step_done"),
+    BSP_WORKER_OUTPUT_DONE(13, "/worker/output_done"),
+    BSP_WORKER_CLOSE_DONE(14, "/worker/close_done");
 
     private byte code;
     private String key;

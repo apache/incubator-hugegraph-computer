@@ -132,6 +132,8 @@ public class EtcdBspTest extends UnitTestBase {
             for (int i = 0; i < this.maxSuperStep; i++) {
                 this.bsp4Master.waitWorkersStepPrepareDone(i);
                 this.bsp4Master.masterStepPrepareDone(i);
+                this.bsp4Master.waitWorkersStepComputeDone(i);
+                this.bsp4Master.masterStepComputeDone(i);
                 List<WorkerStat> list = this.bsp4Master.waitWorkersStepDone(i);
                 SuperstepStat superstepStat = new SuperstepStat();
                 for (WorkerStat workerStat1 : list) {
@@ -151,6 +153,8 @@ public class EtcdBspTest extends UnitTestBase {
                 superstep++;
                 this.bsp4Worker.workerStepPrepareDone(superstep);
                 this.bsp4Worker.waitMasterStepPrepareDone(superstep);
+                this.bsp4Worker.workerStepComputeDone(superstep);
+                this.bsp4Worker.waitMasterStepComputeDone(superstep);
                 PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
                                                         50L, 60L, 70L);
                 PartitionStat stat2 = new PartitionStat(1, 200L, 300L,

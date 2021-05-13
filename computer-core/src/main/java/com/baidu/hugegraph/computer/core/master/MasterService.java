@@ -161,17 +161,23 @@ public class MasterService {
              * 2) All managers call beforeSuperstep.
              * 3) Master signals the workers that the master prepared
              *    superstep.
-             * 4) Master waits the workers do vertex computation, and get
+             * 4) Master waits the workers do vertex computation.
+             * 5) Master signal the workers that all workers have finished
+             *    vertex computation.
+             * 6) Master waits the workers end the superstep, and get
              *    superstepStat.
-             * 5) Master compute whether to continue the next superstep
+             * 7) Master compute whether to continue the next superstep
              *    iteration.
-             * 6) All managers call afterSuperstep.
-             * 7) Master signals the workers with superstepStat, and workers
+             * 8) All managers call afterSuperstep.
+             * 9) Master signals the workers with superstepStat, and workers
              *    know whether to continue the next superstep iteration.
              */
             this.bsp4Master.waitWorkersStepPrepareDone(superstep);
             this.managers.beforeSuperstep(this.config, superstep);
             this.bsp4Master.masterStepPrepareDone(superstep);
+
+            this.bsp4Master.waitWorkersStepComputeDone(superstep);
+            this.bsp4Master.masterStepComputeDone(superstep);
             List<WorkerStat> workerStats =
                     this.bsp4Master.waitWorkersStepDone(superstep);
             superstepStat = SuperstepStat.from(workerStats);

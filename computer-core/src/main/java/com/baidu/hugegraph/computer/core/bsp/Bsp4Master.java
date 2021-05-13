@@ -150,6 +150,28 @@ public class Bsp4Master extends BspBase {
     }
 
     /**
+     * After all workers compute specified superstep done.
+     */
+    public void waitWorkersStepComputeDone(int superstep) {
+        LOG.info("Master is waiting for workers superstep-compute-done({})",
+                 superstep);
+        String path = this.constructPath(BspEvent.BSP_WORKER_STEP_COMPUTE_DONE,
+                                         superstep);
+        this.waitOnWorkersEvent(path, this.barrierOnWorkersTimeout());
+        LOG.info("Master waited workers superstep-compute-done");
+    }
+
+    /**
+     * Master signals the workers that the all workers compute done.
+     */
+    public void masterStepComputeDone(int superstep) {
+        LOG.info("Master set superstep-compute-done({})", superstep);
+        String path = this.constructPath(BspEvent.BSP_MASTER_STEP_COMPUTE_DONE,
+                                         superstep);
+        this.bspClient().put(path, Constants.EMPTY_BYTES);
+    }
+
+    /**
      * Master signals the workers that superstep done. The workers read
      * GraphStat and determines whether to continue iteration.
      */

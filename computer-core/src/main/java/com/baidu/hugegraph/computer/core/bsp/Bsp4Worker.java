@@ -50,7 +50,7 @@ public class Bsp4Worker extends BspBase {
         String path = this.constructPath(BspEvent.BSP_WORKER_INIT_DONE,
                                          this.workerInfo.id());
         this.bspClient().put(path, SerializeUtil.toBytes(this.workerInfo));
-        LOG.info("Worker is registered: {}", this.workerInfo);
+        LOG.info("Worker is init-done: {}", this.workerInfo);
     }
 
     /**
@@ -58,14 +58,14 @@ public class Bsp4Worker extends BspBase {
      * and port.
      */
     public ContainerInfo waitMasterInitDone() {
-        LOG.info("Worker({}) is waiting for master registered",
+        LOG.info("Worker({}) is waiting for master init-done",
                  this.workerInfo.id());
         String path = this.constructPath(BspEvent.BSP_MASTER_INIT_DONE);
         byte[] bytes = this.bspClient().get(path, this.registerTimeout(),
                                             this.logInterval());
         ContainerInfo masterInfo = new ContainerInfo();
         SerializeUtil.fromBytes(bytes, masterInfo);
-        LOG.info("Worker({}) waited master registered: {}",
+        LOG.info("Worker({}) waited master init-done: {}",
                  this.workerInfo.id(), masterInfo);
         return masterInfo;
     }
@@ -75,7 +75,7 @@ public class Bsp4Worker extends BspBase {
      * listen on.
      */
     public List<ContainerInfo> waitMasterAllInitDone() {
-        LOG.info("Worker({}) is waiting for master all-registered",
+        LOG.info("Worker({}) is waiting for master all-init-done",
                  this.workerInfo.id());
         String path = this.constructPath(BspEvent.BSP_MASTER_ALL_INIT_DONE);
         byte[] serializedContainers = this.bspClient().get(
@@ -86,7 +86,7 @@ public class Bsp4Worker extends BspBase {
                                          serializedContainers,
                                          ContainerInfo::new);
         this.assignThisWorkerId(containers);
-        LOG.info("Worker({}) waited master all-registered, workers: {}",
+        LOG.info("Worker({}) waited master all-init-done, workers: {}",
                  this.workerInfo.id(), containers);
         return containers;
     }
@@ -96,14 +96,14 @@ public class Bsp4Worker extends BspBase {
      * start with.
      */
     public int waitMasterResume() {
-        LOG.info("Worker({}) is waiting for master superstep-resume",
+        LOG.info("Worker({}) is waiting for master resume",
                  this.workerInfo.id());
         String path = this.constructPath(BspEvent.BSP_MASTER_RESUME);
         byte[] bytes = this.bspClient().get(path, this.barrierOnMasterTimeout(),
                                             this.logInterval());
         IntValue superstep = new IntValue();
         SerializeUtil.fromBytes(bytes, superstep);
-        LOG.info("Worker({}) waited superstep-resume({})",
+        LOG.info("Worker({}) waited master resume({})",
                  this.workerInfo.id(), superstep.value());
         return superstep.value();
     }
@@ -140,7 +140,7 @@ public class Bsp4Worker extends BspBase {
         String path = this.constructPath(BspEvent.BSP_WORKER_STEP_PREPARE_DONE,
                                          superstep, this.workerInfo.id());
         this.bspClient().put(path, Constants.EMPTY_BYTES);
-        LOG.info("Worker({}) set superstep-prepared({})",
+        LOG.info("Worker({}) set superstep-prepare-done({})",
                  this.workerInfo.id(), superstep);
     }
 
@@ -149,13 +149,41 @@ public class Bsp4Worker extends BspBase {
      * to other workers.
      */
     public void waitMasterStepPrepareDone(int superstep) {
-        LOG.info("Worker({}) is waiting for master superstep-prepared({})",
+        LOG.info("Worker({}) is waiting for master superstep-prepare-done({})",
                  this.workerInfo.id(), superstep);
         String path = this.constructPath(BspEvent.BSP_MASTER_STEP_PREPARE_DONE,
                                          superstep);
         this.bspClient().get(path, this.barrierOnMasterTimeout(),
                              this.logInterval());
-        LOG.info("Worker({}) waited master superstep-prepared({})",
+        LOG.info("Worker({}) waited master superstep-prepare-done({})",
+                 this.workerInfo.id(), superstep);
+    }
+
+    /**
+     * Worker set this signal to indicate the worker has computed the
+     * vertices for specified superstep.
+     */
+    public void workerStepComputeDone(int superstep) {
+        String path = this.constructPath(BspEvent.BSP_WORKER_STEP_COMPUTE_DONE,
+                                         superstep, this.workerInfo.id());
+        this.bspClient().put(path, Constants.EMPTY_BYTES);
+        LOG.info("Worker({}) set superstep-compute-done({})",
+                 this.workerInfo.id(), superstep);
+    }
+
+    /**
+     * After receive this signal, it indicates that all workers have computed
+     * vertices for the superstep. The worker can calls after-superstep callback
+     * of managers.
+     */
+    public void waitMasterStepComputeDone(int superstep) {
+        LOG.info("Worker({}) is waiting for master superstep-compute-done({})",
+                 this.workerInfo.id(), superstep);
+        String path = this.constructPath(BspEvent.BSP_MASTER_STEP_COMPUTE_DONE,
+                                         superstep);
+        this.bspClient().get(path, this.barrierOnMasterTimeout(),
+                             this.logInterval());
+        LOG.info("Worker({}) waited master superstep-compute-done({})",
                  this.workerInfo.id(), superstep);
     }
 
