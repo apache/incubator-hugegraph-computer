@@ -82,16 +82,15 @@ public class WorkerService {
 
         InetSocketAddress dataAddress = this.initDataTransportManagers();
 
-        int workerId = this.config.get(ComputerOptions.WORKER_ID);
-        this.workerInfo = new ContainerInfo(workerId, dataAddress.getHostName(),
+        this.workerInfo = new ContainerInfo(dataAddress.getHostName(),
                                             0, dataAddress.getPort());
         LOG.info("{} Start to initialize worker", this);
 
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
 
         /*
-         * Keep the waitMasterInitDone() before initManagers(),
-         * ensure master init() before worker managers init()
+         * Keep the waitMasterInitDone() called before initManagers(),
+         * in order to ensure master init() before worker managers init()
          */
         this.masterInfo = this.bsp4Worker.waitMasterInitDone();
 
@@ -234,8 +233,10 @@ public class WorkerService {
 
     private InetSocketAddress initDataTransportManagers() {
         // TODO: Start data-transport server and get its host and port.
+        String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
+        int port = this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
         InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
-                                        "127.0.0.1", 8004);
+                                        host, port);
 
         return dataAddress;
     }

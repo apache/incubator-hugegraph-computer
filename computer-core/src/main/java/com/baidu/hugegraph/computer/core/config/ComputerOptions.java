@@ -247,14 +247,6 @@ public class ComputerOptions extends OptionHolder {
                     TimeUnit.SECONDS.toMillis(30L)
             );
 
-    public static final ConfigOption<Integer> WORKER_ID =
-            new ConfigOption<>(
-                    "worker.id",
-                    "The worker id used to uniquely identify the worker.",
-                    positiveInt(),
-                    1
-            );
-
     public static final ConfigOption<Class<?>> WORKER_PARTITIONER =
             new ConfigOption<>(
                     "worker.partitioner",
@@ -335,7 +327,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> TRANSPORT_SERVER_HOST =
             new ConfigOption<>(
                     "transport.server_host",
-                    "The server bind host.",
+                    "The server hostname or ip to listen on to transfer data.",
                     disallowEmpty(),
                     "127.0.0.1"
             );
@@ -343,8 +335,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_SERVER_PORT =
             new ConfigOption<>(
                     "transport.server_port",
-                    "The server bind port, if it is zero " +
-                    "will let the system pick up an ephemeral port.",
+                    "The server port to listen on to transfer data. " +
+                    "The system will assign a random port if server_port=0.",
                     nonNegativeInt(),
                     0
             );
