@@ -22,9 +22,9 @@ package com.baidu.hugegraph.computer.core.util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.io.ObjectFactory;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
@@ -67,12 +67,12 @@ public final class SerializeUtil {
     }
 
     public static <V extends Readable> List<V> fromBytes(byte[] bytes,
-                                               ObjectFactory<V> factory) {
+                                                         Supplier<V> supplier) {
         try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
             int size = bai.readInt();
             List<V> list = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                V obj = factory.create();
+                V obj = supplier.get();
                 obj.read(bai);
                 list.add(obj);
             }

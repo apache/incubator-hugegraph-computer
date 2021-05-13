@@ -81,14 +81,8 @@ public class ContainerInfo implements Readable, Writable {
         return this.dataPort;
     }
 
-    /**
-     * @return If this container is equals to the specified containerInfo
-     * except id.
-     */
-    public boolean equalsExceptId(ContainerInfo other) {
-        return this.hostname.equals(other.hostname) &&
-               this.rpcPort == other.rpcPort &&
-               this.dataPort == other.dataPort;
+    public String uniqueName() {
+        return String.format("%s:%s", this.hostname, this.dataPort);
     }
 
     @Override

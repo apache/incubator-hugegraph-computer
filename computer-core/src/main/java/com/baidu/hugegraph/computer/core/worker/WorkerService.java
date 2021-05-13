@@ -139,7 +139,7 @@ public class WorkerService {
 
         LOG.info("{} WorkerService execute", this);
         // TODO: determine superstep if fail over is enabled.
-        int superstep = this.bsp4Worker.waitMasterResume();
+        int superstep = this.bsp4Worker.waitMasterResumeDone();
         SuperstepStat superstepStat;
         if (superstep == Constants.INPUT_SUPERSTEP) {
             superstepStat = this.inputstep();

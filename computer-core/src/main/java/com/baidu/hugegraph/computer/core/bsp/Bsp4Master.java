@@ -66,7 +66,7 @@ public class Bsp4Master extends BspBase {
         }
         LOG.info("Master waited all workers init-done, workers: {}",
                  containers);
-        this.assignContainerId(containers);
+        this.assignIdForWorkers(containers);
         this.masterAllInitDone(containers);
         return containers;
     }
@@ -74,11 +74,11 @@ public class Bsp4Master extends BspBase {
     /**
      * The master determines which superstep to start from
      */
-    public void masterResume(int superstep) {
-        String path = this.constructPath(BspEvent.BSP_MASTER_RESUME);
+    public void masterResumeDone(int superstep) {
+        String path = this.constructPath(BspEvent.BSP_MASTER_RESUME_DONE);
         IntValue superstepWritable = new IntValue(superstep);
         this.bspClient().put(path, SerializeUtil.toBytes(superstepWritable));
-        LOG.info("Master set superstep-resume({})", superstep);
+        LOG.info("Master set resume-done({})", superstep);
     }
 
     /**
@@ -213,7 +213,7 @@ public class Bsp4Master extends BspBase {
                                             timeout, this.logInterval());
     }
 
-    private void assignContainerId(List<ContainerInfo> containers) {
+    private void assignIdForWorkers(List<ContainerInfo> containers) {
         // Assign worker id from 1.
         for (int i = 0; i < containers.size(); i++) {
             containers.get(i).id(i + 1);

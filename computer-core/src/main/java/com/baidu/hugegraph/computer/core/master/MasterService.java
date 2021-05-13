@@ -134,7 +134,7 @@ public class MasterService {
          * TODO: Get input splits from HugeGraph if resume from
          * Constants.INPUT_SUPERSTEP.
          */
-        this.bsp4Master.masterResume(superstep);
+        this.bsp4Master.masterResumeDone(superstep);
 
         /*
          * Step 2: Input superstep for loading vertices and edges.
@@ -180,7 +180,7 @@ public class MasterService {
             this.bsp4Master.waitWorkersStepComputeDone(superstep);
             this.bsp4Master.masterStepComputeDone(superstep);
             List<WorkerStat> workerStats =
-                    this.bsp4Master.waitWorkersStepDone(superstep);
+                             this.bsp4Master.waitWorkersStepDone(superstep);
             superstepStat = SuperstepStat.from(workerStats);
             SuperstepContext context = new SuperstepContext(this.config,
                                                             superstep,

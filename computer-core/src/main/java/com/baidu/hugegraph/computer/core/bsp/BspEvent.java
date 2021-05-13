@@ -25,7 +25,7 @@ public enum BspEvent {
     BSP_MASTER_INIT_DONE(1, "/master"),
     BSP_WORKER_INIT_DONE(2, "/worker"),
     BSP_MASTER_ALL_INIT_DONE(3, "/master/all_init_done"),
-    BSP_MASTER_RESUME(4, "/master/resume"),
+    BSP_MASTER_RESUME_DONE(4, "/master/resume"),
     BSP_WORKER_INPUT_DONE(5, "/worker/input_done"),
     BSP_MASTER_INPUT_DONE(6, "/master/input_done"),
     BSP_WORKER_STEP_PREPARE_DONE(7, "/worker/step_prepared"),

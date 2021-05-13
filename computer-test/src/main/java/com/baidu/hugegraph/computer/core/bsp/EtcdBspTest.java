@@ -101,7 +101,7 @@ public class EtcdBspTest extends UnitTestBase {
         workerStat.add(new PartitionStat(1, 200L, 300L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
-            this.bsp4Master.masterResume(-1);
+            this.bsp4Master.masterResumeDone(-1);
             this.bsp4Master.waitWorkersInputDone();
             this.bsp4Master.masterInputDone();
             List<WorkerStat> workerStats = this.bsp4Master
@@ -111,7 +111,7 @@ public class EtcdBspTest extends UnitTestBase {
             countDownLatch.countDown();
         });
         this.executorService.submit(() -> {
-            int firstSuperStep = this.bsp4Worker.waitMasterResume();
+            int firstSuperStep = this.bsp4Worker.waitMasterResumeDone();
             Assert.assertEquals(-1, firstSuperStep);
             this.bsp4Worker.workerInputDone();
             this.bsp4Worker.waitMasterInputDone();

@@ -54,9 +54,9 @@ public class Bsp4Worker extends BspBase {
          * {@link #waitMasterAllInitDone()}.
          */
         String path = this.constructPath(BspEvent.BSP_WORKER_INIT_DONE,
-                                         this.workerInfo.toString());
+                                         this.workerInfo.uniqueName());
         this.bspClient().put(path, SerializeUtil.toBytes(this.workerInfo));
-        LOG.info("Worker is init-done: {}", this.workerInfo);
+        LOG.info("Worker is init-done: {}", this.workerInfo.uniqueName());
     }
 
     /**
@@ -85,9 +85,9 @@ public class Bsp4Worker extends BspBase {
                  this.workerInfo.id());
         String path = this.constructPath(BspEvent.BSP_MASTER_ALL_INIT_DONE);
         byte[] serializedContainers = this.bspClient().get(
-                                           path,
-                                           this.registerTimeout(),
-                                           this.logInterval());
+                                      path,
+                                      this.registerTimeout(),
+                                      this.logInterval());
         List<ContainerInfo> containers = SerializeUtil.fromBytes(
                                          serializedContainers,
                                          ContainerInfo::new);
@@ -101,15 +101,15 @@ public class Bsp4Worker extends BspBase {
      * The master set this signal to let workers knows the first superstep to
      * start with.
      */
-    public int waitMasterResume() {
-        LOG.info("Worker({}) is waiting for master resume",
+    public int waitMasterResumeDone() {
+        LOG.info("Worker({}) is waiting for master resume-done",
                  this.workerInfo.id());
-        String path = this.constructPath(BspEvent.BSP_MASTER_RESUME);
+        String path = this.constructPath(BspEvent.BSP_MASTER_RESUME_DONE);
         byte[] bytes = this.bspClient().get(path, this.barrierOnMasterTimeout(),
                                             this.logInterval());
         IntValue superstep = new IntValue();
         SerializeUtil.fromBytes(bytes, superstep);
-        LOG.info("Worker({}) waited master resume({})",
+        LOG.info("Worker({}) waited master resume-done({})",
                  this.workerInfo.id(), superstep.value());
         return superstep.value();
     }
@@ -248,10 +248,10 @@ public class Bsp4Worker extends BspBase {
     // Note: The workerInfo in Bsp4Worker is the same object in WorkerService.
     private void assignThisWorkerId(List<ContainerInfo> workersFromMaster) {
         for (ContainerInfo container : workersFromMaster) {
-            if (this.workerInfo.equalsExceptId(container)) {
+            if (this.workerInfo.uniqueName().equals(container.uniqueName())) {
                 this.workerInfo.id(container.id());
                 LOG.info("Worker({}) assigned id {} from master",
-                         this.workerInfo, this.workerInfo.id());
+                         this.workerInfo.uniqueName(), this.workerInfo.id());
                 break;
             }
         }
