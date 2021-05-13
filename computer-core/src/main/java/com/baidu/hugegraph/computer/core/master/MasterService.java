@@ -77,7 +77,6 @@ public class MasterService {
         this.maxSuperStep = this.config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
 
         this.bsp4Master = new Bsp4Master(this.config);
-        this.bsp4Master.init();
 
         InetSocketAddress rpcAddress = this.initManagers();
 

@@ -29,33 +29,42 @@ public abstract class BspBase {
 
     private static final Logger LOG = Log.logger(BspBase.class);
 
-    private Config config;
-    private BspClient bspClient;
-    private int workerCount;
-    private long registerTimeout;
-    private long barrierOnMasterTimeout;
-    private long barrierOnWorkersTimeout;
-    private long logInterval;
+    private final Config config;
+
+    private final String jobId;
+    private final int workerCount;
+    private final long registerTimeout;
+    private final long barrierOnMasterTimeout;
+    private final long barrierOnWorkersTimeout;
+    private final long logInterval;
+
+    private final BspClient bspClient;
 
     public BspBase(Config config) {
         this.config = config;
-    }
 
-    /**
-     * Do initialization operation, like connect to etcd or ZooKeeper cluster.
-     */
-    public void init() {
-        this.bspClient = this.createBspClient();
-        this.bspClient.init();
+        this.jobId = config.get(ComputerOptions.JOB_ID);
         this.workerCount = this.config.get(ComputerOptions.JOB_WORKERS_COUNT);
         this.registerTimeout = this.config.get(
-                               ComputerOptions.BSP_REGISTER_TIMEOUT);
+             ComputerOptions.BSP_REGISTER_TIMEOUT);
         this.barrierOnWorkersTimeout = this.config.get(
              ComputerOptions.BSP_WAIT_WORKERS_TIMEOUT);
         this.barrierOnMasterTimeout = this.config.get(
              ComputerOptions.BSP_WAIT_MASTER_TIMEOUT);
         this.logInterval = this.config.get(ComputerOptions.BSP_LOG_INTERVAL);
-        LOG.info("Connect to BSP server: {}", this.bspClient.endpoint());
+
+        this.bspClient = this.init();
+    }
+
+    /**
+     * Do initialization operation, like connect to etcd or ZooKeeper cluster.
+     */
+    private BspClient init() {
+        BspClient bspClient = this.createBspClient();
+        bspClient.init(this.jobId);
+        LOG.info("Init {} BSP connection to '{}' for job '{}'",
+                 bspClient.type(), bspClient.endpoint(), this.jobId);
+        return bspClient;
     }
 
     /**
@@ -64,11 +73,12 @@ public abstract class BspBase {
      */
     public void close() {
         this.bspClient.close();
-        LOG.info("Closed the BSP connection: {}", this.bspClient.endpoint());
+        LOG.info("Closed {} BSP connection '{}' for job '{}'",
+                 this.bspClient.type(), this.bspClient.endpoint(), this.jobId);
     }
 
     private BspClient createBspClient() {
-        // TODO: the type of bsp client can be get from config
+        // TODO: create from factory. the type of bsp can be get from config
         return new EtcdBspClient(this.config);
     }
 
