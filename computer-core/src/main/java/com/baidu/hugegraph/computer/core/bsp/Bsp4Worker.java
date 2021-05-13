@@ -48,8 +48,8 @@ public class Bsp4Worker extends BspBase {
      */
     public void workerInitDone() {
         /*
-         * Can't use workerInfo.id(), because the master not assigned worker
-         * id yet. The master assigns worker's id by signal
+         * Can't use workerInfo.id(), because the master does not assign
+         * worker id yet. The master assigns worker's id by signal
          * BspEvent.BSP_MASTER_ALL_INIT_DONE. Worker get it through method
          * {@link #waitMasterAllInitDone()}.
          */
