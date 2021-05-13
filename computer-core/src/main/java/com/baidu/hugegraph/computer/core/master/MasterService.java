@@ -173,7 +173,7 @@ public class MasterService {
             this.managers.beforeSuperstep(this.config, superstep);
             this.bsp4Master.masterStepPrepareDone(superstep);
             List<WorkerStat> workerStats =
-                    this.bsp4Master.waitWorkersSuperstepDone(superstep);
+                    this.bsp4Master.waitWorkersStepDone(superstep);
             superstepStat = SuperstepStat.from(workerStats);
             SuperstepContext context = new SuperstepContext(this.config,
                                                             superstep,
@@ -266,7 +266,7 @@ public class MasterService {
         LOG.info("{} MasterService inputstep started", this);
         this.bsp4Master.waitWorkersInputDone();
         this.bsp4Master.masterInputDone();
-        List<WorkerStat> workerStats = this.bsp4Master.waitWorkersSuperstepDone(
+        List<WorkerStat> workerStats = this.bsp4Master.waitWorkersStepDone(
                                        Constants.INPUT_SUPERSTEP);
         SuperstepStat superstepStat = SuperstepStat.from(workerStats);
         this.bsp4Master.masterStepDone(Constants.INPUT_SUPERSTEP,

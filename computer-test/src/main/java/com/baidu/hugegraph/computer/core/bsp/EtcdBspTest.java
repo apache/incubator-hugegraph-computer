@@ -56,6 +56,7 @@ public class EtcdBspTest extends UnitTestBase {
         );
 
         this.bsp4Master = new Bsp4Master(config);
+        this.bsp4Master.clean();
         this.masterInfo = new ContainerInfo(-1, "localhost", 8001, 8002);
         this.workerInfo = new ContainerInfo(0, "localhost", 8003, 8004);
         this.bsp4Worker = new Bsp4Worker(config, this.workerInfo);
@@ -70,15 +71,13 @@ public class EtcdBspTest extends UnitTestBase {
     }
 
     @Test
-    public void testRegister() throws InterruptedException {
+    public void testInit() throws InterruptedException {
         // If both two threads reach countDown, it means no exception is thrown.
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
             this.bsp4Master.masterInitDone(this.masterInfo);
-            List<ContainerInfo> workers = this.bsp4Master
-                                              .waitWorkersInitDone();
+            List<ContainerInfo> workers = this.bsp4Master.waitWorkersInitDone();
             Assert.assertEquals(1, workers.size());
-            Assert.assertEquals(this.workerInfo, workers.get(0));
             countDownLatch.countDown();
         });
         this.executorService.submit(() -> {
@@ -86,7 +85,7 @@ public class EtcdBspTest extends UnitTestBase {
             ContainerInfo master = this.bsp4Worker.waitMasterInitDone();
             Assert.assertEquals(this.masterInfo, master);
             List<ContainerInfo> workers = this.bsp4Worker
-                                              .waitWorkersInitDone();
+                                              .waitMasterAllInitDone();
             Assert.assertEquals(1, workers.size());
             Assert.assertEquals(this.workerInfo, workers.get(0));
             countDownLatch.countDown();
@@ -106,7 +105,7 @@ public class EtcdBspTest extends UnitTestBase {
             this.bsp4Master.waitWorkersInputDone();
             this.bsp4Master.masterInputDone();
             List<WorkerStat> workerStats = this.bsp4Master
-                                               .waitWorkersSuperstepDone(-1);
+                                               .waitWorkersStepDone(-1);
             Assert.assertEquals(1, workerStats.size());
             Assert.assertEquals(workerStat, workerStats.get(0));
             countDownLatch.countDown();
@@ -116,7 +115,7 @@ public class EtcdBspTest extends UnitTestBase {
             Assert.assertEquals(-1, firstSuperStep);
             this.bsp4Worker.workerInputDone();
             this.bsp4Worker.waitMasterInputDone();
-            this.bsp4Worker.workerSuperstepDone(-1, workerStat);
+            this.bsp4Worker.workerStepDone(-1, workerStat);
             countDownLatch.countDown();
         });
         countDownLatch.await();
@@ -133,8 +132,7 @@ public class EtcdBspTest extends UnitTestBase {
             for (int i = 0; i < this.maxSuperStep; i++) {
                 this.bsp4Master.waitWorkersStepPrepareDone(i);
                 this.bsp4Master.masterStepPrepareDone(i);
-                List<WorkerStat> list = this.bsp4Master
-                                            .waitWorkersSuperstepDone(i);
+                List<WorkerStat> list = this.bsp4Master.waitWorkersStepDone(i);
                 SuperstepStat superstepStat = new SuperstepStat();
                 for (WorkerStat workerStat1 : list) {
                     superstepStat.increase(workerStat1);
@@ -162,10 +160,9 @@ public class EtcdBspTest extends UnitTestBase {
                 workerStatInSuperstep.add(stat2);
                 // Sleep some time to simulate the worker do computation.
                 UnitTestBase.sleep(100L);
-                this.bsp4Worker.workerSuperstepDone(superstep,
-                                                    workerStatInSuperstep);
-                superstepStat = this.bsp4Worker.waitMasterStepDone(
-                                                superstep);
+                this.bsp4Worker.workerStepDone(superstep,
+                                               workerStatInSuperstep);
+                superstepStat = this.bsp4Worker.waitMasterStepDone(superstep);
             }
             countDownLatch.countDown();
         });

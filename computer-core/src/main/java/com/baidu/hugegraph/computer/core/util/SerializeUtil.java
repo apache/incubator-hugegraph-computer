@@ -20,9 +20,11 @@
 package com.baidu.hugegraph.computer.core.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.ObjectFactory;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
@@ -31,9 +33,6 @@ import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
 public final class SerializeUtil {
-
-    // TODO: try to reduce call ComputerContext.instance() directly.
-    private static final ComputerContext CONTEXT = ComputerContext.instance();
 
     public static byte[] toBytes(Writable obj) {
         try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
@@ -45,9 +44,39 @@ public final class SerializeUtil {
         }
     }
 
+    public static byte[] toBytes(List<? extends Writable> list) {
+        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
+            bao.writeInt(list.size());
+            for (Writable obj : list) {
+                obj.write(bao);
+            }
+            return bao.toByteArray();
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Failed to create byte array with List<Writable> '%s'",
+                      e, list);
+        }
+    }
+
     public static void fromBytes(byte[] bytes, Readable obj) {
         try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
             obj.read(bai);
+        } catch (IOException e) {
+            throw new ComputerException("Failed to read from byte array", e);
+        }
+    }
+
+    public static <V extends Readable> List<V> fromBytes(byte[] bytes,
+                                               ObjectFactory<V> factory) {
+        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
+            int size = bai.readInt();
+            List<V> list = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                V obj = factory.create();
+                obj.read(bai);
+                list.add(obj);
+            }
+            return list;
         } catch (IOException e) {
             throw new ComputerException("Failed to read from byte array", e);
         }

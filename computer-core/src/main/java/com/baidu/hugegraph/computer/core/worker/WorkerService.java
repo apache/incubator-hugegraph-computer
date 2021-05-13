@@ -100,7 +100,7 @@ public class WorkerService {
         this.bsp4Worker.workerInitDone();
         this.masterInfo = this.bsp4Worker.waitMasterInitDone();
         List<ContainerInfo> containers =
-                            this.bsp4Worker.waitWorkersInitDone();
+                            this.bsp4Worker.waitMasterAllInitDone();
         for (ContainerInfo container : containers) {
             this.workers.put(container.id(), container);
             // TODO: Connect to other workers for data transport
@@ -166,7 +166,7 @@ public class WorkerService {
 
             this.managers.afterSuperstep(this.config, superstep);
             this.computation.afterSuperstep(context);
-            this.bsp4Worker.workerSuperstepDone(superstep, workerStat);
+            this.bsp4Worker.workerStepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
 
             superstepStat = this.bsp4Worker.waitMasterStepDone(superstep);
@@ -235,8 +235,8 @@ public class WorkerService {
          */
         WorkerStat workerStat = manager.mergeGraph();
 
-        this.bsp4Worker.workerSuperstepDone(Constants.INPUT_SUPERSTEP,
-                                            workerStat);
+        this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
+                                       workerStat);
         SuperstepStat superstepStat = this.bsp4Worker.waitMasterStepDone(
                                       Constants.INPUT_SUPERSTEP);
         LOG.info("{} WorkerService inputstep finished", this);

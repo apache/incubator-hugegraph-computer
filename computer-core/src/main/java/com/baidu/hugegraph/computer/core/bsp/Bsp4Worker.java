@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.bsp;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -75,21 +74,18 @@ public class Bsp4Worker extends BspBase {
      * Get all workers information includes hostname and port the workers
      * listen on.
      */
-    public List<ContainerInfo> waitWorkersInitDone() {
+    public List<ContainerInfo> waitMasterAllInitDone() {
         LOG.info("Worker({}) is waiting for master all-registered",
                  this.workerInfo.id());
-        // TODO: change to wait BSP_MASTER_ALL_REGISTERED
-        String path = this.constructPath(BspEvent.BSP_WORKER_INIT_DONE);
-        List<byte[]> serializedContainers = this.bspClient().getChildren(
-                                            path, this.workerCount(),
-                                            this.registerTimeout(),
-                                            this.logInterval());
-        List<ContainerInfo> containers = new ArrayList<>(this.workerCount());
-        for (byte[] serializedContainer : serializedContainers) {
-            ContainerInfo container = new ContainerInfo();
-            SerializeUtil.fromBytes(serializedContainer, container);
-            containers.add(container);
-        }
+        String path = this.constructPath(BspEvent.BSP_MASTER_ALL_INIT_DONE);
+        byte[] serializedContainers = this.bspClient().get(
+                                           path,
+                                           this.registerTimeout(),
+                                           this.logInterval());
+        List<ContainerInfo> containers = SerializeUtil.fromBytes(
+                                         serializedContainers,
+                                         ContainerInfo::new);
+        this.assignThisWorkerId(containers);
         LOG.info("Worker({}) waited master all-registered, workers: {}",
                  this.workerInfo.id(), containers);
         return containers;
@@ -167,7 +163,7 @@ public class Bsp4Worker extends BspBase {
      * Worker set this signal after sent all messages to corresponding
      * workers and sent aggregators to master.
      */
-    public void workerSuperstepDone(int superstep, WorkerStat workerStat) {
+    public void workerStepDone(int superstep, WorkerStat workerStat) {
         String path = this.constructPath(BspEvent.BSP_WORKER_STEP_DONE,
                                          superstep, this.workerInfo.id());
         this.bspClient().put(path, SerializeUtil.toBytes(workerStat));
@@ -203,5 +199,17 @@ public class Bsp4Worker extends BspBase {
                                          this.workerInfo.id());
         this.bspClient().put(path, Constants.EMPTY_BYTES);
         LOG.info("Worker({}) set output-done", this.workerInfo.id());
+    }
+
+    // Note: The workerInfo in Bsp4Worker is the same object in WorkerService.
+    private void assignThisWorkerId(List<ContainerInfo> workersFromMaster) {
+        for (ContainerInfo container : workersFromMaster) {
+            if (this.workerInfo.equalsExceptId(container)) {
+                this.workerInfo.id(container.id());
+                LOG.info("Worker({}) assigned id {} from master",
+                         this.workerInfo, this.workerInfo.id());
+                break;
+            }
+        }
     }
 }

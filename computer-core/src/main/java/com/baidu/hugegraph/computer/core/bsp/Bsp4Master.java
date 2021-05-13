@@ -64,8 +64,10 @@ public class Bsp4Master extends BspBase {
             SerializeUtil.fromBytes(serializedContainer, container);
             containers.add(container);
         }
-        LOG.info("Master waited all workers registered, workers: {}",
+        LOG.info("Master waited all workers init done, workers: {}",
                  containers);
+        this.assignContainerId(containers);
+        this.masterAllRegisterDone(containers);
         return containers;
     }
 
@@ -106,7 +108,7 @@ public class Bsp4Master extends BspBase {
      * check the max iteration count, and then calls masterSuperstepDone to
      * synchronize superstep result.
      */
-    public List<WorkerStat> waitWorkersSuperstepDone(int superstep) {
+    public List<WorkerStat> waitWorkersStepDone(int superstep) {
         LOG.info("Master is waiting for workers superstep-done({})", superstep);
         String path = this.constructPath(BspEvent.BSP_WORKER_STEP_DONE,
                                          superstep);
@@ -178,5 +180,18 @@ public class Bsp4Master extends BspBase {
     private List<byte[]> waitOnWorkersEvent(String prefix, long timeout) {
         return this.bspClient().getChildren(prefix, this.workerCount(),
                                             timeout, this.logInterval());
+    }
+
+    private void assignContainerId(List<ContainerInfo> containers) {
+        // Assign worker id from 1.
+        for (int i = 0; i < containers.size(); i++) {
+            containers.get(i).id(i + 1);
+        }
+    }
+
+    private void masterAllRegisterDone(List<ContainerInfo> workers) {
+        String path = this.constructPath(BspEvent.BSP_MASTER_ALL_INIT_DONE);
+        this.bspClient().put(path, SerializeUtil.toBytes(workers));
+        LOG.info("Master all register done, workers {}", workers);
     }
 }

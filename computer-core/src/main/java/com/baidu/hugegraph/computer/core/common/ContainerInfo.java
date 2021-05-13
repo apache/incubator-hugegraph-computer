@@ -61,6 +61,10 @@ public class ContainerInfo implements Readable, Writable {
         return this.id;
     }
 
+    public void id(int id) {
+        this.id = id;
+    }
+
     public String hostname() {
         return this.hostname;
     }
@@ -71,6 +75,16 @@ public class ContainerInfo implements Readable, Writable {
 
     public int dataPort() {
         return this.dataPort;
+    }
+
+    /**
+     * @return If this container is equals to the specified containerInfo
+     * except id.
+     */
+    public boolean equalsExceptId(ContainerInfo other) {
+        return this.hostname.equals(other.hostname) &&
+               this.rpcPort == other.rpcPort &&
+               this.dataPort == other.dataPort;
     }
 
     @Override
