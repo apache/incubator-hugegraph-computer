@@ -46,7 +46,11 @@ public class ContainerInfo implements Readable, Writable {
     }
 
     public ContainerInfo(int id, String hostname, int rpcPort) {
-        this(id, hostname, rpcPort, 0);
+        this(0, hostname, rpcPort, 0);
+    }
+
+    public ContainerInfo(String hostname, int rpcPort, int dataPort) {
+        this(0, hostname, rpcPort, dataPort);
     }
 
     public ContainerInfo(int id, String hostname, int rpcPort, int dataPort) {

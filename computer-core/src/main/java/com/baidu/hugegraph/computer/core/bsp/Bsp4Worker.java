@@ -47,8 +47,14 @@ public class Bsp4Worker extends BspBase {
      * Register this worker, worker's information is passed by constructor.
      */
     public void workerInitDone() {
+        /*
+         * Can't use workerInfo.id(), because the master not assigned worker
+         * id yet. The master assigns worker's id by signal
+         * BspEvent.BSP_MASTER_ALL_INIT_DONE. Worker get it through method
+         * {@link #waitMasterAllInitDone()}.
+         */
         String path = this.constructPath(BspEvent.BSP_WORKER_INIT_DONE,
-                                         this.workerInfo.id());
+                                         this.workerInfo.toString());
         this.bspClient().put(path, SerializeUtil.toBytes(this.workerInfo));
         LOG.info("Worker is init-done: {}", this.workerInfo);
     }

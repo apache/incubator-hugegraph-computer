@@ -78,7 +78,7 @@ public class WorkerService {
 
         InetSocketAddress dataAddress = this.initManagers();
 
-        this.workerInfo = new ContainerInfo(0, dataAddress.getHostName(),
+        this.workerInfo = new ContainerInfo(dataAddress.getHostName(),
                                             0, dataAddress.getPort());
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
         this.computation = this.config.createObject(
