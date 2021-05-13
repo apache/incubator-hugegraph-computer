@@ -124,6 +124,7 @@ public class WorkerService {
          */
         this.managers.closeAll(this.config);
         this.computation.close(this.config);
+        this.bsp4Worker.workerCloseDone();
         this.bsp4Worker.close();
         LOG.info("{} WorkerService closed", this);
     }

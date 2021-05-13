@@ -104,6 +104,7 @@ public class MasterService {
     public void close() {
         this.checkInited();
 
+        this.bsp4Master.waitWorkersCloseDone();
         this.managers.closeAll(this.config);
         // TODO: pass parameter MasterContext.
         this.masterComputation.close(null);

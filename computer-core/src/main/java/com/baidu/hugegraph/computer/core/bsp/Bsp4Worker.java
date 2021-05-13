@@ -220,13 +220,23 @@ public class Bsp4Worker extends BspBase {
 
     /**
      * Worker set this signal to indicate the worker has outputted the result.
-     * It can successfully exit.
      */
     public void workerOutputDone() {
         String path = this.constructPath(BspEvent.BSP_WORKER_OUTPUT_DONE,
                                          this.workerInfo.id());
         this.bspClient().put(path, Constants.EMPTY_BYTES);
         LOG.info("Worker({}) set output-done", this.workerInfo.id());
+    }
+
+    /**
+     * Worker set this signal to indicate the worker has stopped the managers
+     * and will successfully exit.
+     */
+    public void workerCloseDone() {
+        String path = this.constructPath(BspEvent.BSP_WORKER_CLOSE_DONE,
+                                         this.workerInfo.id());
+        this.bspClient().put(path, Constants.EMPTY_BYTES);
+        LOG.info("Worker({}) set close-done", this.workerInfo.id());
     }
 
     // Note: The workerInfo in Bsp4Worker is the same object in WorkerService.

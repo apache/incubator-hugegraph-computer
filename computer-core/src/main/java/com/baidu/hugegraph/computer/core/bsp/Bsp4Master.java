@@ -194,6 +194,16 @@ public class Bsp4Master extends BspBase {
         LOG.info("Master waited workers output-done");
     }
 
+    /**
+     * Wait workers close the managers and exit first.
+     */
+    public void waitWorkersCloseDone() {
+        LOG.info("Master is waiting for workers close-done");
+        String path = this.constructPath(BspEvent.BSP_WORKER_CLOSE_DONE);
+        this.waitOnWorkersEvent(path, this.barrierOnWorkersTimeout());
+        LOG.info("Master waited workers close-done");
+    }
+
     public void clean() {
         this.bspClient().clean();
         LOG.info("Cleaned up the BSP data");
