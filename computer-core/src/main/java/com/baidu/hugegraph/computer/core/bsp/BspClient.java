@@ -24,12 +24,23 @@ import java.util.List;
 interface BspClient {
 
     /**
-     * Do initialization operation, like connect to etcd cluster.
+     * Return bsp server type, like etcd or zookeeper.
      */
-    void init();
+    String type();
 
     /**
-     * Contrary to init. Could not do any bsp operation after close is called.
+     * Get endpoint of the bsp server.
+     */
+    String endpoint();
+
+    /**
+     * Do initialization operation, like connect to etcd server.
+     */
+    void init(String namespace);
+
+    /**
+     * Close connection from bsp server.
+     * Could not do any bsp operation after close is called.
      */
     void close();
 
@@ -39,12 +50,7 @@ interface BspClient {
     void clean();
 
     /**
-     * Get endpoint of the bsp server.
-     */
-    String endpoint();
-
-    /**
-     * Put KV pair to the bsp server.
+     * Put key & value to the bsp server.
      */
     void put(String key, byte[] value);
 

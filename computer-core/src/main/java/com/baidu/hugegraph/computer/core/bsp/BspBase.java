@@ -29,27 +29,24 @@ public abstract class BspBase {
 
     private static final Logger LOG = Log.logger(BspBase.class);
 
-    private Config config;
     private BspClient bspClient;
-    private int workerCount;
-    private long registerTimeout;
-    private long barrierOnMasterTimeout;
-    private long barrierOnWorkersTimeout;
-    private long logInterval;
+
+    private final Config config;
+
+    private final String jobId;
+    private final int workerCount;
+    private final long registerTimeout;
+    private final long barrierOnMasterTimeout;
+    private final long barrierOnWorkersTimeout;
+    private final long logInterval;
 
     public BspBase(Config config) {
         this.config = config;
-    }
 
-    /**
-     * Do initialization operation, like connect to etcd or ZooKeeper cluster.
-     */
-    public void init() {
-        this.bspClient = this.createBspClient();
-        this.bspClient.init();
+        this.jobId = config.get(ComputerOptions.JOB_ID);
         this.workerCount = this.config.get(ComputerOptions.JOB_WORKERS_COUNT);
         this.registerTimeout = this.config.get(
-                               ComputerOptions.BSP_REGISTER_TIMEOUT);
+             ComputerOptions.BSP_REGISTER_TIMEOUT);
         this.barrierOnWorkersTimeout = this.config.get(
              ComputerOptions.BSP_WAIT_WORKERS_TIMEOUT);
         this.barrierOnMasterTimeout = this.config.get(
@@ -59,12 +56,23 @@ public abstract class BspBase {
     }
 
     /**
+     * Do initialization operation, like connect to etcd or ZooKeeper cluster.
+     */
+    public void init() {
+        this.bspClient = this.createBspClient();
+        this.bspClient.init(this.jobId);
+        LOG.info("Init {} BSP connection to '{}' for job '{}'",
+                 this.bspClient.type(), this.bspClient.endpoint(), this.jobId);
+    }
+
+    /**
      * Close the connection to etcd or Zookeeper. Contrary to init.
      * Could not do any bsp operation after close is called.
      */
     public void close() {
         this.bspClient.close();
-        LOG.info("Closed the BSP connection: {}", this.bspClient.endpoint());
+        LOG.info("Closed {} BSP connection '{}' for job '{}'",
+                 this.bspClient.type(), this.bspClient.endpoint(), this.jobId);
     }
 
     private BspClient createBspClient() {

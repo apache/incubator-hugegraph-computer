@@ -26,23 +26,27 @@ import com.baidu.hugegraph.computer.core.config.Config;
 
 public final class EtcdBspClient implements BspClient {
 
-    private final Config config;
+    private final String endpoints;
+
     private EtcdClient etcdClient;
 
     public EtcdBspClient(Config config) {
-        this.config = config;
+         this.endpoints = config.get(ComputerOptions.BSP_ETCD_ENDPOINTS);
+    }
+
+    @Override
+    public String type() {
+        return "etcd";
     }
 
     @Override
     public String endpoint() {
-        return this.config.get(ComputerOptions.BSP_ETCD_ENDPOINTS);
+        return this.endpoints;
     }
 
     @Override
-    public void init() {
-        String endpoints = this.endpoint();
-        String jobId = this.config.get(ComputerOptions.JOB_ID);
-        this.etcdClient = new EtcdClient(endpoints, jobId);
+    public void init(String namespace) {
+        this.etcdClient = new EtcdClient(this.endpoints, namespace);
     }
 
     @Override
