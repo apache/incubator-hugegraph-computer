@@ -69,7 +69,7 @@
             <dependency>
                 <groupId>com.baidu.hugegraph</groupId>
                 <artifactId>hugegraph-client</artifactId>
-                <version>1.9.3</version>
+                <version>1.9.4</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>

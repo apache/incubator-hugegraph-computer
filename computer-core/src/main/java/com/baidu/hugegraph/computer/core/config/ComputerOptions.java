@@ -32,9 +32,11 @@ import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportProvider;
+import com.baidu.hugegraph.config.ConfigConvOption;
 import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
+import com.baidu.hugegraph.structure.constant.Direction;
 import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -122,6 +124,32 @@ public class ComputerOptions extends OptionHolder {
                     "The page size for streamed load input split data",
                     positiveInt(),
                     500
+            );
+
+    public static final ConfigConvOption<String, Direction> EDGE_DIRECTION =
+            new ConfigConvOption<>(
+                    "input.edge_direction",
+                    "",
+                    allowValues("OUT", "IN", "BOTH"),
+                    Direction::valueOf,
+                    "OUT"
+            );
+
+    public static final ConfigConvOption<String, EdgeFrequency>
+            EDGE_FREQ_IN_VERTEX_PAIR = new ConfigConvOption<>(
+                    "input.edge_freq_in_vertex_pair",
+                    "",
+                    allowValues("SINGLE", "SINGLE_PER_LABEL", "MULTI"),
+                    EdgeFrequency::valueOf,
+                    "SINGLE"
+            );
+
+    public static final ConfigOption<Integer> MAX_EDGES_IN_ONE_VERTEX =
+            new ConfigOption<>(
+                    "input.max_edges_in_one_vertex",
+                    "",
+                    positiveInt(),
+                    200
             );
 
     public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =
@@ -325,6 +353,24 @@ public class ComputerOptions extends OptionHolder {
                     disallowEmpty(),
                     String.class,
                     ImmutableList.of("jobs")
+            );
+
+    public static final ConfigOption<Integer> WRITE_BUFFER_SIZE =
+            new ConfigOption<>(
+                    "worker.write_buffer_size",
+                    "The maxium size of write buffer that used to store " +
+                    "vertex or message.",
+                    positiveInt(),
+                    (int) (50 * Bytes.KB)
+            );
+
+    public static final ConfigOption<Integer> WRITE_BUFFER_CAPACITY =
+            new ConfigOption<>(
+                    "worker.write_buffer_capacity",
+                    "The maxium size of write buffer that used to store " +
+                    "vertex or message.",
+                    positiveInt(),
+                    (int) (60 * Bytes.KB)
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =

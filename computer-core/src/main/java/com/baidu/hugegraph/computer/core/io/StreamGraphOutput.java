@@ -31,6 +31,7 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
 public class StreamGraphOutput implements GraphOutput {
 
@@ -44,14 +45,15 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
+        ComputerContext context = ComputerContext.instance();
         // Write necessary
         this.writeId(vertex.id());
         this.writeValue(vertex.value());
 
-        if (this.config.outputVertexAdjacentEdges()) {
+        if (context.config().outputVertexAdjacentEdges()) {
             this.writeEdges(vertex.edges());
         }
-        if (this.config.outputVertexProperties()) {
+        if (context.config().outputVertexProperties()) {
             this.writeProperties(vertex.properties());
         }
     }

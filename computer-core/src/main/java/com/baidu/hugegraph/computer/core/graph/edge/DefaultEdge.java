@@ -28,18 +28,38 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultEdge implements Edge {
 
+    private String label;
     private Id targetId;
+    private String name;
     private Value<?> value;
     private Properties properties;
 
     public DefaultEdge(GraphFactory graphFactory) {
-        this(graphFactory, null, null);
+        this(graphFactory, null, null, null);
     }
 
-    public DefaultEdge(GraphFactory graphFactory, Id targetId, Value<?> value) {
+    public DefaultEdge(GraphFactory graphFactory, Id targetId, String name,
+                       Value<?> value) {
+        this(graphFactory, null, targetId, name, value);
+    }
+
+    public DefaultEdge(GraphFactory graphFactory, String label, Id targetId,
+                       String name, Value<?> value) {
+        this.label = label;
         this.targetId = targetId;
         this.value = value;
+        this.name = name;
         this.properties = graphFactory.createProperties();
+    }
+
+    @Override
+    public String label() {
+        return this.label;
+    }
+
+    @Override
+    public String name() {
+        return this.name;
     }
 
     @Override
@@ -82,19 +102,21 @@ public class DefaultEdge implements Edge {
             return false;
         }
         DefaultEdge other = (DefaultEdge) obj;
-        return this.targetId.equals(other.targetId) &&
+        return this.label.equals(other.label) &&
+               this.targetId.equals(other.targetId) &&
                this.value.equals(other.value) &&
                this.properties.equals(other.properties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.targetId, this.value, this.properties);
+        return Objects.hash(this.label, this.targetId,
+                            this.value, this.properties);
     }
 
     @Override
     public String toString() {
-        return String.format("DefaultEdge{targetId=%s, value=%s}",
-                             this.targetId, this.value);
+        return String.format("DefaultEdge{label=%s, targetId=%s, value=%s}",
+                             this.label, this.targetId, this.value);
     }
 }

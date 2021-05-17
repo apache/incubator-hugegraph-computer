@@ -23,7 +23,7 @@ import com.baidu.hugegraph.computer.core.input.InputSplit;
 
 public interface InputSplitRpcService {
 
-    public InputSplit nextVertexInputSplit();
+    InputSplit nextVertexInputSplit();
 
-    public InputSplit nextEdgeInputSplit();
+    InputSplit nextEdgeInputSplit();
 }

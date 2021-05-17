@@ -43,7 +43,10 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
+import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
+import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -114,11 +117,10 @@ public class WorkerService {
         LOG.info("{} register WorkerService", this);
         this.bsp4Worker.workerInitDone();
         List<ContainerInfo> workers = this.bsp4Worker.waitMasterAllInitDone();
+        DataClientManager dm = this.managers.get(DataClientManager.NAME);
         for (ContainerInfo worker : workers) {
             this.workers.put(worker.id(), worker);
-            // TODO: Connect to other workers for data transport
-            //DataClientManager dm = this.managers.get(DataClientManager.NAME);
-            //dm.connect(container.hostname(), container.dataPort());
+            dm.connect(worker.id(), worker.hostname(), worker.dataPort());
         }
 
         this.managers.initedAll(this.config);
@@ -253,16 +255,25 @@ public class WorkerService {
                                                      masterInfo.rpcPort());
         rpcManager.init(this.config);
 
-        WorkerInputManager inputManager = new WorkerInputManager();
-        inputManager.service(rpcManager.inputSplitService());
-        this.managers.add(inputManager);
-
         WorkerAggrManager aggregatorManager = new WorkerAggrManager(
                                               this.context);
         aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
 
-        // Init managers
+        SortManager sortManager = new SortManager(this.context);
+        this.managers.add(sortManager);
+
+        ConnectionManager connectionManager = new TransportConnectionManager();
+        DataClientManager clientManager = new DataClientManager(
+                                              connectionManager);
+        this.managers.add(clientManager);
+
+        WorkerInputManager inputManager = new WorkerInputManager(this.context,
+                                              sortManager, clientManager);
+        inputManager.service(rpcManager.inputSplitService());
+        this.managers.add(inputManager);
+
+        // Init all managers
         this.managers.initAll(this.config);
 
         LOG.info("{} WorkerService initialized managers", this);
