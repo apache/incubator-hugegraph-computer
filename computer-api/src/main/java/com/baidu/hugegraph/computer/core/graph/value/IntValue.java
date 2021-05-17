@@ -56,9 +56,7 @@ public class IntValue implements Value<IntValue> {
 
     @Override
     public void assign(Value<IntValue> other) {
-        E.checkArgument(other instanceof IntValue,
-                        "Can't assign '%s'(%s) to IntValue",
-                        other, other.getClass().getSimpleName());
+        this.checkAssign(other);
         this.value = ((IntValue) other).value;
     }
 

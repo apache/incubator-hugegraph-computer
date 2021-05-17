@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.util.E;
 
 public interface Value<T> extends Writable, Readable, Comparable<T> {
 
@@ -39,4 +40,20 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
      * @return copy a value instance of this object
      */
     Value<T> copy();
+
+    /**
+     * Check whether a value can be assigned to this object
+     */
+    default void checkAssign(Value<T> other) {
+        if (other == null) {
+            E.checkArgument(false,
+                            "Can't assign null to %s",
+                            this.getClass().getSimpleName());
+        } else if (!this.getClass().isAssignableFrom(other.getClass())) {
+            E.checkArgument(false,
+                            "Can't assign '%s'(%s) to %s",
+                            other, other.getClass().getSimpleName(),
+                            this.getClass().getSimpleName());
+        }
+    }
 }
