@@ -50,6 +50,8 @@ import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
+import com.baidu.hugegraph.computer.core.network.DataServerManager;
+import com.baidu.hugegraph.computer.core.receiver.ReceiveManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -239,7 +241,21 @@ public class WorkerService {
         // TODO: Start data-transport server and get its host and port.
         String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
         int port = this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
-        return InetSocketAddress.createUnresolved(host, port);
+
+        InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
+                                        host, port);
+
+        DataFileManager dataFileManager = new DataFileManager();
+        this.managers.add(dataFileManager);
+
+        ReceiveManager receiveManager = new ReceiveManager(dataFileManager);
+        this.managers.add(receiveManager);
+
+        DataServerManager dataServerManager =
+                          new DataServerManager(receiveManager);
+        this.managers.add(dataServerManager);
+
+        return dataAddress;
     }
 
     private void initManagers(ContainerInfo masterInfo) {
@@ -312,11 +328,8 @@ public class WorkerService {
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
 
-        /*
-         * Merge vertices and edges in each partition parallel,
-         * and get the workerStat.
-         */
-        WorkerStat workerStat = manager.mergeGraph();
+        ReceiveManager receiveManager = this.managers.get(ReceiveManager.NAME);
+        WorkerStat workerStat = receiveManager.mergeGraph();
 
         this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
                                        workerStat);

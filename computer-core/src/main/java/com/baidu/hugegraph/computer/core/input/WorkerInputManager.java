@@ -23,13 +23,11 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
-import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.computer.core.worker.load.LoadService;
 
 public class WorkerInputManager implements Manager {
@@ -94,14 +92,5 @@ public class WorkerInputManager implements Manager {
             this.sendManager.sendEdge(vertex);
         }
         this.sendManager.finishSend(MessageType.EDGE);
-    }
-
-    public WorkerStat mergeGraph() {
-        // TODO: merge the data in partitions parallel, and get workerStat
-        PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
-                                                50L, 60L, 70L);
-        WorkerStat workerStat = new WorkerStat();
-        workerStat.add(stat1);
-        return workerStat;
     }
 }
