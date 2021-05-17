@@ -52,13 +52,13 @@ public final class EntriesUtil {
     private static class SubKvIterator implements EntryIterator {
 
         private final RandomAccessInput input;
-        private final RandomAccessInput userAccessInput;
+        private final RandomAccessInput useAccessInput;
         private long size;
 
         public SubKvIterator(KvEntry kvEntry) {
             try {
                 this.input = new UnsafeBytesInput(kvEntry.value().bytes());
-                this.userAccessInput = this.input.duplicate();
+                this.useAccessInput = this.input.duplicate();
                 this.size = this.input.readInt();
             } catch (IOException e) {
                 throw new ComputerException(e.getMessage(), e);
@@ -77,50 +77,67 @@ public final class EntriesUtil {
             }
 
             this.size--;
-            return EntriesUtil.entryFromInput(this.input, this.userAccessInput);
+            return EntriesUtil.entryFromInput(this.input, this.useAccessInput,
+                                              true);
         }
 
         @Override
         public void close() throws Exception {
             this.input.close();
-            this.userAccessInput.close();
+            this.useAccessInput.close();
         }
     }
 
-    public static KvEntry entryFromInput(RandomAccessInput input) {
-        return entryFromInput(input, input);
-    }
-
     public static KvEntry entryFromInput(RandomAccessInput input,
-                                         RandomAccessInput userAccessInput) {
+                                         RandomAccessInput userAccessInput,
+                                         boolean useInput) {
         try {
-            // Read key
-            int keyLength = input.readInt();
-            long keyOffset = input.position();
-            input.skip(keyLength);
+            Pointer key, value;
+            if (useInput) {
+                // Read key
+                int keyLength = input.readInt();
+                long keyPosition = input.position();
+                input.skip(keyLength);
 
-            // Read value
-            int valueLength = input.readInt();
-            long valueOffset = input.position();
-            input.skip(valueLength);
+                // Read value
+                int valueLength = input.readInt();
+                long valuePosition = input.position();
+                input.skip(valueLength);
 
-            Pointer key = new InlinePointer(userAccessInput, keyOffset,
-                                            keyLength);
-            Pointer value = new InlinePointer(userAccessInput, valueOffset,
-                                              valueLength);
+                key = new DefaultPointer(userAccessInput, keyPosition,
+                                         keyLength);
+                value = new DefaultPointer(userAccessInput, valuePosition,
+                                           valueLength);
+            } else {
+                // Read key
+                int keyLength = input.readInt();
+                byte[] keyBytes = input.readBytes(keyLength);
+
+                // Read value
+                int valueLength = input.readInt();
+                byte[] valueBytes = input.readBytes(valueLength);
+
+                key = new InlinePointer(keyBytes);
+                value = new InlinePointer(valueBytes);
+            }
             return new DefaultKvEntry(key, value);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
     }
 
+    public static KvEntry entryFromInput(RandomAccessInput input,
+                                         boolean useInput) {
+        return entryFromInput(input, input, useInput);
+    }
+
     public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry) {
         try {
-            RandomAccessInput input = entry.value().input();
-            input.seek(entry.value().offset());
+            RandomAccessInput input = new UnsafeBytesInput(
+                                      entry.value().bytes());
             // Skip sub-entry size
             input.skip(Integer.BYTES);
-            KvEntry firstSubKv = EntriesUtil.entryFromInput(input);
+            KvEntry firstSubKv = EntriesUtil.entryFromInput(input, false);
 
             return new KvEntryWithFirstSubKv(entry.key(), entry.value(),
                                              firstSubKv);

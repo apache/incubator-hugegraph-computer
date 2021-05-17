@@ -37,7 +37,6 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
@@ -148,15 +147,14 @@ public class HgkvFileTest {
         String filePath = availableFilePath("1");
         File file = StoreTestUtil.hgkvFileFromMap(data, filePath);
         try {
-            HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath());
+            HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath(),
+                                                           false);
             Iterator<KvEntry> iterator = reader.iterator();
             int index = 0;
             while (iterator.hasNext()) {
                 KvEntry next = iterator.next();
-                Pointer key = next.key();
-                key.input().seek(key.offset());
-                int keyData = key.input().readInt();
-                Assert.assertEquals(data.get(index).intValue(), keyData);
+                int key = StoreTestUtil.byteArrayToInt(next.key().bytes());
+                Assert.assertEquals(data.get(index).intValue(), key);
                 index += 2;
             }
             Assert.assertThrows(NoSuchElementException.class,

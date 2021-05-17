@@ -57,9 +57,10 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
         E.checkArgument(entries.hasNext(),
                         "Parameter entries must not be empty");
 
-        PeekNextIter<KvEntry> kvEntries = PeekNextIterAdaptor.of(entries);
-        KvEntry currentKv = kvEntries.peekNext();
+        PeekableIterator<KvEntry> kvEntries = PeekableIteratorAdaptor.of(
+                                              entries);
         SubKvSorter sorter = new SubKvSorter(kvEntries, this.sources);
+        KvEntry currentKv = sorter.currentKv();
 
         while (true) {
             currentKv.key().write(this.output);
@@ -102,7 +103,7 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
                     // Write kvEntry to file.
                     RandomAccessInput input = EntriesUtil.inputFromOutput(
                                                           this.output);
-                    writer.write(EntriesUtil.entryFromInput(input));
+                    writer.write(EntriesUtil.entryFromInput(input, false));
                     this.output.seek(0);
 
                     if (current == null) {
@@ -120,11 +121,11 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
                 lastSubKv = current;
                 lastSubValue = lastSubKv.value();
             }
+            sorter.reset();
             // Get next KV
-            if ((currentKv = kvEntries.peekNext()) == null) {
+            if ((currentKv = sorter.currentKv()) == null) {
                 break;
             }
-            sorter.reset();
         }
         writer.finish();
     }

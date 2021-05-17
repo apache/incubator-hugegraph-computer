@@ -33,14 +33,17 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 public class HgkvFileReaderImpl implements HgkvFileReader {
 
     private final HgkvFile hgkvFile;
+    private final boolean useInput;
 
-    public HgkvFileReaderImpl(String path) throws IOException {
+    public HgkvFileReaderImpl(String path, boolean useInput)
+                              throws IOException {
         this.hgkvFile = HgkvFileImpl.open(path);
+        this.useInput = useInput;
     }
 
     @Override
     public EntryIterator iterator() throws IOException {
-        return new EntryIter(this.hgkvFile);
+        return new EntryIter(this.hgkvFile, this.useInput);
     }
 
     private static class EntryIter implements EntryIterator {
@@ -48,12 +51,15 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
         private final BufferedFileInput input;
         private final BufferedFileInput userAccessInput;
         private long numEntries;
+        private final boolean useInput;
 
-        public EntryIter(HgkvFile hgkvFile) throws IOException {
+        public EntryIter(HgkvFile hgkvFile, boolean useInput)
+                         throws IOException {
             this.numEntries = hgkvFile.numEntries();
             File file = new File(hgkvFile.path());
             this.input = new BufferedFileInput(file);
             this.userAccessInput = this.input.duplicate();
+            this.useInput = useInput;
         }
 
         @Override
@@ -69,7 +75,8 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
 
             this.numEntries--;
             return EntriesUtil.entryFromInput(this.input,
-                                              this.userAccessInput);
+                                              this.userAccessInput,
+                                              this.useInput);
         }
 
         @Override

@@ -106,9 +106,7 @@ public class StoreTestUtil {
     }
 
     public static Integer dataFromPointer(Pointer pointer) throws IOException {
-        RandomAccessInput input = pointer.input();
-        input.seek(pointer.offset());
-        return input.readInt();
+        return byteArrayToInt(pointer.bytes());
     }
 
     public static String availablePathById(String id) {
@@ -121,5 +119,14 @@ public class StoreTestUtil {
                (bytes[1] & 0xFF) << 8 |
                (bytes[2] & 0xFF) << 16 |
                (bytes[3] & 0xFF) << 24;
+    }
+
+    public static byte[] intToByteArray(int data) {
+        return new byte[] {
+                (byte) (data & 0xFF),
+                (byte) ((data >> 8) & 0xFF),
+                (byte) ((data >> 16) & 0xFF),
+                (byte) ((data >> 24) & 0xFF)
+        };
     }
 }

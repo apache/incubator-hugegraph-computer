@@ -28,7 +28,6 @@ import javax.ws.rs.NotSupportedException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
@@ -139,11 +138,7 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
             this.dataBlockBuilder.finish();
             this.dataBlockBuilder.reset();
 
-            RandomAccessInput input = key.input();
-            long position = input.position();
-            input.seek(key.offset());
-            this.indexBlock.add(input.readBytes((int) key.length()));
-            input.seek(position);
+            this.indexBlock.add(key.bytes());
         }
         this.dataBlockBuilder.add(key, value);
     }

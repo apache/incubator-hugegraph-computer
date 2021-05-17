@@ -29,6 +29,8 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIteratorAdaptor;
 import com.baidu.hugegraph.computer.core.sort.merge.HgkvDirMerger;
 import com.baidu.hugegraph.computer.core.sort.merge.HgkvDirMergerImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
@@ -89,28 +91,32 @@ public class SorterImpl implements Sorter {
                             throws Exception {
         if (withSubKv) {
             this.mergeInputs(inputs,
-                             o -> new HgkvDir4SubKvReaderImpl(o).iterator(),
+                             o -> new HgkvDir4SubKvReaderImpl(o, false)
+                                  .iterator(),
                              flusher, outputs);
         } else {
-            this.mergeInputs(inputs, o -> new HgkvDirReaderImpl(o).iterator(),
+            this.mergeInputs(inputs,
+                             o -> new HgkvDirReaderImpl(o, false)
+                                  .iterator(),
                              flusher, outputs);
         }
     }
 
     @Override
-    public EntryIterator iterator(List<String> inputs) throws IOException {
+    public PeekableIterator<KvEntry> iterator(List<String> inputs)
+                                              throws IOException {
         InputsSorterImpl sorter = new InputsSorterImpl();
         List<EntryIterator> entries = new ArrayList<>();
         for (String input : inputs) {
-            HgkvDirReader reader = new HgkvDirReaderImpl(input);
+            HgkvDirReader reader = new HgkvDirReaderImpl(input, true);
             entries.add(reader.iterator());
         }
-        return sorter.sort(entries);
+        return PeekableIteratorAdaptor.of(sorter.sort(entries));
     }
 
     private void sortBuffers(List<EntryIterator> entries,
-                             OuterSortFlusher flusher,
-                             String output) throws IOException {
+                             OuterSortFlusher flusher, String output)
+                             throws IOException {
         InputsSorter sorter = new InputsSorterImpl();
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(output,
                                                              this.config)) {

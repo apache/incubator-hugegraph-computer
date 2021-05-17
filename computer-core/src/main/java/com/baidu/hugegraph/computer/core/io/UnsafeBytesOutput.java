@@ -28,7 +28,6 @@ import java.util.Arrays;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
-import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
 
 import sun.misc.Unsafe;
@@ -213,7 +212,7 @@ public class UnsafeBytesOutput implements RandomAccessOutput, Closeable {
     public void write(RandomAccessInput input, long offset, long length)
                       throws IOException {
         if (UnsafeBytesInput.class == input.getClass()) {
-            byte[] buffer = Whitebox.getInternalState(input, "buffer");
+            byte[] buffer = ((UnsafeBytesInput) input).buffer();
             this.write(buffer, (int) offset, (int) length);
         } else {
             input.seek(offset);

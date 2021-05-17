@@ -33,10 +33,12 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 public class HgkvDirReaderImpl implements HgkvDirReader {
 
     private final HgkvDir hgkvDir;
+    private final boolean useInput;
 
-    public HgkvDirReaderImpl(String path) {
+    public HgkvDirReaderImpl(String path, boolean useInput) {
         try {
             this.hgkvDir = HgkvDirImpl.open(path);
+            this.useInput = useInput;
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
@@ -45,7 +47,7 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
     @Override
     public EntryIterator iterator() {
         try {
-            return new HgkvDirEntryIter(this.hgkvDir);
+            return new HgkvDirEntryIter(this.hgkvDir, this.useInput);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
@@ -56,10 +58,13 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
         private final Iterator<HgkvFile> segments;
         private long numEntries;
         private EntryIterator kvIter;
+        private final boolean useInput;
 
-        public HgkvDirEntryIter(HgkvDir hgkvDir) throws IOException {
+        public HgkvDirEntryIter(HgkvDir hgkvDir, boolean useInput)
+                                throws IOException {
             this.segments = hgkvDir.segments().iterator();
             this.numEntries = hgkvDir.numEntries();
+            this.useInput = useInput;
         }
 
         @Override
@@ -97,7 +102,8 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
             EntryIterator iterator;
             while (this.segments.hasNext()) {
                 HgkvFile segment = this.segments.next();
-                HgkvFileReader reader = new HgkvFileReaderImpl(segment.path());
+                HgkvFileReader reader = new HgkvFileReaderImpl(segment.path(),
+                                                               this.useInput);
                 iterator = reader.iterator();
                 if (iterator.hasNext()) {
                     return iterator;

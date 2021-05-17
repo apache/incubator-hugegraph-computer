@@ -113,8 +113,8 @@ public class SorterTestUtil {
     }
 
     public static void assertKvEntry(KvEntry entry, Integer expectKey,
-                                            Integer expectValues)
-            throws IOException {
+                                     Integer expectValues)
+                                     throws IOException {
         Assert.assertEquals(expectKey,
                             StoreTestUtil.dataFromPointer(entry.key()));
         Assert.assertEquals(expectValues,

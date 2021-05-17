@@ -34,7 +34,7 @@ public class EntriesInput implements EntryIterator {
     public EntriesInput(RandomAccessInput input) {
         this.input = input;
         try {
-            this.userAccessInput = input.duplicate();
+            this.userAccessInput = this.input.duplicate();
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
@@ -51,11 +51,13 @@ public class EntriesInput implements EntryIterator {
 
     @Override
     public KvEntry next() {
-        return EntriesUtil.entryFromInput(this.input, this.userAccessInput);
+        return EntriesUtil.entryFromInput(this.input, this.userAccessInput,
+                                          false);
     }
 
     @Override
     public void close() throws IOException {
+        this.input.close();
         this.userAccessInput.close();
     }
 }

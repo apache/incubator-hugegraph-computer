@@ -129,7 +129,7 @@ public class SorterTest {
                             path, false);
 
         // Assert merge result from target hgkvDir
-        HgkvDirReader reader = new HgkvDirReaderImpl(path);
+        HgkvDirReader reader = new HgkvDirReaderImpl(path, false);
         EntryIterator iter = reader.iterator();
         SorterTestUtil.assertKvEntry(iter.next(), 1, 8);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 8);
@@ -196,7 +196,7 @@ public class SorterTest {
                                                 5, 10,
                                                 6, 55);
         Iterator<Integer> resultIter = result.iterator();
-        EntryIterator iterator = sorter.iterator(outputs);
+        Iterator<KvEntry> iterator = sorter.iterator(outputs);
         KvEntry last = iterator.next();
         int value = StoreTestUtil.dataFromPointer(last.value());
         while (true) {
@@ -308,7 +308,8 @@ public class SorterTest {
          * key 3 subKv 2 6, 3 3
          * key 3 subKv 4 3
          */
-        EntryIterator kvIter = sorter.iterator(ImmutableList.of(outputFile));
+        ImmutableList<String> outputs = ImmutableList.of(outputFile);
+        Iterator<KvEntry> kvIter = sorter.iterator(outputs);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 1, 3, 3, 5, 3);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 5, 3, 8, 6);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 9, 3);
@@ -354,7 +355,8 @@ public class SorterTest {
         sorter.mergeBuffers(inputs, new KvOuterSortFlusher(), resultFile,
                             false);
 
-        EntryIterator iter = sorter.iterator(ImmutableList.of(resultFile));
+        ImmutableList<String> outputs = ImmutableList.of(resultFile);
+        Iterator<KvEntry> iter = sorter.iterator(outputs);
         SorterTestUtil.assertKvEntry(iter.next(), 1, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);

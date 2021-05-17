@@ -19,9 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.sort.flusher;
 
-import java.util.Iterator;
+import org.apache.commons.lang.NotImplementedException;
 
-public interface PeekNextIter<T> extends Iterator<T> {
+import com.baidu.hugegraph.iterator.CIter;
 
-    T peekNext();
+public interface PeekableIterator<T> extends CIter<T> {
+
+    T peek();
+
+    @Override
+    default Object metadata(String s, Object... objects) {
+        throw new NotImplementedException();
+    }
 }

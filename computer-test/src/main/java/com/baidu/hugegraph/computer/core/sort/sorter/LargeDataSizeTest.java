@@ -27,7 +27,6 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -76,13 +75,10 @@ public class LargeDataSizeTest {
         watcher = new StopWatch();
     }
 
-    @After
-    public void teardown() {
-        FileUtils.deleteQuietly(new File(FILE_DIR));
-    }
-
     @Test
     public void test() throws Exception {
+        FileUtils.deleteQuietly(new File(FILE_DIR));
+
         final long bufferSize = Bytes.MB;
         final int mergeBufferNum = 300;
         final int dataSize = 1000000;
@@ -100,7 +96,7 @@ public class LargeDataSizeTest {
             output.writeInt(Integer.BYTES);
             output.writeInt(random.nextInt(dataSize));
             output.writeInt(Integer.BYTES);
-            int entryValue = random.nextInt(10);
+            int entryValue = random.nextInt(5);
             value = value + entryValue;
             output.writeInt(entryValue);
 
@@ -159,7 +155,7 @@ public class LargeDataSizeTest {
     }
 
     private static long getFileValue(String file) throws IOException {
-        HgkvDirReader reader = new HgkvDirReaderImpl(file);
+        HgkvDirReader reader = new HgkvDirReaderImpl(file, false);
         EntryIterator iterator = reader.iterator();
         long result = 0;
         while (iterator.hasNext()) {

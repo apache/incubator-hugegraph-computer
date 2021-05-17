@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import com.baidu.hugegraph.computer.core.sort.flusher.PeekNextIter;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.LoserTreeInputsSorting;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -32,12 +32,14 @@ import com.baidu.hugegraph.util.E;
 
 public class SubKvSorter implements Iterator<KvEntry> {
 
-    private final PeekNextIter<KvEntry> kvEntries;
+    private final PeekableIterator<KvEntry> kvEntries;
     private final int subKvSortPathNum;
     private final List<Iterator<KvEntry>> subKvMergeSource;
     private Iterator<KvEntry> subKvSorting;
+    private KvEntry currentEntry;
 
-    public SubKvSorter(PeekNextIter<KvEntry> kvEntries, int subKvSortPathNum) {
+    public SubKvSorter(PeekableIterator<KvEntry> kvEntries,
+                       int subKvSortPathNum) {
         E.checkArgument(kvEntries.hasNext(),
                         "Parameter entries must not be empty");
         this.kvEntries = kvEntries;
@@ -60,8 +62,13 @@ public class SubKvSorter implements Iterator<KvEntry> {
         return this.subKvSorting.next();
     }
 
+    public KvEntry currentKv() {
+        return this.currentEntry;
+    }
+
     public void reset() {
         if (!this.kvEntries.hasNext()) {
+            this.currentEntry = null;
             return;
         }
         this.subKvMergeSource.clear();
@@ -69,11 +76,13 @@ public class SubKvSorter implements Iterator<KvEntry> {
         KvEntry entry = this.kvEntries.next();
         this.subKvMergeSource.add(new MergePath(this.kvEntries, entry));
         while (this.subKvMergeSource.size() < this.subKvSortPathNum &&
-               entry.key().compareTo(this.kvEntries.peekNext().key()) == 0) {
+               this.kvEntries.peek() != null &&
+               entry.key().compareTo(this.kvEntries.peek().key()) == 0) {
             entry = this.kvEntries.next();
             this.subKvMergeSource.add(new MergePath(this.kvEntries, entry));
         }
         this.subKvSorting = new LoserTreeInputsSorting<>(this.subKvMergeSource);
+        this.currentEntry = entry;
     }
 
     private void init() {
@@ -82,14 +91,15 @@ public class SubKvSorter implements Iterator<KvEntry> {
 
     private static class MergePath implements Iterator<KvEntry> {
 
-        private final PeekNextIter<KvEntry> entries;
+        private final PeekableIterator<KvEntry> entries;
         private Iterator<KvEntry> subKvIter;
-        private KvEntry current;
+        private KvEntry currentEntry;
 
-        public MergePath(PeekNextIter<KvEntry> entries, KvEntry current) {
+        public MergePath(PeekableIterator<KvEntry> entries,
+                         KvEntry currentEntry) {
             this.entries = entries;
-            this.subKvIter = EntriesUtil.subKvIterFromEntry(current);
-            this.current = current;
+            this.subKvIter = EntriesUtil.subKvIterFromEntry(currentEntry);
+            this.currentEntry = currentEntry;
         }
 
         @Override
@@ -101,12 +111,12 @@ public class SubKvSorter implements Iterator<KvEntry> {
         public KvEntry next() {
             KvEntry next = this.subKvIter.next();
             if (!this.subKvIter.hasNext()) {
-                KvEntry nextKvEntry = this.entries.peekNext();
+                KvEntry nextKvEntry = this.entries.peek();
                 if (nextKvEntry != null &&
-                    nextKvEntry.key().compareTo(this.current.key()) == 0) {
-                    this.current = this.entries.next();
+                    nextKvEntry.key().compareTo(this.currentEntry.key()) == 0) {
+                    this.currentEntry = this.entries.next();
                     this.subKvIter = EntriesUtil.subKvIterFromEntry(
-                                                 this.current);
+                                                 this.currentEntry);
                 }
             }
             return next;

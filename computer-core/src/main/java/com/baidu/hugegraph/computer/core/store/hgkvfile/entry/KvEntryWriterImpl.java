@@ -65,10 +65,10 @@ public class KvEntryWriterImpl implements KvEntryWriter {
         this.output.writeInt(this.subEntryCount);
 
         // Sort subKvs
-        this.sortSubKvs();
+        this.sortAndWriteSubKvs();
     }
 
-    private void sortSubKvs() throws IOException {
+    private void sortAndWriteSubKvs() throws IOException {
         UnsafeBytesInput input = EntriesUtil.inputFromOutput(this.subKvBuffer);
         InputSorter sorter = new JavaInputSorter();
         Iterator<KvEntry> subKvs = sorter.sort(new EntriesInput(input));
@@ -87,9 +87,9 @@ public class KvEntryWriterImpl implements KvEntryWriter {
         // Write data
         data.write(this.subKvBuffer);
         // Fill data length placeholder
-        int dataLength = (int) (this.subKvBuffer.position() - position -
-                                Integer.BYTES);
-        this.subKvBuffer.writeInt(position, dataLength);
+        long dataLength = this.subKvBuffer.position() - position -
+                          Integer.BYTES;
+        this.subKvBuffer.writeInt(position, (int) dataLength);
         this.total += Integer.BYTES + dataLength;
     }
 }

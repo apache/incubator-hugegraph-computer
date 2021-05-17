@@ -37,15 +37,10 @@ public class MockIntSumCombiner implements Combiner<Pointer> {
     @Override
     public Pointer combine(Pointer v1, Pointer v2) {
         try {
-            this.output.seek(0);
-            this.input.seek(0);
+            Integer d1 = StoreTestUtil.dataFromPointer(v1);
+            Integer d2 = StoreTestUtil.dataFromPointer(v2);
 
-            Integer value1 = StoreTestUtil.dataFromPointer(v1);
-            Integer value2 = StoreTestUtil.dataFromPointer(v2);
-            this.output.writeInt(Integer.BYTES);
-            this.output.writeInt(value1 + value2);
-
-            return new InlinePointer(this.input, 4, 4);
+            return new InlinePointer(StoreTestUtil.intToByteArray(d1 + d2));
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }

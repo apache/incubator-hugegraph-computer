@@ -23,26 +23,24 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.util.E;
 
-public class PeekNextIterAdaptor<T> implements PeekNextIter<T> {
+public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
 
     private final Iterator<T> entries;
     private T next;
 
-    private PeekNextIterAdaptor(Iterator<T> entries) {
+    private PeekableIteratorAdaptor(Iterator<T> entries) {
         this.entries = entries;
-        if (entries.hasNext()) {
-            this.next = entries.next();
-        }
+        this.goNext();
     }
 
-    public static <T> PeekNextIter<T> of(Iterator<T> iterator) {
+    public static <T> PeekableIterator<T> of(Iterator<T> iterator) {
         E.checkArgument(iterator.hasNext(),
                         "Parameter iterator must not be empty");
-        return new PeekNextIterAdaptor<>(iterator);
+        return new PeekableIteratorAdaptor<>(iterator);
     }
 
     @Override
-    public T peekNext() {
+    public T peek() {
         return this.next;
     }
 
@@ -55,12 +53,23 @@ public class PeekNextIterAdaptor<T> implements PeekNextIter<T> {
     public T next() {
         T next = this.next;
 
+        this.goNext();
+
+        return next;
+    }
+
+    private void goNext() {
         if (this.entries.hasNext()) {
             this.next = this.entries.next();
         } else {
             this.next = null;
         }
+    }
 
-        return next;
+    @Override
+    public void close() throws Exception {
+        if (this.entries instanceof AutoCloseable) {
+            ((AutoCloseable) this.entries).close();
+        }
     }
 }
