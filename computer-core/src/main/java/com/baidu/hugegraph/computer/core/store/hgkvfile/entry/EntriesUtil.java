@@ -28,6 +28,7 @@ import java.util.NoSuchElementException;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 
@@ -103,10 +104,10 @@ public final class EntriesUtil {
             long valueOffset = input.position();
             input.skip(valueLength);
 
-            Pointer key = new OptimizedPointer(userAccessInput, keyOffset,
-                                               keyLength);
-            Pointer value = new OptimizedPointer(userAccessInput, valueOffset,
-                                                 valueLength);
+            Pointer key = new InlinePointer(userAccessInput, keyOffset,
+                                            keyLength);
+            Pointer value = new InlinePointer(userAccessInput, valueOffset,
+                                              valueLength);
             return new DefaultKvEntry(key, value);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
@@ -126,5 +127,9 @@ public final class EntriesUtil {
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
+    }
+
+    public static UnsafeBytesInput inputFromOutput(UnsafeBytesOutput output) {
+        return new UnsafeBytesInput(output.buffer(), output.position());
     }
 }

@@ -23,10 +23,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.sorter.SubKvSorter;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
@@ -35,18 +32,18 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.util.E;
 
-public class SubKvCombineOuterSortFlusher implements OuterSortFlusher {
+public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
 
     private final Combiner<Pointer> combiner;
     private final UnsafeBytesOutput output;
     private final int subKvFlushThreshold;
     private int sources;
 
-    public SubKvCombineOuterSortFlusher(Combiner<Pointer> combiner,
-                                        Config config) {
+    public CombineSubKvOuterSortFlusher(Combiner<Pointer> combiner,
+                                        int subKvFlushThreshold) {
         this.combiner = combiner;
         this.output = new UnsafeBytesOutput();
-        this.subKvFlushThreshold = config.get(ComputerOptions.EDGE_BATCH_SIZE);
+        this.subKvFlushThreshold = subKvFlushThreshold;
     }
 
     @Override
@@ -58,7 +55,7 @@ public class SubKvCombineOuterSortFlusher implements OuterSortFlusher {
     public void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
                       throws IOException {
         E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty.");
+                        "Parameter entries must not be empty");
 
         PeekNextIter<KvEntry> kvEntries = PeekNextIterAdaptor.of(entries);
         KvEntry currentKv = kvEntries.peekNext();
@@ -103,7 +100,8 @@ public class SubKvCombineOuterSortFlusher implements OuterSortFlusher {
                     this.output.writeInt(writtenCount);
                     this.output.seek(currentPosition);
                     // Write kvEntry to file.
-                    RandomAccessInput input = this.inputFromOutput(this.output);
+                    RandomAccessInput input = EntriesUtil.inputFromOutput(
+                                                          this.output);
                     writer.write(EntriesUtil.entryFromInput(input));
                     this.output.seek(0);
 
@@ -129,9 +127,5 @@ public class SubKvCombineOuterSortFlusher implements OuterSortFlusher {
             sorter.reset();
         }
         writer.finish();
-    }
-
-    private RandomAccessInput inputFromOutput(UnsafeBytesOutput output) {
-        return new UnsafeBytesInput(output.buffer(), output.position());
     }
 }

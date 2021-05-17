@@ -42,7 +42,7 @@ public class KvInnerSortFlusher implements InnerSortFlusher {
     @Override
     public void flush(Iterator<KvEntry> entries) throws IOException {
         E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty.");
+                        "Parameter entries must not be empty");
         while (entries.hasNext()) {
             KvEntry entry = entries.next();
             entry.key().write(this.output);

@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 import java.io.IOException;
 import java.util.Iterator;
 
-import javax.ws.rs.NotSupportedException;
+import org.apache.commons.lang.NotImplementedException;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -36,14 +36,14 @@ public interface OuterSortFlusher {
      * This method must be called before flush if sort with subKv.
      */
     default void sources(int sources) {
-        throw new NotSupportedException();
+        throw new NotImplementedException();
     }
 
     /**
      * Combiner entries with the same key.
      */
     default Combiner<Pointer> combiner() {
-        throw new NotSupportedException();
+        throw new NotImplementedException();
     }
 
     /**

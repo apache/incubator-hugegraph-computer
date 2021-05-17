@@ -122,8 +122,4 @@ public class StoreTestUtil {
                (bytes[2] & 0xFF) << 16 |
                (bytes[3] & 0xFF) << 24;
     }
-
-    public static UnsafeBytesInput inputFromOutput(UnsafeBytesOutput output) {
-        return new UnsafeBytesInput(output.buffer(), output.position());
-    }
 }

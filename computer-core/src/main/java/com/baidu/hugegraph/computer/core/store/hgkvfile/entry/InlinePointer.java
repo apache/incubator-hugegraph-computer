@@ -26,14 +26,14 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 
-public class OptimizedPointer implements Pointer {
+public class InlinePointer implements Pointer {
 
     private final RandomAccessInput input;
     private final long offset;
     private final long length;
     private final byte[] bytes;
 
-    public OptimizedPointer(RandomAccessInput input, long offset, long length) {
+    public InlinePointer(RandomAccessInput input, long offset, long length) {
         this.input = input;
         this.offset = offset;
         this.length = length;

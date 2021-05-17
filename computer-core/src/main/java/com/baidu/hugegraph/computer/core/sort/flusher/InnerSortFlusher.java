@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 import java.io.IOException;
 import java.util.Iterator;
 
-import javax.ws.rs.NotSupportedException;
+import org.apache.commons.lang.NotImplementedException;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
@@ -32,17 +32,17 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 public interface InnerSortFlusher {
 
     /**
-     * Flush result write to this output.
+     * Flush result to this output.
      */
     default RandomAccessOutput output() {
-        throw new NotSupportedException();
+        throw new NotImplementedException();
     }
 
     /**
-     * Combiner entries with the same key.
+     * Combine entries with the same key.
      */
     default Combiner<Pointer> combiner() {
-        throw new NotSupportedException();
+        throw new NotImplementedException();
     }
 
     /**

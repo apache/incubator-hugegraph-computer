@@ -44,17 +44,17 @@ import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.combiner.MockIntSumCombiner;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
-import com.baidu.hugegraph.computer.core.sort.flusher.KvCombineInnerSortFlusher;
-import com.baidu.hugegraph.computer.core.sort.flusher.KvCombineOuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.Lists;
@@ -68,10 +68,6 @@ public class LargeDataSizeTest {
 
     @BeforeClass
     public static void init() {
-        // Don't forget to register options
-        OptionSpace.register("computer",
-                             "com.baidu.hugegraph.computer.core.config." +
-                             "ComputerOptions");
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MERGE_PATH_NUM, "200",
                 ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB)
@@ -110,8 +106,7 @@ public class LargeDataSizeTest {
 
             // Write data to buffer and sort buffer
             if (output.position() >= bufferSize || (i + 1) == dataSize) {
-                UnsafeBytesInput input = StoreTestUtil.inputFromOutput(
-                                                           output);
+                UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
                 buffers.add(sortBuffer(sorter, input));
                 output = new UnsafeBytesOutput();
             }
@@ -139,29 +134,28 @@ public class LargeDataSizeTest {
 
     private static RandomAccessInput sortBuffer(Sorter sorter,
                                                 RandomAccessInput input)
-            throws IOException {
+                                                throws IOException {
         UnsafeBytesOutput output = new UnsafeBytesOutput();
         Combiner<Pointer> combiner = new MockIntSumCombiner();
-        InnerSortFlusher flusher = new KvCombineInnerSortFlusher(output,
+        InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
         sorter.sortBuffer(input, flusher);
-        return StoreTestUtil.inputFromOutput(output);
+        return EntriesUtil.inputFromOutput(output);
     }
 
     private static void mergeBuffers(Sorter sorter,
                                      List<RandomAccessInput> buffers,
                                      String output) throws IOException {
         Combiner<Pointer> combiner = new MockIntSumCombiner();
-        OuterSortFlusher flusher = new KvCombineOuterSortFlusher(combiner);
+        OuterSortFlusher flusher = new CombineKvOuterSortFlusher(combiner);
         sorter.mergeBuffers(buffers, flusher, output, false);
     }
 
     private static void mergeFiles(Sorter sorter, List<String> files,
                                    List<String> outputs) throws Exception {
         Combiner<Pointer> combiner = new MockIntSumCombiner();
-        OuterSortFlusher flusher = new KvCombineOuterSortFlusher(combiner);
-        sorter.mergeInputs(files, flusher, Lists.newArrayList(outputs),
-                           false);
+        OuterSortFlusher flusher = new CombineKvOuterSortFlusher(combiner);
+        sorter.mergeInputs(files, flusher, outputs, false);
     }
 
     private static long getFileValue(String file) throws IOException {

@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.OptimizedPointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class MockIntSumCombiner implements Combiner<Pointer> {
@@ -45,7 +45,7 @@ public class MockIntSumCombiner implements Combiner<Pointer> {
             this.output.writeInt(Integer.BYTES);
             this.output.writeInt(value1 + value2);
 
-            return new OptimizedPointer(this.input, 4, 4);
+            return new InlinePointer(this.input, 4, 4);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }

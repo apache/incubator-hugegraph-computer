@@ -20,30 +20,21 @@
 package com.baidu.hugegraph.computer.core.sort.flusher;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.util.E;
 
-public class KvCombineInnerSortFlusher implements InnerSortFlusher {
+public class CombineKvOuterSortFlusher implements OuterSortFlusher {
 
-    private final RandomAccessOutput output;
     private final Combiner<Pointer> combiner;
 
-    public KvCombineInnerSortFlusher(RandomAccessOutput output,
-                                     Combiner<Pointer> combiner) {
-        this.output = output;
+    public CombineKvOuterSortFlusher(Combiner<Pointer> combiner) {
         this.combiner = combiner;
-    }
-
-    @Override
-    public RandomAccessOutput output() {
-        return this.output;
     }
 
     @Override
@@ -52,44 +43,33 @@ public class KvCombineInnerSortFlusher implements InnerSortFlusher {
     }
 
     @Override
-    public void flush(Iterator<KvEntry> entries) throws IOException {
+    public void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
+                      throws IOException {
         E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty.");
+                        "Parameter entries must not be empty");
 
         KvEntry last = entries.next();
-        List<KvEntry> sameKeyEntries = new ArrayList<>();
-        sameKeyEntries.add(last);
+        Pointer value = last.value();
 
         while (true) {
             KvEntry current = null;
             if (entries.hasNext()) {
                 current = entries.next();
                 if (last.compareTo(current) == 0) {
-                    sameKeyEntries.add(current);
+                    value = this.combiner.combine(value, current.value());
                     continue;
                 }
             }
 
-            Pointer key = sameKeyEntries.get(0).key();
-            key.write(this.output);
-            Pointer value = null;
-            for (KvEntry entry : sameKeyEntries) {
-                if (value == null) {
-                    value = entry.value();
-                    continue;
-                }
-                value = this.combiner.combine(value, entry.value());
-            }
-            assert value != null;
-            value.write(this.output);
+            writer.write(new DefaultKvEntry(last.key(), value));
 
             if (current == null) {
                 break;
             }
 
-            sameKeyEntries.clear();
-            sameKeyEntries.add(current);
             last = current;
+            value = last.value();
         }
+        writer.finish();
     }
 }

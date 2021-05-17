@@ -83,18 +83,14 @@ public class SorterTestUtil {
         return output;
     }
 
-    public static UnsafeBytesInput inputFromOutput(UnsafeBytesOutput output) {
-        return new UnsafeBytesInput(output.buffer(), output.position());
-    }
-
     public static UnsafeBytesInput inputFromKvMap(List<Integer> map)
                                                   throws IOException {
-        return inputFromOutput(writeKvMapToOutput(map));
+        return EntriesUtil.inputFromOutput(writeKvMapToOutput(map));
     }
 
     public static UnsafeBytesInput inputFromSubKvMap(List<List<Integer>> map)
                                                      throws IOException {
-        return inputFromOutput(writeSubKvMapToOutput(map));
+        return EntriesUtil.inputFromOutput(writeSubKvMapToOutput(map));
     }
 
     public static void assertOutputEqualsMap(UnsafeBytesOutput output,

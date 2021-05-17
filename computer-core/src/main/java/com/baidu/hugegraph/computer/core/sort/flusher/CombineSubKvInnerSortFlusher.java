@@ -24,24 +24,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
-
-import org.apache.commons.collections.CollectionUtils;
+import java.util.stream.Collectors;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortingFactory;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
-import com.baidu.hugegraph.iterator.FlatMapperIterator;
 import com.baidu.hugegraph.util.E;
 
-public class SubKvCombineInnerSortFlusher implements InnerSortFlusher {
+public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
 
     private final RandomAccessOutput output;
     private final Combiner<Pointer> combiner;
     private final int subKvFlushThreshold;
 
-    public SubKvCombineInnerSortFlusher(RandomAccessOutput output,
+    public CombineSubKvInnerSortFlusher(RandomAccessOutput output,
                                         Combiner<Pointer> combiner,
                                         int subKvFlushThreshold) {
         this.output = output;
@@ -65,6 +64,7 @@ public class SubKvCombineInnerSortFlusher implements InnerSortFlusher {
                         "Parameter entries must not be empty.");
 
         KvEntry last = entries.next();
+        // TODO use byte buffer store all value pointer to avoid big collection.
         List<KvEntry> sameKeyEntries = new ArrayList<>();
         sameKeyEntries.add(last);
 
@@ -90,24 +90,19 @@ public class SubKvCombineInnerSortFlusher implements InnerSortFlusher {
         }
     }
 
-    private List<KvEntry> sortedSubKvFromEntries(List<KvEntry> entries) {
-        List<KvEntry> subKvs = new ArrayList<>();
+    private Iterator<KvEntry> sortedSubKvFromEntries(List<KvEntry> entries) {
         Function<KvEntry, Iterator<KvEntry>> kvEntryToSubKvs =
                                              EntriesUtil::subKvIterFromEntry;
-        FlatMapperIterator<KvEntry, KvEntry> iter = new FlatMapperIterator<>(
-                                                        entries.iterator(),
-                                                        kvEntryToSubKvs);
-        while (iter.hasNext()) {
-            subKvs.add(iter.next());
-        }
-        subKvs.sort(KvEntry::compareTo);
+        List<Iterator<KvEntry>> subKvs = entries.stream()
+                                                 .map(kvEntryToSubKvs)
+                                                 .collect(Collectors.toList());
 
-        return subKvs;
+        return SortingFactory.createSorting(subKvs);
     }
 
-    private void writeSubKvs(KvEntry kvEntry, List<KvEntry> subKvs)
+    private void writeSubKvs(KvEntry kvEntry, Iterator<KvEntry> subKvIter)
                              throws IOException {
-        E.checkArgument(CollectionUtils.isNotEmpty(subKvs),
+        E.checkArgument(subKvIter.hasNext(),
                         "Parameter subKvs must not be empty.");
 
         kvEntry.key().write(this.output);
@@ -118,7 +113,6 @@ public class SubKvCombineInnerSortFlusher implements InnerSortFlusher {
         this.output.writeInt(0);
 
         // Write subKv to output
-        Iterator<KvEntry> subKvIter = subKvs.iterator();
         KvEntry lastSubKv = subKvIter.next();
         Pointer lastSubValue = lastSubKv.value();
         int writtenCount = 0;
