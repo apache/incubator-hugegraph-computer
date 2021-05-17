@@ -27,8 +27,10 @@ import org.junit.runners.Suite;
     OverwriteCombinerTest.class,
     MergeOldPropertiesCombinerTest.class,
     MergeNewPropertiesCombinerTest.class,
-    DoubleValueSumCombinerTest.class,
+    IntValueSumCombinerTest.class,
     LongValueSumCombinerTest.class,
+    FloatValueSumCombinerTest.class,
+    DoubleValueSumCombinerTest.class,
     ValueMinCombinerTest.class,
     ValueMaxCombinerTest.class
 })
