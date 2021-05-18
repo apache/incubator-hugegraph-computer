@@ -63,11 +63,11 @@ public class BuffersTest {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         executorService.submit(() -> {
-            buffers.signalSorted();
+            buffers.waitSorted();
             countDownLatch.countDown();
         });
         executorService.submit(() -> {
-            buffers.waitSorted();
+            buffers.signalSorted();
             countDownLatch.countDown();
         });
         executorService.shutdown();
