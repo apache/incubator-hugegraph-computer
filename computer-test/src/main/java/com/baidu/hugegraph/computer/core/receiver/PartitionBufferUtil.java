@@ -19,20 +19,22 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
 
-import com.baidu.hugegraph.computer.core.receiver.edge.EdgePartitionBufferTest;
-import com.baidu.hugegraph.computer.core.receiver.message.MessagePartitionBufferTest;
-import com.baidu.hugegraph.computer.core.receiver.vertex.VertexPartitionBufferTest;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ReceiveManagerTest.class,
-    BuffersTest.class,
-    VertexPartitionBufferTest.class,
-    EdgePartitionBufferTest.class,
-    MessagePartitionBufferTest.class
-})
-public class ReceiverTestSuite {
+public class PartitionBufferUtil {
+
+    public static void addBuffer(PartitionBuffer partition, int length) {
+        byte[] bytes = new byte[length];
+        ByteBuf buf = Unpooled.directBuffer(length);
+        try {
+            buf = buf.writeBytes(bytes);
+            NettyManagedBuffer buff = new NettyManagedBuffer(buf);
+            partition.addBuffer(buff);
+        } finally {
+            buf.release();
+        }
+    }
 }

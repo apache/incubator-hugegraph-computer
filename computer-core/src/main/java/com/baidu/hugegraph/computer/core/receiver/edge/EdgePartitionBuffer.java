@@ -17,22 +17,31 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.receiver;
+package com.baidu.hugegraph.computer.core.receiver.edge;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.receiver.PartitionBuffer;
+import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
-import com.baidu.hugegraph.computer.core.receiver.edge.EdgePartitionBufferTest;
-import com.baidu.hugegraph.computer.core.receiver.message.MessagePartitionBufferTest;
-import com.baidu.hugegraph.computer.core.receiver.vertex.VertexPartitionBufferTest;
+public class EdgePartitionBuffer extends PartitionBuffer {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    ReceiveManagerTest.class,
-    BuffersTest.class,
-    VertexPartitionBufferTest.class,
-    EdgePartitionBufferTest.class,
-    MessagePartitionBufferTest.class
-})
-public class ReceiverTestSuite {
+    public static final String TYPE = "edge";
+
+    public EdgePartitionBuffer(Config config,
+                               DataFileGenerator fileGenerator) {
+        super(config, fileGenerator, Constants.INPUT_SUPERSTEP);
+    }
+
+    @Override
+    protected Combiner combiner() {
+        // TODO: implement
+        return null;
+    }
+
+    @Override
+    protected String type() {
+        return TYPE;
+    }
 }
