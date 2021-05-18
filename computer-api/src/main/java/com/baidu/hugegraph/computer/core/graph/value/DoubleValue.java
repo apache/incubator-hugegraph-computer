@@ -56,9 +56,7 @@ public class DoubleValue implements Value<DoubleValue> {
 
     @Override
     public void assign(Value<DoubleValue> other) {
-        E.checkArgument(other instanceof DoubleValue,
-                        "Can't assign '%s'(%s) to DoubleValue",
-                        other, other.getClass().getSimpleName());
+        this.checkAssign(other);
         this.value = ((DoubleValue) other).value;
     }
 

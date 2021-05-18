@@ -56,9 +56,7 @@ public class LongValue implements Value<LongValue> {
 
     @Override
     public void assign(Value<LongValue> other) {
-        E.checkArgument(other instanceof LongValue,
-                        "Can't assign '%s'(%s) to LongValue",
-                        other, other.getClass().getSimpleName());
+        this.checkAssign(other);
         this.value = ((LongValue) other).value;
     }
 

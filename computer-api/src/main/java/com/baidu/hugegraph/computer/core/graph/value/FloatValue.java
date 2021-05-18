@@ -56,9 +56,7 @@ public class FloatValue implements Value<FloatValue> {
 
     @Override
     public void assign(Value<FloatValue> other) {
-        E.checkArgument(other instanceof FloatValue,
-                        "Can't assign '%s'(%s) to FloatValue",
-                        other, other.getClass().getSimpleName());
+        this.checkAssign(other);
         this.value = ((FloatValue) other).value;
     }
 
