@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.store.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hghvfile.entry.KvEntryWriter;
 
 public interface EntryOutput {
@@ -33,7 +32,7 @@ public interface EntryOutput {
      * each sub-value is properties of an edge.
      * The output format:
      * | key length | key | total sub-entry length | sub-entry count |
-     * sub-key length | sub-key | sub-value length |
+     * sub-key length | sub-key | sub-value length | sub-value |
      */
     KvEntryWriter writeEntry(Id key) throws IOException;
 

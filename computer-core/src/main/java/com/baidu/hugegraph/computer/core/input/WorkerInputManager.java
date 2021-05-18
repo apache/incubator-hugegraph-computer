@@ -28,8 +28,8 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
-import com.baidu.hugegraph.computer.core.worker.DataClientManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
+import com.baidu.hugegraph.computer.core.worker.DataClientManager;
 import com.baidu.hugegraph.computer.core.worker.VertexSendManager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.computer.core.worker.load.LoadService;
@@ -75,12 +75,14 @@ public class WorkerInputManager implements Manager {
             Vertex vertex = iterator.next();
             this.sendManager.sendVertex(MessageType.VERTEX, vertex);
         }
+        this.sendManager.finish(MessageType.VERTEX);
 
         iterator = this.loadService.createIteratorFromEdge();
         while (iterator.hasNext()) {
             Vertex vertex = iterator.next();
             this.sendManager.sendVertex(MessageType.EDGE, vertex);
         }
+        this.sendManager.finish(MessageType.EDGE);
     }
 
     public WorkerStat mergeGraph() {

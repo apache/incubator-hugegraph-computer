@@ -40,7 +40,7 @@ import com.baidu.hugegraph.computer.core.store.hghvfile.entry.KvEntryWriter;
 public class BufferImpl {
 
     private final int bufferSize;
-    private final RandomAccessOutput output;
+    private final OptimizedUnsafeBytesOutput output;
     private final EntryOutput entryOutput;
 
     public BufferImpl(int size, int capacity) {
@@ -61,11 +61,11 @@ public class BufferImpl {
         try {
             this.output.seek(0L);
         } catch (IOException e) {
-            throw new ComputerException("Failed to seek to byte 0 point");
+            throw new ComputerException("Failed to seek to position 0");
         }
     }
 
-    public RandomAccessOutput output() {
+    public OptimizedUnsafeBytesOutput output() {
         return this.output;
     }
 

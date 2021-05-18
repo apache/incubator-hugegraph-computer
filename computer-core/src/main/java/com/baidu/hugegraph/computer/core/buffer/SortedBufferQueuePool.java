@@ -19,12 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.buffer;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.util.Log;
 
@@ -32,39 +32,34 @@ public class SortedBufferQueuePool {
 
     private static final Logger LOG = Log.logger(SortedBufferQueuePool.class);
 
-    // workerId => queue
-    private final Map<Integer, SortedBufferQueue> queues;
     private final BarrierEvent notEmptyEvent;
+    // workerId => queue
+    private final SortedBufferQueue[] queues;
 
-    public SortedBufferQueuePool() {
-        this.queues = new ConcurrentHashMap<>();
+    public SortedBufferQueuePool(ComputerContext context) {
+        Config config = context.config();
+        int workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         this.notEmptyEvent = new BarrierEvent();
-    }
-
-    public SortedBufferQueue getOrCreateQueue(int workerId) {
-        SortedBufferQueue queue = this.queues.get(workerId);
-        if (queue == null) {
-            SortedBufferQueue newQueue = new SortedBufferQueue(
-                                         this.notEmptyEvent);
-            queue = this.queues.putIfAbsent(workerId, newQueue);
-            if (queue == null) {
-                queue = newQueue;
-                LOG.info("Create an SortedBufferQueue for worker {}", workerId);
-            }
+        this.queues = new SortedBufferQueue[workerCount];
+        for (int i = 0; i < workerCount; i++) {
+            this.queues[i] = new SortedBufferQueue(this.notEmptyEvent);
         }
-        return queue;
     }
 
     public SortedBufferQueue get(int workerId) {
-        return this.queues.get(workerId);
+        if (workerId < 0 || workerId >= this.queues.length)  {
+            throw new ComputerException("Invalid workerId %s", workerId);
+
+        }
+        return this.queues[workerId];
     }
 
     public void waitUntilAnyQueueNotEmpty() {
         try {
             this.notEmptyEvent.await();
         } catch (InterruptedException e) {
-            throw new ComputerException("Waiting any buffer queue not empty" +
-                                        "was interupted");
+            throw new ComputerException("Waiting any buffer queue not empty " +
+                                        "was interrupted");
         }
     }
 }

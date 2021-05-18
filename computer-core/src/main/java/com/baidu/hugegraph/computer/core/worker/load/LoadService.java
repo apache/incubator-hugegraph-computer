@@ -35,6 +35,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.EdgeFetcher;
 import com.baidu.hugegraph.computer.core.input.GraphFetcher;
 import com.baidu.hugegraph.computer.core.input.HugeConverter;
+import com.baidu.hugegraph.computer.core.input.InputFilter;
 import com.baidu.hugegraph.computer.core.input.InputSourceFactory;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
@@ -53,12 +54,15 @@ public class LoadService {
     private GraphFetcher fetcher;
     // Service proxy on the client
     private InputSplitRpcService rpcService;
+    private InputFilter inputFilter;
 
     public LoadService(ComputerContext context) {
         this.graphFactory = context.graphFactory();
         this.config = null;
         this.fetcher = null;
         this.rpcService = null;
+        this.inputFilter = context.config().createObject(
+                           ComputerOptions.INPUT_FILTER_CLASS);
     }
 
     public void init(Config config) {
@@ -124,6 +128,7 @@ public class LoadService {
 
         private Vertex convert(com.baidu.hugegraph.structure.graph.Vertex
                                vertex) {
+            vertex = inputFilter.filter(vertex);
             Id id = HugeConverter.convertId(vertex.id());
             Properties properties = HugeConverter.convertProperties(
                                     vertex.properties());
@@ -135,8 +140,12 @@ public class LoadService {
 
     private class IteratorFromEdge implements Iterator<Vertex> {
 
-        // TODO: 如果是in边，应该从in的分片中获取数据；如果是both边，应该从out中
-        // 获取数据，然后每个edge转换为两个顶点，暂时只考虑out边的情况
+        /*
+         * TODO: If it is an in edge, we should get the data from the in shard;
+         * if it is a both edge, should get the data from the out, and then
+         * convert each edge to two vertices. For the time being, only consider
+         * the case of the out edge.
+         */
         // private final Direction direction;
         private final int maxEdgesInOneVertex;
         private InputSplit inputSplit;
@@ -210,6 +219,7 @@ public class LoadService {
         }
 
         private Edge convert(com.baidu.hugegraph.structure.graph.Edge edge) {
+            edge = inputFilter.filter(edge);
             Id targetId = HugeConverter.convertId(edge.targetId());
             String name = edge.name();
             Properties properties = HugeConverter.convertProperties(

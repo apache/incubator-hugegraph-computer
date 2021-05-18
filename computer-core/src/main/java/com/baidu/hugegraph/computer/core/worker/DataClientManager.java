@@ -75,7 +75,8 @@ public class DataClientManager implements Manager {
         ClientHandler availableHandler = new ClientHandler() {
             @Override
             public void sendAvailable(ConnectionId connectionId) {
-                LOG.info("ConnectionId {} is available", connectionId);
+                LOG.debug("Channel for connectionId {} is available",
+                          connectionId);
                 notBusyEvent.signalAll();
             }
 
@@ -90,6 +91,9 @@ public class DataClientManager implements Manager {
             @Override
             public void exceptionCaught(TransportException cause,
                                         ConnectionId connectionId) {
+                LOG.error("Chananel for connectionId {} occurred exception",
+                          connectionId, cause);
+                connectionManager.closeClient(connectionId);
             }
         };
         this.connectionManager.initClientManager(config, availableHandler);
@@ -99,12 +103,7 @@ public class DataClientManager implements Manager {
     @Override
     public void close(Config config) {
         this.sendExecutor.interrupt();
-        for (Map.Entry<Integer, TransportClient> entry :
-             this.clients.entrySet()) {
-            TransportClient client = entry.getValue();
-            client.close();
-            LOG.info("Close TransportClient for worker {}", entry.getKey());
-        }
+        this.connectionManager.shutdownClients();
     }
 
     public void connect(int workerId, String hostname, int dataPort) {
@@ -131,7 +130,7 @@ public class DataClientManager implements Manager {
             this.notBusyEvent.await();
         } catch (InterruptedException e) {
             throw new ComputerException("Waiting any client not busy " +
-                                        "was interupted");
+                                        "was interrupted");
         }
     }
 

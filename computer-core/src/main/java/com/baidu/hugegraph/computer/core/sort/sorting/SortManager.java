@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.sort.sorting;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
@@ -78,6 +79,12 @@ public class SortManager implements Manager {
     @Override
     public void close(Config config) {
         Manager.super.close(config);
+        this.sortExecutor.shutdown();
+        try {
+            this.sortExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            LOG.warn("Waiting sort executor terminated was interrupted");
+        }
     }
 
     public void bufferQueuePool(SortedBufferQueuePool bufferQueuePool) {
@@ -90,7 +97,7 @@ public class SortManager implements Manager {
         return CompletableFuture.supplyAsync(() -> {
             RandomAccessInput bufferForRead = buffer.wrapForRead();
             // TODO：This ByteBuffer should be allocated from the off-heap
-//            ByteBuf sortedBuffer = this.allocator.directBuffer(WRITE_BUFFER_CAPACITY);
+//            ByteBuf sortedBuffer = this.allocator.directBuffer(capacity);
             UnsafeBytesOutput sortedBuffer = new UnsafeBytesOutput(capacity);
             this.bufferSorter.sortBuffer(bufferForRead, this.valueCombiner,
                                          sortedBuffer);
@@ -99,7 +106,7 @@ public class SortManager implements Manager {
             // The following code is also executed in sort thread
             buffer.finishSorting();
             // Each target worker has a buffer queue
-            SortedBufferQueue queue = this.queuePool.getOrCreateQueue(workerId);
+            SortedBufferQueue queue = this.queuePool.get(workerId);
             queue.offer(partitionId, type, sortedBuffer);
         });
     }

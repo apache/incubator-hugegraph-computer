@@ -19,12 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.buffer;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.util.Log;
@@ -33,29 +34,38 @@ public class WriteBufferPool {
 
     private static final Logger LOG = Log.logger(WriteBufferPool.class);
 
-    private final Config config;
-    private final Map<Integer, WriteBuffer> buffers;
+    // partitionId => buffer
+    private final WriteBuffer[] buffers;
 
     public WriteBufferPool(ComputerContext context) {
-        this.config = context.config();
-        this.buffers = new ConcurrentHashMap<>();
+        Config config = context.config();
+        int partitionCount = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
+        int size = config.get(ComputerOptions.WRITE_BUFFER_SIZE);
+        int capacity = config.get(ComputerOptions.WRITE_BUFFER_CAPACITY);
+        this.buffers = new WriteBuffer[partitionCount];
+        for (int i = 0; i < partitionCount; i++) {
+            /*
+             * It depends on the concrete implementation of the
+             * partition algorithm, which is not elegant.
+             */
+            this.buffers[i] = new WriteBuffer(size, capacity);
+        }
     }
 
-    public WriteBuffer getOrCreateBuffer(int partitionId) {
-        WriteBuffer buffer = this.buffers.get(partitionId);
-        if (buffer == null) {
-            int size = this.config.get(ComputerOptions.WRITE_BUFFER_SIZE);
-            int capacity = this.config.get(
-                           ComputerOptions.WRITE_BUFFER_CAPACITY);
-            // Maybe create an extra buffer object, but it's harmless
-            WriteBuffer newBuffer = new WriteBuffer(size, capacity);
-            buffer = this.buffers.putIfAbsent(partitionId, newBuffer);
-            if (buffer == null) {
-                buffer = newBuffer;
-                LOG.info("Create a WriteBufferPool for partition {}",
-                         partitionId);
-            }
+    public WriteBuffer get(int partitionId) {
+        if (partitionId < 0 || partitionId >= this.buffers.length)  {
+            throw new ComputerException("Invalid partitionId %s", partitionId);
+
         }
-        return buffer;
+        return this.buffers[partitionId];
+    }
+
+    public Map<Integer, WriteBuffer> all() {
+        Map<Integer, WriteBuffer> all = new LinkedHashMap<>();
+        for (int partitionId = 0; partitionId < this.buffers.length;
+             partitionId++) {
+            all.put(partitionId, this.buffers[partitionId]);
+        }
+        return all;
     }
 }

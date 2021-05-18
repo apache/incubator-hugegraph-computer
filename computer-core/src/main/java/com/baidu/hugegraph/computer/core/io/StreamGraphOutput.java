@@ -31,7 +31,6 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
 public class StreamGraphOutput implements GraphOutput {
 

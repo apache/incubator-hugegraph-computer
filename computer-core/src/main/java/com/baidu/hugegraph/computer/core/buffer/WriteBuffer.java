@@ -49,15 +49,26 @@ public class WriteBuffer {
     }
 
     public synchronized void switchForSorting() {
+        if (!this.reachThreshold()) {
+            return;
+        }
         // Ensure last sorting task finished
         while (!this.sortingBuffer.isEmpty()) {
             try {
                 this.wait();
             } catch (InterruptedException e) {
                 throw new ComputerException("Waiting sorting buffer empty " +
-                                            "was interupted");
+                                            "was interrupted");
             }
         }
+        this.prepareSorting();
+    }
+
+    /**
+     * Can remove synchronized if VertexSendManager.finish() only called by
+     * single thread
+     */
+    public synchronized void prepareSorting() {
         // Swap the writing buffer and sorting buffer pointer
         BufferImpl temp = this.writingBuffer;
         this.writingBuffer = this.sortingBuffer;

@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
+import com.baidu.hugegraph.computer.core.input.DefaultInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportProvider;
@@ -124,6 +125,16 @@ public class ComputerOptions extends OptionHolder {
                     "The page size for streamed load input split data",
                     positiveInt(),
                     500
+            );
+
+    public static final ConfigOption<Class<?>> INPUT_FILTER_CLASS =
+            new ConfigOption<>(
+                    "input.filter_class",
+                    "The class to create input-filter object, " +
+                    "input-filter is used to Filter vertex edges " +
+                    "according to user needs.",
+                    disallowEmpty(),
+                    DefaultInputFilter.class
             );
 
     public static final ConfigConvOption<String, Direction> EDGE_DIRECTION =

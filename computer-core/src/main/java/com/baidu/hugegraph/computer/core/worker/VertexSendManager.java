@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.worker;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class VertexSendManager implements Manager {
         this.writeBufferPool = new WriteBufferPool(context);
         this.sortManager = sortManager;
         this.clientManager = clientManager;
-        this.bufferQueuePool = new SortedBufferQueuePool();
+        this.bufferQueuePool = new SortedBufferQueuePool(context);
         this.exception = new AtomicReference<>();
     }
 
@@ -84,9 +85,9 @@ public class VertexSendManager implements Manager {
     }
 
     /**
-     * There will multiple read threads calling the method
+     * There will multiple threads calling the method
      */
-    public synchronized void sendVertex(MessageType type, Vertex vertex) {
+    public void sendVertex(MessageType type, Vertex vertex) {
         if (this.exception.get() != null) {
             throw new ComputerException("Failed to send vertex(MessageType=%s)",
                       this.exception.get(), type);
@@ -94,28 +95,48 @@ public class VertexSendManager implements Manager {
 
         int partitionId = this.partitioner.partitionId(vertex.id());
         // Each target partition has a write buffer
-        WriteBuffer buffer = this.writeBufferPool.getOrCreateBuffer(
-                             partitionId);
+        WriteBuffer buffer = this.writeBufferPool.get(partitionId);
         if (buffer.reachThreshold()) {
             // After switch, the buffer can be continued write
             buffer.switchForSorting();
-            int workerId = this.partitioner.workerId(partitionId);
-            this.sortManager.sort(workerId, partitionId, type, buffer)
-                            .whenComplete((r, e) -> {
-                if (e != null) {
-                    LOG.error("Failed to sort buffer or put sorted buffer " +
-                              "into queue", e);
-                    // Just record the first error
-                    this.exception.compareAndSet(null, e);
-                }
-            });
+            this.sort(partitionId, type, buffer);
         }
-        // Write vertex to buffer
-        try {
-            buffer.writeVertex(type, vertex);
-        } catch (IOException e) {
-            throw new ComputerException(
-                      "Failed to write vertex(MessageType=%s)", e, type);
+
+        synchronized (buffer) {
+            // Write vertex to buffer
+            try {
+                buffer.writeVertex(type, vertex);
+            } catch (IOException e) {
+                throw new ComputerException(
+                          "Failed to write vertex(MessageType=%s)", e, type);
+            }
         }
+    }
+
+    /**
+     * Send the last batch of buffer
+     * @param type the message type
+     */
+    public void finish(MessageType type) {
+        Map<Integer, WriteBuffer> all = this.writeBufferPool.all();
+        for (Map.Entry<Integer, WriteBuffer> entry : all.entrySet()) {
+            int partitionId = entry.getKey();
+            WriteBuffer buffer = entry.getValue();
+            buffer.prepareSorting();
+            this.sort(partitionId, type, buffer);
+        }
+    }
+
+    private void sort(int partitionId, MessageType type, WriteBuffer buffer) {
+        int workerId = this.partitioner.workerId(partitionId);
+        this.sortManager.sort(workerId, partitionId, type, buffer)
+                        .whenComplete((r, e) -> {
+            if (e != null) {
+                LOG.error("Failed to sort buffer or put sorted buffer " +
+                          "into queue", e);
+                // Just record the first error
+                this.exception.compareAndSet(null, e);
+            }
+        });
     }
 }
