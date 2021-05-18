@@ -24,17 +24,20 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.util.BytesUtil;
 
-public class DefaultPointer implements Pointer {
+public class CachedPointer implements Pointer {
 
     private final RandomAccessInput input;
     private final long offset;
     private final long length;
+    private byte[] bytes;
 
-    public DefaultPointer(RandomAccessInput input, long offset, long length) {
+    public CachedPointer(RandomAccessInput input, long offset, long length) {
         this.input = input;
         this.offset = offset;
         this.length = length;
+        this.bytes = null;
     }
 
     @Override
@@ -53,29 +56,26 @@ public class DefaultPointer implements Pointer {
     }
 
     @Override
-    public byte[] bytes() {
-        try {
+    public byte[] bytes() throws IOException {
+        if (this.bytes == null) {
             this.input.seek(this.offset);
-            return this.input.readBytes((int) this.length);
-        } catch (IOException e) {
-            throw new ComputerException(e.getMessage(), e);
+            this.bytes = this.input.readBytes((int) this.length);
         }
+        return this.bytes;
     }
 
     @Override
     public void write(RandomAccessOutput output) throws IOException {
         output.writeInt((int) this.length);
-        output.write(this.input, this.offset, this.length);
+        output.write(this.bytes());
     }
 
     @Override
     public int compareTo(Pointer other) {
         try {
-            return this.input.compare(this.offset, this.length, other.input(),
-                                      other.offset(), other.length());
+            return BytesUtil.compare(this.bytes(), other.bytes());
         } catch (IOException e) {
-            throw new ComputerException("Error when compare tow pointers: %s",
-                                        e.getMessage(), e);
+            throw new ComputerException(e.getMessage(), e);
         }
     }
 }

@@ -23,17 +23,12 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class MockIntSumCombiner implements Combiner<Pointer> {
 
-    private final UnsafeBytesOutput output = new UnsafeBytesOutput(8);
-    private final UnsafeBytesInput input = new UnsafeBytesInput(
-                                                   this.output.buffer());
     @Override
     public Pointer combine(Pointer v1, Pointer v2) {
         try {

@@ -28,7 +28,7 @@ public interface Pointer extends Range, Comparable<Pointer> {
 
     RandomAccessInput input();
 
-    byte[] bytes();
+    byte[] bytes() throws IOException;
 
     void write(RandomAccessOutput output) throws IOException;
 }

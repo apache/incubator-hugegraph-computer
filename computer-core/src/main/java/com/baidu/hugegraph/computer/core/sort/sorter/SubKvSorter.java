@@ -42,6 +42,8 @@ public class SubKvSorter implements Iterator<KvEntry> {
                        int subKvSortPathNum) {
         E.checkArgument(kvEntries.hasNext(),
                         "Parameter entries must not be empty");
+        E.checkArgument(subKvSortPathNum > 0,
+                        "Parameter subKvSortPathNum must > 0");
         this.kvEntries = kvEntries;
         this.subKvSortPathNum = subKvSortPathNum;
         this.subKvMergeSource = new ArrayList<>(this.subKvSortPathNum);
@@ -73,13 +75,17 @@ public class SubKvSorter implements Iterator<KvEntry> {
         }
         this.subKvMergeSource.clear();
 
-        KvEntry entry = this.kvEntries.next();
-        this.subKvMergeSource.add(new MergePath(this.kvEntries, entry));
-        while (this.subKvMergeSource.size() < this.subKvSortPathNum &&
-               this.kvEntries.peek() != null &&
-               entry.key().compareTo(this.kvEntries.peek().key()) == 0) {
+        assert this.subKvSortPathNum > 0;
+        KvEntry entry;
+        while (true) {
             entry = this.kvEntries.next();
             this.subKvMergeSource.add(new MergePath(this.kvEntries, entry));
+
+            KvEntry next = this.kvEntries.peek();
+            if (this.subKvMergeSource.size() == this.subKvSortPathNum ||
+                next == null || entry.key().compareTo(next.key()) != 0) {
+                break;
+            }
         }
         this.subKvSorting = new LoserTreeInputsSorting<>(this.subKvMergeSource);
         this.currentEntry = entry;

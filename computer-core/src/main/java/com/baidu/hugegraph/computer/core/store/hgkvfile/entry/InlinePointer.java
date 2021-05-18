@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
@@ -42,19 +43,19 @@ public class InlinePointer implements Pointer {
     }
 
     @Override
-    public byte[] bytes() {
+    public byte[] bytes() throws IOException {
         return this.bytes;
     }
 
     @Override
     public void write(RandomAccessOutput output) throws IOException {
         output.writeInt((int) this.length);
-        output.write(this.bytes);
+        output.write(this.bytes());
     }
 
     @Override
     public long offset() {
-        return -1L;
+        return 0L;
     }
 
     @Override
@@ -64,6 +65,10 @@ public class InlinePointer implements Pointer {
 
     @Override
     public int compareTo(Pointer other) {
-        return BytesUtil.compare(this.bytes, other.bytes());
+        try {
+            return BytesUtil.compare(this.bytes(), other.bytes());
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
     }
 }

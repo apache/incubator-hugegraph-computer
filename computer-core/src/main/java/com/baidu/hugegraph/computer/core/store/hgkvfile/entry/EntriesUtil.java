@@ -90,45 +90,60 @@ public final class EntriesUtil {
 
     public static KvEntry entryFromInput(RandomAccessInput input,
                                          RandomAccessInput userAccessInput,
-                                         boolean useInput) {
+                                         boolean useCachedPointer) {
         try {
-            Pointer key, value;
-            if (useInput) {
-                // Read key
-                int keyLength = input.readInt();
-                long keyPosition = input.position();
-                input.skip(keyLength);
-
-                // Read value
-                int valueLength = input.readInt();
-                long valuePosition = input.position();
-                input.skip(valueLength);
-
-                key = new DefaultPointer(userAccessInput, keyPosition,
-                                         keyLength);
-                value = new DefaultPointer(userAccessInput, valuePosition,
-                                           valueLength);
+            if (useCachedPointer) {
+                return cachedPointerKvEntry(input, userAccessInput);
             } else {
-                // Read key
-                int keyLength = input.readInt();
-                byte[] keyBytes = input.readBytes(keyLength);
-
-                // Read value
-                int valueLength = input.readInt();
-                byte[] valueBytes = input.readBytes(valueLength);
-
-                key = new InlinePointer(keyBytes);
-                value = new InlinePointer(valueBytes);
+                return inlinePointerKvEntry(input);
             }
-            return new DefaultKvEntry(key, value);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
     }
 
     public static KvEntry entryFromInput(RandomAccessInput input,
-                                         boolean useInput) {
-        return entryFromInput(input, input, useInput);
+                                         boolean useCachedPointer) {
+        return entryFromInput(input, input, useCachedPointer);
+    }
+    
+    private static KvEntry cachedPointerKvEntry(
+                           RandomAccessInput input,
+                           RandomAccessInput userAccessInput)
+                           throws IOException {
+        // Read key
+        int keyLength = input.readInt();
+        long keyPosition = input.position();
+        input.skip(keyLength);
+
+        // Read value
+        int valueLength = input.readInt();
+        long valuePosition = input.position();
+        input.skip(valueLength);
+        
+        Pointer key, value;
+        key = new CachedPointer(userAccessInput, keyPosition,
+                                keyLength);
+        value = new CachedPointer(userAccessInput, valuePosition,
+                                  valueLength);
+        
+        return new DefaultKvEntry(key, value);
+    }
+
+    private static KvEntry inlinePointerKvEntry(RandomAccessInput input)
+                                                throws IOException {
+        // Read key
+        int keyLength = input.readInt();
+        byte[] keyBytes = input.readBytes(keyLength);
+
+        // Read value
+        int valueLength = input.readInt();
+        byte[] valueBytes = input.readBytes(valueLength);
+
+        Pointer key = new InlinePointer(keyBytes);
+        Pointer value = new InlinePointer(valueBytes);
+
+        return new DefaultKvEntry(key, value);
     }
 
     public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry) {

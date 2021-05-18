@@ -155,7 +155,7 @@ public class LargeDataSizeTest {
     }
 
     private static long getFileValue(String file) throws IOException {
-        HgkvDirReader reader = new HgkvDirReaderImpl(file, false);
+        HgkvDirReader reader = new HgkvDirReaderImpl(file);
         EntryIterator iterator = reader.iterator();
         long result = 0;
         while (iterator.hasNext()) {

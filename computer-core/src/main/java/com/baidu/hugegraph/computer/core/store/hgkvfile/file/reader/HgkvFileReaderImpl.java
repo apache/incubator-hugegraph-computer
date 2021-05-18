@@ -33,17 +33,17 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 public class HgkvFileReaderImpl implements HgkvFileReader {
 
     private final HgkvFile hgkvFile;
-    private final boolean useInput;
+    private final boolean useCachedPointer;
 
-    public HgkvFileReaderImpl(String path, boolean useInput)
+    public HgkvFileReaderImpl(String path, boolean useCachedPointer)
                               throws IOException {
         this.hgkvFile = HgkvFileImpl.open(path);
-        this.useInput = useInput;
+        this.useCachedPointer = useCachedPointer;
     }
 
     @Override
     public EntryIterator iterator() throws IOException {
-        return new EntryIter(this.hgkvFile, this.useInput);
+        return new EntryIter(this.hgkvFile, this.useCachedPointer);
     }
 
     private static class EntryIter implements EntryIterator {
@@ -51,15 +51,15 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
         private final BufferedFileInput input;
         private final BufferedFileInput userAccessInput;
         private long numEntries;
-        private final boolean useInput;
+        private final boolean useCachedPointer;
 
-        public EntryIter(HgkvFile hgkvFile, boolean useInput)
+        public EntryIter(HgkvFile hgkvFile, boolean useCachedPointer)
                          throws IOException {
             this.numEntries = hgkvFile.numEntries();
             File file = new File(hgkvFile.path());
             this.input = new BufferedFileInput(file);
             this.userAccessInput = this.input.duplicate();
-            this.useInput = useInput;
+            this.useCachedPointer = useCachedPointer;
         }
 
         @Override
@@ -76,7 +76,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
             this.numEntries--;
             return EntriesUtil.entryFromInput(this.input,
                                               this.userAccessInput,
-                                              this.useInput);
+                                              this.useCachedPointer);
         }
 
         @Override

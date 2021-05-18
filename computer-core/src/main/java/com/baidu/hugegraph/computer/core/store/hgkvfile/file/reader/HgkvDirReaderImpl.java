@@ -33,21 +33,25 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 public class HgkvDirReaderImpl implements HgkvDirReader {
 
     private final HgkvDir hgkvDir;
-    private final boolean useInput;
+    private final boolean useCachedPointer;
 
-    public HgkvDirReaderImpl(String path, boolean useInput) {
+    public HgkvDirReaderImpl(String path, boolean useCachedPointer) {
         try {
             this.hgkvDir = HgkvDirImpl.open(path);
-            this.useInput = useInput;
+            this.useCachedPointer = useCachedPointer;
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
     }
 
+    public HgkvDirReaderImpl(String path) {
+        this(path, false);
+    }
+
     @Override
     public EntryIterator iterator() {
         try {
-            return new HgkvDirEntryIter(this.hgkvDir, this.useInput);
+            return new HgkvDirEntryIter(this.hgkvDir, this.useCachedPointer);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
@@ -58,13 +62,13 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
         private final Iterator<HgkvFile> segments;
         private long numEntries;
         private EntryIterator kvIter;
-        private final boolean useInput;
+        private final boolean useCachedPointer;
 
-        public HgkvDirEntryIter(HgkvDir hgkvDir, boolean useInput)
+        public HgkvDirEntryIter(HgkvDir hgkvDir, boolean useCachedPointer)
                                 throws IOException {
             this.segments = hgkvDir.segments().iterator();
             this.numEntries = hgkvDir.numEntries();
-            this.useInput = useInput;
+            this.useCachedPointer = useCachedPointer;
         }
 
         @Override
@@ -102,8 +106,8 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
             EntryIterator iterator;
             while (this.segments.hasNext()) {
                 HgkvFile segment = this.segments.next();
-                HgkvFileReader reader = new HgkvFileReaderImpl(segment.path(),
-                                                               this.useInput);
+                HgkvFileReader reader = new HgkvFileReaderImpl(
+                                        segment.path(), this.useCachedPointer);
                 iterator = reader.iterator();
                 if (iterator.hasNext()) {
                     return iterator;

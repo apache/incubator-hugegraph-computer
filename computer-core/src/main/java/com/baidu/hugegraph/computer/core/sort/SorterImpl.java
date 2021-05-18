@@ -91,13 +91,11 @@ public class SorterImpl implements Sorter {
                             throws Exception {
         if (withSubKv) {
             this.mergeInputs(inputs,
-                             o -> new HgkvDir4SubKvReaderImpl(o, false)
-                                  .iterator(),
+                             o -> new HgkvDir4SubKvReaderImpl(o).iterator(),
                              flusher, outputs);
         } else {
             this.mergeInputs(inputs,
-                             o -> new HgkvDirReaderImpl(o, false)
-                                  .iterator(),
+                             o -> new HgkvDirReaderImpl(o).iterator(),
                              flusher, outputs);
         }
     }
