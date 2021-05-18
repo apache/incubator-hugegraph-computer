@@ -52,8 +52,9 @@ public abstract class PartitionBuffer {
         ConfigOption<Long> option =
                            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT;
         long buffersLimit = config.get(option);
-        this.receive = new Buffers<>(buffersLimit);
-        this.sort = new Buffers<>(buffersLimit);
+        long sortTimeout = config.get(ComputerOptions.WORKER_SORT_TIMEOUT);
+        this.receive = new Buffers<>(buffersLimit, sortTimeout);
+        this.sort = new Buffers<>(buffersLimit, sortTimeout);
         /*
          * Set the sort sorted, so the first time call sort.waitSorted() can
          * return immediately.

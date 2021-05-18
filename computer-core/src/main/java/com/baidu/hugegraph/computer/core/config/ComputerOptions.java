@@ -358,6 +358,14 @@ public class ComputerOptions extends OptionHolder {
                     100 * Bytes.MB
             );
 
+    public static final ConfigOption<Long> WORKER_SORT_TIMEOUT =
+            new ConfigOption<>(
+                    "worker.sort_timeout",
+                    "The max timeout(in ms) to wait sort thread done.",
+                    positiveInt(),
+                    TimeUnit.MINUTES.toMillis(10)
+            );
+
     public static final ConfigListOption<String> WORKER_DATA_DIRS =
             new ConfigListOption<>(
                     "worker.data_dirs",

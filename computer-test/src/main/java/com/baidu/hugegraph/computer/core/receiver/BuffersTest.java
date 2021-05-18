@@ -23,18 +23,21 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class BuffersTest {
 
     @Test
-    public void test() throws InterruptedException {
+    public void testAddBuffer() {
         long threshold = 1024L;
         byte[] bytes = new byte[100];
-        Buffers<byte[]> buffers = new Buffers<>(threshold);
+        long maxWaitTime = 1000L;
+        Buffers<byte[]> buffers = new Buffers<>(threshold, maxWaitTime);
         for (int i = 0; i < 10; i++) {
             buffers.addBuffer(bytes, bytes.length);
         }
@@ -59,7 +62,18 @@ public class BuffersTest {
         // Sort buffer
         List<byte[]> list2 = buffers.list();
         Assert.assertEquals(11, list2.size());
+    }
 
+    @Test
+    public void testSortBuffer() throws InterruptedException {
+        long threshold = 1024L;
+        byte[] bytes = new byte[100];
+        long maxWaitTime = 1000L;
+        Buffers<byte[]> buffers = new Buffers<>(threshold, maxWaitTime);
+        for (int i = 0; i < 10; i++) {
+            buffers.addBuffer(bytes, bytes.length);
+        }
+        System.out.println("testSort");
         CountDownLatch countDownLatch = new CountDownLatch(2);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         executorService.submit(() -> {
@@ -72,5 +86,51 @@ public class BuffersTest {
         });
         executorService.shutdown();
         countDownLatch.await();
+    }
+
+    @Test
+    public void testSortTimeout() {
+        long threshold = 1024L;
+        byte[] bytes = new byte[100];
+        long maxWaitTime = 1000L;
+        Buffers<byte[]> buffers = new Buffers<>(threshold, maxWaitTime);
+        for (int i = 0; i < 10; i++) {
+            buffers.addBuffer(bytes, bytes.length);
+        }
+
+        Assert.assertThrows(ComputerException.class, () -> {
+            buffers.waitSorted();
+        }, e -> {
+            Assert.assertContains("Not sorted in 1000 ms", e.getMessage());
+        });
+    }
+
+    @Test
+    public void testSortInterrupt() throws InterruptedException {
+        long threshold = 1024L;
+        byte[] bytes = new byte[100];
+        long maxWaitTime = 1000L;
+        Buffers<byte[]> buffers = new Buffers<>(threshold, maxWaitTime);
+        for (int i = 0; i < 10; i++) {
+            buffers.addBuffer(bytes, bytes.length);
+        }
+        AtomicBoolean success = new AtomicBoolean(false);
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        Thread sortThread = new Thread(() -> {
+            buffers.waitSorted();
+        });
+        sortThread.setUncaughtExceptionHandler((t, e) -> {
+            String expected = "Interrupted while waiting buffers to be sorted";
+            try {
+                Assert.assertContains(expected, e.getMessage());
+                success.set(true);
+            } finally {
+                countDownLatch.countDown();
+            }
+        });
+        sortThread.start();
+        sortThread.interrupt();
+        countDownLatch.await();
+        Assert.assertTrue(success.get());
     }
 }

@@ -36,12 +36,14 @@ public class Buffers<T> {
     private long sumBytes;
     private List<T> list;
     private BarrierEvent event;
+    private long sortTimeout;
 
-    public Buffers(long threshold) {
+    public Buffers(long threshold, long sortTimeout) {
         this.sumBytes = 0L;
         this.list = new ArrayList<>();
         this.event = new BarrierEvent();
         this.threshold = threshold;
+        this.sortTimeout = sortTimeout;
     }
 
     public void addBuffer(T data, long size) {
@@ -65,7 +67,10 @@ public class Buffers<T> {
             return;
         }
         try {
-            this.event.await();
+            boolean sorted = this.event.await(this.sortTimeout);
+            if (!sorted) {
+                throw new ComputerException("Not sorted in %s ms", this.sortTimeout);
+            }
             this.event.reset();
         } catch (InterruptedException e) {
             throw new ComputerException(
