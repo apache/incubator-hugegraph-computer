@@ -64,9 +64,7 @@ public class IdValue implements Value<IdValue> {
 
     @Override
     public void assign(Value<IdValue> other) {
-        E.checkArgument(other instanceof IdValue,
-                        "Can't assign '%s'(%s) to IdValue",
-                        other, other.getClass().getSimpleName());
+        this.checkAssign(other);
         this.bytes = ((IdValue) other).bytes;
         this.length = ((IdValue) other).length;
     }

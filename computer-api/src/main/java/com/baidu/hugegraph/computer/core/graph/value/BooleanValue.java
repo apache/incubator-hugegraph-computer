@@ -27,9 +27,6 @@ import com.baidu.hugegraph.util.E;
 
 public class BooleanValue implements Value<BooleanValue> {
 
-    public static final BooleanValue TRUE = new BooleanValue(true);
-    public static final BooleanValue FALSE = new BooleanValue(false);
-
     private boolean value;
 
     public BooleanValue() {
@@ -59,15 +56,13 @@ public class BooleanValue implements Value<BooleanValue> {
 
     @Override
     public void assign(Value<BooleanValue> other) {
-        E.checkArgument(other instanceof BooleanValue,
-                        "Can't assign '%s'(%s) to BooleanValue",
-                        other, other.getClass().getSimpleName());
+        this.checkAssign(other);
         this.value = ((BooleanValue) other).value;
     }
 
     @Override
     public BooleanValue copy() {
-        return this.value ? TRUE : FALSE;
+        return new BooleanValue(this.value);
     }
 
     @Override

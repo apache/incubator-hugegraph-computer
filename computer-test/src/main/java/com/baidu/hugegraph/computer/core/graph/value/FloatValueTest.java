@@ -140,11 +140,13 @@ public class FloatValueTest extends UnitTestBase {
 
     @Test
     public void testEquals() {
-        FloatValue value1 = new FloatValue();
+        FloatValue value1 = new FloatValue(0f);
         Assert.assertTrue(value1.equals(value1));
         Assert.assertTrue(value1.equals(new FloatValue(0f)));
         Assert.assertFalse(value1.equals(new FloatValue(1)));
         Assert.assertFalse(value1.equals(new FloatValue(1.0f)));
+
+        Assert.assertFalse(value1.equals(new IntValue(0)));
         Assert.assertFalse(value1.equals(null));
     }
 

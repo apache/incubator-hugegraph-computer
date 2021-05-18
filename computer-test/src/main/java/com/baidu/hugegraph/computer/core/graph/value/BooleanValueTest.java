@@ -29,35 +29,147 @@ import com.baidu.hugegraph.testutil.Assert;
 public class BooleanValueTest extends UnitTestBase {
 
     @Test
-    public void test() {
-        BooleanValue booleanValue1 = new BooleanValue();
-        BooleanValue booleanValue2 = new BooleanValue(true);
+    public void testType() {
+        BooleanValue value1 = new BooleanValue();
+        BooleanValue value2 = new BooleanValue(true);
+        BooleanValue value3 = new BooleanValue(false);
 
-        Assert.assertEquals(ValueType.BOOLEAN, booleanValue1.type());
-        Assert.assertEquals(false, booleanValue1.value());
-        Assert.assertEquals(true, booleanValue2.value());
+        Assert.assertEquals(ValueType.BOOLEAN, value1.type());
+        Assert.assertEquals(ValueType.BOOLEAN, value2.type());
+        Assert.assertEquals(ValueType.BOOLEAN, value3.type());
+    }
 
-        booleanValue2.value(false);
-        Assert.assertEquals(false, booleanValue2.value());
-        Assert.assertEquals(booleanValue2,
-                            new BooleanValue(booleanValue2.value()));
-        Assert.assertEquals(booleanValue1, booleanValue2);
-        Assert.assertEquals(Boolean.hashCode(false),
-                            booleanValue2.hashCode());
+    @Test
+    public void testValue() {
+        BooleanValue value1 = new BooleanValue();
+        BooleanValue value2 = new BooleanValue(true);
+        BooleanValue value3 = new BooleanValue(false);
+
+        Assert.assertEquals(false, value1.value());
+        Assert.assertEquals(true, value2.value());
+        Assert.assertEquals(false, value3.value());
+
+        value2.value(false);
+        Assert.assertEquals(false, value2.value());
+        Assert.assertEquals(value3, value2);
+
+        BooleanValue value5 = new BooleanValue(value2.value());
+        Assert.assertEquals(value2, value5);
+    }
+
+    @Test
+    public void testAssign() {
+        BooleanValue value1 = new BooleanValue();
+        BooleanValue value2 = new BooleanValue(true);
+        BooleanValue value3 = new BooleanValue(false);
+
+        Assert.assertEquals(false, value1.value());
+        value1.assign(value2);
+        Assert.assertEquals(true, value1.value());
+        Assert.assertEquals(true, value2.value());
+
+        value2.assign(value3);
+        Assert.assertEquals(true, value1.value());
+        Assert.assertEquals(false, value2.value());
+        Assert.assertEquals(false, value3.value());
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Value<BooleanValue> v = (Value) new IntValue();
+            value2.assign(v);
+        }, e -> {
+            Assert.assertContains("Can't assign '0'(IntValue) to BooleanValue",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Value<BooleanValue> v = (Value) new LongValue();
+            value2.assign(v);
+        }, e -> {
+            Assert.assertContains("Can't assign '0'(LongValue) to BooleanValue",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            value2.assign(null);
+        }, e -> {
+            Assert.assertContains("Can't assign null to BooleanValue",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testCopy() {
+        BooleanValue value1 = new BooleanValue();
+        BooleanValue value2 = new BooleanValue(true);
+        BooleanValue value3 = new BooleanValue(false);
+
+        BooleanValue copy = value1.copy();
+        Assert.assertEquals(false, value1.value());
+        Assert.assertEquals(false, copy.value());
+
+        copy.assign(value2);
+        Assert.assertEquals(false, value1.value());
+        Assert.assertEquals(true, copy.value());
+
+        copy = value2.copy();
+        Assert.assertEquals(true, value2.value());
+        Assert.assertEquals(true, copy.value());
+
+        copy.assign(value3);
+        Assert.assertEquals(true, value2.value());
+        Assert.assertEquals(false, copy.value());
     }
 
     @Test
     public void testReadWrite() throws IOException {
+        assertValueEqualAfterWriteAndRead(new BooleanValue());
         assertValueEqualAfterWriteAndRead(new BooleanValue(true));
+        assertValueEqualAfterWriteAndRead(new BooleanValue(false));
     }
 
     @Test
     public void testCompare() {
-        BooleanValue value1 = BooleanValue.FALSE;
-        BooleanValue value2 = BooleanValue.FALSE;
-        BooleanValue value3 = BooleanValue.TRUE;
+        BooleanValue value1 = new BooleanValue();
+        BooleanValue value2 = new BooleanValue(false);
+        BooleanValue value3 = new BooleanValue(true);
+
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+    }
+
+    @Test
+    public void testEquals() {
+        BooleanValue value1 = new BooleanValue();
+        Assert.assertTrue(value1.equals(value1));
+        Assert.assertTrue(value1.equals(new BooleanValue(false)));
+        Assert.assertFalse(value1.equals(new BooleanValue(true)));
+
+        Assert.assertFalse(value1.equals(new IntValue(1)));
+        Assert.assertFalse(value1.equals(null));
+    }
+
+    @Test
+    public void testHashCode() {
+        BooleanValue value1 = new BooleanValue();
+        BooleanValue value2 = new BooleanValue(true);
+        BooleanValue value3 = new BooleanValue(false);
+
+        Assert.assertEquals(Boolean.hashCode(false), value1.hashCode());
+        Assert.assertEquals(Boolean.hashCode(true), value2.hashCode());
+        Assert.assertEquals(Boolean.hashCode(false), value3.hashCode());
+    }
+
+    @Test
+    public void testToString() {
+        BooleanValue value1 = new BooleanValue();
+        BooleanValue value2 = new BooleanValue(true);
+        BooleanValue value3 = new BooleanValue(false);
+
+        Assert.assertEquals("false", value1.toString());
+        Assert.assertEquals("true", value2.toString());
+        Assert.assertEquals("false", value3.toString());
     }
 }

@@ -46,7 +46,7 @@ public class NullValue implements Value<NullValue> {
 
     @Override
     public void assign(Value<NullValue> other) {
-        // pass
+        this.checkAssign(other);
     }
 
     @Override

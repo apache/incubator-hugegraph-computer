@@ -163,7 +163,7 @@ public class IntValueTest extends UnitTestBase {
         Assert.assertTrue(intValue1.equals(intValue1));
         Assert.assertTrue(intValue1.equals(new IntValue(0)));
         Assert.assertFalse(intValue1.equals(new IntValue(1)));
-        Assert.assertFalse(intValue1.equals(new FloatValue(1)));
+        Assert.assertFalse(intValue1.equals(new FloatValue(1f)));
         Assert.assertFalse(intValue1.equals(null));
     }
 
