@@ -51,8 +51,8 @@ public class VertexPartitionBufferTest extends UnitTestBase {
         DataFileManager dataFileManager = new DataFileManager();
         dataFileManager.init(config);
         VertexPartitionBuffer partition = new VertexPartitionBuffer(
-                                              config,
-                                              dataFileManager);
+                                          config,
+                                          dataFileManager);
         Assert.assertEquals("vertex", partition.type());
         for (int i = 0; i < 25; i++) {
             PartitionBufferUtil.addBuffer(partition, 100);

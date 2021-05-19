@@ -245,16 +245,6 @@ public class WorkerService {
         InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
                                         host, port);
 
-        DataFileManager dataFileManager = new DataFileManager();
-        this.managers.add(dataFileManager);
-
-        ReceiveManager receiveManager = new ReceiveManager(dataFileManager);
-        this.managers.add(receiveManager);
-
-        DataServerManager dataServerManager =
-                          new DataServerManager(receiveManager);
-        this.managers.add(dataServerManager);
-
         return dataAddress;
     }
 
@@ -307,6 +297,19 @@ public class WorkerService {
         this.managers.initAll(this.config);
 
         LOG.info("{} WorkerService initialized managers", this);
+        DataFileManager fileManager = new DataFileManager();
+        this.managers.add(fileManager);
+
+        ReceiveManager receiveManager = new ReceiveManager(fileManager);
+        this.managers.add(receiveManager);
+
+        DataServerManager serverManager = new DataServerManager(receiveManager);
+        this.managers.add(serverManager);
+
+        // Init managers
+        this.managers.initAll(this.config);
+
+        LOG.info("{} WorkerService initialized", this);
     }
 
     private void checkInited() {

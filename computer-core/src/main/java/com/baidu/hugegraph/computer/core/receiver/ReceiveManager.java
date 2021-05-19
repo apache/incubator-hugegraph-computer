@@ -61,11 +61,12 @@ public class ReceiveManager implements Manager, MessageHandler {
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionId connectionId) {
+        // TODO: implement failover
         LOG.warn("Exception caught for connection:{}, root cause:{}",
                  connectionId, cause);
     }
 
-    /*
+    /**
      * Merge vertices and edges in each partition parallel, and get the
      * workerStat. Be called at the end of input superstep.
      */

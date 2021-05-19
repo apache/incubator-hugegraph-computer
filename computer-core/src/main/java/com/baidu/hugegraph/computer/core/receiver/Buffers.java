@@ -69,7 +69,8 @@ public class Buffers<T> {
         try {
             boolean sorted = this.event.await(this.sortTimeout);
             if (!sorted) {
-                throw new ComputerException("Not sorted in %s ms", this.sortTimeout);
+                throw new ComputerException("Not sorted in %s ms",
+                                            this.sortTimeout);
             }
             this.event.reset();
         } catch (InterruptedException e) {
