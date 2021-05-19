@@ -32,7 +32,6 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
 
     /**
      * Assign a new value to this object
-     * @return the old value in this object
      */
     void assign(Value<T> value);
 
@@ -46,12 +45,10 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
      */
     default void checkAssign(Value<T> other) {
         if (other == null) {
-            E.checkArgument(false,
-                            "Can't assign null to %s",
+            E.checkArgument(false, "Can't assign null to %s",
                             this.getClass().getSimpleName());
         } else if (!this.getClass().isAssignableFrom(other.getClass())) {
-            E.checkArgument(false,
-                            "Can't assign '%s'(%s) to %s",
+            E.checkArgument(false, "Can't assign '%s'(%s) to %s",
                             other, other.getClass().getSimpleName(),
                             this.getClass().getSimpleName());
         }
