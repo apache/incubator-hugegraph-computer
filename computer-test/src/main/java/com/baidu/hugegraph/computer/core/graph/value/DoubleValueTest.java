@@ -29,66 +29,181 @@ import com.baidu.hugegraph.testutil.Assert;
 public class DoubleValueTest extends UnitTestBase {
 
     @Test
-    public void test() {
-        DoubleValue doubleValue1 = new DoubleValue();
-        DoubleValue doubleValue2 = new DoubleValue(Double.MIN_VALUE);
+    public void testType() {
+        DoubleValue value1 = new DoubleValue();
+        DoubleValue value2 = new DoubleValue(Double.MIN_VALUE);
 
-        Assert.assertEquals(ValueType.DOUBLE, doubleValue1.type());
-        Assert.assertEquals(0.0D, doubleValue1.value(), 0.0D);
-        Assert.assertEquals(Double.MIN_VALUE, doubleValue2.value(), 0.0D);
+        Assert.assertEquals(ValueType.DOUBLE, value1.type());
+        Assert.assertEquals(ValueType.DOUBLE, value2.type());
+    }
 
-        doubleValue2.value(Double.MAX_VALUE);
-        Assert.assertEquals(Double.MAX_VALUE, doubleValue2.value(), 0.0D);
-        Assert.assertNotEquals(doubleValue1, doubleValue2);
-        Assert.assertEquals(doubleValue2,
-                            new DoubleValue(doubleValue2.value()));
-        Assert.assertEquals(Double.hashCode(Double.MAX_VALUE),
-                            doubleValue2.hashCode());
+    @Test
+    public void testValue() {
+        DoubleValue value1 = new DoubleValue();
+        DoubleValue value2 = new DoubleValue(1234.56d);
+        DoubleValue value3 = new DoubleValue(Double.MIN_VALUE);
+        DoubleValue value4 = new DoubleValue(Double.MAX_VALUE);
+
+        Assert.assertEquals(0d, value1.value(), 0d);
+        Assert.assertEquals(1234.56d, value2.value(), 0d);
+        Assert.assertEquals(Double.MIN_VALUE, value3.value(), 0d);
+        Assert.assertEquals(Double.MAX_VALUE, value4.value(), 0d);
+
+        value3.value(Double.MAX_VALUE);
+        Assert.assertEquals(Double.MAX_VALUE, value3.value(), 0d);
+        Assert.assertEquals(value3, value4);
+
+        DoubleValue value5 = new DoubleValue(value2.value());
+        Assert.assertEquals(value2, value5);
+    }
+
+    @Test
+    public void testAssign() {
+        DoubleValue value1 = new DoubleValue();
+        DoubleValue value2 = new DoubleValue(1234.56d);
+        DoubleValue value3 = new DoubleValue(Double.MIN_VALUE);
+        DoubleValue value4 = new DoubleValue(Double.MAX_VALUE);
+
+        Assert.assertEquals(0d, value1.value(), 0d);
+        value1.assign(value2);
+        Assert.assertEquals(1234.56d, value1.value(), 0d);
+        Assert.assertEquals(1234.56d, value2.value(), 0d);
+
+        value2.assign(value3);
+        Assert.assertEquals(1234.56d, value1.value(), 0d);
+        Assert.assertEquals(Double.MIN_VALUE, value2.value(), 0d);
+
+        value2.assign(value4);
+        Assert.assertEquals(1234.56d, value1.value(), 0d);
+        Assert.assertEquals(Double.MAX_VALUE, value2.value(), 0d);
+        Assert.assertEquals(Double.MIN_VALUE, value3.value(), 0d);
+        Assert.assertEquals(Double.MAX_VALUE, value4.value(), 0d);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Value<DoubleValue> v = (Value) new IntValue();
+            value2.assign(v);
+        }, e -> {
+            Assert.assertContains("Can't assign '0'(IntValue) to DoubleValue",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Value<DoubleValue> v = (Value) new FloatValue();
+            value2.assign(v);
+        }, e -> {
+            Assert.assertContains("Can't assign '0.0'(FloatValue) to " +
+                                  "DoubleValue", e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            value2.assign(null);
+        }, e -> {
+            Assert.assertContains("Can't assign null to DoubleValue",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testCopy() {
+        DoubleValue value1 = new DoubleValue();
+        DoubleValue value2 = new DoubleValue(1234.56d);
+
+        DoubleValue copy = value1.copy();
+        Assert.assertEquals(0d, value1.value(), 0d);
+        Assert.assertEquals(0d, copy.value(), 0d);
+
+        copy.assign(value2);
+        Assert.assertEquals(1234.56d, copy.value(), 0d);
+        Assert.assertEquals(0d, value1.value(), 0d);
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        assertValueEqualAfterWriteAndRead(new DoubleValue(0.0D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-0.0D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(0.1D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-0.1D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(1.1D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-1.1D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(1.123456789D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-1.123456789D));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(0.0d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-0.0d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(0.1d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-0.1d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(1.1d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-1.1d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(1.123456789d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-1.123456789d));
         assertValueEqualAfterWriteAndRead(new DoubleValue(
-                                          987654321.123456789D));
+                                          987654321.123456789d));
         assertValueEqualAfterWriteAndRead(new DoubleValue(
-                                          -987654321.123456789D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(127D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-127D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(128D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-128D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(256D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-256D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(32767D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-32767D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(32768D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-32768D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(65536D));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(-65535D));
+                                          -987654321.123456789d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(127d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-127d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(128d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-128d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(256d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-256d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(32767d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-32767d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(32768d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-32768d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(65536d));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(-65535d));
         assertValueEqualAfterWriteAndRead(new DoubleValue(Integer.MIN_VALUE));
         assertValueEqualAfterWriteAndRead(new DoubleValue(Integer.MAX_VALUE));
         assertValueEqualAfterWriteAndRead(new DoubleValue(Long.MIN_VALUE));
         assertValueEqualAfterWriteAndRead(new DoubleValue(Long.MAX_VALUE));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(Float.MIN_VALUE));
-        assertValueEqualAfterWriteAndRead(new DoubleValue(Float.MAX_VALUE));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MIN_VALUE));
+        assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MAX_VALUE));
         assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MIN_VALUE));
         assertValueEqualAfterWriteAndRead(new DoubleValue(Double.MAX_VALUE));
     }
 
     @Test
     public void testCompare() {
-        DoubleValue value1 = new DoubleValue(123.0D);
-        DoubleValue value2 = new DoubleValue(123.0D);
-        DoubleValue value3 = new DoubleValue(321.0D);
+        DoubleValue value1 = new DoubleValue(123d);
+        DoubleValue value2 = new DoubleValue(123d);
+        DoubleValue value3 = new DoubleValue(321d);
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+    }
+
+    @Test
+    public void testEquals() {
+        DoubleValue value1 = new DoubleValue();
+        Assert.assertTrue(value1.equals(value1));
+        Assert.assertTrue(value1.equals(new DoubleValue(0d)));
+        Assert.assertFalse(value1.equals(new DoubleValue(1)));
+        Assert.assertFalse(value1.equals(new DoubleValue(1.0d)));
+        Assert.assertFalse(value1.equals(null));
+    }
+
+    @Test
+    public void testHashCode() {
+        DoubleValue value1 = new DoubleValue();
+        DoubleValue value2 = new DoubleValue(1234.56d);
+        DoubleValue value3 = new DoubleValue(Double.MIN_VALUE);
+        DoubleValue value4 = new DoubleValue(Double.MAX_VALUE);
+
+        Assert.assertEquals(Double.hashCode(0d),
+                            value1.hashCode());
+        Assert.assertEquals(Double.hashCode(1234.56d),
+                            value2.hashCode());
+        Assert.assertEquals(Double.hashCode(Double.MIN_VALUE),
+                            value3.hashCode());
+        Assert.assertEquals(Double.hashCode(Double.MAX_VALUE),
+                            value4.hashCode());
+    }
+
+    @Test
+    public void testToString() {
+        DoubleValue value1 = new DoubleValue();
+        DoubleValue value2 = new DoubleValue(1234.56d);
+        DoubleValue value3 = new DoubleValue(Double.MIN_VALUE);
+        DoubleValue value4 = new DoubleValue(Double.MAX_VALUE);
+        DoubleValue value5 = new DoubleValue(-Double.MAX_VALUE);
+
+        Assert.assertEquals("0.0", value1.toString());
+        Assert.assertEquals("1234.56", value2.toString());
+        Assert.assertEquals("4.9E-324", value3.toString());
+        Assert.assertEquals("1.7976931348623157E308", value4.toString());
+        Assert.assertEquals("-1.7976931348623157E308", value5.toString());
     }
 }

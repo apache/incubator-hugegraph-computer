@@ -58,12 +58,14 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public void add(T value) {
-        E.checkArgument(value != null, "The value to be added can't be null");
+        E.checkArgument(value != null,
+                        "Can't add null to %s", this.type().string());
         if (this.elemType != ValueType.UNKNOWN) {
             E.checkArgument(this.elemType == value.type(),
-                            "The value to be added can't be null and type " +
-                            "should be %s, actual is %s",
-                            this.elemType, value);
+                            "Invalid value '%s' with type %s, " +
+                            "expect element with type %s",
+                            value, value.type().string(),
+                            this.elemType.string());
         } else {
             this.elemType = value.type();
         }
@@ -77,15 +79,9 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     public T getLast() {
         int index = this.values.size() - 1;
         if (index < 0) {
-            throw new NoSuchElementException("The list value is empty");
+            throw new NoSuchElementException("The list is empty");
         }
         return this.values.get(index);
-    }
-
-    public ListValue<T> copy() {
-        List<T> values = GRAPH_FACTORY.createList();
-        values.addAll(this.values);
-        return new ListValue<>(this.elemType, values);
     }
 
     public boolean contains(T obj) {
@@ -110,6 +106,24 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
+    public void assign(Value<ListValue<T>> other) {
+        this.checkAssign(other);
+        ValueType elemType = ((ListValue<T>) other).elemType();
+        E.checkArgument(elemType == this.elemType(),
+                        "Can't assign %s<%s> to %s<%s>",
+                        other.type().string(), elemType.string(),
+                        this.type().string(), this.elemType().string());
+        this.values = ((ListValue<T>) other).values();
+    }
+
+    @Override
+    public ListValue<T> copy() {
+        List<T> values = GRAPH_FACTORY.createList();
+        values.addAll(this.values);
+        return new ListValue<>(this.elemType, values);
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.read(in, true);
     }
@@ -118,10 +132,14 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
                         throws IOException {
         int size = in.readInt();
         if (readElemType) {
-            this.elemType = SerialEnum.fromCode(ValueType.class,
-                                                in.readByte());
+            this.elemType = SerialEnum.fromCode(ValueType.class, in.readByte());
         }
-        this.values = GRAPH_FACTORY.createList(size);
+        if (size > this.values.size() || size < this.values.size() / 2) {
+            this.values = GRAPH_FACTORY.createList(size);
+        } else {
+            this.values.clear();
+        }
+
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
             T value = (T) VALUE_FACTORY.createValue(this.elemType);
@@ -184,7 +202,6 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
     @Override
     public String toString() {
-        return String.format("ListValue{elemType=%s" + ", size=%s}",
-                             this.elemType, this.values.size());
+        return this.values.toString();
     }
 }

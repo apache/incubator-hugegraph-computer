@@ -24,38 +24,46 @@ import com.baidu.hugegraph.computer.core.common.SerialEnum;
 
 public enum ValueType implements SerialEnum {
 
-    UNKNOWN(-1, -1),
-    NULL(1, 0),
-    BOOLEAN(2, 1),
-    INT(3, 4),
-    LONG(4, 8),
-    FLOAT(5, 4),
-    DOUBLE(6, 8),
-    ID_VALUE(20, -1),
-    ID_VALUE_LIST(30, -1),
-    ID_VALUE_LIST_LIST(40, -1),
-    LIST_VALUE(80, -1),
-    CUSTOM_VALUE(100, -1);
+    UNKNOWN(-1, -1, "unknown"),
+    NULL(1, 0, "null"),
+    BOOLEAN(2, 1, "bool"),
+    INT(3, 4, "int"),
+    LONG(4, 8, "long"),
+    FLOAT(5, 4, "float"),
+    DOUBLE(6, 8, "double"),
+    ID_VALUE(20, -1, "id"),
+    ID_VALUE_LIST(30, -1, "idlist"),
+    ID_VALUE_LIST_LIST(40, -1, "idlistlist"),
+    LIST_VALUE(80, -1, "list"),
+    CUSTOM_VALUE(100, -1, "custom");
 
-    private byte code;
-    // Is it a fixed value type, -1 means not fixed.
-    private int byteSize;
+    private final byte code;
+    // Length in bytes if it's a fixed value type, -1 means not fixed.
+    private final int byteSize;
+    // Name of this value type
+    private final String name;
 
     static {
         SerialEnum.register(ValueType.class);
     }
 
-    ValueType(int code, int byteSize) {
+    ValueType(int code, int byteSize, String name) {
         assert code >= -128 && code <= 127;
         this.code = (byte) code;
         this.byteSize = byteSize;
+        this.name = name;
     }
 
+    @Override
     public byte code() {
         return this.code;
     }
 
     public int byteSize() {
         return this.byteSize;
+    }
+
+    public String string() {
+        return this.name;
     }
 }

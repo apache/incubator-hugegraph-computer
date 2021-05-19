@@ -45,13 +45,23 @@ public class NullValue implements Value<NullValue> {
     }
 
     @Override
+    public void assign(Value<NullValue> other) {
+        this.checkAssign(other);
+    }
+
+    @Override
+    public NullValue copy() {
+        return this;
+    }
+
+    @Override
     public void write(RandomAccessOutput out) throws IOException {
-        // Do nothing
+        // pass
     }
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        // Do nothing
+        // pass
     }
 
     @Override

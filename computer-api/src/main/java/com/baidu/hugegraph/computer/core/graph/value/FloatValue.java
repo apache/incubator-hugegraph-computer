@@ -55,6 +55,17 @@ public class FloatValue implements Value<FloatValue> {
     }
 
     @Override
+    public void assign(Value<FloatValue> other) {
+        this.checkAssign(other);
+        this.value = ((FloatValue) other).value;
+    }
+
+    @Override
+    public FloatValue copy() {
+        return new FloatValue(this.value);
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readFloat();
     }

@@ -22,41 +22,293 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 
 public class ListValueTest extends UnitTestBase {
 
     @Test
-    public void test() {
-        ListValue<IntValue> listValue1 = new ListValue<>(ValueType.INT);
-        ListValue<IntValue> listValue2 = new ListValue<>(ValueType.INT);
+    public void testType() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
 
-        listValue1.add(new IntValue(100));
-        listValue2.add(new IntValue(100));
+        Assert.assertEquals(ValueType.LIST_VALUE, value1.type());
+        Assert.assertEquals(ValueType.LIST_VALUE, value2.type());
+    }
 
-        Assert.assertEquals(ValueType.LIST_VALUE, listValue1.type());
-        Assert.assertEquals(ValueType.INT, listValue1.elemType());
-        Assert.assertEquals(new IntValue(100), listValue1.get(0));
-        Assert.assertEquals(1, listValue1.size());
-        Assert.assertTrue(ListUtils.isEqualList(
-                          Lists.newArrayList(new IntValue(100)),
-                          listValue1.values()));
-        Assert.assertEquals(listValue1, listValue2);
+    @Test
+    public void testElemType() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
 
-        listValue2.add(new IntValue(200));
-        Assert.assertTrue(ListUtils.isEqualList(
-                          Lists.newArrayList(new IntValue(100),
-                                             new IntValue(200)),
-                          listValue2.values()));
-        Assert.assertNotEquals(listValue1, listValue2);
-        Assert.assertEquals(ListUtils.hashCodeForList(
-                            Lists.newArrayList(new IntValue(100))),
-                            listValue1.hashCode());
+        Assert.assertEquals(ValueType.INT, value1.elemType());
+        Assert.assertEquals(ValueType.FLOAT, value2.elemType());
+    }
+
+    @Test
+    public void testAdd() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        Assert.assertEquals(0, value1.size());
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+        Assert.assertEquals(3, value1.size());
+
+        Assert.assertEquals(0, value2.size());
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+        Assert.assertEquals(2, value2.size());
+
+        ListValue<Value<?>> value3 = new ListValue<>(ValueType.FLOAT);
+        value3.add(new FloatValue(301f));
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            value3.add(new IntValue(303));
+        }, e -> {
+            Assert.assertContains("Invalid value '303' with type int",
+                                  e.getMessage());
+            Assert.assertContains("expect element with type float",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            value3.add(null);
+        }, e -> {
+            Assert.assertContains("Can't add null to list",
+                                  e.getMessage());
+        });
+
+        ListValue<Value<?>> value4 = new ListValue<>(ValueType.UNKNOWN);
+        Assert.assertEquals(ValueType.UNKNOWN, value4.elemType());
+        value4.add(new IntValue(303));
+        Assert.assertEquals(ValueType.INT, value4.elemType());
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            value4.add(new FloatValue(303f));
+        }, e -> {
+            Assert.assertContains("expect element with type int",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            value4.add(null);
+        }, e -> {
+            Assert.assertContains("Can't add null to list",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testGet() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        Assert.assertEquals(0, value1.size());
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+        Assert.assertEquals(3, value1.size());
+
+        Assert.assertEquals(0, value2.size());
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+        Assert.assertEquals(2, value2.size());
+
+        Assert.assertEquals(101, value1.get(0).value());
+        Assert.assertEquals(102, value1.get(1).value());
+        Assert.assertEquals(103, value1.get(2).value());
+
+        Assert.assertEquals(201f, value2.get(0).value(), 0f);
+        Assert.assertEquals(202f, value2.get(1).value(), 0f);
+
+        Assert.assertThrows(IndexOutOfBoundsException.class, () -> {
+            value1.get(3);
+        }, e -> {
+            Assert.assertContains("Index: 3, Size: 3", e.getMessage());
+        });
+
+        Assert.assertThrows(IndexOutOfBoundsException.class, () -> {
+            value2.get(3);
+        }, e -> {
+            Assert.assertContains("Index: 3, Size: 2", e.getMessage());
+        });
+    }
+
+    @Test
+    public void testGetLast() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+
+        Assert.assertThrows(NoSuchElementException.class, () -> {
+            value1.getLast();
+        }, e -> {
+            Assert.assertContains("The list is empty", e.getMessage());
+        });
+
+        value1.add(new IntValue(100));
+        Assert.assertEquals(100, value1.getLast().value());
+
+        value1.add(new IntValue(200));
+        Assert.assertEquals(200, value1.getLast().value());
+    }
+
+    @Test
+    public void testContains() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        value1.add(new IntValue(100));
+        value1.add(new IntValue(200));
+        Assert.assertTrue(value1.contains(new IntValue(100)));
+        Assert.assertTrue(value1.contains(new IntValue(200)));
+        Assert.assertFalse(value1.contains(new IntValue(300)));
+    }
+
+    @Test
+    public void testSize() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        Assert.assertEquals(0, value1.size());
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+        Assert.assertEquals(3, value1.size());
+
+        Assert.assertEquals(0, value2.size());
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+        Assert.assertEquals(2, value2.size());
+    }
+
+    @Test
+    public void testValues() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        Assert.assertEquals(ImmutableList.of(), value1.values());
+        Assert.assertEquals(ImmutableList.of(), value2.values());
+
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+
+        Assert.assertEquals(ImmutableList.of(new IntValue(101),
+                                             new IntValue(102),
+                                             new IntValue(103)),
+                            value1.values());
+
+        Assert.assertEquals(ImmutableList.of(new FloatValue(201f),
+                                             new FloatValue(202f)),
+                            value2.values());
+    }
+
+    @Test
+    public void testAssign() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+
+        ListValue<IntValue> value3 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value4 = new ListValue<>(ValueType.FLOAT);
+        Assert.assertEquals(ImmutableList.of(), value3.values());
+        Assert.assertEquals(ImmutableList.of(), value4.values());
+
+        Assert.assertNotEquals(value1, value3);
+        value3.assign(value1);
+        Assert.assertEquals(value1, value3);
+
+        /*
+         * NOTE: updating value1 lead to value3 to change
+         * TODO: should keep value1 unmodifiable and let value3 modifiable?
+         */
+        Assert.assertEquals(3, value3.size());
+        value1.add(new IntValue(104));
+        Assert.assertEquals(4, value1.size());
+        Assert.assertEquals(4, value3.size());
+
+        Assert.assertNotEquals(value2, value4);
+        value4.assign(value2);
+        Assert.assertEquals(value2, value4);
+
+        Assert.assertThrows(UnsupportedOperationException.class, () -> {
+            value4.add(new FloatValue(203f));
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Value<ListValue<IntValue>> v = (Value) value2;
+            value3.assign(v);
+        }, e -> {
+            Assert.assertContains("Can't assign list<float> to list<int>",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Value<ListValue<FloatValue>> v = (Value) value1;
+            value4.assign(v);
+        }, e -> {
+            Assert.assertContains("Can't assign list<int> to list<float>",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Value<ListValue<IntValue>> v = (Value) new IntValue();
+            value3.assign(v);
+        }, e -> {
+            Assert.assertContains("Can't assign '0'(IntValue) to ListValue",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            @SuppressWarnings({ "unchecked", "rawtypes" })
+            Value<ListValue<FloatValue>> v = (Value) new LongValue();
+            value4.assign(v);
+        }, e -> {
+            Assert.assertContains("Can't assign '0'(LongValue) to ListValue",
+                                  e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            value2.assign(null);
+        }, e -> {
+            Assert.assertContains("Can't assign null to ListValue",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testCopy() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        value1.add(new IntValue(100));
+        value1.add(new IntValue(200));
+
+        ListValue<IntValue> value2 = value1.copy();
+        Assert.assertEquals(value1, value2);
+
+        value2.add(new IntValue(300));
+
+        Assert.assertEquals(3, value2.size());
+        Assert.assertEquals(100, value2.get(0).value());
+        Assert.assertEquals(200, value2.get(1).value());
+        Assert.assertEquals(300, value2.get(2).value());
+
+        Assert.assertEquals(2, value1.size());
+        Assert.assertEquals(100, value1.get(0).value());
+        Assert.assertEquals(200, value1.get(1).value());
     }
 
     @Test
@@ -84,45 +336,65 @@ public class ListValueTest extends UnitTestBase {
     }
 
     @Test
-    public void testCopy() {
+    public void testEquals() {
         ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
-        value1.add(new IntValue(100));
-        value1.add(new IntValue(200));
-        ListValue<IntValue> value2 = value1.copy();
-        Assert.assertEquals(value1, value2);
-        value2.add(new IntValue(300));
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
 
-        Assert.assertEquals(3, value2.size());
-        Assert.assertTrue(value2.contains(new IntValue(100)));
-        Assert.assertTrue(value2.contains(new IntValue(200)));
-        Assert.assertTrue(value2.contains(new IntValue(300)));
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
 
-        Assert.assertEquals(2, value1.size());
-        Assert.assertTrue(value1.contains(new IntValue(100)));
-        Assert.assertTrue(value1.contains(new IntValue(200)));
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+
+        Assert.assertTrue(value1.equals(value1));
+        Assert.assertTrue(value2.equals(value2));
+
+        Assert.assertTrue(value1.equals(value1.copy()));
+        Assert.assertTrue(value2.equals(value2.copy()));
+
+        Assert.assertFalse(value1.equals(value2));
+        Assert.assertFalse(value2.equals(value1));
+
+        Assert.assertFalse(value1.equals(new IntValue(1)));
+        Assert.assertFalse(value1.equals(null));
     }
 
     @Test
-    public void testContains() {
+    public void testHashCode() {
         ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
-        value1.add(new IntValue(100));
-        value1.add(new IntValue(200));
-        Assert.assertTrue(value1.contains(new IntValue(100)));
-        Assert.assertTrue(value1.contains(new IntValue(200)));
-        Assert.assertFalse(value1.contains(new IntValue(300)));
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        Assert.assertEquals(1, value1.hashCode());
+        Assert.assertEquals(1, value2.hashCode());
+
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+
+        Assert.assertEquals(130117, value1.hashCode());
+        Assert.assertEquals(1763771329, value2.hashCode());
     }
 
     @Test
-    public void testGetLast() {
+    public void testToString() {
         ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
-        Assert.assertThrows(NoSuchElementException.class, () -> {
-            value1.getLast();
-        }, e -> {
-            Assert.assertContains("The list value is empty", e.getMessage());
-        });
-        value1.add(new IntValue(100));
-        Assert.assertTrue(value1.getLast().equals(new IntValue(100)));
-        value1.add(new IntValue(200));
-        Assert.assertTrue(value1.getLast().equals(new IntValue(200)));
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        Assert.assertEquals("[]", value1.toString());
+        Assert.assertEquals("[]", value2.toString());
+
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+
+        Assert.assertEquals("[101, 102, 103]", value1.toString());
+        Assert.assertEquals("[201.0, 202.0]", value2.toString());
     }
 }

@@ -55,6 +55,17 @@ public class DoubleValue implements Value<DoubleValue> {
     }
 
     @Override
+    public void assign(Value<DoubleValue> other) {
+        this.checkAssign(other);
+        this.value = ((DoubleValue) other).value;
+    }
+
+    @Override
+    public DoubleValue copy() {
+        return new DoubleValue(this.value);
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readDouble();
     }

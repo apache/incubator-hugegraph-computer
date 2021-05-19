@@ -37,13 +37,16 @@ public class IdValue implements Value<IdValue> {
     private int length;
 
     public IdValue() {
-        this.bytes = EMPTY_BYTES;
-        this.length = 0;
+        this(EMPTY_BYTES, 0);
     }
 
     public IdValue(byte[] bytes) {
+        this(bytes, bytes.length);
+    }
+
+    public IdValue(byte[] bytes, int length) {
         this.bytes = bytes;
-        this.length = bytes.length;
+        this.length = length;
     }
 
     public byte[] bytes() {
@@ -57,6 +60,18 @@ public class IdValue implements Value<IdValue> {
     @Override
     public ValueType type() {
         return ValueType.ID_VALUE;
+    }
+
+    @Override
+    public void assign(Value<IdValue> other) {
+        this.checkAssign(other);
+        this.bytes = ((IdValue) other).bytes;
+        this.length = ((IdValue) other).length;
+    }
+
+    @Override
+    public IdValue copy() {
+        return new IdValue(this.bytes, this.length);
     }
 
     @Override

@@ -19,20 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
+import com.baidu.hugegraph.util.E;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    OverwriteCombinerTest.class,
-    MergeOldPropertiesCombinerTest.class,
-    MergeNewPropertiesCombinerTest.class,
-    IntValueSumCombinerTest.class,
-    LongValueSumCombinerTest.class,
-    FloatValueSumCombinerTest.class,
-    DoubleValueSumCombinerTest.class,
-    ValueMinCombinerTest.class,
-    ValueMaxCombinerTest.class
-})
-public class CombinerTestSuite {
+public class FloatValueSumCombiner implements Combiner<FloatValue> {
+
+    @Override
+    public FloatValue combine(FloatValue v1, FloatValue v2) {
+        E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
+        E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
+        v2.value(v1.value() + v2.value());
+        return v2;
+    }
 }
