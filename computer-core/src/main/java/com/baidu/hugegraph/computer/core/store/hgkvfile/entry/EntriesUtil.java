@@ -46,7 +46,7 @@ public final class EntriesUtil {
     }
 
     public static EntryIterator subKvIterFromEntry(KvEntry entry) {
-        return new SubKvIterator(entry);
+        return new SubKvIterator(entry, true);
     }
 
     private static class SubKvIterator implements EntryIterator {
@@ -54,15 +54,21 @@ public final class EntriesUtil {
         private final RandomAccessInput input;
         private final RandomAccessInput useAccessInput;
         private long size;
+        private final boolean useInlinePointer;
 
-        public SubKvIterator(KvEntry kvEntry) {
+        public SubKvIterator(KvEntry kvEntry, boolean useInlinePointer) {
             try {
                 this.input = new UnsafeBytesInput(kvEntry.value().bytes());
                 this.useAccessInput = this.input.duplicate();
                 this.size = this.input.readInt();
+                this.useInlinePointer = useInlinePointer;
             } catch (IOException e) {
                 throw new ComputerException(e.getMessage(), e);
             }
+        }
+
+        public SubKvIterator(KvEntry kvEntry) {
+            this(kvEntry, true);
         }
 
         @Override
@@ -78,7 +84,7 @@ public final class EntriesUtil {
 
             this.size--;
             return EntriesUtil.entryFromInput(this.input, this.useAccessInput,
-                                              true);
+                                              this.useInlinePointer);
         }
 
         @Override
@@ -90,12 +96,12 @@ public final class EntriesUtil {
 
     public static KvEntry entryFromInput(RandomAccessInput input,
                                          RandomAccessInput userAccessInput,
-                                         boolean useCachedPointer) {
+                                         boolean useInlinePointer) {
         try {
-            if (useCachedPointer) {
-                return cachedPointerKvEntry(input, userAccessInput);
-            } else {
+            if (useInlinePointer) {
                 return inlinePointerKvEntry(input);
+            } else {
+                return cachedPointerKvEntry(input, userAccessInput);
             }
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
@@ -103,8 +109,8 @@ public final class EntriesUtil {
     }
 
     public static KvEntry entryFromInput(RandomAccessInput input,
-                                         boolean useCachedPointer) {
-        return entryFromInput(input, input, useCachedPointer);
+                                         boolean useInlinePointer) {
+        return entryFromInput(input, input, useInlinePointer);
     }
     
     private static KvEntry cachedPointerKvEntry(
@@ -121,11 +127,10 @@ public final class EntriesUtil {
         long valuePosition = input.position();
         input.skip(valueLength);
         
-        Pointer key, value;
-        key = new CachedPointer(userAccessInput, keyPosition,
-                                keyLength);
-        value = new CachedPointer(userAccessInput, valuePosition,
-                                  valueLength);
+        Pointer key = new CachedPointer(userAccessInput, keyPosition,
+                                        keyLength);
+        Pointer value = new CachedPointer(userAccessInput, valuePosition,
+                                          valueLength);
         
         return new DefaultKvEntry(key, value);
     }
@@ -152,7 +157,7 @@ public final class EntriesUtil {
                                       entry.value().bytes());
             // Skip sub-entry size
             input.skip(Integer.BYTES);
-            KvEntry firstSubKv = EntriesUtil.entryFromInput(input, false);
+            KvEntry firstSubKv = EntriesUtil.entryFromInput(input, true);
 
             return new KvEntryWithFirstSubKv(entry.key(), entry.value(),
                                              firstSubKv);

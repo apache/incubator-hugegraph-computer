@@ -29,12 +29,12 @@ public class HgkvDir4SubKvReaderImpl implements HgkvDirReader {
 
     private final HgkvDirReader reader;
 
-    public HgkvDir4SubKvReaderImpl(String path, boolean useCachedPointer) {
-        this.reader = new HgkvDirReaderImpl(path, useCachedPointer);
+    public HgkvDir4SubKvReaderImpl(String path, boolean useInlinePointer) {
+        this.reader = new HgkvDirReaderImpl(path, useInlinePointer);
     }
 
     public HgkvDir4SubKvReaderImpl(String path) {
-        this(path, false);
+        this(path, true);
     }
 
     @Override

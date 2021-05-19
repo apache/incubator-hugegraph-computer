@@ -46,16 +46,15 @@ import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Bytes;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class LargeDataSizeTest {
@@ -81,7 +80,7 @@ public class LargeDataSizeTest {
 
         final long bufferSize = Bytes.MB;
         final int mergeBufferNum = 300;
-        final int dataSize = 1000000;
+        final int dataSize = 100000000;
         long value = 0;
 
         Random random = new Random();
@@ -117,14 +116,14 @@ public class LargeDataSizeTest {
         }
 
         // Merge file
-        String resultFile1 = availableDirPath("0");
-        mergeFiles(sorter, mergeBufferFiles, Lists.newArrayList(resultFile1));
+        String resultFile = availableDirPath("0");
+        mergeFiles(sorter, mergeBufferFiles, Lists.newArrayList(resultFile));
 
         watcher.stop();
         LOGGER.info(String.format("LargeDataSizeTest sort time: %s",
                                   watcher.getTime()));
 
-        long result = getFileValue(resultFile1);
+        long result = sumOfEntryValue(sorter, ImmutableList.of(resultFile));
         Assert.assertEquals(value, result);
     }
 
@@ -154,15 +153,16 @@ public class LargeDataSizeTest {
         sorter.mergeInputs(files, flusher, outputs, false);
     }
 
-    private static long getFileValue(String file) throws IOException {
-        HgkvDirReader reader = new HgkvDirReaderImpl(file);
-        EntryIterator iterator = reader.iterator();
-        long result = 0;
-        while (iterator.hasNext()) {
-            KvEntry next = iterator.next();
-            result += StoreTestUtil.dataFromPointer(next.value());
+    private static long sumOfEntryValue(Sorter sorter, List<String> files)
+                                        throws Exception {
+        try (PeekableIterator<KvEntry> iterator = sorter.iterator(files)) {
+            long result = 0;
+            while (iterator.hasNext()) {
+                KvEntry next = iterator.next();
+                result += StoreTestUtil.dataFromPointer(next.value());
+            }
+            return result;
         }
-        return result;
     }
 
     private static String availableDirPath(String id) {

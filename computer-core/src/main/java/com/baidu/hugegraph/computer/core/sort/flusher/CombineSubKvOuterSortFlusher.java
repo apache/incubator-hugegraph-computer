@@ -103,7 +103,7 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
                     // Write kvEntry to file.
                     RandomAccessInput input = EntriesUtil.inputFromOutput(
                                                           this.output);
-                    writer.write(EntriesUtil.entryFromInput(input, false));
+                    writer.write(EntriesUtil.entryFromInput(input, true));
                     this.output.seek(0);
 
                     if (current == null) {

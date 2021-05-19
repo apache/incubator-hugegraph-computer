@@ -29,9 +29,15 @@ public class EntriesSubKvInput implements EntryIterator {
 
     private final CIter<KvEntry> entries;
 
+    public EntriesSubKvInput(RandomAccessInput input,
+                             boolean useInlinePointer) {
+        this.entries = new MapperIterator<>(
+                       new EntriesInput(input, useInlinePointer),
+                       EntriesUtil::kvEntryWithFirstSubKv);
+    }
+
     public EntriesSubKvInput(RandomAccessInput input) {
-        this.entries = new MapperIterator<>(new EntriesInput(input),
-                                            EntriesUtil::kvEntryWithFirstSubKv);
+        this(input, true);
     }
 
     @Override

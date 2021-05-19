@@ -33,17 +33,21 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 public class HgkvFileReaderImpl implements HgkvFileReader {
 
     private final HgkvFile hgkvFile;
-    private final boolean useCachedPointer;
+    private final boolean useInlinePointer;
 
-    public HgkvFileReaderImpl(String path, boolean useCachedPointer)
+    public HgkvFileReaderImpl(String path, boolean useInlinePointer)
                               throws IOException {
         this.hgkvFile = HgkvFileImpl.open(path);
-        this.useCachedPointer = useCachedPointer;
+        this.useInlinePointer = useInlinePointer;
+    }
+
+    public HgkvFileReaderImpl(String path) throws IOException {
+        this(path, true);
     }
 
     @Override
     public EntryIterator iterator() throws IOException {
-        return new EntryIter(this.hgkvFile, this.useCachedPointer);
+        return new EntryIter(this.hgkvFile, this.useInlinePointer);
     }
 
     private static class EntryIter implements EntryIterator {
@@ -51,15 +55,15 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
         private final BufferedFileInput input;
         private final BufferedFileInput userAccessInput;
         private long numEntries;
-        private final boolean useCachedPointer;
+        private final boolean useInlinePointer;
 
-        public EntryIter(HgkvFile hgkvFile, boolean useCachedPointer)
+        public EntryIter(HgkvFile hgkvFile, boolean useInlinePointer)
                          throws IOException {
             this.numEntries = hgkvFile.numEntries();
             File file = new File(hgkvFile.path());
             this.input = new BufferedFileInput(file);
             this.userAccessInput = this.input.duplicate();
-            this.useCachedPointer = useCachedPointer;
+            this.useInlinePointer = useInlinePointer;
         }
 
         @Override
@@ -76,7 +80,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
             this.numEntries--;
             return EntriesUtil.entryFromInput(this.input,
                                               this.userAccessInput,
-                                              this.useCachedPointer);
+                                              this.useInlinePointer);
         }
 
         @Override

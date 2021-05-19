@@ -106,7 +106,7 @@ public class SorterImpl implements Sorter {
         InputsSorterImpl sorter = new InputsSorterImpl();
         List<EntryIterator> entries = new ArrayList<>();
         for (String input : inputs) {
-            HgkvDirReader reader = new HgkvDirReaderImpl(input, true);
+            HgkvDirReader reader = new HgkvDirReaderImpl(input, false);
             entries.add(reader.iterator());
         }
         return PeekableIteratorAdaptor.of(sorter.sort(entries));
