@@ -31,4 +31,14 @@ public interface MessageHandler extends TransportHandler {
      * sorting in process.
      */
     void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+
+    /**
+     * Notice start session completed.
+     */
+    void onStarted(ConnectionId connectionId);
+
+    /**
+     * Notice finish session completed.
+     */
+    void onFinished(ConnectionId connectionId);
 }

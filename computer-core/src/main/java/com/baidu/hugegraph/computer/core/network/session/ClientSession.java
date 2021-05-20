@@ -21,6 +21,9 @@ package com.baidu.hugegraph.computer.core.network.session;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -37,8 +40,8 @@ import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
-import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.util.E;
+import com.google.common.util.concurrent.SettableFuture;
 
 public class ClientSession extends TransportSession {
 
@@ -47,8 +50,8 @@ public class ClientSession extends TransportSession {
 
     private final Lock lock;
     private volatile boolean flowBlocking;
-    private final BarrierEvent startedBarrier;
-    private final BarrierEvent finishedBarrier;
+    private final AtomicReference<SettableFuture<Boolean>> startedFutureRef;
+    private final AtomicReference<SettableFuture<Boolean>> finishedFutureRef;
     private final Function<Message, Future<Void>> sendFunction;
 
     public ClientSession(TransportConf conf,
@@ -58,8 +61,8 @@ public class ClientSession extends TransportSession {
         this.minPendingRequests = this.conf.minPendingRequests();
         this.lock = new ReentrantLock();
         this.flowBlocking = false;
-        this.startedBarrier = new BarrierEvent();
-        this.finishedBarrier = new BarrierEvent();
+        this.startedFutureRef = new AtomicReference<>();
+        this.finishedFutureRef = new AtomicReference<>();
         this.sendFunction = sendFunction;
     }
 
@@ -79,33 +82,72 @@ public class ClientSession extends TransportSession {
         this.state = TransportState.FINISH_SENT;
     }
 
-    public synchronized void start(long timeout) throws TransportException,
-                                                        InterruptedException {
+    public synchronized void start(long timeout) throws TransportException {
+        Future<Boolean> startFuture = startAsync();
+        try {
+            startFuture.get(timeout, TimeUnit.MILLISECONDS);
+        } catch (Throwable e) {
+            this.stateReady();
+            if (e instanceof TimeoutException) {
+                throw new TransportException(
+                          "Timeout(%sms) to wait start-response", timeout);
+            } else {
+                throw new TransportException("Failed to wait start-response",
+                                             e);
+            }
+        } finally {
+            startFuture.cancel(false);
+            this.startedFutureRef
+                .compareAndSet((SettableFuture<Boolean>) startFuture, null);
+        }
+    }
+
+    public synchronized Future<Boolean> startAsync() {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
                         "at start()", this.state);
 
+        SettableFuture<Boolean> startedFuture = SettableFuture.create();
+        this.startedFutureRef.set(startedFuture);
+
         this.stateStartSent();
         try {
             this.sendFunction.apply(StartMessage.INSTANCE);
-
-            if (!this.startedBarrier.await(timeout)) {
-                throw new TransportException(
-                          "Timeout(%sms) to wait start-response", timeout);
-            }
         } catch (Throwable e) {
             this.stateReady();
+            startedFuture.cancel(false);
+            this.startedFutureRef.compareAndSet(startedFuture, null);
             throw e;
+        }
+        return startedFuture;
+    }
+
+    public synchronized void finish(long timeout) throws TransportException {
+        Future<Boolean> finishFuture = finishAsync();
+        try {
+            finishFuture.get(timeout, TimeUnit.MILLISECONDS);
+        } catch (Throwable e) {
+            this.stateEstablished();
+            if (e instanceof TimeoutException) {
+                throw new TransportException(
+                      "Timeout(%sms) to wait finish-response", timeout);
+            } else {
+                throw new TransportException("Failed to wait finish-response",
+                                             e);
+            }
         } finally {
-            this.startedBarrier.reset();
+            this.finishedFutureRef
+                .compareAndSet((SettableFuture<Boolean>) finishFuture, null);
         }
     }
 
-    public synchronized void finish(long timeout) throws TransportException,
-                                                         InterruptedException {
+    public synchronized Future<Boolean> finishAsync() {
         E.checkArgument(this.state == TransportState.ESTABLISHED,
                         "The state must be ESTABLISHED instead of %s " +
                         "at finish()", this.state);
+
+        SettableFuture<Boolean> finishedFuture = SettableFuture.create();
+        this.finishedFutureRef.set(finishedFuture);
 
         int finishId = this.genFinishId();
 
@@ -113,17 +155,14 @@ public class ClientSession extends TransportSession {
         try {
             FinishMessage finishMessage = new FinishMessage(finishId);
             this.sendFunction.apply(finishMessage);
-
-            if (!this.finishedBarrier.await(timeout)) {
-                throw new TransportException(
-                          "Timeout(%sms) to wait finish-response", timeout);
-            }
         } catch (Throwable e) {
             this.stateEstablished();
+            finishedFuture.cancel(false);
+            this.finishedFutureRef.compareAndSet(finishedFuture, null);
             throw e;
-        } finally {
-            this.finishedBarrier.reset();
         }
+
+        return finishedFuture;
     }
 
     public synchronized void sendAsync(MessageType messageType, int partition,
@@ -175,7 +214,11 @@ public class ClientSession extends TransportSession {
 
         this.stateEstablished();
 
-        this.startedBarrier.signalAll();
+        SettableFuture<Boolean> settableFuture = this.startedFutureRef.get();
+        if (settableFuture != null && !settableFuture.isCancelled()) {
+            settableFuture.set(true);
+            this.startedFutureRef.compareAndSet(settableFuture, null);
+        }
     }
 
     private void onRecvFinishAck() {
@@ -185,7 +228,11 @@ public class ClientSession extends TransportSession {
 
         this.stateReady();
 
-        this.finishedBarrier.signalAll();
+        SettableFuture<Boolean> finishedFuture = this.finishedFutureRef.get();
+        if (finishedFuture != null && !finishedFuture.isCancelled()) {
+            finishedFuture.set(true);
+            this.finishedFutureRef.compareAndSet(finishedFuture, null);
+        }
     }
 
     private void onRecvDataAck(int ackId) {

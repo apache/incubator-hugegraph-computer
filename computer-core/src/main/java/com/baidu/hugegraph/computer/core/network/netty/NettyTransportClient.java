@@ -110,16 +110,17 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
+    public Future<Boolean> startSessionAsync() {
+        return this.session.startAsync();
+    }
+
+    @Override
     public void startSession() throws TransportException {
         this.startSession(this.syncRequestTimeout);
     }
 
     private void startSession(long timeout) throws TransportException {
-        try {
-            this.session.start(timeout);
-        } catch (InterruptedException e) {
-            throw new TransportException("Interrupted while start session", e);
-        }
+        this.session.start(timeout);
     }
 
     @Override
@@ -133,16 +134,17 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
+    public Future<Boolean> finishSessionAsync() {
+        return this.session.finishAsync();
+    }
+
+    @Override
     public void finishSession() throws TransportException {
         this.finishSession(this.finishSessionTimeout);
     }
 
     private void finishSession(long timeout) throws TransportException {
-        try {
-            this.session.finish(timeout);
-        } catch (InterruptedException e) {
-            throw new TransportException("Interrupted while finish session", e);
-        }
+        this.session.finish(timeout);
     }
 
     protected boolean checkSendAvailable() {

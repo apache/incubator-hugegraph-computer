@@ -43,6 +43,18 @@ public class MockMessageHandler implements MessageHandler {
     }
 
     @Override
+    public void onStarted(ConnectionId connectionId) {
+        LOG.info("Start session completed, connectionId: {}",
+                 connectionId);
+    }
+
+    @Override
+    public void onFinished(ConnectionId connectionId) {
+        LOG.info("Finish session completed, connectionId: {}",
+                 connectionId);
+    }
+
+    @Override
     public void channelActive(ConnectionId connectionId) {
         LOG.info("Server channel active, connectionId: {}", connectionId);
     }
