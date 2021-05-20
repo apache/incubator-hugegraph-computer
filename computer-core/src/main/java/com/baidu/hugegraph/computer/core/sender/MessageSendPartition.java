@@ -17,23 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.edge;
+package com.baidu.hugegraph.computer.core.sender;
 
-import com.baidu.hugegraph.computer.core.allocator.Recyclable;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 
-public interface Edge extends Recyclable {
+public class MessageSendPartition {
 
-    String label();
+    // Any object else?
+    private final WriteBuffers buffer;
 
-    Id targetId();
+    public MessageSendPartition(ComputerContext context) {
+        Config config = context.config();
+        int threshold = config.get(ComputerOptions.WRITE_BUFFER_THRESHOLD);
+        int capacity = config.get(ComputerOptions.WRITE_BUFFER_CAPACITY);
+        this.buffer = new WriteBuffers(threshold, capacity);
+    }
 
-    String name();
-
-    void targetId(Id targetId);
-
-    Properties properties();
-
-    void properties(Properties properties);
+    public WriteBuffers writeBuffer() {
+        return this.buffer;
+    }
 }

@@ -19,11 +19,26 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
+/**
+ * The frequency of edges can exist between two vertices
+ */
 public enum EdgeFrequency {
 
+    /**
+     * Only one edge can exist between two vertices,
+     * use sourceId + target to identify it.
+     */
     SINGLE,
 
+    /**
+     * Each edge label can exist one edge between two vertices ,
+     * use sourceId + edgelabel + target to identify it.
+     */
     SINGLE_PER_LABEL,
 
-    MULTI
+    /**
+     * Multiple edge can exist between two vertices,
+     * use sourceId + edgelabel + sortValues + target to identify it.
+     */
+    MULTIPLE
 }

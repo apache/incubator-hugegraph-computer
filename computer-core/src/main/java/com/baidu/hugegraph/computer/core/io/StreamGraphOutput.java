@@ -44,15 +44,14 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
-        ComputerContext context = ComputerContext.instance();
         // Write necessary
         this.writeId(vertex.id());
         this.writeValue(vertex.value());
 
-        if (context.config().outputVertexAdjacentEdges()) {
+        if (this.config.outputVertexAdjacentEdges()) {
             this.writeEdges(vertex.edges());
         }
-        if (context.config().outputVertexProperties()) {
+        if (this.config.outputVertexProperties()) {
             this.writeProperties(vertex.properties());
         }
     }
@@ -75,11 +74,8 @@ public class StreamGraphOutput implements GraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ComputerContext context = ComputerContext.instance();
         // Write necessary
         this.writeId(edge.targetId());
-        this.writeValue(edge.value());
 
         if (this.config.outputEdgeProperties()) {
             this.writeProperties(edge.properties());

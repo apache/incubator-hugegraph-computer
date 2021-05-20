@@ -17,39 +17,43 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.worker;
+package com.baidu.hugegraph.computer.core.sender;
 
 import java.nio.ByteBuffer;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
-public class SortedBufferEvent {
+public class SortedBufferQueue {
 
-    public static final SortedBufferEvent START = new SortedBufferEvent(-1,
-                                                  MessageType.START, null);
-    public static final SortedBufferEvent END = new SortedBufferEvent(-1,
-                                                MessageType.FINISH, null);
+    private final Queue<SortedBufferMessage> queue;
+    private final Runnable notifyNotEmpty;
 
-    private final int partitionId;
-    private final MessageType type;
-    private final ByteBuffer buffer;
-
-    public SortedBufferEvent(int partitionId, MessageType type,
-                             ByteBuffer buffer) {
-        this.type = type;
-        this.partitionId = partitionId;
-        this.buffer = buffer;
+    public SortedBufferQueue(Runnable notifyNotEmpty) {
+        // TODO: replace with conversant queue
+        this.queue = new LinkedBlockingQueue<>(128);
+        this.notifyNotEmpty = notifyNotEmpty;
     }
 
-    public int partitionId() {
-        return this.partitionId;
+    public boolean isEmpty() {
+        return this.queue.isEmpty();
     }
 
-    public MessageType messageType() {
-        return this.type;
+    public void offer(int partitionId, MessageType type, ByteBuffer buffer) {
+        this.offer(new SortedBufferMessage(partitionId, type, buffer));
     }
 
-    public ByteBuffer sortedBuffer() {
-        return this.buffer;
+    public void offer(SortedBufferMessage event) {
+        this.queue.offer(event);
+        this.notifyNotEmpty.run();
+    }
+
+    public SortedBufferMessage peek() {
+        return this.queue.peek();
+    }
+
+    public SortedBufferMessage poll() {
+        return this.queue.poll();
     }
 }

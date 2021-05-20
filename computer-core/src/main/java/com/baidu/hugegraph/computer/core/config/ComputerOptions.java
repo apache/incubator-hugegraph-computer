@@ -137,30 +137,41 @@ public class ComputerOptions extends OptionHolder {
                     DefaultInputFilter.class
             );
 
-    public static final ConfigConvOption<String, Direction> EDGE_DIRECTION =
-            new ConfigConvOption<>(
+    public static final ConfigConvOption<String, Direction>
+            INPUT_EDGE_DIRECTION = new ConfigConvOption<>(
                     "input.edge_direction",
-                    "",
+                    "The data of the edge in which direction is loaded, " +
+                    "when the value is BOTH, the edges in both OUT and IN " +
+                    "direction will be loaded.",
                     allowValues("OUT", "IN", "BOTH"),
                     Direction::valueOf,
                     "OUT"
             );
 
     public static final ConfigConvOption<String, EdgeFrequency>
-            EDGE_FREQ_IN_VERTEX_PAIR = new ConfigConvOption<>(
-                    "input.edge_freq_in_vertex_pair",
-                    "",
+            INPUT_EDGE_FREQ = new ConfigConvOption<>(
+                    "input.edge_freq",
+                    "The frequency of edges can exist between two vertices.",
                     allowValues("SINGLE", "SINGLE_PER_LABEL", "MULTI"),
                     EdgeFrequency::valueOf,
                     "SINGLE"
             );
 
-    public static final ConfigOption<Integer> MAX_EDGES_IN_ONE_VERTEX =
+    public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
             new ConfigOption<>(
                     "input.max_edges_in_one_vertex",
-                    "",
+                    "The maximum number of edges allowed to be attached " +
+                    "to a vertex object.",
                     positiveInt(),
                     200
+            );
+
+    public static final ConfigOption<Integer> SORT_THREAD_NUMS =
+            new ConfigOption<>(
+                    "sort.thread_nums",
+                    "The number of threads performing internal sorting.",
+                    positiveInt(),
+                    4
             );
 
     public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =
@@ -205,8 +216,7 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static final ConfigOption<Integer>
-           ALLOCATOR_MAX_VERTICES_PER_THREAD =
-            new ConfigOption<>(
+           ALLOCATOR_MAX_VERTICES_PER_THREAD = new ConfigOption<>(
                     "allocator.max_vertices_per_thread",
                     "Maximum number of vertices per thread processed " +
                     "in each memory allocator",
@@ -366,11 +376,11 @@ public class ComputerOptions extends OptionHolder {
                     ImmutableList.of("jobs")
             );
 
-    public static final ConfigOption<Integer> WRITE_BUFFER_SIZE =
+    public static final ConfigOption<Integer> WRITE_BUFFER_THRESHOLD =
             new ConfigOption<>(
-                    "worker.write_buffer_size",
-                    "The maxium size of write buffer that used to store " +
-                    "vertex or message.",
+                    "worker.write_buffer_threshold",
+                    "The threshold of write buffer that used to store " +
+                    "vertex or message, exceeding it will trigger sorting.",
                     positiveInt(),
                     (int) (50 * Bytes.KB)
             );

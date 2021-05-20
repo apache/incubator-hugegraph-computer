@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.buffer;
+package com.baidu.hugegraph.computer.core.sender;
 
 import java.io.IOException;
 
@@ -27,20 +27,24 @@ import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
-public class WriteBuffer {
+public class WriteBuffers {
 
     // For writing
-    private BufferImpl writingBuffer;
+    private WriteBuffer writingBuffer;
     // For sorting
-    private BufferImpl sortingBuffer;
+    private WriteBuffer sortingBuffer;
 
-    public WriteBuffer(int size, int capacity) {
-        this.writingBuffer = new BufferImpl(size, capacity);
-        this.sortingBuffer = new BufferImpl(size, capacity);
+    public WriteBuffers(int size, int capacity) {
+        this.writingBuffer = new WriteBuffer(size, capacity);
+        this.sortingBuffer = new WriteBuffer(size, capacity);
     }
 
     public boolean reachThreshold() {
         return this.writingBuffer.reachThreshold();
+    }
+
+    public boolean isEmpty() {
+        return this.writingBuffer.isEmpty();
     }
 
     public void writeVertex(MessageType type, Vertex vertex)
@@ -65,12 +69,12 @@ public class WriteBuffer {
     }
 
     /**
-     * Can remove synchronized if VertexSendManager.finish() only called by
+     * Can remove synchronized if MessageSendManager.finish() only called by
      * single thread
      */
     public synchronized void prepareSorting() {
         // Swap the writing buffer and sorting buffer pointer
-        BufferImpl temp = this.writingBuffer;
+        WriteBuffer temp = this.writingBuffer;
         this.writingBuffer = this.sortingBuffer;
         this.sortingBuffer = temp;
     }

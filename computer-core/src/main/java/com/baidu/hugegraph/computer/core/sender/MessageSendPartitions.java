@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.buffer;
+package com.baidu.hugegraph.computer.core.sender;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,41 +30,39 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.util.Log;
 
-public class WriteBufferPool {
+public class MessageSendPartitions {
 
-    private static final Logger LOG = Log.logger(WriteBufferPool.class);
+    private static final Logger LOG = Log.logger(MessageSendPartitions.class);
 
-    // partitionId => buffer
-    private final WriteBuffer[] buffers;
+    // Each partition has a MessageSendPartition pbject
+    private final MessageSendPartition[] partitions;
 
-    public WriteBufferPool(ComputerContext context) {
+    public MessageSendPartitions(ComputerContext context) {
         Config config = context.config();
         int partitionCount = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
-        int size = config.get(ComputerOptions.WRITE_BUFFER_SIZE);
-        int capacity = config.get(ComputerOptions.WRITE_BUFFER_CAPACITY);
-        this.buffers = new WriteBuffer[partitionCount];
+        this.partitions = new MessageSendPartition[partitionCount];
         for (int i = 0; i < partitionCount; i++) {
             /*
              * It depends on the concrete implementation of the
              * partition algorithm, which is not elegant.
              */
-            this.buffers[i] = new WriteBuffer(size, capacity);
+            this.partitions[i] = new MessageSendPartition(context);
         }
     }
 
-    public WriteBuffer get(int partitionId) {
-        if (partitionId < 0 || partitionId >= this.buffers.length)  {
+    public MessageSendPartition get(int partitionId) {
+        if (partitionId < 0 || partitionId >= this.partitions.length)  {
             throw new ComputerException("Invalid partitionId %s", partitionId);
 
         }
-        return this.buffers[partitionId];
+        return this.partitions[partitionId];
     }
 
-    public Map<Integer, WriteBuffer> all() {
-        Map<Integer, WriteBuffer> all = new LinkedHashMap<>();
-        for (int partitionId = 0; partitionId < this.buffers.length;
+    public Map<Integer, MessageSendPartition> all() {
+        Map<Integer, MessageSendPartition> all = new LinkedHashMap<>();
+        for (int partitionId = 0; partitionId < this.partitions.length;
              partitionId++) {
-            all.put(partitionId, this.buffers[partitionId]);
+            all.put(partitionId, this.partitions[partitionId]);
         }
         return all;
     }

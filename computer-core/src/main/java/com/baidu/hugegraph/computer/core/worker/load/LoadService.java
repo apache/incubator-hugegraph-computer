@@ -45,7 +45,7 @@ import com.baidu.hugegraph.util.E;
 public class LoadService {
 
     private final GraphFactory graphFactory;
-    private Config config;
+    private final Config config;
     /*
      * GraphFetcher include:
      *   VertexFetcher vertexFetcher;
@@ -54,21 +54,20 @@ public class LoadService {
     private GraphFetcher fetcher;
     // Service proxy on the client
     private InputSplitRpcService rpcService;
-    private InputFilter inputFilter;
+    private final InputFilter inputFilter;
 
     public LoadService(ComputerContext context) {
         this.graphFactory = context.graphFactory();
-        this.config = null;
+        this.config = context.config();
         this.fetcher = null;
         this.rpcService = null;
         this.inputFilter = context.config().createObject(
                            ComputerOptions.INPUT_FILTER_CLASS);
     }
 
-    public void init(Config config) {
+    public void init() {
         assert this.rpcService != null;
-        this.config = config;
-        this.fetcher = InputSourceFactory.createGraphFetcher(config,
+        this.fetcher = InputSourceFactory.createGraphFetcher(this.config,
                                                              this.rpcService);
     }
 
@@ -91,28 +90,28 @@ public class LoadService {
 
     private class IteratorFromVertex implements Iterator<Vertex> {
 
-        private InputSplit inputSplit;
+        private InputSplit currentSplit;
 
         public IteratorFromVertex() {
-            this.inputSplit = null;
+            this.currentSplit = null;
         }
 
         @Override
         public boolean hasNext() {
             VertexFetcher vertexFetcher = fetcher.vertexFetcher();
-            if (this.inputSplit == null || !vertexFetcher.hasNext()) {
+            if (this.currentSplit == null || !vertexFetcher.hasNext()) {
                 /*
                  * The first time or the current split is complete,
                  * need to fetch next input split meta
                  */
-                this.inputSplit = fetcher.nextVertexInputSplit();
-                if (this.inputSplit == InputSplit.END_SPLIT) {
+                this.currentSplit = fetcher.nextVertexInputSplit();
+                if (this.currentSplit == InputSplit.END_SPLIT) {
                     return false;
                 }
-                vertexFetcher.prepareLoadInputSplit(this.inputSplit);
+                vertexFetcher.prepareLoadInputSplit(this.currentSplit);
             }
-            assert this.inputSplit != null &&
-                   this.inputSplit != InputSplit.END_SPLIT;
+            assert this.currentSplit != null &&
+                   this.currentSplit != InputSplit.END_SPLIT;
             return vertexFetcher.hasNext();
         }
 
@@ -147,34 +146,34 @@ public class LoadService {
          * the case of the out edge.
          */
         // private final Direction direction;
-        private final int maxEdgesInOneVertex;
-        private InputSplit inputSplit;
-        private Vertex currVertex;
+        private final int maxEdges;
+        private InputSplit currentSplit;
+        private Vertex currentVertex;
 
         public IteratorFromEdge() {
             // this.direction = config.get(ComputerOptions.EDGE_DIRECTION);
-            this.maxEdgesInOneVertex = config.get(
-                                       ComputerOptions.MAX_EDGES_IN_ONE_VERTEX);
-            this.inputSplit = null;
-            this.currVertex = null;
+            this.maxEdges = config.get(
+                            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
+            this.currentSplit = null;
+            this.currentVertex = null;
         }
 
         @Override
         public boolean hasNext() {
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
-            if (this.inputSplit == null || !edgeFetcher.hasNext()) {
+            if (this.currentSplit == null || !edgeFetcher.hasNext()) {
                 /*
                  * The first time or the current split is complete,
                  * need to fetch next input split meta
                  */
-                this.inputSplit = fetcher.nextEdgeInputSplit();
-                if (this.inputSplit == InputSplit.END_SPLIT) {
+                this.currentSplit = fetcher.nextEdgeInputSplit();
+                if (this.currentSplit == InputSplit.END_SPLIT) {
                     return false;
                 }
-                edgeFetcher.prepareLoadInputSplit(this.inputSplit);
+                edgeFetcher.prepareLoadInputSplit(this.currentSplit);
             }
-            assert this.inputSplit != null &&
-                   this.inputSplit != InputSplit.END_SPLIT;
+            assert this.currentSplit != null &&
+                   this.currentSplit != InputSplit.END_SPLIT;
             return edgeFetcher.hasNext();
         }
 
@@ -188,33 +187,32 @@ public class LoadService {
                 hugeEdge = fetcher.edgeFetcher().next();
                 Edge edge = this.convert(hugeEdge);
                 Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
-                if (this.currVertex == null) {
-                    this.currVertex = new DefaultVertex(graphFactory,
-                                                        sourceId, null);
-                    this.currVertex.addEdge(edge);
-                } else if (this.currVertex.id().equals(sourceId) &&
-                           this.currVertex.numEdges() <
-                           this.maxEdgesInOneVertex) {
+                if (this.currentVertex == null) {
+                    this.currentVertex = new DefaultVertex(graphFactory,
+                                                           sourceId, null);
+                    this.currentVertex.addEdge(edge);
+                } else if (this.currentVertex.id().equals(sourceId) &&
+                           this.currentVertex.numEdges() < this.maxEdges) {
                     /*
                      * Current edge is the adjacent edge of previous vertex and
                      * not reached the threshold of one vertex can hold
                      */
-                    this.currVertex.addEdge(edge);
+                    this.currentVertex.addEdge(edge);
                 } else {
                     /*
                      * Current edge isn't the adjacent edge of previous vertex
                      * or reached the threshold of one vertex can hold
                      */
-                    Vertex vertex = this.currVertex;
-                    this.currVertex = new DefaultVertex(graphFactory,
-                                                        sourceId, null);
-                    this.currVertex.addEdge(edge);
+                    Vertex vertex = this.currentVertex;
+                    this.currentVertex = new DefaultVertex(graphFactory,
+                                                           sourceId, null);
+                    this.currentVertex.addEdge(edge);
                     return vertex;
                 }
             }
-            assert this.currVertex != null;
-            Vertex vertex = this.currVertex;
-            this.currVertex = null;
+            assert this.currentVertex != null;
+            Vertex vertex = this.currentVertex;
+            this.currentVertex = null;
             return vertex;
         }
 
@@ -224,8 +222,7 @@ public class LoadService {
             String name = edge.name();
             Properties properties = HugeConverter.convertProperties(
                                     edge.properties());
-            Edge computerEdge = new DefaultEdge(graphFactory, targetId,
-                                                name, null);
+            Edge computerEdge = new DefaultEdge(graphFactory, targetId, name);
             computerEdge.properties(properties);
             return computerEdge;
         }

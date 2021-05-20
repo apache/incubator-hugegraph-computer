@@ -26,9 +26,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.buffer.SortedBufferQueue;
-import com.baidu.hugegraph.computer.core.buffer.SortedBufferQueuePool;
-import com.baidu.hugegraph.computer.core.buffer.WriteBuffer;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -36,6 +33,9 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferQueue;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferQueuePool;
+import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
 import com.baidu.hugegraph.computer.core.store.SortCombiner;
 import com.baidu.hugegraph.computer.core.store.Sorter;
 import com.baidu.hugegraph.util.ExecutorUtil;
@@ -58,7 +58,8 @@ public class SortManager implements Manager {
 
     public SortManager(ComputerContext context) {
         this.config = context.config();
-        this.sortExecutor = ExecutorUtil.newFixedThreadPool(4, "sort");
+        int threadNum = this.config.get(ComputerOptions.SORT_THREAD_NUMS);
+        this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, "sort");
         // TODO：How to create
         this.bufferSorter = null;
         this.valueCombiner = null;
@@ -92,7 +93,7 @@ public class SortManager implements Manager {
     }
 
     public CompletableFuture<Void> sort(int workerId, int partitionId,
-                                        MessageType type, WriteBuffer buffer) {
+                                        MessageType type, WriteBuffers buffer) {
         int capacity = this.config.get(ComputerOptions.WRITE_BUFFER_CAPACITY);
         return CompletableFuture.supplyAsync(() -> {
             RandomAccessInput bufferForRead = buffer.wrapForRead();

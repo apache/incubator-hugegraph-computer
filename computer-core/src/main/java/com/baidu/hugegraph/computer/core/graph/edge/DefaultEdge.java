@@ -24,30 +24,26 @@ import java.util.Objects;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultEdge implements Edge {
 
     private String label;
     private Id targetId;
     private String name;
-    private Value<?> value;
     private Properties properties;
 
     public DefaultEdge(GraphFactory graphFactory) {
-        this(graphFactory, null, null, null);
+        this(graphFactory, null, null);
     }
 
-    public DefaultEdge(GraphFactory graphFactory, Id targetId, String name,
-                       Value<?> value) {
-        this(graphFactory, null, targetId, name, value);
+    public DefaultEdge(GraphFactory graphFactory, Id targetId, String name) {
+        this(graphFactory, null, targetId, name);
     }
 
     public DefaultEdge(GraphFactory graphFactory, String label, Id targetId,
-                       String name, Value<?> value) {
+                       String name) {
         this.label = label;
         this.targetId = targetId;
-        this.value = value;
         this.name = name;
         this.properties = graphFactory.createProperties();
     }
@@ -73,17 +69,6 @@ public class DefaultEdge implements Edge {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <V extends Value<?>> V value() {
-        return (V) this.value;
-    }
-
-    @Override
-    public <V extends Value<?>> void value(V value) {
-        this.value = value;
-    }
-
-    @Override
     public Properties properties() {
         return this.properties;
     }
@@ -104,19 +89,19 @@ public class DefaultEdge implements Edge {
         DefaultEdge other = (DefaultEdge) obj;
         return this.label.equals(other.label) &&
                this.targetId.equals(other.targetId) &&
-               this.value.equals(other.value) &&
+               this.name.equals(other.name) &&
                this.properties.equals(other.properties);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(this.label, this.targetId,
-                            this.value, this.properties);
+                            this.name, this.properties);
     }
 
     @Override
     public String toString() {
-        return String.format("DefaultEdge{label=%s, targetId=%s, value=%s}",
-                             this.label, this.targetId, this.value);
+        return String.format("DefaultEdge{label=%s, targetId=%s, name=%s}",
+                             this.label, this.targetId, this.name);
     }
 }

@@ -29,5 +29,7 @@ public interface Properties extends Readable, Writable {
 
     Map<String, Value<?>> get();
 
+    Value<?> get(String key);
+
     void put(String key, Value<?> value);
 }

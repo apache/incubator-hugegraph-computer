@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.buffer;
+package com.baidu.hugegraph.computer.core.sender;
 
 import org.slf4j.Logger;
 
@@ -42,7 +42,7 @@ public class SortedBufferQueuePool {
         this.notEmptyEvent = new BarrierEvent();
         this.queues = new SortedBufferQueue[workerCount];
         for (int i = 0; i < workerCount; i++) {
-            this.queues[i] = new SortedBufferQueue(this.notEmptyEvent);
+            this.queues[i] = new SortedBufferQueue(notEmptyEvent::signal);
         }
     }
 

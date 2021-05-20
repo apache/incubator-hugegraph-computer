@@ -265,11 +265,11 @@ public class WorkerService {
 
         ConnectionManager connectionManager = new TransportConnectionManager();
         DataClientManager clientManager = new DataClientManager(
-                                              connectionManager);
+                                          connectionManager);
         this.managers.add(clientManager);
 
         WorkerInputManager inputManager = new WorkerInputManager(this.context,
-                                              sortManager, clientManager);
+                                          sortManager, clientManager);
         inputManager.service(rpcManager.inputSplitService());
         this.managers.add(inputManager);
 

@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.worker.DataClientManager;
-import com.baidu.hugegraph.computer.core.worker.VertexSendManager;
+import com.baidu.hugegraph.computer.core.worker.MessageSendManager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.computer.core.worker.load.LoadService;
 
@@ -39,13 +39,13 @@ public class WorkerInputManager implements Manager {
     public static final String NAME = "worker_input";
 
     private final LoadService loadService;
-    private final VertexSendManager sendManager;
+    private final MessageSendManager sendManager;
 
     public WorkerInputManager(ComputerContext context, SortManager sortManager,
                               DataClientManager clientManager) {
         this.loadService = new LoadService(context);
-        this.sendManager = new VertexSendManager(context, sortManager,
-                                                 clientManager);
+        this.sendManager = new MessageSendManager(context, sortManager,
+                                                  clientManager);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class WorkerInputManager implements Manager {
 
     @Override
     public void init(Config config) {
-        this.loadService.init(config);
+        this.loadService.init();
         this.sendManager.init(config);
     }
 
@@ -70,19 +70,21 @@ public class WorkerInputManager implements Manager {
     }
 
     public void loadGraph() {
+        this.sendManager.startSend(MessageType.VERTEX);
         Iterator<Vertex> iterator = this.loadService.createIteratorFromVertex();
         while (iterator.hasNext()) {
             Vertex vertex = iterator.next();
             this.sendManager.sendVertex(MessageType.VERTEX, vertex);
         }
-        this.sendManager.finish(MessageType.VERTEX);
+        this.sendManager.finishSend(MessageType.VERTEX);
 
+        this.sendManager.startSend(MessageType.EDGE);
         iterator = this.loadService.createIteratorFromEdge();
         while (iterator.hasNext()) {
             Vertex vertex = iterator.next();
             this.sendManager.sendVertex(MessageType.EDGE, vertex);
         }
-        this.sendManager.finish(MessageType.EDGE);
+        this.sendManager.finishSend(MessageType.EDGE);
     }
 
     public WorkerStat mergeGraph() {

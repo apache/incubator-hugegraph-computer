@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.buffer;
+package com.baidu.hugegraph.computer.core.sender;
 
 import java.io.IOException;
 import java.util.Map;
@@ -37,13 +37,13 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.store.hghvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hghvfile.entry.KvEntryWriter;
 
-public class BufferImpl {
+public class WriteBuffer {
 
     private final int bufferSize;
     private final OptimizedUnsafeBytesOutput output;
     private final EntryOutput entryOutput;
 
-    public BufferImpl(int size, int capacity) {
+    public WriteBuffer(int size, int capacity) {
         this.bufferSize = size;
         this.output = new OptimizedUnsafeBytesOutput(capacity);
         this.entryOutput = new EntryOutputImpl(this.output);
@@ -90,7 +90,7 @@ public class BufferImpl {
 
     private void writeVertexWithEdges(Vertex vertex) throws IOException {
         EdgeFrequency frequency = ComputerContext.instance().config().get(
-                                  ComputerOptions.EDGE_FREQ_IN_VERTEX_PAIR);
+                                  ComputerOptions.INPUT_EDGE_FREQ);
         KvEntryWriter writer = this.entryOutput.writeEntry(vertex.id());
         if (frequency == EdgeFrequency.SINGLE) {
             for (Edge edge : vertex.edges()) {
@@ -115,7 +115,7 @@ public class BufferImpl {
                 });
             }
         } else {
-            assert frequency == EdgeFrequency.MULTI;
+            assert frequency == EdgeFrequency.MULTIPLE;
             for (Edge edge : vertex.edges()) {
                 // Use label + sortValues + targetId as subKey
                 writer.writeSubKey(out -> {

@@ -25,8 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.buffer.SortedBufferQueue;
-import com.baidu.hugegraph.computer.core.buffer.SortedBufferQueuePool;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferMessage;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferQueue;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferQueuePool;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -172,21 +173,21 @@ public class DataClientManager implements Manager {
                 emptyQueueCounter.decrementAndGet();
             }
 
-            SortedBufferEvent event = queue.peek();
-            if (event == SortedBufferEvent.START) {
+            SortedBufferMessage message = queue.peek();
+            if (message == SortedBufferMessage.START) {
                 client.startSession();
                 LOG.info("Start session linked to {}", workerId);
                 queue.poll();
                 return;
-            } else if (event == SortedBufferEvent.END) {
+            } else if (message == SortedBufferMessage.END) {
                 client.finishSession();
                 LOG.info("Finish session linked to {}", workerId);
                 queue.poll();
                 return;
             }
 
-            if (client.send(event.messageType(), event.partitionId(),
-                            event.sortedBuffer())) {
+            if (client.send(message.messageType(), message.partitionId(),
+                            message.sortedBuffer())) {
                 // Pop up the element after sending successfully
                 queue.poll();
             } else {
