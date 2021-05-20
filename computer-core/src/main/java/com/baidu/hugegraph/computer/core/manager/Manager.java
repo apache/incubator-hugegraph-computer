@@ -35,8 +35,8 @@ public interface Manager {
     String name();
 
     /**
-     * Used to add the resources needed by the computation. Be called only one
-     * time before all supersteps start.
+     * Used to add the resources needed by the computation.
+     * Be called only one time before all supersteps start.
      */
     default void init(Config config) {
         // pass
@@ -51,8 +51,8 @@ public interface Manager {
     }
 
     /**
-     * Close the resources used in the computation. Be called only one time
-     * after all supersteps ended.
+     * Close the resources used in the computation.
+     * Be called only one time after all supersteps ended.
      */
     default void close(Config config) {
         // pass

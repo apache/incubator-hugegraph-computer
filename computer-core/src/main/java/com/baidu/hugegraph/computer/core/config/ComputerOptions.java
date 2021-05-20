@@ -336,7 +336,7 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "transport.server_port",
                     "The server port to listen on to transfer data. " +
-                    "The system will assign a random port if server_port=0.",
+                    "The system will assign a random port if it's set to 0.",
                     nonNegativeInt(),
                     0
             );

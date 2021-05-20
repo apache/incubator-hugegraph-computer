@@ -102,8 +102,9 @@ public class WorkerAggrManager implements Manager {
 
     public <V extends Value<?>> Aggregator<V> createAggregator(String name) {
         /*
-         * Create aggregator for the current superstep,
-         * Generally called when computation.beforeSuperstep()
+         * Create aggregator for the current superstep, this method would
+         * be called once per superstep for each aggregator, generally called
+         * when computation.beforeSuperstep().
          */
         @SuppressWarnings("unchecked")
         Aggregator<V> aggr = (Aggregator<V>)
@@ -114,7 +115,7 @@ public class WorkerAggrManager implements Manager {
     public <V extends Value<?>> void aggregateValue(String name, V value) {
         /*
          * Update aggregator for the current superstep,
-         * Generally called when computation.afterSuperstep()
+         * generally called when computation.afterSuperstep().
          */
         E.checkArgument(value != null,
                         "Can't set value to null for aggregator '%s'", name);

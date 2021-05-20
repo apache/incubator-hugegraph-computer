@@ -101,12 +101,15 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
         this.combineAndSwapIfNeeded(localValue, this.value);
     }
 
-    private void combineAndSwapIfNeeded(V localValue, V value2) {
-        V tmp = this.combiner.combine(localValue, this.value);
+    private void combineAndSwapIfNeeded(V localValue, V thisValue) {
+        // TODO: call combine(localValue, thisValue, <output>thisValue)
+        V tmp = this.combiner.combine(localValue, thisValue);
         if (tmp == localValue) {
-            this.localValue.set(this.value);
+            this.localValue.set(thisValue);
+            this.value = tmp;
+        } else {
+            assert tmp == thisValue;
         }
-        this.value = tmp;
     }
 
     @Override
