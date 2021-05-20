@@ -22,6 +22,8 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -103,10 +105,32 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     }
 
     @Test
+    public void testStartAsync() throws Exception {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        Future<Boolean> future = client.startSessionAsync();
+        Boolean success = future.get(conf.syncRequestTimeout(),
+                                     TimeUnit.MILLISECONDS);
+        Assert.assertTrue(success);
+    }
+
+    @Test
     public void testFinishSession() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         client.startSession();
         client.finishSession();
+    }
+
+    @Test
+    public void testFinishAsync() throws Exception {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        Future<Boolean> startFuture = client.startSessionAsync();
+        Boolean startSuccess = startFuture.get(conf.syncRequestTimeout(),
+                                               TimeUnit.MILLISECONDS);
+        Assert.assertTrue(startSuccess);
+        Future<Boolean> finishFuture = client.finishSessionAsync();
+        Boolean finishSuccess = finishFuture.get(conf.finishSessionTimeout(),
+                                                 TimeUnit.MILLISECONDS);
+        Assert.assertTrue(finishSuccess);
     }
 
     @Test
