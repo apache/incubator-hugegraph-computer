@@ -19,28 +19,14 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-public class DefaultKvEntry implements KvEntry {
-
-    private final Pointer key;
-    private final Pointer value;
+public class DefaultKvEntry extends AbstractKvEntry {
 
     public DefaultKvEntry(Pointer key, Pointer value) {
-        this.key = key;
-        this.value = value;
+        super(key, value);
     }
 
     @Override
-    public Pointer key() {
-        return this.key;
-    }
-
-    @Override
-    public Pointer value() {
-        return this.value;
-    }
-
-    @Override
-    public int compareTo(KvEntry o) {
-        return this.key.compareTo(o.key());
+    public long numSubEntries() {
+        return 0L;
     }
 }

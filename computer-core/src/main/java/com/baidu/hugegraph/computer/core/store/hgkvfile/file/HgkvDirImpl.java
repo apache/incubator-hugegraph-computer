@@ -143,9 +143,12 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     private void build() throws IOException {
         this.magic = MAGIC;
         this.version = PRIMARY_VERSION + "." + MINOR_VERSION;
-        this.entriesSize = this.segments.stream()
-                                        .mapToLong(HgkvFile::numEntries)
-                                        .sum();
+        this.numEntries = this.segments.stream()
+                                       .mapToLong(HgkvFile::numEntries)
+                                       .sum();
+        this.numSubEntries = this.segments.stream()
+                                          .mapToLong(HgkvFile::numSubEntries)
+                                          .sum();
         this.max = this.segments.stream()
                                 .map(HgkvFile::max)
                                 .max(BytesUtil::compare)

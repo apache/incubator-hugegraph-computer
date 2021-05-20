@@ -118,7 +118,7 @@ public class SorterImpl implements Sorter {
         InputsSorter sorter = new InputsSorterImpl();
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(output,
                                                              this.config)) {
-            Iterator<KvEntry> result = sorter.sort(entries);
+            EntryIterator result = sorter.sort(entries);
             flusher.flush(result, builder);
         }
     }
@@ -133,8 +133,8 @@ public class SorterImpl implements Sorter {
 
         HgkvDirMerger merger = new HgkvDirMergerImpl(this.config);
         for (SelectedFiles result : results) {
-            merger.merge(
-                   result.inputs(), inputToEntries, result.output(), flusher);
+            merger.merge(result.inputs(), inputToEntries,
+                         result.output(), flusher);
         }
     }
 }

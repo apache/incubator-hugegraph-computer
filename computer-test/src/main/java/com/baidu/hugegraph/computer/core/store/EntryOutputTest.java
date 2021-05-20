@@ -130,16 +130,14 @@ public class EntryOutputTest {
         List<LongId> data = intListToLongIds(entries);
 
         UnsafeBytesOutput output = new UnsafeBytesOutput();
-        EntryOutput entryOutput = new EntryOutputImpl(output);
+        EntryOutput entryOutput = new EntryOutputImpl(output, needSort);
         int index = 0;
-        KvEntryWriter entry1 = entryOutput.writeEntry(data.get(index++),
-                                                      needSort);
+        KvEntryWriter entry1 = entryOutput.writeEntry(data.get(index++));
         entry1.writeSubKv(data.get(index++), data.get(index++));
         entry1.writeSubKv(data.get(index++), data.get(index++));
         entry1.writeSubKv(data.get(index++), data.get(index++));
         entry1.writeFinish();
-        KvEntryWriter entry2 = entryOutput.writeEntry(data.get(index++),
-                                                      needSort);
+        KvEntryWriter entry2 = entryOutput.writeEntry(data.get(index++));
         entry2.writeSubKv(data.get(index++), data.get(index++));
         entry2.writeSubKv(data.get(index++), data.get(index));
         entry2.writeFinish();

@@ -23,15 +23,16 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.util.E;
 
-public abstract class CombineSorterFlusher {
+public abstract class CombinableSorterFlusher {
 
     private final Combiner<Pointer> combiner;
 
-    public CombineSorterFlusher(Combiner<Pointer> combiner) {
+    public CombinableSorterFlusher(Combiner<Pointer> combiner) {
         this.combiner = combiner;
     }
 
@@ -53,7 +54,7 @@ public abstract class CombineSorterFlusher {
                 }
             }
 
-            this.writeKvEntry(last.key(), combineValue);
+            this.writeKvEntry(new DefaultKvEntry(last.key(), combineValue));
 
             if (current == null) {
                 break;
@@ -64,6 +65,5 @@ public abstract class CombineSorterFlusher {
         }
     }
 
-    protected abstract void writeKvEntry(Pointer key, Pointer value)
-                                         throws IOException;
+    protected abstract void writeKvEntry(KvEntry entry) throws IOException;
 }

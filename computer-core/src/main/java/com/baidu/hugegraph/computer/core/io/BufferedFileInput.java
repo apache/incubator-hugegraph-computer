@@ -79,7 +79,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
 
     @Override
     public void seek(long position) throws IOException {
-        if (this.position() == position) {
+        if (position == this.position()) {
             return;
         }
         long bufferStart = this.fileOffset - this.limit();

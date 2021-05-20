@@ -22,19 +22,19 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 import java.io.Closeable;
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public interface HgkvFileBuilder extends Closeable {
 
     /**
      * Add kv entry to file.
      */
-    void add(Pointer key, Pointer value) throws IOException;
+    void add(KvEntry entry) throws IOException;
 
     /**
      * Return size of new entry.
      */
-    long sizeOfEntry(Pointer key, Pointer value);
+    long sizeOfEntry(KvEntry entry);
 
     /**
      * Finish build file.

@@ -33,7 +33,8 @@ public abstract class AbstractHgkvFile implements HgkvFile {
 
     protected final String path;
     protected String magic;
-    protected long entriesSize;
+    protected long numEntries;
+    protected long numSubEntries;
     protected long dataBlockSize;
     protected long indexBlockSize;
     protected byte[] max;
@@ -51,7 +52,12 @@ public abstract class AbstractHgkvFile implements HgkvFile {
 
     @Override
     public long numEntries() {
-        return this.entriesSize;
+        return this.numEntries;
+    }
+
+    @Override
+    public long numSubEntries() {
+        return this.numSubEntries;
     }
 
     @Override

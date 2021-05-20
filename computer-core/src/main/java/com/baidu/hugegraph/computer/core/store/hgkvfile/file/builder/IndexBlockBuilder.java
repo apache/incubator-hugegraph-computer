@@ -27,5 +27,5 @@ public interface IndexBlockBuilder {
 
     void finish();
 
-    long size();
+    long length();
 }

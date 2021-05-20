@@ -70,7 +70,7 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
          * If the segment size is larger than FILE_MAX_SIZE after add entry
          * Stop build of the current segment and create a new segment.
          */
-        long entrySize = this.segmentBuilder.sizeOfEntry(key, value);
+        long entrySize = this.segmentBuilder.sizeOfEntry(entry);
         long segmentSize = this.segmentBuilder.dataLength();
         if ((entrySize + segmentSize) > this.maxEntriesBytes) {
             this.segmentBuilder.finish();
@@ -78,7 +78,7 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
             this.segmentBuilder = this.nextSegmentBuilder(this.dir,
                                                           this.config);
         }
-        this.segmentBuilder.add(key, value);
+        this.segmentBuilder.add(entry);
     }
 
     @Override

@@ -58,7 +58,7 @@ public class EntriesInput implements EntryIterator {
     @Override
     public KvEntry next() {
         return EntriesUtil.entryFromInput(this.input, this.userAccessInput,
-                                          this.userInlinePointer);
+                                          this.userInlinePointer, false);
     }
 
     @Override

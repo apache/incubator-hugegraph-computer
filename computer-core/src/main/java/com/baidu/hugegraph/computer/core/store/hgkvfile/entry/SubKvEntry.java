@@ -19,11 +19,26 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-public interface KvEntry extends Comparable<KvEntry> {
+import java.io.IOException;
 
-    Pointer key();
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 
-    Pointer value();
+public class SubKvEntry extends AbstractKvEntry {
 
-    long numSubEntries();
+    private final int numSubEntries;
+
+    public SubKvEntry(Pointer key, Pointer value) {
+        super(key, value);
+        try {
+            this.numSubEntries = new UnsafeBytesInput(value.bytes()).readInt();
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public long numSubEntries() {
+        return this.numSubEntries;
+    }
 }

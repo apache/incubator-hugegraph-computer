@@ -28,18 +28,24 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 public class EntryOutputImpl implements EntryOutput {
 
     private final RandomAccessOutput output;
+    private final boolean needSortSubKv;
+
+    public EntryOutputImpl(RandomAccessOutput output,
+                           boolean needSortSubKv) {
+        this.output = output;
+        this.needSortSubKv = needSortSubKv;
+    }
 
     public EntryOutputImpl(RandomAccessOutput output) {
-        this.output = output;
+        this(output, true);
     }
 
     @Override
-    public KvEntryWriter writeEntry(Id key, boolean needSort)
-                                    throws IOException {
+    public KvEntryWriter writeEntry(Id key) throws IOException {
         // Write key
         this.writeData(key);
 
-        return new KvEntryWriterImpl(this.output, needSort);
+        return new KvEntryWriterImpl(this.output, this.needSortSubKv);
     }
 
     @Override

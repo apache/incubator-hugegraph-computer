@@ -19,11 +19,28 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-public interface KvEntry extends Comparable<KvEntry> {
+public abstract class AbstractKvEntry implements KvEntry {
 
-    Pointer key();
+    protected final Pointer key;
+    protected final Pointer value;
 
-    Pointer value();
+    public AbstractKvEntry(Pointer key, Pointer value) {
+        this.key = key;
+        this.value = value;
+    }
 
-    long numSubEntries();
+    @Override
+    public Pointer key() {
+        return this.key;
+    }
+
+    @Override
+    public Pointer value() {
+        return this.value;
+    }
+
+    @Override
+    public int compareTo(KvEntry o) {
+        return this.key.compareTo(o.key());
+    }
 }

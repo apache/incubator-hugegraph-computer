@@ -46,7 +46,7 @@ public class IndexBlockBuilderImpl implements IndexBlockBuilder {
     }
 
     @Override
-    public long size() {
+    public long length() {
         return this.blockSize;
     }
 }

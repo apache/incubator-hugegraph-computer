@@ -35,7 +35,7 @@ public interface EntryOutput {
      * | sub-key1 length | sub-key1 | sub-value1 length | sub-value1 |
      * | sub-key2 length | sub-key2 | sub-value2 length | sub-value2 |
      */
-    KvEntryWriter writeEntry(Id key, boolean needSort) throws IOException;
+    KvEntryWriter writeEntry(Id key) throws IOException;
 
     /**
      * Write entry with single value.

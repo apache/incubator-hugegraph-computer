@@ -95,4 +95,16 @@ public class TestData {
     public static List<Iterator<Integer>> dataEmpty() {
         return toIterators(ALL_EMPTY_LIST);
     }
+
+    public static List<Iterator<Integer>> sameDataLists() {
+        int size = 16;
+        List<List<Integer>> list = new ArrayList<>();
+        for (int i = 0; i < 16; i++) {
+            list.add(ImmutableList.of(1));
+        }
+
+        return list.stream()
+               .map(List::iterator)
+               .collect(Collectors.toList());
+    }
 }

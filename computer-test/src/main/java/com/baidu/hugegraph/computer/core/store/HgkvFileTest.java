@@ -110,14 +110,13 @@ public class HgkvFileTest {
         final String filePath = availableFilePath("1");
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(filePath,
                                                                CONFIG)) {
-            Assert.assertThrows(NullPointerException.class, () -> {
-                builder.add(null, null);
+            Assert.assertThrows(IllegalArgumentException.class, () -> {
+                builder.add(null);
             },
-            e -> Assert.assertEquals("The 'key' can't be null",
-                                     e.getMessage()));
+            e -> Assert.assertTrue(e.getMessage().contains("not be null")));
             builder.finish();
             Assert.assertThrows(NotSupportedException.class, () -> {
-                builder.add(null, null);
+                builder.add(null);
             },
             e -> Assert.assertTrue(e.getMessage().contains("build finished")));
         } finally {

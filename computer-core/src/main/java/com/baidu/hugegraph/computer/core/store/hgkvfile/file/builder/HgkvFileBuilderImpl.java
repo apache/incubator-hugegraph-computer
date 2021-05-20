@@ -28,6 +28,7 @@ import javax.ws.rs.NotSupportedException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
@@ -42,11 +43,11 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
     private final BlockBuilder dataBlockBuilder;
     private final IndexBlockBuilder indexBlockBuilder;
     private boolean finished;
-    private long entriesSize;
 
     private final List<byte[]> indexBlock;
     private long numEntries;
-    private long dataBlockLength;
+    private long numSubEntries;
+    private long dataLength;
     private int footerLength;
     private long maxKeyOffset;
     private final long minKeyOffset;
@@ -58,33 +59,33 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         this.dataBlockBuilder = new DataBlockBuilderImpl(this.output);
         this.indexBlockBuilder = new IndexBlockBuilderImpl(this.output);
         this.finished = false;
-        this.entriesSize = 0L;
+        this.dataLength = 0L;
 
         this.indexBlock = new ArrayList<>();
         this.numEntries = 0L;
-        this.dataBlockLength = 0L;
+        this.numSubEntries = 0L;
         this.footerLength = 0;
         this.maxKeyOffset = 0L;
         this.minKeyOffset = 0L;
     }
 
     @Override
-    public void add(Pointer key, Pointer value) throws IOException {
+    public void add(KvEntry entry) throws IOException {
         if (this.finished) {
             throw new NotSupportedException("HgkvFile build finished, " +
                                             "can't add new entry.");
         }
-        E.checkNotNull(key, "key");
-        E.checkNotNull(value, "value");
+        E.checkArgument(entry != null,
+                        "Parameter entry must not be null");
 
-        this.blockAddEntry(key, value);
-        this.changeAfterAdd(key, value);
+        this.blockAddEntry(entry);
+        this.changeAfterAdd(entry);
     }
 
     @Override
-    public long sizeOfEntry(Pointer key, Pointer value) {
-        long keySize = Integer.BYTES + key.length();
-        long valueSize = Integer.BYTES + value.length();
+    public long sizeOfEntry(KvEntry entry) {
+        long keySize = Integer.BYTES + entry.key().length();
+        long valueSize = Integer.BYTES + entry.value().length();
         return keySize + valueSize;
     }
 
@@ -98,18 +99,17 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         this.writeIndexBlock();
         this.writeFooter();
         this.output.close();
-        this.dataBlockLength = this.entriesSize;
         this.finished = true;
     }
 
     @Override
     public long dataLength() {
-        return this.entriesSize;
+        return this.dataLength;
     }
 
     @Override
     public long indexLength() {
-        return this.indexBlockBuilder.size();
+        return this.indexBlockBuilder.length();
     }
 
     @Override
@@ -122,16 +122,18 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         this.finish();
     }
 
-    private void changeAfterAdd(Pointer key, Pointer value) {
+    private void changeAfterAdd(KvEntry entry) {
         this.numEntries++;
-        this.maxKeyOffset = this.entriesSize;
+        this.numSubEntries += entry.numSubEntries();
+        this.maxKeyOffset = this.dataLength;
 
-        this.entriesSize += this.sizeOfEntry(key, value);
-        this.dataBlockLength = this.entriesSize;
+        this.dataLength += this.sizeOfEntry(entry);
     }
 
-    private void blockAddEntry(Pointer key, Pointer value) throws IOException {
+    private void blockAddEntry(KvEntry entry) throws IOException {
         // Finish and reset builder if the block is full.
+        Pointer key = entry.key();
+        Pointer value = entry.value();
         long entrySize = this.dataBlockBuilder.sizeOfEntry(key, value);
         long blockSize = this.dataBlockBuilder.size();
         if ((entrySize + blockSize) >= this.maxDataBlockSize) {
@@ -154,14 +156,17 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         // Write magic
         this.output.writeBytes(HgkvFileImpl.MAGIC);
         this.footerLength += HgkvFileImpl.MAGIC.length();
-        // Write entriesSize
+        // Write numEntries
         this.output.writeLong(this.numEntries);
         this.footerLength += Long.BYTES;
+        // Write numSubEntries
+        this.output.writeLong(this.numSubEntries);
+        this.footerLength += Long.BYTES;
         // Write length of dataBlock
-        this.output.writeLong(this.dataBlockLength);
+        this.output.writeLong(this.dataLength);
         this.footerLength += Long.BYTES;
         // Write length of indexBlock
-        this.output.writeLong(this.indexBlockBuilder.size());
+        this.output.writeLong(this.indexLength());
         this.footerLength += Long.BYTES;
         // Write max key offset
         this.output.writeLong(this.maxKeyOffset);

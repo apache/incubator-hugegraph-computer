@@ -84,7 +84,7 @@ public final class EntriesUtil {
 
             this.size--;
             return EntriesUtil.entryFromInput(this.input, this.useAccessInput,
-                                              this.useInlinePointer);
+                                              this.useInlinePointer, true);
         }
 
         @Override
@@ -96,12 +96,14 @@ public final class EntriesUtil {
 
     public static KvEntry entryFromInput(RandomAccessInput input,
                                          RandomAccessInput userAccessInput,
-                                         boolean useInlinePointer) {
+                                         boolean useInlinePointer,
+                                         boolean useSubKvEntry) {
         try {
             if (useInlinePointer) {
-                return inlinePointerKvEntry(input);
+                return inlinePointerKvEntry(input, useSubKvEntry);
             } else {
-                return cachedPointerKvEntry(input, userAccessInput);
+                return cachedPointerKvEntry(input, userAccessInput,
+                                            useSubKvEntry);
             }
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
@@ -109,13 +111,15 @@ public final class EntriesUtil {
     }
 
     public static KvEntry entryFromInput(RandomAccessInput input,
-                                         boolean useInlinePointer) {
-        return entryFromInput(input, input, useInlinePointer);
+                                         boolean useInlinePointer,
+                                         boolean useSubKvEntry) {
+        return entryFromInput(input, input, useInlinePointer, useSubKvEntry);
     }
     
     private static KvEntry cachedPointerKvEntry(
                            RandomAccessInput input,
-                           RandomAccessInput userAccessInput)
+                           RandomAccessInput userAccessInput,
+                           boolean useSubKvEntry)
                            throws IOException {
         // Read key
         int keyLength = input.readInt();
@@ -132,10 +136,11 @@ public final class EntriesUtil {
         Pointer value = new CachedPointer(userAccessInput, valuePosition,
                                           valueLength);
         
-        return new DefaultKvEntry(key, value);
+        return switchKvEntry(key, value, useSubKvEntry);
     }
 
-    private static KvEntry inlinePointerKvEntry(RandomAccessInput input)
+    private static KvEntry inlinePointerKvEntry(RandomAccessInput input,
+                                                boolean useSubKvEntry)
                                                 throws IOException {
         // Read key
         int keyLength = input.readInt();
@@ -148,7 +153,16 @@ public final class EntriesUtil {
         Pointer key = new InlinePointer(keyBytes);
         Pointer value = new InlinePointer(valueBytes);
 
-        return new DefaultKvEntry(key, value);
+        return switchKvEntry(key, value, useSubKvEntry);
+    }
+
+    private static KvEntry switchKvEntry(Pointer key, Pointer value,
+                                         boolean useSubKvEntry) {
+        if (useSubKvEntry) {
+            return new SubKvEntry(key, value);
+        } else {
+            return new DefaultKvEntry(key, value);
+        }
     }
 
     public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry) {
@@ -157,7 +171,7 @@ public final class EntriesUtil {
                                       entry.value().bytes());
             // Skip sub-entry size
             input.skip(Integer.BYTES);
-            KvEntry firstSubKv = EntriesUtil.entryFromInput(input, true);
+            KvEntry firstSubKv = EntriesUtil.entryFromInput(input, true, true);
 
             return new KvEntryWithFirstSubKv(entry.key(), entry.value(),
                                              firstSubKv);

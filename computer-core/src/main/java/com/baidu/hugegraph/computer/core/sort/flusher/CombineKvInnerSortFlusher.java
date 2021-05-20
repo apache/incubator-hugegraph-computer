@@ -27,7 +27,7 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
-public class CombineKvInnerSortFlusher extends CombineSorterFlusher
+public class CombineKvInnerSortFlusher extends CombinableSorterFlusher
                                        implements InnerSortFlusher {
 
     private final RandomAccessOutput output;
@@ -39,9 +39,9 @@ public class CombineKvInnerSortFlusher extends CombineSorterFlusher
     }
 
     @Override
-    protected void writeKvEntry(Pointer key, Pointer value) throws IOException {
-        key.write(this.output);
-        value.write(this.output);
+    protected void writeKvEntry(KvEntry entry) throws IOException {
+        entry.key().write(this.output);
+        entry.value().write(this.output);
     }
 
     @Override

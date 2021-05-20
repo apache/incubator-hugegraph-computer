@@ -92,7 +92,7 @@ public class StoreTestUtil {
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path, config)) {
             List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
-                builder.add(entry.key(), entry.value());
+                builder.add(entry);
             }
             builder.finish();
         } catch (Exception e) {

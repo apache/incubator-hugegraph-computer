@@ -19,24 +19,20 @@
 
 package com.baidu.hugegraph.computer.core.sort.flusher;
 
-import java.util.Iterator;
-
-import org.apache.commons.lang.NotImplementedException;
-
 import com.baidu.hugegraph.iterator.CIter;
 import com.baidu.hugegraph.util.E;
 
 public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
 
-    private final Iterator<T> entries;
+    private final CIter<T> entries;
     private T next;
 
-    private PeekableIteratorAdaptor(Iterator<T> entries) {
+    private PeekableIteratorAdaptor(CIter<T> entries) {
         this.entries = entries;
         this.goNext();
     }
 
-    public static <T> PeekableIterator<T> of(Iterator<T> iterator) {
+    public static <T> PeekableIterator<T> of(CIter<T> iterator) {
         E.checkArgument(iterator.hasNext(),
                         "Parameter iterator must not be empty");
         return new PeekableIteratorAdaptor<>(iterator);
@@ -71,16 +67,11 @@ public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
 
     @Override
     public void close() throws Exception {
-        if (this.entries instanceof AutoCloseable) {
-            ((AutoCloseable) this.entries).close();
-        }
+        this.entries.close();
     }
 
     @Override
     public Object metadata(String s, Object... objects) {
-        if (this.entries instanceof CIter) {
-            return ((CIter<T>) this.entries).metadata(s, objects);
-        }
-        throw new NotImplementedException();
+        return this.entries.metadata(s, objects);
     }
 }

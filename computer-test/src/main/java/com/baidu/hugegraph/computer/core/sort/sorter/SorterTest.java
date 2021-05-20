@@ -53,6 +53,8 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
@@ -315,6 +317,11 @@ public class SorterTest {
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 9, 3);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 3, 2, 6, 3, 3);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 3, 4, 3);
+
+        // Assert file properties
+        HgkvDir dir = HgkvDirImpl.open(outputFile);
+        Assert.assertEquals(5, dir.numEntries());
+        Assert.assertEquals(8, dir.numSubEntries());
     }
 
     @Test

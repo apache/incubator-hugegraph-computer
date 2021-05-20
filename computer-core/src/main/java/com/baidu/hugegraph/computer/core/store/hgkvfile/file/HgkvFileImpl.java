@@ -98,8 +98,8 @@ public class HgkvFileImpl extends AbstractHgkvFile {
     }
 
     private void readFooterV1d0(BufferedFileInput input)
-                                 throws IOException {
-        final int footerLength = 48;
+                                throws IOException {
+        final int footerLength = 56;
         File file = new File(this.path);
         input.seek(file.length() - footerLength);
 
@@ -108,8 +108,10 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         E.checkArgument(HgkvFileImpl.MAGIC.equals(magic),
                         "Illegal file '%s'", file.getPath());
         this.magic = magic;
-        // Read entriesSize
-        this.entriesSize = input.readLong();
+        // Read numEntries
+        this.numEntries = input.readLong();
+        // Read numSubEntries
+        this.numSubEntries = input.readLong();
         // Read dataBlock length
         this.dataBlockSize = input.readLong();
         // Read indexBlock length
@@ -122,7 +124,7 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         short minorVersion = input.readShort();
         this.version = primaryVersion + "." + minorVersion;
 
-        if (this.entriesSize > 0) {
+        if (this.numEntries > 0) {
             // Read max key
             input.seek(maxKeyOffset);
             this.max = input.readBytes(input.readInt());

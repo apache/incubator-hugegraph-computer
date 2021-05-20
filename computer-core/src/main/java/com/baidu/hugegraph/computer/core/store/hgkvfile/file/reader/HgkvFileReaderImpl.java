@@ -80,7 +80,8 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
             this.numEntries--;
             return EntriesUtil.entryFromInput(this.input,
                                               this.userAccessInput,
-                                              this.useInlinePointer);
+                                              this.useInlinePointer,
+                                              false);
         }
 
         @Override

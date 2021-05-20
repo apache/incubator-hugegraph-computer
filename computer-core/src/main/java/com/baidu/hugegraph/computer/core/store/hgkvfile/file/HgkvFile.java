@@ -37,6 +37,11 @@ public interface HgkvFile extends Closeable {
     long numEntries();
 
     /**
+     * Number of sub entries in file.
+     */
+    long numSubEntries();
+
+    /**
      * File version.
      */
     String version();
