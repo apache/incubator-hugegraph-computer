@@ -67,6 +67,7 @@ public class WorkerService {
     private Config config;
     private Bsp4Worker bsp4Worker;
     private ContainerInfo workerInfo;
+
     private Computation<?> computation;
     private Combiner<Value<?>> combiner;
 

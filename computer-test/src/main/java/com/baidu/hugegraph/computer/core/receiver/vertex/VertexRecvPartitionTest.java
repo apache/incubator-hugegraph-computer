@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.receiver.message;
+package com.baidu.hugegraph.computer.core.receiver.vertex;
 
 import java.io.File;
 import java.util.List;
@@ -33,10 +33,10 @@ import com.baidu.hugegraph.computer.core.receiver.PartitionBufferUtil;
 import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.config.RpcOptions;
 
-public class MessagePartitionBufferTest {
+public class VertexRecvPartitionTest extends UnitTestBase {
 
     @Test
-    public void testMessagePartitionBuffer() {
+    public void testVertexPartitionBuffer() {
         Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_001",
@@ -50,11 +50,10 @@ public class MessagePartitionBufferTest {
         FileUtils.deleteQuietly(new File("data_dir2"));
         DataFileManager dataFileManager = new DataFileManager();
         dataFileManager.init(config);
-        MessagePartitionBuffer partition = new MessagePartitionBuffer(
-                                               config,
-                                               dataFileManager,
-                                               -1);
-        Assert.assertEquals("message", partition.type());
+        VertexRecvPartition partition = new VertexRecvPartition(
+                                          config,
+                                          dataFileManager);
+        Assert.assertEquals("vertex", partition.type());
         for (int i = 0; i < 25; i++) {
             PartitionBufferUtil.addBuffer(partition, 100);
         }

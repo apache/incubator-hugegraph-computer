@@ -21,16 +21,16 @@ package com.baidu.hugegraph.computer.core.receiver.message;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.PartitionBuffer;
+import com.baidu.hugegraph.computer.core.receiver.RecvPartition;
 import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
-public class MessagePartitionBuffer extends PartitionBuffer {
+public class MessageRecvPartition extends RecvPartition {
 
     public static final String TYPE = "message";
 
-    public MessagePartitionBuffer(Config config,
-                                 DataFileGenerator fileGenerator,
-                                 int superstep) {
+    public MessageRecvPartition(Config config,
+                                DataFileGenerator fileGenerator,
+                                int superstep) {
         super(config, fileGenerator, superstep);
     }
 

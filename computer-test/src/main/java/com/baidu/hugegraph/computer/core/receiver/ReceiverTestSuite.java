@@ -22,17 +22,17 @@ package com.baidu.hugegraph.computer.core.receiver;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import com.baidu.hugegraph.computer.core.receiver.edge.EdgePartitionBufferTest;
-import com.baidu.hugegraph.computer.core.receiver.message.MessagePartitionBufferTest;
-import com.baidu.hugegraph.computer.core.receiver.vertex.VertexPartitionBufferTest;
+import com.baidu.hugegraph.computer.core.receiver.edge.EdgeRecvPartitionTest;
+import com.baidu.hugegraph.computer.core.receiver.message.MessageRecvPartitionTest;
+import com.baidu.hugegraph.computer.core.receiver.vertex.VertexRecvPartitionTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     ReceiveManagerTest.class,
-    BuffersTest.class,
-    VertexPartitionBufferTest.class,
-    EdgePartitionBufferTest.class,
-    MessagePartitionBufferTest.class
+    RecvMessageBuffersTest.class,
+    VertexRecvPartitionTest.class,
+    EdgeRecvPartitionTest.class,
+    MessageRecvPartitionTest.class
 })
 public class ReceiverTestSuite {
 }

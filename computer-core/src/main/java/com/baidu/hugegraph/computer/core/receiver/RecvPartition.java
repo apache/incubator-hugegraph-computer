@@ -34,31 +34,31 @@ import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
  * sorting the buffers to file. The type of data may be vertex, edge, and
  * message.
  */
-public abstract class PartitionBuffer {
+public abstract class RecvPartition {
 
     // Used to receive buffers.
-    protected Buffers<byte[]> receive;
+    protected RecvMessageBuffers receive;
     // Used to sort the buffers that reach threshold.
-    protected Buffers<byte[]> sort;
+    protected RecvMessageBuffers sort;
 
-    private final List<String> files;
+    private final List<String> outputFiles;
     private final DataFileGenerator fileGenerator;
     private final int superstep;
 
-    public PartitionBuffer(Config config,
-                           DataFileGenerator fileGenerator,
-                           int superstep) {
+    public RecvPartition(Config config,
+                         DataFileGenerator fileGenerator,
+                         int superstep) {
         long buffersLimit = config.get(
              ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT);
         long sortTimeout = config.get(ComputerOptions.WORKER_SORT_TIMEOUT);
-        this.receive = new Buffers<>(buffersLimit, sortTimeout);
-        this.sort = new Buffers<>(buffersLimit, sortTimeout);
+        this.receive = new RecvMessageBuffers(buffersLimit, sortTimeout);
+        this.sort = new RecvMessageBuffers(buffersLimit, sortTimeout);
         /*
          * Set the sort sorted, so the first time call sort.waitSorted() can
          * return immediately.
          */
         this.sort.signalSorted();
-        this.files = new ArrayList<>();
+        this.outputFiles = new ArrayList<>();
         this.fileGenerator = fileGenerator;
         this.superstep = superstep;
     }
@@ -67,10 +67,8 @@ public abstract class PartitionBuffer {
      * Only one thread can call this method.
      */
     public synchronized void addBuffer(ManagedBuffer buffer) {
-        // TODO: does not use copy
-        byte[] bytes = buffer.copyToByteArray();
-        this.receive.addBuffer(bytes, bytes.length);
-        if (this.receive.isFull()) {
+        this.receive.addBuffer(buffer);
+        if (this.receive.full()) {
             this.sort.waitSorted();
             this.swap();
             this.sortBuffers(this.sort);
@@ -78,7 +76,7 @@ public abstract class PartitionBuffer {
     }
 
     public List<String> onDiskFiles() {
-        return this.files;
+        return this.outputFiles;
     }
 
     /**
@@ -92,17 +90,17 @@ public abstract class PartitionBuffer {
     protected abstract String type();
 
     // TODO: use another thread to sort buffers.
-    private void sortBuffers(Buffers<byte[]> buffers) {
+    private void sortBuffers(RecvMessageBuffers buffers) {
         Combiner<?> combiner = this.combiner();
         // TODO: use directory instead of file.
         File file = this.fileGenerator.nextFile(type(), this.superstep);
         // TODO: sort the buffers to file.
-        this.files.add(file.getAbsolutePath());
+        this.outputFiles.add(file.getAbsolutePath());
         buffers.signalSorted();
     }
 
     private void swap() {
-        Buffers<byte[]> tmp = this.receive;
+        RecvMessageBuffers tmp = this.receive;
         this.receive = this.sort;
         this.sort = tmp;
     }

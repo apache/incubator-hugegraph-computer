@@ -30,21 +30,22 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class BuffersTest {
+public class RecvMessageBuffersTest {
 
     @Test
     public void testAddBuffer() {
         long threshold = 1024L;
         byte[] bytes = new byte[100];
         long maxWaitTime = 1000L;
-        Buffers<byte[]> buffers = new Buffers<>(threshold, maxWaitTime);
+        RecvMessageBuffers<byte[]>
+                buffers = new RecvMessageBuffers<>(threshold, maxWaitTime);
         for (int i = 0; i < 10; i++) {
             buffers.addBuffer(bytes, bytes.length);
         }
-        Assert.assertFalse(buffers.isFull());
+        Assert.assertFalse(buffers.full());
         Assert.assertEquals(1000L, buffers.sumBytes());
         buffers.addBuffer(bytes, bytes.length);
-        Assert.assertTrue(buffers.isFull());
+        Assert.assertTrue(buffers.full());
 
         // Sort buffer
         List<byte[]> list = buffers.list();
@@ -55,9 +56,9 @@ public class BuffersTest {
         for (int i = 0; i < 10; i++) {
             buffers.addBuffer(bytes, bytes.length);
         }
-        Assert.assertFalse(buffers.isFull());
+        Assert.assertFalse(buffers.full());
         buffers.addBuffer(bytes, bytes.length);
-        Assert.assertTrue(buffers.isFull());
+        Assert.assertTrue(buffers.full());
 
         // Sort buffer
         List<byte[]> list2 = buffers.list();
@@ -69,7 +70,8 @@ public class BuffersTest {
         long threshold = 1024L;
         byte[] bytes = new byte[100];
         long maxWaitTime = 1000L;
-        Buffers<byte[]> buffers = new Buffers<>(threshold, maxWaitTime);
+        RecvMessageBuffers<byte[]>
+                buffers = new RecvMessageBuffers<>(threshold, maxWaitTime);
         for (int i = 0; i < 10; i++) {
             buffers.addBuffer(bytes, bytes.length);
         }
@@ -93,7 +95,8 @@ public class BuffersTest {
         long threshold = 1024L;
         byte[] bytes = new byte[100];
         long maxWaitTime = 1000L;
-        Buffers<byte[]> buffers = new Buffers<>(threshold, maxWaitTime);
+        RecvMessageBuffers<byte[]>
+                buffers = new RecvMessageBuffers<>(threshold, maxWaitTime);
         for (int i = 0; i < 10; i++) {
             buffers.addBuffer(bytes, bytes.length);
         }
@@ -110,7 +113,8 @@ public class BuffersTest {
         long threshold = 1024L;
         byte[] bytes = new byte[100];
         long maxWaitTime = 1000L;
-        Buffers<byte[]> buffers = new Buffers<>(threshold, maxWaitTime);
+        RecvMessageBuffers<byte[]>
+                buffers = new RecvMessageBuffers<>(threshold, maxWaitTime);
         for (int i = 0; i < 10; i++) {
             buffers.addBuffer(bytes, bytes.length);
         }

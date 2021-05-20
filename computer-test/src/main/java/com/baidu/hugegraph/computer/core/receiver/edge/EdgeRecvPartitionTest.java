@@ -33,7 +33,7 @@ import com.baidu.hugegraph.computer.core.receiver.PartitionBufferUtil;
 import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.config.RpcOptions;
 
-public class EdgePartitionBufferTest {
+public class EdgeRecvPartitionTest {
 
     @Test
     public void testEdgePartitionBuffer() {
@@ -50,7 +50,7 @@ public class EdgePartitionBufferTest {
         FileUtils.deleteQuietly(new File("data_dir2"));
         DataFileManager dataFileManager = new DataFileManager();
         dataFileManager.init(config);
-        EdgePartitionBuffer partition = new EdgePartitionBuffer(
+        EdgeRecvPartition partition = new EdgeRecvPartition(
                                             config,
                                             dataFileManager);
         Assert.assertEquals("edge", partition.type());

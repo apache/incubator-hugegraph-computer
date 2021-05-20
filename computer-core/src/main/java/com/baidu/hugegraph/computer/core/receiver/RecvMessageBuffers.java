@@ -23,47 +23,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
-import com.google.common.collect.ImmutableList;
 
-public class Buffers<T> {
+public class RecvMessageBuffers {
 
     /*
      * The threshold is not hard limit. For performance, it checks
      * if the sumBytes >= threshold after {@link #addBuffer(T, long)}.
      */
     private long threshold;
-    private long sumBytes;
-    private List<T> list;
+    private long totalBytes;
+
+    private List<byte[]> buffers;
     private BarrierEvent event;
     private long sortTimeout;
 
-    public Buffers(long threshold, long sortTimeout) {
-        this.sumBytes = 0L;
-        this.list = new ArrayList<>();
+    public RecvMessageBuffers(long threshold, long sortTimeout) {
+        this.totalBytes = 0L;
         this.event = new BarrierEvent();
         this.threshold = threshold;
         this.sortTimeout = sortTimeout;
+        this.buffers= new ArrayList<>();
     }
 
-    public void addBuffer(T data, long size) {
-        this.list.add(data);
-        this.sumBytes += size;
+    public void addBuffer(ManagedBuffer data) {
+        /*
+         * TODO: does not use copy. Develop new type of RandomAccessInput
+         *  direct read from ManagedBuffer.
+         */
+        byte[] bytes = data.copyToByteArray();
+        this.buffers.add(bytes);
+        this.totalBytes += bytes.length;
     }
 
-    public boolean isFull() {
-        return this.sumBytes >= this.threshold;
+    public boolean full() {
+        return this.totalBytes >= this.threshold;
     }
 
-    public List<T> list() {
-        return ImmutableList.copyOf(this.list);
+    public List<RandomAccessInput> buffers() {
+        List<RandomAccessInput> inputs = new ArrayList<>(this.buffers.size());
+        for (byte[] buffer : this.buffers) {
+            inputs.add(new UnsafeBytesInput(buffer));
+        }
+        return inputs;
     }
 
     /**
      * Wait the buffers to be sorted.
      */
     public void waitSorted() {
-        if (this.list.size() == 0) {
+        if (this.buffers.size() == 0) {
             return;
         }
         try {
@@ -80,12 +92,12 @@ public class Buffers<T> {
     }
 
     public void signalSorted() {
-        this.list.clear();
-        this.sumBytes = 0L;
+        this.buffers.clear();
+        this.totalBytes = 0L;
         this.event.signalAll();
     }
 
     public long sumBytes() {
-        return this.sumBytes;
+        return this.totalBytes;
     }
 }

@@ -26,7 +26,7 @@ import io.netty.buffer.Unpooled;
 
 public class PartitionBufferUtil {
 
-    public static void addBuffer(PartitionBuffer partition, int length) {
+    public static void addBuffer(RecvPartition partition, int length) {
         byte[] bytes = new byte[length];
         ByteBuf buf = Unpooled.directBuffer(length);
         try {

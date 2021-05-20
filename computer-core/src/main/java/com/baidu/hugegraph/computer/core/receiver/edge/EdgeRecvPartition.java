@@ -22,15 +22,15 @@ package com.baidu.hugegraph.computer.core.receiver.edge;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.PartitionBuffer;
+import com.baidu.hugegraph.computer.core.receiver.RecvPartition;
 import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
-public class EdgePartitionBuffer extends PartitionBuffer {
+public class EdgeRecvPartition extends RecvPartition {
 
     public static final String TYPE = "edge";
 
-    public EdgePartitionBuffer(Config config,
-                               DataFileGenerator fileGenerator) {
+    public EdgeRecvPartition(Config config,
+                             DataFileGenerator fileGenerator) {
         super(config, fileGenerator, Constants.INPUT_SUPERSTEP);
     }
 
