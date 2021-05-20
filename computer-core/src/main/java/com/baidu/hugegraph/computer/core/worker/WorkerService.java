@@ -62,7 +62,6 @@ public class WorkerService {
     private Computation<?> computation;
     private Combiner<Value<?>> combiner;
 
-    @SuppressWarnings("unused")
     private ContainerInfo masterInfo;
 
     public WorkerService() {
@@ -94,7 +93,7 @@ public class WorkerService {
          */
         this.masterInfo = this.bsp4Worker.waitMasterInitDone();
 
-        this.initManagers();
+        this.initManagers(this.masterInfo);
 
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
@@ -241,16 +240,17 @@ public class WorkerService {
         return dataAddress;
     }
 
-    private void initManagers() {
+    private void initManagers(ContainerInfo masterInfo) {
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
         /*
-         * TODO: get rpc-server address from ContainerInfo masterInfo
-         *       config.hugeConfig().setProperty(this.masterInfo.hostname())
-         *       config.hugeConfig().setProperty(this.masterInfo.rpcPort())
-         * NOTE: this init() method will be called twice, ignore the 2nd call
+         * NOTE: this init() method will be called twice, will be ignored at
+         * the 2nd time call.
          */
+        WorkerRpcManager.updateRpcRemoteServerConfig(this.config,
+                                                     masterInfo.hostname(),
+                                                     masterInfo.rpcPort());
         rpcManager.init(this.config);
 
         WorkerInputManager inputManager = new WorkerInputManager();

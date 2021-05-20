@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.rpc;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
+import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.rpc.RpcClientProvider;
 import com.baidu.hugegraph.rpc.RpcConsumerConfig;
 
@@ -56,5 +57,16 @@ public class WorkerRpcManager implements Manager {
     public AggregateRpcService aggregateRpcService() {
         RpcConsumerConfig clientConfig = this.rpcClient.config();
         return clientConfig.serviceProxy(AggregateRpcService.class);
+    }
+
+    public static void updateRpcRemoteServerConfig(Config config,
+                                                   String host, int port) {
+        /*
+         * Update rpc remote-url to the global config.
+         * NOTE: this rpc-server address is from ContainerInfo.masterInfo,
+         * the masterInfo has bee got from BSP server.
+         */
+        String url = host + ":" + port;
+        config.hugeConfig().setProperty(RpcOptions.RPC_REMOTE_URL.name(), url);
     }
 }

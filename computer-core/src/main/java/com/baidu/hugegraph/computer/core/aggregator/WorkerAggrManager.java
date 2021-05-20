@@ -106,7 +106,8 @@ public class WorkerAggrManager implements Manager {
          * Generally called when computation.beforeSuperstep()
          */
         @SuppressWarnings("unchecked")
-        Aggregator<V> aggr = (Aggregator<V>) this.registerAggregators.get(name);
+        Aggregator<V> aggr = (Aggregator<V>)
+                             this.registerAggregators.copy(name);
         return aggr;
     }
 

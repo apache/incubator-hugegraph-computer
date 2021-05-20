@@ -45,7 +45,7 @@ public class RegisterAggregators {
         this.aggregators.put(name, aggregator);
     }
 
-    public Aggregator<? extends Value<?>> get(String name) {
+    public Aggregator<? extends Value<?>> copy(String name) {
         Aggregator<? extends Value<?>> aggregator = this.aggregators.get(name);
         E.checkArgument(aggregator != null,
                         "Can't get unregistered aggregator with name '%s'",
