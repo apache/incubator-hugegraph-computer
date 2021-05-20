@@ -47,8 +47,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     public void testWriteReadVertex() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value"
         );
 
         LongId longId = new LongId(100L);
@@ -73,14 +72,13 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     public void testWriteReadEdges() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value"
         );
         GraphFactory factory = graphFactory();
         Edges edges1 = factory.createEdges(3);
         edges1.add(factory.createEdge(new LongId(100)));
-        edges1.add(factory.createEdge(new LongId(200)));
-        edges1.add(factory.createEdge(new LongId(300)));
+        edges1.add(factory.createEdge(new LongId(200), "knows"));
+        edges1.add(factory.createEdge(new LongId(300), "watch", "1111"));
 
         byte[] bytes;
         try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
@@ -101,8 +99,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     public void testWriteReadEmptyEdges() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value"
         );
 
         Edges edges1 = graphFactory().createEdges(0);
@@ -125,8 +122,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     public void testWriteReadProperties() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value"
         );
 
         /*
@@ -195,8 +191,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     public void testWriteReadValue() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value"
         );
 
         LongValue longValue1 = new LongValue(100L);
@@ -220,8 +215,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         // Test IdValueList
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "ID_VALUE_LIST",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value"
         );
 
         LongId longId1 = new LongId(100L);

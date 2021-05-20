@@ -34,7 +34,7 @@ public class MessageSendPartitions {
 
     private static final Logger LOG = Log.logger(MessageSendPartitions.class);
 
-    // Each partition has a MessageSendPartition pbject
+    // Each partition has a MessageSendPartition object
     private final MessageSendPartition[] partitions;
 
     public MessageSendPartitions(ComputerContext context) {
@@ -53,7 +53,6 @@ public class MessageSendPartitions {
     public MessageSendPartition get(int partitionId) {
         if (partitionId < 0 || partitionId >= this.partitions.length)  {
             throw new ComputerException("Invalid partitionId %s", partitionId);
-
         }
         return this.partitions[partitionId];
     }

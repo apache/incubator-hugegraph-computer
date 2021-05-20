@@ -96,9 +96,17 @@ public class StreamGraphInput implements GraphInput {
 
     @Override
     public Edge readEdge() throws IOException {
-        // Write necessary
+        // Read necessary
         Id targetId = this.readId();
-        Edge edge = this.graphFactory.createEdge(targetId);
+        String label = null;
+        if (this.in.readBoolean()) {
+            label = this.in.readUTF();
+        }
+        String name = null;
+        if (this.in.readBoolean()) {
+            name = this.in.readUTF();
+        }
+        Edge edge = this.graphFactory.createEdge(targetId, label, name);
 
         if (this.config.outputEdgeProperties()) {
             Properties properties = this.readProperties();

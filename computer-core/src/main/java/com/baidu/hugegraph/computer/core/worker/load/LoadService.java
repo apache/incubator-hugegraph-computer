@@ -26,7 +26,6 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
@@ -131,7 +130,7 @@ public class LoadService {
             Id id = HugeConverter.convertId(vertex.id());
             Properties properties = HugeConverter.convertProperties(
                                     vertex.properties());
-            Vertex computerVertex = new DefaultVertex(graphFactory, id, null);
+            Vertex computerVertex = graphFactory.createVertex(id, null);
             computerVertex.properties(properties);
             return computerVertex;
         }
@@ -219,10 +218,10 @@ public class LoadService {
         private Edge convert(com.baidu.hugegraph.structure.graph.Edge edge) {
             edge = inputFilter.filter(edge);
             Id targetId = HugeConverter.convertId(edge.targetId());
-            String name = edge.name();
             Properties properties = HugeConverter.convertProperties(
                                     edge.properties());
-            Edge computerEdge = new DefaultEdge(graphFactory, targetId, name);
+            Edge computerEdge = graphFactory.createEdge(targetId, edge.label(),
+                                                        edge.name());
             computerEdge.properties(properties);
             return computerEdge;
         }

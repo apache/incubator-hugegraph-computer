@@ -75,8 +75,7 @@ public class UnitTestSuite {
 
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value"
         );
     }
 }

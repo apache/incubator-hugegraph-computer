@@ -77,6 +77,19 @@ public class CsvStructGraphOutput extends StructGraphOutput {
         this.writeId(edge.targetId());
         this.writeSplitter();
 
+        if (edge.label() != null) {
+            this.out.writeString(edge.label());
+        } else {
+            this.out.writeRawString("null");
+        }
+        this.writeSplitter();
+
+        if (edge.name() != null) {
+            this.out.writeString(edge.name());
+        } else {
+            this.out.writeRawString("null");
+        }
+
         if (this.config.outputEdgeProperties()) {
             this.writeSplitter();
             this.writeProperties(edge.properties());

@@ -87,14 +87,6 @@ public class ComputerOptions extends OptionHolder {
                     "value"
             );
 
-    public static final ConfigOption<String> EDGES_NAME =
-            new ConfigOption<>(
-                    "algorithm.edges_name",
-                    "The algorithm value name of edges",
-                    disallowEmpty(),
-                    "value"
-            );
-
     public static final ConfigOption<String> INPUT_SOURCE_TYPE =
             new ConfigOption<>(
                     "input.source_type",
@@ -151,8 +143,17 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigConvOption<String, EdgeFrequency>
             INPUT_EDGE_FREQ = new ConfigConvOption<>(
                     "input.edge_freq",
-                    "The frequency of edges can exist between two vertices.",
-                    allowValues("SINGLE", "SINGLE_PER_LABEL", "MULTI"),
+                    "The frequency of edges can exist between a pair of " +
+                    "vertices, allowed values: [SINGLE, SINGLE_PER_LABEL, " +
+                    "MULTIPLE]. SINGLE means that only one edge can exist " +
+                    "between a pair of vertices, use sourceId + targetId to " +
+                    "identify it; SINGLE_PER_LABEL means that each edge " +
+                    "label can exist one edge between a pair of vertices, " +
+                    "use sourceId + edgelabel + targetId to identify it; " +
+                    "MULTIPLE means that many edge can exist between a pair " +
+                    "of vertices, use sourceId + edgelabel + sortValues + " +
+                    "targetId to identify it.",
+                    allowValues("SINGLE", "SINGLE_PER_LABEL", "MULTIPLE"),
                     EdgeFrequency::valueOf,
                     "SINGLE"
             );
@@ -160,8 +161,9 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
             new ConfigOption<>(
                     "input.max_edges_in_one_vertex",
-                    "The maximum number of edges allowed to be attached " +
-                    "to a vertex object.",
+                    "The maximum number of adjacent edges allowed to be " +
+                    "attached to a vertex, the adjacent edges will be " +
+                    "stored and transferred together as a batch unit.",
                     positiveInt(),
                     200
             );
@@ -226,8 +228,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
             VALUE_TYPE.name(),
-            VALUE_NAME.name(),
-            EDGES_NAME.name()
+            VALUE_NAME.name()
     );
 
     public static final ConfigOption<String> JOB_ID =
@@ -379,8 +380,9 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> WRITE_BUFFER_THRESHOLD =
             new ConfigOption<>(
                     "worker.write_buffer_threshold",
-                    "The threshold of write buffer that used to store " +
-                    "vertex or message, exceeding it will trigger sorting.",
+                    "The threshold of write buffer, exceeding it will " +
+                    "trigger sorting, the write buffer is used to store " +
+                    "vertex or message.",
                     positiveInt(),
                     (int) (50 * Bytes.KB)
             );

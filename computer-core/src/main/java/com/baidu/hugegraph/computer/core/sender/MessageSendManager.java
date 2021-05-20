@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.worker;
+package com.baidu.hugegraph.computer.core.sender;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -31,25 +31,23 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.graph.partition.Partitioner;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
+import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.computer.core.sender.MessageSendPartition;
-import com.baidu.hugegraph.computer.core.sender.MessageSendPartitions;
-import com.baidu.hugegraph.computer.core.sender.SortedBufferMessage;
-import com.baidu.hugegraph.computer.core.sender.SortedBufferQueue;
-import com.baidu.hugegraph.computer.core.sender.SortedBufferQueuePool;
-import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
+import com.baidu.hugegraph.computer.core.worker.DataClientManager;
 import com.baidu.hugegraph.util.Log;
 
 public class MessageSendManager implements Manager {
 
     public static final Logger LOG = Log.logger(MessageSendManager.class);
 
-    private static final String NAME = "message_send";
+    public static final String NAME = "message_send";
 
     // TODO: 这个名字实在是太奇怪了，无法忍受
     private final MessageSendPartitions sendPartitions;
@@ -115,6 +113,10 @@ public class MessageSendManager implements Manager {
                           "Failed to write vertex(MessageType=%s)", e, type);
             }
         }
+    }
+
+    public void sendMessage(Id target, Value<?> value) {
+
     }
 
     /**

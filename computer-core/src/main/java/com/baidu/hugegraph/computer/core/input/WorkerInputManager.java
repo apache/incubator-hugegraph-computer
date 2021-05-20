@@ -28,9 +28,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
-import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
-import com.baidu.hugegraph.computer.core.worker.DataClientManager;
-import com.baidu.hugegraph.computer.core.worker.MessageSendManager;
+import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.computer.core.worker.load.LoadService;
 
@@ -38,14 +36,20 @@ public class WorkerInputManager implements Manager {
 
     public static final String NAME = "worker_input";
 
+    /*
+     * Fetch vertices and edges from the data source and convert them
+     * to computer-vertices and computer-edges
+     */
     private final LoadService loadService;
+    /**
+     *
+     */
     private final MessageSendManager sendManager;
 
-    public WorkerInputManager(ComputerContext context, SortManager sortManager,
-                              DataClientManager clientManager) {
+    public WorkerInputManager(ComputerContext context,
+                              MessageSendManager sendManager) {
         this.loadService = new LoadService(context);
-        this.sendManager = new MessageSendManager(context, sortManager,
-                                                  clientManager);
+        this.sendManager = sendManager;
     }
 
     @Override
@@ -69,6 +73,11 @@ public class WorkerInputManager implements Manager {
         this.loadService.rpcService(rpcService);
     }
 
+    /*
+     * Load vertices and edges parallel.
+     * When this method finish, it means that all vertices and edges are sent,
+     * but there is no guarantee that all of them has been received.
+     */
     public void loadGraph() {
         this.sendManager.startSend(MessageType.VERTEX);
         Iterator<Vertex> iterator = this.loadService.createIteratorFromVertex();
@@ -85,6 +94,8 @@ public class WorkerInputManager implements Manager {
             this.sendManager.sendVertex(MessageType.EDGE, vertex);
         }
         this.sendManager.finishSend(MessageType.EDGE);
+
+        // TODO: Need wait all data has been received by receiver?
     }
 
     public WorkerStat mergeGraph() {

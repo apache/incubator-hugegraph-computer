@@ -50,6 +50,10 @@ public interface GraphFactory {
 
     Edge createEdge(Id targetId);
 
+    Edge createEdge(Id targetId, String label);
+
+    Edge createEdge(Id targetId, String label, String name);
+
     Properties createProperties();
 
     <V> List<V> createList();

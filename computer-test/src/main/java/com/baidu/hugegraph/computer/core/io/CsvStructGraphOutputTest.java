@@ -47,7 +47,6 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
@@ -81,7 +80,6 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexWithEdges() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "true",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
@@ -95,8 +93,8 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         idValueList.add(new LongId(998L).idValue());
         idValueList.add(new LongId(999L).idValue());
         Vertex vertex = factory.createVertex(longId, idValueList);
-        vertex.addEdge(factory.createEdge(new LongId(200)));
-        vertex.addEdge(factory.createEdge(new LongId(300)));
+        vertex.addEdge(factory.createEdge(new LongId(200), "knows"));
+        vertex.addEdge(factory.createEdge(new LongId(300), "watch", "1111"));
 
         String fileName = "output2.csv";
         File file = new File(fileName);
@@ -108,9 +106,10 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             output.writeVertex(vertex);
             output.close();
 
-            String json = FileUtils.readFileToString(file);
-            Assert.assertEquals("100,[998,999],[{200},{300}]" +
-                                System.lineSeparator(), json);
+            String text = FileUtils.readFileToString(file);
+            Assert.assertEquals("100,[998,999],[{200,\"knows\",null}," +
+                                "{300,\"watch\",\"1111\"}]" +
+                                System.lineSeparator(), text);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -120,7 +119,6 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexWithProperties() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",
@@ -159,10 +157,10 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             output.writeVertex(vertex);
             output.close();
 
-            String json = FileUtils.readFileToString(file);
+            String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[[66],[998,999]],{true,127,-0.01,16383," +
                                 "100,0.1,1000000,10000000000}" +
-                                System.lineSeparator(), json);
+                                System.lineSeparator(), text);
         } finally {
             FileUtils.deleteQuietly(file);
         }

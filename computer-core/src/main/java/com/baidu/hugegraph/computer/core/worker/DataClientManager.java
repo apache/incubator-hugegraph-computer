@@ -25,9 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.sender.SortedBufferMessage;
-import com.baidu.hugegraph.computer.core.sender.SortedBufferQueue;
-import com.baidu.hugegraph.computer.core.sender.SortedBufferQueuePool;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -36,6 +33,9 @@ import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferMessage;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferQueue;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferQueuePool;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.util.Log;
 
@@ -45,7 +45,7 @@ public class DataClientManager implements Manager {
 
     public static final String NAME = "data_client";
 
-    private final ConnectionManager connectionManager;
+    private final ConnectionManager connManager;
     // The thread used to send vertex/message, only one is enough
     private final SendExecutor sendExecutor;
     // Each target worker has a TransportClient
@@ -56,8 +56,8 @@ public class DataClientManager implements Manager {
     private final AtomicInteger busyClientCounter;
     private final BarrierEvent notBusyEvent;
 
-    public DataClientManager(ConnectionManager connectionManager) {
-        this.connectionManager = connectionManager;
+    public DataClientManager(ConnectionManager connManager) {
+        this.connManager = connManager;
         this.sendExecutor = new SendExecutor();
         this.clients = new ConcurrentHashMap<>();
         this.queuePool = null;
@@ -73,44 +73,21 @@ public class DataClientManager implements Manager {
 
     @Override
     public void init(Config config) {
-        ClientHandler availableHandler = new ClientHandler() {
-            @Override
-            public void sendAvailable(ConnectionId connectionId) {
-                LOG.debug("Channel for connectionId {} is available",
-                          connectionId);
-                notBusyEvent.signalAll();
-            }
-
-            @Override
-            public void channelActive(ConnectionId connectionId) {
-            }
-
-            @Override
-            public void channelInactive(ConnectionId connectionId) {
-            }
-
-            @Override
-            public void exceptionCaught(TransportException cause,
-                                        ConnectionId connectionId) {
-                LOG.error("Chananel for connectionId {} occurred exception",
-                          connectionId, cause);
-                connectionManager.closeClient(connectionId);
-            }
-        };
-        this.connectionManager.initClientManager(config, availableHandler);
+        ClientHandler clientHandler = new DataClientHandler();
+        this.connManager.initClientManager(config, clientHandler);
         this.sendExecutor.start();
     }
 
     @Override
     public void close(Config config) {
         this.sendExecutor.interrupt();
-        this.connectionManager.shutdownClients();
+        this.connManager.shutdownClients();
     }
 
     public void connect(int workerId, String hostname, int dataPort) {
         try {
-            TransportClient client = this.connectionManager.getOrCreateClient(
-                                                            hostname, dataPort);
+            TransportClient client = this.connManager.getOrCreateClient(
+                                     hostname, dataPort);
             this.clients.put(workerId, client);
         } catch (TransportException e) {
             throw new ComputerException("Failed to connect worker server {}:{}",
@@ -132,6 +109,31 @@ public class DataClientManager implements Manager {
         } catch (InterruptedException e) {
             throw new ComputerException("Waiting any client not busy " +
                                         "was interrupted");
+        }
+    }
+
+    private class DataClientHandler implements ClientHandler {
+
+        @Override
+        public void sendAvailable(ConnectionId connectionId) {
+            LOG.debug("Channel for connectionId {} is available", connectionId);
+            notBusyEvent.signalAll();
+        }
+
+        @Override
+        public void channelActive(ConnectionId connectionId) {
+        }
+
+        @Override
+        public void channelInactive(ConnectionId connectionId) {
+        }
+
+        @Override
+        public void exceptionCaught(TransportException cause,
+                                    ConnectionId connectionId) {
+            LOG.error("Chananel for connectionId {} occurred exception",
+                      connectionId, cause);
+            connManager.closeClient(connectionId);
         }
     }
 
@@ -174,16 +176,20 @@ public class DataClientManager implements Manager {
             }
 
             SortedBufferMessage message = queue.peek();
-            if (message == SortedBufferMessage.START) {
-                client.startSession();
-                LOG.info("Start session linked to {}", workerId);
-                queue.poll();
-                return;
-            } else if (message == SortedBufferMessage.END) {
-                client.finishSession();
-                LOG.info("Finish session linked to {}", workerId);
-                queue.poll();
-                return;
+            switch (message.messageType()) {
+                case START:
+                    client.startSession();
+                    LOG.info("Start session linked to {}", workerId);
+                    queue.poll();
+                    break;
+                case FINISH:
+                    client.finishSession();
+                    LOG.info("Finish session linked to {}", workerId);
+                    queue.poll();
+                    break;
+                default:
+                    // It's data message, continue send
+                    break;
             }
 
             if (client.send(message.messageType(), message.partitionId(),

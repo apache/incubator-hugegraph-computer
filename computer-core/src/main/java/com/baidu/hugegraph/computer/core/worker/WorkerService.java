@@ -33,10 +33,10 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -46,6 +46,7 @@ import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
+import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
@@ -263,13 +264,19 @@ public class WorkerService {
         SortManager sortManager = new SortManager(this.context);
         this.managers.add(sortManager);
 
-        ConnectionManager connectionManager = new TransportConnectionManager();
-        DataClientManager clientManager = new DataClientManager(
-                                          connectionManager);
+        // It doesn't implement Manager interface
+        ConnectionManager connManager = new TransportConnectionManager();
+
+        DataClientManager clientManager = new DataClientManager(connManager);
         this.managers.add(clientManager);
 
+        MessageSendManager sendManager = new MessageSendManager(this.context,
+                                                                sortManager,
+                                                                clientManager);
+        this.managers.add(sendManager);
+
         WorkerInputManager inputManager = new WorkerInputManager(this.context,
-                                          sortManager, clientManager);
+                                                                 sendManager);
         inputManager.service(rpcManager.inputSplitService());
         this.managers.add(inputManager);
 
@@ -292,9 +299,6 @@ public class WorkerService {
      */
     private SuperstepStat inputstep() {
         LOG.info("{} WorkerService inputstep started", this);
-        /*
-         * TODO: Load vertices and edges parallel.
-         */
         WorkerInputManager manager = this.managers.get(WorkerInputManager.NAME);
         manager.loadGraph();
 
@@ -348,12 +352,15 @@ public class WorkerService {
         private final int superstep;
         private final SuperstepStat superstepStat;
         private final WorkerAggrManager aggrManager;
+        private final MessageSendManager sendManager;
 
         private SuperstepContext(int superstep, SuperstepStat superstepStat) {
             this.superstep = superstep;
             this.superstepStat = superstepStat;
             this.aggrManager = WorkerService.this.managers.get(
                                WorkerAggrManager.NAME);
+            this.sendManager = WorkerService.this.managers.get(
+                               MessageSendManager.NAME);
         }
 
         @Override
@@ -379,14 +386,15 @@ public class WorkerService {
 
         @Override
         public void sendMessage(Id target, Value<?> value) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
+            this.sendManager.sendMessage(target, value);
         }
 
         @Override
         public void sendMessageToAllEdges(Vertex vertex, Value<?> value) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
+            // Copied from ComptutaionContext
+            for (Edge edge : vertex.edges()) {
+                this.sendMessage(edge.targetId(), value);
+            }
         }
 
         @Override

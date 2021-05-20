@@ -17,25 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sender;
+package com.baidu.hugegraph.computer.core.worker;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 
-public class MessageSendPartition {
+public class WorkerExecutor {
 
-    // Any object else?
-    private final WriteBuffers buffers;
+    public static void main(String[] args) {
+        args = new String[]{
+            "algorithm.value_name", "rank",
+            "algorithm.value_type", "DOUBLE",
+            "rpc.remote_url", "127.0.0.1:8090"
+        };
 
-    public MessageSendPartition(ComputerContext context) {
-        Config config = context.config();
-        int threshold = config.get(ComputerOptions.WRITE_BUFFER_THRESHOLD);
-        int capacity = config.get(ComputerOptions.WRITE_BUFFER_CAPACITY);
-        this.buffers = new WriteBuffers(threshold, capacity);
-    }
-
-    public WriteBuffers writeBuffer() {
-        return this.buffers;
+        ComputerContextUtil.initContext(args);
+        ComputerContext context = ComputerContext.instance();
+        WorkerService service = new WorkerService();
+        service.init(context.config());
+        service.execute();
+        service.close();
     }
 }

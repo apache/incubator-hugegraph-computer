@@ -150,7 +150,6 @@ public class DefaultAllocatorTest extends UnitTestBase {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD, capacityValue
         );
         Allocator allocator = context().allocator();

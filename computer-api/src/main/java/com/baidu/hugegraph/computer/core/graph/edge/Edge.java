@@ -25,13 +25,17 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 
 public interface Edge extends Recyclable {
 
+    Id targetId();
+
+    void targetId(Id targetId);
+
     String label();
 
-    Id targetId();
+    void label(String label);
 
     String name();
 
-    void targetId(Id targetId);
+    void name(String name);
 
     Properties properties();
 

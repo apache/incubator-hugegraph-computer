@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -27,6 +26,7 @@ import org.apache.commons.configuration.MapConfiguration;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
@@ -38,7 +38,7 @@ public final class DefaultConfig implements Config {
     private final HotConfig hotConfig;
 
     public DefaultConfig(String... options) {
-        this(convertToMap(options));
+        this(ComputerContextUtil.convertToMap(options));
     }
 
     public DefaultConfig(Map<String, String> options) {
@@ -64,8 +64,6 @@ public final class DefaultConfig implements Config {
         HotConfig hotConfig = new HotConfig();
         hotConfig.vertexValueName(
                   allConfig.get(ComputerOptions.VALUE_NAME));
-        hotConfig.edgeValueName(
-                  allConfig.get(ComputerOptions.EDGES_NAME));
         hotConfig.valueType(ValueType.valueOf(
                   allConfig.get(ComputerOptions.VALUE_TYPE)));
 
@@ -194,11 +192,6 @@ public final class DefaultConfig implements Config {
     }
 
     @Override
-    public String edgeValueName() {
-        return this.hotConfig.edgeValueName();
-    }
-
-    @Override
     public ValueType valueType() {
         return this.hotConfig.valueType();
     }
@@ -216,20 +209,5 @@ public final class DefaultConfig implements Config {
     @Override
     public Boolean outputEdgeProperties() {
         return this.hotConfig.outputEdgeProperties();
-    }
-
-    private static Map<String, String> convertToMap(String... options) {
-        if (options == null || options.length == 0) {
-            throw new ComputerException("Config options can't be null " +
-                                        "or empty");
-        }
-        if ((options.length & 0x01) == 1) {
-            throw new ComputerException("Config options length must be even");
-        }
-        Map<String, String> map = new HashMap<>();
-        for (int i = 0; i < options.length; i += 2) {
-            map.put(options[i], options[i + 1]);
-        }
-        return map;
     }
 }

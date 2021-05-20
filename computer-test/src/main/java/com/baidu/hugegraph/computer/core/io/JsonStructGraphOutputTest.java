@@ -47,7 +47,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
@@ -82,7 +81,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexWithEdges() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "true",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
@@ -96,8 +94,8 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         idValueList.add(new LongId(998L).idValue());
         idValueList.add(new LongId(999L).idValue());
         Vertex vertex = factory.createVertex(longId, idValueList);
-        vertex.addEdge(factory.createEdge(new LongId(200)));
-        vertex.addEdge(factory.createEdge(new LongId(300)));
+        vertex.addEdge(factory.createEdge(new LongId(200), "knows"));
+        vertex.addEdge(factory.createEdge(new LongId(300), "watch", "1111"));
 
         String fileName = "output.json";
         File file = new File(fileName);
@@ -111,8 +109,10 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
-                                "\"adjacent_edges\":[{\"target_id\":200}," +
-                                "{\"target_id\":300}]}" +
+                                "\"adjacent_edges\":[{\"target_id\":200," +
+                                "\"label\":\"knows\",\"name\":null}," +
+                                "{\"target_id\":300,\"label\":\"watch\"," +
+                                "\"name\":\"1111\"}]}" +
                                 System.lineSeparator(), json);
             dos.close();
         } finally {
@@ -124,7 +124,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexWithProperties() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",

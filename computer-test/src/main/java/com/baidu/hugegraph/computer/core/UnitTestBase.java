@@ -106,8 +106,8 @@ public class UnitTestBase {
                                       Object... options) {
         Object[] requiredOptions = new Object[] {
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
-            ComputerOptions.VALUE_TYPE, "LONG"};
+            ComputerOptions.VALUE_TYPE, "LONG"
+        };
         Object[] allOptions = new Object[requiredOptions.length +
                                          options.length];
         System.arraycopy(requiredOptions, 0, allOptions, 0,

@@ -26,19 +26,19 @@ public enum EdgeFrequency {
 
     /**
      * Only one edge can exist between two vertices,
-     * use sourceId + target to identify it.
+     * use sourceId + targetId to identify it.
      */
     SINGLE,
 
     /**
      * Each edge label can exist one edge between two vertices ,
-     * use sourceId + edgelabel + target to identify it.
+     * use sourceId + edgelabel + targetId to identify it.
      */
     SINGLE_PER_LABEL,
 
     /**
      * Multiple edge can exist between two vertices,
-     * use sourceId + edgelabel + sortValues + target to identify it.
+     * use sourceId + edgelabel + sortValues + targetId to identify it.
      */
     MULTIPLE
 }
