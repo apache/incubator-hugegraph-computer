@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
@@ -43,11 +42,9 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
 
 public class StoreTestUtil {
 
-    private static final Config CONFIG;
     public static final String FILE_DIR;
 
     static {
-        CONFIG = ComputerContext.instance().config();
         FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
     }
 
@@ -73,10 +70,10 @@ public class StoreTestUtil {
         return entries;
     }
 
-    public static void hgkvDirFromMap(List<Integer> map, String path)
-                                      throws IOException {
+    public static void hgkvDirFromMap(List<Integer> map, String path,
+                                      Config config) throws IOException {
         File file = new File(path);
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
+        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, config)) {
             List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
                 builder.write(entry);
@@ -88,11 +85,11 @@ public class StoreTestUtil {
         }
     }
 
-    public static File hgkvFileFromMap(List<Integer> map, String path)
-                                       throws IOException {
+    public static File hgkvFileFromMap(List<Integer> map, String path,
+                                       Config config) throws IOException {
         File file = new File(path);
 
-        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path, CONFIG)) {
+        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path, config)) {
             List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
                 builder.add(entry.key(), entry.value());

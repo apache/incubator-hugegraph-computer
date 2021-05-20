@@ -79,6 +79,9 @@ public class BufferedFileInput extends UnsafeBytesInput {
 
     @Override
     public void seek(long position) throws IOException {
+        if (this.position() == position) {
+            return;
+        }
         long bufferStart = this.fileOffset - this.limit();
         if (position >= bufferStart && position < this.fileOffset) {
             super.seek(position - bufferStart);
@@ -181,29 +184,29 @@ public class BufferedFileInput extends UnsafeBytesInput {
                                          (int) length, otherInput.buffer(),
                                          (int) otherOffset, (int) otherLength);
             } else {
-                long otherPosition = other.position();
+                long otherOldPosition = other.position();
                 other.seek(otherOffset);
                 byte[] bytes = other.readBytes((int) otherLength);
-                other.seek(otherPosition);
+                other.seek(otherOldPosition);
                 return BytesUtil.compare(this.buffer(), (int) offset,
                                          (int) length, bytes, 0,
                                          bytes.length);
             }
         } else {
-            long position = this.position();
+            long oldPosition = this.position();
             this.seek(offset);
             byte[] bytes1 = this.readBytes((int) length);
-            this.seek(position);
+            this.seek(oldPosition);
 
             if ((otherOffset + otherLength) <= otherInput.limit()) {
                 return BytesUtil.compare(bytes1, 0, bytes1.length,
                                          otherInput.buffer(), (int) otherOffset,
                                          (int) otherLength);
             } else {
-                long otherPosition = other.position();
+                long otherOldPosition = other.position();
                 other.seek(otherOffset);
                 byte[] bytes2 = other.readBytes((int) otherLength);
-                other.seek(otherPosition);
+                other.seek(otherOldPosition);
                 return BytesUtil.compare(bytes1, 0, bytes1.length,
                                          bytes2, 0, bytes2.length);
             }

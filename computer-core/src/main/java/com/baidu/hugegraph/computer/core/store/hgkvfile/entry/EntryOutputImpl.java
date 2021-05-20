@@ -34,11 +34,12 @@ public class EntryOutputImpl implements EntryOutput {
     }
 
     @Override
-    public KvEntryWriter writeEntry(Id key) throws IOException {
+    public KvEntryWriter writeEntry(Id key, boolean needSort)
+                                    throws IOException {
         // Write key
         this.writeData(key);
 
-        return new KvEntryWriterImpl(this.output);
+        return new KvEntryWriterImpl(this.output, needSort);
     }
 
     @Override

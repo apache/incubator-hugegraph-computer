@@ -19,12 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
 
-import java.io.FileNotFoundException;
-
-import javax.ws.rs.NotSupportedException;
-
-import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
-
 public abstract class AbstractHgkvFile implements HgkvFile {
 
     public static final byte PRIMARY_VERSION;
@@ -78,10 +72,5 @@ public abstract class AbstractHgkvFile implements HgkvFile {
     @Override
     public String magic() {
         return this.magic;
-    }
-
-    @Override
-    public BufferedFileOutput output() throws FileNotFoundException {
-        throw new NotSupportedException();
     }
 }

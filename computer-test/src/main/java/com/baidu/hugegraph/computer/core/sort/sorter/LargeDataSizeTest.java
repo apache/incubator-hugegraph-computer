@@ -80,7 +80,7 @@ public class LargeDataSizeTest {
 
         final long bufferSize = Bytes.MB;
         final int mergeBufferNum = 300;
-        final int dataSize = 100000000;
+        final int dataSize = 10000000;
         long value = 0;
 
         Random random = new Random();

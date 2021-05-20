@@ -133,8 +133,8 @@ public class SorterImpl implements Sorter {
 
         HgkvDirMerger merger = new HgkvDirMergerImpl(this.config);
         for (SelectedFiles result : results) {
-            merger.merge(result.inputs(), inputToEntries, result.output(),
-                         flusher);
+            merger.merge(
+                   result.inputs(), inputToEntries, result.output(), flusher);
         }
     }
 }

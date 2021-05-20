@@ -33,7 +33,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -55,11 +54,10 @@ public class HgkvFileTest {
     @BeforeClass
     public static void init() {
         FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
-        UnitTestBase.updateWithRequiredOptions(
+        CONFIG = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
         );
-        CONFIG = ComputerContext.instance().config();
     }
 
     @After
@@ -74,7 +72,7 @@ public class HgkvFileTest {
         String filePath = availableFilePath("1");
         File file = null;
         try {
-            file = StoreTestUtil.hgkvFileFromMap(data, filePath);
+            file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -87,7 +85,7 @@ public class HgkvFileTest {
         String filePath = availableFilePath("1");
         File file = null;
         try {
-            file = StoreTestUtil.hgkvFileFromMap(data, filePath);
+            file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
             // Open file
             HgkvFile hgkvFile = HgkvFileImpl.open(file.getPath());
             Assert.assertEquals(HgkvFileImpl.MAGIC, hgkvFile.magic());
@@ -134,7 +132,7 @@ public class HgkvFileTest {
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 HgkvFileImpl.open(finalTempFile);
             },
-            e -> Assert.assertTrue(e.getMessage().contains("Not exists")));
+            e -> Assert.assertTrue(e.getMessage().contains("not exists")));
         } finally {
             FileUtils.deleteQuietly(tempFile);
         }
@@ -145,7 +143,7 @@ public class HgkvFileTest {
         // The keys in the data must be ordered
         List<Integer> data = testData();
         String filePath = availableFilePath("1");
-        File file = StoreTestUtil.hgkvFileFromMap(data, filePath);
+        File file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
         try {
             HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath(),
                                                            false);

@@ -1,0 +1,155 @@
+/*
+ * Copyright 2017 HugeGraph Authors
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with this
+ * work for additional information regarding copyright ownership. The ASF
+ * licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+package com.baidu.hugegraph.computer.core.store;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
+import com.google.common.collect.ImmutableList;
+
+public class EntryOutputTest {
+
+    @Test
+    public void testWriteKvEntry() throws IOException {
+        List<Integer> entries = ImmutableList.of(1, 5,
+                                                 6, 6,
+                                                 2, 1,
+                                                 4, 8);
+        List<LongId> data = intListToLongIds(entries);
+
+        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        EntryOutput entryOutput = new EntryOutputImpl(output);
+
+        for (int i = 0; i < data.size(); ) {
+            LongId id = data.get(i++);
+            Writable value = data.get(i++);
+            entryOutput.writeEntry(id, value);
+        }
+
+        // Assert result
+        UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
+        EntryIterator iter = new EntriesInput(input);
+        SorterTestUtil.assertKvEntry(iter.next(), 1, 5);
+        SorterTestUtil.assertKvEntry(iter.next(), 6, 6);
+        SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
+        SorterTestUtil.assertKvEntry(iter.next(), 4, 8);
+    }
+
+    @Test
+    public void testSubKvNotNeedSort() throws IOException {
+        List<Integer> entries = ImmutableList.of(5,
+                                                 6, 6,
+                                                 2, 1,
+                                                 4, 8,
+                                                 1,
+                                                 2, 2,
+                                                 6, 1);
+        EntryIterator iter = new EntriesInput(inputFromEntries(entries, false));
+
+        // Assert entry1
+        KvEntry kvEntry1 = iter.next();
+        int key1 = StoreTestUtil.dataFromPointer(kvEntry1.key());
+        Assert.assertEquals(5, key1);
+        EntryIterator kvEntry1SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry1);
+        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 6, 6);
+        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 2, 1);
+        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 4, 8);
+        // Assert entry2
+        KvEntry kvEntry2 = iter.next();
+        int key2 = StoreTestUtil.dataFromPointer(kvEntry2.key());
+        Assert.assertEquals(1, key2);
+        EntryIterator kvEntry2SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry2);
+        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 2, 2);
+        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 6, 1);
+    }
+
+    @Test
+    public void testSubKvNeedSort() throws IOException {
+        List<Integer> entries = ImmutableList.of(5,
+                                                 6, 6,
+                                                 2, 1,
+                                                 4, 8,
+                                                 1,
+                                                 2, 2,
+                                                 6, 1);
+        EntryIterator iter = new EntriesInput(inputFromEntries(entries, true));
+
+        // Assert entry1
+        KvEntry kvEntry1 = iter.next();
+        int key1 = StoreTestUtil.dataFromPointer(kvEntry1.key());
+        Assert.assertEquals(5, key1);
+        EntryIterator kvEntry1SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry1);
+        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 2, 1);
+        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 4, 8);
+        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 6, 6);
+        // Assert entry2
+        KvEntry kvEntry2 = iter.next();
+        int key2 = StoreTestUtil.dataFromPointer(kvEntry2.key());
+        Assert.assertEquals(1, key2);
+        EntryIterator kvEntry2SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry2);
+        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 2, 2);
+        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 6, 1);
+    }
+
+    private static UnsafeBytesInput inputFromEntries(List<Integer> entries,
+                                                     boolean needSort)
+                                                     throws IOException {
+        List<LongId> data = intListToLongIds(entries);
+
+        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        EntryOutput entryOutput = new EntryOutputImpl(output);
+        int index = 0;
+        KvEntryWriter entry1 = entryOutput.writeEntry(data.get(index++),
+                                                      needSort);
+        entry1.writeSubKv(data.get(index++), data.get(index++));
+        entry1.writeSubKv(data.get(index++), data.get(index++));
+        entry1.writeSubKv(data.get(index++), data.get(index++));
+        entry1.writeFinish();
+        KvEntryWriter entry2 = entryOutput.writeEntry(data.get(index++),
+                                                      needSort);
+        entry2.writeSubKv(data.get(index++), data.get(index++));
+        entry2.writeSubKv(data.get(index++), data.get(index));
+        entry2.writeFinish();
+
+        return EntriesUtil.inputFromOutput(output);
+    }
+
+    private static List<LongId> intListToLongIds(List<Integer> list) {
+        return list.stream()
+                   .map(LongId::new)
+                   .collect(Collectors.toList());
+    }
+}

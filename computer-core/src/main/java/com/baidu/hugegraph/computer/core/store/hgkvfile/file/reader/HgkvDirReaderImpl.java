@@ -68,6 +68,7 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
                                 throws IOException {
             this.segments = hgkvDir.segments().iterator();
             this.numEntries = hgkvDir.numEntries();
+            this.kvIter = null;
             this.useInlinePointer = useInlinePointer;
         }
 

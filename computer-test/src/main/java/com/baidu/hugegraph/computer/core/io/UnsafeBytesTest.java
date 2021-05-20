@@ -418,7 +418,7 @@ public class UnsafeBytesTest {
         output.write(input, 0, input.available());
         Assert.assertEquals(uuid, new String(output.toByteArray()));
 
-        // Input class isn't  UnsafeBytesInput
+        // Input class isn't UnsafeBytesInput
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
         BufferedFileOutput fileOutput = null;
         BufferedFileInput fileInput = null;

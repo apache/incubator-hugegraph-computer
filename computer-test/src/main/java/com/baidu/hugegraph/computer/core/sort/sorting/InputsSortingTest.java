@@ -19,13 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
 import com.baidu.hugegraph.testutil.Assert;
+import com.google.common.collect.ImmutableList;
 
 public class InputsSortingTest {
 
@@ -56,6 +59,24 @@ public class InputsSortingTest {
 
         sorting = new LoserTreeInputsSorting<>(TestData.dataEmpty());
         this.assertSorted(TestData.dataEmpty(), sorting);
+    }
+
+    @Test
+    public void testLoserTree() {
+        int size = 16;
+        List<List<Integer>> list = new ArrayList<>();
+        for (int i = 0; i < 16; i++) {
+            list.add(ImmutableList.of(1));
+        }
+
+        List<Iterator<Integer>> sources = list.stream()
+                                              .map(List::iterator)
+                                              .collect(Collectors.toList());
+        InputsSorting<Integer> tree = new LoserTreeInputsSorting<>(sources);
+        for (int i = 0; i < size; i++) {
+            Assert.assertTrue(tree.hasNext());
+            Assert.assertEquals(1, tree.next());
+        }
     }
 
     private void assertSorted(List<Iterator<Integer>> list,

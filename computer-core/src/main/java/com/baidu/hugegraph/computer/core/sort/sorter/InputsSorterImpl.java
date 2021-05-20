@@ -31,16 +31,16 @@ public class InputsSorterImpl implements InputsSorter {
 
     @Override
     public EntryIterator sort(List<EntryIterator> entries) throws IOException {
-        return new EntriesSorting(entries);
+        return new SortingEntries(entries);
     }
 
-    private static class EntriesSorting implements EntryIterator {
+    private static class SortingEntries implements EntryIterator {
 
         private final InputsSorting<KvEntry> inputsSorting;
         private final List<EntryIterator> sources;
         private boolean closed;
 
-        public EntriesSorting(List<EntryIterator> sources) {
+        public SortingEntries(List<EntryIterator> sources) {
             this.sources = sources;
             this.inputsSorting = SortingFactory.createSorting(sources);
             this.closed = false;

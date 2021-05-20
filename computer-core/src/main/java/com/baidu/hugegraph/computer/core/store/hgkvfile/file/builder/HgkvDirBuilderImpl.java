@@ -46,7 +46,7 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
         try {
             this.config = config;
             this.maxEntriesBytes = config.get(
-                                          ComputerOptions.HGKV_MAX_FILE_SIZE);
+                                   ComputerOptions.HGKV_MAX_FILE_SIZE);
             this.dir = HgkvDirImpl.create(path);
             this.fileId = 0;
             this.segmentBuilder = this.nextSegmentBuilder(this.dir, config);
@@ -59,15 +59,17 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
     @Override
     public void write(KvEntry entry) throws IOException {
         E.checkState(!this.finished,
-                     "build finished, can't continue to add data");
+                     "Can't write entry because it has been finished");
         E.checkArgument(entry != null && entry.key() != null &&
                         entry.value() != null,
-                        "entry or entry-values must not be empty");
+                        "Parameter entry must not be empty");
 
         Pointer key = entry.key();
         Pointer value = entry.value();
-        // If the segment size is larger than FILE_MAX_SIZE after add entry
-        // Stop build of the current segment and create a new segment.
+        /*
+         * If the segment size is larger than FILE_MAX_SIZE after add entry
+         * Stop build of the current segment and create a new segment.
+         */
         long entrySize = this.segmentBuilder.sizeOfEntry(key, value);
         long segmentSize = this.segmentBuilder.dataLength();
         if ((entrySize + segmentSize) > this.maxEntriesBytes) {

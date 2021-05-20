@@ -29,12 +29,13 @@ public interface EntryOutput {
     /**
      * Write entry with multiple sub-key and sub-value.
      * Used when write vertex with edges, each sub-key is target id of an edge,
-     * each sub-value is properties of an edge.
+     * each sub-value is the properties of an edge.
      * The output format:
      * | key length | key | total sub-entry length | sub-entry count |
-     * sub-key length | sub-key | sub-value length |
+     * | sub-key1 length | sub-key1 | sub-value1 length | sub-value1 |
+     * | sub-key2 length | sub-key2 | sub-value2 length | sub-value2 |
      */
-    KvEntryWriter writeEntry(Id key) throws IOException;
+    KvEntryWriter writeEntry(Id key, boolean needSort) throws IOException;
 
     /**
      * Write entry with single value.

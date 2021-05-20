@@ -147,9 +147,9 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
-    public static final ConfigOption<Integer> OUTPUT_EDGE_BATCH_SIZE =
+    public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
             new ConfigOption<>(
-                    "output.edge_batch_size",
+                    "input.max_edges_in_one_vertex",
                     "The number of edges of a vertex in kvEntry.",
                     positiveInt(),
                     500

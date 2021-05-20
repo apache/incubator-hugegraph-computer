@@ -180,7 +180,7 @@ public class SorterTest {
             } else {
                 map = map2;
             }
-            StoreTestUtil.hgkvDirFromMap(map, inputs.get(i));
+            StoreTestUtil.hgkvDirFromMap(map, inputs.get(i), CONFIG);
         }
 
         // Merge file
@@ -245,10 +245,10 @@ public class SorterTest {
         UnsafeBytesInput input = SorterTestUtil.inputFromSubKvMap(data);
         UnsafeBytesOutput output = new UnsafeBytesOutput();
         Combiner<Pointer> combiner = new MockIntSumCombiner();
-        int subKvFlushThreshold = config.get(
-                                  ComputerOptions.OUTPUT_EDGE_BATCH_SIZE);
+        int flushThreshold = config.get(
+                             ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
         InnerSortFlusher flusher = new CombineSubKvInnerSortFlusher(
-                                       output, combiner, subKvFlushThreshold);
+                                       output, combiner, flushThreshold);
 
         Sorter sorter = new SorterImpl(config);
         sorter.sortBuffer(input, flusher);
@@ -259,7 +259,7 @@ public class SorterTest {
     @Test
     public void testSortSubKvBuffer() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.OUTPUT_EDGE_BATCH_SIZE, "2"
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2"
         );
 
         /*
@@ -281,10 +281,10 @@ public class SorterTest {
     @Test
     public void testSortSubKvBuffers() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.OUTPUT_EDGE_BATCH_SIZE, "2"
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2"
         );
-        Integer subKvFlushThreshold = config.get(
-                                      ComputerOptions.OUTPUT_EDGE_BATCH_SIZE);
+        int flushThreshold = config.get(
+                             ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
 
         UnsafeBytesInput i1 = this.sortedSubKvBuffer(config);
         UnsafeBytesInput i2 = this.sortedSubKvBuffer(config);
@@ -294,7 +294,7 @@ public class SorterTest {
         Sorter sorter = new SorterImpl(config);
         Combiner<Pointer> combiner = new MockIntSumCombiner();
         OuterSortFlusher flusher = new CombineSubKvOuterSortFlusher(
-                                   combiner, subKvFlushThreshold);
+                                   combiner, flushThreshold);
         flusher.sources(buffers.size());
 
         String outputFile = StoreTestUtil.availablePathById("1");

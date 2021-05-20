@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -27,6 +28,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.ws.rs.NotSupportedException;
+
+import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.util.E;
 
@@ -129,6 +133,11 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     @Override
     public List<HgkvFile> segments() {
         return this.segments;
+    }
+
+    @Override
+    public BufferedFileOutput output() throws FileNotFoundException {
+        throw new NotSupportedException();
     }
 
     private void build() throws IOException {

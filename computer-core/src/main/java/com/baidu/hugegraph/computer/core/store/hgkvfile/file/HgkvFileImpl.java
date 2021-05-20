@@ -38,7 +38,8 @@ public class HgkvFileImpl extends AbstractHgkvFile {
 
     public static HgkvFile create(String path) throws IOException {
         File file = new File(path);
-        E.checkArgument(!file.exists(), "File already exists, path: '%s'",
+        E.checkArgument(!file.exists(),
+                        "Can't create file due to already exists: '%s'",
                         file.getPath());
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
@@ -49,15 +50,17 @@ public class HgkvFileImpl extends AbstractHgkvFile {
     }
 
     public static HgkvFile open(String path) throws IOException {
-        E.checkArgumentNotNull(path, "Path must not be null");
+        E.checkArgumentNotNull(path, "Parameter path must not be null");
         return open(new File(path));
     }
 
     public static HgkvFile open(File file) throws IOException {
-        E.checkArgumentNotNull(file, "File must not be null");
-        E.checkArgument(file.exists(), "Not exists hgkv file: '%s'",
+        E.checkArgumentNotNull(file, "Parameter file must not be null");
+        E.checkArgument(file.exists(),
+                        "Can't open file due to file not exists: '%s'",
                         file.getPath());
-        E.checkArgument(file.isFile(), "Not hgkv file path: '%s'",
+        E.checkArgument(file.isFile(),
+                        "Can't create file due to path isn't a file: '%s'",
                         file.getPath());
 
         HgkvFileImpl hgkvFile = new HgkvFileImpl(file.getPath());

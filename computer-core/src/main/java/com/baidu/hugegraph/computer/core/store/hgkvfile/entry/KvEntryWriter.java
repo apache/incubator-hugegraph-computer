@@ -24,10 +24,8 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
 public interface KvEntryWriter {
-    
-    void writeSubKey(Writable subKey) throws IOException;
 
-    void writeSubValue(Writable subValue) throws IOException;
+    void writeSubKv(Writable subKey, Writable subValue) throws IOException;
 
     void writeFinish() throws IOException;
 }

@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
@@ -33,39 +34,56 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
 public class KvEntryWriterImpl implements KvEntryWriter {
 
     private final RandomAccessOutput output;
+    private final long placeholderPosition;
+    private final boolean needSort;
     private long total;
     private int subEntryCount;
 
     private final UnsafeBytesOutput subKvBuffer;
 
-    public KvEntryWriterImpl(RandomAccessOutput output) {
+    public KvEntryWriterImpl(RandomAccessOutput output, boolean needSort) {
         this.output = output;
+        this.placeholderPosition = output.position();
+        try {
+            // Write total subKv length placeholder
+            this.output.writeInt(0);
+            // Write total subKv count placeholder
+            this.output.writeInt(0);
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
+        this.needSort = needSort;
         this.total = 0;
         this.subEntryCount = 0;
 
-        this.subKvBuffer = new UnsafeBytesOutput();
+        if (needSort) {
+            this.subKvBuffer = new UnsafeBytesOutput();
+        } else {
+            this.subKvBuffer = null;
+        }
     }
 
     @Override
-    public void writeSubKey(Writable subKey) throws IOException {
+    public void writeSubKv(Writable subKey, Writable subValue)
+                           throws IOException {
         this.writeData(subKey);
-    }
-
-    @Override
-    public void writeSubValue(Writable subValue) throws IOException {
         this.writeData(subValue);
         this.subEntryCount++;
     }
 
     @Override
     public void writeFinish() throws IOException {
-        // Write total value length
-        this.output.writeInt((int) this.total);
-        // Write sub-entry count
-        this.output.writeInt(this.subEntryCount);
+        // Fill total value length
+        this.output.writeInt(this.placeholderPosition,
+                             (int) this.total + Integer.BYTES);
+        // Fill sub-entry count
+        this.output.writeInt(this.placeholderPosition + Integer.BYTES,
+                             this.subEntryCount);
 
-        // Sort subKvs
-        this.sortAndWriteSubKvs();
+        if (this.needSort) {
+            // Sort subKvs
+            this.sortAndWriteSubKvs();
+        }
     }
 
     private void sortAndWriteSubKvs() throws IOException {
@@ -81,15 +99,22 @@ public class KvEntryWriterImpl implements KvEntryWriter {
     }
 
     private void writeData(Writable data) throws IOException {
-        long position = this.subKvBuffer.position();
+        RandomAccessOutput output;
+        if (this.needSort) {
+            assert this.subKvBuffer != null;
+            output = this.subKvBuffer;
+        } else {
+            output = this.output;
+        }
+
+        long position = output.position();
         // Write data length placeholder
-        this.subKvBuffer.writeInt(0);
+        output.writeInt(0);
         // Write data
-        data.write(this.subKvBuffer);
+        data.write(output);
         // Fill data length placeholder
-        long dataLength = this.subKvBuffer.position() - position -
-                          Integer.BYTES;
-        this.subKvBuffer.writeInt(position, (int) dataLength);
+        long dataLength = output.position() - position - Integer.BYTES;
+        output.writeInt(position, (int) dataLength);
         this.total += Integer.BYTES + dataLength;
     }
 }

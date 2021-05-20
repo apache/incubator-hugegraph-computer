@@ -46,7 +46,7 @@ public final class EntriesUtil {
     }
 
     public static EntryIterator subKvIterFromEntry(KvEntry entry) {
-        return new SubKvIterator(entry, true);
+        return new SubKvIterator(entry);
     }
 
     private static class SubKvIterator implements EntryIterator {

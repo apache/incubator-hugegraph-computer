@@ -125,7 +125,7 @@ public class HgkvDirTest {
                                               5, 9,
                                               6, 2);
         String path = availableDirPath("1");
-        StoreTestUtil.hgkvDirFromMap(data, path);
+        StoreTestUtil.hgkvDirFromMap(data, path, CONFIG);
         HgkvDirReader reader = new HgkvDirReaderImpl(path, false);
 
         EntryIterator iterator = reader.iterator();

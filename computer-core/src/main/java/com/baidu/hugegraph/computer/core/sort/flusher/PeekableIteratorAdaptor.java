@@ -21,6 +21,9 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 
 import java.util.Iterator;
 
+import org.apache.commons.lang.NotImplementedException;
+
+import com.baidu.hugegraph.iterator.CIter;
 import com.baidu.hugegraph.util.E;
 
 public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
@@ -71,5 +74,13 @@ public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
         if (this.entries instanceof AutoCloseable) {
             ((AutoCloseable) this.entries).close();
         }
+    }
+
+    @Override
+    public Object metadata(String s, Object... objects) {
+        if (this.entries instanceof CIter) {
+            return ((CIter<T>) this.entries).metadata(s, objects);
+        }
+        throw new NotImplementedException();
     }
 }

@@ -27,49 +27,25 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.util.E;
 
-public class CombineKvOuterSortFlusher implements OuterSortFlusher {
+public class CombineKvOuterSortFlusher extends CombineSorterFlusher
+                                       implements OuterSortFlusher {
 
-    private final Combiner<Pointer> combiner;
+    private HgkvDirBuilder writer;
 
     public CombineKvOuterSortFlusher(Combiner<Pointer> combiner) {
-        this.combiner = combiner;
+        super(combiner);
     }
 
     @Override
-    public Combiner<Pointer> combiner() {
-        return this.combiner;
+    protected void writeKvEntry(Pointer key, Pointer value) throws IOException {
+        this.writer.write(new DefaultKvEntry(key, value));
     }
 
     @Override
     public void flush(Iterator<KvEntry> entries, HgkvDirBuilder writer)
                       throws IOException {
-        E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty");
-
-        KvEntry last = entries.next();
-        Pointer value = last.value();
-
-        while (true) {
-            KvEntry current = null;
-            if (entries.hasNext()) {
-                current = entries.next();
-                if (last.compareTo(current) == 0) {
-                    value = this.combiner.combine(value, current.value());
-                    continue;
-                }
-            }
-
-            writer.write(new DefaultKvEntry(last.key(), value));
-
-            if (current == null) {
-                break;
-            }
-
-            last = current;
-            value = last.value();
-        }
-        writer.finish();
+        this.writer = writer;
+        this.flush(entries);
     }
 }

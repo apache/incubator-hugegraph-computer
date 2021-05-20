@@ -26,56 +26,26 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
-import com.baidu.hugegraph.util.E;
 
-public class CombineKvInnerSortFlusher implements InnerSortFlusher {
+public class CombineKvInnerSortFlusher extends CombineSorterFlusher
+                                       implements InnerSortFlusher {
 
     private final RandomAccessOutput output;
-    private final Combiner<Pointer> combiner;
 
     public CombineKvInnerSortFlusher(RandomAccessOutput output,
                                      Combiner<Pointer> combiner) {
+        super(combiner);
         this.output = output;
-        this.combiner = combiner;
     }
 
     @Override
-    public RandomAccessOutput output() {
-        return this.output;
-    }
-
-    @Override
-    public Combiner<Pointer> combiner() {
-        return this.combiner;
+    protected void writeKvEntry(Pointer key, Pointer value) throws IOException {
+        key.write(this.output);
+        value.write(this.output);
     }
 
     @Override
     public void flush(Iterator<KvEntry> entries) throws IOException {
-        E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty");
-
-        KvEntry last = entries.next();
-        Pointer value = last.value();
-
-        while (true) {
-            KvEntry current = null;
-            if (entries.hasNext()) {
-                current = entries.next();
-                if (last.compareTo(current) == 0) {
-                    value = this.combiner.combine(value, current.value());
-                    continue;
-                }
-            }
-
-            last.key().write(this.output);
-            value.write(this.output);
-
-            if (current == null) {
-                break;
-            }
-
-            last = current;
-            value = last.value();
-        }
+        super.flush(entries);
     }
 }

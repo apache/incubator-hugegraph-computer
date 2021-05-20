@@ -115,17 +115,17 @@ public class SubKvSorter implements Iterator<KvEntry> {
 
         @Override
         public KvEntry next() {
-            KvEntry next = this.subKvIter.next();
+            KvEntry nextSubKvEntry = this.subKvIter.next();
             if (!this.subKvIter.hasNext()) {
-                KvEntry nextKvEntry = this.entries.peek();
-                if (nextKvEntry != null &&
-                    nextKvEntry.key().compareTo(this.currentEntry.key()) == 0) {
+                KvEntry nextEntry = this.entries.peek();
+                if (nextEntry != null &&
+                    nextEntry.key().compareTo(this.currentEntry.key()) == 0) {
                     this.currentEntry = this.entries.next();
                     this.subKvIter = EntriesUtil.subKvIterFromEntry(
                                                  this.currentEntry);
                 }
             }
-            return next;
+            return nextSubKvEntry;
         }
     }
 }
