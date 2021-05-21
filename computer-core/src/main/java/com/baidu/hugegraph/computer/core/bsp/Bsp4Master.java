@@ -47,7 +47,7 @@ public class Bsp4Master extends BspBase {
     public void masterInitDone(ContainerInfo masterInfo) {
         String path = this.constructPath(BspEvent.BSP_MASTER_INIT_DONE);
         this.bspClient().put(path, SerializeUtil.toBytes(masterInfo));
-        LOG.info("Master init-done, master info: {}", masterInfo);
+        LOG.info("Master set init-done, master info: {}", masterInfo);
     }
 
     /**

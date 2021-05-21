@@ -19,29 +19,31 @@
 
 package com.baidu.hugegraph.computer.core.aggregator;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public interface Aggregator<V extends Value<?>> {
 
     /**
-     * Used by worker to aggregate a new value when compute a vertex, needs to
-     * be commutative and associative.
+     * Used by worker to aggregate a new value when compute a vertex.
+     * The combination method needs to be commutative and associative.
+     * Can be called in worker computation compute() or afterSuperstep().
      * @param value The value to be aggregated
      */
     void aggregateValue(V value);
 
     /**
-     * Used by worker to aggregate an int value when compute a vertex. For
-     * performance reasons, it can aggregate without create an IntValue object.
+     * Used by worker to aggregate an int value. For performance reasons, it
+     * can aggregate without create an IntValue object.
      */
     default void aggregateValue(int value) {
         throw new ComputerException("Not implemented: aggregateValue(int)");
     }
 
     /**
-     * Used by worker to aggregate a long value. For performance reasons, it can
-     * aggregate without create a LongValue object.
+     * Used by worker to aggregate a long value. For performance reasons, it
+     * can aggregate without create a LongValue object.
      */
     default void aggregateValue(long value) {
         throw new ComputerException("Not implemented: aggregateValue(long)");
@@ -64,17 +66,28 @@ public interface Aggregator<V extends Value<?>> {
     }
 
     /**
-     * Used by worker or master to get current aggregated value. The worker
-     * get aggregated value before a superstep. The master can get the
-     * aggregated value after a superstep.
+     * Used by worker or master to get the aggregated value. The worker
+     * get an aggregated value of previous superstep in current superstep.
+     * The master can get an aggregated value of current superstep when
+     * master-computation compute().
      */
     V aggregatedValue();
 
     /**
      * Used by worker or master to set current aggregated value directly. The
-     * worker set aggregated value and then sent to master for further
-     * aggregation. The master set aggregated value and then use by worker in
-     * next superstep.
+     * worker set aggregated value and then send to master for further
+     * aggregation. The master set aggregated value and then used by workers in
+     * the next superstep.
      */
     void aggregatedValue(V value);
+
+    /**
+     * Return cloned object of this instance.
+     */
+    Aggregator<V> copy();
+
+    /**
+     * Repair the object because some fields may not be deserialized.
+     */
+    void repair(ComputerContext context);
 }

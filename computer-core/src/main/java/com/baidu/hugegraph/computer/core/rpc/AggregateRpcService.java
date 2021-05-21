@@ -19,7 +19,21 @@
 
 package com.baidu.hugegraph.computer.core.rpc;
 
+import java.util.Map;
+
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
+import com.baidu.hugegraph.computer.core.aggregator.RegisterAggregators;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+
 public interface AggregateRpcService {
 
-    // TODO: implement
+    RegisterAggregators registeredAggregators();
+
+    Map<String, Value<?>> listAggregators();
+
+    void aggregateAggregators(Map<String, Value<?>> aggregators);
+
+    <V extends Value<?>> Aggregator<V> getAggregator(String name);
+
+    <V extends Value<?>> void aggregateAggregator(String name, V value);
 }

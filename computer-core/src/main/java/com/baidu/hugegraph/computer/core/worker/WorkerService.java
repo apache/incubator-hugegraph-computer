@@ -26,9 +26,11 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
 import com.baidu.hugegraph.computer.core.aggregator.WorkerAggrManager;
 import com.baidu.hugegraph.computer.core.bsp.Bsp4Worker;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -49,6 +51,7 @@ public class WorkerService {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 
+    private final ComputerContext context;
     private final Managers managers;
     private final Map<Integer, ContainerInfo> workers;
 
@@ -59,10 +62,10 @@ public class WorkerService {
     private Computation<?> computation;
     private Combiner<Value<?>> combiner;
 
-    @SuppressWarnings("unused")
     private ContainerInfo masterInfo;
 
     public WorkerService() {
+        this.context = ComputerContext.instance();
         this.managers = new Managers();
         this.workers = new HashMap<>();
         this.inited = false;
@@ -76,15 +79,26 @@ public class WorkerService {
 
         this.config = config;
 
-        InetSocketAddress dataAddress = this.initManagers();
+        InetSocketAddress dataAddress = this.initDataTransportManagers();
 
         this.workerInfo = new ContainerInfo(dataAddress.getHostName(),
                                             0, dataAddress.getPort());
+        LOG.info("{} Start to initialize worker", this);
+
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
+
+        /*
+         * Keep the waitMasterInitDone() called before initManagers(),
+         * in order to ensure master init() before worker managers init()
+         */
+        this.masterInfo = this.bsp4Worker.waitMasterInitDone();
+
+        this.initManagers(this.masterInfo);
+
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
-        this.computation.init(config);
-        LOG.info("Computation name: {}, category: {}",
+        this.computation.init(this.config);
+        LOG.info("Loading computation '{}' in category '{}'",
                  this.computation.name(), this.computation.category());
 
         this.combiner = this.config.createObject(
@@ -97,16 +111,18 @@ public class WorkerService {
                      this.combiner.name(), this.computation.name());
         }
 
+        LOG.info("{} register WorkerService", this);
         this.bsp4Worker.workerInitDone();
-        this.masterInfo = this.bsp4Worker.waitMasterInitDone();
-        List<ContainerInfo> containers =
-                            this.bsp4Worker.waitMasterAllInitDone();
-        for (ContainerInfo container : containers) {
-            this.workers.put(container.id(), container);
+        List<ContainerInfo> workers = this.bsp4Worker.waitMasterAllInitDone();
+        for (ContainerInfo worker : workers) {
+            this.workers.put(worker.id(), worker);
             // TODO: Connect to other workers for data transport
             //DataClientManager dm = this.managers.get(DataClientManager.NAME);
             //dm.connect(container.hostname(), container.dataPort());
         }
+
+        this.managers.initedAll(this.config);
+        LOG.info("{} WorkerService initialized", this);
         this.inited = true;
     }
 
@@ -117,13 +133,16 @@ public class WorkerService {
     public void close() {
         this.checkInited();
 
+        this.computation.close(this.config);
+
         /*
+         * Seems managers.closeAll() would do the following actions:
          * TODO: close the connection to other workers.
          * TODO: stop the connection to the master
          * TODO: stop the data transportation server.
          */
         this.managers.closeAll(this.config);
-        this.computation.close(this.config);
+
         this.bsp4Worker.workerCloseDone();
         this.bsp4Worker.close();
         LOG.info("{} WorkerService closed", this);
@@ -138,6 +157,7 @@ public class WorkerService {
         this.checkInited();
 
         LOG.info("{} WorkerService execute", this);
+
         // TODO: determine superstep if fail over is enabled.
         int superstep = this.bsp4Worker.waitMasterResumeDone();
         SuperstepStat superstepStat;
@@ -158,16 +178,42 @@ public class WorkerService {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
+
+            /*
+             * Call beforeSuperstep() before all workers compute() called.
+             *
+             * NOTE: keep computation.beforeSuperstep() called after
+             * managers.beforeSuperstep().
+             */
             this.managers.beforeSuperstep(this.config, superstep);
             this.computation.beforeSuperstep(context);
+
+            /*
+             * Notify master by each worker, when the master received all
+             * workers signal, then notify all workers to do compute().
+             */
             this.bsp4Worker.workerStepPrepareDone(superstep);
             this.bsp4Worker.waitMasterStepPrepareDone(superstep);
 
             WorkerStat workerStat = this.compute();
+
+            /*
+             * Wait for all workers to do compute()
+             */
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
-            this.managers.afterSuperstep(this.config, superstep);
+
+            /*
+             * Call afterSuperstep() after all workers compute() is done.
+             *
+             * NOTE: keep managers.afterSuperstep() called after
+             * computation.afterSuperstep(), because managers may rely on
+             * computation, like WorkerAggrManager send aggregators to master
+             * after called aggregateValue(String name, V value) in computation.
+             */
             this.computation.afterSuperstep(context);
+            this.managers.afterSuperstep(this.config, superstep);
+
             this.bsp4Worker.workerStepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
 
@@ -179,34 +225,47 @@ public class WorkerService {
 
     @Override
     public String toString() {
-        return String.format("[worker %s]", this.workerInfo.id());
+        Object id = this.workerInfo == null ?
+                    "?" + this.hashCode() : this.workerInfo.id();
+        return String.format("[worker %s]", id);
     }
 
-    private InetSocketAddress initManagers() {
+    private InetSocketAddress initDataTransportManagers() {
         // TODO: Start data-transport server and get its host and port.
+        String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
+        int port = this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
         InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
-                                        "127.0.0.1", 8004);
+                                        host, port);
 
+        return dataAddress;
+    }
+
+    private void initManagers(ContainerInfo masterInfo) {
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
+        /*
+         * NOTE: this init() method will be called twice, will be ignored at
+         * the 2nd time call.
+         */
+        WorkerRpcManager.updateRpcRemoteServerConfig(this.config,
+                                                     masterInfo.hostname(),
+                                                     masterInfo.rpcPort());
         rpcManager.init(this.config);
 
         WorkerInputManager inputManager = new WorkerInputManager();
         inputManager.service(rpcManager.inputSplitService());
         this.managers.add(inputManager);
 
-        WorkerAggrManager aggregatorManager = this.config.createObject(
-                          ComputerOptions.WORKER_AGGREGATOR_MANAGER_CLASS);
+        WorkerAggrManager aggregatorManager = new WorkerAggrManager(
+                                              this.context);
         aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
 
         // Init managers
         this.managers.initAll(this.config);
 
-        LOG.info("{} WorkerService initialized", this);
-
-        return dataAddress;
+        LOG.info("{} WorkerService initialized managers", this);
     }
 
     private void checkInited() {
@@ -277,10 +336,13 @@ public class WorkerService {
 
         private final int superstep;
         private final SuperstepStat superstepStat;
+        private final WorkerAggrManager aggrManager;
 
         private SuperstepContext(int superstep, SuperstepStat superstepStat) {
             this.superstep = superstep;
             this.superstepStat = superstepStat;
+            this.aggrManager = WorkerService.this.managers.get(
+                               WorkerAggrManager.NAME);
         }
 
         @Override
@@ -289,15 +351,19 @@ public class WorkerService {
         }
 
         @Override
+        public <V extends Value<?>> Aggregator<V> createAggregator(
+                                                  String name) {
+            return this.aggrManager.createAggregator(name);
+        }
+
+        @Override
         public <V extends Value<?>> void aggregateValue(String name, V value) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
+            this.aggrManager.aggregateValue(name, value);
         }
 
         @Override
         public <V extends Value<?>> V aggregatedValue(String name) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
+            return this.aggrManager.aggregatedValue(name);
         }
 
         @Override

@@ -56,7 +56,7 @@ public class Bsp4Worker extends BspBase {
         String path = this.constructPath(BspEvent.BSP_WORKER_INIT_DONE,
                                          this.workerInfo.uniqueName());
         this.bspClient().put(path, SerializeUtil.toBytes(this.workerInfo));
-        LOG.info("Worker is init-done: {}", this.workerInfo.uniqueName());
+        LOG.info("Worker set init-done: {}", this.workerInfo.uniqueName());
     }
 
     /**
