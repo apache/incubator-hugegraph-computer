@@ -186,6 +186,52 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     }
 
     @Test
+    public void testStartSessionWithSendException() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        @SuppressWarnings("unchecked")
+        Function<Message, ChannelFuture> sendFunc =
+                                         Mockito.mock(Function.class);
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
+
+        Mockito.doThrow(new RuntimeException("test exception"))
+               .when(sendFunc)
+               .apply(Mockito.any());
+
+        Assert.assertThrows(RuntimeException.class, () -> {
+            client.startSession();
+        }, e -> {
+            Assert.assertContains("test exception",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
+    public void testFinishSessionWithSendException() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        client.startSession();
+
+        @SuppressWarnings("unchecked")
+        Function<Message, ChannelFuture> sendFunc =
+                Mockito.mock(Function.class);
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
+
+        Mockito.doThrow(new RuntimeException("test exception"))
+               .when(sendFunc)
+               .apply(Mockito.any());
+
+        Assert.assertThrows(RuntimeException.class, () -> {
+            client.finishSession();
+        }, e -> {
+            Assert.assertContains("test exception",
+                                  e.getMessage());
+        });
+    }
+
+    @Test
     public void testFlowControl() throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(
                             StringEncoding.encode("test data"));
