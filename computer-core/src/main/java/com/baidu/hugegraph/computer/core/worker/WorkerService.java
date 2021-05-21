@@ -51,7 +51,8 @@ import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.network.DataServerManager;
-import com.baidu.hugegraph.computer.core.receiver.ReceiveManager;
+import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
+import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -208,6 +209,10 @@ public class WorkerService {
             /*
              * Wait for all workers to do compute()
              */
+            MessageRecvManager receiveManager =
+                               this.managers.get(MessageRecvManager.NAME);
+            receiveManager.waitReceivedAllMessages();
+
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
 
@@ -301,10 +306,10 @@ public class WorkerService {
         DataFileManager fileManager = new DataFileManager();
         this.managers.add(fileManager);
 
-        ReceiveManager receiveManager = new ReceiveManager(fileManager);
-        this.managers.add(receiveManager);
+        MessageRecvManager recveManager = new MessageRecvManager(fileManager);
+        this.managers.add(recveManager);
 
-        DataServerManager serverManager = new DataServerManager(receiveManager);
+        DataServerManager serverManager = new DataServerManager(recveManager);
         this.managers.add(serverManager);
 
         // Init managers
@@ -332,7 +337,10 @@ public class WorkerService {
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
 
-        ReceiveManager receiveManager = this.managers.get(ReceiveManager.NAME);
+        MessageRecvManager receiveManager =
+                           this.managers.get(MessageRecvManager.NAME);
+        receiveManager.waitReceivedAllMessages();
+
         WorkerStat workerStat = receiveManager.mergeGraph();
 
         this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,

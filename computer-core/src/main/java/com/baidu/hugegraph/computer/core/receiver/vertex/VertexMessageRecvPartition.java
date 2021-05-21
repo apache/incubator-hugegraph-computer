@@ -22,15 +22,15 @@ package com.baidu.hugegraph.computer.core.receiver.vertex;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.RecvPartition;
+import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
-public class VertexRecvPartition extends RecvPartition {
+public class VertexMessageRecvPartition extends MessageRecvPartition {
 
     public static final String TYPE = "vertex";
 
-    public VertexRecvPartition(Config config,
-                               DataFileGenerator fileGenerator) {
+    public VertexMessageRecvPartition(Config config,
+                                      DataFileGenerator fileGenerator) {
         super(config, fileGenerator, Constants.INPUT_SUPERSTEP);
     }
 

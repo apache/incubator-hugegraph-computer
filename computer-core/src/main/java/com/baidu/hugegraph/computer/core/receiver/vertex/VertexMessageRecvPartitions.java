@@ -17,22 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.receiver;
+package com.baidu.hugegraph.computer.core.receiver.vertex;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
+import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
-import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitionTest;
-import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitionTest;
-import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitionTest;
+public class VertexMessageRecvPartitions
+       extends MessageRecvPartitions<VertexMessageRecvPartition> {
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    MessageRecvManagerTest.class,
-    MessageRecvBuffersTest.class,
-    VertexMessageRecvPartitionTest.class,
-    EdgeMessageRecvPartitionTest.class,
-    ComputeMessageRecvPartitionTest.class
-})
-public class ReceiverTestSuite {
+    public VertexMessageRecvPartitions(Config config,
+                                       DataFileGenerator fileGenerator) {
+        super(config, fileGenerator, Constants.INPUT_SUPERSTEP);
+    }
+
+    @Override
+    public VertexMessageRecvPartition createPartition(int superstep) {
+        return new VertexMessageRecvPartition(this.config, this.fileGenerator);
+    }
 }

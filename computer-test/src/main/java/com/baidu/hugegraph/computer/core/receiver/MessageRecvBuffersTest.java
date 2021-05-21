@@ -28,64 +28,73 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class RecvMessageBuffersTest {
+public class MessageRecvBuffersTest {
 
     @Test
     public void testAddBuffer() {
         long threshold = 1024L;
-        byte[] bytes = new byte[100];
+        int size = 100;
         long maxWaitTime = 1000L;
-        RecvMessageBuffers<byte[]>
-                buffers = new RecvMessageBuffers<>(threshold, maxWaitTime);
+        MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
+                                                            maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            buffers.addBuffer(bytes, bytes.length);
+            BuffersUtil.addBuffer(buffers, size);
         }
+
         Assert.assertFalse(buffers.full());
-        Assert.assertEquals(1000L, buffers.sumBytes());
-        buffers.addBuffer(bytes, bytes.length);
+        Assert.assertEquals(1000L, buffers.totalBytes());
+
+        BuffersUtil.addBuffer(buffers, size);
         Assert.assertTrue(buffers.full());
 
         // Sort buffer
-        List<byte[]> list = buffers.list();
+        List<RandomAccessInput> list = buffers.buffers();
         Assert.assertEquals(11, list.size());
 
         buffers.signalSorted();
 
         for (int i = 0; i < 10; i++) {
-            buffers.addBuffer(bytes, bytes.length);
+            BuffersUtil.addBuffer(buffers, size);
         }
+
+        Assert.assertEquals(1000L, buffers.totalBytes());
         Assert.assertFalse(buffers.full());
-        buffers.addBuffer(bytes, bytes.length);
+
+        BuffersUtil.addBuffer(buffers, size);
+
         Assert.assertTrue(buffers.full());
 
         // Sort buffer
-        List<byte[]> list2 = buffers.list();
+        List<RandomAccessInput> list2 = buffers.buffers();
         Assert.assertEquals(11, list2.size());
     }
 
     @Test
     public void testSortBuffer() throws InterruptedException {
         long threshold = 1024L;
-        byte[] bytes = new byte[100];
+        int size = 100;
         long maxWaitTime = 1000L;
-        RecvMessageBuffers<byte[]>
-                buffers = new RecvMessageBuffers<>(threshold, maxWaitTime);
+        MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
+                                                            maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            buffers.addBuffer(bytes, bytes.length);
+            BuffersUtil.addBuffer(buffers, size);
         }
-        System.out.println("testSort");
         CountDownLatch countDownLatch = new CountDownLatch(2);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
+
         executorService.submit(() -> {
             buffers.waitSorted();
             countDownLatch.countDown();
         });
+
         executorService.submit(() -> {
             buffers.signalSorted();
             countDownLatch.countDown();
         });
+
         executorService.shutdown();
         countDownLatch.await();
     }
@@ -93,30 +102,31 @@ public class RecvMessageBuffersTest {
     @Test
     public void testSortTimeout() {
         long threshold = 1024L;
-        byte[] bytes = new byte[100];
+        int size = 100;
         long maxWaitTime = 1000L;
-        RecvMessageBuffers<byte[]>
-                buffers = new RecvMessageBuffers<>(threshold, maxWaitTime);
+        MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
+                                                            maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            buffers.addBuffer(bytes, bytes.length);
+            BuffersUtil.addBuffer(buffers, size);
         }
 
         Assert.assertThrows(ComputerException.class, () -> {
             buffers.waitSorted();
         }, e -> {
-            Assert.assertContains("Not sorted in 1000 ms", e.getMessage());
+            Assert.assertContains("Buffers not sorted in 1000 ms",
+                                  e.getMessage());
         });
     }
 
     @Test
     public void testSortInterrupt() throws InterruptedException {
         long threshold = 1024L;
-        byte[] bytes = new byte[100];
+        int size = 100;
         long maxWaitTime = 1000L;
-        RecvMessageBuffers<byte[]>
-                buffers = new RecvMessageBuffers<>(threshold, maxWaitTime);
+        MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
+                                                            maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            buffers.addBuffer(bytes, bytes.length);
+            BuffersUtil.addBuffer(buffers, size);
         }
         AtomicBoolean success = new AtomicBoolean(false);
         CountDownLatch countDownLatch = new CountDownLatch(1);

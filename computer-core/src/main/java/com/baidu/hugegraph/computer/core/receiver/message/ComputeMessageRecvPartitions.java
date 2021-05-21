@@ -19,29 +19,22 @@
 
 package com.baidu.hugegraph.computer.core.receiver.message;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.RecvPartition;
+import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
-public class MessageRecvPartition extends RecvPartition {
+public class ComputeMessageRecvPartitions
+       extends MessageRecvPartitions<ComputeMessageRecvPartition> {
 
-    public static final String TYPE = "message";
-
-    public MessageRecvPartition(Config config,
-                                DataFileGenerator fileGenerator,
-                                int superstep) {
-        super(config, fileGenerator, superstep);
+    public ComputeMessageRecvPartitions(Config config,
+                                        DataFileGenerator fileGenerator) {
+        super(config, fileGenerator, -1);
     }
 
     @Override
-    protected Combiner combiner() {
-        // TODO: implement
-        return null;
-    }
-
-    @Override
-    protected String type() {
-        return TYPE;
+    public ComputeMessageRecvPartition createPartition(int superstep) {
+        return new ComputeMessageRecvPartition(this.config,
+                                               this.fileGenerator,
+                                               superstep);
     }
 }

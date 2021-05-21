@@ -17,24 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.receiver;
+package com.baidu.hugegraph.computer.core.receiver.edge;
 
-import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
+import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+public class EdgeMessageRecvPartitions
+       extends MessageRecvPartitions<EdgeMessageRecvPartition> {
 
-public class PartitionBufferUtil {
+    public EdgeMessageRecvPartitions(Config config,
+                                     DataFileGenerator fileGenerator) {
+        super(config, fileGenerator, -1);
+    }
 
-    public static void addBuffer(RecvPartition partition, int length) {
-        byte[] bytes = new byte[length];
-        ByteBuf buf = Unpooled.directBuffer(length);
-        try {
-            buf = buf.writeBytes(bytes);
-            NettyManagedBuffer buff = new NettyManagedBuffer(buf);
-            partition.addBuffer(buff);
-        } finally {
-            buf.release();
-        }
+    @Override
+    public EdgeMessageRecvPartition createPartition(int superstep) {
+        return new EdgeMessageRecvPartition(this.config, this.fileGenerator);
     }
 }

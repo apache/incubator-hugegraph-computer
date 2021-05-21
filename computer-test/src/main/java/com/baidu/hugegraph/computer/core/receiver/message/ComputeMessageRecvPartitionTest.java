@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.receiver.edge;
+package com.baidu.hugegraph.computer.core.receiver.message;
 
 import java.io.File;
 import java.util.List;
@@ -29,14 +29,15 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.PartitionBufferUtil;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.receiver.BuffersUtil;
 import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.config.RpcOptions;
 
-public class EdgeRecvPartitionTest {
+public class ComputeMessageRecvPartitionTest {
 
     @Test
-    public void testEdgePartitionBuffer() {
+    public void testComputeMessageRecvPartition() {
         Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_001",
@@ -48,20 +49,25 @@ public class EdgeRecvPartitionTest {
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
-        DataFileManager dataFileManager = new DataFileManager();
-        dataFileManager.init(config);
-        EdgeRecvPartition partition = new EdgeRecvPartition(
-                                            config,
-                                            dataFileManager);
-        Assert.assertEquals("edge", partition.type());
+        DataFileManager fileManager = new DataFileManager();
+        fileManager.init(config);
+        ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
+                                                config,
+                                                fileManager,
+                                                0);
+        Assert.assertEquals("message", partition.type());
         for (int i = 0; i < 25; i++) {
-            PartitionBufferUtil.addBuffer(partition, 100);
+            BuffersUtil.addBuffer(100, (ManagedBuffer buffer) -> {
+                partition.addBuffer(buffer);
+            });
         }
 
-        List<String> files = partition.onDiskFiles();
-        Assert.assertEquals(2,files.size());
-        partition.waitSortBuffersSorted();
-        partition.sortReceiveBuffersAndWaitSorted();
-        Assert.assertEquals(3,files.size());
+        List<String> files1 = partition.outputFiles();
+        Assert.assertEquals(2, files1.size());
+        partition.flushAllBuffersAndWaitSorted();
+        List<String> files2 = partition.outputFiles();
+        Assert.assertEquals(3, files2.size());
+
+        fileManager.close(config);
     }
 }

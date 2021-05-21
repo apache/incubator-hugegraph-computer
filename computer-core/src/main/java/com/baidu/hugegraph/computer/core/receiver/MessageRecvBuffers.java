@@ -28,11 +28,11 @@ import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 
-public class RecvMessageBuffers {
+public class MessageRecvBuffers {
 
     /*
      * The threshold is not hard limit. For performance, it checks
-     * if the sumBytes >= threshold after {@link #addBuffer(T, long)}.
+     * if the sumBytes >= threshold after {@link #addBuffer(ManagedBuffer)}.
      */
     private long threshold;
     private long totalBytes;
@@ -41,17 +41,17 @@ public class RecvMessageBuffers {
     private BarrierEvent event;
     private long sortTimeout;
 
-    public RecvMessageBuffers(long threshold, long sortTimeout) {
+    public MessageRecvBuffers(long threshold, long sortTimeout) {
         this.totalBytes = 0L;
         this.event = new BarrierEvent();
         this.threshold = threshold;
         this.sortTimeout = sortTimeout;
-        this.buffers= new ArrayList<>();
+        this.buffers = new ArrayList<>();
     }
 
     public void addBuffer(ManagedBuffer data) {
         /*
-         * TODO: does not use copy. Develop new type of RandomAccessInput
+         * TODO: does not use copy. Develop new type of RandomAccessInput to
          *  direct read from ManagedBuffer.
          */
         byte[] bytes = data.copyToByteArray();
@@ -81,7 +81,7 @@ public class RecvMessageBuffers {
         try {
             boolean sorted = this.event.await(this.sortTimeout);
             if (!sorted) {
-                throw new ComputerException("Not sorted in %s ms",
+                throw new ComputerException("Buffers not sorted in %s ms",
                                             this.sortTimeout);
             }
             this.event.reset();
@@ -97,7 +97,7 @@ public class RecvMessageBuffers {
         this.event.signalAll();
     }
 
-    public long sumBytes() {
+    public long totalBytes() {
         return this.totalBytes;
     }
 }

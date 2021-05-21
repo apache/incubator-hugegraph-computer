@@ -27,7 +27,7 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.ReceiveManager;
+import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.computer.core.worker.MockComputation;
 import com.baidu.hugegraph.computer.core.worker.MockMasterComputation;
@@ -51,12 +51,14 @@ public class DataServerManagerTest {
         );
         DataFileManager dataFileManager = new DataFileManager();
         dataFileManager.init(config);
-        ReceiveManager receiveManager = new ReceiveManager(dataFileManager);
+        MessageRecvManager receiveManager =
+                           new MessageRecvManager(dataFileManager);
         receiveManager.init(config);
-        DataServerManager dataServerManager =
-                          new DataServerManager(receiveManager);
-        dataServerManager.init(config);
-        InetSocketAddress address = dataServerManager.address();
+        DataServerManager serverManager = new DataServerManager(receiveManager);
+        serverManager.init(config);
+
+        Assert.assertEquals(DataServerManager.NAME, serverManager.name());
+        InetSocketAddress address = serverManager.address();
         Assert.assertNotEquals(0, address.getPort());
         ConnectionId connectionId = ConnectionId.parseConnectionId(
                                                  address.getHostName(),
@@ -66,5 +68,6 @@ public class DataServerManagerTest {
         TransportException e = new TransportException("test transport " +
                                                       "exception");
         receiveManager.exceptionCaught(e, connectionId);
+        serverManager.close(config);
     }
 }

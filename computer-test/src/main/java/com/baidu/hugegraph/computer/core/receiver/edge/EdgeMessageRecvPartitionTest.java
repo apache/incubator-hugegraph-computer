@@ -17,55 +17,53 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.receiver;
+package com.baidu.hugegraph.computer.core.receiver.edge;
 
+import java.io.File;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.receiver.BuffersUtil;
 import com.baidu.hugegraph.computer.core.store.DataFileManager;
-import com.baidu.hugegraph.computer.core.util.StringEncoding;
-import com.baidu.hugegraph.computer.core.worker.MockComputation;
-import com.baidu.hugegraph.computer.core.worker.MockMasterComputation;
 import com.baidu.hugegraph.config.RpcOptions;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
-public class ReceiveManagerTest {
+public class EdgeMessageRecvPartitionTest {
 
     @Test
-    public void test() {
+    public void testEdgeMessageRecvPartition() {
         Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.BSP_LOG_INTERVAL, "30000",
             ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-            ComputerOptions.WORKER_COMPUTATION_CLASS,
-            MockComputation.class.getName(),
-            ComputerOptions.MASTER_COMPUTATION_CLASS,
-            MockMasterComputation.class.getName()
+            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000"
         );
-        DataFileManager dataFileManager = new DataFileManager();
-        dataFileManager.init(config);
-        ReceiveManager receiveManager = new ReceiveManager(dataFileManager);
-        receiveManager.init(config);
-
-        String testData = "test data";
-        byte[] bytesSource = StringEncoding.encode(testData);
-        ByteBuf buf = Unpooled.directBuffer(bytesSource.length);
-        try {
-            buf = buf.writeBytes(bytesSource);
-            NettyManagedBuffer buff = new NettyManagedBuffer(buf);
-            receiveManager.handle(MessageType.VERTEX, 0, buff);
-        } finally {
-            buf.release();
+        FileUtils.deleteQuietly(new File("data_dir1"));
+        FileUtils.deleteQuietly(new File("data_dir2"));
+        DataFileManager fileManager = new DataFileManager();
+        fileManager.init(config);
+        EdgeMessageRecvPartition partition = new EdgeMessageRecvPartition(
+                                             config, fileManager);
+        Assert.assertEquals("edge", partition.type());
+        for (int i = 0; i < 25; i++) {
+            BuffersUtil.addBuffer(partition, 100);
         }
-        dataFileManager.close(config);
-        receiveManager.close(config);
+
+        List<String> files1 = partition.outputFiles();
+        Assert.assertEquals(2,files1.size());
+        partition.flushAllBuffersAndWaitSorted();
+
+        List<String> files2 = partition.outputFiles();
+        Assert.assertEquals(3,files2.size());
+
+        fileManager.close(config);
     }
 }

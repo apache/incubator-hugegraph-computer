@@ -29,14 +29,14 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.PartitionBufferUtil;
+import com.baidu.hugegraph.computer.core.receiver.BuffersUtil;
 import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.config.RpcOptions;
 
-public class VertexRecvPartitionTest extends UnitTestBase {
+public class VertexMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
-    public void testVertexPartitionBuffer() {
+    public void testVertexMessageRecvPartition() {
         Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_001",
@@ -48,20 +48,26 @@ public class VertexRecvPartitionTest extends UnitTestBase {
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
-        DataFileManager dataFileManager = new DataFileManager();
-        dataFileManager.init(config);
-        VertexRecvPartition partition = new VertexRecvPartition(
-                                          config,
-                                          dataFileManager);
+        DataFileManager fileManager = new DataFileManager();
+        fileManager.init(config);
+        VertexMessageRecvPartition partition = new VertexMessageRecvPartition(
+                                               config, fileManager);
         Assert.assertEquals("vertex", partition.type());
         for (int i = 0; i < 25; i++) {
-            PartitionBufferUtil.addBuffer(partition, 100);
+            BuffersUtil.addBuffer(partition, 100);
         }
 
-        List<String> files = partition.onDiskFiles();
-        Assert.assertEquals(2,files.size());
-        partition.waitSortBuffersSorted();
-        partition.sortReceiveBuffersAndWaitSorted();
-        Assert.assertEquals(3,files.size());
+        List<String> files1 = partition.outputFiles();
+        Assert.assertEquals(2, files1.size());
+
+        partition.flushAllBuffersAndWaitSorted();
+        List<String> files2 = partition.outputFiles();
+        Assert.assertEquals(3, files2.size());
+
+        partition.mergeOutputFiles(1);
+        List<String> files3 = partition.outputFiles();
+        Assert.assertEquals(1, files3.size());
+
+        fileManager.close(config);
     }
 }
