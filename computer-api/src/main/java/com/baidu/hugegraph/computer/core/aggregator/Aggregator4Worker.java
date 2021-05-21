@@ -30,27 +30,38 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 public interface Aggregator4Worker {
 
     /**
-     * Create aggregator by name in worker, the aggregator is registered by
-     * master. Can be called in each superstep.
-     * Throws ComputerException if master does not register the aggregator
-     * with specified name.
+     * Create aggregator by name in worker-computation, the aggregator is
+     * registered by master-computation.
+     * Used by algorithm's worker-computation beforeSuperstep(), can be called
+     * in each superstep.
+     * Throws ComputerException if master-computation does not register
+     * aggregator with the specified name.
      */
     <V extends Value<?>> Aggregator<V> createAggregator(String name);
 
     /**
-     * Set aggregate value after a superstep. The value will be sent to
-     * master when current superstep finish.
-     * Throws ComputerException if master does not register the aggregator
-     * with specified name.
+     * Set aggregate value in worker. The value of aggregator will be
+     * aggregated locally in worker first, and it would be sent to master when
+     * the current superstep finish.
+     * Used by algorithm's worker-computation afterSuperstep(), can be called
+     * in each superstep.
+     * Throws ComputerException if master-computation does not register
+     * aggregator with the specified name.
      * @param value The value to be aggregated
      */
     <V extends Value<?>> void aggregateValue(String name, V value);
 
     /**
-     * Get the aggregated value before a superstep start. The value is
-     * aggregated by master at previous superstep.
-     * Throws ComputerException if master does not register the aggregator
-     * with specified name.
+     * Get the aggregated value in worker-computation, the value is aggregated
+     * by master at previous superstep, it won't be changed in a superstep.
+     * Each worker aggregate an aggregator value locally, then submit to master,
+     * then master aggregate the aggregator values from all workers.
+     * master-computation can get the aggregated value in master compute(), and
+     * worker-computation can get the aggregated value in the next superstep.
+     * Used by algorithm's worker-computation compute(), can be called in
+     * each superstep.
+     * Throws ComputerException if master-computation does not register
+     * aggregator with the specified name.
      */
     <V extends Value<?>> V aggregatedValue(String name);
 }

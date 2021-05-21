@@ -35,7 +35,7 @@ public interface Aggregator4Master {
 
     /**
      * Register the aggregator with specified name. The name must be unique.
-     * Used by algorithm's master-computation to register aggregators.
+     * Used by algorithm's master-computation init() to register aggregators.
      */
     <V extends Value<?>, C extends Aggregator<V>>
     void registerAggregator(String name, Class<C> aggregator);
@@ -43,7 +43,7 @@ public interface Aggregator4Master {
     /**
      * Register aggregator with specified value type and a combiner which can
      * combine values with specified value type. The name must be unique.
-     * Used by algorithm's master-computation to register aggregators.
+     * Used by algorithm's master-computation init() to register aggregators.
      */
     <V extends Value<?>, C extends Combiner<V>>
     void registerAggregator(String name, ValueType type, Class<C> combiner);
@@ -52,24 +52,29 @@ public interface Aggregator4Master {
      * Register aggregator with specified default value(include type) and
      * a combiner which can combine values with specified value type.
      * The name must be unique.
-     * Used by algorithm's master-computation to register aggregators.
+     * Used by algorithm's master-computation init() to register aggregators.
      */
     <V extends Value<?>, C extends Combiner<V>>
     void registerAggregator(String name, V defaultValue, Class<C> combiner);
 
     /**
-     * Set the aggregated value by master-computation. The value will be
-     * received by workers at next superstep.
-     * Throws ComputerException if master does not register the aggregator
-     * with specified name.
+     * Set the aggregated value by master-computation, generally users may not
+     * need to explicitly set a aggregated value.
+     * If the value is set, it will be received by workers at next superstep.
+     * Throws ComputerException if master-computation does not register
+     * aggregator with specified name.
      */
     <V extends Value<?>> void aggregatedValue(String name, V value);
 
     /**
-     * Get the aggregated value. The aggregated value is aggregated from
-     * workers at this superstep.
-     * Throws ComputerException if master does not register the aggregator
-     * with specified name.
+     * Get the aggregated value. Each worker aggregate the aggregator value
+     * locally, then submit to master, then master aggregate the aggregators
+     * value from all workers. master-computation can get the aggregated value
+     * in master compute(), and worker-computation can get the aggregated value
+     * in the next superstep.
+     * Used by algorithm's master-computation compute()
+     * Throws ComputerException if master-computation does not register
+     * aggregator with the specified name.
      */
     <V extends Value<?>> V aggregatedValue(String name);
 }
