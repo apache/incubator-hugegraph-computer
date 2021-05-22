@@ -21,13 +21,17 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.net.InetSocketAddress;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
+import com.baidu.hugegraph.util.Log;
 
 public class DataServerManager implements Manager {
 
+    private static final Logger LOG = Log.logger(DataServerManager.class);
     public static final String NAME = "data_server";
 
     private final ConnectionManager connectionManager;
@@ -46,11 +50,14 @@ public class DataServerManager implements Manager {
     @Override
     public void init(Config config) {
         this.connectionManager.startServer(config, this.messageHandler);
+        LOG.info("DataServerManager initialized, address='{}'",
+                 this.connectionManager.getServer().bindAddress());
     }
 
     @Override
     public void close(Config config) {
         this.connectionManager.shutdownServer();
+        LOG.info("DataServerManager closed");
     }
 
     public InetSocketAddress address() {

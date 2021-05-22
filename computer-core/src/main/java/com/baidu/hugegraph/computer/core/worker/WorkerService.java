@@ -52,7 +52,6 @@ import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.network.DataServerManager;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
-import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -89,10 +88,7 @@ public class WorkerService {
 
         this.config = config;
 
-        InetSocketAddress dataAddress = this.initDataTransportManagers();
-
-        this.workerInfo = new ContainerInfo(dataAddress.getHostName(),
-                                            0, dataAddress.getPort());
+        this.workerInfo = new ContainerInfo();
         LOG.info("{} Start to initialize worker", this);
 
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
@@ -103,7 +99,8 @@ public class WorkerService {
          */
         this.masterInfo = this.bsp4Worker.waitMasterInitDone();
 
-        this.initManagers(this.masterInfo);
+        InetSocketAddress address = this.initManagers(this.masterInfo);
+        this.workerInfo.updateAddress(address);
 
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
@@ -243,18 +240,7 @@ public class WorkerService {
         return String.format("[worker %s]", id);
     }
 
-    private InetSocketAddress initDataTransportManagers() {
-        // TODO: Start data-transport server and get its host and port.
-        String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
-        int port = this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
-
-        InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
-                                        host, port);
-
-        return dataAddress;
-    }
-
-    private void initManagers(ContainerInfo masterInfo) {
+    private InetSocketAddress initManagers(ContainerInfo masterInfo) {
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
@@ -275,13 +261,11 @@ public class WorkerService {
         FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
 
-        /*
-         * TODO: when recv module merged, change it
-         * remove exclude config from test codecov
-         */
-        FakeMessageRecvHandler recvManager = new FakeMessageRecvHandler();
-        FakeDataServerManager serverManager = new FakeDataServerManager(
-                                              recvManager);
+        MessageRecvManager recvManager = new MessageRecvManager(fileManager);
+        this.managers.add(recvManager);
+
+        DataServerManager serverManager = new DataServerManager(recvManager);
+        this.managers.add(serverManager);
         this.managers.add(serverManager);
 
         SortManager sortManager = new SortManager(this.context);
@@ -303,19 +287,8 @@ public class WorkerService {
         this.managers.initAll(this.config);
 
         LOG.info("{} WorkerService initialized managers", this);
-        DataFileManager fileManager = new DataFileManager();
-        this.managers.add(fileManager);
 
-        MessageRecvManager recveManager = new MessageRecvManager(fileManager);
-        this.managers.add(recveManager);
-
-        DataServerManager serverManager = new DataServerManager(recveManager);
-        this.managers.add(serverManager);
-
-        // Init managers
-        this.managers.initAll(this.config);
-
-        LOG.info("{} WorkerService initialized", this);
+        return serverManager.address();
     }
 
     private void checkInited() {

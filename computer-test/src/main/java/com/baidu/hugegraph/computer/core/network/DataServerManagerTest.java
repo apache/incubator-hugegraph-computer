@@ -49,12 +49,11 @@ public class DataServerManagerTest {
             ComputerOptions.MASTER_COMPUTATION_CLASS,
             MockMasterComputation.class.getName()
         );
-        DataFileManager dataFileManager = new DataFileManager();
-        dataFileManager.init(config);
-        MessageRecvManager receiveManager =
-                           new MessageRecvManager(dataFileManager);
-        receiveManager.init(config);
-        DataServerManager serverManager = new DataServerManager(receiveManager);
+        DataFileManager fileManager = new DataFileManager();
+        fileManager.init(config);
+        MessageRecvManager recvManager = new MessageRecvManager(fileManager);
+        recvManager.init(config);
+        DataServerManager serverManager = new DataServerManager(recvManager);
         serverManager.init(config);
 
         Assert.assertEquals(DataServerManager.NAME, serverManager.name());
@@ -63,11 +62,11 @@ public class DataServerManagerTest {
         ConnectionId connectionId = ConnectionId.parseConnectionId(
                                                  address.getHostName(),
                                                  address.getPort());
-        receiveManager.channelActive(connectionId);
-        receiveManager.channelInactive(connectionId);
+        recvManager.channelActive(connectionId);
+        recvManager.channelInactive(connectionId);
         TransportException e = new TransportException("test transport " +
                                                       "exception");
-        receiveManager.exceptionCaught(e, connectionId);
+        recvManager.exceptionCaught(e, connectionId);
         serverManager.close(config);
     }
 }

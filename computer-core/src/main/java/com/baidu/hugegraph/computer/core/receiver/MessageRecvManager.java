@@ -41,7 +41,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     private static final Logger LOG = Log.logger(MessageRecvManager.class);
 
-    public static final String NAME = "receive";
+    public static final String NAME = "message_recv";
 
     private final DataFileManager fileManager;
 
@@ -70,6 +70,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
          * TODO: create CountDownLatch to trace MessageType.FINISH messages for
          *  inputstep.
          */
+        LOG.info("MessageRecvManager initialized");
     }
 
     @Override
