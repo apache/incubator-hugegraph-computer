@@ -27,6 +27,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -45,6 +46,7 @@ import com.baidu.hugegraph.computer.core.sort.combiner.MockIntSumCombiner;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
@@ -61,10 +63,9 @@ import com.google.common.collect.Lists;
 
 public class LargeDataSizeTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(
-                                                       LargeDataSizeTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(
+                                      LargeDataSizeTest.class);
     private static String FILE_DIR;
-    private static StopWatch watcher;
 
     @BeforeClass
     public static void init() {
@@ -77,13 +78,16 @@ public class LargeDataSizeTest {
                 ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB)
         );
         FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
-        watcher = new StopWatch();
+    }
+
+    @Before
+    public void setup() {
+        FileUtils.deleteQuietly(new File(FILE_DIR));
     }
 
     @Test
-    public void test() throws Exception {
-        FileUtils.deleteQuietly(new File(FILE_DIR));
-
+    public void testAllProcess() throws Exception {
+        StopWatch watcher = new StopWatch();
         final long bufferSize = Bytes.MB;
         final int mergeBufferNum = 300;
         final int dataSize = 10000000;
@@ -126,11 +130,91 @@ public class LargeDataSizeTest {
         mergeFiles(sorter, mergeBufferFiles, Lists.newArrayList(resultFile));
 
         watcher.stop();
-        LOGGER.info(String.format("LargeDataSizeTest sort time: %s",
-                                  watcher.getTime()));
+        LOG.info(String.format("testAllProcess sort time: %s",
+                               watcher.getTime()));
 
         long result = sumOfEntryValue(sorter, ImmutableList.of(resultFile));
         Assert.assertEquals(value, result);
+    }
+
+    @Test
+    public void testMergeBuffers() throws Exception {
+        StopWatch watcher = new StopWatch();
+        // Sort buffers total size 100M, each buffer is 50KB
+        final long bufferSize = Bytes.KB * 50;
+        final long bufferNum = 2000;
+        final int keyRange = 10000000;
+        long totalValue = 0L;
+
+        Random random = new Random();
+        List<RandomAccessInput> buffers = new ArrayList<>();
+        for (int i = 0; i < bufferNum; i++) {
+            UnsafeBytesOutput buffer = new UnsafeBytesOutput();
+            while (buffer.position() < bufferSize) {
+                // Write data
+                buffer.writeInt(Integer.BYTES);
+                int key = random.nextInt(keyRange);
+                buffer.writeInt(key);
+                buffer.writeInt(Integer.BYTES);
+                int value = random.nextInt(100);
+                totalValue += value;
+                buffer.writeInt(value);
+            }
+            buffers.add(EntriesUtil.inputFromOutput(buffer));
+        }
+
+        // Sort buffer
+        Sorter sorter = new SorterImpl(ComputerContext.instance().config());
+        watcher.start();
+        List<RandomAccessInput> sortedBuffers = new ArrayList<>();
+        for (RandomAccessInput buffer : buffers) {
+            RandomAccessInput sortedBuffer = sortBuffer(sorter, buffer);
+            sortedBuffers.add(sortedBuffer);
+        }
+        watcher.stop();
+
+        LOG.info("testMergeBuffers sort buffer cost time:{}",
+                 watcher.getTime());
+
+        String resultFile = availableDirPath("0");
+        // Sort buffers
+        watcher.reset();
+        watcher.start();
+        sorter.mergeBuffers(sortedBuffers, new KvOuterSortFlusher(),
+                            resultFile, false);
+        watcher.stop();
+
+        LOG.info("testMergeBuffers merge buffers cost time:{}",
+                 watcher.getTime());
+
+        // Assert result
+        long result = sumOfEntryValue(sorter, ImmutableList.of(resultFile));
+        Assert.assertEquals(totalValue, result);
+        assertFileOrder(sorter, ImmutableList.of(resultFile));
+    }
+
+    @Test
+    public void testMergeBuffersAllSameKey() throws Exception {
+        List<RandomAccessInput> buffers = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            UnsafeBytesOutput buffer = new UnsafeBytesOutput();
+            for (int j = 0; j < 100; j++) {
+                // Write data
+                buffer.writeInt(Integer.BYTES);
+                buffer.writeInt(1);
+                buffer.writeInt(Integer.BYTES);
+                buffer.writeInt(1);
+            }
+            buffers.add(EntriesUtil.inputFromOutput(buffer));
+        }
+
+        String resultFile = availableDirPath("0");
+        Sorter sorter = new SorterImpl(ComputerContext.instance().config());
+        mergeBuffers(sorter, buffers, resultFile);
+
+        // Assert result
+        long result = sumOfEntryValue(sorter, ImmutableList.of(resultFile));
+        Assert.assertEquals(1000 * 100, result);
     }
 
     private static RandomAccessInput sortBuffer(Sorter sorter,
@@ -166,7 +250,7 @@ public class LargeDataSizeTest {
             HgkvDir dir = HgkvDirImpl.open(file);
             entrySize += dir.numEntries();
         }
-        LOGGER.info("Finally kvEntry size:{}", entrySize);
+        LOG.info("Finally kvEntry size:{}", entrySize);
 
         PeekableIterator<KvEntry> iterator = null;
         try {
@@ -177,6 +261,27 @@ public class LargeDataSizeTest {
                 result += StoreTestUtil.dataFromPointer(next.value());
             }
             return result;
+        } finally {
+            if (iterator != null) {
+                iterator.close();
+            }
+        }
+    }
+
+    private static void assertFileOrder(Sorter sorter, List<String> files)
+                                        throws Exception {
+        PeekableIterator<KvEntry> iterator = null;
+        KvEntry last = null;
+        try {
+            iterator = sorter.iterator(files, false);
+            while (iterator.hasNext()) {
+                KvEntry next = iterator.next();
+                if (last == null) {
+                    last = iterator.next();
+                    continue;
+                }
+                Assert.assertTrue(last.key().compareTo(next.key()) <= 0);
+            }
         } finally {
             if (iterator != null) {
                 iterator.close();

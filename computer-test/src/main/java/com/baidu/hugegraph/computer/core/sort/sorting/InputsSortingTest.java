@@ -19,15 +19,25 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Random;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.hugegraph.testutil.Assert;
 
 public class InputsSortingTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(
+                                      InputsSortingTest.class);
 
     @Test
     public void testHeapInputsSorting() {
@@ -80,5 +90,36 @@ public class InputsSortingTest {
         Assert.assertFalse(inputsSorting.hasNext());
         Assert.assertFalse(sortedResult.hasNext());
         Assert.assertThrows(NoSuchElementException.class, inputsSorting::next);
+    }
+
+    @Test
+    public void testLoserTreeOrder() {
+        StopWatch watcher = new StopWatch();
+        Random random = new Random();
+        List<List<Integer>> lists = new ArrayList<>();
+        for (int i = 0; i < 2000; i++) {
+            List<Integer> list = new ArrayList<>();
+            for (int j = 0; j < 500; j++) {
+                list.add(random.nextInt(100));
+            }
+            lists.add(list);
+        }
+
+        List<Iterator<Integer>> sources = lists.stream()
+                                               .peek(Collections::sort)
+                                               .map(List::iterator)
+                                               .collect(Collectors.toList());
+
+        watcher.start();
+        InputsSorting<Integer> sorting = SortingFactory.createSorting(sources);
+        int last = 0;
+        while (sorting.hasNext()) {
+            Integer next = sorting.next();
+            Assert.assertTrue(last <= next);
+            last = next;
+        }
+        watcher.stop();
+
+        LOG.info("testLoserTreeOrder cost time:{}", watcher.getTime());
     }
 }
