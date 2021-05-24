@@ -146,15 +146,21 @@ public class MessageRecvManager implements Manager, MessageHandler {
         }
     }
 
-    public VertexMessageRecvPartitions vertexPartitions() {
-        return this.vertexPartitions;
+    public VertexMessageRecvPartitions removeVertexPartitions() {
+        VertexMessageRecvPartitions partitions = this.vertexPartitions;
+        this.vertexPartitions = null;
+        return partitions;
     }
 
-    public EdgeMessageRecvPartitions edgePartitions() {
-        return this.edgePartitions;
+    public EdgeMessageRecvPartitions removeEdgePartitions() {
+        EdgeMessageRecvPartitions partitions = this.edgePartitions;
+        this.edgePartitions = null;
+        return partitions;
     }
 
-    public ComputeMessageRecvPartitions messagePartitions() {
-        return this.messagePartitions;
+    public ComputeMessageRecvPartitions removeMessagePartitions() {
+        ComputeMessageRecvPartitions partitions = this.messagePartitions;
+        this.messagePartitions = null;
+        return partitions;
     }
 }

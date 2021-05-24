@@ -79,8 +79,8 @@ public class MessageRecvManagerTest {
             });
         }
         this.receiveManager.waitReceivedAllMessages();
-        VertexMessageRecvPartitions partitions =
-                                    this.receiveManager.vertexPartitions();
+        VertexMessageRecvPartitions partitions = this.receiveManager
+                                                 .removeVertexPartitions();
         partitions.flushAllBuffersAndWaitSorted();
 
         for (MessageRecvPartition p : partitions.partitions().values()) {
@@ -102,7 +102,7 @@ public class MessageRecvManagerTest {
         }
         this.receiveManager.waitReceivedAllMessages();
         EdgeMessageRecvPartitions partitions =
-                                  this.receiveManager.edgePartitions();
+                                  this.receiveManager.removeEdgePartitions();
         partitions.flushAllBuffersAndWaitSorted();
 
         for (MessageRecvPartition p : partitions.partitions().values()) {
@@ -125,16 +125,16 @@ public class MessageRecvManagerTest {
             });
         }
         this.receiveManager.waitReceivedAllMessages();
-        ComputeMessageRecvPartitions partitions =
-                                     this.receiveManager.messagePartitions();
+        this.receiveManager.afterSuperstep(this.config, 0);
+
+        ComputeMessageRecvPartitions partitions = this.receiveManager
+                                                  .removeMessagePartitions();
         partitions.flushAllBuffersAndWaitSorted();
 
         for (MessageRecvPartition p : partitions.partitions().values()) {
             // Before merge
             Assert.assertEquals(8, p.outputFiles().size());
         }
-        this.receiveManager.afterSuperstep(this.config, 0);
-
         // Superstep 1
         this.receiveManager.beforeSuperstep(this.config, 1);
         for (int i = 0; i < 51; i++) {
@@ -143,14 +143,15 @@ public class MessageRecvManagerTest {
             });
         }
         this.receiveManager.waitReceivedAllMessages();
-        partitions = this.receiveManager.messagePartitions();
+        this.receiveManager.afterSuperstep(this.config, 1);
+
+        partitions = this.receiveManager.removeMessagePartitions();
         partitions.flushAllBuffersAndWaitSorted();
 
         for (MessageRecvPartition p : partitions.partitions().values()) {
             // Before merge
             Assert.assertEquals(6, p.outputFiles().size());
         }
-        this.receiveManager.afterSuperstep(this.config, 1);
     }
 
     @Test
