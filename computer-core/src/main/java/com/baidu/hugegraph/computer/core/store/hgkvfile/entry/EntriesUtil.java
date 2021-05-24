@@ -97,13 +97,13 @@ public final class EntriesUtil {
     public static KvEntry entryFromInput(RandomAccessInput input,
                                          RandomAccessInput userAccessInput,
                                          boolean useInlinePointer,
-                                         boolean useSubKvEntry) {
+                                         boolean valueWithSubKv) {
         try {
             if (useInlinePointer) {
-                return inlinePointerKvEntry(input, useSubKvEntry);
+                return inlinePointerKvEntry(input, valueWithSubKv);
             } else {
-                return cachedPointerKvEntry(input, userAccessInput,
-                                            useSubKvEntry);
+                return cachedPointerKvEntry(userAccessInput, userAccessInput,
+                                            valueWithSubKv);
             }
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
@@ -112,15 +112,17 @@ public final class EntriesUtil {
 
     public static KvEntry entryFromInput(RandomAccessInput input,
                                          boolean useInlinePointer,
-                                         boolean useSubKvEntry) {
-        return entryFromInput(input, input, useInlinePointer, useSubKvEntry);
+                                         boolean valueWithSubKv) {
+        return entryFromInput(input, input, useInlinePointer, valueWithSubKv);
     }
     
     private static KvEntry cachedPointerKvEntry(
                            RandomAccessInput input,
                            RandomAccessInput userAccessInput,
-                           boolean useSubKvEntry)
+                           boolean valueWithSubKv)
                            throws IOException {
+        int numSubKvEntries = 0;
+
         // Read key
         int keyLength = input.readInt();
         long keyPosition = input.position();
@@ -129,40 +131,47 @@ public final class EntriesUtil {
         // Read value
         int valueLength = input.readInt();
         long valuePosition = input.position();
-        input.skip(valueLength);
-        
+        if (valueWithSubKv) {
+            numSubKvEntries = input.readInt();
+            input.skip(valueLength - Integer.BYTES);
+        } else {
+            input.skip(valueLength);
+        }
+
         Pointer key = new CachedPointer(userAccessInput, keyPosition,
                                         keyLength);
         Pointer value = new CachedPointer(userAccessInput, valuePosition,
                                           valueLength);
         
-        return switchKvEntry(key, value, useSubKvEntry);
+        return new DefaultKvEntry(key, value, numSubKvEntries);
     }
 
     private static KvEntry inlinePointerKvEntry(RandomAccessInput input,
-                                                boolean useSubKvEntry)
+                                                boolean valueWithSubKv)
                                                 throws IOException {
+        int numSubEntries = 0;
         // Read key
         int keyLength = input.readInt();
         byte[] keyBytes = input.readBytes(keyLength);
 
         // Read value
         int valueLength = input.readInt();
-        byte[] valueBytes = input.readBytes(valueLength);
+        byte[] valueBytes = new byte[valueLength];
+        if (valueWithSubKv) {
+            numSubEntries = input.readInt();
+            valueBytes[0] = (byte) (numSubEntries & 0xFF);
+            valueBytes[1] = (byte) ((numSubEntries >> 8) & 0xFF);
+            valueBytes[2] = (byte) ((numSubEntries >> 16) & 0xFF);
+            valueBytes[3] = (byte) ((numSubEntries >> 24) & 0xFF);
+            input.readFully(valueBytes, 4, valueLength - 4);
+        } else {
+            input.readFully(valueBytes);
+        }
 
         Pointer key = new InlinePointer(keyBytes);
         Pointer value = new InlinePointer(valueBytes);
 
-        return switchKvEntry(key, value, useSubKvEntry);
-    }
-
-    private static KvEntry switchKvEntry(Pointer key, Pointer value,
-                                         boolean useSubKvEntry) {
-        if (useSubKvEntry) {
-            return new SubKvEntry(key, value);
-        } else {
-            return new DefaultKvEntry(key, value);
-        }
+        return new DefaultKvEntry(key, value, numSubEntries);
     }
 
     public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry) {

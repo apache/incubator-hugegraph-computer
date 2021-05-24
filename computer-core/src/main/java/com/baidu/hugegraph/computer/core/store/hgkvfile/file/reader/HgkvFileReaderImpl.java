@@ -34,20 +34,25 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
 
     private final HgkvFile hgkvFile;
     private final boolean useInlinePointer;
+    private final boolean withSubKv;
 
-    public HgkvFileReaderImpl(String path, boolean useInlinePointer)
+    public HgkvFileReaderImpl(String path, boolean useInlinePointer,
+                              boolean withSubKv)
                               throws IOException {
         this.hgkvFile = HgkvFileImpl.open(path);
         this.useInlinePointer = useInlinePointer;
+        this.withSubKv = withSubKv;
     }
 
-    public HgkvFileReaderImpl(String path) throws IOException {
-        this(path, true);
+    public HgkvFileReaderImpl(String path, boolean withSubKv)
+                              throws IOException {
+        this(path, true, withSubKv);
     }
 
     @Override
     public EntryIterator iterator() throws IOException {
-        return new EntryIter(this.hgkvFile, this.useInlinePointer);
+        return new EntryIter(this.hgkvFile, this.useInlinePointer,
+                             this.withSubKv);
     }
 
     private static class EntryIter implements EntryIterator {
@@ -56,14 +61,17 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
         private final BufferedFileInput userAccessInput;
         private long numEntries;
         private final boolean useInlinePointer;
+        private final boolean withSubKv;
 
-        public EntryIter(HgkvFile hgkvFile, boolean useInlinePointer)
+        public EntryIter(HgkvFile hgkvFile, boolean useInlinePointer,
+                         boolean withSubKv)
                          throws IOException {
             this.numEntries = hgkvFile.numEntries();
             File file = new File(hgkvFile.path());
             this.input = new BufferedFileInput(file);
             this.userAccessInput = this.input.duplicate();
             this.useInlinePointer = useInlinePointer;
+            this.withSubKv = withSubKv;
         }
 
         @Override
@@ -81,7 +89,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
             return EntriesUtil.entryFromInput(this.input,
                                               this.userAccessInput,
                                               this.useInlinePointer,
-                                              false);
+                                              this.withSubKv);
         }
 
         @Override

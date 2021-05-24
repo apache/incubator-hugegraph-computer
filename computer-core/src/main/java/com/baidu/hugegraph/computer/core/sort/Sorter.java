@@ -108,5 +108,6 @@ public interface Sorter {
     /**
      * Get the iterator of <key, value> pair by increasing order of key.
      */
-    PeekableIterator<KvEntry> iterator(List<String> inputs) throws IOException;
+    PeekableIterator<KvEntry> iterator(List<String> inputs, boolean withSubKv)
+                                       throws IOException;
 }

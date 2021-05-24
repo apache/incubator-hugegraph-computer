@@ -101,12 +101,13 @@ public class SorterImpl implements Sorter {
     }
 
     @Override
-    public PeekableIterator<KvEntry> iterator(List<String> inputs)
+    public PeekableIterator<KvEntry> iterator(List<String> inputs,
+                                              boolean withSubKv)
                                               throws IOException {
         InputsSorterImpl sorter = new InputsSorterImpl();
         List<EntryIterator> entries = new ArrayList<>();
         for (String input : inputs) {
-            HgkvDirReader reader = new HgkvDirReaderImpl(input, false);
+            HgkvDirReader reader = new HgkvDirReaderImpl(input, withSubKv);
             entries.add(reader.iterator());
         }
         return PeekableIteratorAdaptor.of(sorter.sort(entries));

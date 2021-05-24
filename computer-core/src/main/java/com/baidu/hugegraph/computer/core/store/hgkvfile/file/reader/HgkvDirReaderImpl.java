@@ -34,24 +34,32 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
 
     private final HgkvDir hgkvDir;
     private final boolean useInlinePointer;
+    private final boolean withSubKv;
 
-    public HgkvDirReaderImpl(String path, boolean useInlinePointer) {
+    public HgkvDirReaderImpl(String path, boolean useInlinePointer,
+                             boolean withSubKv) {
         try {
             this.hgkvDir = HgkvDirImpl.open(path);
             this.useInlinePointer = useInlinePointer;
+            this.withSubKv = withSubKv;
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
     }
 
+    public HgkvDirReaderImpl(String path, boolean withSubKv) {
+        this(path, true, withSubKv);
+    }
+
     public HgkvDirReaderImpl(String path) {
-        this(path, true);
+        this(path, true, false);
     }
 
     @Override
     public EntryIterator iterator() {
         try {
-            return new HgkvDirEntryIter(this.hgkvDir, this.useInlinePointer);
+            return new HgkvDirEntryIter(this.hgkvDir, this.useInlinePointer,
+                                        this.withSubKv);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
@@ -63,13 +71,16 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
         private long numEntries;
         private EntryIterator kvIter;
         private final boolean useInlinePointer;
+        private final boolean withSubKv;
 
-        public HgkvDirEntryIter(HgkvDir hgkvDir, boolean useInlinePointer)
+        public HgkvDirEntryIter(HgkvDir hgkvDir, boolean useInlinePointer,
+                                boolean withSubKv)
                                 throws IOException {
             this.segments = hgkvDir.segments().iterator();
             this.numEntries = hgkvDir.numEntries();
             this.kvIter = null;
             this.useInlinePointer = useInlinePointer;
+            this.withSubKv = withSubKv;
         }
 
         @Override
@@ -108,7 +119,8 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
             while (this.segments.hasNext()) {
                 HgkvFile segment = this.segments.next();
                 HgkvFileReader reader = new HgkvFileReaderImpl(
-                                        segment.path(), this.useInlinePointer);
+                                        segment.path(), this.useInlinePointer,
+                                        this.withSubKv);
                 iterator = reader.iterator();
                 if (iterator.hasNext()) {
                     return iterator;

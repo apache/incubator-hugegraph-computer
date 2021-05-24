@@ -30,7 +30,7 @@ public class HgkvDir4SubKvReaderImpl implements HgkvDirReader {
     private final HgkvDirReader reader;
 
     public HgkvDir4SubKvReaderImpl(String path, boolean useInlinePointer) {
-        this.reader = new HgkvDirReaderImpl(path, useInlinePointer);
+        this.reader = new HgkvDirReaderImpl(path, useInlinePointer, true);
     }
 
     public HgkvDir4SubKvReaderImpl(String path) {

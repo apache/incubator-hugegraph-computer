@@ -198,7 +198,7 @@ public class SorterTest {
                                                 5, 10,
                                                 6, 55);
         Iterator<Integer> resultIter = result.iterator();
-        Iterator<KvEntry> iterator = sorter.iterator(outputs);
+        Iterator<KvEntry> iterator = sorter.iterator(outputs, false);
         KvEntry last = iterator.next();
         int value = StoreTestUtil.dataFromPointer(last.value());
         while (true) {
@@ -311,7 +311,7 @@ public class SorterTest {
          * key 3 subKv 4 3
          */
         ImmutableList<String> outputs = ImmutableList.of(outputFile);
-        Iterator<KvEntry> kvIter = sorter.iterator(outputs);
+        Iterator<KvEntry> kvIter = sorter.iterator(outputs, true);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 1, 3, 3, 5, 3);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 5, 3, 8, 6);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 9, 3);
@@ -363,7 +363,7 @@ public class SorterTest {
                             false);
 
         ImmutableList<String> outputs = ImmutableList.of(resultFile);
-        Iterator<KvEntry> iter = sorter.iterator(outputs);
+        Iterator<KvEntry> iter = sorter.iterator(outputs, false);
         SorterTestUtil.assertKvEntry(iter.next(), 1, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
