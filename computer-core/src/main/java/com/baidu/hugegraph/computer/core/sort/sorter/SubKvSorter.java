@@ -32,21 +32,21 @@ import com.baidu.hugegraph.util.E;
 
 public class SubKvSorter implements Iterator<KvEntry> {
 
-    private final PeekableIterator<KvEntry> kvEntries;
+    private final PeekableIterator<KvEntry> entries;
     private final int subKvSortPathNum;
-    private final List<Iterator<KvEntry>> subKvMergeSource;
+    private final List<Iterator<KvEntry>> subKvMergeSources;
     private Iterator<KvEntry> subKvSorting;
     private KvEntry currentEntry;
 
-    public SubKvSorter(PeekableIterator<KvEntry> kvEntries,
+    public SubKvSorter(PeekableIterator<KvEntry> entries,
                        int subKvSortPathNum) {
-        E.checkArgument(kvEntries.hasNext(),
+        E.checkArgument(entries.hasNext(),
                         "Parameter entries must not be empty");
         E.checkArgument(subKvSortPathNum > 0,
                         "Parameter subKvSortPathNum must > 0");
-        this.kvEntries = kvEntries;
+        this.entries = entries;
         this.subKvSortPathNum = subKvSortPathNum;
-        this.subKvMergeSource = new ArrayList<>(this.subKvSortPathNum);
+        this.subKvMergeSources = new ArrayList<>(this.subKvSortPathNum);
         this.init();
     }
 
@@ -69,25 +69,26 @@ public class SubKvSorter implements Iterator<KvEntry> {
     }
 
     public void reset() {
-        if (!this.kvEntries.hasNext()) {
+        if (!this.entries.hasNext()) {
             this.currentEntry = null;
             return;
         }
-        this.subKvMergeSource.clear();
+        this.subKvMergeSources.clear();
 
         assert this.subKvSortPathNum > 0;
         KvEntry entry;
         while (true) {
-            entry = this.kvEntries.next();
-            this.subKvMergeSource.add(new MergePath(this.kvEntries, entry));
+            entry = this.entries.next();
+            this.subKvMergeSources.add(new MergePath(this.entries, entry));
 
-            KvEntry next = this.kvEntries.peek();
-            if (this.subKvMergeSource.size() == this.subKvSortPathNum ||
+            KvEntry next = this.entries.peek();
+            if (this.subKvMergeSources.size() == this.subKvSortPathNum ||
                 next == null || entry.key().compareTo(next.key()) != 0) {
                 break;
             }
         }
-        this.subKvSorting = new LoserTreeInputsSorting<>(this.subKvMergeSource);
+        this.subKvSorting = new LoserTreeInputsSorting<>(
+                            this.subKvMergeSources);
         this.currentEntry = entry;
     }
 

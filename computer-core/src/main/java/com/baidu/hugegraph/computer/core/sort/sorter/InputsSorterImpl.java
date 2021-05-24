@@ -61,7 +61,7 @@ public class InputsSorterImpl implements InputsSorter {
             if (this.closed) {
                 return;
             }
-            for (AutoCloseable source : this.sources) {
+            for (EntryIterator source : this.sources) {
                 source.close();
             }
             this.closed = true;

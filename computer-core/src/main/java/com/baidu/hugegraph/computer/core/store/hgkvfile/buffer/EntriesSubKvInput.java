@@ -47,7 +47,7 @@ public class EntriesSubKvInput implements EntryIterator {
 
     @Override
     public KvEntry next() {
-        return EntriesUtil.kvEntryWithFirstSubKv(this.entries.next());
+        return this.entries.next();
     }
 
     @Override

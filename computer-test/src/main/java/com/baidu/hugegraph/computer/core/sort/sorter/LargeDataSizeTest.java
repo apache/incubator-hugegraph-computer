@@ -50,6 +50,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.testutil.Assert;
@@ -103,7 +104,7 @@ public class LargeDataSizeTest {
             if (output.position() >= bufferSize || (i + 1) == dataSize) {
                 UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
                 buffers.add(sortBuffer(sorter, input));
-                output = new UnsafeBytesOutput();
+                output.seek(0);
             }
 
             // Merge buffers to HgkvDir
@@ -155,6 +156,13 @@ public class LargeDataSizeTest {
 
     private static long sumOfEntryValue(Sorter sorter, List<String> files)
                                         throws Exception {
+        long entrySize = 0L;
+        for (String file : files) {
+            HgkvDir dir = HgkvDirImpl.open(file);
+            entrySize += dir.numEntries();
+        }
+        LOGGER.info("Finally kvEntry size:{}", entrySize);
+
         try (PeekableIterator<KvEntry> iterator = sorter.iterator(files)) {
             long result = 0;
             while (iterator.hasNext()) {
