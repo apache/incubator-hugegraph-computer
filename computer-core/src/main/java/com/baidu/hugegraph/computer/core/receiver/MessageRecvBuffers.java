@@ -39,20 +39,20 @@ public class MessageRecvBuffers {
 
     private List<byte[]> buffers;
     private BarrierEvent event;
-    private long sortTimeout;
+    private long waitSortedTimeout;
 
-    public MessageRecvBuffers(long threshold, long sortTimeout) {
+    public MessageRecvBuffers(long threshold, long waitSortedTimeout) {
         this.totalBytes = 0L;
         this.event = new BarrierEvent();
         this.threshold = threshold;
-        this.sortTimeout = sortTimeout;
+        this.waitSortedTimeout = waitSortedTimeout;
         this.buffers = new ArrayList<>();
     }
 
     public void addBuffer(ManagedBuffer data) {
         /*
-         * TODO: does not use copy. Develop new type of RandomAccessInput to
-         *  direct read from ManagedBuffer.
+         * TODO: don't not use copy, add a new class
+         *       RandomAccessInput(ManagedBuffer)
          */
         byte[] bytes = data.copyToByteArray();
         this.buffers.add(bytes);
@@ -79,10 +79,11 @@ public class MessageRecvBuffers {
             return;
         }
         try {
-            boolean sorted = this.event.await(this.sortTimeout);
+            boolean sorted = this.event.await(this.waitSortedTimeout);
             if (!sorted) {
-                throw new ComputerException("Buffers not sorted in %s ms",
-                                            this.sortTimeout);
+                throw new ComputerException(
+                          "Buffers have not been sorted in %s ms",
+                          this.waitSortedTimeout);
             }
             this.event.reset();
         } catch (InterruptedException e) {

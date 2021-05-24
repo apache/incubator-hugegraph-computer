@@ -358,7 +358,7 @@ public class ComputerOptions extends OptionHolder {
                     100 * Bytes.MB
             );
 
-    public static final ConfigOption<Long> WORKER_SORT_TIMEOUT =
+    public static final ConfigOption<Long> WORKER_WAIT_SORT_TIMEOUT =
             new ConfigOption<>(
                     "worker.sort_timeout",
                     "The max timeout(in ms) to wait sort thread done.",

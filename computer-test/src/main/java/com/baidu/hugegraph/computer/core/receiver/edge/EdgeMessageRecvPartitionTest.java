@@ -54,7 +54,7 @@ public class EdgeMessageRecvPartitionTest {
                                              config, fileManager);
         Assert.assertEquals("edge", partition.type());
         for (int i = 0; i < 25; i++) {
-            BuffersUtil.addBuffer(partition, 100);
+            BuffersUtil.addMockBufferToPartition(partition, 100);
         }
 
         List<String> files1 = partition.outputFiles();

@@ -29,6 +29,8 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitions;
+import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.computer.core.worker.MockComputation;
@@ -72,7 +74,7 @@ public class MessageRecvManagerTest {
     @Test
     public void testVertexMessage() {
         for (int i = 0; i < 100; i++) {
-            BuffersUtil.addBuffer(100, (ManagedBuffer buffer) -> {
+            BuffersUtil.mockBufferAndConsume(100, (ManagedBuffer buffer) -> {
                 this.receiveManager.handle(MessageType.VERTEX, 0, buffer);
             });
         }
@@ -93,19 +95,19 @@ public class MessageRecvManagerTest {
 
     @Test
     public void testEdgeMessage() {
-        for (int i = 0; i < 99; i++) {
-            BuffersUtil.addBuffer(100, (ManagedBuffer buffer) -> {
+        for (int i = 0; i < 89; i++) {
+            BuffersUtil.mockBufferAndConsume(100, (ManagedBuffer buffer) -> {
                 this.receiveManager.handle(MessageType.EDGE, 0, buffer);
             });
         }
         this.receiveManager.waitReceivedAllMessages();
-        VertexMessageRecvPartitions partitions =
-                                    this.receiveManager.vertexPartitions();
+        EdgeMessageRecvPartitions partitions =
+                                  this.receiveManager.edgePartitions();
         partitions.flushAllBuffersAndWaitSorted();
 
         for (MessageRecvPartition p : partitions.partitions().values()) {
             // Before merge
-            Assert.assertEquals(10, p.outputFiles().size());
+            Assert.assertEquals(9, p.outputFiles().size());
 
             // Merge to 1 file
             p.mergeOutputFiles(1);
@@ -117,36 +119,36 @@ public class MessageRecvManagerTest {
     public void testComputeMessage() {
         // Superstep 0
         this.receiveManager.beforeSuperstep(this.config, 0);
-        for (int i = 0; i < 91; i++) {
-            BuffersUtil.addBuffer(100, (ManagedBuffer buffer) -> {
+        for (int i = 0; i < 71; i++) {
+            BuffersUtil.mockBufferAndConsume(100, (ManagedBuffer buffer) -> {
                 this.receiveManager.handle(MessageType.MSG, 0, buffer);
             });
         }
         this.receiveManager.waitReceivedAllMessages();
-        VertexMessageRecvPartitions partitions =
-                                    this.receiveManager.vertexPartitions();
+        ComputeMessageRecvPartitions partitions =
+                                     this.receiveManager.messagePartitions();
         partitions.flushAllBuffersAndWaitSorted();
 
         for (MessageRecvPartition p : partitions.partitions().values()) {
             // Before merge
-            Assert.assertEquals(10, p.outputFiles().size());
+            Assert.assertEquals(8, p.outputFiles().size());
         }
         this.receiveManager.afterSuperstep(this.config, 0);
 
         // Superstep 1
         this.receiveManager.beforeSuperstep(this.config, 1);
         for (int i = 0; i < 51; i++) {
-            BuffersUtil.addBuffer(100, (ManagedBuffer buffer) -> {
+            BuffersUtil.mockBufferAndConsume(100, (ManagedBuffer buffer) -> {
                 this.receiveManager.handle(MessageType.MSG, 0, buffer);
             });
         }
         this.receiveManager.waitReceivedAllMessages();
-        partitions = this.receiveManager.vertexPartitions();
+        partitions = this.receiveManager.messagePartitions();
         partitions.flushAllBuffersAndWaitSorted();
 
         for (MessageRecvPartition p : partitions.partitions().values()) {
             // Before merge
-            Assert.assertEquals(5, p.outputFiles().size());
+            Assert.assertEquals(6, p.outputFiles().size());
         }
         this.receiveManager.afterSuperstep(this.config, 1);
     }
@@ -159,7 +161,7 @@ public class MessageRecvManagerTest {
     @Test
     public void testOtherMessageType() {
         Assert.assertThrows(ComputerException.class, () -> {
-            BuffersUtil.addBuffer(100, (ManagedBuffer buffer) -> {
+            BuffersUtil.mockBufferAndConsume(100, (ManagedBuffer buffer) -> {
                 this.receiveManager.handle(MessageType.ACK, 0, buffer);
             });
         }, e -> {

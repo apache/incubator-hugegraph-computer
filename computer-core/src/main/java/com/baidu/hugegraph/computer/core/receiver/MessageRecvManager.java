@@ -68,16 +68,15 @@ public class MessageRecvManager implements Manager, MessageHandler {
                               this.config, this.fileManager);
         /*
          * TODO: create CountDownLatch to trace MessageType.FINISH messages for
-         *  inputstep.
+         *       inputstep.
          */
-        LOG.info("MessageRecvManager initialized");
     }
 
     @Override
     public void beforeSuperstep(Config config, int superstep) {
         /*
          * TODO: create countdown latch to trace MessageType.FINISH messages for
-         *  current superstep.
+         *       current superstep.
          */
         this.messagePartitions = new ComputeMessageRecvPartitions(
                                  this.config, this.fileManager);
@@ -128,7 +127,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
                        ManagedBuffer buffer) {
         /*
          * TODO: handle MessageType.FINISH type of messages to indicate received
-         *  all messages.
+         *       all messages.
          */
         switch (messageType) {
             case VERTEX:

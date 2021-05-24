@@ -38,9 +38,11 @@ import com.baidu.hugegraph.util.E;
  */
 public abstract class MessageRecvPartition {
 
-    // Used to receive buffers.
-    private MessageRecvBuffers receiveBuffers;
-    // Used to sort the buffers that reach threshold.
+    private MessageRecvBuffers recvBuffers;
+    /*
+     * Used to sort the buffers that reached threshold
+     * ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT.
+     */
     private MessageRecvBuffers sortBuffers;
 
     private List<String> outputFiles;
@@ -52,14 +54,12 @@ public abstract class MessageRecvPartition {
                                 int superstep) {
         long buffersLimit = config.get(
              ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT);
-        long sortTimeout = config.get(ComputerOptions.WORKER_SORT_TIMEOUT);
-        this.receiveBuffers = new MessageRecvBuffers(buffersLimit, sortTimeout);
-        this.sortBuffers = new MessageRecvBuffers(buffersLimit, sortTimeout);
-        /*
-         * Set the sortBuffers sorted, so the first time call
-         * sortBuffers.waitSorted() can return immediately.
-         */
-        this.sortBuffers.signalSorted();
+        long waitSortTimeout = config.get(
+                               ComputerOptions.WORKER_WAIT_SORT_TIMEOUT);
+        this.recvBuffers = new MessageRecvBuffers(buffersLimit,
+                                                  waitSortTimeout);
+        this.sortBuffers = new MessageRecvBuffers(buffersLimit,
+                                                  waitSortTimeout);
         this.outputFiles = new ArrayList<>();
         this.fileGenerator = fileGenerator;
         this.superstep = superstep;
@@ -69,8 +69,8 @@ public abstract class MessageRecvPartition {
      * Only one thread can call this method.
      */
     public synchronized void addBuffer(ManagedBuffer buffer) {
-        this.receiveBuffers.addBuffer(buffer);
-        if (this.receiveBuffers.full()) {
+        this.recvBuffers.addBuffer(buffer);
+        if (this.recvBuffers.full()) {
             this.sortBuffers.waitSorted();
             this.swapReceiveAndSortBuffers();
             this.sortBuffers(this.sortBuffers);
@@ -78,17 +78,17 @@ public abstract class MessageRecvPartition {
     }
 
     /**
-     * Flush the receive buffers to file, and wait both receive buffers and
+     * Flush the receive buffers to file, and wait both recvBuffers and
      * sortBuffers to finish sorting.
      * After this method be called, can not call
      * {@link #addBuffer(ManagedBuffer)} any more.
      */
     public void flushAllBuffersAndWaitSorted() {
         this.sortBuffers.waitSorted();
-        if (this.receiveBuffers.totalBytes() > 0) {
-            this.sortBuffers(this.receiveBuffers);
+        if (this.recvBuffers.totalBytes() > 0) {
+            this.sortBuffers(this.recvBuffers);
         }
-        this.receiveBuffers.waitSorted();
+        this.recvBuffers.waitSorted();
     }
 
     public List<String> outputFiles() {
@@ -130,8 +130,8 @@ public abstract class MessageRecvPartition {
     }
 
     private void swapReceiveAndSortBuffers() {
-        MessageRecvBuffers tmp = this.receiveBuffers;
-        this.receiveBuffers = this.sortBuffers;
+        MessageRecvBuffers tmp = this.recvBuffers;
+        this.recvBuffers = this.sortBuffers;
         this.sortBuffers = tmp;
     }
 }

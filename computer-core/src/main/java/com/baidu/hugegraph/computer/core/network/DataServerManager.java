@@ -50,14 +50,15 @@ public class DataServerManager implements Manager {
     @Override
     public void init(Config config) {
         this.connectionManager.startServer(config, this.messageHandler);
-        LOG.info("DataServerManager initialized, address='{}'",
-                 this.connectionManager.getServer().bindAddress());
+        LOG.info("DataServerManager initialized with address '{}'",
+                 this.address());
     }
 
     @Override
     public void close(Config config) {
+        InetSocketAddress address = this.address();
         this.connectionManager.shutdownServer();
-        LOG.info("DataServerManager closed");
+        LOG.info("DataServerManager closed with address '{}'", address);
     }
 
     public InetSocketAddress address() {

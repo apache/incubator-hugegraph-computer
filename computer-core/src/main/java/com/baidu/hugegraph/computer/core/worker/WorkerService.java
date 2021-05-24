@@ -204,6 +204,11 @@ public class WorkerService {
             WorkerStat workerStat = this.compute();
 
             /*
+             * TODO: signal the MessageSendManager that no more messages
+             *       and send FINISH signal after send all messages.
+             */
+
+            /*
              * Wait for all workers to do compute()
              */
             MessageRecvManager receiveManager =
@@ -286,9 +291,11 @@ public class WorkerService {
         // Init all managers
         this.managers.initAll(this.config);
 
-        LOG.info("{} WorkerService initialized managers", this);
-
-        return serverManager.address();
+        InetSocketAddress address = serverManager.address();
+        LOG.info("{} WorkerService initialized managers with data server " +
+                 "address",
+                 this, address);
+        return address;
     }
 
     private void checkInited() {

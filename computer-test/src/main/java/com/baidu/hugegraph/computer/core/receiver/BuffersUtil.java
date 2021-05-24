@@ -29,21 +29,24 @@ import io.netty.buffer.Unpooled;
 
 public class BuffersUtil {
 
-    public static void addBuffer(MessageRecvPartition partition, int length) {
-        addBuffer(length, (ManagedBuffer buffer) -> {
+    public static void addMockBufferToPartition(MessageRecvPartition partition,
+                                                int mockBufferLength) {
+        mockBufferAndConsume(mockBufferLength, (ManagedBuffer buffer) -> {
             partition.addBuffer(buffer);
         });
     }
 
-    public static void addBuffer(MessageRecvBuffers buffers, int length) {
-        addBuffer(length, (ManagedBuffer buffer) -> {
+    public static void addMockBufferToBuffers(MessageRecvBuffers buffers,
+                                              int mockBufferLength) {
+        mockBufferAndConsume(mockBufferLength, (ManagedBuffer buffer) -> {
             buffers.addBuffer(buffer);
         });
     }
 
-    public static void addBuffer(int length, Consumer<ManagedBuffer> consumer) {
-        byte[] bytes = new byte[length];
-        ByteBuf buf = Unpooled.directBuffer(length);
+    public static void mockBufferAndConsume(int mockBufferLength,
+                                            Consumer<ManagedBuffer> consumer) {
+        byte[] bytes = new byte[mockBufferLength];
+        ByteBuf buf = Unpooled.directBuffer(mockBufferLength);
         try {
             buf = buf.writeBytes(bytes);
             NettyManagedBuffer buff = new NettyManagedBuffer(buf);

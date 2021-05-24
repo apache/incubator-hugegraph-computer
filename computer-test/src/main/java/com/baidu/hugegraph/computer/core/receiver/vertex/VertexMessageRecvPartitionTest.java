@@ -54,7 +54,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
                                                config, fileManager);
         Assert.assertEquals("vertex", partition.type());
         for (int i = 0; i < 25; i++) {
-            BuffersUtil.addBuffer(partition, 100);
+            BuffersUtil.addMockBufferToPartition(partition, 100);
         }
 
         List<String> files1 = partition.outputFiles();

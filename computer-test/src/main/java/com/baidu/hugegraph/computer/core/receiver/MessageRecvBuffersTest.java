@@ -34,20 +34,20 @@ import com.baidu.hugegraph.testutil.Assert;
 public class MessageRecvBuffersTest {
 
     @Test
-    public void testAddBuffer() {
+    public void testBufferToBuffers() {
         long threshold = 1024L;
         int size = 100;
         long maxWaitTime = 1000L;
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addBuffer(buffers, size);
+            BuffersUtil.addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertFalse(buffers.full());
         Assert.assertEquals(1000L, buffers.totalBytes());
 
-        BuffersUtil.addBuffer(buffers, size);
+        BuffersUtil.addMockBufferToBuffers(buffers, size);
         Assert.assertTrue(buffers.full());
 
         // Sort buffer
@@ -57,13 +57,13 @@ public class MessageRecvBuffersTest {
         buffers.signalSorted();
 
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addBuffer(buffers, size);
+            BuffersUtil.addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertEquals(1000L, buffers.totalBytes());
         Assert.assertFalse(buffers.full());
 
-        BuffersUtil.addBuffer(buffers, size);
+        BuffersUtil.addMockBufferToBuffers(buffers, size);
 
         Assert.assertTrue(buffers.full());
 
@@ -80,7 +80,7 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addBuffer(buffers, size);
+            BuffersUtil.addMockBufferToBuffers(buffers, size);
         }
         CountDownLatch countDownLatch = new CountDownLatch(2);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -100,20 +100,20 @@ public class MessageRecvBuffersTest {
     }
 
     @Test
-    public void testSortTimeout() {
+    public void testWaitSortTimeout() {
         long threshold = 1024L;
         int size = 100;
         long maxWaitTime = 1000L;
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addBuffer(buffers, size);
+            BuffersUtil.addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertThrows(ComputerException.class, () -> {
             buffers.waitSorted();
         }, e -> {
-            Assert.assertContains("Buffers not sorted in 1000 ms",
+            Assert.assertContains("Buffers have not been sorted in 1000 ms",
                                   e.getMessage());
         });
     }
@@ -126,7 +126,7 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addBuffer(buffers, size);
+            BuffersUtil.addMockBufferToBuffers(buffers, size);
         }
         AtomicBoolean success = new AtomicBoolean(false);
         CountDownLatch countDownLatch = new CountDownLatch(1);
