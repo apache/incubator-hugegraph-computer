@@ -47,6 +47,7 @@ public class MasterRpcManager implements Manager {
 
     @Override
     public void close(Config config) {
+        this.rpcServer.unexportAll();
         this.rpcServer.destroy();
     }
 

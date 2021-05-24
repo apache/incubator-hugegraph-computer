@@ -45,11 +45,11 @@ public class SortedBufferMessage {
         return this.partitionId;
     }
 
-    public MessageType messageType() {
+    public MessageType type() {
         return this.type;
     }
 
-    public ByteBuffer sortedBuffer() {
+    public ByteBuffer buffer() {
         return this.buffer;
     }
 }

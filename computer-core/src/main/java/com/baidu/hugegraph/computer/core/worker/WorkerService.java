@@ -43,11 +43,13 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
-import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
-import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
+import com.baidu.hugegraph.computer.core.network.DataClientManager;
+import com.baidu.hugegraph.computer.core.network.DataServerManager;
+import com.baidu.hugegraph.computer.core.recv.FakeMessageRecvManager;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
+import com.baidu.hugegraph.computer.core.store.DataFileManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -237,10 +239,7 @@ public class WorkerService {
         // TODO: Start data-transport server and get its host and port.
         String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
         int port = this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
-        InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
-                                        host, port);
-
-        return dataAddress;
+        return InetSocketAddress.createUnresolved(host, port);
     }
 
     private void initManagers(ContainerInfo masterInfo) {
@@ -264,10 +263,17 @@ public class WorkerService {
         SortManager sortManager = new SortManager(this.context);
         this.managers.add(sortManager);
 
-        // It doesn't implement Manager interface
-        ConnectionManager connManager = new TransportConnectionManager();
+        DataFileManager fileManager = new DataFileManager();
+        this.managers.add(fileManager);
 
-        DataClientManager clientManager = new DataClientManager(connManager);
+        FakeMessageRecvManager recvManager = new FakeMessageRecvManager();
+        this.managers.add(recvManager);
+
+        DataServerManager serverManager = new DataServerManager(recvManager);
+        this.managers.add(serverManager);
+
+        // It doesn't implement Manager interface
+        DataClientManager clientManager = new DataClientManager();
         this.managers.add(clientManager);
 
         MessageSendManager sendManager = new MessageSendManager(this.context,

@@ -92,20 +92,12 @@ public class JsonStructGraphOutput extends StructGraphOutput {
 
         this.writeKey("label");
         this.writeJoiner();
-        if (edge.label() != null) {
-            this.out.writeString(edge.label());
-        } else {
-            this.out.writeRawString("null");
-        }
+        this.out.writeString(edge.label());
         this.writeSplitter();
 
         this.writeKey("name");
         this.writeJoiner();
-        if (edge.name() != null) {
-            this.out.writeString(edge.name());
-        } else {
-            this.out.writeRawString("null");
-        }
+        this.out.writeString(edge.name());
 
         if (this.config.outputEdgeProperties()) {
             this.writeSplitter();

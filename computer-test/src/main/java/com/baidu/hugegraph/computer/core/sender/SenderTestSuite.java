@@ -19,23 +19,17 @@
 
 package com.baidu.hugegraph.computer.core.sender;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class MessageSendPartition {
-
-    // Any object else?
-    private final WriteBuffers buffers;
-
-    public MessageSendPartition(ComputerContext context) {
-        Config config = context.config();
-        int threshold = config.get(ComputerOptions.WRITE_BUFFER_THRESHOLD);
-        int capacity = config.get(ComputerOptions.WRITE_BUFFER_CAPACITY);
-        this.buffers = new WriteBuffers(threshold, capacity);
-    }
-
-    public WriteBuffers writeBuffer() {
-        return this.buffers;
-    }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    MessageSendBuffersTest.class,
+    MessageSendManagerTest.class,
+    SortedBufferMessageTest.class,
+    SortedBufferQueueTest.class,
+    WriteBufferTest.class,
+    WriteBuffersTest.class
+})
+public class SenderTestSuite {
 }

@@ -27,6 +27,7 @@ before_script:
 
 script:
   - mvn test -P unit-test
+  - mvn test -P integrate-test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

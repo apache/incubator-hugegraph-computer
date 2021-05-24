@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -27,14 +28,15 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.computer.core.sender.SortedBufferQueue;
-import com.baidu.hugegraph.computer.core.sender.SortedBufferQueuePool;
+import com.baidu.hugegraph.computer.core.sender.QueuedMessageSender;
+import com.baidu.hugegraph.computer.core.sender.SortedBufferMessage;
 import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
 import com.baidu.hugegraph.computer.core.store.SortCombiner;
 import com.baidu.hugegraph.computer.core.store.Sorter;
@@ -54,17 +56,17 @@ public class SortManager implements Manager {
     private final Sorter bufferSorter;
     private final SortCombiner valueCombiner;
     private final ByteBufAllocator allocator;
-    private SortedBufferQueuePool queuePool;
+    private QueuedMessageSender sender;
 
     public SortManager(ComputerContext context) {
         this.config = context.config();
         int threadNum = this.config.get(ComputerOptions.SORT_THREAD_NUMS);
         this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, "sort");
-        // TODO：How to create
-        this.bufferSorter = null;
+        // TODO：After sort module merged, remove FakeBufferSorter
+        this.bufferSorter = new FakeBufferSorter();
         this.valueCombiner = null;
         this.allocator = ByteBufAllocator.DEFAULT;
-        this.queuePool = null;
+        this.sender = null;
     }
 
     @Override
@@ -88,8 +90,8 @@ public class SortManager implements Manager {
         }
     }
 
-    public void bufferQueuePool(SortedBufferQueuePool bufferQueuePool) {
-        this.queuePool = bufferQueuePool;
+    public void sender(QueuedMessageSender sender) {
+        this.sender = sender;
     }
 
     public CompletableFuture<Void> sort(int workerId, int partitionId,
@@ -100,15 +102,26 @@ public class SortManager implements Manager {
             // TODO：This ByteBuffer should be allocated from the off-heap
 //            ByteBuf sortedBuffer = this.allocator.directBuffer(capacity);
             UnsafeBytesOutput sortedBuffer = new UnsafeBytesOutput(capacity);
-            this.bufferSorter.sortBuffer(bufferForRead, this.valueCombiner,
-                                         sortedBuffer);
+            try {
+                this.bufferSorter.sortBuffer(bufferForRead, this.valueCombiner,
+                                             sortedBuffer);
+            } catch (IOException e) {
+                throw new ComputerException("Failed to sort buffer", e);
+            }
             return ByteBuffer.wrap(sortedBuffer.buffer());
         }, this.sortExecutor).thenAccept(sortedBuffer -> {
             // The following code is also executed in sort thread
             buffer.finishSorting();
             // Each target worker has a buffer queue
-            SortedBufferQueue queue = this.queuePool.get(workerId);
-            queue.offer(partitionId, type, sortedBuffer);
+            SortedBufferMessage message = new SortedBufferMessage(partitionId,
+                                                                  type,
+                                                                  sortedBuffer);
+            try {
+                this.sender.send(workerId, message);
+            } catch (InterruptedException e) {
+                throw new ComputerException("Waiting to put buffer into " +
+                                            "queue was interrupted");
+            }
         });
     }
 }

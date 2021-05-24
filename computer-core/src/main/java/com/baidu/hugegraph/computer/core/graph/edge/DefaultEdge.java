@@ -21,37 +21,28 @@ package com.baidu.hugegraph.computer.core.graph.edge;
 
 import java.util.Objects;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 
 public class DefaultEdge implements Edge {
 
-    private Id targetId;
     private String label;
     private String name;
+    private Id targetId;
     private Properties properties;
 
     public DefaultEdge(GraphFactory graphFactory) {
-        this(graphFactory, null, null, null);
+        this(graphFactory, Constants.EMPTY_STR, Constants.EMPTY_STR, null);
     }
 
-    public DefaultEdge(GraphFactory graphFactory, Id targetId,
-                       String label, String name) {
-        this.targetId = targetId;
+    public DefaultEdge(GraphFactory graphFactory, String label,
+                       String name, Id targetId) {
         this.label = label;
         this.name = name;
-        this.properties = graphFactory.createProperties();
-    }
-
-    @Override
-    public Id targetId() {
-        return this.targetId;
-    }
-
-    @Override
-    public void targetId(Id targetId) {
         this.targetId = targetId;
+        this.properties = graphFactory.createProperties();
     }
 
     @Override
@@ -75,6 +66,16 @@ public class DefaultEdge implements Edge {
     }
 
     @Override
+    public Id targetId() {
+        return this.targetId;
+    }
+
+    @Override
+    public void targetId(Id targetId) {
+        this.targetId = targetId;
+    }
+
+    @Override
     public Properties properties() {
         return this.properties;
     }
@@ -93,21 +94,21 @@ public class DefaultEdge implements Edge {
             return false;
         }
         DefaultEdge other = (DefaultEdge) obj;
-        return this.targetId.equals(other.targetId) &&
-               (this.label == other.label || this.label.equals(other.label)) &&
-               (this.name == other.name || this.name.equals(other.name)) &&
+        return Objects.equals(this.label, other.label) &&
+               Objects.equals(this.targetId, other.targetId) &&
+               Objects.equals(this.name, other.name) &&
                this.properties.equals(other.properties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.targetId, this.label,
-                            this.name, this.properties);
+        return Objects.hash(this.label, this.name, this.targetId,
+                            this.properties);
     }
 
     @Override
     public String toString() {
-        return String.format("DefaultEdge{targetId=%s, label=%s, name=%s}",
-                             this.targetId, this.label, this.name);
+        return String.format("DefaultEdge{label=%s, name=%s, targetId=%s}",
+                             this.label, this.name, this.targetId);
     }
 }

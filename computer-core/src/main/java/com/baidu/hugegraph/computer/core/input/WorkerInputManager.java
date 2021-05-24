@@ -41,8 +41,8 @@ public class WorkerInputManager implements Manager {
      * to computer-vertices and computer-edges
      */
     private final LoadService loadService;
-    /**
-     *
+    /*
+     * Send vertex/edge or message to target worker
      */
     private final MessageSendManager sendManager;
 
@@ -73,7 +73,7 @@ public class WorkerInputManager implements Manager {
         this.loadService.rpcService(rpcService);
     }
 
-    /*
+    /**
      * Load vertices and edges parallel.
      * When this method finish, it means that all vertices and edges are sent,
      * but there is no guarantee that all of them has been received.
@@ -94,8 +94,6 @@ public class WorkerInputManager implements Manager {
             this.sendManager.sendVertex(MessageType.EDGE, vertex);
         }
         this.sendManager.finishSend(MessageType.EDGE);
-
-        // TODO: Need wait all data has been received by receiver?
     }
 
     public WorkerStat mergeGraph() {

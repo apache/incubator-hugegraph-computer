@@ -37,20 +37,24 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.store.hghvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hghvfile.entry.KvEntryWriter;
 
-public class WriteBuffer {
+/**
+ * It's not a public class
+ */
+class WriteBuffer {
 
-    private final int bufferSize;
+    private final int threshold;
     private final OptimizedUnsafeBytesOutput output;
     private final EntryOutput entryOutput;
 
-    public WriteBuffer(int size, int capacity) {
-        this.bufferSize = size;
+    public WriteBuffer(int threshold, int capacity) {
+        assert threshold > 0 && capacity > 0 && threshold <= capacity;
+        this.threshold = threshold;
         this.output = new OptimizedUnsafeBytesOutput(capacity);
         this.entryOutput = new EntryOutputImpl(this.output);
     }
 
     public boolean reachThreshold() {
-        return this.output.position() >= this.bufferSize;
+        return this.output.position() >= this.threshold;
     }
 
     public boolean isEmpty() {

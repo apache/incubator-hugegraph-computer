@@ -42,7 +42,7 @@ import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
-import com.baidu.hugegraph.config.ConfigOption;
+import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
 
@@ -92,12 +92,12 @@ public class UnitTestBase {
         Map<String, String> map = new HashMap<>();
         for (int i = 0; i < optionKeyValues.length; i += 2) {
             Object key = optionKeyValues[i];
-            E.checkArgument(key instanceof ConfigOption,
-                            "The option key must be ConfigOption class");
+            E.checkArgument(key instanceof TypedOption,
+                            "The option key must be TypedOption class");
             Object value = optionKeyValues[i + 1];
             E.checkArgument(value instanceof String,
                             "The option value must be String class");
-            map.put(((ConfigOption<?>) key).name(), (String) value);
+            map.put(((TypedOption<?, ?>) key).name(), (String) value);
         }
         ComputerContextUtil.initContext(map);
     }

@@ -17,27 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.edge;
+package com.baidu.hugegraph.computer.core.sender;
 
-import com.baidu.hugegraph.computer.core.allocator.Recyclable;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import java.nio.ByteBuffer;
 
-public interface Edge extends Recyclable {
+import org.junit.Test;
 
-    String label();
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.testutil.Assert;
 
-    void label(String label);
+public class SortedBufferMessageTest {
 
-    String name();
-
-    void name(String name);
-
-    Id targetId();
-
-    void targetId(Id targetId);
-
-    Properties properties();
-
-    void properties(Properties properties);
+    @Test
+    public void testGetter() {
+        SortedBufferMessage message = new SortedBufferMessage(
+                                      1, MessageType.VERTEX,
+                                      ByteBuffer.allocate(4));
+        Assert.assertEquals(1, message.partitionId());
+        Assert.assertEquals(MessageType.VERTEX, message.type());
+        Assert.assertEquals(ByteBuffer.allocate(4), message.buffer());
+    }
 }

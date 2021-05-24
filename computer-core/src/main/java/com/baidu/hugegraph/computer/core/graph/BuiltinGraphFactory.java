@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
@@ -96,17 +97,18 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Edge createEdge(Id targetId) {
-        return new DefaultEdge(this, targetId, null, null);
+        return new DefaultEdge(this, Constants.EMPTY_STR,
+                               Constants.EMPTY_STR, targetId);
     }
 
     @Override
-    public Edge createEdge(Id targetId, String label) {
-        return new DefaultEdge(this, targetId, label, null);
+    public Edge createEdge(String label, Id targetId) {
+        return new DefaultEdge(this, label, Constants.EMPTY_STR, targetId);
     }
 
     @Override
-    public Edge createEdge(Id targetId, String label, String name) {
-        return new DefaultEdge(this, targetId, label, name);
+    public Edge createEdge(String label, String name, Id targetId) {
+        return new DefaultEdge(this, label, name, targetId);
     }
 
     @Override

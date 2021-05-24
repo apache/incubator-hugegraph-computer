@@ -77,8 +77,8 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         GraphFactory factory = graphFactory();
         Edges edges1 = factory.createEdges(3);
         edges1.add(factory.createEdge(new LongId(100)));
-        edges1.add(factory.createEdge(new LongId(200), "knows"));
-        edges1.add(factory.createEdge(new LongId(300), "watch", "1111"));
+        edges1.add(factory.createEdge("knows", new LongId(200)));
+        edges1.add(factory.createEdge("watch", "1111", new LongId(300)));
 
         byte[] bytes;
         try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {

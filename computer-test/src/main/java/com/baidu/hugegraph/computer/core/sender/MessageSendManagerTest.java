@@ -17,27 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.edge;
+package com.baidu.hugegraph.computer.core.sender;
 
-import com.baidu.hugegraph.computer.core.allocator.Recyclable;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-
-public interface Edge extends Recyclable {
-
-    String label();
-
-    void label(String label);
-
-    String name();
-
-    void name(String name);
-
-    Id targetId();
-
-    void targetId(Id targetId);
-
-    Properties properties();
-
-    void properties(Properties properties);
+public class MessageSendManagerTest {
 }

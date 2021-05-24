@@ -50,9 +50,9 @@ public interface GraphFactory {
 
     Edge createEdge(Id targetId);
 
-    Edge createEdge(Id targetId, String label);
+    Edge createEdge(String label, Id targetId);
 
-    Edge createEdge(Id targetId, String label, String name);
+    Edge createEdge(String label, String name, Id targetId);
 
     Properties createProperties();
 

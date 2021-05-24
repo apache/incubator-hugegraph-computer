@@ -75,7 +75,6 @@ public class StreamGraphOutput implements GraphOutput {
     @Override
     public void writeEdge(Edge edge) throws IOException {
         // Write necessary
-        this.writeId(edge.targetId());
         if (edge.label() != null) {
             this.out.writeBoolean(true);
             this.out.writeUTF(edge.label());
@@ -88,6 +87,7 @@ public class StreamGraphOutput implements GraphOutput {
         } else {
             this.out.writeBoolean(false);
         }
+        this.writeId(edge.targetId());
         if (this.config.outputEdgeProperties()) {
             this.writeProperties(edge.properties());
         }

@@ -104,13 +104,13 @@ public class LoadService {
                  * need to fetch next input split meta
                  */
                 this.currentSplit = fetcher.nextVertexInputSplit();
-                if (this.currentSplit == InputSplit.END_SPLIT) {
+                if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
                     return false;
                 }
                 vertexFetcher.prepareLoadInputSplit(this.currentSplit);
             }
             assert this.currentSplit != null &&
-                   this.currentSplit != InputSplit.END_SPLIT;
+                   !this.currentSplit.equals(InputSplit.END_SPLIT);
             return vertexFetcher.hasNext();
         }
 
@@ -166,13 +166,13 @@ public class LoadService {
                  * need to fetch next input split meta
                  */
                 this.currentSplit = fetcher.nextEdgeInputSplit();
-                if (this.currentSplit == InputSplit.END_SPLIT) {
+                if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
                     return false;
                 }
                 edgeFetcher.prepareLoadInputSplit(this.currentSplit);
             }
             assert this.currentSplit != null &&
-                   this.currentSplit != InputSplit.END_SPLIT;
+                   !this.currentSplit.equals(InputSplit.END_SPLIT);
             return edgeFetcher.hasNext();
         }
 
@@ -220,8 +220,9 @@ public class LoadService {
             Id targetId = HugeConverter.convertId(edge.targetId());
             Properties properties = HugeConverter.convertProperties(
                                     edge.properties());
-            Edge computerEdge = graphFactory.createEdge(targetId, edge.label(),
-                                                        edge.name());
+            Edge computerEdge = graphFactory.createEdge(edge.label(),
+                                                        edge.name(), targetId
+            );
             computerEdge.properties(properties);
             return computerEdge;
         }

@@ -93,8 +93,8 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         idValueList.add(new LongId(998L).idValue());
         idValueList.add(new LongId(999L).idValue());
         Vertex vertex = factory.createVertex(longId, idValueList);
-        vertex.addEdge(factory.createEdge(new LongId(200), "knows"));
-        vertex.addEdge(factory.createEdge(new LongId(300), "watch", "1111"));
+        vertex.addEdge(factory.createEdge("knows", new LongId(200)));
+        vertex.addEdge(factory.createEdge("watch", "1111", new LongId(300)));
 
         String fileName = "output2.csv";
         File file = new File(fileName);
@@ -107,7 +107,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             output.close();
 
             String text = FileUtils.readFileToString(file);
-            Assert.assertEquals("100,[998,999],[{200,\"knows\",null}," +
+            Assert.assertEquals("100,[998,999],[{200,\"knows\",\"\"}," +
                                 "{300,\"watch\",\"1111\"}]" +
                                 System.lineSeparator(), text);
         } finally {

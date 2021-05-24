@@ -83,6 +83,20 @@
                             </includes>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>integrate-test</id>
+                        <configuration>
+                            <testSourceDirectory>
+                                ${basedir}/src/main/java/
+                            </testSourceDirectory>
+                            <testClassesDirectory>
+                                ${basedir}/target/classes/
+                            </testClassesDirectory>
+                            <includes>
+                                <include>**/IntegrateTestSuite.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

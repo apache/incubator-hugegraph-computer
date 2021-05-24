@@ -20,40 +20,61 @@
 package com.baidu.hugegraph.computer.core.sender;
 
 import java.nio.ByteBuffer;
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.util.E;
 
-public class SortedBufferQueue {
+/**
+ * It's not a public class
+ */
+class SortedBufferQueue {
 
-    private final Queue<SortedBufferMessage> queue;
-    private final Runnable notifyNotEmpty;
+    private final BlockingQueue<SortedBufferMessage> queue;
+    private final Runnable notifyNotEmptyCallback;
+    private final AtomicBoolean empty;
 
     public SortedBufferQueue(Runnable notifyNotEmpty) {
+        E.checkArgumentNotNull(notifyNotEmpty,
+                               "The callback to notify any queue not empty " +
+                               "can't be null");
         // TODO: replace with conversant queue
         this.queue = new LinkedBlockingQueue<>(128);
-        this.notifyNotEmpty = notifyNotEmpty;
+        this.notifyNotEmptyCallback = notifyNotEmpty;
+        this.empty = new AtomicBoolean(true);
     }
 
     public boolean isEmpty() {
         return this.queue.isEmpty();
     }
 
-    public void offer(int partitionId, MessageType type, ByteBuffer buffer) {
-        this.offer(new SortedBufferMessage(partitionId, type, buffer));
+    public void put(int partitionId, MessageType type, ByteBuffer buffer)
+                    throws InterruptedException {
+        this.put(new SortedBufferMessage(partitionId, type, buffer));
     }
 
-    public void offer(SortedBufferMessage event) {
-        this.queue.offer(event);
-        this.notifyNotEmpty.run();
+    public void put(SortedBufferMessage message) throws InterruptedException {
+        this.queue.put(message);
+        if (this.empty.compareAndSet(true, false)) {
+            /*
+             * Only invoke callback when queue from empty to not empty
+             * to avoid frequently acquiring locks
+             */
+            this.notifyNotEmptyCallback.run();
+        }
     }
 
     public SortedBufferMessage peek() {
-        return this.queue.peek();
+        SortedBufferMessage message = this.queue.peek();
+        if (message == null) {
+            this.empty.compareAndSet(false, true);
+        }
+        return message;
     }
 
-    public SortedBufferMessage poll() {
-        return this.queue.poll();
+    public SortedBufferMessage take() throws InterruptedException {
+        return this.queue.take();
     }
 }

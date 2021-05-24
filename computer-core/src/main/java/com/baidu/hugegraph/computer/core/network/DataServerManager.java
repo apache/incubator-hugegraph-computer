@@ -17,18 +17,26 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.input;
+package com.baidu.hugegraph.computer.core.network;
+
+import java.net.InetSocketAddress;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
-import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
+import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 
-public class MasterInputManager implements Manager {
+public class DataServerManager implements Manager {
 
-    public static final String NAME = "master_input";
+    public static final String NAME = "data_server";
 
-    private InputSplitFetcher fetcher;
-    private MasterInputHandler handler;
+    private final ConnectionManager connectionManager;
+    private final MessageHandler messageHandler;
+
+    public DataServerManager(MessageHandler messageHandler) {
+        this.connectionManager = new TransportConnectionManager();
+        this.messageHandler = messageHandler;
+    }
 
     @Override
     public String name() {
@@ -37,22 +45,15 @@ public class MasterInputManager implements Manager {
 
     @Override
     public void init(Config config) {
-        this.fetcher = InputSourceFactory.createInputSplitFetcher(config);
-        this.handler = new MasterInputHandler(this.fetcher);
-        this.handler.createVertexInputSplits();
-        this.handler.createEdgeInputSplits();
+        this.connectionManager.startServer(config, this.messageHandler);
     }
 
     @Override
     public void close(Config config) {
-        // Maybe fetcher=null if not successfully initialized
-        if (this.fetcher != null) {
-            this.fetcher.close();
-        }
+        this.connectionManager.shutdownServer();
     }
 
-    public MasterInputHandler handler() {
-        E.checkNotNull(this.handler, "handler");
-        return this.handler;
+    public InetSocketAddress address() {
+        return this.connectionManager.getServer().bindAddress();
     }
 }

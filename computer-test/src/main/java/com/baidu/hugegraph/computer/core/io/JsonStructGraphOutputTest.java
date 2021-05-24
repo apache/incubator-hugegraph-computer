@@ -94,8 +94,8 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         idValueList.add(new LongId(998L).idValue());
         idValueList.add(new LongId(999L).idValue());
         Vertex vertex = factory.createVertex(longId, idValueList);
-        vertex.addEdge(factory.createEdge(new LongId(200), "knows"));
-        vertex.addEdge(factory.createEdge(new LongId(300), "watch", "1111"));
+        vertex.addEdge(factory.createEdge("knows", new LongId(200)));
+        vertex.addEdge(factory.createEdge("watch", "1111", new LongId(300)));
 
         String fileName = "output.json";
         File file = new File(fileName);
@@ -110,7 +110,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
                                 "\"adjacent_edges\":[{\"target_id\":200," +
-                                "\"label\":\"knows\",\"name\":null}," +
+                                "\"label\":\"knows\",\"name\":\"\"}," +
                                 "{\"target_id\":300,\"label\":\"watch\"," +
                                 "\"name\":\"1111\"}]}" +
                                 System.lineSeparator(), json);

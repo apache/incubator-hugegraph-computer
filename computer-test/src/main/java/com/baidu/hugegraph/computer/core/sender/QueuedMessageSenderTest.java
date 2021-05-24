@@ -17,25 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.worker;
+package com.baidu.hugegraph.computer.core.sender;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
-
-public class WorkerExecutor {
-
-    public static void main(String[] args) {
-        args = new String[]{
-            "algorithm.value_name", "rank",
-            "algorithm.value_type", "DOUBLE",
-            "rpc.remote_url", "127.0.0.1:8090"
-        };
-
-        ComputerContextUtil.initContext(args);
-        ComputerContext context = ComputerContext.instance();
-        WorkerService service = new WorkerService();
-        service.init(context.config());
-        service.execute();
-        service.close();
-    }
+public class QueuedMessageSenderTest {
 }

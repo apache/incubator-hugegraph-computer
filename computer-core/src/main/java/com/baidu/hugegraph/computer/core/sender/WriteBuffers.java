@@ -26,6 +26,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.util.E;
 
 public class WriteBuffers {
 
@@ -34,9 +35,18 @@ public class WriteBuffers {
     // For sorting
     private WriteBuffer sortingBuffer;
 
-    public WriteBuffers(int size, int capacity) {
-        this.writingBuffer = new WriteBuffer(size, capacity);
-        this.sortingBuffer = new WriteBuffer(size, capacity);
+    public WriteBuffers(int threshold, int capacity) {
+        E.checkArgument(threshold > 0,
+                        "The threshold of buffer must be > 0, actual got %s",
+                        threshold);
+        E.checkArgument(capacity > 0,
+                        "The capacity of buffer must be > 0, actual got %s",
+                        capacity);
+        E.checkArgument(threshold <= capacity,
+                        "The threshold must be <= capacity, actual got %s > %s",
+                        threshold, capacity);
+        this.writingBuffer = new WriteBuffer(threshold, capacity);
+        this.sortingBuffer = new WriteBuffer(threshold, capacity);
     }
 
     public boolean reachThreshold() {
