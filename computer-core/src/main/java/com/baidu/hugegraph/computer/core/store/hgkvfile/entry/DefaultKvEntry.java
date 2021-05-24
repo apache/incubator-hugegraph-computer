@@ -21,15 +21,15 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 public class DefaultKvEntry extends AbstractKvEntry {
 
-    private long numSubEntries;
-
-    public DefaultKvEntry(Pointer key, Pointer value) {
-        super(key, value);
-    }
+    private final long numSubEntries;
 
     public DefaultKvEntry(Pointer key, Pointer value, long numSubEntries) {
-        this(key, value);
+        super(key, value);
         this.numSubEntries = numSubEntries;
+    }
+
+    public DefaultKvEntry(Pointer key, Pointer value) {
+        this(key, value, 0L);
     }
 
     @Override

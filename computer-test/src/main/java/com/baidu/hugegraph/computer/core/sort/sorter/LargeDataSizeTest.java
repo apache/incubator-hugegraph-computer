@@ -55,7 +55,6 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableList;
@@ -69,10 +68,6 @@ public class LargeDataSizeTest {
 
     @BeforeClass
     public static void init() {
-        // Don't forget to register options
-        OptionSpace.register("computer",
-                             "com.baidu.hugegraph.computer.core.config." +
-                             "ComputerOptions");
         UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MERGE_PATH_NUM, "200",
                 ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB)
