@@ -31,7 +31,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
@@ -57,13 +56,13 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Bytes;
+import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class LargeDataSizeTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(
-                                      LargeDataSizeTest.class);
+    private static final Logger LOG = Log.logger(LargeDataSizeTest.class);
     private static String FILE_DIR;
 
     @BeforeClass
@@ -125,8 +124,7 @@ public class LargeDataSizeTest {
         mergeFiles(sorter, mergeBufferFiles, Lists.newArrayList(resultFile));
 
         watcher.stop();
-        LOG.info(String.format("testAllProcess sort time: %s",
-                               watcher.getTime()));
+        LOG.info("testAllProcess sort time: {}", watcher.getTime());
 
         long result = sumOfEntryValue(sorter, ImmutableList.of(resultFile));
         Assert.assertEquals(value, result);
@@ -168,7 +166,7 @@ public class LargeDataSizeTest {
         }
         watcher.stop();
 
-        LOG.info("testMergeBuffers sort buffer cost time:{}",
+        LOG.info("testMergeBuffers sort buffer cost time: {}",
                  watcher.getTime());
 
         String resultFile = availableDirPath("0");
@@ -179,7 +177,7 @@ public class LargeDataSizeTest {
                             resultFile, false);
         watcher.stop();
 
-        LOG.info("testMergeBuffers merge buffers cost time:{}",
+        LOG.info("testMergeBuffers merge buffers cost time: {}",
                  watcher.getTime());
 
         // Assert result
@@ -245,7 +243,7 @@ public class LargeDataSizeTest {
             HgkvDir dir = HgkvDirImpl.open(file);
             entrySize += dir.numEntries();
         }
-        LOG.info("Finally kvEntry size:{}", entrySize);
+        LOG.info("Finally kvEntry size: {}", entrySize);
 
         PeekableIterator<KvEntry> iterator = null;
         try {

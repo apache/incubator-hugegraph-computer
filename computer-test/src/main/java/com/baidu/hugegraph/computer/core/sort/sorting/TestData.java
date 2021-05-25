@@ -21,10 +21,14 @@ package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
 public class TestData {
@@ -97,14 +101,42 @@ public class TestData {
     }
 
     public static List<Iterator<Integer>> sameDataLists() {
-        int size = 16;
-        List<List<Integer>> list = new ArrayList<>();
+        List<List<Integer>> lists = new ArrayList<>();
         for (int i = 0; i < 16; i++) {
-            list.add(ImmutableList.of(1));
+            lists.add(ImmutableList.of(1, 1, 1));
         }
 
-        return list.stream()
-               .map(List::iterator)
-               .collect(Collectors.toList());
+        return toIterators(lists);
+    }
+
+    public static List<List<Integer>> randomSortedLists(int sourcesSize,
+                                                        int listSize) {
+        Random random = new Random();
+        List<List<Integer>> lists = new ArrayList<>();
+        for (int i = 0; i < sourcesSize; i++) {
+            List<Integer> list = new ArrayList<>();
+            for (int j = 0; j < listSize; j++) {
+                list.add(random.nextInt(100));
+            }
+            lists.add(list);
+        }
+
+        lists.forEach(Collections::sort);
+
+        return lists;
+    }
+
+    public static void assertSorted(List<Iterator<Integer>> list,
+                                    InputsSorting<Integer> inputsSorting) {
+        List<Integer> result = TestData.getSortedResult(list);
+        Iterator<Integer> sortedResult = result.iterator();
+
+        while (inputsSorting.hasNext() && sortedResult.hasNext()) {
+            Assert.assertEquals(inputsSorting.next(), sortedResult.next());
+        }
+
+        Assert.assertFalse(inputsSorting.hasNext());
+        Assert.assertFalse(sortedResult.hasNext());
+        Assert.assertThrows(NoSuchElementException.class, inputsSorting::next);
     }
 }
