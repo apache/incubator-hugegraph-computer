@@ -26,7 +26,6 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.util.E;
@@ -38,9 +37,9 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
     private final long maxEntriesBytes;
 
     private final HgkvDir dir;
-    private int fileId;
+    private int segmentId;
     private HgkvFileBuilder segmentBuilder;
-    private boolean finished;
+    private boolean buildFinished;
 
     public HgkvDirBuilderImpl(String path, Config config) {
         try {
@@ -48,9 +47,9 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
             this.maxEntriesBytes = config.get(
                                    ComputerOptions.HGKV_MAX_FILE_SIZE);
             this.dir = HgkvDirImpl.create(path);
-            this.fileId = 0;
+            this.segmentId = 0;
             this.segmentBuilder = this.nextSegmentBuilder(this.dir, config);
-            this.finished = false;
+            this.buildFinished = false;
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
@@ -58,14 +57,12 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
 
     @Override
     public void write(KvEntry entry) throws IOException {
-        E.checkState(!this.finished,
+        E.checkState(!this.buildFinished,
                      "Can't write entry because it has been finished");
         E.checkArgument(entry != null && entry.key() != null &&
                         entry.value() != null,
                         "Parameter entry must not be empty");
 
-        Pointer key = entry.key();
-        Pointer value = entry.value();
         /*
          * If the segment size is larger than FILE_MAX_SIZE after add entry
          * Stop build of the current segment and create a new segment.
@@ -83,11 +80,11 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
 
     @Override
     public void finish() throws IOException {
-        if (this.finished) {
+        if (this.buildFinished) {
             return;
         }
         this.segmentBuilder.finish();
-        this.finished = true;
+        this.buildFinished = true;
     }
 
     @Override
@@ -98,7 +95,7 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
     private HgkvFileBuilder nextSegmentBuilder(HgkvDir dir, Config config)
                                                throws IOException {
         String path = dir.path() + File.separator +
-                      HgkvDirImpl.FILE_NAME_PREFIX + (++this.fileId) +
+                      HgkvDirImpl.FILE_NAME_PREFIX + (++this.segmentId) +
                       HgkvDirImpl.FILE_EXTEND_NAME;
         return new HgkvFileBuilderImpl(path, config);
     }

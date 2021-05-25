@@ -21,13 +21,13 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public interface BlockBuilder {
 
-    void add(Pointer key, Pointer value) throws IOException;
+    void add(KvEntry entry) throws IOException;
 
-    long sizeOfEntry(Pointer key, Pointer value) throws IOException;
+    long sizeOfEntry(KvEntry entry) throws IOException;
 
     long size();
 

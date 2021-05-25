@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public class DataBlockBuilderImpl implements BlockBuilder {
 
@@ -35,15 +35,15 @@ public class DataBlockBuilderImpl implements BlockBuilder {
     }
 
     @Override
-    public void add(Pointer key, Pointer value) throws IOException {
-        key.write(this.output);
-        value.write(this.output);
+    public void add(KvEntry entry) throws IOException {
+        entry.key().write(this.output);
+        entry.value().write(this.output);
     }
 
     @Override
-    public long sizeOfEntry(Pointer key, Pointer value) {
-        long keyLength = Integer.BYTES + key.length();
-        long valueLength = Integer.BYTES + value.length();
+    public long sizeOfEntry(KvEntry entry) {
+        long keyLength = Integer.BYTES + entry.key().length();
+        long valueLength = Integer.BYTES + entry.value().length();
         return keyLength + valueLength;
     }
 
