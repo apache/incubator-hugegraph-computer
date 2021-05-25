@@ -36,9 +36,10 @@ public class DisperseEvenlySelector implements InputFilesSelector {
     @Override
     public List<SelectedFiles> selectedOfOutputs(List<String> inputs,
                                                  List<String> outputs)
-                                                 throws IOException {
+            throws IOException {
         E.checkArgument(inputs.size() >= outputs.size(),
-                        "Inputs size must be greater than outputs size");
+                        "The inputs size of InputFilesSelector must be >= " +
+                        "outputs size");
 
         List<HgkvDir> inputDirs = new ArrayList<>();
         for (String input : inputs) {
@@ -59,8 +60,8 @@ public class DisperseEvenlySelector implements InputFilesSelector {
         for (; i < outputs.size(); i++) {
             HgkvDir inputDir = inputDirs.get(i);
             Node heapNode = new Node(inputDir.numEntries(),
-                                       Lists.newArrayList(inputDir.path()),
-                                       outputs.get(i));
+                                     Lists.newArrayList(inputDir.path()),
+                                     outputs.get(i));
             heapNodes.add(heapNode);
         }
         Heap<Node> heap = new Heap<>(heapNodes,

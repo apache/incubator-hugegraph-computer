@@ -106,7 +106,9 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         // Read magic
         String magic = new String(input.readBytes(MAGIC.length()));
         E.checkArgument(HgkvFileImpl.MAGIC.equals(magic),
-                        "Illegal file magic for '%s'", file.getPath());
+                        "Failed to read footer, illegal hgvk-file magic in " +
+                        "file: '%s'",
+                        file.getPath());
         this.magic = magic;
         // Read numEntries
         this.numEntries = input.readLong();

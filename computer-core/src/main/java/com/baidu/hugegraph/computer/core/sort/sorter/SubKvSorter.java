@@ -43,7 +43,7 @@ public class SubKvSorter implements Iterator<KvEntry> {
         E.checkArgument(entries.hasNext(),
                         "Parameter entries can't be empty");
         E.checkArgument(subKvSortPathNum > 0,
-                        "Parameter subKvSortPathNum must > 0");
+                        "Parameter subKvSortPathNum must be > 0");
         this.entries = entries;
         this.subKvSortPathNum = subKvSortPathNum;
         this.subKvMergeSources = new ArrayList<>(this.subKvSortPathNum);
