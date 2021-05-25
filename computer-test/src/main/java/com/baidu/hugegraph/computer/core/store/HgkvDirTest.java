@@ -102,13 +102,13 @@ public class HgkvDirTest {
         file.createNewFile();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             HgkvDirImpl.open(file.getPath());
-        }, e -> Assert.assertTrue(e.getMessage().contains("isn't dir")));
+        }, e -> Assert.assertTrue(e.getMessage().contains("not a directory")));
         FileUtils.deleteQuietly(file);
 
         // Open not exists file
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             HgkvDirImpl.open(file.getPath());
-        }, e -> Assert.assertTrue(e.getMessage().contains("isn't exists")));
+        }, e -> Assert.assertTrue(e.getMessage().contains("not exists")));
     }
 
     @Test

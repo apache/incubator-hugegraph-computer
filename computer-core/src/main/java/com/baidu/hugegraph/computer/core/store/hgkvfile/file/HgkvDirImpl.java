@@ -71,10 +71,11 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     public static HgkvDir open(String path) throws IOException {
         File file = new File(path);
         E.checkArgument(file.exists(),
-                        "Failed to open dir, path isn't exists: '%s'",
+                        "Failed to open path because it does not exists: '%s'",
                         file.getPath());
         E.checkArgument(file.isDirectory(),
-                        "Failed to open dir, path isn't dir: '%s'",
+                        "Failed to open path " +
+                        "because it's not a directory: '%s'",
                         file.getPath());
         return open(file);
     }
@@ -115,8 +116,8 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
         String fileName = Paths.get(path).getFileName().toString();
         Matcher matcher = FILE_NUM_PATTERN.matcher(fileName);
         E.checkState(matcher.find(),
-                     "Can't get segment id from file name, illegal file " +
-                     "name: '%s'", fileName);
+                     "Can't get segment id from illegal file name: '%s'",
+                     fileName);
         return Integer.parseInt(matcher.group());
     }
 

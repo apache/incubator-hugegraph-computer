@@ -36,10 +36,10 @@ public class DisperseEvenlySelector implements InputFilesSelector {
     @Override
     public List<SelectedFiles> selectedOfOutputs(List<String> inputs,
                                                  List<String> outputs)
-            throws IOException {
+                                                 throws IOException {
         E.checkArgument(inputs.size() >= outputs.size(),
                         "The inputs size of InputFilesSelector must be >= " +
-                        "outputs size");
+                        "outputs size but got %s inputs < %s outputs");
 
         List<HgkvDir> inputDirs = new ArrayList<>();
         for (String input : inputs) {
