@@ -34,8 +34,8 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
@@ -63,20 +63,19 @@ import com.google.common.collect.Lists;
 public class LargeDataSizeTest {
 
     private static final Logger LOG = Log.logger(LargeDataSizeTest.class);
-    private static String FILE_DIR;
+    private static Config CONFIG;
 
     @BeforeClass
     public static void init() {
-        UnitTestBase.updateWithRequiredOptions(
+        CONFIG = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MERGE_PATH_NUM, "200",
                 ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB)
         );
-        FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
     }
 
     @Before
     public void setup() {
-        FileUtils.deleteQuietly(new File(FILE_DIR));
+        FileUtils.deleteQuietly(new File(StoreTestUtil.FILE_DIR));
     }
 
     @Test
@@ -84,7 +83,7 @@ public class LargeDataSizeTest {
         StopWatch watcher = new StopWatch();
         final long bufferSize = Bytes.MB;
         final int mergeBufferNum = 300;
-        final int dataSize = 10000000;
+        final int dataSize = 1000000;
         long value = 0;
 
         Random random = new Random();
@@ -92,7 +91,7 @@ public class LargeDataSizeTest {
         List<RandomAccessInput> buffers = new ArrayList<>(mergeBufferNum);
         List<String> mergeBufferFiles = new ArrayList<>();
         int fileNum = 10;
-        Sorter sorter = new SorterImpl(ComputerContext.instance().config());
+        Sorter sorter = new SorterImpl(CONFIG);
 
         watcher.start();
         for (int i = 0; i < dataSize; i++) {
@@ -112,7 +111,7 @@ public class LargeDataSizeTest {
 
             // Merge buffers to HgkvDir
             if (buffers.size() >= mergeBufferNum || (i + 1) == dataSize) {
-                String outputFile = availableDirPath(String.valueOf(fileNum++));
+                String outputFile = StoreTestUtil.availablePathById(fileNum++);
                 mergeBufferFiles.add(outputFile);
                 mergeBuffers(sorter, buffers, outputFile);
                 buffers.clear();
@@ -120,7 +119,7 @@ public class LargeDataSizeTest {
         }
 
         // Merge file
-        String resultFile = availableDirPath("0");
+        String resultFile = StoreTestUtil.availablePathById("0");
         mergeFiles(sorter, mergeBufferFiles, Lists.newArrayList(resultFile));
 
         watcher.stop();
@@ -157,7 +156,7 @@ public class LargeDataSizeTest {
         }
 
         // Sort buffer
-        Sorter sorter = new SorterImpl(ComputerContext.instance().config());
+        Sorter sorter = new SorterImpl(CONFIG);
         watcher.start();
         List<RandomAccessInput> sortedBuffers = new ArrayList<>();
         for (RandomAccessInput buffer : buffers) {
@@ -169,7 +168,7 @@ public class LargeDataSizeTest {
         LOG.info("testMergeBuffers sort buffer cost time: {}",
                  watcher.getTime());
 
-        String resultFile = availableDirPath("0");
+        String resultFile = StoreTestUtil.availablePathById("0");
         // Sort buffers
         watcher.reset();
         watcher.start();
@@ -201,8 +200,8 @@ public class LargeDataSizeTest {
             buffers.add(EntriesUtil.inputFromOutput(buffer));
         }
 
-        String resultFile = availableDirPath("0");
-        Sorter sorter = new SorterImpl(ComputerContext.instance().config());
+        String resultFile = StoreTestUtil.availablePathById("0");
+        Sorter sorter = new SorterImpl(CONFIG);
         mergeBuffers(sorter, buffers, resultFile);
 
         // Assert result
@@ -280,10 +279,5 @@ public class LargeDataSizeTest {
                 iterator.close();
             }
         }
-    }
-
-    private static String availableDirPath(String id) {
-        return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
-               HgkvDirImpl.FILE_EXTEND_NAME;
     }
 }

@@ -30,7 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -47,22 +46,19 @@ import com.google.common.collect.ImmutableList;
 
 public class HgkvDirTest {
 
-    private static String FILE_DIR;
     private static Config CONFIG;
 
     @BeforeClass
     public static void init() {
-        FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
-        UnitTestBase.updateWithRequiredOptions(
+        CONFIG = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
         );
-        CONFIG = ComputerContext.instance().config();
     }
 
     @After
     public void teardown() {
-        FileUtils.deleteQuietly(new File(FILE_DIR));
+        FileUtils.deleteQuietly(new File(StoreTestUtil.FILE_DIR));
     }
 
     @Test
@@ -75,7 +71,7 @@ public class HgkvDirTest {
                                               6, 2);
         List<KvEntry> kvEntries = StoreTestUtil.kvEntriesFromMap(data);
 
-        String path = availableDirPath("1");
+        String path = StoreTestUtil.availablePathById("1");
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
             for (KvEntry entry : kvEntries) {
                 builder.write(entry);
@@ -101,14 +97,14 @@ public class HgkvDirTest {
     @Test
     public void testExceptionCase() throws IOException {
         // Path isn't directory
-        File file = new File(availableDirPath("1"));
+        File file = new File(StoreTestUtil.availablePathById("1"));
         file.getParentFile().mkdirs();
         file.createNewFile();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             HgkvDirImpl.open(file.getPath());
         }, e -> Assert.assertTrue(e.getMessage().contains("not directory")));
-
         FileUtils.deleteQuietly(file);
+
         // Open not exists file
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             HgkvDirImpl.open(file.getPath());
@@ -124,7 +120,7 @@ public class HgkvDirTest {
                                               5, 5,
                                               5, 9,
                                               6, 2);
-        String path = availableDirPath("1");
+        String path = StoreTestUtil.availablePathById("1");
         StoreTestUtil.hgkvDirFromMap(data, path, CONFIG);
         HgkvDirReader reader = new HgkvDirReaderImpl(path, false);
 
@@ -139,10 +135,5 @@ public class HgkvDirTest {
         Assert.assertThrows(NoSuchElementException.class,
                             iterator::next);
         iterator.close();
-    }
-
-    private static String availableDirPath(String id) {
-        return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
-               HgkvDirImpl.FILE_EXTEND_NAME;
     }
 }

@@ -36,7 +36,6 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilder;
@@ -48,12 +47,10 @@ import com.google.common.collect.ImmutableList;
 
 public class HgkvFileTest {
 
-    private static String FILE_DIR;
     private static Config CONFIG;
 
     @BeforeClass
     public static void init() {
-        FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
         CONFIG = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
@@ -62,14 +59,14 @@ public class HgkvFileTest {
 
     @After
     public void teardown() throws IOException {
-        FileUtils.deleteDirectory(new File(FILE_DIR));
+        FileUtils.deleteDirectory(new File(StoreTestUtil.FILE_DIR));
     }
 
     @Test
     public void testHgkvFileBuilder() throws IOException {
         // The data must be ordered
         List<Integer> data = testData();
-        String filePath = availableFilePath("1");
+        String filePath = StoreTestUtil.availablePathById("1");
         File file = null;
         try {
             file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
@@ -82,7 +79,7 @@ public class HgkvFileTest {
     public void testOpenFile() throws IOException {
         // The keys in the data must be ordered
         List<Integer> data = testData();
-        String filePath = availableFilePath("1");
+        String filePath = StoreTestUtil.availablePathById("1");
         File file = null;
         try {
             file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
@@ -107,7 +104,7 @@ public class HgkvFileTest {
     @Test
     public void testExceptionCase() throws IOException {
         // Exception to add key/value
-        final String filePath = availableFilePath("1");
+        final String filePath = StoreTestUtil.availablePathById("1");
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(filePath,
                                                                CONFIG)) {
             Assert.assertThrows(IllegalArgumentException.class, () -> {
@@ -126,7 +123,7 @@ public class HgkvFileTest {
         // Open not exists file.
         File tempFile = null;
         try {
-            tempFile = new File(availableFilePath("1"));
+            tempFile = new File(StoreTestUtil.availablePathById("1"));
             File finalTempFile = tempFile;
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 HgkvFileImpl.open(finalTempFile);
@@ -141,7 +138,7 @@ public class HgkvFileTest {
     public void testHgkvFileReader() throws IOException {
         // The keys in the data must be ordered
         List<Integer> data = testData();
-        String filePath = availableFilePath("1");
+        String filePath = StoreTestUtil.availablePathById("1");
         File file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
         try {
             HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath(),
@@ -167,10 +164,5 @@ public class HgkvFileTest {
                                 5, 2,
                                 5, 9,
                                 6, 2);
-    }
-
-    private static String availableFilePath(String id) {
-        return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
-               HgkvDirImpl.FILE_EXTEND_NAME;
     }
 }

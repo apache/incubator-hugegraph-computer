@@ -42,11 +42,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
 
 public class StoreTestUtil {
 
-    public static final String FILE_DIR;
-
-    static {
-        FILE_DIR = System.getProperty("user.home") + File.separator + "hgkv";
-    }
+    public static final String FILE_DIR = "hgkv";
 
     public static List<KvEntry> kvEntriesFromMap(List<Integer> map)
                                                  throws IOException {
@@ -109,6 +105,10 @@ public class StoreTestUtil {
     public static String availablePathById(String id) {
         return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
                HgkvDirImpl.FILE_EXTEND_NAME;
+    }
+
+    public static String availablePathById(int id) {
+        return availablePathById(String.valueOf(id));
     }
 
     public static int byteArrayToInt(byte[] bytes) {
