@@ -36,7 +36,7 @@ public class SortingFactory {
             case LOSER_TREE:
                 return createLoserTreeSorting(inputs);
             default:
-                throw new ComputerException("Can't create inputsSorting for %s",
+                throw new ComputerException("Can't create sorting for '%s'",
                                             MODE);
         }
     }

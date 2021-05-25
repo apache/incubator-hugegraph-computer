@@ -25,8 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import javax.ws.rs.NotSupportedException;
-
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.BeforeClass;
@@ -110,12 +108,12 @@ public class HgkvFileTest {
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 builder.add(null);
             },
-            e -> Assert.assertTrue(e.getMessage().contains("not be null")));
+            e -> Assert.assertTrue(e.getMessage().contains("can't be null")));
             builder.finish();
-            Assert.assertThrows(NotSupportedException.class, () -> {
+            Assert.assertThrows(IllegalStateException.class, () -> {
                 builder.add(null);
             },
-            e -> Assert.assertTrue(e.getMessage().contains("build finished")));
+            e -> Assert.assertTrue(e.getMessage().contains("finished")));
         } finally {
             FileUtils.deleteQuietly(new File(filePath));
         }

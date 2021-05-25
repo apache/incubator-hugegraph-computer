@@ -41,7 +41,7 @@ public class SubKvSorter implements Iterator<KvEntry> {
     public SubKvSorter(PeekableIterator<KvEntry> entries,
                        int subKvSortPathNum) {
         E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty");
+                        "Parameter entries can't be empty");
         E.checkArgument(subKvSortPathNum > 0,
                         "Parameter subKvSortPathNum must > 0");
         this.entries = entries;

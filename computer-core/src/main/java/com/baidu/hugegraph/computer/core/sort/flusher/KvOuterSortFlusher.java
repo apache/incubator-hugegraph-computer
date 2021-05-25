@@ -32,7 +32,7 @@ public class KvOuterSortFlusher implements OuterSortFlusher {
     public void flush(EntryIterator entries, HgkvDirBuilder writer)
                       throws IOException {
         E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty");
+                        "Parameter entries can't be empty");
         while (entries.hasNext()) {
             KvEntry entry = entries.next();
             writer.write(entry);

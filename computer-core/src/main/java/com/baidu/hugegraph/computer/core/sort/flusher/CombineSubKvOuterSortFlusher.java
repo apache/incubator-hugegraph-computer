@@ -55,7 +55,7 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
     public void flush(EntryIterator entries, HgkvDirBuilder writer)
                       throws IOException {
         E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty");
+                        "Parameter entries can't be empty");
 
         PeekableIterator<KvEntry> kvEntries = PeekableIteratorAdaptor.of(
                                               entries);

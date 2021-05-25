@@ -34,7 +34,7 @@ public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
 
     public static <T> PeekableIterator<T> of(CIter<T> iterator) {
         E.checkArgument(iterator.hasNext(),
-                        "Parameter iterator must not be empty");
+                        "Parameter iterator can't be empty");
         return new PeekableIteratorAdaptor<>(iterator);
     }
 

@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.NotSupportedException;
-
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
@@ -70,12 +68,10 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
 
     @Override
     public void add(KvEntry entry) throws IOException {
-        if (this.buildFinished) {
-            throw new NotSupportedException("HgkvFile build finished, " +
-                                            "can't add new entry");
-        }
+        E.checkState(!this.buildFinished,
+                     "Failed to write entry, builder is finished");
         E.checkArgument(entry != null,
-                        "Parameter entry must not be null");
+                        "Parameter entry can't be null");
 
         this.blockAddEntry(entry);
         this.changeMetaAfterAdd(entry);

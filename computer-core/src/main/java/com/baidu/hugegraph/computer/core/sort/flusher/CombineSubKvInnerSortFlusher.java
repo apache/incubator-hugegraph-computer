@@ -61,7 +61,7 @@ public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
     @Override
     public void flush(Iterator<KvEntry> entries) throws IOException {
         E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty.");
+                        "Parameter entries can't be empty");
 
         KvEntry last = entries.next();
         // TODO use byte buffer store all value pointer to avoid big collection.
@@ -103,7 +103,7 @@ public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
     private void writeSubKvs(KvEntry kvEntry, Iterator<KvEntry> subKvIter)
                              throws IOException {
         E.checkArgument(subKvIter.hasNext(),
-                        "Parameter subKvs must not be empty.");
+                        "Parameter subKvs can't be empty");
 
         kvEntry.key().write(this.output);
         long position = this.output.position();

@@ -50,12 +50,12 @@ public class HgkvFileImpl extends AbstractHgkvFile {
     }
 
     public static HgkvFile open(String path) throws IOException {
-        E.checkArgumentNotNull(path, "Parameter path must not be null");
+        E.checkArgumentNotNull(path, "Parameter path can't be null");
         return open(new File(path));
     }
 
     public static HgkvFile open(File file) throws IOException {
-        E.checkArgumentNotNull(file, "Parameter file must not be null");
+        E.checkArgumentNotNull(file, "Parameter file can't be null");
         E.checkArgument(file.exists(),
                         "Can't open file due to file not exists: '%s'",
                         file.getPath());
@@ -106,7 +106,7 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         // Read magic
         String magic = new String(input.readBytes(MAGIC.length()));
         E.checkArgument(HgkvFileImpl.MAGIC.equals(magic),
-                        "Illegal file '%s'", file.getPath());
+                        "Illegal file magic for '%s'", file.getPath());
         this.magic = magic;
         // Read numEntries
         this.numEntries = input.readLong();

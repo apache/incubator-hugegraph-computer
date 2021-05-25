@@ -52,7 +52,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
         this.tempDir = config.get(ComputerOptions.HGKV_TEMP_DIR) +
                        File.separator + UUID.randomUUID();
         boolean result = new File(this.tempDir).mkdirs();
-        E.checkState(result, "Create temp directory fail %s",
+        E.checkState(result, "Failed to create temp directory: '%s'",
                      this.tempDir);
     }
 

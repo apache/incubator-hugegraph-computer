@@ -38,7 +38,7 @@ public abstract class CombinableSorterFlusher {
 
     protected void flush(Iterator<KvEntry> entries) throws IOException {
         E.checkArgument(entries.hasNext(),
-                        "Parameter entries must not be empty");
+                        "Parameter entries can't be empty");
 
         KvEntry last = entries.next();
         Pointer combineValue = last.value();

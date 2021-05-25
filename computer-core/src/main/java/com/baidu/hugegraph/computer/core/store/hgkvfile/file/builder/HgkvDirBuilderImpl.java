@@ -61,10 +61,10 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
     @Override
     public void write(KvEntry entry) throws IOException {
         E.checkState(!this.buildFinished,
-                     "Can't write entry because it has been finished");
+                     "Failed to write entry, builder is finished");
         E.checkArgument(entry != null && entry.key() != null &&
                         entry.value() != null,
-                        "Parameter entry must not be empty");
+                        "Parameter entry can't be empty");
 
         /*
          * If the segment size is larger than FILE_MAX_SIZE after add entry
