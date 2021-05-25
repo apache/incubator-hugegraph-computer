@@ -21,11 +21,13 @@ package com.baidu.hugegraph.computer.core.store;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -103,8 +105,9 @@ public class StoreTestUtil {
     }
 
     public static String availablePathById(String id) {
-        return FILE_DIR + File.separator + HgkvDirImpl.FILE_NAME_PREFIX + id +
-               HgkvDirImpl.FILE_EXTEND_NAME;
+        String fileName = StringUtils.join(HgkvDirImpl.FILE_NAME_PREFIX, id,
+                                           HgkvDirImpl.FILE_EXTEND_NAME);
+        return Paths.get(FILE_DIR, fileName).toString();
     }
 
     public static String availablePathById(int id) {

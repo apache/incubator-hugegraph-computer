@@ -19,8 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -94,9 +96,10 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
 
     private HgkvFileBuilder nextSegmentBuilder(HgkvDir dir, Config config)
                                                throws IOException {
-        String path = dir.path() + File.separator +
-                      HgkvDirImpl.FILE_NAME_PREFIX + (++this.segmentId) +
-                      HgkvDirImpl.FILE_EXTEND_NAME;
+        String fileName = StringUtils.join(HgkvDirImpl.FILE_NAME_PREFIX,
+                                           String.valueOf(++this.segmentId),
+                                           HgkvDirImpl.FILE_EXTEND_NAME);
+        String path = Paths.get(dir.path(), fileName).toString();
         return new HgkvFileBuilderImpl(path, config);
     }
 }
