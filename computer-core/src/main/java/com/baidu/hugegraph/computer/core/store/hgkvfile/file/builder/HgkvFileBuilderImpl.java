@@ -51,7 +51,7 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
     private long maxKeyOffset;
     private final long minKeyOffset;
 
-    public HgkvFileBuilderImpl(String path, Config config) throws IOException {
+    public HgkvFileBuilderImpl(Config config, String path) throws IOException {
         this.maxDataBlockSize = config.get(ComputerOptions.HGKV_DATABLOCK_SIZE);
         HgkvFile hgkvFile = HgkvFileImpl.create(path);
         this.output = hgkvFile.output();

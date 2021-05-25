@@ -68,10 +68,10 @@ public class StoreTestUtil {
         return entries;
     }
 
-    public static void hgkvDirFromMap(List<Integer> map, String path,
-                                      Config config) throws IOException {
+    public static void hgkvDirFromMap(Config config, List<Integer> map,
+                                      String path) throws IOException {
         File file = new File(path);
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, config)) {
+        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config, path)) {
             List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
                 builder.write(entry);
@@ -83,11 +83,11 @@ public class StoreTestUtil {
         }
     }
 
-    public static File hgkvFileFromMap(List<Integer> map, String path,
-                                       Config config) throws IOException {
+    public static File hgkvFileFromMap(Config config, List<Integer> map,
+                                       String path) throws IOException {
         File file = new File(path);
 
-        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(path, config)) {
+        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(config, path)) {
             List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
                 builder.add(entry);

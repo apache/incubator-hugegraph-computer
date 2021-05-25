@@ -139,8 +139,8 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
         File file = new File(output);
         // Merge inputs and write to output
         try (EntryIterator sortedKv = sorter.sort(entries);
-             HgkvDirBuilder builder = new HgkvDirBuilderImpl(file.getPath(),
-                                                             this.config)) {
+             HgkvDirBuilder builder = new HgkvDirBuilderImpl(this.config,
+                                                             file.getPath())) {
              flusher.flush(sortedKv, builder);
         } catch (IOException e) {
             FileUtils.deleteQuietly(file);

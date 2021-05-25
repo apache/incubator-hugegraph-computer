@@ -69,7 +69,7 @@ public class HgkvFileTest {
         String filePath = StoreTestUtil.availablePathById("1");
         File file = null;
         try {
-            file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
+            file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -82,7 +82,7 @@ public class HgkvFileTest {
         String filePath = StoreTestUtil.availablePathById("1");
         File file = null;
         try {
-            file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
+            file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
             // Open file
             HgkvFile hgkvFile = HgkvFileImpl.open(file.getPath());
             Assert.assertEquals(HgkvFileImpl.MAGIC, hgkvFile.magic());
@@ -105,8 +105,8 @@ public class HgkvFileTest {
     public void testExceptionCase() throws IOException {
         // Exception to add key/value
         final String filePath = StoreTestUtil.availablePathById("1");
-        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(filePath,
-                                                               CONFIG)) {
+        try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(CONFIG,
+                                                               filePath)) {
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 builder.add(null);
             },
@@ -139,7 +139,7 @@ public class HgkvFileTest {
         // The keys in the data must be ordered
         List<Integer> data = testData();
         String filePath = StoreTestUtil.availablePathById("1");
-        File file = StoreTestUtil.hgkvFileFromMap(data, filePath, CONFIG);
+        File file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
         try {
             HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath(),
                                                            false);

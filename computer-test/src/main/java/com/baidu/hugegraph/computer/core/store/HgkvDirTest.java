@@ -72,7 +72,7 @@ public class HgkvDirTest {
         List<KvEntry> kvEntries = StoreTestUtil.kvEntriesFromMap(data);
 
         String path = StoreTestUtil.availablePathById("1");
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(path, CONFIG)) {
+        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(CONFIG, path)) {
             for (KvEntry entry : kvEntries) {
                 builder.write(entry);
             }
@@ -121,7 +121,7 @@ public class HgkvDirTest {
                                               5, 9,
                                               6, 2);
         String path = StoreTestUtil.availablePathById("1");
-        StoreTestUtil.hgkvDirFromMap(data, path, CONFIG);
+        StoreTestUtil.hgkvDirFromMap(CONFIG, data, path);
         HgkvDirReader reader = new HgkvDirReaderImpl(path, false);
 
         EntryIterator iterator = reader.iterator();

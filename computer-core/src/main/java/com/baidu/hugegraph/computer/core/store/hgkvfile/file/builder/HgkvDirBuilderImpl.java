@@ -43,14 +43,15 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
     private HgkvFileBuilder segmentBuilder;
     private boolean buildFinished;
 
-    public HgkvDirBuilderImpl(String path, Config config) {
+    public HgkvDirBuilderImpl(Config config, String path) {
         try {
             this.config = config;
             this.maxEntriesBytes = config.get(
                                    ComputerOptions.HGKV_MAX_FILE_SIZE);
             this.dir = HgkvDirImpl.create(path);
             this.segmentId = 0;
-            this.segmentBuilder = this.nextSegmentBuilder(this.dir, config);
+            this.segmentBuilder = nextSegmentBuilder(config, this.dir,
+                                                     ++this.segmentId);
             this.buildFinished = false;
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
@@ -74,8 +75,8 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
         if ((entrySize + segmentSize) > this.maxEntriesBytes) {
             this.segmentBuilder.finish();
             // Create new hgkvFile.
-            this.segmentBuilder = this.nextSegmentBuilder(this.dir,
-                                                          this.config);
+            this.segmentBuilder = nextSegmentBuilder(this.config, this.dir,
+                                                     ++this.segmentId);
         }
         this.segmentBuilder.add(entry);
     }
@@ -94,12 +95,14 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
         this.finish();
     }
 
-    private HgkvFileBuilder nextSegmentBuilder(HgkvDir dir, Config config)
-                                               throws IOException {
+    private static HgkvFileBuilder nextSegmentBuilder(Config config,
+                                                      HgkvDir dir,
+                                                      int segmentId)
+                                                      throws IOException {
         String fileName = StringUtils.join(HgkvDirImpl.FILE_NAME_PREFIX,
-                                           String.valueOf(++this.segmentId),
+                                           String.valueOf(segmentId),
                                            HgkvDirImpl.FILE_EXTEND_NAME);
         String path = Paths.get(dir.path(), fileName).toString();
-        return new HgkvFileBuilderImpl(path, config);
+        return new HgkvFileBuilderImpl(config, path);
     }
 }

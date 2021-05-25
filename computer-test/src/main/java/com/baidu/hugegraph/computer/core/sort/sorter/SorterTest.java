@@ -182,7 +182,7 @@ public class SorterTest {
             } else {
                 map = map2;
             }
-            StoreTestUtil.hgkvDirFromMap(map, inputs.get(i), CONFIG);
+            StoreTestUtil.hgkvDirFromMap(CONFIG, map, inputs.get(i));
         }
 
         // Merge file

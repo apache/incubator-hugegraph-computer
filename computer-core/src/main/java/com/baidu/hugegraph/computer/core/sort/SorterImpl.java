@@ -117,8 +117,8 @@ public class SorterImpl implements Sorter {
                              OuterSortFlusher flusher, String output)
                              throws IOException {
         InputsSorter sorter = new InputsSorterImpl();
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(output,
-                                                             this.config)) {
+        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(this.config,
+                                                             output)) {
             EntryIterator result = sorter.sort(entries);
             flusher.flush(result, builder);
         }
