@@ -31,20 +31,22 @@ import com.baidu.hugegraph.concurrent.BarrierEvent;
 public class MessageRecvBuffers {
 
     /*
-     * The threshold is not hard limit. For performance, it checks
-     * if the sumBytes >= threshold after {@link #addBuffer(ManagedBuffer)}.
+     * The bytesLimit is the limit of total bytes in buffers. The bytesLimit
+     * is not hard limit. For performance, it checks whether totalBytes >=
+     * bytesLimit after {@link #addBuffer(ManagedBuffer)}.
+     * If totalBytes >= bytesLimit, the buffers will be sorted into a file.
      */
-    private long threshold;
+    private long bytesLimit;
     private long totalBytes;
 
     private List<byte[]> buffers;
     private BarrierEvent event;
     private long waitSortedTimeout;
 
-    public MessageRecvBuffers(long threshold, long waitSortedTimeout) {
+    public MessageRecvBuffers(long bytesLimit, long waitSortedTimeout) {
         this.totalBytes = 0L;
         this.event = new BarrierEvent();
-        this.threshold = threshold;
+        this.bytesLimit = bytesLimit;
         this.waitSortedTimeout = waitSortedTimeout;
         this.buffers = new ArrayList<>();
     }
@@ -60,7 +62,7 @@ public class MessageRecvBuffers {
     }
 
     public boolean full() {
-        return this.totalBytes >= this.threshold;
+        return this.totalBytes >= this.bytesLimit;
     }
 
     public List<RandomAccessInput> buffers() {
