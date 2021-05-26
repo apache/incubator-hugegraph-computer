@@ -22,12 +22,13 @@ package com.baidu.hugegraph.computer.core.receiver.edge;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
 public class EdgeMessageRecvPartition extends MessageRecvPartition {
 
-    public static final String TYPE = "edge";
+    public static final String TYPE = MessageType.EDGE.name();
 
     public EdgeMessageRecvPartition(Config config,
                                     DataFileGenerator fileGenerator) {

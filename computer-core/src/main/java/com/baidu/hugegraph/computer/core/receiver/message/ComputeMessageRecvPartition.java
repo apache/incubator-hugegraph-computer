@@ -21,12 +21,13 @@ package com.baidu.hugegraph.computer.core.receiver.message;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
 public class ComputeMessageRecvPartition extends MessageRecvPartition {
 
-    public static final String TYPE = "message";
+    public static final String TYPE = MessageType.MSG.name();
 
     public ComputeMessageRecvPartition(Config config,
                                        DataFileGenerator fileGenerator,

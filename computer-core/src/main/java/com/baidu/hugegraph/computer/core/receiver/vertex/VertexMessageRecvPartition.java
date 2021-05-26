@@ -22,12 +22,13 @@ package com.baidu.hugegraph.computer.core.receiver.vertex;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
 
 public class VertexMessageRecvPartition extends MessageRecvPartition {
 
-    public static final String TYPE = "vertex";
+    public static final String TYPE = MessageType.VERTEX.name();
 
     public VertexMessageRecvPartition(Config config,
                                       DataFileGenerator fileGenerator) {

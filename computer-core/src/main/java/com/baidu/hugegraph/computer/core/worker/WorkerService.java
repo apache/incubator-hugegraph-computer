@@ -293,7 +293,7 @@ public class WorkerService {
 
         InetSocketAddress address = serverManager.address();
         LOG.info("{} WorkerService initialized managers with data server " +
-                 "address {}", this, address);
+                 "address '{}'", this, address);
         return address;
     }
 

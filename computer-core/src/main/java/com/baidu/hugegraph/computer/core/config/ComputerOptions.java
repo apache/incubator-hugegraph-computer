@@ -361,8 +361,8 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Long> WORKER_WAIT_SORT_TIMEOUT =
             new ConfigOption<>(
                     "worker.wait_sort_timeout",
-                    "The max timeout(in ms) the handle thread of data server " +
-                    "to wait for sort thread to sort sortBuffers.",
+                    "The max timeout(in ms) message handler wait for " +
+                    "sort-thread to sort one batch of buffers.",
                     positiveInt(),
                     TimeUnit.MINUTES.toMillis(10)
             );
