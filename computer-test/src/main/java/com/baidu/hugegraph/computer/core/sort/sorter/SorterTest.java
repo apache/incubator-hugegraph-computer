@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.sort.sorter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
@@ -58,6 +60,8 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.DisperseEvenlySelector;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.InputFilesSelector;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -371,5 +375,35 @@ public class SorterTest {
         SorterTestUtil.assertKvEntry(iter.next(), 3, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 4, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 6, 1);
+    }
+
+    @Test
+    public void testExceptionCaseForSelector() {
+        // Parameter inputs size < outputs size
+        String input1 = StoreTestUtil.availablePathById("1");
+        String input2 = StoreTestUtil.availablePathById("2");
+        List<String> inputs = ImmutableList.of(input1, input2);
+
+        String output1 = StoreTestUtil.availablePathById("3");
+        String output2 = StoreTestUtil.availablePathById("4");
+        String output3 = StoreTestUtil.availablePathById("5");
+        List<String> outputs = ImmutableList.of(output1, output2, output3);
+
+        InputFilesSelector selector = new DisperseEvenlySelector();
+        Assert.assertThrows(IllegalArgumentException.class,
+                            () -> selector.selectedOfOutputs(inputs, outputs),
+                            (e) -> Assert.assertContains("must be >=",
+                                                         e.getMessage()));
+    }
+
+    @Test
+    public void testExceptionCaseForFlusher() {
+        RandomAccessOutput output = new UnsafeBytesOutput();
+        InnerSortFlusher flusher = new KvInnerSortFlusher(output);
+        List<KvEntry> entries = new ArrayList<>();
+        Assert.assertThrows(IllegalArgumentException.class,
+                            () -> flusher.flush(entries.iterator()),
+                            (e) -> Assert.assertContains("can't be empty",
+                                                         e.getMessage()));
     }
 }

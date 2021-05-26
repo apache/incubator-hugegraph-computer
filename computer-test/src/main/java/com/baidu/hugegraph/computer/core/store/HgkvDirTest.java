@@ -95,23 +95,6 @@ public class HgkvDirTest {
     }
 
     @Test
-    public void testExceptionCase() throws IOException {
-        // Path isn't directory
-        File file = new File(StoreTestUtil.availablePathById("1"));
-        file.getParentFile().mkdirs();
-        file.createNewFile();
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            HgkvDirImpl.open(file.getPath());
-        }, e -> Assert.assertTrue(e.getMessage().contains("not a directory")));
-        FileUtils.deleteQuietly(file);
-
-        // Open not exists file
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            HgkvDirImpl.open(file.getPath());
-        }, e -> Assert.assertTrue(e.getMessage().contains("not exists")));
-    }
-
-    @Test
     public void testHgkvDirReader() throws Exception {
         // The keys in the data must be ordered
         List<Integer> data = ImmutableList.of(2, 3,
@@ -135,5 +118,22 @@ public class HgkvDirTest {
         Assert.assertThrows(NoSuchElementException.class,
                             iterator::next);
         iterator.close();
+    }
+
+    @Test
+    public void testExceptionCaseForHgkvDir() throws IOException {
+        // Path isn't directory
+        File file = new File(StoreTestUtil.availablePathById("1"));
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            HgkvDirImpl.open(file.getPath());
+        }, e -> Assert.assertTrue(e.getMessage().contains("not a directory")));
+        FileUtils.deleteQuietly(file);
+
+        // Open not exists file
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            HgkvDirImpl.open(file.getPath());
+        }, e -> Assert.assertTrue(e.getMessage().contains("not exists")));
     }
 }
