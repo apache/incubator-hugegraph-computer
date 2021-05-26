@@ -202,8 +202,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Assert.assertThrows(RuntimeException.class, () -> {
             client.startSession();
         }, e -> {
-            Assert.assertContains("test exception",
-                                  e.getMessage());
+            Assert.assertContains("test exception", e.getMessage());
         });
     }
 
@@ -214,8 +213,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         client.startSession();
 
         @SuppressWarnings("unchecked")
-        Function<Message, ChannelFuture> sendFunc =
-                Mockito.mock(Function.class);
+        Function<Message, Future<Void>> sendFunc = Mockito.mock(Function.class);
         Whitebox.setInternalState(client.clientSession(),
                                   "sendFunction", sendFunc);
 
@@ -226,8 +224,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Assert.assertThrows(RuntimeException.class, () -> {
             client.finishSession();
         }, e -> {
-            Assert.assertContains("test exception",
-                                  e.getMessage());
+            Assert.assertContains("test exception", e.getMessage());
         });
     }
 
