@@ -41,9 +41,9 @@ public interface TransportClient {
     void startSession() throws TransportException;
 
     /**
-     * This method is asynchronous startSession.
+     * This method is the asynchronous version of {@link #startSession}.
      */
-    Future<Boolean> startSessionAsync() throws TransportException;
+    Future<Void> startSessionAsync() throws TransportException;
 
     /**
      * Send the buffer to the server.
@@ -61,9 +61,9 @@ public interface TransportClient {
     void finishSession() throws TransportException;
 
     /**
-     * This method is asynchronous finishSession.
+     * This method is the asynchronous version of {@link #finishSession}.
      */
-    Future<Boolean> finishSessionAsync() throws TransportException;
+    Future<Void> finishSessionAsync() throws TransportException;
 
     /**
      * Get the {@link ConnectionId}

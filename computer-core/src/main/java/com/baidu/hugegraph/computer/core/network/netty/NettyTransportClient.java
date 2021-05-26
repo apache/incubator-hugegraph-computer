@@ -110,7 +110,7 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public Future<Boolean> startSessionAsync() {
+    public Future<Void> startSessionAsync() {
         return this.session.startAsync();
     }
 
@@ -134,7 +134,7 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public Future<Boolean> finishSessionAsync() {
+    public Future<Void> finishSessionAsync() {
         return this.session.finishAsync();
     }
 

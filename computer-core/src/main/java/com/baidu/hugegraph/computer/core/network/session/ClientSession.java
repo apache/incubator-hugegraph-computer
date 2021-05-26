@@ -50,8 +50,8 @@ public class ClientSession extends TransportSession {
 
     private final Lock lock;
     private volatile boolean flowBlocking;
-    private final AtomicReference<SettableFuture<Boolean>> startedFutureRef;
-    private final AtomicReference<SettableFuture<Boolean>> finishedFutureRef;
+    private final AtomicReference<SettableFuture<Void>> startedFutureRef;
+    private final AtomicReference<SettableFuture<Void>> finishedFutureRef;
     private final Function<Message, Future<Void>> sendFunction;
 
     public ClientSession(TransportConf conf,
@@ -83,7 +83,7 @@ public class ClientSession extends TransportSession {
     }
 
     public synchronized void start(long timeout) throws TransportException {
-        Future<Boolean> startFuture = startAsync();
+        Future<Void> startFuture = startAsync();
         try {
             startFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Throwable e) {
@@ -98,17 +98,19 @@ public class ClientSession extends TransportSession {
         } finally {
             startFuture.cancel(false);
             this.startedFutureRef
-                .compareAndSet((SettableFuture<Boolean>) startFuture, null);
+                .compareAndSet((SettableFuture<Void>) startFuture, null);
         }
     }
 
-    public synchronized Future<Boolean> startAsync() {
+    public synchronized Future<Void> startAsync() {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
                         "at start()", this.state);
 
-        SettableFuture<Boolean> startedFuture = SettableFuture.create();
-        this.startedFutureRef.set(startedFuture);
+        SettableFuture<Void> startedFuture = SettableFuture.create();
+        boolean success = this.startedFutureRef.compareAndSet(null,
+                                                              startedFuture);
+        E.checkArgument(success, "The startedFutureRef must be null");
 
         this.stateStartSent();
         try {
@@ -123,7 +125,7 @@ public class ClientSession extends TransportSession {
     }
 
     public synchronized void finish(long timeout) throws TransportException {
-        Future<Boolean> finishFuture = finishAsync();
+        Future<Void> finishFuture = finishAsync();
         try {
             finishFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Throwable e) {
@@ -137,17 +139,19 @@ public class ClientSession extends TransportSession {
             }
         } finally {
             this.finishedFutureRef
-                .compareAndSet((SettableFuture<Boolean>) finishFuture, null);
+                .compareAndSet((SettableFuture<Void>) finishFuture, null);
         }
     }
 
-    public synchronized Future<Boolean> finishAsync() {
+    public synchronized Future<Void> finishAsync() {
         E.checkArgument(this.state == TransportState.ESTABLISHED,
                         "The state must be ESTABLISHED instead of %s " +
                         "at finish()", this.state);
 
-        SettableFuture<Boolean> finishedFuture = SettableFuture.create();
-        this.finishedFutureRef.set(finishedFuture);
+        SettableFuture<Void> finishedFuture = SettableFuture.create();
+        boolean success = this.finishedFutureRef.compareAndSet(null,
+                                                               finishedFuture);
+        E.checkArgument(success, "The finishedFutureRef must be null");
 
         int finishId = this.genFinishId();
 
@@ -214,9 +218,11 @@ public class ClientSession extends TransportSession {
 
         this.stateEstablished();
 
-        SettableFuture<Boolean> settableFuture = this.startedFutureRef.get();
-        if (settableFuture != null && !settableFuture.isCancelled()) {
-            settableFuture.set(true);
+        SettableFuture<Void> settableFuture = this.startedFutureRef.get();
+        if (settableFuture != null) {
+            if (!settableFuture.isCancelled()) {
+                settableFuture.set(null);
+            }
             this.startedFutureRef.compareAndSet(settableFuture, null);
         }
     }
@@ -228,9 +234,11 @@ public class ClientSession extends TransportSession {
 
         this.stateReady();
 
-        SettableFuture<Boolean> finishedFuture = this.finishedFutureRef.get();
-        if (finishedFuture != null && !finishedFuture.isCancelled()) {
-            finishedFuture.set(true);
+        SettableFuture<Void> finishedFuture = this.finishedFutureRef.get();
+        if (finishedFuture != null) {
+            if (!finishedFuture.isCancelled()) {
+                finishedFuture.set(null);
+            }
             this.finishedFutureRef.compareAndSet(finishedFuture, null);
         }
     }
