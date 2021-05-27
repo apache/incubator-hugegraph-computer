@@ -25,6 +25,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -34,6 +36,7 @@ import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
+import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
@@ -42,6 +45,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
@@ -110,5 +114,24 @@ public class FlusherTest {
             String errorMsg = "Parameter entries can't be empty";
             Assert.assertContains(errorMsg, e.getMessage());
         });
+    }
+
+    @Test
+    public void testOverwriteCombiner() throws Exception {
+        List<Integer> data = ImmutableList.of(1, 2, 3, 5, 1, 3, 1, 1, 3, 4);
+        UnsafeBytesInput input = SorterTestUtil.inputFromKvMap(data);
+
+        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        Combiner<Pointer> combiner = new OverwriteCombiner<>();
+        InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
+                                                                 combiner);
+        Sorter sorter = new SorterImpl(CONFIG);
+        sorter.sortBuffer(input, flusher);
+
+        UnsafeBytesInput result = EntriesUtil.inputFromOutput(output);
+        // Assert result
+        Iterator<KvEntry> kvIter = new EntriesInput(result);
+        SorterTestUtil.assertKvEntry(kvIter.next(), 1, 1);
+        SorterTestUtil.assertKvEntry(kvIter.next(), 3, 4);
     }
 }

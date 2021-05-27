@@ -47,11 +47,11 @@ public class PointerTest {
         Pointer inlineKey = inlineKvEntry.key();
         Pointer inlineValue = inlineKvEntry.value();
         Assert.assertEquals(0L, inlineKey.offset());
-        Assert.assertEquals(4, inlineKey.length());
+        Assert.assertEquals(4L, inlineKey.length());
         Assert.assertEquals(0, BytesUtil.compare(bytes,
                                                           inlineKey.bytes()));
         Assert.assertEquals(0L, inlineValue.offset());
-        Assert.assertEquals(4, inlineValue.length());
+        Assert.assertEquals(4L, inlineValue.length());
         Assert.assertEquals(0, BytesUtil.compare(bytes,
                                                           inlineValue.bytes()));
 
@@ -60,12 +60,12 @@ public class PointerTest {
         KvEntry cachedKvEntry = EntriesUtil.entryFromInput(input, false, false);
         Pointer cachedKey = cachedKvEntry.key();
         Pointer cachedValue = cachedKvEntry.value();
-        Assert.assertEquals(4, cachedKey.offset());
-        Assert.assertEquals(4, cachedKey.length());
+        Assert.assertEquals(4L, cachedKey.offset());
+        Assert.assertEquals(4L, cachedKey.length());
         Assert.assertEquals(0, BytesUtil.compare(bytes,
                                                           cachedKey.bytes()));
-        Assert.assertEquals(12, cachedValue.offset());
-        Assert.assertEquals(4, cachedValue.length());
+        Assert.assertEquals(12L, cachedValue.offset());
+        Assert.assertEquals(4L, cachedValue.length());
         Assert.assertEquals(0, BytesUtil.compare(bytes,
                                                           cachedValue.bytes()));
     }
