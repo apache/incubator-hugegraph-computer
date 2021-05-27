@@ -21,16 +21,18 @@ package com.baidu.hugegraph.computer.core.store;
 
 import java.io.File;
 
-public interface DataFileGenerator {
+public interface FileGenerator {
 
     /**
-     * @return the next data dir to persist data like vertices, edges and
-     * messages.
+     * @return the next data directory to persist data like vertices, edges and
+     * messages. If pass parentDirectories such as ["message", "1"], it
+     * return directory end with message/1.
      */
-    File nextDir();
+    File nextDir(String... parentDirectories);
 
     /**
      * @return the next file to persist data like vertices, edges and messages.
+     * The returned file is unique.
      */
-    File nextFile(String type, int superstep);
+    File nextFile(String... parentDirectories);
 }

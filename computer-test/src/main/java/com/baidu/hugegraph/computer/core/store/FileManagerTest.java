@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class DataDirManagerTest extends UnitTestBase {
+public class FileManagerTest extends UnitTestBase {
 
     @Test
     public void testInitWithFile() throws IOException {
@@ -41,8 +41,8 @@ public class DataDirManagerTest extends UnitTestBase {
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.WORKER_DATA_DIRS, "[" + file.getAbsolutePath() + "]"
         );
-        DataFileManager dataFileManager = new DataFileManager();
-        Assert.assertEquals(DataFileManager.NAME, dataFileManager.name());
+        FileManager dataFileManager = new FileManager();
+        Assert.assertEquals(FileManager.NAME, dataFileManager.name());
         Assert.assertThrows(ComputerException.class, () -> {
             dataFileManager.init(config);
         }, e -> {
@@ -57,7 +57,7 @@ public class DataDirManagerTest extends UnitTestBase {
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.WORKER_DATA_DIRS, "[/etc]"
         );
-        DataFileManager dataFileManager = new DataFileManager();
+        FileManager dataFileManager = new FileManager();
         Assert.assertThrows(ComputerException.class, () -> {
             dataFileManager.init(config);
         }, e -> {
@@ -75,7 +75,7 @@ public class DataDirManagerTest extends UnitTestBase {
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "300"
         );
-        DataFileManager dataFileManager = new DataFileManager();
+        FileManager dataFileManager = new FileManager();
 
         dataFileManager.init(config);
 
@@ -92,6 +92,29 @@ public class DataDirManagerTest extends UnitTestBase {
     }
 
     @Test
+    public void testNextDirWithPrefix() {
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "300"
+        );
+        FileManager dataFileManager = new FileManager();
+
+        dataFileManager.init(config);
+
+        File dir1 = dataFileManager.nextDir();
+        Assert.assertContains("local_001", dir1.getName());
+        File dir2 = dataFileManager.nextDir("vertex");
+
+        Assert.assertEquals("vertex", dir2.getName());
+
+        dataFileManager.close(config);
+    }
+
+    @Test
     public void testNextFile() {
         Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
@@ -101,23 +124,23 @@ public class DataDirManagerTest extends UnitTestBase {
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "300"
         );
-        DataFileManager dataFileManager = new DataFileManager();
+        FileManager dataFileManager = new FileManager();
 
         dataFileManager.init(config);
 
-        File vertexFile = dataFileManager.nextFile("vertex", -1);
+        File vertexFile = dataFileManager.nextFile("vertex", "-1");
         File vertexSuperstepDir = vertexFile.getParentFile();
         Assert.assertEquals("-1", vertexSuperstepDir.getName());
         File vertexRootDir = vertexSuperstepDir.getParentFile();
         Assert.assertEquals("vertex", vertexRootDir.getName());
 
-        File messageFile = dataFileManager.nextFile("message", 0);
+        File messageFile = dataFileManager.nextFile("message", "0");
         File messageSuperstepDir = messageFile.getParentFile();
         Assert.assertEquals("0", messageSuperstepDir.getName());
         File messageRootDir = messageSuperstepDir.getParentFile();
         Assert.assertEquals("message", messageRootDir.getName());
 
-        File messageFile2 = dataFileManager.nextFile("message", 0);
+        File messageFile2 = dataFileManager.nextFile("message", "0");
         Assert.assertNotEquals(messageFile, messageFile2);
 
         dataFileManager.close(config);

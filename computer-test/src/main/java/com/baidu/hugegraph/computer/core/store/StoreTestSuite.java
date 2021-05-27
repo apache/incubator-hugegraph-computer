@@ -24,7 +24,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    DataDirManagerTest.class
+    FileManagerTest.class
 })
 public class StoreTestSuite {
 }

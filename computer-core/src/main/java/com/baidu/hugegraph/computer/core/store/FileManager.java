@@ -35,16 +35,16 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.util.Log;
 
-public class DataFileManager implements DataFileGenerator, Manager {
+public class FileManager implements FileGenerator, Manager {
 
-    private static final Logger LOG = Log.logger(DataFileManager.class);
+    private static final Logger LOG = Log.logger(FileManager.class);
 
     public static final String NAME = "data_dir";
 
     private List<File> dirs;
     private AtomicInteger sequence;
 
-    public DataFileManager() {
+    public FileManager() {
         this.dirs = new ArrayList<>();
         this.sequence = new AtomicInteger();
     }
@@ -56,6 +56,17 @@ public class DataFileManager implements DataFileGenerator, Manager {
 
     @Override
     public void init(Config config) {
+        /*
+         * Multiple workers run on same computer will not see each other's
+         * directories.
+         * If runs on K8S, the worker-container can only see the directories
+         * assigned to itself.
+         * If runs on YARN, the worker-container's data-dir is set the format
+         * "$ROOT/${job_id}/{$container_id}", so each container can only see
+         * the directories assigned to itself too. The main class is
+         * responsible for converting the setting from YARN to
+         * HugeGraph-Computer.
+         */
         String jobId = config.get(ComputerOptions.JOB_ID);
         List<String> paths = config.get(ComputerOptions.WORKER_DATA_DIRS);
         LOG.info("The directories '{}' configured to persist data for job {}",
@@ -82,19 +93,21 @@ public class DataFileManager implements DataFileGenerator, Manager {
     }
 
     @Override
-    public File nextDir() {
+    public File nextDir(String... prefix) {
         int index = this.sequence.incrementAndGet();
         assert index >= 0;
-        return this.dirs.get(index % this.dirs.size());
+        File dir = this.dirs.get(index % this.dirs.size());
+        for (String path : prefix) {
+            dir = new File(dir, path);
+        }
+        this.mkdirs(dir);
+        return dir;
     }
 
     @Override
-    public File nextFile(String type, int superstep) {
-        File dir = this.nextDir();
-        File labelDir = new File(dir, type);
-        File superStepDir = new File(labelDir, Integer.toString(superstep));
-        this.mkdirs(superStepDir);
-        return new File(superStepDir, UUID.randomUUID().toString());
+    public File nextFile(String... prefix) {
+        File dir = this.nextDir(prefix);
+        return new File(dir, UUID.randomUUID().toString());
     }
 
     /**
