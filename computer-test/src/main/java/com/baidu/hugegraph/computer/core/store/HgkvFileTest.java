@@ -27,6 +27,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -53,6 +54,11 @@ public class HgkvFileTest {
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16"
         );
+    }
+
+    @Before
+    public void setup() throws IOException {
+        FileUtils.deleteDirectory(new File(StoreTestUtil.FILE_DIR));
     }
 
     @After

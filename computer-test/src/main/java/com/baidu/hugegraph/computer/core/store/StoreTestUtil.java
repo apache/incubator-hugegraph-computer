@@ -33,6 +33,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
@@ -68,8 +69,8 @@ public class StoreTestUtil {
         return entries;
     }
 
-    public static void hgkvDirFromMap(Config config, List<Integer> map,
-                                      String path) throws IOException {
+    public static void hgkvDirFromKvMap(Config config, List<Integer> map,
+                                        String path) throws IOException {
         File file = new File(path);
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config, path)) {
             List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
@@ -80,6 +81,18 @@ public class StoreTestUtil {
         } catch (Exception e) {
             FileUtils.deleteQuietly(file);
             throw e;
+        }
+    }
+
+    public static void hgkvDirFromSubKvMap(Config config,
+                                           List<List<Integer>> map,
+                                           String path) throws IOException {
+        UnsafeBytesInput input = SorterTestUtil.inputFromSubKvMap(map);
+        Iterator<KvEntry> iter = new EntriesInput(input);
+        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config, path)) {
+            while (iter.hasNext()) {
+                builder.write(iter.next());
+            }
         }
     }
 

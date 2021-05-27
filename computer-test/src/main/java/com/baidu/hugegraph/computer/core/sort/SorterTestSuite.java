@@ -22,19 +22,21 @@ package com.baidu.hugegraph.computer.core.sort;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.core.sort.sorter.CombinerTest;
 import com.baidu.hugegraph.computer.core.sort.sorter.EntriesUtilTest;
+import com.baidu.hugegraph.computer.core.sort.sorter.FlusherTest;
 import com.baidu.hugegraph.computer.core.sort.sorter.LargeDataSizeTest;
 import com.baidu.hugegraph.computer.core.sort.sorter.SorterTest;
-import com.baidu.hugegraph.computer.core.sort.sorting.HeapInputSortingTest;
-import com.baidu.hugegraph.computer.core.sort.sorting.LoserTreeInputSortingTest;
+import com.baidu.hugegraph.computer.core.sort.sorting.InputsSortingTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    LoserTreeInputSortingTest.class,
-    HeapInputSortingTest.class,
+    CombinerTest.class,
     EntriesUtilTest.class,
+    FlusherTest.class,
+    LargeDataSizeTest.class,
     SorterTest.class,
-    LargeDataSizeTest.class
+    InputsSortingTest.class
 })
 public class SorterTestSuite {
 }

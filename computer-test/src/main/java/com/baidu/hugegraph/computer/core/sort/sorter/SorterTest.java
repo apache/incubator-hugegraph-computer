@@ -21,12 +21,12 @@ package com.baidu.hugegraph.computer.core.sort.sorter;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,7 +35,6 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
@@ -45,8 +44,6 @@ import com.baidu.hugegraph.computer.core.sort.combiner.MockIntSumCombiner;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
-import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
-import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
@@ -62,6 +59,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReade
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.DisperseEvenlySelector;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.InputFilesSelector;
+import com.baidu.hugegraph.iterator.CIter;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -79,13 +77,18 @@ public class SorterTest {
         );
     }
 
+    @Before
+    public void setup() throws IOException {
+        FileUtils.deleteDirectory(new File(StoreTestUtil.FILE_DIR));
+    }
+
     @After
-    public void teardown() {
-        FileUtils.deleteQuietly(new File(StoreTestUtil.FILE_DIR));
+    public void teardown() throws IOException {
+        FileUtils.deleteDirectory(new File(StoreTestUtil.FILE_DIR));
     }
 
     @Test
-    public void testSortKvBuffer() throws IOException {
+    public void testSortKvBuffer() throws Exception {
         List<Integer> map = ImmutableList.of(2, 3,
                                              1, 23,
                                              6, 2,
@@ -186,7 +189,7 @@ public class SorterTest {
             } else {
                 map = map2;
             }
-            StoreTestUtil.hgkvDirFromMap(CONFIG, map, inputs.get(i));
+            StoreTestUtil.hgkvDirFromKvMap(CONFIG, map, inputs.get(i));
         }
 
         // Merge file
@@ -230,7 +233,7 @@ public class SorterTest {
     }
 
     private UnsafeBytesInput sortedSubKvBuffer(Config config)
-                                               throws IOException {
+                                               throws Exception {
         List<Integer> kv1 = ImmutableList.of(3,
                                              2, 1,
                                              4, 1);
@@ -263,7 +266,7 @@ public class SorterTest {
     }
 
     @Test
-    public void testSortSubKvBuffer() throws IOException {
+    public void testSortSubKvBuffer() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2"
         );
@@ -285,7 +288,7 @@ public class SorterTest {
     }
 
     @Test
-    public void testSortSubKvBuffers() throws IOException {
+    public void testSortSubKvBuffers() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2"
         );
@@ -329,52 +332,71 @@ public class SorterTest {
     }
 
     @Test
-    public void testKvInnerSortFlusher() throws IOException {
-        List<Integer> map = ImmutableList.of(2, 1,
-                                             3, 1,
+    public void testMergeSubKvFiles() throws Exception {
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2"
+        );
+        int flushThreshold = config.get(
+                             ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
+
+        List<Integer> kv1 = ImmutableList.of(1,
                                              2, 1,
                                              4, 1);
-        UnsafeBytesInput input = SorterTestUtil.inputFromKvMap(map);
+        List<Integer> kv2 = ImmutableList.of(4,
+                                             2, 1,
+                                             3, 1);
+        List<Integer> kv3 = ImmutableList.of(4,
+                                             6, 1,
+                                             8, 1);
+        List<Integer> kv4 = ImmutableList.of(1,
+                                             1, 1,
+                                             2, 1);
+        List<Integer> kv5 = ImmutableList.of(1,
+                                             5, 1,
+                                             7, 1);
+        List<Integer> kv6 = ImmutableList.of(2,
+                                             2, 1,
+                                             5, 1);
 
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
-        Sorter sorter = new SorterImpl(CONFIG);
-        sorter.sortBuffer(input, new KvInnerSortFlusher(output));
+        List<List<Integer>> data1 = ImmutableList.of(kv1, kv2, kv3);
+        List<List<Integer>> data2 = ImmutableList.of(kv4, kv5, kv6);
+        List<List<Integer>> data3 = ImmutableList.of(kv4, kv1, kv3);
 
-        UnsafeBytesInput result = EntriesUtil.inputFromOutput(output);
-        EntryIterator iter = new EntriesInput(result);
-        SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 3, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 4, 1);
-    }
+        String input1 = StoreTestUtil.availablePathById(1);
+        String input2 = StoreTestUtil.availablePathById(2);
+        String input3 = StoreTestUtil.availablePathById(3);
+        String output = StoreTestUtil.availablePathById(0);
 
-    @Test
-    public void testKvOuterSortFlusher() throws IOException {
-        List<Integer> map1 = ImmutableList.of(2, 1,
-                                              2, 1,
-                                              3, 1,
-                                              4, 1);
-        List<Integer> map2 = ImmutableList.of(1, 1,
-                                              3, 1,
-                                              6, 1);
-        UnsafeBytesInput input1 = SorterTestUtil.inputFromKvMap(map1);
-        UnsafeBytesInput input2 = SorterTestUtil.inputFromKvMap(map2);
-        List<RandomAccessInput> inputs = ImmutableList.of(input1, input2);
+        List<String> inputs = ImmutableList.of(input1, input2, input3);
+        List<String> outputs = ImmutableList.of(output);
 
-        String resultFile = StoreTestUtil.availablePathById("1");
-        Sorter sorter = new SorterImpl(CONFIG);
-        sorter.mergeBuffers(inputs, new KvOuterSortFlusher(), resultFile,
-                            false);
+        StoreTestUtil.hgkvDirFromSubKvMap(config, data1, input1);
+        StoreTestUtil.hgkvDirFromSubKvMap(config, data2, input2);
+        StoreTestUtil.hgkvDirFromSubKvMap(config, data3, input3);
 
-        ImmutableList<String> outputs = ImmutableList.of(resultFile);
-        Iterator<KvEntry> iter = sorter.iterator(outputs, false);
-        SorterTestUtil.assertKvEntry(iter.next(), 1, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 3, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 3, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 4, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 6, 1);
+        Sorter sorter = new SorterImpl(config);
+        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        OuterSortFlusher flusher = new CombineSubKvOuterSortFlusher(
+                                       combiner, flushThreshold);
+        flusher.sources(inputs.size());
+        sorter.mergeInputs(inputs, flusher, outputs, true);
+
+        /* Assert result
+         * key 1 subKv 1 2 2 4
+         * key 1 subKv 4 2 5 1
+         * key 1 subKv 7 1
+         * key 2 subKv 2 1 5 1
+         * key 4 subKv 2 1 3 1
+         * key 4 subKv 6 2 8 2
+         */
+        try (CIter<KvEntry> kvIter = sorter.iterator(outputs, true)) {
+            SorterTestUtil.assertSubKvByKv(kvIter.next(), 1, 1, 2, 2, 4);
+            SorterTestUtil.assertSubKvByKv(kvIter.next(), 1, 4, 2, 5, 1);
+            SorterTestUtil.assertSubKvByKv(kvIter.next(), 1, 7, 1);
+            SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 2, 1, 5, 1);
+            SorterTestUtil.assertSubKvByKv(kvIter.next(), 4, 2, 1, 3, 1);
+            SorterTestUtil.assertSubKvByKv(kvIter.next(), 4, 6, 2, 8, 2);
+        }
     }
 
     @Test
@@ -390,25 +412,13 @@ public class SorterTest {
         List<String> outputs = ImmutableList.of(output1, output2, output3);
 
         InputFilesSelector selector = new DisperseEvenlySelector();
-        String errorMsg = "inputs size of InputFilesSelector must be >= " +
-                          "outputs size";
+
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             selector.selectedOfOutputs(inputs, outputs);
         }, e -> {
-            Assert.assertTrue(e.getMessage().contains(errorMsg));
-        });
-    }
-
-    @Test
-    public void testExceptionCaseForFlusher() {
-        RandomAccessOutput output = new UnsafeBytesOutput();
-        InnerSortFlusher flusher = new KvInnerSortFlusher(output);
-        List<KvEntry> entries = new ArrayList<>();
-        String errorMsg = "Parameter entries can't be empty";
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            flusher.flush(entries.iterator());
-        }, e -> {
-            Assert.assertTrue(e.getMessage().contains(errorMsg));
+            String errorMsg = "inputs size of InputFilesSelector must be >= " +
+                              "outputs size";
+            Assert.assertContains(errorMsg, e.getMessage());
         });
     }
 }

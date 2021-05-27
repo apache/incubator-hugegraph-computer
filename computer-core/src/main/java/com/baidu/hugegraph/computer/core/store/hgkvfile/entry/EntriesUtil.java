@@ -36,12 +36,15 @@ public final class EntriesUtil {
 
     private static final int DEFAULT_CAPACITY = 100000;
 
-    public static List<KvEntry> readInput(RandomAccessInput input) {
+    public static List<KvEntry> readInput(RandomAccessInput input)
+                                          throws IOException {
         List<KvEntry> pointers = new ArrayList<>(DEFAULT_CAPACITY);
-        EntriesInput entriesInput = new EntriesInput(input);
-        while (entriesInput.hasNext()) {
-            pointers.add(entriesInput.next());
+        try (EntriesInput entriesInput = new EntriesInput(input)) {
+            while (entriesInput.hasNext()) {
+                pointers.add(entriesInput.next());
+            }
         }
+
         return pointers;
     }
 
@@ -102,7 +105,7 @@ public final class EntriesUtil {
             if (useInlinePointer) {
                 return inlinePointerKvEntry(input, valueWithSubKv);
             } else {
-                return cachedPointerKvEntry(userAccessInput, userAccessInput,
+                return cachedPointerKvEntry(input, userAccessInput,
                                             valueWithSubKv);
             }
         } catch (IOException e) {

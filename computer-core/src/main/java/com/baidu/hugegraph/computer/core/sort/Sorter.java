@@ -43,7 +43,7 @@ public interface Sorter {
      * @param flusher The flusher for the same key.
      */
     void sortBuffer(RandomAccessInput input, InnerSortFlusher flusher)
-                    throws IOException;
+                    throws Exception;
 
     /**
      * Merge the buffers by increasing order of key.
@@ -70,8 +70,7 @@ public interface Sorter {
      */
      void mergeBuffers(List<RandomAccessInput> inputBuffers,
                        OuterSortFlusher flusher, String output,
-                       boolean withSubKv)
-                       throws IOException;
+                       boolean withSubKv) throws Exception;
 
     /**
      * Merge the n inputs into m outputs.

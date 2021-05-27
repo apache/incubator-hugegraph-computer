@@ -27,6 +27,7 @@ import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -74,8 +75,13 @@ public class LargeDataSizeTest {
     }
 
     @Before
-    public void setup() {
-        FileUtils.deleteQuietly(new File(StoreTestUtil.FILE_DIR));
+    public void setup() throws IOException {
+        FileUtils.deleteDirectory(new File(StoreTestUtil.FILE_DIR));
+    }
+
+    @After
+    public void teardown() throws IOException {
+        FileUtils.deleteDirectory(new File(StoreTestUtil.FILE_DIR));
     }
 
     @Test
@@ -211,7 +217,7 @@ public class LargeDataSizeTest {
 
     private static RandomAccessInput sortBuffer(Sorter sorter,
                                                 RandomAccessInput input)
-                                                throws IOException {
+                                                throws Exception {
         UnsafeBytesOutput output = new UnsafeBytesOutput();
         Combiner<Pointer> combiner = new MockIntSumCombiner();
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
@@ -222,7 +228,7 @@ public class LargeDataSizeTest {
 
     private static void mergeBuffers(Sorter sorter,
                                      List<RandomAccessInput> buffers,
-                                     String output) throws IOException {
+                                     String output) throws Exception {
         Combiner<Pointer> combiner = new MockIntSumCombiner();
         OuterSortFlusher flusher = new CombineKvOuterSortFlusher(combiner);
         sorter.mergeBuffers(buffers, flusher, output, false);

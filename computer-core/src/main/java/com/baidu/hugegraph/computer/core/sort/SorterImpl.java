@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.sort;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,25 +60,34 @@ public class SorterImpl implements Sorter {
 
     @Override
     public void sortBuffer(RandomAccessInput input, InnerSortFlusher flusher)
-                           throws IOException {
-        Iterator<KvEntry> entries = new EntriesInput(input);
-        InputSorter sorter = new JavaInputSorter();
-        flusher.flush(sorter.sort(entries));
+                           throws Exception {
+        try (EntryIterator entries = new EntriesInput(input)) {
+            InputSorter sorter = new JavaInputSorter();
+            flusher.flush(sorter.sort(entries));
+        }
     }
 
     @Override
     public void mergeBuffers(List<RandomAccessInput> inputs,
                              OuterSortFlusher flusher, String output,
-                             boolean withSubKv) throws IOException {
-        List<EntryIterator> entries;
-        if (withSubKv) {
-            entries = inputs.stream()
-                            .map(EntriesSubKvInput::new)
-                            .collect(Collectors.toList());
-        } else {
-            entries = inputs.stream()
-                            .map(EntriesInput::new)
-                            .collect(Collectors.toList());
+                             boolean withSubKv) throws Exception {
+        List<EntryIterator> entries = null;
+        try {
+            if (withSubKv) {
+                entries = inputs.stream()
+                                .map(EntriesSubKvInput::new)
+                                .collect(Collectors.toList());
+            } else {
+                entries = inputs.stream()
+                                .map(EntriesInput::new)
+                                .collect(Collectors.toList());
+            }
+        } finally {
+            if (entries != null) {
+                for (EntryIterator iterator : entries) {
+                    iterator.close();
+                }
+            }
         }
 
         this.sortBuffers(entries, flusher, output);
@@ -107,7 +115,8 @@ public class SorterImpl implements Sorter {
         InputsSorterImpl sorter = new InputsSorterImpl();
         List<EntryIterator> entries = new ArrayList<>();
         for (String input : inputs) {
-            HgkvDirReader reader = new HgkvDirReaderImpl(input, withSubKv);
+            HgkvDirReader reader = new HgkvDirReaderImpl(input, false,
+                                                         withSubKv);
             entries.add(reader.iterator());
         }
         return PeekableIteratorAdaptor.of(sorter.sort(entries));

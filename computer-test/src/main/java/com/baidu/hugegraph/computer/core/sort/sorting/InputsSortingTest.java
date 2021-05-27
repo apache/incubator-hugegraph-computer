@@ -20,33 +20,43 @@
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import java.util.List;
+
 import org.junit.Test;
 
-public class LoserTreeInputSortingTest {
-
+public class InputsSortingTest {
+    
     @Test
-    public void testLoserTreeInputsSorting() {
+    public void testSorting() {
+        testSorting(SortingMode.LOSER_TREE);
+        testSorting(SortingMode.HEAP);
+    }
+    
+    @Test
+    public void testWithRandomLists() {
+        testWithRandomLists(SortingMode.LOSER_TREE);
+        testWithRandomLists(SortingMode.HEAP);
+    }
+    
+    private static void testSorting(SortingMode mode) {
         InputsSorting<Integer> sorting;
-
-        sorting = new LoserTreeInputsSorting<>(TestData.data(),
-                                               Integer::compareTo);
+        sorting = SortingFactory.createSorting(TestData.data(), mode);
         TestData.assertSorted(TestData.data(), sorting);
 
-        sorting = new LoserTreeInputsSorting<>(TestData.dataWithEmpty());
+        sorting = SortingFactory.createSorting(TestData.dataWithEmpty(), mode);
         TestData.assertSorted(TestData.dataWithEmpty(), sorting);
 
-        sorting = new LoserTreeInputsSorting<>(TestData.dataEmpty());
+        sorting = SortingFactory.createSorting(TestData.dataEmpty(), mode);
         TestData.assertSorted(TestData.dataEmpty(), sorting);
 
-        sorting = new LoserTreeInputsSorting<>(TestData.sameDataLists());
+        sorting = SortingFactory.createSorting(TestData.sameDataLists(), mode);
         TestData.assertSorted(TestData.sameDataLists(), sorting);
     }
 
-    @Test
-    public void testWithRandomLists() {
+    private static void testWithRandomLists(SortingMode mode) {
         List<List<Integer>> randomLists = TestData.randomSortedLists(1000, 50);
-        InputsSorting<Integer> sorting = new LoserTreeInputsSorting<>(
-                                         TestData.toIterators(randomLists));
+        InputsSorting<Integer> sorting;
+        sorting = SortingFactory.createSorting(
+                TestData.toIterators(randomLists), mode);
         TestData.assertSorted(TestData.toIterators(randomLists), sorting);
     }
 }

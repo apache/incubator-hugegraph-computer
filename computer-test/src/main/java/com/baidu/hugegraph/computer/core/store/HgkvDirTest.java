@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -56,9 +57,14 @@ public class HgkvDirTest {
         );
     }
 
+    @Before
+    public void setup() throws IOException {
+        FileUtils.deleteDirectory(new File(StoreTestUtil.FILE_DIR));
+    }
+
     @After
-    public void teardown() {
-        FileUtils.deleteQuietly(new File(StoreTestUtil.FILE_DIR));
+    public void teardown() throws IOException {
+        FileUtils.deleteDirectory(new File(StoreTestUtil.FILE_DIR));
     }
 
     @Test
@@ -104,7 +110,7 @@ public class HgkvDirTest {
                                               5, 9,
                                               6, 2);
         String path = StoreTestUtil.availablePathById("1");
-        StoreTestUtil.hgkvDirFromMap(CONFIG, data, path);
+        StoreTestUtil.hgkvDirFromKvMap(CONFIG, data, path);
         HgkvDirReader reader = new HgkvDirReaderImpl(path, false);
 
         EntryIterator iterator = reader.iterator();

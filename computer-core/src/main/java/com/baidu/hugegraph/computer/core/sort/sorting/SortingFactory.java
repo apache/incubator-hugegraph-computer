@@ -29,16 +29,22 @@ public class SortingFactory {
     private static final SortingMode MODE = SortingMode.LOSER_TREE;
 
     public static <T> InputsSorting<T> createSorting(
-                                       List<? extends Iterator<T>> inputs) {
-        switch (MODE) {
+                                       List<? extends Iterator<T>> inputs,
+                                       SortingMode mode) {
+        switch (mode) {
             case HEAP:
                 return createHeapSorting(inputs);
             case LOSER_TREE:
                 return createLoserTreeSorting(inputs);
             default:
                 throw new ComputerException("Can't create sorting for '%s'",
-                                            MODE);
+                                            mode);
         }
+    }
+
+    public static <T> InputsSorting<T> createSorting(
+                                       List<? extends Iterator<T>> inputs) {
+        return createSorting(inputs, MODE);
     }
 
     private static <T> InputsSorting<T> createLoserTreeSorting(
