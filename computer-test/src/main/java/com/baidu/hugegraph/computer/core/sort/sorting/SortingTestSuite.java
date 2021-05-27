@@ -17,19 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    EntryOutputTest.class,
-    PointerTest.class,
-    EntryOutputTest.class,
-    FileManagerTest.class
+    InputsSortingTest.HeapInputsSortingTest.class,
+    InputsSortingTest.LoserTreeInputsSortingTest.class
 })
-public class StoreTestSuite {
+public class SortingTestSuite {
 }

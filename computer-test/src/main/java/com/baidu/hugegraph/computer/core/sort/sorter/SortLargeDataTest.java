@@ -50,20 +50,24 @@ import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-public class LargeDataSizeTest {
+public class SortLargeDataTest {
 
-    private static final Logger LOG = Log.logger(LargeDataSizeTest.class);
+    private static final Logger LOG = Log.logger(SortLargeDataTest.class);
     private static Config CONFIG;
 
     @BeforeClass
@@ -213,6 +217,47 @@ public class LargeDataSizeTest {
         // Assert result
         long result = sumOfEntryValue(sorter, ImmutableList.of(resultFile));
         Assert.assertEquals(1000 * 100, result);
+    }
+
+    @Test
+    public void testDiffNumEntriesFileMerge() throws Exception {
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.HGKV_MERGE_PATH_NUM, "3"
+        );
+        List<Integer> sizeList = ImmutableList.of(200, 500, 20, 50, 300,
+                                                  250, 10, 33, 900, 89, 20);
+        List<String> inputs = new ArrayList<>();
+
+        for (int j = 0; j < sizeList.size(); j++) {
+            String file = StoreTestUtil.availablePathById(j + 10);
+            inputs.add(file);
+            try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config,
+                                                                 file)) {
+                for (int i = 0; i < sizeList.get(j); i++) {
+                    byte[] keyBytes = StoreTestUtil.intToByteArray(i);
+                    byte[] valueBytes = StoreTestUtil.intToByteArray(1);
+                    Pointer key = new InlinePointer(keyBytes);
+                    Pointer value = new InlinePointer(valueBytes);
+                    KvEntry entry = new DefaultKvEntry(key, value);
+                    builder.write(entry);
+                }
+            }
+        }
+
+        List<String> outputs = ImmutableList.of(
+                               StoreTestUtil.availablePathById(0),
+                               StoreTestUtil.availablePathById(1),
+                               StoreTestUtil.availablePathById(2),
+                               StoreTestUtil.availablePathById(3));
+        Sorter sorter = new SorterImpl(config);
+        sorter.mergeInputs(inputs, new KvOuterSortFlusher(), outputs, false);
+
+        int total = sizeList.stream().mapToInt(i -> i).sum();
+        int mergeTotal = 0;
+        for (String output : outputs) {
+            mergeTotal += HgkvDirImpl.open(output).numEntries();
+        }
+        Assert.assertEquals(total, mergeTotal);
     }
 
     private static RandomAccessInput sortBuffer(Sorter sorter,

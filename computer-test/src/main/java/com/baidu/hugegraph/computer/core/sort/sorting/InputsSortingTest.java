@@ -25,38 +25,51 @@ import org.junit.Test;
 
 public class InputsSortingTest {
     
+    private final SortingMode mode;
+    
+    protected InputsSortingTest(SortingMode mode) {
+        this.mode = mode;
+    }
+    
     @Test
     public void testSorting() {
-        testSorting(SortingMode.LOSER_TREE);
-        testSorting(SortingMode.HEAP);
-    }
-    
-    @Test
-    public void testWithRandomLists() {
-        testWithRandomLists(SortingMode.LOSER_TREE);
-        testWithRandomLists(SortingMode.HEAP);
-    }
-    
-    private static void testSorting(SortingMode mode) {
         InputsSorting<Integer> sorting;
-        sorting = SortingFactory.createSorting(TestData.data(), mode);
+        sorting = SortingFactory.createSorting(TestData.data(), this.mode);
         TestData.assertSorted(TestData.data(), sorting);
 
-        sorting = SortingFactory.createSorting(TestData.dataWithEmpty(), mode);
+        sorting = SortingFactory.createSorting(TestData.dataWithEmpty(),
+                                               this.mode);
         TestData.assertSorted(TestData.dataWithEmpty(), sorting);
 
-        sorting = SortingFactory.createSorting(TestData.dataEmpty(), mode);
+        sorting = SortingFactory.createSorting(TestData.dataEmpty(),
+                                               this.mode);
         TestData.assertSorted(TestData.dataEmpty(), sorting);
 
-        sorting = SortingFactory.createSorting(TestData.sameDataLists(), mode);
+        sorting = SortingFactory.createSorting(TestData.sameDataLists(),
+                                               this.mode);
         TestData.assertSorted(TestData.sameDataLists(), sorting);
     }
 
-    private static void testWithRandomLists(SortingMode mode) {
+    @Test
+    public void testWithRandomLists() {
         List<List<Integer>> randomLists = TestData.randomSortedLists(1000, 50);
         InputsSorting<Integer> sorting;
         sorting = SortingFactory.createSorting(
-                TestData.toIterators(randomLists), mode);
+                  TestData.toIterators(randomLists), this.mode);
         TestData.assertSorted(TestData.toIterators(randomLists), sorting);
+    }
+
+    public static class LoserTreeInputsSortingTest extends InputsSortingTest {
+
+        public LoserTreeInputsSortingTest() {
+            super(SortingMode.LOSER_TREE);
+        }
+    }
+
+    public static class HeapInputsSortingTest extends InputsSortingTest {
+
+        public HeapInputsSortingTest() {
+            super(SortingMode.LOSER_TREE);
+        }
     }
 }

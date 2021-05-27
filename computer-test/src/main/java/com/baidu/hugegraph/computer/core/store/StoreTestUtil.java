@@ -42,6 +42,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuil
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.testutil.Assert;
 
 public class StoreTestUtil {
 
@@ -106,6 +107,7 @@ public class StoreTestUtil {
                 builder.add(entry);
             }
             builder.finish();
+            Assert.assertEquals(56, builder.headerLength());
         } catch (Exception e) {
             FileUtils.deleteQuietly(file);
             throw e;

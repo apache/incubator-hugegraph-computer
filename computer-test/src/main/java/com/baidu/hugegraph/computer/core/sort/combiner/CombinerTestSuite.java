@@ -17,26 +17,14 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort;
+package com.baidu.hugegraph.computer.core.sort.combiner;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import com.baidu.hugegraph.computer.core.sort.sorter.CombinerTest;
-import com.baidu.hugegraph.computer.core.sort.sorter.EntriesUtilTest;
-import com.baidu.hugegraph.computer.core.sort.sorter.FlusherTest;
-import com.baidu.hugegraph.computer.core.sort.sorter.LargeDataSizeTest;
-import com.baidu.hugegraph.computer.core.sort.sorter.SorterTest;
-import com.baidu.hugegraph.computer.core.sort.sorting.InputsSortingTest;
-
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    CombinerTest.class,
-    EntriesUtilTest.class,
-    FlusherTest.class,
-    LargeDataSizeTest.class,
-    SorterTest.class,
-    InputsSortingTest.class
+    CombinerTest.class
 })
-public class SorterTestSuite {
+public class CombinerTestSuite {
 }

@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.allocator.AllocatorTestSuite;
 import com.baidu.hugegraph.computer.core.bsp.BspTestSuite;
-import com.baidu.hugegraph.computer.core.combiner.CombinerTestSuite;
 import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.ConfigTestSuite;
@@ -34,7 +33,9 @@ import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
 import com.baidu.hugegraph.computer.core.input.InputTestSuite;
 import com.baidu.hugegraph.computer.core.io.IOTestSuite;
 import com.baidu.hugegraph.computer.core.network.NetworkTestSuite;
-import com.baidu.hugegraph.computer.core.sort.SorterTestSuite;
+import com.baidu.hugegraph.computer.core.sort.combiner.CombinerTestSuite;
+import com.baidu.hugegraph.computer.core.sort.sorter.SorterTestSuite;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortingTestSuite;
 import com.baidu.hugegraph.computer.core.store.StoreTestSuite;
 import com.baidu.hugegraph.computer.core.worker.WorkerTestSuite;
 import com.baidu.hugegraph.config.OptionSpace;
@@ -54,7 +55,9 @@ import com.baidu.hugegraph.util.Log;
     WorkerTestSuite.class,
     NetworkTestSuite.class,
     StoreTestSuite.class,
-    SorterTestSuite.class
+    SorterTestSuite.class,
+    SortingTestSuite.class,
+    CombinerTestSuite.class
 })
 public class UnitTestSuite {
 
