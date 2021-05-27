@@ -92,7 +92,7 @@ public class FileManager implements FileGenerator, Manager {
     }
 
     @Override
-    public String nextBaseDirectory() {
+    public String nextDirectory() {
         int index = this.sequence.incrementAndGet();
         assert index >= 0;
         return this.dirs.get(index % this.dirs.size());

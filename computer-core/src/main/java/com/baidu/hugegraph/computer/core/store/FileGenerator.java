@@ -24,26 +24,25 @@ import java.nio.file.Paths;
 public interface FileGenerator {
 
     /**
-     * FileGenerator manages the local base directories of a container.
-     * The local base directories can be got from config.
-     * For example, the local base directories configured
-     * ["/disk1/job_001/container_001", "/disk2/job_001/container_001"].
-     * It indicates there are two local base directories and one directory for
-     * one local disks.
+     * Allocate a base directory each call. There may be multi base
+     * directories configured by user, generally each base directory
+     * represent a disk, allocated by round mode.
      *
      * Note: Can't request a directory and write many files into it, this will
      *       cause the io pressure can't distributed over several disks.
      *
      * @return The directory of allocated local base directory.
      */
-    String nextBaseDirectory();
+    String nextDirectory();
 
     /**
+     * Return a string representation of a allocated base directory +
+     * joined string of paths.
      * @param paths The paths as sub-directory.
      * @return A string representation of a directory "#nextBaseDirectory() +
-     * paths"
+     *         joined string of paths"
      */
     default String nextDirectory(String... paths) {
-        return Paths.get(nextBaseDirectory(), paths).toString();
+        return Paths.get(this.nextDirectory(), paths).toString();
     }
 }

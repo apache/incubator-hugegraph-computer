@@ -75,11 +75,11 @@ public class FileManagerTest extends UnitTestBase {
 
         dataFileManager.init(config);
 
-        String dir1 = dataFileManager.nextBaseDirectory();
-        String dir2 = dataFileManager.nextBaseDirectory();
-        String dir3 = dataFileManager.nextBaseDirectory();
-        String dir4 = dataFileManager.nextBaseDirectory();
-        String dir5 = dataFileManager.nextBaseDirectory();
+        String dir1 = dataFileManager.nextDirectory();
+        String dir2 = dataFileManager.nextDirectory();
+        String dir3 = dataFileManager.nextDirectory();
+        String dir4 = dataFileManager.nextDirectory();
+        String dir5 = dataFileManager.nextDirectory();
         Assert.assertEquals(dir1, dir3);
         Assert.assertEquals(dir3, dir5);
         Assert.assertEquals(dir2, dir4);
