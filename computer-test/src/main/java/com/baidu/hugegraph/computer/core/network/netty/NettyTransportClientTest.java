@@ -107,10 +107,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testStartAsync() throws Exception {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        Future<Boolean> future = client.startSessionAsync();
-        Boolean success = future.get(conf.syncRequestTimeout(),
-                                     TimeUnit.MILLISECONDS);
-        Assert.assertTrue(success);
+        Future<Void> future = client.startSessionAsync();
+        future.get(conf.syncRequestTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Test
@@ -123,14 +121,10 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testFinishAsync() throws Exception {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        Future<Boolean> startFuture = client.startSessionAsync();
-        Boolean startSuccess = startFuture.get(conf.syncRequestTimeout(),
-                                               TimeUnit.MILLISECONDS);
-        Assert.assertTrue(startSuccess);
-        Future<Boolean> finishFuture = client.finishSessionAsync();
-        Boolean finishSuccess = finishFuture.get(conf.finishSessionTimeout(),
-                                                 TimeUnit.MILLISECONDS);
-        Assert.assertTrue(finishSuccess);
+        Future<Void> startFuture = client.startSessionAsync();
+        startFuture.get(conf.syncRequestTimeout(), TimeUnit.MILLISECONDS);
+        Future<Void> finishFuture = client.finishSessionAsync();
+        finishFuture.get(conf.finishSessionTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Test
