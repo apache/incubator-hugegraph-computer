@@ -110,7 +110,8 @@ public class ClientSession extends TransportSession {
         SettableFuture<Void> startedFuture = SettableFuture.create();
         boolean success = this.startedFutureRef.compareAndSet(null,
                                                               startedFuture);
-        E.checkArgument(success, "The startedFutureRef must be null");
+        E.checkArgument(success,
+                        "The startedFutureRef value must be null at start()");
 
         this.stateStartSent();
         try {
@@ -151,7 +152,8 @@ public class ClientSession extends TransportSession {
         SettableFuture<Void> finishedFuture = SettableFuture.create();
         boolean success = this.finishedFutureRef.compareAndSet(null,
                                                                finishedFuture);
-        E.checkArgument(success, "The finishedFutureRef must be null");
+        E.checkArgument(success,
+                        "The finishedFutureRef value must be null at finish()");
 
         int finishId = this.genFinishId();
 
