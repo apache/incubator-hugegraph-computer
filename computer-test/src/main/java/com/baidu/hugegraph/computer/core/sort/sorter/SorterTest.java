@@ -390,10 +390,13 @@ public class SorterTest {
         List<String> outputs = ImmutableList.of(output1, output2, output3);
 
         InputFilesSelector selector = new DisperseEvenlySelector();
-        Assert.assertThrows(IllegalArgumentException.class,
-                            () -> selector.selectedOfOutputs(inputs, outputs),
-                            (e) -> Assert.assertContains("must be >=",
-                                                         e.getMessage()));
+        String errorMsg = "inputs size of InputFilesSelector must be >= " +
+                          "outputs size";
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            selector.selectedOfOutputs(inputs, outputs);
+        }, e -> {
+            Assert.assertTrue(e.getMessage().contains(errorMsg));
+        });
     }
 
     @Test
@@ -401,9 +404,11 @@ public class SorterTest {
         RandomAccessOutput output = new UnsafeBytesOutput();
         InnerSortFlusher flusher = new KvInnerSortFlusher(output);
         List<KvEntry> entries = new ArrayList<>();
-        Assert.assertThrows(IllegalArgumentException.class,
-                            () -> flusher.flush(entries.iterator()),
-                            (e) -> Assert.assertContains("can't be empty",
-                                                         e.getMessage()));
+        String errorMsg = "Parameter entries can't be empty";
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            flusher.flush(entries.iterator());
+        }, e -> {
+            Assert.assertTrue(e.getMessage().contains(errorMsg));
+        });
     }
 }

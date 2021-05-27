@@ -39,7 +39,7 @@ public class DisperseEvenlySelector implements InputFilesSelector {
                                                  throws IOException {
         E.checkArgument(inputs.size() >= outputs.size(),
                         "The inputs size of InputFilesSelector must be >= " +
-                        "outputs size but got %s inputs < %s outputs",
+                        "outputs size, but got %s inputs < %s outputs",
                         inputs.size(), outputs.size());
 
         List<HgkvDir> inputDirs = new ArrayList<>();

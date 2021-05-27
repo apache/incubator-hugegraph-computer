@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
 public interface EntryOutput {
@@ -34,8 +33,9 @@ public interface EntryOutput {
      * | key length | key | total sub-entry length | sub-entry count |
      * | sub-key1 length | sub-key1 | sub-value1 length | sub-value1 |
      * | sub-key2 length | sub-key2 | sub-value2 length | sub-value2 |
+     * @param key
      */
-    KvEntryWriter writeEntry(Id key) throws IOException;
+    KvEntryWriter writeEntry(Writable key) throws IOException;
 
     /**
      * Write entry with single value.
@@ -43,5 +43,5 @@ public interface EntryOutput {
      * The output format:
      * | key length | key | value length | value |
      */
-    void writeEntry(Id key, Writable value) throws IOException;
+    void writeEntry(Writable key, Writable value) throws IOException;
 }

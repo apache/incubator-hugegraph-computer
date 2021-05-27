@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
@@ -41,7 +40,7 @@ public class EntryOutputImpl implements EntryOutput {
     }
 
     @Override
-    public KvEntryWriter writeEntry(Id key) throws IOException {
+    public KvEntryWriter writeEntry(Writable key) throws IOException {
         // Write key
         this.writeData(key);
 
@@ -49,7 +48,7 @@ public class EntryOutputImpl implements EntryOutput {
     }
 
     @Override
-    public void writeEntry(Id key, Writable value) throws IOException {
+    public void writeEntry(Writable key, Writable value) throws IOException {
         // Write key
         this.writeData(key);
         // Write value

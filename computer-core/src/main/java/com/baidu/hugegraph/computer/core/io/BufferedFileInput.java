@@ -24,10 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import javax.ws.rs.NotSupportedException;
-
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
+import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
 
@@ -174,7 +173,8 @@ public class BufferedFileInput extends UnsafeBytesInput {
     public int compare(long offset, long length, RandomAccessInput other,
                        long otherOffset, long otherLength) throws IOException {
         if (other.getClass() != BufferedFileInput.class) {
-            throw new NotSupportedException();
+            throw new NotSupportException("BufferedFileInput must be compare " +
+                                          "with BufferedFileInput");
         }
 
         BufferedFileInput otherInput = (BufferedFileInput) other;

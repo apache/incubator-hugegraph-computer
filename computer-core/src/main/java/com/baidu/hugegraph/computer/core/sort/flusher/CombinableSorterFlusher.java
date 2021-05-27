@@ -36,7 +36,7 @@ public abstract class CombinableSorterFlusher {
         this.combiner = combiner;
     }
 
-    protected void flush(Iterator<KvEntry> entries) throws IOException {
+    public void flush(Iterator<KvEntry> entries) throws IOException {
         E.checkArgument(entries.hasNext(),
                         "Parameter entries can't be empty");
 

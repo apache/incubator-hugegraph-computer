@@ -59,6 +59,7 @@ public interface Sorter {
      * | sub-key1 length | sub-key1 | sub-value1 length | sub-value1 |
      * | sub-key2 length | sub-key2 | sub-value2 length | sub-value2 |
      * and so on.
+     * Keys are in increasing order in each buffer.
      * Sub-keys are in increasing order in a key value pair.
      *
      * The results of multiple buffer sorting are output to @param output

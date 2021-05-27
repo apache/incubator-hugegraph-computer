@@ -28,10 +28,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.ws.rs.NotSupportedException;
-
 import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
+import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
@@ -143,7 +142,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     @Override
     public BufferedFileOutput output() throws FileNotFoundException {
-        throw new NotSupportedException();
+        throw new NotSupportException("Can't get output from HgkvDir");
     }
 
     private void build() throws IOException {

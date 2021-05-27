@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.sort.flusher;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
@@ -42,10 +41,5 @@ public class CombineKvInnerSortFlusher extends CombinableSorterFlusher
     protected void writeKvEntry(KvEntry entry) throws IOException {
         entry.key().write(this.output);
         entry.value().write(this.output);
-    }
-
-    @Override
-    public void flush(Iterator<KvEntry> entries) throws IOException {
-        super.flush(entries);
     }
 }
