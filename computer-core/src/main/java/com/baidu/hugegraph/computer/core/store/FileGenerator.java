@@ -19,20 +19,31 @@
 
 package com.baidu.hugegraph.computer.core.store;
 
-import java.io.File;
+import java.nio.file.Paths;
 
 public interface FileGenerator {
 
     /**
-     * @return the next data directory to persist data like vertices, edges and
-     * messages. If pass parentDirectories such as ["message", "1"], it
-     * return directory end with message/1.
+     * FileGenerator manages the local base directories of a container.
+     * The local base directories can be got from config.
+     * For example, the local base directories configured
+     * ["/disk1/job_001/container_001", "/disk2/job_001/container_001"].
+     * It indicates there are two local base directories and one directory for
+     * one local disks.
+     *
+     * Note: Can't request a directory and write many files into it, this will
+     *       cause the io pressure can't distributed over several disks.
+     *
+     * @return The directory of allocated local base directory.
      */
-    File nextDir(String... parentDirectories);
+    String nextBaseDirectory();
 
     /**
-     * @return the next file to persist data like vertices, edges and messages.
-     * The returned file is unique.
+     * @param paths The paths as sub-directory.
+     * @return A string representation of a directory "#nextBaseDirectory() +
+     * paths"
      */
-    File nextFile(String... parentDirectories);
+    default String nextDirectory(String... paths) {
+        return Paths.get(nextBaseDirectory(), paths).toString();
+    }
 }

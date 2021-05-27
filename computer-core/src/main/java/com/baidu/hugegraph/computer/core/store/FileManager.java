@@ -23,7 +23,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
@@ -41,7 +40,7 @@ public class FileManager implements FileGenerator, Manager {
 
     public static final String NAME = "data_dir";
 
-    private List<File> dirs;
+    private List<String> dirs;
     private AtomicInteger sequence;
 
     public FileManager() {
@@ -76,7 +75,7 @@ public class FileManager implements FileGenerator, Manager {
             File jobDir = new File(dir, jobId);
             this.mkdirs(jobDir);
             LOG.debug("Initialized directory '{}' to directory list", jobDir);
-            this.dirs.add(jobDir);
+            this.dirs.add(jobDir.toString());
         }
         /*
          * Shuffle dirs to prevent al workers of the same computer start from
@@ -87,33 +86,22 @@ public class FileManager implements FileGenerator, Manager {
 
     @Override
     public void close(Config config) {
-        for (File dir : this.dirs) {
-            FileUtils.deleteQuietly(dir);
+        for (String dir : this.dirs) {
+            FileUtils.deleteQuietly(new File(dir));
         }
     }
 
     @Override
-    public File nextDir(String... prefix) {
+    public String nextBaseDirectory() {
         int index = this.sequence.incrementAndGet();
         assert index >= 0;
-        File dir = this.dirs.get(index % this.dirs.size());
-        for (String path : prefix) {
-            dir = new File(dir, path);
-        }
-        this.mkdirs(dir);
-        return dir;
-    }
-
-    @Override
-    public File nextFile(String... prefix) {
-        File dir = this.nextDir(prefix);
-        return new File(dir, UUID.randomUUID().toString());
+        return this.dirs.get(index % this.dirs.size());
     }
 
     /**
      * Creates the directory named by specified dir.
      */
-    private void mkdirs(File dir) {
+    private static void mkdirs(File dir) {
         if (!dir.mkdirs() && !dir.exists()) {
             throw new ComputerException("Can't create dir %s",
                                         dir.getAbsolutePath());
