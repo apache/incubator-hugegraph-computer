@@ -50,12 +50,10 @@ public class PointerTest {
         Pointer inlineValue = inlineKvEntry.value();
         Assert.assertEquals(0L, inlineKey.offset());
         Assert.assertEquals(4L, inlineKey.length());
-        Assert.assertEquals(0, BytesUtil.compare(data,
-                                                          inlineKey.bytes()));
+        Assert.assertEquals(0, BytesUtil.compare(data, inlineKey.bytes()));
         Assert.assertEquals(0L, inlineValue.offset());
         Assert.assertEquals(4L, inlineValue.length());
-        Assert.assertEquals(0, BytesUtil.compare(data,
-                                                          inlineValue.bytes()));
+        Assert.assertEquals(0, BytesUtil.compare(data, inlineValue.bytes()));
 
         UnsafeBytesOutput writeOutput = new UnsafeBytesOutput();
         inlineKey.write(writeOutput);
@@ -73,12 +71,10 @@ public class PointerTest {
         Pointer cachedValue = cachedKvEntry.value();
         Assert.assertEquals(4L, cachedKey.offset());
         Assert.assertEquals(4L, cachedKey.length());
-        Assert.assertEquals(0, BytesUtil.compare(data,
-                                                          cachedKey.bytes()));
+        Assert.assertEquals(0, BytesUtil.compare(data, cachedKey.bytes()));
         Assert.assertEquals(12L, cachedValue.offset());
         Assert.assertEquals(4L, cachedValue.length());
-        Assert.assertEquals(0, BytesUtil.compare(data,
-                                                          cachedValue.bytes()));
+        Assert.assertEquals(0, BytesUtil.compare(data, cachedValue.bytes()));
 
         writeOutput = new UnsafeBytesOutput();
         cachedKey.write(writeOutput);

@@ -323,7 +323,7 @@ public class SortLargeDataTest {
                     last = iterator.next();
                     continue;
                 }
-                Assert.assertTrue(last.key().compareTo(next.key()) <= 0);
+                Assert.assertLte(0, last.key().compareTo(next.key()));
             }
         } finally {
             if (iterator != null) {

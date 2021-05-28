@@ -113,13 +113,17 @@ public class HgkvFileTest {
                                                                filePath)) {
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 builder.add(null);
-            },
-            e -> Assert.assertTrue(e.getMessage().contains("can't be null")));
+            }, e -> {
+                Assert.assertContains("Parameter entry can't be null",
+                                      e.getMessage());
+            });
             builder.finish();
             Assert.assertThrows(IllegalStateException.class, () -> {
                 builder.add(null);
-            },
-            e -> Assert.assertTrue(e.getMessage().contains("finished")));
+            }, e -> {
+                Assert.assertContains("builder is finished",
+                                      e.getMessage());
+            });
         } finally {
             FileUtils.deleteQuietly(new File(filePath));
         }
@@ -131,8 +135,10 @@ public class HgkvFileTest {
             File finalTempFile = tempFile;
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 HgkvFileImpl.open(finalTempFile);
-            },
-            e -> Assert.assertTrue(e.getMessage().contains("not exists")));
+            }, e -> {
+                Assert.assertContains("file not exists",
+                                      e.getMessage());
+            });
         } finally {
             FileUtils.deleteQuietly(tempFile);
         }
