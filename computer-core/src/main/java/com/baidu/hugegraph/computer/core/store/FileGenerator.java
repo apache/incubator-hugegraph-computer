@@ -30,8 +30,8 @@ public interface FileGenerator {
      *
      * For example, the base directories configured
      * ["/disk1/job_001/container_001", "/disk2/job_001/container_001"].
-     * It indicates there are two base directories and one directory for one
-     * local disks.
+     * It indicates there are two base directories and each base directory
+     * for one disk.
      * First call returns "/disk1/job_001/container_001",
      * second call returns "/disk2/job_001/container_001"
      * and third call returns "/disk1/job_001/container_001" and so on in
