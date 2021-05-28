@@ -35,12 +35,14 @@ public class PointerTest {
 
     @Test
     public void test() throws IOException {
-        byte[] bytes = new byte[]{100, 0, 0, 0};
+        byte[] data = new byte[]{100, 0, 0, 0};
+        byte[] expectedWriteResult = {4, 0, 0, 0, 100, 0, 0, 0,
+                                      4, 0, 0, 0, 100, 0, 0, 0};
         UnsafeBytesOutput output = new UnsafeBytesOutput();
         output.writeInt(Integer.BYTES);
-        output.write(bytes);
+        output.write(data);
         output.writeInt(Integer.BYTES);
-        output.write(bytes);
+        output.write(data);
 
         UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
         KvEntry inlineKvEntry = EntriesUtil.entryFromInput(input, true, false);
@@ -48,12 +50,21 @@ public class PointerTest {
         Pointer inlineValue = inlineKvEntry.value();
         Assert.assertEquals(0L, inlineKey.offset());
         Assert.assertEquals(4L, inlineKey.length());
-        Assert.assertEquals(0, BytesUtil.compare(bytes,
+        Assert.assertEquals(0, BytesUtil.compare(data,
                                                           inlineKey.bytes()));
         Assert.assertEquals(0L, inlineValue.offset());
         Assert.assertEquals(4L, inlineValue.length());
-        Assert.assertEquals(0, BytesUtil.compare(bytes,
+        Assert.assertEquals(0, BytesUtil.compare(data,
                                                           inlineValue.bytes()));
+
+        UnsafeBytesOutput writeOutput = new UnsafeBytesOutput();
+        inlineKey.write(writeOutput);
+        inlineValue.write(writeOutput);
+        int result = BytesUtil.compare(expectedWriteResult,
+                                       expectedWriteResult.length,
+                                       writeOutput.buffer(),
+                                       (int) writeOutput.position());
+        Assert.assertEquals(0, result);
 
         input.seek(0);
 
@@ -62,11 +73,20 @@ public class PointerTest {
         Pointer cachedValue = cachedKvEntry.value();
         Assert.assertEquals(4L, cachedKey.offset());
         Assert.assertEquals(4L, cachedKey.length());
-        Assert.assertEquals(0, BytesUtil.compare(bytes,
+        Assert.assertEquals(0, BytesUtil.compare(data,
                                                           cachedKey.bytes()));
         Assert.assertEquals(12L, cachedValue.offset());
         Assert.assertEquals(4L, cachedValue.length());
-        Assert.assertEquals(0, BytesUtil.compare(bytes,
+        Assert.assertEquals(0, BytesUtil.compare(data,
                                                           cachedValue.bytes()));
+
+        writeOutput = new UnsafeBytesOutput();
+        cachedKey.write(writeOutput);
+        cachedValue.write(writeOutput);
+        result = BytesUtil.compare(expectedWriteResult,
+                                   expectedWriteResult.length,
+                                   writeOutput.buffer(),
+                                   (int) writeOutput.position());
+        Assert.assertEquals(0, result);
     }
 }

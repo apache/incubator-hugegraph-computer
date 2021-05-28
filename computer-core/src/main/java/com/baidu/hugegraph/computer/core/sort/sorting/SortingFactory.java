@@ -48,12 +48,12 @@ public class SortingFactory {
     }
 
     private static <T> InputsSorting<T> createLoserTreeSorting(
-                                       List<? extends Iterator<T>> inputs) {
+                                        List<? extends Iterator<T>> inputs) {
         return new LoserTreeInputsSorting<>(inputs);
     }
 
     private static <T> InputsSorting<T> createHeapSorting(
-                                       List<? extends Iterator<T>> inputs) {
+                                        List<? extends Iterator<T>> inputs) {
         return new HeapInputsSorting<>(inputs);
     }
 }

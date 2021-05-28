@@ -69,7 +69,7 @@ public class InputsSortingTest {
     public static class HeapInputsSortingTest extends InputsSortingTest {
 
         public HeapInputsSortingTest() {
-            super(SortingMode.LOSER_TREE);
+            super(SortingMode.HEAP);
         }
     }
 }
