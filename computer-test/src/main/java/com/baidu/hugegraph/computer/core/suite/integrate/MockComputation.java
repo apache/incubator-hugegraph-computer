@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.integrate;
+package com.baidu.hugegraph.computer.core.suite.integrate;
 
 import java.util.Iterator;
 
@@ -26,11 +26,6 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
-/**
- * Just used to create computation instance, note that the computation class
- * has not been embedded in the framework yet, so it will not really
- * participate in computation.
- */
 public class MockComputation implements Computation<DoubleValue> {
 
     @Override
@@ -45,12 +40,12 @@ public class MockComputation implements Computation<DoubleValue> {
 
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
-        // do nothing
+
     }
 
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<DoubleValue> messages) {
-        // do nothing
+
     }
 }

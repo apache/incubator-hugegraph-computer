@@ -37,7 +37,6 @@ import com.baidu.hugegraph.computer.core.graph.partition.Partitioner;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
-import com.baidu.hugegraph.computer.core.network.DataClientManager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.util.Log;
@@ -51,17 +50,16 @@ public class MessageSendManager implements Manager {
     private final MessageSendBuffers buffers;
     private final Partitioner partitioner;
     private final SortManager sortManager;
-    private final QueuedMessageSender sender;
+    private final QueuedSender sender;
     private final AtomicReference<Throwable> exception;
 
-    public MessageSendManager(ComputerContext context,
-                              SortManager sortManager,
-                              DataClientManager clientManager) {
+    public MessageSendManager(ComputerContext context, SortManager sortManager,
+                              QueuedSender sender) {
         this.buffers = new MessageSendBuffers(context);
         this.partitioner = new HashPartitioner();
         // The sort and client manager is inited at WorkerService init()
         this.sortManager = sortManager;
-        this.sender = clientManager.sender();
+        this.sender = sender;
         this.exception = new AtomicReference<>();
     }
 
@@ -73,8 +71,6 @@ public class MessageSendManager implements Manager {
     @Override
     public void init(Config config) {
         this.partitioner.init(config);
-        // The sort manager as producer
-        this.sortManager.sender(this.sender);
     }
 
     @Override
@@ -93,20 +89,21 @@ public class MessageSendManager implements Manager {
         if (buffer.reachThreshold()) {
             // After switch, the buffer can be continued write
             buffer.switchForSorting();
-            this.sort(partitionId, type, buffer);
+            this.sortThenSend(partitionId, type, buffer);
         }
-        synchronized (buffer) {
+        try {
             // Write vertex to buffer
-            try {
-                buffer.writeVertex(type, vertex);
-            } catch (IOException e) {
-                throw new ComputerException(
-                          "Failed to write vertex(MessageType=%s)", e, type);
-            }
+            buffer.writeVertex(type, vertex);
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Failed to write vertex(MessageType=%s)", e, type);
         }
     }
 
-    public void sendMessage(Id target, Value<?> value) {
+    public void sendMessage(Id targetId, Value<?> value) {
+        this.checkException();
+
+        int partitionId = this.partitioner.partitionId(targetId);
 
     }
 
@@ -146,7 +143,7 @@ public class MessageSendManager implements Manager {
              */
             if (!buffer.isEmpty()) {
                 buffer.prepareSorting();
-                Future<?> future = this.sort(partitionId, type, buffer);
+                Future<?> future = this.sortThenSend(partitionId, type, buffer);
                 futures.put(partitionId, future);
             }
         }
@@ -164,6 +161,7 @@ public class MessageSendManager implements Manager {
         try {
             for (Integer partitionId : all.keySet()) {
                 int workerId = this.partitioner.workerId(partitionId);
+                // TODO: after async send merged, wait all end ACK
                 this.sender.send(workerId, SortedBufferMessage.END);
             }
             LOG.info("Finish send message(type={})", type);
@@ -173,11 +171,22 @@ public class MessageSendManager implements Manager {
         }
     }
 
-    private Future<?> sort(int partitionId, MessageType type,
-                           WriteBuffers buffer) {
+    private Future<?> sortThenSend(int partitionId, MessageType type,
+                                   WriteBuffers buffer) {
         int workerId = this.partitioner.workerId(partitionId);
-        return this.sortManager.sort(workerId, partitionId, type, buffer)
-                        .whenComplete((r, e) -> {
+        return this.sortManager.sort(buffer).thenAccept(sortedBuffer -> {
+            // The following code is also executed in sort thread
+            buffer.finishSorting();
+            // Each target worker has a buffer queue
+            SortedBufferMessage message;
+            message = new SortedBufferMessage(partitionId, type, sortedBuffer);
+            try {
+                this.sender.send(workerId, message);
+            } catch (InterruptedException e) {
+                throw new ComputerException("Waiting to put buffer into " +
+                                                    "queue was interrupted");
+            }
+        }).whenComplete((r, e) -> {
             if (e != null) {
                 LOG.error("Failed to sort buffer or put sorted buffer " +
                           "into queue", e);

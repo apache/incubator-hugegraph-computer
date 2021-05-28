@@ -214,9 +214,9 @@ public class Bsp4Master extends BspBase {
     }
 
     private void assignIdForWorkers(List<ContainerInfo> containers) {
-        // Assign worker id from 0.
+        // Assign worker id from 1.
         for (int i = 0; i < containers.size(); i++) {
-            containers.get(i).id(i);
+            containers.get(i).id(i + 1);
         }
     }
 

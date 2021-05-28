@@ -26,7 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;

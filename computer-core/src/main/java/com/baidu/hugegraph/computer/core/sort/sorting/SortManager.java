@@ -34,9 +34,6 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.computer.core.sender.QueuedMessageSender;
-import com.baidu.hugegraph.computer.core.sender.SortedBufferMessage;
 import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
 import com.baidu.hugegraph.computer.core.store.SortCombiner;
 import com.baidu.hugegraph.computer.core.store.Sorter;
@@ -50,23 +47,22 @@ public class SortManager implements Manager {
     public static final Logger LOG = Log.logger(SortManager.class);
 
     private static final String NAME = "sort";
+    private static final String PREFIX = "sort-executor-";
 
     private final Config config;
     private final ExecutorService sortExecutor;
     private final Sorter bufferSorter;
     private final SortCombiner valueCombiner;
     private final ByteBufAllocator allocator;
-    private QueuedMessageSender sender;
 
     public SortManager(ComputerContext context) {
         this.config = context.config();
         int threadNum = this.config.get(ComputerOptions.SORT_THREAD_NUMS);
-        this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, "sort");
+        this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, PREFIX);
         // TODO：After sort module merged, remove FakeBufferSorter
         this.bufferSorter = new FakeBufferSorter();
         this.valueCombiner = null;
         this.allocator = ByteBufAllocator.DEFAULT;
-        this.sender = null;
     }
 
     @Override
@@ -76,12 +72,11 @@ public class SortManager implements Manager {
 
     @Override
     public void init(Config config) {
-        Manager.super.init(config);
+        // pass
     }
 
     @Override
     public void close(Config config) {
-        Manager.super.close(config);
         this.sortExecutor.shutdown();
         try {
             this.sortExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
@@ -90,12 +85,7 @@ public class SortManager implements Manager {
         }
     }
 
-    public void sender(QueuedMessageSender sender) {
-        this.sender = sender;
-    }
-
-    public CompletableFuture<Void> sort(int workerId, int partitionId,
-                                        MessageType type, WriteBuffers buffer) {
+    public CompletableFuture<ByteBuffer> sort(WriteBuffers buffer) {
         int capacity = this.config.get(ComputerOptions.WRITE_BUFFER_CAPACITY);
         return CompletableFuture.supplyAsync(() -> {
             RandomAccessInput bufferForRead = buffer.wrapForRead();
@@ -109,19 +99,6 @@ public class SortManager implements Manager {
                 throw new ComputerException("Failed to sort buffer", e);
             }
             return ByteBuffer.wrap(sortedBuffer.buffer());
-        }, this.sortExecutor).thenAccept(sortedBuffer -> {
-            // The following code is also executed in sort thread
-            buffer.finishSorting();
-            // Each target worker has a buffer queue
-            SortedBufferMessage message = new SortedBufferMessage(partitionId,
-                                                                  type,
-                                                                  sortedBuffer);
-            try {
-                this.sender.send(workerId, message);
-            } catch (InterruptedException e) {
-                throw new ComputerException("Waiting to put buffer into " +
-                                            "queue was interrupted");
-            }
-        });
+        }, this.sortExecutor);
     }
 }

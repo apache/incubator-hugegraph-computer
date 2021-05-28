@@ -31,13 +31,16 @@ import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.util.Log;
 
-public class QueuedMessageSender {
+public class QueuedMessageSender implements QueuedSender {
 
     public static final Logger LOG = Log.logger(QueuedMessageSender.class);
 
+    private static final String PREFIX = "send-executor-";
+
+    // Each target worker has a WorkerChannel
     private final Map<Integer, WorkerChannel> workerChannels;
     // The thread used to send vertex/message, only one is enough
-    private final SendExecutor sendExecutor;
+    private final Thread sendExecutor;
 
     private final AtomicInteger activeClientCount;
     private final AtomicInteger emptyQueueCount;
@@ -48,7 +51,7 @@ public class QueuedMessageSender {
 
     public QueuedMessageSender() {
         this.workerChannels = new ConcurrentHashMap<>();
-        this.sendExecutor = new SendExecutor();
+        this.sendExecutor = new Thread(new Sender(), PREFIX);
         this.activeClientCount = new AtomicInteger();
         this.emptyQueueCount = new AtomicInteger();
         this.busyClientCount = new AtomicInteger();
@@ -72,6 +75,7 @@ public class QueuedMessageSender {
         this.workerChannels.put(workerId, workerChannel);
     }
 
+    @Override
     public void send(int workerId, SortedBufferMessage message)
                      throws InterruptedException {
         WorkerChannel workerChannel = this.workerChannels.get(workerId);
@@ -81,7 +85,8 @@ public class QueuedMessageSender {
         workerChannel.queue.put(message);
     }
 
-    public Runnable notifyNotBusy() {
+    public Runnable notBusyNotifier() {
+        // DataClientHandler.sendAvailable will call it
         return this.anyClientNotBusyEvent::signal;
     }
 
@@ -89,16 +94,12 @@ public class QueuedMessageSender {
         return this.workerChannels.size();
     }
 
-    private class SendExecutor extends Thread {
-
-        public SendExecutor() {
-            super("send-executor");
-        }
+    private class Sender implements Runnable {
 
         @Override
         public void run() {
             LOG.info("Start run send exector");
-            while (!this.isInterrupted()) {
+            while (!Thread.currentThread().isInterrupted()) {
                 for (Integer groupId : workerChannels.keySet()) {
                     try {
                         QueuedMessageSender.this.doSend(groupId);
@@ -147,9 +148,8 @@ public class QueuedMessageSender {
     }
 
     private void handleStartMessage(int workerId, SortedBufferQueue queue,
-                                    TransportClient client)
-                                    throws TransportException,
-                                           InterruptedException {
+                                    TransportClient client) throws
+                                    TransportException, InterruptedException {
         client.startSession();
         queue.take();
         this.activeClientCount.incrementAndGet();
@@ -158,9 +158,8 @@ public class QueuedMessageSender {
     }
 
     private void handleFinishMessage(int workerId, SortedBufferQueue queue,
-                                     TransportClient client)
-                                     throws TransportException,
-                                            InterruptedException {
+                                     TransportClient client) throws
+                                     TransportException, InterruptedException {
         client.finishSession();
         queue.take();
         this.activeClientCount.decrementAndGet();
@@ -170,9 +169,8 @@ public class QueuedMessageSender {
 
     private void handleDataMessage(SortedBufferQueue queue,
                                    TransportClient client,
-                                   SortedBufferMessage message)
-                                   throws TransportException,
-                                          InterruptedException {
+                                   SortedBufferMessage message) throws
+                                   TransportException, InterruptedException {
         if (client.send(message.type(), message.partitionId(),
                         message.buffer())) {
             // Pop up the element after sending successfully

@@ -45,11 +45,11 @@ import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.DataClientManager;
 import com.baidu.hugegraph.computer.core.network.DataServerManager;
-import com.baidu.hugegraph.computer.core.recv.FakeMessageRecvManager;
+import com.baidu.hugegraph.computer.core.recv.FakeMessageRecvHandler;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
-import com.baidu.hugegraph.computer.core.store.DataFileManager;
+import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -260,25 +260,22 @@ public class WorkerService {
         aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
 
-        SortManager sortManager = new SortManager(this.context);
-        this.managers.add(sortManager);
-
-        DataFileManager fileManager = new DataFileManager();
+        FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
 
-        FakeMessageRecvManager recvManager = new FakeMessageRecvManager();
-        this.managers.add(recvManager);
-
+        // TODO: when recv module merged, change it
+        FakeMessageRecvHandler recvManager = new FakeMessageRecvHandler();
         DataServerManager serverManager = new DataServerManager(recvManager);
         this.managers.add(serverManager);
 
-        // It doesn't implement Manager interface
+        SortManager sortManager = new SortManager(this.context);
+        this.managers.add(sortManager);
+
         DataClientManager clientManager = new DataClientManager();
         this.managers.add(clientManager);
 
         MessageSendManager sendManager = new MessageSendManager(this.context,
-                                                                sortManager,
-                                                                clientManager);
+                                         sortManager, clientManager.sender());
         this.managers.add(sendManager);
 
         WorkerInputManager inputManager = new WorkerInputManager(this.context,

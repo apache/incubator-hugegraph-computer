@@ -19,8 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.sender;
 
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -31,37 +30,39 @@ import com.baidu.hugegraph.computer.core.config.Config;
 public class MessageSendBuffers {
 
     /*
+     * Currently there is only one WriteBuffer object in each partition.
      * Add a MessageSendPartition class when find that we really need it
-     * to encapsulate more objects. currently, there is only WriteBuffer
+     * to encapsulate more objects.
      */
-    private final Map<Integer, WriteBuffers> buffers;
+    private final WriteBuffers[] buffers;
 
     public MessageSendBuffers(ComputerContext context) {
         Config config = context.config();
         int partitionCount = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
         int threshold = config.get(ComputerOptions.WRITE_BUFFER_THRESHOLD);
         int capacity = config.get(ComputerOptions.WRITE_BUFFER_CAPACITY);
-        this.buffers = new HashMap<>();
+        this.buffers = new WriteBuffers[partitionCount];
         for (int i = 0; i < partitionCount; i++) {
             /*
              * It depends on the concrete implementation of the
              * partition algorithm, which is not elegant.
              */
-            int partitionId = i;
-            WriteBuffers buffer = new WriteBuffers(threshold, capacity);
-            this.buffers.put(partitionId, buffer);
+            this.buffers[i] = new WriteBuffers(threshold, capacity);
         }
     }
 
     public WriteBuffers get(int partitionId) {
-        WriteBuffers buffer = this.buffers.get(partitionId);
-        if (buffer == null)  {
+        if (partitionId < 0 || partitionId >= this.buffers.length)  {
             throw new ComputerException("Invalid partitionId %s", partitionId);
         }
-        return buffer;
+        return this.buffers[partitionId];
     }
 
     public Map<Integer, WriteBuffers> all() {
-        return Collections.unmodifiableMap(this.buffers);
+        Map<Integer, WriteBuffers> all = new LinkedHashMap<>();
+        for (int i = 0; i < this.buffers.length; i++) {
+            all.put(i, this.buffers[i]);
+        }
+        return all;
     }
 }

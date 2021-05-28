@@ -28,6 +28,7 @@ import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.computer.core.sender.QueuedMessageSender;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 public class DataClientManager implements Manager {
@@ -57,7 +58,7 @@ public class DataClientManager implements Manager {
     public void init(Config config) {
         this.sender.init();
         ClientHandler clientHandler = new DataClientHandler(
-                                      this.sender.notifyNotBusy());
+                                      this.sender.notBusyNotifier());
         this.connManager.initClientManager(config, clientHandler);
         LOG.info("DataClientManager inited");
     }
@@ -90,24 +91,28 @@ public class DataClientManager implements Manager {
 
     private class DataClientHandler implements ClientHandler {
 
-        private final Runnable notifyNotBusy;
+        private final Runnable notBusyNotifier;
 
-        public DataClientHandler(Runnable notifyNotBusy) {
-            this.notifyNotBusy = notifyNotBusy;
+        public DataClientHandler(Runnable notBusyNotifier) {
+            E.checkNotNull(notBusyNotifier,
+                           "The not-busy notifier can't be null");
+            this.notBusyNotifier = notBusyNotifier;
         }
 
         @Override
         public void sendAvailable(ConnectionId connectionId) {
             LOG.debug("Channel for connectionId {} is available", connectionId);
-            this.notifyNotBusy.run();
+            this.notBusyNotifier.run();
         }
 
         @Override
         public void channelActive(ConnectionId connectionId) {
+            LOG.debug("Channel for connectionId {} is active", connectionId);
         }
 
         @Override
         public void channelInactive(ConnectionId connectionId) {
+            LOG.debug("Channel for connectionId {} is inactive", connectionId);
         }
 
         @Override

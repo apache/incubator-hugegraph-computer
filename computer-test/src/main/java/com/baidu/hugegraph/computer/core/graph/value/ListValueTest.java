@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 

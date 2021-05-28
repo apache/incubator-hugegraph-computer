@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.combiner;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;

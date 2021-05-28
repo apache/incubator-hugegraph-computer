@@ -23,44 +23,15 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.util.Log;
 
-public class FakeMessageRecvManager implements Manager, MessageHandler {
+public class FakeMessageRecvHandler implements MessageHandler {
 
-    private static final Logger LOG = Log.logger(FakeMessageRecvManager.class);
-
-    public static final String NAME = "message_recv";
-
-    @Override
-    public String name() {
-        return NAME;
-    }
-
-    @Override
-    public void init(Config config) {
-        LOG.info("MessageRecvManager initialized");
-    }
-
-    @Override
-    public void beforeSuperstep(Config config, int superstep) {
-        LOG.info("Reinitialized message recv partitions");
-    }
-
-    @Override
-    public void afterSuperstep(Config config, int superstep) {
-        LOG.info("Flush all buffers and wait sorted");
-    }
-
-    @Override
-    public void close(Config config) {
-        LOG.info("MessageRecvManager closed");
-    }
+    private static final Logger LOG = Log.logger(FakeMessageRecvHandler.class);
 
     @Override
     public void handle(MessageType messageType, int partition,

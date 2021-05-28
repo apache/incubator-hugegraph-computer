@@ -47,6 +47,7 @@ public final class HashPartitioner implements Partitioner {
 
     @Override
     public int workerId(int partitionId) {
-        return partitionId % this.workerCount;
+        // Note: workerId start from 1
+        return (partitionId % this.workerCount) + 1;
     }
 }

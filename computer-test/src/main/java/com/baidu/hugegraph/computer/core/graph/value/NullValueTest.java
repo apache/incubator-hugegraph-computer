@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class NullValueTest extends UnitTestBase {

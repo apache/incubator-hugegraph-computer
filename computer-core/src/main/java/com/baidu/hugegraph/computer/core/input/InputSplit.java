@@ -48,7 +48,7 @@ public class InputSplit {
         if (this == object) {
             return true;
         }
-        if (object == null || getClass() != object.getClass()) {
+        if (object == null || this.getClass() != object.getClass()) {
             return false;
         }
         InputSplit other = (InputSplit) object;
@@ -63,7 +63,7 @@ public class InputSplit {
 
     @Override
     public String toString() {
-        return "InputSplit{start='" + this.start + '\'' +
-                ", end='" + this.end + '\'' + '}';
+        return String.format("InputSplit{start='%s', end='%s'}",
+                             this.start, this.end);
     }
 }

@@ -57,8 +57,8 @@ public class WriteBuffers {
         return this.writingBuffer.isEmpty();
     }
 
-    public void writeVertex(MessageType type, Vertex vertex)
-                            throws IOException {
+    public synchronized void writeVertex(MessageType type, Vertex vertex)
+                                         throws IOException {
         this.writingBuffer.writeVertex(type, vertex);
     }
 
@@ -91,7 +91,7 @@ public class WriteBuffers {
 
     public synchronized void finishSorting() {
         this.sortingBuffer.clear();
-        this.notifyAll();
+        this.notify();
     }
 
     public RandomAccessInput wrapForRead() {

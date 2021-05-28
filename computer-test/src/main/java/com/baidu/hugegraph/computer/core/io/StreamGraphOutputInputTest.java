@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;

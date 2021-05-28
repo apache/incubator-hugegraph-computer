@@ -37,7 +37,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.exception.NotSupportException;

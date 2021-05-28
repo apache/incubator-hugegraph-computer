@@ -42,6 +42,10 @@ import com.baidu.hugegraph.computer.core.store.hghvfile.entry.KvEntryWriter;
  */
 class WriteBuffer {
 
+    /*
+     * When writed bytes exceed this threshold, means that need a new buffer
+     * to continue write
+     */
     private final int threshold;
     private final OptimizedUnsafeBytesOutput output;
     private final EntryOutput entryOutput;
