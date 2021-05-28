@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -110,7 +111,7 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public Future<Void> startSessionAsync() {
+    public CompletableFuture<Void> startSessionAsync() {
         return this.session.startAsync();
     }
 
@@ -134,7 +135,7 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
-    public Future<Void> finishSessionAsync() {
+    public CompletableFuture<Void> finishSessionAsync() {
         return this.session.finishAsync();
     }
 

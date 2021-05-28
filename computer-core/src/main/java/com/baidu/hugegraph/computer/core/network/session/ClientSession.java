@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.network.session;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -41,7 +42,6 @@ import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.util.E;
-import com.google.common.util.concurrent.SettableFuture;
 
 public class ClientSession extends TransportSession {
 
@@ -50,8 +50,8 @@ public class ClientSession extends TransportSession {
 
     private final Lock lock;
     private volatile boolean flowBlocking;
-    private final AtomicReference<SettableFuture<Void>> startedFutureRef;
-    private final AtomicReference<SettableFuture<Void>> finishedFutureRef;
+    private final AtomicReference<CompletableFuture<Void>> startedFutureRef;
+    private final AtomicReference<CompletableFuture<Void>> finishedFutureRef;
     private final Function<Message, Future<Void>> sendFunction;
 
     public ClientSession(TransportConf conf,
@@ -83,7 +83,7 @@ public class ClientSession extends TransportSession {
     }
 
     public synchronized void start(long timeout) throws TransportException {
-        Future<Void> startFuture = startAsync();
+        CompletableFuture<Void> startFuture = startAsync();
         try {
             startFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Throwable e) {
@@ -97,17 +97,16 @@ public class ClientSession extends TransportSession {
             }
         } finally {
             startFuture.cancel(false);
-            this.startedFutureRef
-                .compareAndSet((SettableFuture<Void>) startFuture, null);
+            this.startedFutureRef.compareAndSet(startFuture, null);
         }
     }
 
-    public synchronized Future<Void> startAsync() {
+    public synchronized CompletableFuture<Void> startAsync() {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
                         "at start()", this.state);
 
-        SettableFuture<Void> startedFuture = SettableFuture.create();
+        CompletableFuture<Void> startedFuture = new CompletableFuture<>();
         boolean success = this.startedFutureRef.compareAndSet(null,
                                                               startedFuture);
         E.checkArgument(success,
@@ -126,7 +125,7 @@ public class ClientSession extends TransportSession {
     }
 
     public synchronized void finish(long timeout) throws TransportException {
-        Future<Void> finishFuture = finishAsync();
+        CompletableFuture<Void> finishFuture = finishAsync();
         try {
             finishFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Throwable e) {
@@ -139,17 +138,16 @@ public class ClientSession extends TransportSession {
                                              e);
             }
         } finally {
-            this.finishedFutureRef
-                .compareAndSet((SettableFuture<Void>) finishFuture, null);
+            this.finishedFutureRef.compareAndSet(finishFuture, null);
         }
     }
 
-    public synchronized Future<Void> finishAsync() {
+    public synchronized CompletableFuture<Void> finishAsync() {
         E.checkArgument(this.state == TransportState.ESTABLISHED,
                         "The state must be ESTABLISHED instead of %s " +
                         "at finish()", this.state);
 
-        SettableFuture<Void> finishedFuture = SettableFuture.create();
+        CompletableFuture<Void> finishedFuture = new CompletableFuture<>();
         boolean success = this.finishedFutureRef.compareAndSet(null,
                                                                finishedFuture);
         E.checkArgument(success,
@@ -220,10 +218,10 @@ public class ClientSession extends TransportSession {
 
         this.stateEstablished();
 
-        SettableFuture<Void> settableFuture = this.startedFutureRef.get();
+        CompletableFuture<Void> settableFuture = this.startedFutureRef.get();
         if (settableFuture != null) {
             if (!settableFuture.isCancelled()) {
-                settableFuture.set(null);
+                settableFuture.complete(null);
             }
             this.startedFutureRef.compareAndSet(settableFuture, null);
         }
@@ -236,10 +234,10 @@ public class ClientSession extends TransportSession {
 
         this.stateReady();
 
-        SettableFuture<Void> finishedFuture = this.finishedFutureRef.get();
+        CompletableFuture<Void> finishedFuture = this.finishedFutureRef.get();
         if (finishedFuture != null) {
             if (!finishedFuture.isCancelled()) {
-                finishedFuture.set(null);
+                finishedFuture.complete(null);
             }
             this.finishedFutureRef.compareAndSet(finishedFuture, null);
         }

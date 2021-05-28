@@ -33,12 +33,12 @@ public interface MessageHandler extends TransportHandler {
     void handle(MessageType messageType, int partition, ManagedBuffer buffer);
 
     /**
-     * Notice start session completed.
+     * Notify start session completed.
      */
     void onStarted(ConnectionId connectionId);
 
     /**
-     * Notice finish session completed.
+     * Notify finish session completed.
      */
     void onFinished(ConnectionId connectionId);
 }

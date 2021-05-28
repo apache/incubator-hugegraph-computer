@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
@@ -43,7 +43,7 @@ public interface TransportClient {
     /**
      * This method is the asynchronous version of {@link #startSession}.
      */
-    Future<Void> startSessionAsync() throws TransportException;
+    CompletableFuture<Void> startSessionAsync() throws TransportException;
 
     /**
      * Send the buffer to the server.
@@ -63,7 +63,7 @@ public interface TransportClient {
     /**
      * This method is the asynchronous version of {@link #finishSession}.
      */
-    Future<Void> finishSessionAsync() throws TransportException;
+    CompletableFuture<Void> finishSessionAsync() throws TransportException;
 
     /**
      * Get the {@link ConnectionId}
