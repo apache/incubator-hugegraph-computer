@@ -23,7 +23,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.io.FileUtils;
@@ -35,16 +34,16 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.util.Log;
 
-public class DataFileManager implements DataFileGenerator, Manager {
+public class FileManager implements FileGenerator, Manager {
 
-    private static final Logger LOG = Log.logger(DataFileManager.class);
+    private static final Logger LOG = Log.logger(FileManager.class);
 
     public static final String NAME = "data_dir";
 
-    private List<File> dirs;
+    private List<String> dirs;
     private AtomicInteger sequence;
 
-    public DataFileManager() {
+    public FileManager() {
         this.dirs = new ArrayList<>();
         this.sequence = new AtomicInteger();
     }
@@ -56,6 +55,17 @@ public class DataFileManager implements DataFileGenerator, Manager {
 
     @Override
     public void init(Config config) {
+        /*
+         * Multiple workers run on same computer will not see each other's
+         * directories.
+         * If runs on K8S, the worker-container can only see the directories
+         * assigned to itself.
+         * If runs on YARN, the worker-container's data-dir is set the format
+         * "$ROOT/${job_id}/{$container_id}", so each container can only see
+         * the directories assigned to itself too. The main class is
+         * responsible for converting the setting from YARN to
+         * HugeGraph-Computer.
+         */
         String jobId = config.get(ComputerOptions.JOB_ID);
         List<String> paths = config.get(ComputerOptions.WORKER_DATA_DIRS);
         LOG.info("The directories '{}' configured to persist data for job {}",
@@ -65,7 +75,7 @@ public class DataFileManager implements DataFileGenerator, Manager {
             File jobDir = new File(dir, jobId);
             this.mkdirs(jobDir);
             LOG.debug("Initialized directory '{}' to directory list", jobDir);
-            this.dirs.add(jobDir);
+            this.dirs.add(jobDir.toString());
         }
         /*
          * Shuffle dirs to prevent al workers of the same computer start from
@@ -76,31 +86,22 @@ public class DataFileManager implements DataFileGenerator, Manager {
 
     @Override
     public void close(Config config) {
-        for (File dir : this.dirs) {
-            FileUtils.deleteQuietly(dir);
+        for (String dir : this.dirs) {
+            FileUtils.deleteQuietly(new File(dir));
         }
     }
 
     @Override
-    public File nextDir() {
+    public String nextDirectory() {
         int index = this.sequence.incrementAndGet();
         assert index >= 0;
         return this.dirs.get(index % this.dirs.size());
     }
 
-    @Override
-    public File nextFile(String type, int superstep) {
-        File dir = this.nextDir();
-        File labelDir = new File(dir, type);
-        File superStepDir = new File(labelDir, Integer.toString(superstep));
-        this.mkdirs(superStepDir);
-        return new File(superStepDir, UUID.randomUUID().toString());
-    }
-
     /**
      * Creates the directory named by specified dir.
      */
-    private void mkdirs(File dir) {
+    private static void mkdirs(File dir) {
         if (!dir.mkdirs() && !dir.exists()) {
             throw new ComputerException("Can't create dir %s",
                                         dir.getAbsolutePath());
