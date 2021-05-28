@@ -28,6 +28,15 @@ public interface FileGenerator {
      * directories configured by user, generally each base directory
      * represent a disk, allocated by round mode.
      *
+     * For example, the base directories configured
+     * ["/disk1/job_001/container_001", "/disk2/job_001/container_001"].
+     * It indicates there are two base directories and one directory for one
+     * local disks.
+     * First call returns "/disk1/job_001/container_001",
+     * second call returns "/disk2/job_001/container_001"
+     * and third call returns "/disk1/job_001/container_001" and so on in
+     * round mode.
+     *
      * Note: Can't request a directory and write many files into it, this will
      *       cause the io pressure can't distributed over several disks.
      *
@@ -36,10 +45,11 @@ public interface FileGenerator {
     String nextDirectory();
 
     /**
-     * Return a string representation of a allocated base directory +
+     * Allocate a base directory each call, return allocated base directory +
      * joined string of paths.
+     *
      * @param paths The paths as sub-directory.
-     * @return A string representation of a directory "#nextBaseDirectory() +
+     * @return A string representation of a directory "#nextDirectory() +
      *         joined string of paths"
      */
     default String nextDirectory(String... paths) {
