@@ -633,7 +633,7 @@ public class BufferedFileTest {
              BufferedFileInput input2 = inputByString(file2, "banana")) {
             int result = input1.compare(0, input1.available(), input2, 0,
                                         input2.available());
-            Assert.assertTrue(result < 0);
+            Assert.assertLt(0, result);
         } finally {
             FileUtils.deleteQuietly(file1);
             FileUtils.deleteQuietly(file2);
@@ -649,7 +649,7 @@ public class BufferedFileTest {
             RandomAccessInput input = new UnsafeBytesInput(output.buffer());
             int result = input.compare(0, input.available(), fileInput, 0,
                                         fileInput.available());
-            Assert.assertTrue(result > 0);
+            Assert.assertGt(0, result);
         } finally {
             FileUtils.deleteQuietly(file3);
         }
@@ -687,14 +687,14 @@ public class BufferedFileTest {
              * "le" compare to "et"
              */
             result = input1.compare(0, 2, input2, 1, 2);
-            Assert.assertTrue(result > 0);
+            Assert.assertGt(0, result);
 
             /*
              * Compare range in input1 buffer but not in input2 buffer
              * "le" compare to "aid"
              */
             result = input1.compare(0, 2, input2, 12, 2);
-            Assert.assertTrue(result > 0);
+            Assert.assertGt(0, result);
 
             /*
              * Compare range not in buffer
@@ -708,7 +708,7 @@ public class BufferedFileTest {
              * "aid" compare to "let"
              */
             result = input1.compare(12, 3, input2, 0, 3);
-            Assert.assertTrue(result < 0);
+            Assert.assertLt(0, result);
         } finally {
             FileUtils.deleteQuietly(file1);
             FileUtils.deleteQuietly(file2);
