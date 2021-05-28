@@ -112,18 +112,16 @@ public class HgkvDirTest {
         String path = StoreTestUtil.availablePathById("1");
         StoreTestUtil.hgkvDirFromKvMap(CONFIG, data, path);
         HgkvDirReader reader = new HgkvDirReaderImpl(path, false);
-
-        EntryIterator iterator = reader.iterator();
-        int i = 0;
-        while (iterator.hasNext()) {
-            KvEntry entry = iterator.next();
-            int key = StoreTestUtil.byteArrayToInt(entry.key().bytes());
-            Assert.assertEquals(data.get(i).intValue(), key);
-            i += 2;
+        try (EntryIterator iterator = reader.iterator()) {
+            int i = 0;
+            while (iterator.hasNext()) {
+                KvEntry entry = iterator.next();
+                int key = StoreTestUtil.byteArrayToInt(entry.key().bytes());
+                Assert.assertEquals(data.get(i).intValue(), key);
+                i += 2;
+            }
+            Assert.assertThrows(NoSuchElementException.class, iterator::next);
         }
-        Assert.assertThrows(NoSuchElementException.class,
-                            iterator::next);
-        iterator.close();
     }
 
     @Test

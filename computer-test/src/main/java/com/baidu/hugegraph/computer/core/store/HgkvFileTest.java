@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.store;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -34,6 +33,7 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
@@ -71,12 +71,7 @@ public class HgkvFileTest {
         // The data must be ordered
         List<Integer> data = testData();
         String filePath = StoreTestUtil.availablePathById("1");
-        File file = null;
-        try {
-            file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
-        } finally {
-            FileUtils.deleteQuietly(file);
-        }
+        StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
     }
 
     @Test
@@ -84,31 +79,29 @@ public class HgkvFileTest {
         // The keys in the data must be ordered
         List<Integer> data = testData();
         String filePath = StoreTestUtil.availablePathById("1");
-        File file = null;
-        try {
-            file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
-            // Open file
-            HgkvFile hgkvFile = HgkvFileImpl.open(file.getPath());
-            Assert.assertEquals(HgkvFileImpl.MAGIC, hgkvFile.magic());
-            String version = HgkvFileImpl.PRIMARY_VERSION + "." +
-                             HgkvFileImpl.MINOR_VERSION;
-            Assert.assertEquals(version, hgkvFile.version());
-            Assert.assertEquals(5, hgkvFile.numEntries());
-            // Read max key
-            int maxKey = StoreTestUtil.byteArrayToInt(hgkvFile.max());
-            Assert.assertEquals(6, maxKey);
-            // Read min key
-            int minKey = StoreTestUtil.byteArrayToInt(hgkvFile.min());
-            Assert.assertEquals(2, minKey);
-        } finally {
-            FileUtils.deleteQuietly(file);
-        }
+        File file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
+        // Open file
+        HgkvFile hgkvFile = HgkvFileImpl.open(file.getPath());
+        // Assert magic
+        Assert.assertEquals(HgkvFileImpl.MAGIC, hgkvFile.magic());
+        // Assert version
+        String version = HgkvFileImpl.PRIMARY_VERSION + "." +
+                         HgkvFileImpl.MINOR_VERSION;
+        Assert.assertEquals(version, hgkvFile.version());
+        // Assert numEntries
+        Assert.assertEquals(5, hgkvFile.numEntries());
+        // Assert max key
+        int maxKey = StoreTestUtil.byteArrayToInt(hgkvFile.max());
+        Assert.assertEquals(6, maxKey);
+        // Assert min key
+        int minKey = StoreTestUtil.byteArrayToInt(hgkvFile.min());
+        Assert.assertEquals(2, minKey);
     }
 
     @Test
     public void testExceptionCase() throws IOException {
         // Exception to add key/value
-        final String filePath = StoreTestUtil.availablePathById("1");
+        String filePath = StoreTestUtil.availablePathById("1");
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(CONFIG,
                                                                filePath)) {
             Assert.assertThrows(IllegalArgumentException.class, () -> {
@@ -124,36 +117,26 @@ public class HgkvFileTest {
                 Assert.assertContains("builder is finished",
                                       e.getMessage());
             });
-        } finally {
-            FileUtils.deleteQuietly(new File(filePath));
         }
 
         // Open not exists file.
-        File tempFile = null;
-        try {
-            tempFile = new File(StoreTestUtil.availablePathById("1"));
-            File finalTempFile = tempFile;
-            Assert.assertThrows(IllegalArgumentException.class, () -> {
-                HgkvFileImpl.open(finalTempFile);
-            }, e -> {
-                Assert.assertContains("file not exists",
-                                      e.getMessage());
-            });
-        } finally {
-            FileUtils.deleteQuietly(tempFile);
-        }
+        File tempFile = new File(StoreTestUtil.availablePathById("2"));
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            HgkvFileImpl.open(tempFile);
+        }, e -> {
+            Assert.assertContains("file not exists", e.getMessage());
+        });
     }
 
     @Test
-    public void testHgkvFileReader() throws IOException {
+    public void testHgkvFileReader() throws Exception {
         // The keys in the data must be ordered
         List<Integer> data = testData();
         String filePath = StoreTestUtil.availablePathById("1");
         File file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
-        try {
-            HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath(),
-                                                           false);
-            Iterator<KvEntry> iterator = reader.iterator();
+
+        HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath(), false);
+        try (EntryIterator iterator = reader.iterator()) {
             int index = 0;
             while (iterator.hasNext()) {
                 KvEntry next = iterator.next();
@@ -161,10 +144,7 @@ public class HgkvFileTest {
                 Assert.assertEquals(data.get(index).intValue(), key);
                 index += 2;
             }
-            Assert.assertThrows(NoSuchElementException.class,
-                                iterator::next);
-        } finally {
-            FileUtils.deleteQuietly(file);
+            Assert.assertThrows(NoSuchElementException.class, iterator::next);
         }
     }
 
