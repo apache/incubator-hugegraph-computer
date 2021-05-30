@@ -21,12 +21,12 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
 
 public abstract class AbstractHgkvFile implements HgkvFile {
 
-    public static final byte PRIMARY_VERSION;
+    public static final byte MAJOR_VERSION;
     public static final byte MINOR_VERSION;
     public static final String MAGIC;
 
     static {
-        PRIMARY_VERSION = 1;
+        MAJOR_VERSION = 1;
         MINOR_VERSION = 0;
         MAGIC = "hgkv";
     }

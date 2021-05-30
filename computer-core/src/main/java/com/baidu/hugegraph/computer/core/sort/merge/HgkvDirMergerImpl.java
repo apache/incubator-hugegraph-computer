@@ -48,7 +48,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
 
     public HgkvDirMergerImpl(Config config) {
         this.config = config;
-        this.mergePathNum = config.get(ComputerOptions.HGKV_MERGE_PATH_NUM);
+        this.mergePathNum = config.get(ComputerOptions.HGKV_MERGE_FILES_NUM);
         this.tempDir = config.get(ComputerOptions.HGKV_TEMP_DIR) +
                        File.separator + UUID.randomUUID();
         boolean result = new File(this.tempDir).mkdirs();
@@ -90,8 +90,11 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
     }
 
     private List<List<String>> splitSubInputs(List<String> inputs) {
-        List<List<String>> splitResult = new ArrayList<>();
-        List<String> subInputs = new ArrayList<>();
+        int splitResultSize = inputs.size() % this.mergePathNum == 0 ?
+                              inputs.size() / this.mergePathNum :
+                              inputs.size() / this.mergePathNum + 1;
+        List<List<String>> splitResult = new ArrayList<>(splitResultSize);
+        List<String> subInputs = new ArrayList<>(this.mergePathNum);
 
         for (int i = 0; i < inputs.size(); i++) {
             subInputs.add(inputs.get(i));
@@ -110,7 +113,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
                                       InputToEntries inputToEntries,
                                       OuterSortFlusher flusher)
                                       throws Exception {
-        List<File> tempFiles = new ArrayList<>();
+        List<File> tempFiles = new ArrayList<>(splitResult.size());
         // Merge subInputs
         for (List<String> subInputs : splitResult) {
             String fileName = this.filePathFromId(++tempFileId);

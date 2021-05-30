@@ -573,7 +573,7 @@ public class ComputerOptions extends OptionHolder {
                     Bytes.KB * 64
             );
 
-    public static final ConfigOption<Integer> HGKV_MERGE_PATH_NUM =
+    public static final ConfigOption<Integer> HGKV_MERGE_FILES_NUM =
             new ConfigOption<>(
                     "hgkv.max_merge_files",
                     "The max number of files to merge at one time.",

@@ -87,7 +87,7 @@ public class HgkvDirTest {
             // Open the file and determine the footer is as expected
             HgkvDir dir = HgkvDirImpl.open(path);
             Assert.assertEquals(HgkvFileImpl.MAGIC, dir.magic());
-            String version = HgkvDirImpl.PRIMARY_VERSION + "." +
+            String version = HgkvDirImpl.MAJOR_VERSION + "." +
                              HgkvDirImpl.MINOR_VERSION;
             Assert.assertEquals(version, dir.version());
             Assert.assertEquals(5, dir.numEntries());

@@ -35,17 +35,11 @@ import com.baidu.hugegraph.util.E;
 
 public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
-    public static final String FILE_NAME_PREFIX;
-    public static final String FILE_EXTEND_NAME;
-    private static final String FILE_NAME_REGEX;
-    private static final Pattern FILE_NUM_PATTERN;
-
-    static {
-        FILE_NAME_PREFIX = "hgkv_";
-        FILE_EXTEND_NAME = ".hgkv";
-        FILE_NAME_REGEX = FILE_NAME_PREFIX + "[0-9]+" + FILE_EXTEND_NAME;
-        FILE_NUM_PATTERN = Pattern.compile("[0-9]+");
-    }
+    public static final String FILE_NAME_PREFIX = "hgkv_";
+    public static final String FILE_EXTEND_NAME = ".hgkv";
+    private static final String FILE_NAME_REGEX =
+                                FILE_NAME_PREFIX + "[0-9]+" + FILE_EXTEND_NAME;
+    private static final Pattern FILE_NUM_PATTERN = Pattern.compile("[0-9]+");
 
     private final List<HgkvFile> segments;
 
@@ -61,13 +55,14 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     public static HgkvDir create(String path) throws IOException {
         File file = new File(path);
         E.checkArgument(!file.exists(),
-                        "Can't create HgkvDir, because the " +
+                        "Can't create HgkvDir because the " +
                         "directory already exists: '%s'", file.getPath());
         file.mkdirs();
         return new HgkvDirImpl(path);
     }
 
     public static HgkvDir open(String path) throws IOException {
+        E.checkArgumentNotNull(path, "Parameter path can't be null");
         File file = new File(path);
         E.checkArgument(file.exists(),
                         "Failed to open path because it does not exists: '%s'",
@@ -147,7 +142,7 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 
     private void build() throws IOException {
         this.magic = MAGIC;
-        this.version = PRIMARY_VERSION + "." + MINOR_VERSION;
+        this.version = MAJOR_VERSION + "." + MINOR_VERSION;
         this.numEntries = this.segments.stream()
                                        .mapToLong(HgkvFile::numEntries)
                                        .sum();

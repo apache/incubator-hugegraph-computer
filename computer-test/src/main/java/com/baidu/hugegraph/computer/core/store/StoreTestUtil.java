@@ -97,8 +97,8 @@ public class StoreTestUtil {
         }
     }
 
-    public static File hgkvFileFromMap(Config config, List<Integer> map,
-                                       String path) throws IOException {
+    public static File mapToHgkvFile(Config config, List<Integer> map,
+                                     String path) throws IOException {
         File file = new File(path);
 
         try (HgkvFileBuilder builder = new HgkvFileBuilderImpl(config, path)) {

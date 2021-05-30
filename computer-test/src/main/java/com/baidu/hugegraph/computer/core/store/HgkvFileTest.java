@@ -71,7 +71,7 @@ public class HgkvFileTest {
         // The data must be ordered
         List<Integer> data = testData();
         String filePath = StoreTestUtil.availablePathById("1");
-        StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
+        StoreTestUtil.mapToHgkvFile(CONFIG, data, filePath);
     }
 
     @Test
@@ -79,13 +79,13 @@ public class HgkvFileTest {
         // The keys in the data must be ordered
         List<Integer> data = testData();
         String filePath = StoreTestUtil.availablePathById("1");
-        File file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
+        File file = StoreTestUtil.mapToHgkvFile(CONFIG, data, filePath);
         // Open file
         HgkvFile hgkvFile = HgkvFileImpl.open(file.getPath());
         // Assert magic
         Assert.assertEquals(HgkvFileImpl.MAGIC, hgkvFile.magic());
         // Assert version
-        String version = HgkvFileImpl.PRIMARY_VERSION + "." +
+        String version = HgkvFileImpl.MAJOR_VERSION + "." +
                          HgkvFileImpl.MINOR_VERSION;
         Assert.assertEquals(version, hgkvFile.version());
         // Assert numEntries
@@ -124,7 +124,7 @@ public class HgkvFileTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             HgkvFileImpl.open(tempFile);
         }, e -> {
-            Assert.assertContains("file not exists", e.getMessage());
+            Assert.assertContains("file does not exists", e.getMessage());
         });
     }
 
@@ -133,7 +133,7 @@ public class HgkvFileTest {
         // The keys in the data must be ordered
         List<Integer> data = testData();
         String filePath = StoreTestUtil.availablePathById("1");
-        File file = StoreTestUtil.hgkvFileFromMap(CONFIG, data, filePath);
+        File file = StoreTestUtil.mapToHgkvFile(CONFIG, data, filePath);
 
         HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath(), false);
         try (EntryIterator iterator = reader.iterator()) {

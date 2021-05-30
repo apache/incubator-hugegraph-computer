@@ -39,8 +39,8 @@ public class HgkvFileImpl extends AbstractHgkvFile {
     public static HgkvFile create(String path) throws IOException {
         File file = new File(path);
         E.checkArgument(!file.exists(),
-                        "Can't create file due to already exists: '%s'",
-                        file.getPath());
+                        "Can't create HgkvFile because the " +
+                        "file already exists: '%s'", file.getPath());
         if (!file.getParentFile().exists()) {
             file.getParentFile().mkdirs();
         }
@@ -57,10 +57,10 @@ public class HgkvFileImpl extends AbstractHgkvFile {
     public static HgkvFile open(File file) throws IOException {
         E.checkArgumentNotNull(file, "Parameter file can't be null");
         E.checkArgument(file.exists(),
-                        "Can't open file due to file not exists: '%s'",
-                        file.getPath());
+                        "Failed to open path because the " +
+                        "file does not exists: '%s'", file.getPath());
         E.checkArgument(file.isFile(),
-                        "Can't create file due to path isn't a file: '%s'",
+                        "Failed to open path because it's not a file: '%s'",
                         file.getPath());
 
         HgkvFileImpl hgkvFile = new HgkvFileImpl(file.getPath());
@@ -107,8 +107,7 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         String magic = new String(input.readBytes(MAGIC.length()));
         E.checkArgument(HgkvFileImpl.MAGIC.equals(magic),
                         "Failed to read footer, illegal hgvk-file magic in " +
-                        "file: '%s'",
-                        file.getPath());
+                        "file: '%s'", file.getPath());
         this.magic = magic;
         // Read numEntries
         this.numEntries = input.readLong();

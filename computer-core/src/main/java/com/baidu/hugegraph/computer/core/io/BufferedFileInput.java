@@ -172,6 +172,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
     @Override
     public int compare(long offset, long length, RandomAccessInput other,
                        long otherOffset, long otherLength) throws IOException {
+        assert other != null;
         if (other.getClass() != BufferedFileInput.class) {
             throw new NotSupportException("BufferedFileInput must be compare " +
                                           "with BufferedFileInput");

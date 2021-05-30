@@ -168,7 +168,7 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         this.output.writeLong(this.minKeyOffset);
         this.footerLength += Long.BYTES;
         // Write version
-        this.output.writeShort(HgkvFileImpl.PRIMARY_VERSION);
+        this.output.writeShort(HgkvFileImpl.MAJOR_VERSION);
         this.output.writeShort(HgkvFileImpl.MINOR_VERSION);
         this.footerLength += Short.BYTES * 2;
     }

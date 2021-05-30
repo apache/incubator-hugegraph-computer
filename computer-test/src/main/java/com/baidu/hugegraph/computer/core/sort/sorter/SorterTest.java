@@ -73,7 +73,7 @@ public class SorterTest {
         CONFIG = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16",
-                ComputerOptions.HGKV_MERGE_PATH_NUM, "3"
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "3"
         );
     }
 

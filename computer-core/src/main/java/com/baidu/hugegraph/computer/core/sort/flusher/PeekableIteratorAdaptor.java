@@ -29,7 +29,7 @@ public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
 
     private PeekableIteratorAdaptor(CIter<T> entries) {
         this.entries = entries;
-        this.goNext();
+        this.fetchNext();
     }
 
     public static <T> PeekableIterator<T> of(CIter<T> iterator) {
@@ -52,12 +52,12 @@ public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
     public T next() {
         T next = this.next;
 
-        this.goNext();
+        this.fetchNext();
 
         return next;
     }
 
-    private void goNext() {
+    private void fetchNext() {
         if (this.entries.hasNext()) {
             this.next = this.entries.next();
         } else {

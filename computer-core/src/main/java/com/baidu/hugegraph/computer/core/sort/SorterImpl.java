@@ -97,15 +97,13 @@ public class SorterImpl implements Sorter {
     public void mergeInputs(List<String> inputs, OuterSortFlusher flusher,
                             List<String> outputs, boolean withSubKv)
                             throws Exception {
+        InputToEntries inputToEntries;
         if (withSubKv) {
-            this.mergeInputs(inputs,
-                             o -> new HgkvDir4SubKvReaderImpl(o).iterator(),
-                             flusher, outputs);
+            inputToEntries = o -> new HgkvDir4SubKvReaderImpl(o).iterator();
         } else {
-            this.mergeInputs(inputs,
-                             o -> new HgkvDirReaderImpl(o).iterator(),
-                             flusher, outputs);
+            inputToEntries = o -> new HgkvDirReaderImpl(o).iterator();
         }
+        this.mergeInputs(inputs, inputToEntries, flusher, outputs);
     }
 
     @Override

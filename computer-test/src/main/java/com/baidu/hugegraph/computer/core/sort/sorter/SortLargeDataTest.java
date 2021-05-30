@@ -73,7 +73,7 @@ public class SortLargeDataTest {
     @BeforeClass
     public static void init() {
         CONFIG = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.HGKV_MERGE_PATH_NUM, "200",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "200",
                 ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB)
         );
     }
@@ -222,7 +222,7 @@ public class SortLargeDataTest {
     @Test
     public void testDiffNumEntriesFileMerge() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.HGKV_MERGE_PATH_NUM, "3"
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "3"
         );
         List<Integer> sizeList = ImmutableList.of(200, 500, 20, 50, 300,
                                                   250, 10, 33, 900, 89, 20);

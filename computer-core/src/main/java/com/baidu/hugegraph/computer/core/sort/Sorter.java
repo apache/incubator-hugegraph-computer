@@ -38,7 +38,7 @@ public interface Sorter {
      * | key2 length | key2 | value2 length | value2 |
      * | key1 length | key1 | value3 length | value3 |
      * and so on.
-     * If a same key exists several time, combine the values.
+     * If some key exists several time, combine the values.
      * @param input The input buffer.
      * @param flusher The flusher for the same key.
      */
@@ -62,7 +62,7 @@ public interface Sorter {
      * Keys are in increasing order in each buffer.
      * Sub-keys are in increasing order in a key value pair.
      *
-     * The results of multiple buffer sorting are output to @param output
+     * The results of multiple buffer sorting are outputted to @param output
      * @param inputBuffers The input buffer list.
      * @param flusher The flusher for the same key.
      * @param output Sort result output location.
@@ -90,8 +90,8 @@ public interface Sorter {
      * Sub-keys are in increasing order in a key value pair.
      *
      * The format of outputs is same as inputs.
-     * For example number of the inputs is 100, and m is 10, this method
-     * merge 100 inputs into 10 outputs.
+     * For example number of the inputs is 100, and number of the outputs is
+     * 10, this method merge 100 inputs into 10 outputs.
      * The outputs need to be as evenly distributed as possible. It might
      * need to sort the inputs by desc order. Then select the inputs one by
      * one assign to the output with least inputs. It makes the difference
@@ -102,8 +102,7 @@ public interface Sorter {
      * @param withSubKv Buffer format 2 is true, Buffer format 1 is false.
      */
     void mergeInputs(List<String> inputs, OuterSortFlusher flusher,
-                     List<String> outputs, boolean withSubKv)
-                     throws Exception;
+                     List<String> outputs, boolean withSubKv) throws Exception;
 
     /**
      * Get the iterator of <key, value> pair by increasing order of key.
