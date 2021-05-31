@@ -29,10 +29,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportState;

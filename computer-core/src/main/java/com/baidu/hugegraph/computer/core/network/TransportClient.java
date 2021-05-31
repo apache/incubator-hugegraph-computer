@@ -41,7 +41,7 @@ public interface TransportClient {
     void startSession() throws TransportException;
 
     /**
-     * This method is the asynchronous version of {@link #startSession}.
+     * This method is the asynchronous version of {@link #startSession()}.
      */
     CompletableFuture<Void> startSessionAsync() throws TransportException;
 
@@ -61,7 +61,7 @@ public interface TransportClient {
     void finishSession() throws TransportException;
 
     /**
-     * This method is the asynchronous version of {@link #finishSession}.
+     * This method is the asynchronous version of {@link #finishSession()}.
      */
     CompletableFuture<Void> finishSessionAsync() throws TransportException;
 
