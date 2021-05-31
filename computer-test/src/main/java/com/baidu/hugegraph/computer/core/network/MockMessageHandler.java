@@ -55,12 +55,12 @@ public class MockMessageHandler implements MessageHandler {
     }
 
     @Override
-    public void channelActive(ConnectionId connectionId) {
+    public void onChannelActive(ConnectionId connectionId) {
         LOG.info("Server channel active, connectionId: {}", connectionId);
     }
 
     @Override
-    public void channelInactive(ConnectionId connectionId) {
+    public void onChannelInactive(ConnectionId connectionId) {
         LOG.info("Server channel inActive, connectionId: {}", connectionId);
     }
 

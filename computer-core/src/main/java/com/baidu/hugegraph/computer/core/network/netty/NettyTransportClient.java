@@ -99,7 +99,7 @@ public class NettyTransportClient implements TransportClient {
                              NettyProtocol protocol, ClientHandler handler) {
         protocol.replaceClientHandler(channel, this);
         // Client stateReady notice
-        handler.channelActive(connectionId);
+        handler.onChannelActive(connectionId);
     }
 
     private Function<Message, Future<Void>> createSendFunction() {

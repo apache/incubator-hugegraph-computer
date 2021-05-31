@@ -110,13 +110,13 @@ public class ClientSession extends TransportSession {
     public synchronized CompletableFuture<Void> startAsync() {
         E.checkArgument(this.state == TransportState.READY,
                         "The state must be READY instead of %s " +
-                        "at start()", this.state);
+                        "at startAsync()", this.state);
 
         CompletableFuture<Void> startedFuture = new CompletableFuture<>();
         boolean success = this.startedFutureRef.compareAndSet(null,
                                                               startedFuture);
-        E.checkArgument(success,
-                        "The startedFutureRef value must be null at start()");
+        E.checkArgument(success, "The startedFutureRef value must be null " +
+                                 "at startAsync()");
 
         this.stateStartSent();
         try {
@@ -138,7 +138,7 @@ public class ClientSession extends TransportSession {
             this.stateEstablished();
             if (e instanceof TimeoutException) {
                 throw new TransportException(
-                      "Timeout(%sms) to wait finish-response", timeout);
+                          "Timeout(%sms) to wait finish-response", timeout);
             } else {
                 throw new TransportException("Failed to wait finish-response",
                                              e);
@@ -151,13 +151,13 @@ public class ClientSession extends TransportSession {
     public synchronized CompletableFuture<Void> finishAsync() {
         E.checkArgument(this.state == TransportState.ESTABLISHED,
                         "The state must be ESTABLISHED instead of %s " +
-                        "at finish()", this.state);
+                        "at finishAsync()", this.state);
 
         CompletableFuture<Void> finishedFuture = new CompletableFuture<>();
         boolean success = this.finishedFutureRef.compareAndSet(null,
                                                                finishedFuture);
-        E.checkArgument(success,
-                        "The finishedFutureRef value must be null at finish()");
+        E.checkArgument(success, "The finishedFutureRef value must be null " +
+                                 "at finishAsync()");
 
         int finishId = this.genFinishId();
 

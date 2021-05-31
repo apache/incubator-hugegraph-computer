@@ -27,14 +27,14 @@ public interface TransportHandler {
      * Invoked when the channel associated with the given connectionId is
      * active.
      */
-    void channelActive(ConnectionId connectionId);
+    void onChannelActive(ConnectionId connectionId);
 
     /**
      * Invoked when the channel associated with the given
      * connectionId is inactive. No further requests will come from this
      * channel.
      */
-    void channelInactive(ConnectionId connectionId);
+    void onChannelInactive(ConnectionId connectionId);
 
     /**
      * Invoked when the channel associated with the given connectionId has
