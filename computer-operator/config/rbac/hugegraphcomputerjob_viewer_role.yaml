@@ -1,0 +1,20 @@
+# permissions for end users to view hugegraphcomputerjobs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hugegraphcomputerjob-viewer-role
+rules:
+- apiGroups:
+  - computer.hugegraph.io
+  resources:
+  - hugegraphcomputerjobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - computer.hugegraph.io
+  resources:
+  - hugegraphcomputerjobs/status
+  verbs:
+  - get

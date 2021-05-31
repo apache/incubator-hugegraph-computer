@@ -1,0 +1,6 @@
+apiVersion: computer.hugegraph.io/v1
+kind: HugeGraphComputerJob
+metadata:
+  name: hugegraphcomputerjob-sample
+spec:
+  # Add fields here

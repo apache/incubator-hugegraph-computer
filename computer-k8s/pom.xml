@@ -12,6 +12,113 @@
     <artifactId>computer-k8s</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>computer-core</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+            <version>5.4.0</version>
+        </dependency>
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>${project.basedir}/src/main/resources/schema</directory>
+                <includes>
+                    <include>open-api.yaml</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <id>removeUnusedAnnotationImports</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <basedir>${project.basedir}</basedir>
+                            <includes>
+                                <include>target/generated-sources/open-api/**/*.java</include>
+                            </includes>
+                            <regex>false</regex>
+                            <replacements>
+                                <replacement>
+                                    <token>import io.swagger.annotations.ApiModel;</token>
+                                    <value />
+                                </replacement>
+                                <replacement>
+                                    <token>import io.swagger.annotations.ApiModelProperty;</token>
+                                    <value />
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>removeUnusedAnnotations</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <basedir>${project.basedir}</basedir>
+                            <includes>
+                                <include>target/generated-sources/open-api/**/*.java</include>
+                            </includes>
+                            <replacements>
+                                <replacement>
+                                    <token>@ApiModel.*\)</token>
+                                    <value />
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>5.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generateApis>false</generateApis>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <inputSpec>${project.basedir}/src/main/resources/schema/open-api.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <skipValidateSpec>true</skipValidateSpec>
+                            <library>rest-assured</library>
+                            <modelPackage>com.baidu.hugegraph.computer.k8s.crd.models</modelPackage>
+                            <modelNamePrefix>ComputerJob</modelNamePrefix>
+                            <configOptions>
+                                <dateLibrary>joda</dateLibrary>
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <modelDocs>false</modelDocs>
+                                <apiDocs>false</apiDocs>
+                                <swaggerAnnotations>false</swaggerAnnotations>
+                            </configOptions>
+                            <output>${project.build.directory}/generated-sources/open-api</output>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
