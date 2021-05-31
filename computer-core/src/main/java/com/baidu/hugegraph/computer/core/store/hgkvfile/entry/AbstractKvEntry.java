@@ -17,16 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+public abstract class AbstractKvEntry implements KvEntry {
 
-import com.baidu.hugegraph.computer.core.sort.sorting.InputsSortingTest;
+    protected final Pointer key;
+    protected final Pointer value;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    InputsSortingTest.class
-})
-public class SortTestSuite {
+    public AbstractKvEntry(Pointer key, Pointer value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    @Override
+    public Pointer key() {
+        return this.key;
+    }
+
+    @Override
+    public Pointer value() {
+        return this.value;
+    }
+
+    @Override
+    public int compareTo(KvEntry o) {
+        return this.key.compareTo(o.key());
+    }
 }

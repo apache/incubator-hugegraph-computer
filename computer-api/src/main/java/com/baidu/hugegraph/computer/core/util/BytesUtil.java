@@ -43,6 +43,10 @@ public class BytesUtil {
         return hash;
     }
 
+    public static int compare(byte[] bytes1, byte[] bytes2) {
+        return compare(bytes1, bytes1.length, bytes2, bytes2.length);
+    }
+
     public static int compare(byte[] bytes1, int length1,
                               byte[] bytes2, int length2) {
         return compare(bytes1, 0, length1, bytes2, 0, length2);

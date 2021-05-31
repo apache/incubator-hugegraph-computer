@@ -17,17 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 
-import java.util.List;
+import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+public interface IndexBlockBuilder {
 
-public interface SortCombiner {
+    void add(byte[] index) throws IOException;
 
-    /**
-     * Combine the list of inputs, and write the combined result length and
-     * results to output.
-     */
-    void combine(List<Pointer> inputs, RandomAccessOutput output);
+    void finish();
+
+    long length();
 }

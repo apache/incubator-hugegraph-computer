@@ -17,19 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-import java.util.Iterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 
-public interface KvEntry {
+public interface InputToEntries {
 
-    Pointer key();
-
-    /**
-     * Each pointer in iteration is values for a specific key. It mean's
-     * key's value in a file. It may be several fragments for a key in a file.
-     * The values in fragments are at increasing order. The upper layer read
-     * a fragment from a pointer each time.
-     */
-    Iterator<Pointer> values();
+    EntryIterator inputToEntries(String path);
 }

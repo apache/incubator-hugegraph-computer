@@ -24,7 +24,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    InputsSortingTest.class
+    InputsSortingTest.HeapInputsSortingTest.class,
+    InputsSortingTest.LoserTreeInputsSortingTest.class
 })
 public class SortingTestSuite {
 }

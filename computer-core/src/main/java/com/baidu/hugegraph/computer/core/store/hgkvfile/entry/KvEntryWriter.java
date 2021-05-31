@@ -17,11 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-public interface Range {
+import java.io.IOException;
 
-    long offset();
+import com.baidu.hugegraph.computer.core.io.Writable;
 
-    long length();
+public interface KvEntryWriter {
+
+    void writeSubKv(Writable subKey, Writable subValue) throws IOException;
+
+    void writeFinish() throws IOException;
 }

@@ -26,6 +26,7 @@ import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
+import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
 
@@ -77,6 +78,9 @@ public class BufferedFileInput extends UnsafeBytesInput {
 
     @Override
     public void seek(long position) throws IOException {
+        if (position == this.position()) {
+            return;
+        }
         long bufferStart = this.fileOffset - this.limit();
         if (position >= bufferStart && position < this.fileOffset) {
             super.seek(position - bufferStart);
@@ -168,17 +172,45 @@ public class BufferedFileInput extends UnsafeBytesInput {
     @Override
     public int compare(long offset, long length, RandomAccessInput other,
                        long otherOffset, long otherLength) throws IOException {
-        long position = this.position();
-        this.seek(offset);
-        byte[] bytes1 = this.readBytes((int) length);
-        this.seek(position);
+        assert other != null;
+        if (other.getClass() != BufferedFileInput.class) {
+            throw new NotSupportException("BufferedFileInput must be compare " +
+                                          "with BufferedFileInput");
+        }
 
-        long otherPosition = other.position();
-        other.seek(otherOffset);
-        byte[] bytes2 = other.readBytes((int) otherLength);
-        other.seek(otherPosition);
+        BufferedFileInput otherInput = (BufferedFileInput) other;
+        if ((offset + length) <= this.limit()) {
+            if ((otherOffset + otherLength) <= otherInput.limit()) {
+                return BytesUtil.compare(this.buffer(), (int) offset,
+                                         (int) length, otherInput.buffer(),
+                                         (int) otherOffset, (int) otherLength);
+            } else {
+                long otherOldPosition = other.position();
+                other.seek(otherOffset);
+                byte[] bytes = other.readBytes((int) otherLength);
+                other.seek(otherOldPosition);
+                return BytesUtil.compare(this.buffer(), (int) offset,
+                                         (int) length, bytes, 0,
+                                         bytes.length);
+            }
+        } else {
+            long oldPosition = this.position();
+            this.seek(offset);
+            byte[] bytes1 = this.readBytes((int) length);
+            this.seek(oldPosition);
 
-        return BytesUtil.compare(bytes1, 0, (int) length,
-                                 bytes2, 0, (int) otherLength);
+            if ((otherOffset + otherLength) <= otherInput.limit()) {
+                return BytesUtil.compare(bytes1, 0, bytes1.length,
+                                         otherInput.buffer(), (int) otherOffset,
+                                         (int) otherLength);
+            } else {
+                long otherOldPosition = other.position();
+                other.seek(otherOffset);
+                byte[] bytes2 = other.readBytes((int) otherLength);
+                other.seek(otherOldPosition);
+                return BytesUtil.compare(bytes1, 0, bytes1.length,
+                                         bytes2, 0, bytes2.length);
+            }
+        }
     }
 }

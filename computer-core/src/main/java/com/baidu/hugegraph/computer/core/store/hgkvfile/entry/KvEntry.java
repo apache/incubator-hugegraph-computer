@@ -17,11 +17,13 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+public interface KvEntry extends Comparable<KvEntry> {
 
-public interface Pointer extends Range {
+    Pointer key();
 
-    RandomAccessInput input();
+    Pointer value();
+
+    long numSubEntries();
 }

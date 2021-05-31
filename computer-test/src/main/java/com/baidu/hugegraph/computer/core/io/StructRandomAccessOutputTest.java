@@ -83,7 +83,7 @@ public class StructRandomAccessOutputTest {
 
     @Test
     public void testWriteByInput() throws IOException {
-        // Input class is UnsafeByteArrayInput
+        // Input class is UnsafeBytesInput
         String uuid = UUID.randomUUID().toString();
         UnsafeBytesInput input = inputByString(uuid);
         UnsafeBytesOutput output = new UnsafeBytesOutput();
@@ -92,7 +92,7 @@ public class StructRandomAccessOutputTest {
         Assert.assertEquals(50L, srao.position());
         srao.close();
 
-        // Input class isn't UnsafeByteArrayInput
+        // Input class isn't UnsafeBytesInput
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
         BufferedFileOutput fileOutput = null;
         BufferedFileInput fileInput = null;

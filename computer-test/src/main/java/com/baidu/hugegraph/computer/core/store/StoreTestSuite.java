@@ -24,6 +24,11 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    HgkvDirTest.class,
+    HgkvFileTest.class,
+    EntryOutputTest.class,
+    PointerTest.class,
+    EntryOutputTest.class,
     FileManagerTest.class
 })
 public class StoreTestSuite {

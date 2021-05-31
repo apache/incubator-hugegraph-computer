@@ -147,6 +147,14 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
+    public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
+            new ConfigOption<>(
+                    "input.max_edges_in_one_vertex",
+                    "The number of edges of a vertex in kvEntry.",
+                    positiveInt(),
+                    500
+            );
+
     public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
             new ConfigOption<>(
                     "computer.vertex_average_degree",
@@ -547,5 +555,38 @@ public class ComputerOptions extends OptionHolder {
                     "channel will be closed from client side.",
                     positiveInt(),
                     90
+            );
+
+    public static final ConfigOption<Long> HGKV_MAX_FILE_SIZE =
+            new ConfigOption<>(
+                    "hgkv.max_file_size",
+                    "The max number of bytes in each hgkv-file.",
+                    positiveInt(),
+                    Bytes.GB * 4
+            );
+
+    public static final ConfigOption<Long> HGKV_DATABLOCK_SIZE =
+            new ConfigOption<>(
+                    "hgkv.max_data_block_size",
+                    "The max byte size of hgkv-file data block.",
+                    positiveInt(),
+                    Bytes.KB * 64
+            );
+
+    public static final ConfigOption<Integer> HGKV_MERGE_FILES_NUM =
+            new ConfigOption<>(
+                    "hgkv.max_merge_files",
+                    "The max number of files to merge at one time.",
+                    positiveInt(),
+                    200
+            );
+
+    public static final ConfigOption<String> HGKV_TEMP_DIR =
+            new ConfigOption<>(
+                    "hgkv.temp_file_dir",
+                    "This folder is used to store temporary files, temporary " +
+                    "files will be generated during the file merging process.",
+                    disallowEmpty(),
+                    "/tmp/hgkv"
             );
 }

@@ -39,6 +39,8 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
+import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
@@ -631,13 +633,13 @@ public class BufferedFileTest {
              BufferedFileInput input2 = inputByString(file2, "banana")) {
             int result = input1.compare(0, input1.available(), input2, 0,
                                         input2.available());
-            Assert.assertTrue(result < 0);
+            Assert.assertLt(0, result);
         } finally {
             FileUtils.deleteQuietly(file1);
             FileUtils.deleteQuietly(file2);
         }
 
-        // UnsafeByteArrayInput compare to BufferedFileInput
+        // UnsafeBytesInput compare to BufferedFileInput
         File file3 = createTempFile();
         try (BufferedFileInput fileInput = inputByString(file3, "apple")) {
             @SuppressWarnings("resource")
@@ -647,9 +649,69 @@ public class BufferedFileTest {
             RandomAccessInput input = new UnsafeBytesInput(output.buffer());
             int result = input.compare(0, input.available(), fileInput, 0,
                                         fileInput.available());
-            Assert.assertTrue(result > 0);
+            Assert.assertGt(0, result);
         } finally {
             FileUtils.deleteQuietly(file3);
+        }
+    }
+
+    @Test
+    public void testCompareDiffRange() throws IOException {
+        File file1, file2;
+
+        // BufferedFileInput compare to other RandomAccessInput
+        file1 = createTempFile();
+        try (BufferedFileInput input1 = inputByString(file1, "hugegraph")) {
+            UnsafeBytesOutput output = new UnsafeBytesOutput();
+            output.writeBytes("banana");
+            RandomAccessInput input = EntriesUtil.inputFromOutput(output);
+
+            Assert.assertThrows(NotSupportException.class, () -> {
+                input1.compare(0, input1.available(), input, 0,
+                               input.available());
+            });
+        } finally {
+            FileUtils.deleteQuietly(file1);
+        }
+
+        // Compare two BufferedFileInput
+        file1 = createTempFile();
+        file2 = createTempFile();
+        String content = "let's make baidu great again";
+
+        try (BufferedFileInput input1 = inputByString(file1, content, 10);
+             BufferedFileInput input2 = inputByString(file1, content, 10)) {
+            int result;
+            /*
+             * Compare range in buffer
+             * "le" compare to "et"
+             */
+            result = input1.compare(0, 2, input2, 1, 2);
+            Assert.assertGt(0, result);
+
+            /*
+             * Compare range in input1 buffer but not in input2 buffer
+             * "le" compare to "aid"
+             */
+            result = input1.compare(0, 2, input2, 12, 2);
+            Assert.assertGt(0, result);
+
+            /*
+             * Compare range not in buffer
+             * "aid" compare to "aid"
+             */
+            result = input1.compare(12, 3, input2, 12, 3);
+            Assert.assertEquals(0, result);
+
+            /*
+             * Compare range not in input1 buffer but in input2 buffer
+             * "aid" compare to "let"
+             */
+            result = input1.compare(12, 3, input2, 0, 3);
+            Assert.assertLt(0, result);
+        } finally {
+            FileUtils.deleteQuietly(file1);
+            FileUtils.deleteQuietly(file2);
         }
     }
 
@@ -677,5 +739,16 @@ public class BufferedFileTest {
         output.writeBytes(s);
         output.close();
         return new BufferedFileInput(file);
+    }
+
+    private static BufferedFileInput inputByString(File file, String s,
+                                                   int bufferCapacity)
+                                                   throws IOException {
+        BufferedFileOutput output = new BufferedFileOutput(file);
+        output.writeBytes(s);
+        output.close();
+        RandomAccessFile randomAccessFile = new RandomAccessFile(
+                                            file, Constants.FILE_MODE_READ);
+        return new BufferedFileInput(randomAccessFile, bufferCapacity);
     }
 }

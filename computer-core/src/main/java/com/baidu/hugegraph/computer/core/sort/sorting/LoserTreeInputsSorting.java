@@ -140,6 +140,9 @@ public final class LoserTreeInputsSorting<T> extends AbstractInputsSorting<T> {
         }
 
         int result = this.compare(t1, t2);
-        return result <= 0;
+        if (result == 0) {
+            return index1 > index2;
+        }
+        return result < 0;
     }
 }

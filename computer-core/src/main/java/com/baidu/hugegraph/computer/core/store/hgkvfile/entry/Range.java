@@ -17,22 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
-public interface HgkvFile {
+public interface Range {
 
-    /**
-     * The absolute path includes file name.
-     */
-    String path();
+    long offset();
 
-    /**
-     * Return the count of entries.
-     */
-    long entries();
-
-    /**
-     * Return the version of file.
-     */
-    int version();
+    long length();
 }

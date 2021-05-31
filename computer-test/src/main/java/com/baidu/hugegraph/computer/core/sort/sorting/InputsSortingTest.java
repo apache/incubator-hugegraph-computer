@@ -19,56 +19,57 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.testutil.Assert;
-
 public class InputsSortingTest {
-
+    
+    private final SortingMode mode;
+    
+    protected InputsSortingTest(SortingMode mode) {
+        this.mode = mode;
+    }
+    
     @Test
-    public void testHeapInputsSorting() {
+    public void testSorting() {
         InputsSorting<Integer> sorting;
+        sorting = SortingFactory.createSorting(TestData.data(), this.mode);
+        TestData.assertSorted(TestData.data(), sorting);
 
-        sorting = new HeapInputsSorting<>(TestData.data(), Integer::compareTo);
-        this.assertSorted(TestData.data(), sorting);
+        sorting = SortingFactory.createSorting(TestData.dataWithEmpty(),
+                                               this.mode);
+        TestData.assertSorted(TestData.dataWithEmpty(), sorting);
 
-        sorting = new HeapInputsSorting<>(TestData.dataWithEmpty());
-        this.assertSorted(TestData.dataWithEmpty(), sorting);
+        sorting = SortingFactory.createSorting(TestData.dataEmpty(),
+                                               this.mode);
+        TestData.assertSorted(TestData.dataEmpty(), sorting);
 
-        sorting = new HeapInputsSorting<>(TestData.dataEmpty());
-        this.assertSorted(TestData.dataEmpty(), sorting);
+        sorting = SortingFactory.createSorting(TestData.sameDataLists(),
+                                               this.mode);
+        TestData.assertSorted(TestData.sameDataLists(), sorting);
     }
 
     @Test
-    public void testLoserTreeInputsSorting() {
+    public void testWithRandomLists() {
+        List<List<Integer>> randomLists = TestData.randomSortedLists(1000, 50);
         InputsSorting<Integer> sorting;
-
-        sorting = new LoserTreeInputsSorting<>(TestData.data(),
-                                               Integer::compareTo);
-        this.assertSorted(TestData.data(), sorting);
-
-        sorting = new LoserTreeInputsSorting<>(TestData.dataWithEmpty());
-        this.assertSorted(TestData.dataWithEmpty(), sorting);
-
-        sorting = new LoserTreeInputsSorting<>(TestData.dataEmpty());
-        this.assertSorted(TestData.dataEmpty(), sorting);
+        sorting = SortingFactory.createSorting(
+                  TestData.toIterators(randomLists), this.mode);
+        TestData.assertSorted(TestData.toIterators(randomLists), sorting);
     }
 
-    private void assertSorted(List<Iterator<Integer>> list,
-                              InputsSorting<Integer> inputsSorting) {
-        List<Integer> result = TestData.getSortedResult(list);
-        Iterator<Integer> sortedResult = result.iterator();
+    public static class LoserTreeInputsSortingTest extends InputsSortingTest {
 
-        while (inputsSorting.hasNext() && sortedResult.hasNext()) {
-            Assert.assertEquals(inputsSorting.next(), sortedResult.next());
+        public LoserTreeInputsSortingTest() {
+            super(SortingMode.LOSER_TREE);
         }
+    }
 
-        Assert.assertFalse(inputsSorting.hasNext());
-        Assert.assertFalse(sortedResult.hasNext());
-        Assert.assertThrows(NoSuchElementException.class, inputsSorting::next);
+    public static class HeapInputsSortingTest extends InputsSortingTest {
+
+        public HeapInputsSortingTest() {
+            super(SortingMode.HEAP);
+        }
     }
 }
