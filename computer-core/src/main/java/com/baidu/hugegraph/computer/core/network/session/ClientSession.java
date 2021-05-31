@@ -30,6 +30,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.computer.core.common.exception.ComputeException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportState;
@@ -42,8 +45,11 @@ import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.Log;
 
 public class ClientSession extends TransportSession {
+
+    private static final Logger LOG = Log.logger(ClientSession.class);
 
     private final int maxPendingRequests;
     private final int minPendingRequests;
@@ -83,7 +89,7 @@ public class ClientSession extends TransportSession {
     }
 
     public synchronized void start(long timeout) throws TransportException {
-        CompletableFuture<Void> startFuture = startAsync();
+        CompletableFuture<Void> startFuture = this.startAsync();
         try {
             startFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Throwable e) {
@@ -125,7 +131,7 @@ public class ClientSession extends TransportSession {
     }
 
     public synchronized void finish(long timeout) throws TransportException {
-        CompletableFuture<Void> finishFuture = finishAsync();
+        CompletableFuture<Void> finishFuture = this.finishAsync();
         try {
             finishFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Throwable e) {
@@ -218,12 +224,15 @@ public class ClientSession extends TransportSession {
 
         this.stateEstablished();
 
-        CompletableFuture<Void> settableFuture = this.startedFutureRef.get();
-        if (settableFuture != null) {
-            if (!settableFuture.isCancelled()) {
-                settableFuture.complete(null);
+        CompletableFuture<Void> startedFuture = this.startedFutureRef.get();
+        if (startedFuture != null) {
+            if (!startedFuture.isCancelled()) {
+                boolean complete = startedFuture.complete(null);
+                if (!complete) {
+                    LOG.warn("The startedFuture can't be completed");
+                }
             }
-            this.startedFutureRef.compareAndSet(settableFuture, null);
+            this.startedFutureRef.compareAndSet(startedFuture, null);
         }
     }
 
@@ -237,7 +246,10 @@ public class ClientSession extends TransportSession {
         CompletableFuture<Void> finishedFuture = this.finishedFutureRef.get();
         if (finishedFuture != null) {
             if (!finishedFuture.isCancelled()) {
-                finishedFuture.complete(null);
+                boolean complete = finishedFuture.complete(null);
+                if (!complete) {
+                    LOG.warn("The finishedFuture can't be completed");
+                }
             }
             this.finishedFutureRef.compareAndSet(finishedFuture, null);
         }
