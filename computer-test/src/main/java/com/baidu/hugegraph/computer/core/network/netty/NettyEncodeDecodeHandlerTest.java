@@ -25,7 +25,7 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.network.MockUnDecodeMessage;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;

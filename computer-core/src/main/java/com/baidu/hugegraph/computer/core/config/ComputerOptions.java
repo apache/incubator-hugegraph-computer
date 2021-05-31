@@ -200,14 +200,6 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
-    public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
-            new ConfigOption<>(
-                    "input.max_edges_in_one_vertex",
-                    "The number of edges of a vertex in kvEntry.",
-                    positiveInt(),
-                    500
-            );
-
     public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
             new ConfigOption<>(
                     "computer.vertex_average_degree",
@@ -387,10 +379,10 @@ public class ComputerOptions extends OptionHolder {
                     (int) (50 * Bytes.KB)
             );
 
-    public static final ConfigOption<Integer> WRITE_BUFFER_CAPACITY =
+    public static final ConfigOption<Integer> WRITE_BUFFER_INIT_CAPACITY =
             new ConfigOption<>(
                     "worker.write_buffer_capacity",
-                    "The maxium size of write buffer that used to store " +
+                    "The initial size of write buffer that used to store " +
                     "vertex or message.",
                     positiveInt(),
                     (int) (60 * Bytes.KB)

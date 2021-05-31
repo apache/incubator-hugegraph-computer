@@ -20,19 +20,22 @@
 package com.baidu.hugegraph.computer.core.sender;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.graph.partition.Partitioner;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -50,13 +53,14 @@ public class MessageSendManager implements Manager {
     private final MessageSendBuffers buffers;
     private final Partitioner partitioner;
     private final SortManager sortManager;
-    private final QueuedSender sender;
+    private final MessageSender sender;
     private final AtomicReference<Throwable> exception;
 
     public MessageSendManager(ComputerContext context, SortManager sortManager,
-                              QueuedSender sender) {
+                              MessageSender sender) {
         this.buffers = new MessageSendBuffers(context);
-        this.partitioner = new HashPartitioner();
+        this.partitioner = context.config().createObject(
+                           ComputerOptions.WORKER_PARTITIONER);
         // The sort and client manager is inited at WorkerService init()
         this.sortManager = sortManager;
         this.sender = sender;
@@ -81,30 +85,43 @@ public class MessageSendManager implements Manager {
     /**
      * There will multiple threads calling the method
      */
-    public void sendVertex(MessageType type, Vertex vertex) {
+    public void sendVertex(Vertex vertex) {
         this.checkException();
 
-        int partitionId = this.partitioner.partitionId(vertex.id());
-        WriteBuffers buffer = this.buffers.get(partitionId);
-        if (buffer.reachThreshold()) {
-            // After switch, the buffer can be continued write
-            buffer.switchForSorting();
-            this.sortThenSend(partitionId, type, buffer);
-        }
+        WriteBuffers buffer = this.sortIfReachThreshold(vertex.id(),
+                                                        MessageType.VERTEX);
         try {
             // Write vertex to buffer
-            buffer.writeVertex(type, vertex);
+            buffer.writeVertex(vertex);
         } catch (IOException e) {
-            throw new ComputerException(
-                      "Failed to write vertex(MessageType=%s)", e, type);
+            throw new ComputerException("Failed to write vertex", e);
+        }
+    }
+
+    public void sendEdge(Vertex vertex) {
+        this.checkException();
+
+        WriteBuffers buffer = this.sortIfReachThreshold(vertex.id(),
+                                                        MessageType.EDGE);
+        try {
+            // Write edge to buffer
+            buffer.writeEdge(vertex);
+        } catch (IOException e) {
+            throw new ComputerException("Failed to write vertex", e);
         }
     }
 
     public void sendMessage(Id targetId, Value<?> value) {
         this.checkException();
 
-        int partitionId = this.partitioner.partitionId(targetId);
-
+        WriteBuffers buffer = this.sortIfReachThreshold(targetId,
+                                                        MessageType.MSG);
+        try {
+            // Write vertex to buffer
+            buffer.writeMessage(targetId, value);
+        } catch (IOException e) {
+            throw new ComputerException("Failed to write message", e);
+        }
     }
 
     /**
@@ -113,16 +130,18 @@ public class MessageSendManager implements Manager {
      */
     public void startSend(MessageType type) {
         Map<Integer, WriteBuffers> all = this.buffers.all();
+        Set<Integer> workerIds = all.keySet().stream()
+                                    .map(this.partitioner::workerId)
+                                    .collect(Collectors.toSet());
         try {
-            for (Integer partitionId : all.keySet()) {
-                int workerId = this.partitioner.workerId(partitionId);
+            for (Integer workerId : workerIds) {
                 this.sender.send(workerId, SortedBufferMessage.START);
             }
-            LOG.info("Start send message(type={})", type);
         } catch (InterruptedException e) {
             throw new ComputerException("Waiting to put buffer into " +
                                         "queue was interrupted");
         }
+        LOG.info("Start send message(type={})", type);
     }
 
     /**
@@ -132,54 +151,54 @@ public class MessageSendManager implements Manager {
      */
     public void finishSend(MessageType type) {
         Map<Integer, WriteBuffers> all = this.buffers.all();
-        Map<Integer, Future<?>> futures = new LinkedHashMap<>();
-        // Sort and send the last buffer
-        for (Map.Entry<Integer, WriteBuffers> entry : all.entrySet()) {
-            int partitionId = entry.getKey();
-            WriteBuffers buffer = entry.getValue();
-            /*
-             * If the last buffer has already been sorted and sent (empty),
-             * there is no need to send again here
-             */
-            if (!buffer.isEmpty()) {
-                buffer.prepareSorting();
-                Future<?> future = this.sortThenSend(partitionId, type, buffer);
-                futures.put(partitionId, future);
-            }
-        }
-        this.checkException();
+        this.sortLastBatchBuffer(all, type);
 
-        // Wait all future finished
+        Set<Integer> workerIds = all.keySet().stream()
+                                    .map(this.partitioner::workerId)
+                                    .collect(Collectors.toSet());
+        List<Future<?>> futures = new ArrayList<>(workerIds.size());
         try {
-            for (Future<?> future : futures.values()) {
-                future.get();
+            for (Integer workerId : workerIds) {
+                futures.add(this.sender.send(workerId,
+                                             SortedBufferMessage.END));
             }
-        } catch (InterruptedException | ExecutionException e) {
-            throw new ComputerException("Failed to wait sort future finished",
-                                        e);
-        }
-        try {
-            for (Integer partitionId : all.keySet()) {
-                int workerId = this.partitioner.workerId(partitionId);
-                // TODO: after async send merged, wait all end ACK
-                this.sender.send(workerId, SortedBufferMessage.END);
-            }
-            LOG.info("Finish send message(type={})", type);
         } catch (InterruptedException e) {
             throw new ComputerException("Waiting to put buffer into " +
                                         "queue was interrupted");
         }
+
+        try {
+            for (Future<?> future : futures) {
+                future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new ComputerException("Failed to wait close session finished",
+                                        e);
+        }
+        LOG.info("Finish send message(type={})", type);
+    }
+
+    private WriteBuffers sortIfReachThreshold(Id id, MessageType type) {
+        int partitionId = this.partitioner.partitionId(id);
+        WriteBuffers buffer = this.buffers.get(partitionId);
+        if (buffer.reachThreshold()) {
+            // After switch, the buffer can be continued write
+            buffer.switchForSorting();
+            this.sortThenSend(partitionId, type, buffer);
+        }
+        return buffer;
     }
 
     private Future<?> sortThenSend(int partitionId, MessageType type,
                                    WriteBuffers buffer) {
         int workerId = this.partitioner.workerId(partitionId);
-        return this.sortManager.sort(buffer).thenAccept(sortedBuffer -> {
+        return this.sortManager.sort(type, buffer).thenAccept(sortedBuffer -> {
             // The following code is also executed in sort thread
             buffer.finishSorting();
             // Each target worker has a buffer queue
-            SortedBufferMessage message;
-            message = new SortedBufferMessage(partitionId, type, sortedBuffer);
+            SortedBufferMessage message = new SortedBufferMessage(partitionId,
+                                                                  type,
+                                                                  sortedBuffer);
             try {
                 this.sender.send(workerId, message);
             } catch (InterruptedException e) {
@@ -194,6 +213,36 @@ public class MessageSendManager implements Manager {
                 this.exception.compareAndSet(null, e);
             }
         });
+    }
+
+    private void sortLastBatchBuffer(Map<Integer, WriteBuffers> all,
+                                     MessageType type) {
+        List<Future<?>> futures = new ArrayList<>(all.size());
+        // Sort and send the last buffer
+        for (Map.Entry<Integer, WriteBuffers> entry : all.entrySet()) {
+            int partitionId = entry.getKey();
+            WriteBuffers buffer = entry.getValue();
+            /*
+             * If the last buffer has already been sorted and sent (empty),
+             * there is no need to send again here
+             */
+            if (!buffer.isEmpty()) {
+                buffer.prepareSorting();
+                Future<?> future = this.sortThenSend(partitionId, type, buffer);
+                futures.add(partitionId, future);
+            }
+        }
+        this.checkException();
+
+        // Wait all future finished
+        try {
+            for (Future<?> future : futures) {
+                future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new ComputerException("Failed to wait sort future finished",
+                                        e);
+        }
     }
 
     private void checkException() {

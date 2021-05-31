@@ -17,17 +17,35 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.hghvfile.entry;
+package com.baidu.hugegraph.computer.suite.integrate;
 
-import java.io.IOException;
+import java.util.Iterator;
 
-import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.worker.Computation;
+import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
-public interface KvEntryWriter {
+public class MockComputation implements Computation<DoubleValue> {
 
-    void writeSubKey(Writable subKey) throws IOException;
+    @Override
+    public String name() {
+        return "mock";
+    }
 
-    void writeSubValue(Writable subValue) throws IOException;
+    @Override
+    public String category() {
+        return "mock";
+    }
 
-    void writeFinish() throws IOException;
+    @Override
+    public void compute0(ComputationContext context, Vertex vertex) {
+
+    }
+
+    @Override
+    public void compute(ComputationContext context, Vertex vertex,
+                        Iterator<DoubleValue> messages) {
+
+    }
 }

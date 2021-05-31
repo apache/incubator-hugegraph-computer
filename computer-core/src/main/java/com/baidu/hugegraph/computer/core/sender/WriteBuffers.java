@@ -22,10 +22,11 @@ package com.baidu.hugegraph.computer.core.sender;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.util.E;
 
 public class WriteBuffers {
@@ -57,23 +58,22 @@ public class WriteBuffers {
         return this.writingBuffer.isEmpty();
     }
 
-    public synchronized void writeVertex(MessageType type, Vertex vertex)
-                                         throws IOException {
-        this.writingBuffer.writeVertex(type, vertex);
+    public synchronized void writeVertex(Vertex vertex) throws IOException {
+        this.writingBuffer.writeVertex(vertex);
+    }
+
+    public synchronized void writeEdge(Vertex vertex) throws IOException {
+        this.writingBuffer.writeEdge(vertex);
+    }
+
+    public synchronized void writeMessage(Id targetId, Value<?> value)
+                                          throws IOException {
+        this.writingBuffer.writeMessage(targetId, value);
     }
 
     public synchronized void switchForSorting() {
         if (!this.reachThreshold()) {
             return;
-        }
-        // Ensure last sorting task finished
-        while (!this.sortingBuffer.isEmpty()) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                throw new ComputerException("Waiting sorting buffer empty " +
-                                            "was interrupted");
-            }
         }
         this.prepareSorting();
     }
@@ -83,6 +83,15 @@ public class WriteBuffers {
      * single thread
      */
     public synchronized void prepareSorting() {
+        // Ensure last sorting task finished
+        while (!this.sortingBuffer.isEmpty()) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                throw new ComputerException("Waiting sorting buffer empty " +
+                                                    "was interrupted");
+            }
+        }
         // Swap the writing buffer and sorting buffer pointer
         WriteBuffer temp = this.writingBuffer;
         this.writingBuffer = this.sortingBuffer;
@@ -94,7 +103,7 @@ public class WriteBuffers {
         this.notify();
     }
 
-    public RandomAccessInput wrapForRead() {
+    public synchronized RandomAccessInput wrapForRead() {
         return new OptimizedUnsafeBytesInput(this.sortingBuffer.output()
                                                                .buffer());
     }

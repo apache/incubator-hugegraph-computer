@@ -23,9 +23,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
@@ -36,7 +34,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.google.common.collect.ImmutableList;
@@ -68,15 +66,15 @@ public class WriteBufferTest extends UnitTestBase {
         Vertex vertex = context.graphFactory().createVertex(
                         new LongId(1L), new DoubleValue(0.5d));
         // After write, the position is 4
-        buffer.writeVertex(MessageType.VERTEX, vertex);
+        buffer.writeVertex(vertex);
         Assert.assertFalse(buffer.reachThreshold());
 
         // After write, the position is 8
-        buffer.writeVertex(MessageType.VERTEX, vertex);
+        buffer.writeVertex(vertex);
         Assert.assertFalse(buffer.reachThreshold());
 
         // After write, the position is 12
-        buffer.writeVertex(MessageType.VERTEX, vertex);
+        buffer.writeVertex(vertex);
         Assert.assertTrue(buffer.reachThreshold());
     }
 
@@ -87,7 +85,7 @@ public class WriteBufferTest extends UnitTestBase {
 
         Vertex vertex = context.graphFactory().createVertex(
                         new LongId(1L), new DoubleValue(0.5d));
-        buffer.writeVertex(MessageType.VERTEX, vertex);
+        buffer.writeVertex(vertex);
         Assert.assertFalse(buffer.isEmpty());
     }
 
@@ -98,7 +96,7 @@ public class WriteBufferTest extends UnitTestBase {
 
         Vertex vertex = context.graphFactory().createVertex(
                         new LongId(1L), new DoubleValue(0.5d));
-        buffer.writeVertex(MessageType.VERTEX, vertex);
+        buffer.writeVertex(vertex);
         Assert.assertFalse(buffer.isEmpty());
 
         buffer.clear();
@@ -109,21 +107,11 @@ public class WriteBufferTest extends UnitTestBase {
     public void testWriteVertex() throws IOException {
         GraphFactory graphFactory = context.graphFactory();
 
-        Assert.assertThrows(ComputerException.class, () -> {
-            WriteBuffer buffer = new WriteBuffer(10, 20);
-            Vertex vertex = graphFactory.createVertex(new LongId(1L),
-                                                      new DoubleValue(0.5d));
-            buffer.writeVertex(MessageType.START, vertex);
-        }, e -> {
-            Assert.assertTrue(e.getMessage().contains(
-                              "Unexpected MessageType"));
-        });
-
         // NOTE: need ensure the buffer size can hold follow writed bytes
         WriteBuffer buffer = new WriteBuffer(100, 110);
         Vertex vertex = graphFactory.createVertex(new LongId(1L),
                                                   new DoubleValue(0.5d));
-        buffer.writeVertex(MessageType.VERTEX, vertex);
+        buffer.writeVertex(vertex);
         int position1 = Whitebox.getInternalState(buffer.output(), "position");
         Assert.assertGt(0, position1);
 
@@ -136,7 +124,7 @@ public class WriteBufferTest extends UnitTestBase {
                                ImmutableList.of(new Utf8Id("wuhan").idValue(),
                                                 new Utf8Id("xian").idValue())));
         vertex.properties(properties);
-        buffer.writeVertex(MessageType.VERTEX, vertex);
+        buffer.writeVertex(vertex);
         int position2 = Whitebox.getInternalState(buffer.output(), "position");
         Assert.assertGt(position1, position2);
 
@@ -146,7 +134,7 @@ public class WriteBufferTest extends UnitTestBase {
         vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
                                                new LongId(4L)));
-        buffer.writeVertex(MessageType.EDGE, vertex);
+        buffer.writeEdge(vertex);
         int position3 = Whitebox.getInternalState(buffer.output(), "position");
         Assert.assertGt(position2, position3);
     }
@@ -171,7 +159,7 @@ public class WriteBufferTest extends UnitTestBase {
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.INPUT_EDGE_FREQ, "SINGLE"
         );
-        buffer.writeVertex(MessageType.EDGE, vertex);
+        buffer.writeEdge(vertex);
         int position1 = Whitebox.getInternalState(buffer.output(), "position");
         /*
          * 1 -> 2
@@ -186,7 +174,7 @@ public class WriteBufferTest extends UnitTestBase {
             ComputerOptions.INPUT_EDGE_FREQ, "SINGLE_PER_LABEL"
         );
         buffer.clear();
-        buffer.writeVertex(MessageType.EDGE, vertex);
+        buffer.writeEdge(vertex);
         int position2 = Whitebox.getInternalState(buffer.output(), "position");
         /*
          * 1 -> 2
@@ -202,7 +190,7 @@ public class WriteBufferTest extends UnitTestBase {
             ComputerOptions.INPUT_EDGE_FREQ, "MULTIPLE"
         );
         buffer.clear();
-        buffer.writeVertex(MessageType.EDGE, vertex);
+        buffer.writeEdge(vertex);
         int position3 = Whitebox.getInternalState(buffer.output(), "position");
         /*
          * 1 -> 2

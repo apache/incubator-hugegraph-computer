@@ -32,7 +32,7 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class BufferedStreamTest {

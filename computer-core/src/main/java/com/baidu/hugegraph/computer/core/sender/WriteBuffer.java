@@ -27,15 +27,15 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.io.EntryOutput;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.computer.core.store.hghvfile.entry.EntryOutputImpl;
-import com.baidu.hugegraph.computer.core.store.hghvfile.entry.KvEntryWriter;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
 
 /**
  * It's not a public class
@@ -77,68 +77,57 @@ class WriteBuffer {
         return this.output;
     }
 
-    public void writeVertex(MessageType type, Vertex vertex)
-                            throws IOException {
-        if (type != MessageType.VERTEX && type != MessageType.EDGE) {
-            throw new ComputerException("Unexpected MessageType=%s", type);
-        }
-        if (type == MessageType.VERTEX) {
-            this.writeVertexWithProperties(vertex);
-        } else {
-            this.writeVertexWithEdges(vertex);
-        }
-    }
-
-    private void writeVertexWithProperties(Vertex vertex) throws IOException {
+    public void writeVertex(Vertex vertex) throws IOException {
         this.entryOutput.writeEntry(vertex.id(), out -> {
             // write properties
             this.writeProperties(out, vertex.properties());
         });
     }
 
-    private void writeVertexWithEdges(Vertex vertex) throws IOException {
+    public void writeEdge(Vertex vertex) throws IOException {
         EdgeFrequency frequency = ComputerContext.instance().config().get(
                                   ComputerOptions.INPUT_EDGE_FREQ);
         KvEntryWriter writer = this.entryOutput.writeEntry(vertex.id());
         if (frequency == EdgeFrequency.SINGLE) {
             for (Edge edge : vertex.edges()) {
-                // Only use targetId as subKey
-                writer.writeSubKey(edge.targetId());
-                // Use properties as subValue
-                writer.writeSubValue(out -> {
+                // Only use targetId as subKey, use properties as subValue
+                writer.writeSubKv(edge.targetId(), out -> {
                     this.writeProperties(out, edge.properties());
                 });
             }
         } else if (frequency == EdgeFrequency.SINGLE_PER_LABEL) {
             for (Edge edge : vertex.edges()) {
-                // Use label + targetId as subKey
-                writer.writeSubKey(out -> {
+                // Use label + targetId as subKey, use properties as subValue
+                writer.writeSubKv(out -> {
                     out.writeUTF(edge.label());
                     out.writeByte(edge.targetId().type().code());
                     edge.targetId().write(out);
-                });
-                // Use properties as subValue
-                writer.writeSubValue(out -> {
+                }, out -> {
                     this.writeProperties(out, edge.properties());
                 });
             }
         } else {
             assert frequency == EdgeFrequency.MULTIPLE;
             for (Edge edge : vertex.edges()) {
-                // Use label + sortValues + targetId as subKey
-                writer.writeSubKey(out -> {
+                /*
+                 * Use label + sortValues + targetId as subKey,
+                 * use properties as subValue
+                 */
+                writer.writeSubKv(out -> {
                     out.writeUTF(edge.label());
                     out.writeUTF(edge.name());
                     out.writeByte(edge.targetId().type().code());
                     edge.targetId().write(out);
-                });
-                // Use properties as subValue
-                writer.writeSubValue(out -> {
+                }, out -> {
                     this.writeProperties(out, edge.properties());
                 });
             }
         }
         writer.writeFinish();
+    }
+
+    public void writeMessage(Id targetId, Value<?> value) throws IOException {
+        this.entryOutput.writeEntry(targetId, value);
     }
 
     private void writeProperties(RandomAccessOutput out, Properties properties)

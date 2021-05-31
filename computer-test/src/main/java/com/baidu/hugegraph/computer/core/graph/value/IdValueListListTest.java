@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.Lists;

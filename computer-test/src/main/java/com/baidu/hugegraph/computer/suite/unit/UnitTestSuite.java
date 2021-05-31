@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.suite.unit;
+package com.baidu.hugegraph.computer.suite.unit;
 
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;

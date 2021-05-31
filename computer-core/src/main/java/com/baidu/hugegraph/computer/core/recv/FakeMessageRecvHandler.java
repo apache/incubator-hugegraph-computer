@@ -52,12 +52,22 @@ public class FakeMessageRecvHandler implements MessageHandler {
     }
 
     @Override
-    public void channelActive(ConnectionId connectionId) {
+    public void onStarted(ConnectionId connectionId) {
 
     }
 
     @Override
-    public void channelInactive(ConnectionId connectionId) {
+    public void onFinished(ConnectionId connectionId) {
+
+    }
+
+    @Override
+    public void onChannelActive(ConnectionId connectionId) {
+
+    }
+
+    @Override
+    public void onChannelInactive(ConnectionId connectionId) {
 
     }
 

@@ -74,7 +74,7 @@ public class WorkerInputManager implements Manager {
     }
 
     /**
-     * Load vertices and edges parallel.
+     * TODO: Load vertices and edges parallel.
      * When this method finish, it means that all vertices and edges are sent,
      * but there is no guarantee that all of them has been received.
      */
@@ -83,7 +83,7 @@ public class WorkerInputManager implements Manager {
         Iterator<Vertex> iterator = this.loadService.createIteratorFromVertex();
         while (iterator.hasNext()) {
             Vertex vertex = iterator.next();
-            this.sendManager.sendVertex(MessageType.VERTEX, vertex);
+            this.sendManager.sendVertex(vertex);
         }
         this.sendManager.finishSend(MessageType.VERTEX);
 
@@ -91,7 +91,7 @@ public class WorkerInputManager implements Manager {
         iterator = this.loadService.createIteratorFromEdge();
         while (iterator.hasNext()) {
             Vertex vertex = iterator.next();
-            this.sendManager.sendVertex(MessageType.EDGE, vertex);
+            this.sendManager.sendEdge(vertex);
         }
         this.sendManager.finishSend(MessageType.EDGE);
     }

@@ -67,9 +67,6 @@ public class DataClientManager implements Manager {
     public void close(Config config) {
         try {
             this.sender.close();
-        } catch (InterruptedException e) {
-            throw new ComputerException("Waiting queued message sender " +
-                                        "close was interrupted");
         } finally {
             this.connManager.shutdownClients();
         }
@@ -106,12 +103,12 @@ public class DataClientManager implements Manager {
         }
 
         @Override
-        public void channelActive(ConnectionId connectionId) {
+        public void onChannelActive(ConnectionId connectionId) {
             LOG.debug("Channel for connectionId {} is active", connectionId);
         }
 
         @Override
-        public void channelInactive(ConnectionId connectionId) {
+        public void onChannelInactive(ConnectionId connectionId) {
             LOG.debug("Channel for connectionId {} is inactive", connectionId);
         }
 
@@ -120,7 +117,7 @@ public class DataClientManager implements Manager {
                                     ConnectionId connectionId) {
             LOG.error("Channel for connectionId {} occurred exception",
                       connectionId, cause);
-            connManager.closeClient(connectionId);
+            DataClientManager.this.connManager.closeClient(connectionId);
         }
     }
 }

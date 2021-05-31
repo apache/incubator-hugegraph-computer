@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.suite.integrate;
+package com.baidu.hugegraph.computer.suite.integrate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,8 +64,7 @@ public class SenderIntegrateTest {
                 service = initMaster(args);
                 service.execute();
             } catch (Exception e) {
-                e.printStackTrace();
-//                Assert.fail(e.getMessage());
+                Assert.fail(e.getMessage());
             } finally {
                 if (service != null) {
                     service.close();
@@ -88,8 +87,7 @@ public class SenderIntegrateTest {
                 service.execute();
                 service.close();
             } catch (Exception e) {
-                e.printStackTrace();
-//                Assert.fail(e.getMessage());
+                Assert.fail(e.getMessage());
             }
         });
         masterThread.start();

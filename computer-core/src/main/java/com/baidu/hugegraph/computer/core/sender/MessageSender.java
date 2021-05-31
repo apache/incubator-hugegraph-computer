@@ -17,35 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.suite.integrate;
+package com.baidu.hugegraph.computer.core.sender;
 
-import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 
-import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.worker.Computation;
-import com.baidu.hugegraph.computer.core.worker.ComputationContext;
+public interface MessageSender {
 
-public class MockComputation implements Computation<DoubleValue> {
-
-    @Override
-    public String name() {
-        return "mock";
-    }
-
-    @Override
-    public String category() {
-        return "mock";
-    }
-
-    @Override
-    public void compute0(ComputationContext context, Vertex vertex) {
-
-    }
-
-    @Override
-    public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<DoubleValue> messages) {
-
-    }
+    CompletableFuture<Void> send(int workerId, SortedBufferMessage message)
+                                 throws InterruptedException;
 }

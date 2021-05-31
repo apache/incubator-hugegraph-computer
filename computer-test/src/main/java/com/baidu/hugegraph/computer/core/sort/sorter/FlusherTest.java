@@ -118,7 +118,11 @@ public class FlusherTest {
 
     @Test
     public void testOverwriteCombiner() throws Exception {
-        List<Integer> data = ImmutableList.of(1, 2, 3, 5, 1, 3, 1, 1, 3, 4);
+        List<Integer> data = ImmutableList.of(1, 2,
+                                              3, 5,
+                                              1, 3,
+                                              1, 1,
+                                              3, 4);
         UnsafeBytesInput input = SorterTestUtil.inputFromKvMap(data);
 
         UnsafeBytesOutput output = new UnsafeBytesOutput();
