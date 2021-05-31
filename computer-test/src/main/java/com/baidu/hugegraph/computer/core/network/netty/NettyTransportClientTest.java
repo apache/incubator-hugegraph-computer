@@ -22,6 +22,8 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -103,10 +105,26 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     }
 
     @Test
+    public void testStartAsync() throws Exception {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        Future<Void> future = client.startSessionAsync();
+        future.get(conf.syncRequestTimeout(), TimeUnit.MILLISECONDS);
+    }
+
+    @Test
     public void testFinishSession() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         client.startSession();
         client.finishSession();
+    }
+
+    @Test
+    public void testFinishAsync() throws Exception {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        Future<Void> startFuture = client.startSessionAsync();
+        startFuture.get(conf.syncRequestTimeout(), TimeUnit.MILLISECONDS);
+        Future<Void> finishFuture = client.finishSessionAsync();
+        finishFuture.get(conf.finishSessionTimeout(), TimeUnit.MILLISECONDS);
     }
 
     @Test
@@ -158,6 +176,49 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         }, e -> {
             Assert.assertContains("to wait finish-response",
                                   e.getMessage());
+        });
+    }
+
+    @Test
+    public void testStartSessionWithSendException() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        @SuppressWarnings("unchecked")
+        Function<Message, ChannelFuture> sendFunc =
+                                         Mockito.mock(Function.class);
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
+
+        Mockito.doThrow(new RuntimeException("test exception"))
+               .when(sendFunc)
+               .apply(Mockito.any());
+
+        Assert.assertThrows(RuntimeException.class, () -> {
+            client.startSession();
+        }, e -> {
+            Assert.assertContains("test exception", e.getMessage());
+        });
+    }
+
+    @Test
+    public void testFinishSessionWithSendException() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        client.startSession();
+
+        @SuppressWarnings("unchecked")
+        Function<Message, Future<Void>> sendFunc = Mockito.mock(Function.class);
+        Whitebox.setInternalState(client.clientSession(),
+                                  "sendFunction", sendFunc);
+
+        Mockito.doThrow(new RuntimeException("test exception"))
+               .when(sendFunc)
+               .apply(Mockito.any());
+
+        Assert.assertThrows(RuntimeException.class, () -> {
+            client.finishSession();
+        }, e -> {
+            Assert.assertContains("test exception", e.getMessage());
         });
     }
 

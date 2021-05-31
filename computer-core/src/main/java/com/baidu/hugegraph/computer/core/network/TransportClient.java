@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
@@ -40,6 +41,11 @@ public interface TransportClient {
     void startSession() throws TransportException;
 
     /**
+     * This method is the asynchronous version of {@link #startSession()}.
+     */
+    CompletableFuture<Void> startSessionAsync() throws TransportException;
+
+    /**
      * Send the buffer to the server.
      * Return false if unable send data immediately.
      * This method is called zero or many times in iteration.
@@ -53,6 +59,11 @@ public interface TransportClient {
      * make sure the buffers sent be received by target workers.
      */
     void finishSession() throws TransportException;
+
+    /**
+     * This method is the asynchronous version of {@link #finishSession()}.
+     */
+    CompletableFuture<Void> finishSessionAsync() throws TransportException;
 
     /**
      * Get the {@link ConnectionId}

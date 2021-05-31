@@ -29,12 +29,12 @@ public class MockClientHandler implements ClientHandler {
     private static final Logger LOG = Log.logger(MockClientHandler.class);
 
     @Override
-    public void channelActive(ConnectionId connectionId) {
+    public void onChannelActive(ConnectionId connectionId) {
         LOG.info("Client connection active, connectionId: {}", connectionId);
     }
 
     @Override
-    public void channelInactive(ConnectionId connectionId) {
+    public void onChannelInactive(ConnectionId connectionId) {
         LOG.info("Client connection inActive, connectionId: {}", connectionId);
     }
 

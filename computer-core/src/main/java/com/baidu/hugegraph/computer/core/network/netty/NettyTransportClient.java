@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -98,7 +99,7 @@ public class NettyTransportClient implements TransportClient {
                              NettyProtocol protocol, ClientHandler handler) {
         protocol.replaceClientHandler(channel, this);
         // Client stateReady notice
-        handler.channelActive(connectionId);
+        handler.onChannelActive(connectionId);
     }
 
     private Function<Message, Future<Void>> createSendFunction() {
@@ -110,16 +111,17 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
+    public CompletableFuture<Void> startSessionAsync() {
+        return this.session.startAsync();
+    }
+
+    @Override
     public void startSession() throws TransportException {
         this.startSession(this.syncRequestTimeout);
     }
 
     private void startSession(long timeout) throws TransportException {
-        try {
-            this.session.start(timeout);
-        } catch (InterruptedException e) {
-            throw new TransportException("Interrupted while start session", e);
-        }
+        this.session.start(timeout);
     }
 
     @Override
@@ -133,16 +135,17 @@ public class NettyTransportClient implements TransportClient {
     }
 
     @Override
+    public CompletableFuture<Void> finishSessionAsync() {
+        return this.session.finishAsync();
+    }
+
+    @Override
     public void finishSession() throws TransportException {
         this.finishSession(this.finishSessionTimeout);
     }
 
     private void finishSession(long timeout) throws TransportException {
-        try {
-            this.session.finish(timeout);
-        } catch (InterruptedException e) {
-            throw new TransportException("Interrupted while finish session", e);
-        }
+        this.session.finish(timeout);
     }
 
     protected boolean checkSendAvailable() {

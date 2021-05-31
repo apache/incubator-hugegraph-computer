@@ -103,6 +103,9 @@ public class NettyServerHandler extends AbstractNettyHandler {
         ctx.writeAndFlush(startAck).addListener(this.listenerOnWrite);
         this.serverSession.completeStateStart();
 
+        Channel channel = ctx.channel();
+        this.handler.onStarted(TransportUtil.remoteConnectionId(channel));
+
         // Add an schedule task to check and respond ack
         if (this.respondAckTask == null) {
             EventLoop eventExecutors = ctx.channel().eventLoop();
@@ -119,6 +122,9 @@ public class NettyServerHandler extends AbstractNettyHandler {
         AckMessage finishAck = new AckMessage(finishId);
         ctx.writeAndFlush(finishAck).addListener(this.listenerOnWrite);
         this.serverSession.completeStateFinish();
+
+        Channel channel = ctx.channel();
+        this.handler.onFinished(TransportUtil.remoteConnectionId(channel));
 
         // Cancel and remove the task to check respond ack
         if (this.respondAckTask != null) {
@@ -156,7 +162,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
-        this.handler.channelActive(connectionId);
+        this.handler.onChannelActive(connectionId);
         super.channelActive(ctx);
     }
 
@@ -164,7 +170,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
-        this.handler.channelInactive(connectionId);
+        this.handler.onChannelInactive(connectionId);
         super.channelInactive(ctx);
     }
 

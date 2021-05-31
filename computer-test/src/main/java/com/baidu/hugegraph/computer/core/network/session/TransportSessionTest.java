@@ -124,7 +124,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
             clientSession.start(conf.syncRequestTimeout());
         }, e -> {
             Assert.assertContains("The state must be READY " +
-                                  "instead of ESTABLISHED at start()",
+                                  "instead of ESTABLISHED at startAsync()",
                                   e.getMessage());
         });
     }
@@ -162,7 +162,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
             clientSession.finish(conf.finishSessionTimeout());
         }, e -> {
             Assert.assertContains("The state must be ESTABLISHED " +
-                                  "instead of READY at finish()",
+                                  "instead of READY at finishAsync()",
                                   e.getMessage());
         });
     }
