@@ -1,0 +1,24 @@
+# permissions for end users to edit hugegraphcomputerjobs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hugegraphcomputerjob-editor-role
+rules:
+- apiGroups:
+  - computer.hugegraph.io
+  resources:
+  - hugegraphcomputerjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - computer.hugegraph.io
+  resources:
+  - hugegraphcomputerjobs/status
+  verbs:
+  - get
