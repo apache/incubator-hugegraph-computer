@@ -289,8 +289,8 @@ public class ComputerOptions extends OptionHolder {
             WORKER_VERTEX_PROPERTIES_COMBINER_CLASS =
             new ConfigOption<>(
                     "worker.vertex_properties_combiner_class",
-                    "Combiner can combine several properties into one " +
-                    "properties for a vertex at inputstep.",
+                    "The combiner can combine several properties of the same " +
+                    "vertex into one properties at inputstep.",
                     disallowEmpty(),
                     OverwriteCombiner.class
             );
@@ -298,9 +298,9 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Class<?>>
             WORKER_EDGE_PROPERTIES_COMBINER_CLASS =
             new ConfigOption<>(
-                    "worker.edge_combiner_class",
-                    "Combiner can combine several properties into one " +
-                    "properties for a edge at inputstep.",
+                    "worker.edge_properties_combiner_class",
+                    "The combiner can combine several properties of the same " +
+                    "edge into one properties at inputstep.",
                     disallowEmpty(),
                     OverwriteCombiner.class
             );

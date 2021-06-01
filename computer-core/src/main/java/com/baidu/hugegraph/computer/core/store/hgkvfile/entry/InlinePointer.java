@@ -22,9 +22,9 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 
 public class InlinePointer implements Pointer {
@@ -44,7 +44,7 @@ public class InlinePointer implements Pointer {
 
     @Override
     public RandomAccessInput input() {
-        return new UnsafeBytesInput(this.bytes);
+        return new OptimizedUnsafeBytesInput(this.bytes);
     }
 
     @Override

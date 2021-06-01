@@ -19,52 +19,39 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import java.io.IOException;
-
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.Readable;
+import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
-public class PropertiesPointerCombiner implements Combiner<Pointer> {
+public class PointerCombiner<V extends Readable & Writable>
+       implements Combiner<Pointer> {
 
-    private Properties properties1;
-    private Properties properties2;
-    private Combiner<Properties> propertiesCombiner;
+    private V v1;
+    private V v2;
+    private Combiner<V> combiner;
     private OptimizedUnsafeBytesOutput bytesOutput;
-    private GraphOutput graphOutput;
-    private ComputerContext context;
 
-    public PropertiesPointerCombiner(Properties properties1,
-                                     Properties properties2,
-                                     Combiner<Properties> propertiesCombiner) {
-        this.properties1 = properties1;
-        this.properties2 = properties2;
-        this.propertiesCombiner = propertiesCombiner;
+    public PointerCombiner(V v1, V v2, Combiner<V> combiner) {
+        this.v1 = v1;
+        this.v2 = v2;
+        this.combiner = combiner;
         this.bytesOutput = new OptimizedUnsafeBytesOutput();
-        this.context = ComputerContext.instance();
-        this.graphOutput = new StreamGraphOutput(this.context,
-                                                 this.bytesOutput);
     }
 
     @Override
     public Pointer combine(Pointer v1, Pointer v2) {
         try {
-            this.properties1.read(v1.input());
-            this.properties2.read(v2.input());
-            Properties combinedProperties = this.propertiesCombiner.combine(
-                                            this.properties1, this.properties2);
+            this.v1.read(v1.input());
+            this.v2.read(v2.input());
+            V combinedValue = this.combiner.combine(this.v1, this.v2);
             this.bytesOutput.seek(0L);
-            this.graphOutput.writeProperties(combinedProperties);
+            combinedValue.write(this.bytesOutput);
             return new InlinePointer(this.bytesOutput.buffer(),
                                      this.bytesOutput.position());
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ComputerException(
                       "Failed to combine pointer1(offset=%s, length=%s) and" +
                       " pointer2(offset=%s, length=%s)'",

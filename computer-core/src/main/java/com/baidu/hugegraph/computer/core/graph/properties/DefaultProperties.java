@@ -20,12 +20,10 @@
 package com.baidu.hugegraph.computer.core.graph.properties;
 
 import java.io.IOException;
-import java.nio.CharBuffer;
 import java.util.Map;
 import java.util.Objects;
 
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
-import com.baidu.hugegraph.computer.core.graph.BuiltinGraphFactory;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
@@ -60,6 +58,31 @@ public class DefaultProperties implements Properties {
     }
 
     @Override
+    public void read(RandomAccessInput in) throws IOException {
+        this.keyValues.clear();
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            String key = in.readUTF();
+            ValueType valueType = SerialEnum.fromCode(ValueType.class,
+                                                      in.readByte());
+            Value<?> value = this.valueFactory.createValue(valueType);
+            value.read(in);
+            this.keyValues.put(key, value);
+        }
+    }
+
+    @Override
+    public void write(RandomAccessOutput out) throws IOException {
+        out.writeInt(this.keyValues.size());
+        for (Map.Entry<String, Value<?>> entry : this.keyValues.entrySet()) {
+            out.writeUTF(entry.getKey());
+            Value<?> value = entry.getValue();
+            out.writeByte(value.type().code());
+            value.write(out);
+        }
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -80,30 +103,5 @@ public class DefaultProperties implements Properties {
     public String toString() {
         return String.format("DefaultProperties{keyValues=%s}",
                              this.keyValues);
-    }
-
-    @Override
-    public void write(RandomAccessOutput out) throws IOException {
-        out.writeInt(this.keyValues.size());
-        for (Map.Entry<String, Value<?>> entry : this.keyValues.entrySet()) {
-            out.writeUTF(entry.getKey());
-            Value<?> value = entry.getValue();
-            out.writeByte(value.type().code());
-            value.write(out);
-        }
-    }
-
-    @Override
-    public void read(RandomAccessInput in) throws IOException {
-        this.keyValues.clear();
-        int size = in.readInt();
-        for (int i = 0; i < size; i++) {
-            String key = in.readUTF();
-            ValueType valueType = SerialEnum.fromCode(ValueType.class,
-                                                      in.readByte());
-            Value<?> value = this.valueFactory.createValue(valueType);
-            value.read(in);
-            this.keyValues.put(key, value);
-        }
     }
 }
