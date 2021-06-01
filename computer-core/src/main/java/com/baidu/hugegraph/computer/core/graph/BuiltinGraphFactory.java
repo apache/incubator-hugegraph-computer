@@ -38,15 +38,18 @@ import com.baidu.hugegraph.computer.core.graph.id.UuidId;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public final class BuiltinGraphFactory implements GraphFactory {
 
     private final Config config;
+    private ValueFactory valueFactory;
 
-    public BuiltinGraphFactory(Config config) {
+    public BuiltinGraphFactory(Config config, ValueFactory valueFactory) {
         this.config = config;
+        this.valueFactory = valueFactory;
     }
 
     @Override
@@ -113,6 +116,6 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Properties createProperties() {
-        return new DefaultProperties(this);
+        return new DefaultProperties(this, this.valueFactory);
     }
 }

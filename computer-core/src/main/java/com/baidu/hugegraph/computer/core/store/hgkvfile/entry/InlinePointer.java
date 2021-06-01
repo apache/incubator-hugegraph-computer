@@ -37,20 +37,25 @@ public class InlinePointer implements Pointer {
         this.bytes = bytes;
     }
 
+    public InlinePointer(byte[] bytes, long length) {
+        this.bytes = bytes;
+        this.length = length;
+    }
+
     @Override
     public RandomAccessInput input() {
         return new UnsafeBytesInput(this.bytes);
     }
 
     @Override
-    public byte[] bytes() throws IOException {
+    public byte[] bytes() {
         return this.bytes;
     }
 
     @Override
     public void write(RandomAccessOutput output) throws IOException {
         output.writeInt((int) this.length);
-        output.write(this.bytes());
+        output.write(this.bytes(), 0, (int) this.length);
     }
 
     @Override

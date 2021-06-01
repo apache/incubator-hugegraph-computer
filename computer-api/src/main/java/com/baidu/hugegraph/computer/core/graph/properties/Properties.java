@@ -22,8 +22,10 @@ package com.baidu.hugegraph.computer.core.graph.properties;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.io.Readable;
+import com.baidu.hugegraph.computer.core.io.Writable;
 
-public interface Properties {
+public interface Properties extends Readable, Writable {
 
     Map<String, Value<?>> get();
 
