@@ -34,11 +34,11 @@ public class MessageSendBuffersTest extends UnitTestBase {
     @Test
     public void testConstructor() {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "3",
-            ComputerOptions.WRITE_BUFFER_THRESHOLD, "100",
-            ComputerOptions.WRITE_BUFFER_THRESHOLD, "120"
+                ComputerOptions.VALUE_NAME, "rank",
+                ComputerOptions.VALUE_TYPE, "LONG",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "3",
+                ComputerOptions.WORKER_WRITE_BUFFER_THRESHOLD, "100",
+                ComputerOptions.WORKER_WRITE_BUFFER_THRESHOLD, "120"
         );
 
         MessageSendBuffers buffers = new MessageSendBuffers(
@@ -50,11 +50,11 @@ public class MessageSendBuffersTest extends UnitTestBase {
     @Test
     public void testGetter() {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "3",
-            ComputerOptions.WRITE_BUFFER_THRESHOLD, "100",
-            ComputerOptions.WRITE_BUFFER_THRESHOLD, "120"
+                ComputerOptions.VALUE_NAME, "rank",
+                ComputerOptions.VALUE_TYPE, "LONG",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "3",
+                ComputerOptions.WORKER_WRITE_BUFFER_THRESHOLD, "100",
+                ComputerOptions.WORKER_WRITE_BUFFER_THRESHOLD, "120"
         );
         MessageSendBuffers buffers = new MessageSendBuffers(
                                      ComputerContext.instance());

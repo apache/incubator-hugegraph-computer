@@ -62,8 +62,8 @@ public class WriteBuffers {
         this.writingBuffer.writeVertex(vertex);
     }
 
-    public synchronized void writeEdge(Vertex vertex) throws IOException {
-        this.writingBuffer.writeEdge(vertex);
+    public synchronized void writeEdges(Vertex vertex) throws IOException {
+        this.writingBuffer.writeEdges(vertex);
     }
 
     public synchronized void writeMessage(Id targetId, Value<?> value)
@@ -89,7 +89,7 @@ public class WriteBuffers {
                 this.wait();
             } catch (InterruptedException e) {
                 throw new ComputerException("Waiting sorting buffer empty " +
-                                                    "was interrupted");
+                                            "was interrupted");
             }
         }
         // Swap the writing buffer and sorting buffer pointer

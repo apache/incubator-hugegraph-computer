@@ -65,15 +65,15 @@ public class WriteBufferTest extends UnitTestBase {
 
         Vertex vertex = context.graphFactory().createVertex(
                         new LongId(1L), new DoubleValue(0.5d));
-        // After write, the position is 4
+        // After write, the position is 5
         buffer.writeVertex(vertex);
         Assert.assertFalse(buffer.reachThreshold());
 
-        // After write, the position is 8
+        // After write, the position is 10
         buffer.writeVertex(vertex);
-        Assert.assertFalse(buffer.reachThreshold());
+        Assert.assertTrue(buffer.reachThreshold());
 
-        // After write, the position is 12
+        // After write, the position is 15
         buffer.writeVertex(vertex);
         Assert.assertTrue(buffer.reachThreshold());
     }
@@ -134,7 +134,7 @@ public class WriteBufferTest extends UnitTestBase {
         vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
                                                new LongId(4L)));
-        buffer.writeEdge(vertex);
+        buffer.writeEdges(vertex);
         int position3 = Whitebox.getInternalState(buffer.output(), "position");
         Assert.assertGt(position2, position3);
     }
@@ -159,13 +159,8 @@ public class WriteBufferTest extends UnitTestBase {
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.INPUT_EDGE_FREQ, "SINGLE"
         );
-        buffer.writeEdge(vertex);
+        buffer.writeEdges(vertex);
         int position1 = Whitebox.getInternalState(buffer.output(), "position");
-        /*
-         * 1 -> 2
-         *   -> 3
-         *   -> 4
-         */
         Assert.assertGt(0, position1);
 
         UnitTestBase.updateOptions(
@@ -174,14 +169,8 @@ public class WriteBufferTest extends UnitTestBase {
             ComputerOptions.INPUT_EDGE_FREQ, "SINGLE_PER_LABEL"
         );
         buffer.clear();
-        buffer.writeEdge(vertex);
+        buffer.writeEdges(vertex);
         int position2 = Whitebox.getInternalState(buffer.output(), "position");
-        /*
-         * 1 -> 2
-         *   -> knows, 3
-         *   -> watch, 3
-         *   -> watch, 4
-         */
         Assert.assertGt(position1, position2);
 
         UnitTestBase.updateOptions(
@@ -190,15 +179,8 @@ public class WriteBufferTest extends UnitTestBase {
             ComputerOptions.INPUT_EDGE_FREQ, "MULTIPLE"
         );
         buffer.clear();
-        buffer.writeEdge(vertex);
+        buffer.writeEdges(vertex);
         int position3 = Whitebox.getInternalState(buffer.output(), "position");
-        /*
-         * 1 -> 2
-         *   -> knows, 3
-         *   -> watch, 3
-         *   -> watch, 1111, 4
-         *   -> watch, 2222, 4
-         */
         Assert.assertGt(position2, position3);
     }
 }

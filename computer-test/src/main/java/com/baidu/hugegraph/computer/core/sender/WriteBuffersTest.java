@@ -76,15 +76,15 @@ public class WriteBuffersTest extends UnitTestBase {
 
         Vertex vertex = context.graphFactory().createVertex(
                         new LongId(1L), new DoubleValue(0.5d));
-        // After write, the position is 4
+        // After write, the position is 5
         buffers.writeVertex(vertex);
         Assert.assertFalse(buffers.reachThreshold());
 
-        // After write, the position is 8
+        // After write, the position is 10
         buffers.writeVertex(vertex);
-        Assert.assertFalse(buffers.reachThreshold());
+        Assert.assertTrue(buffers.reachThreshold());
 
-        // After write, the position is 12
+        // After write, the position is 15
         buffers.writeVertex(vertex);
         Assert.assertTrue(buffers.reachThreshold());
     }
@@ -134,7 +134,7 @@ public class WriteBuffersTest extends UnitTestBase {
         vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
                                                new LongId(4L)));
-        buffers.writeEdge(vertex);
+        buffers.writeEdges(vertex);
         buffer = Whitebox.getInternalState(buffers, "writingBuffer");
         int position3 = Whitebox.getInternalState(buffer.output(), "position");
         Assert.assertGt(position2, position3);
@@ -144,25 +144,21 @@ public class WriteBuffersTest extends UnitTestBase {
     public void testPrepareSorting() throws IOException {
         GraphFactory graphFactory = context.graphFactory();
 
-        WriteBuffers buffers = new WriteBuffers(10, 20);
+        WriteBuffers buffers = new WriteBuffers(50, 100);
         Vertex vertex = graphFactory.createVertex(new LongId(1L),
                                                   new DoubleValue(0.5d));
         vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
         vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
                                                new LongId(4L)));
-        buffers.writeEdge(vertex);
-        // Reached threshold, the position is 16
+        buffers.writeEdges(vertex);
+        // Reached threshold, the position is 76
         Assert.assertTrue(buffers.reachThreshold());
         Assert.assertFalse(buffers.isEmpty());
         // Exchange writing buffer and sorting buffer
         buffers.prepareSorting();
         Assert.assertFalse(buffers.reachThreshold());
         Assert.assertTrue(buffers.isEmpty());
-        // Exchange writing buffer and sorting buffer
-        buffers.prepareSorting();
-        Assert.assertTrue(buffers.reachThreshold());
-        Assert.assertFalse(buffers.isEmpty());
     }
 
     @Test
@@ -170,15 +166,15 @@ public class WriteBuffersTest extends UnitTestBase {
                                                     InterruptedException {
         GraphFactory graphFactory = context.graphFactory();
 
-        WriteBuffers buffers = new WriteBuffers(10, 20);
+        WriteBuffers buffers = new WriteBuffers(50, 100);
         Vertex vertex = graphFactory.createVertex(new LongId(1L),
                                                   new DoubleValue(0.5d));
         vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
         vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
                                                new LongId(4L)));
-        buffers.writeEdge(vertex);
-        // Reached threshold, the position is 16
+        buffers.writeEdges(vertex);
+        // Reached threshold, the position is 76
         Assert.assertTrue(buffers.reachThreshold());
         /*
          * When reached threshold, switchForSorting will exchange writing buffer
@@ -191,8 +187,8 @@ public class WriteBuffersTest extends UnitTestBase {
         buffers.switchForSorting();
         Assert.assertFalse(buffers.reachThreshold());
         Assert.assertTrue(buffers.isEmpty());
-        // The writing buffer reached threshold again, position is 16
-        buffers.writeEdge(vertex);
+        // The writing buffer reached threshold again, position is 76
+        buffers.writeEdges(vertex);
 
         AtomicInteger counter = new AtomicInteger(0);
         Thread thread1 = new Thread(() -> {
@@ -228,11 +224,9 @@ public class WriteBuffersTest extends UnitTestBase {
                                                   new DoubleValue(0.5d));
         buffers.writeVertex(vertex);
 
-        RandomAccessInput input = buffers.wrapForRead();
-        try (StreamGraphInput graphInput = new StreamGraphInput(context,
-                                                                input)) {
-            // FIXME：The vertex is not written in the StreamGraphOut,
-            // so it should be implemented again when reading it.
+        try (RandomAccessInput input = buffers.wrapForRead()) {
+            StreamGraphInput graphInput = new StreamGraphInput(context,
+                                                               input);
             Vertex readVertex = graphInput.readVertex();
             Assert.assertEquals(vertex, readVertex);
         }

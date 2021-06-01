@@ -64,6 +64,11 @@ public class DefaultProperties implements Properties {
     }
 
     @Override
+    public void putIfAbsent(String key, Value<?> value) {
+        this.keyValues.putIfAbsent(key, value);
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.keyValues.clear();
         int size = in.readInt();

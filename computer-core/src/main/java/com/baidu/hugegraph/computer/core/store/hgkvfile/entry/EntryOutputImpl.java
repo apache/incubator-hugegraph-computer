@@ -43,7 +43,6 @@ public class EntryOutputImpl implements EntryOutput {
     public KvEntryWriter writeEntry(Writable key) throws IOException {
         // Write key
         this.writeData(key);
-
         return new KvEntryWriterImpl(this.output, this.needSortSubKv);
     }
 

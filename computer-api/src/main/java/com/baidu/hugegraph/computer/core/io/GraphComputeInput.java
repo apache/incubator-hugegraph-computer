@@ -21,31 +21,9 @@ package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.NotImplementedException;
-
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-public class StreamGraphInput implements GraphComputeInput {
+public interface GraphComputeInput extends GraphInput {
 
-    private final RandomAccessInput in;
-    private final Config config;
-    private final GraphFactory graphFactory;
-    private final ValueFactory valueFactory;
-
-    public StreamGraphInput(ComputerContext context, RandomAccessInput in) {
-        this.config = context.config();
-        this.graphFactory = context.graphFactory();
-        this.valueFactory = context.valueFactory();
-        this.in = in;
-    }
-
-    @Override
-    public Vertex readVertex() throws IOException {
-        // When data receiver merged, implement it
-        throw new NotImplementedException("StreamGraphInput.readVertex()");
-    }
+    Vertex readVertex() throws IOException;
 }

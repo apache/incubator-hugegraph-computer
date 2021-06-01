@@ -88,8 +88,8 @@ public class MessageSendManager implements Manager {
     public void sendVertex(Vertex vertex) {
         this.checkException();
 
-        WriteBuffers buffer = this.sortIfReachThreshold(vertex.id(),
-                                                        MessageType.VERTEX);
+        WriteBuffers buffer = this.sortIfTargetBufferIsFull(vertex.id(),
+                                                            MessageType.VERTEX);
         try {
             // Write vertex to buffer
             buffer.writeVertex(vertex);
@@ -101,11 +101,11 @@ public class MessageSendManager implements Manager {
     public void sendEdge(Vertex vertex) {
         this.checkException();
 
-        WriteBuffers buffer = this.sortIfReachThreshold(vertex.id(),
-                                                        MessageType.EDGE);
+        WriteBuffers buffer = this.sortIfTargetBufferIsFull(vertex.id(),
+                                                            MessageType.EDGE);
         try {
             // Write edge to buffer
-            buffer.writeEdge(vertex);
+            buffer.writeEdges(vertex);
         } catch (IOException e) {
             throw new ComputerException("Failed to write vertex", e);
         }
@@ -114,8 +114,8 @@ public class MessageSendManager implements Manager {
     public void sendMessage(Id targetId, Value<?> value) {
         this.checkException();
 
-        WriteBuffers buffer = this.sortIfReachThreshold(targetId,
-                                                        MessageType.MSG);
+        WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
+                                                            MessageType.MSG);
         try {
             // Write vertex to buffer
             buffer.writeMessage(targetId, value);
@@ -178,11 +178,11 @@ public class MessageSendManager implements Manager {
         LOG.info("Finish send message(type={})", type);
     }
 
-    private WriteBuffers sortIfReachThreshold(Id id, MessageType type) {
+    private WriteBuffers sortIfTargetBufferIsFull(Id id, MessageType type) {
         int partitionId = this.partitioner.partitionId(id);
         WriteBuffers buffer = this.buffers.get(partitionId);
         if (buffer.reachThreshold()) {
-            // After switch, the buffer can be continued write
+            // After switch, the buffer can be continued to write
             buffer.switchForSorting();
             this.sortThenSend(partitionId, type, buffer);
         }

@@ -17,14 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sender;
+package com.baidu.hugegraph.computer.core.io;
 
-import org.junit.Test;
+import java.io.IOException;
 
-public class MessageSendManagerTest {
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
-    @Test
-    public void test() {
-        // TODO: Supplement
-    }
+public interface GraphWritebackOutput extends GraphOutput {
+
+    void writeVertex(Vertex vertex) throws IOException;
+
+    void writeEdges(Edges edges) throws IOException;
+
+    void writeEdge(Edge edge) throws IOException;
+
+    void writeProperties(Properties properties) throws IOException;
 }

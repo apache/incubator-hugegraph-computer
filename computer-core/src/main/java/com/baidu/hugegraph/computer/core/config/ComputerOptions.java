@@ -369,7 +369,7 @@ public class ComputerOptions extends OptionHolder {
                     ImmutableList.of("jobs")
             );
 
-    public static final ConfigOption<Integer> WRITE_BUFFER_THRESHOLD =
+    public static final ConfigOption<Integer> WORKER_WRITE_BUFFER_THRESHOLD =
             new ConfigOption<>(
                     "worker.write_buffer_threshold",
                     "The threshold of write buffer, exceeding it will " +
@@ -379,8 +379,8 @@ public class ComputerOptions extends OptionHolder {
                     (int) (50 * Bytes.KB)
             );
 
-    public static final ConfigOption<Integer> WRITE_BUFFER_INIT_CAPACITY =
-            new ConfigOption<>(
+    public static final ConfigOption<Integer>
+            WORKER_WRITE_BUFFER_INIT_CAPACITY = new ConfigOption<>(
                     "worker.write_buffer_capacity",
                     "The initial size of write buffer that used to store " +
                     "vertex or message.",

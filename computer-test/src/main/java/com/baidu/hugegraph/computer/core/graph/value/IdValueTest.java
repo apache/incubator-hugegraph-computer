@@ -23,18 +23,14 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
 import com.baidu.hugegraph.computer.core.graph.id.UuidId;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
-import com.baidu.hugegraph.computer.core.util.IdValueUtil;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class IdValueTest extends UnitTestBase {
@@ -122,29 +118,6 @@ public class IdValueTest extends UnitTestBase {
         assertValueEqualAfterWriteAndRead(new Utf8Id("text2").idValue());
         assertValueEqualAfterWriteAndRead(new LongId(123456L).idValue());
         assertValueEqualAfterWriteAndRead(new UuidId().idValue());
-    }
-
-    @Test
-    public void testReadWriteUtf8IdByToId() throws IOException {
-        Id id1 = new Utf8Id("long id");
-        Id id2 = new Utf8Id("short");
-        IdValue value1 = id1.idValue();
-        IdValue value2 = id2.idValue();
-        byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput();
-             StreamGraphOutput output = newStreamGraphOutput(bao)) {
-            output.writeId(IdValueUtil.toId(value1));
-            output.writeId(IdValueUtil.toId(value2));
-            bytes = bao.toByteArray();
-        }
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes);
-             StreamGraphInput input = newStreamGraphInput(bai)) {
-            Id id3 = input.readId();
-            Assert.assertEquals(id1, id3);
-            Id id4 = input.readId();
-            Assert.assertEquals(id2, id4);
-        }
-        Assert.assertEquals("02076c6f6e67206964", value1.toString());
     }
 
     @Test

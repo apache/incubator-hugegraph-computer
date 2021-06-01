@@ -67,7 +67,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
                                        GraphOutputFactory.create(
                                        context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
-            output.close();
+            dos.close();
 
             String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,999" + System.lineSeparator(), text);
@@ -104,7 +104,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
                                        GraphOutputFactory.create(
                                        context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
-            output.close();
+            dos.close();
 
             String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[998,999],[{200,\"knows\",\"\"}," +
@@ -155,7 +155,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
                                        GraphOutputFactory.create(
                                        context, OutputFormat.CSV, dos);
             output.writeVertex(vertex);
-            output.close();
+            dos.close();
 
             String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[[66],[998,999]],{true,127,-0.01,16383," +

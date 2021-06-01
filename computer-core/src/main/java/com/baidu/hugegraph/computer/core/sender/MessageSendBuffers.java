@@ -39,8 +39,10 @@ public class MessageSendBuffers {
     public MessageSendBuffers(ComputerContext context) {
         Config config = context.config();
         int partitionCount = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
-        int threshold = config.get(ComputerOptions.WRITE_BUFFER_THRESHOLD);
-        int capacity = config.get(ComputerOptions.WRITE_BUFFER_INIT_CAPACITY);
+        int threshold = config.get(
+                        ComputerOptions.WORKER_WRITE_BUFFER_THRESHOLD);
+        int capacity = config.get(
+                       ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
         this.buffers = new WriteBuffers[partitionCount];
         for (int i = 0; i < partitionCount; i++) {
             /*

@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 
-public abstract class StructGraphOutput implements GraphOutput {
+public abstract class StructGraphOutput implements GraphWritebackOutput {
 
     protected final Config config;
     protected final StructRandomAccessOutput out;
@@ -63,12 +63,10 @@ public abstract class StructGraphOutput implements GraphOutput {
         this.out.writeRawString(System.lineSeparator());
     }
 
-    @Override
     public void writeId(Id id) throws IOException {
         id.write(this.out);
     }
 
-    @Override
     public void writeValue(Value<?> value) throws IOException {
         switch (value.type()) {
             case ID_VALUE:
@@ -91,11 +89,6 @@ public abstract class StructGraphOutput implements GraphOutput {
                 throw new ComputerException("Unexpected value type %s",
                                             value.type());
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.out.close();
     }
 
     private void writeIdValue(IdValue idValue) throws IOException {

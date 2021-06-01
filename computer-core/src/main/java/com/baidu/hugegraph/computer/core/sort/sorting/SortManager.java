@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -46,8 +47,6 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 
-import io.netty.buffer.ByteBufAllocator;
-
 public class SortManager implements Manager {
 
     public static final Logger LOG = Log.logger(SortManager.class);
@@ -60,19 +59,17 @@ public class SortManager implements Manager {
     private final Combiner<Pointer> combiner;
     private final int capacity;
     private final int flushThreshold;
-    private final ByteBufAllocator allocator;
 
     public SortManager(ComputerContext context) {
         Config config = context.config();
         int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
         this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, PREFIX);
         this.sorter = new SorterImpl(config);
-        this.combiner = config.createObject(
-                        ComputerOptions.WORKER_COMBINER_CLASS, false);
-        this.capacity = config.get(ComputerOptions.WRITE_BUFFER_INIT_CAPACITY);
+        this.combiner = new OverwriteCombiner<>();
+        this.capacity = config.get(
+                        ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
         this.flushThreshold = config.get(
                               ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
-        this.allocator = ByteBufAllocator.DEFAULT;
     }
 
     @Override
@@ -100,10 +97,9 @@ public class SortManager implements Manager {
         return CompletableFuture.supplyAsync(() -> {
             RandomAccessInput bufferForRead = buffer.wrapForRead();
             // TODO：This ByteBuffer should be allocated from the off-heap
-//            ByteBuf sortedBuffer = this.allocator.directBuffer(capacity);
             UnsafeBytesOutput output = new UnsafeBytesOutput(this.capacity);
             InnerSortFlusher flusher = this.createSortFlusher(
-                                       type, output, this.combiner,
+                                       type, output,
                                        this.flushThreshold);
             try {
                 this.sorter.sortBuffer(bufferForRead, flusher);
@@ -116,13 +112,12 @@ public class SortManager implements Manager {
 
     private InnerSortFlusher createSortFlusher(MessageType type,
                                                RandomAccessOutput output,
-                                               Combiner<Pointer> combiner,
                                                int flushThreshold) {
         if (type == MessageType.VERTEX || type == MessageType.MSG) {
-            return new CombineKvInnerSortFlusher(output, combiner);
+            return new CombineKvInnerSortFlusher(output, this.combiner);
         } else {
             assert type == MessageType.EDGE;
-            return new CombineSubKvInnerSortFlusher(output, combiner,
+            return new CombineSubKvInnerSortFlusher(output, this.combiner,
                                                     flushThreshold);
         }
     }

@@ -32,4 +32,6 @@ public interface Properties extends Readable, Writable {
     Value<?> get(String key);
 
     void put(String key, Value<?> value);
+
+    void putIfAbsent(String key, Value<?> value);
 }

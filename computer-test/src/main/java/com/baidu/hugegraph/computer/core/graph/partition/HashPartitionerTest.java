@@ -72,12 +72,12 @@ public class HashPartitionerTest extends UnitTestBase {
         int workerId4 = partitioner.workerId(partition4);
         int workerId5 = partitioner.workerId(partition5);
         int workerId6 = partitioner.workerId(partition6);
-        Assert.assertEquals(0, workerId1);
-        Assert.assertEquals(0, workerId2);
-        Assert.assertEquals(0, workerId3);
-        Assert.assertEquals(0, workerId4);
-        Assert.assertEquals(0, workerId5);
-        Assert.assertEquals(0, workerId6);
+        Assert.assertEquals(1, workerId1);
+        Assert.assertEquals(1, workerId2);
+        Assert.assertEquals(1, workerId3);
+        Assert.assertEquals(1, workerId4);
+        Assert.assertEquals(1, workerId5);
+        Assert.assertEquals(1, workerId6);
     }
 
     @Test
@@ -115,12 +115,12 @@ public class HashPartitionerTest extends UnitTestBase {
         int workerId4 = partitioner.workerId(partition4);
         int workerId5 = partitioner.workerId(partition5);
         int workerId6 = partitioner.workerId(partition6);
-        Assert.assertEquals(0, workerId1);
-        Assert.assertEquals(0, workerId2);
-        Assert.assertEquals(0, workerId3);
-        Assert.assertEquals(0, workerId4);
-        Assert.assertEquals(0, workerId5);
-        Assert.assertEquals(0, workerId6);
+        Assert.assertEquals(1, workerId1);
+        Assert.assertEquals(1, workerId2);
+        Assert.assertEquals(1, workerId3);
+        Assert.assertEquals(1, workerId4);
+        Assert.assertEquals(1, workerId5);
+        Assert.assertEquals(1, workerId6);
     }
 
     @Test
@@ -158,12 +158,12 @@ public class HashPartitionerTest extends UnitTestBase {
         int workerId4 = partitioner.workerId(partition4);
         int workerId5 = partitioner.workerId(partition5);
         int workerId6 = partitioner.workerId(partition6);
-        Assert.assertEquals(0, workerId1);
-        Assert.assertEquals(0, workerId2);
-        Assert.assertEquals(0, workerId3);
-        Assert.assertEquals(0, workerId4);
-        Assert.assertEquals(0, workerId5);
-        Assert.assertEquals(0, workerId6);
+        Assert.assertEquals(1, workerId1);
+        Assert.assertEquals(1, workerId2);
+        Assert.assertEquals(1, workerId3);
+        Assert.assertEquals(1, workerId4);
+        Assert.assertEquals(1, workerId5);
+        Assert.assertEquals(1, workerId6);
     }
 
     @Test
@@ -201,12 +201,12 @@ public class HashPartitionerTest extends UnitTestBase {
         int workerId4 = partitioner.workerId(partition4);
         int workerId5 = partitioner.workerId(partition5);
         int workerId6 = partitioner.workerId(partition6);
-        Assert.assertEquals(0, workerId1);
-        Assert.assertEquals(0, workerId2);
-        Assert.assertEquals(0, workerId3);
-        Assert.assertEquals(0, workerId4);
-        Assert.assertEquals(0, workerId5);
-        Assert.assertEquals(0, workerId6);
+        Assert.assertEquals(1, workerId1);
+        Assert.assertEquals(1, workerId2);
+        Assert.assertEquals(1, workerId3);
+        Assert.assertEquals(1, workerId4);
+        Assert.assertEquals(1, workerId5);
+        Assert.assertEquals(1, workerId6);
     }
 
     @Test
@@ -230,7 +230,7 @@ public class HashPartitionerTest extends UnitTestBase {
                               new LongId(random.nextLong()));
             partitionStat[partitionId]++;
             int workerId = partitioner.workerId(partitionId);
-            workerStat[workerId]++;
+            workerStat[--workerId]++;
         }
         LOG.info("Partition distribution: {}", Arrays.toString(partitionStat));
         LOG.info("Worker distribution: {}", Arrays.toString(workerStat));
