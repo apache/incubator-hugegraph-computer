@@ -19,9 +19,40 @@
 
 package com.baidu.hugegraph.computer.core.sort.flusher;
 
+import java.util.NoSuchElementException;
+
 import com.baidu.hugegraph.iterator.CIter;
 
 public interface PeekableIterator<T> extends CIter<T> {
 
+    public static PeekableIterator EMPTY_ITERATOR = new PeekableIterator() {
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Object next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void close() throws Exception {
+            // pass
+        }
+
+        @Override
+        public Object metadata(String s, Object... objects) {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public Object peek() {
+            throw new NoSuchElementException();
+        }
+    }
+
     T peek();
+
 }

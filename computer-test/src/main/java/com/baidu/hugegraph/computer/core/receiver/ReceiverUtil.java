@@ -19,34 +19,40 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
+import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.io.GraphInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-public class BuffersUtil {
+public class ReceiverUtil {
 
     public static void addMockBufferToPartition(MessageRecvPartition partition,
                                                 int mockBufferLength) {
-        mockBufferAndConsume(mockBufferLength, (ManagedBuffer buffer) -> {
+        comsumeBuffer(mockBufferLength, (ManagedBuffer buffer) -> {
             partition.addBuffer(buffer);
         });
     }
 
     public static void addMockBufferToBuffers(MessageRecvBuffers buffers,
                                               int mockBufferLength) {
-        mockBufferAndConsume(mockBufferLength, (ManagedBuffer buffer) -> {
+        comsumeBuffer(mockBufferLength, (ManagedBuffer buffer) -> {
             buffers.addBuffer(buffer);
         });
     }
 
-    public static void mockBufferAndConsume(int mockBufferLength,
-                                            Consumer<ManagedBuffer> consumer) {
-        byte[] bytes = new byte[mockBufferLength];
-        ByteBuf buf = Unpooled.directBuffer(mockBufferLength);
+    public static void comsumeBuffer(byte[] bytes,
+                                     Consumer<ManagedBuffer> consumer) {
+        ByteBuf buf = Unpooled.directBuffer(bytes.length);
         try {
             buf = buf.writeBytes(bytes);
             NettyManagedBuffer buff = new NettyManagedBuffer(buf);
@@ -54,5 +60,11 @@ public class BuffersUtil {
         } finally {
             buf.release();
         }
+    }
+
+    public static Id readId(ComputerContext context, RandomAccessInput input)
+                            throws IOException {
+        GraphInput graphInput = new StreamGraphInput(context, input);
+        return graphInput.readId();
     }
 }

@@ -19,20 +19,26 @@
 
 package com.baidu.hugegraph.computer.core.receiver.edge;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
-import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.store.FileGenerator;
 
 public class EdgeMessageRecvPartitions
        extends MessageRecvPartitions<EdgeMessageRecvPartition> {
 
     public EdgeMessageRecvPartitions(Config config,
-                                     DataFileGenerator fileGenerator) {
-        super(config, fileGenerator, -1);
+                                     FileGenerator fileGenerator,
+                                     ComputerContext context,
+                                     Sorter sorter) {
+        super(config, fileGenerator, sorter, -1);
     }
 
     @Override
-    public EdgeMessageRecvPartition createPartition(int superstep) {
-        return new EdgeMessageRecvPartition(this.config, this.fileGenerator);
+    public EdgeMessageRecvPartition createPartition(int superstep, Sorter sorter) {
+        return new EdgeMessageRecvPartition(this.config,
+                                            this.fileGenerator,
+                                            this.sorter);
     }
 }

@@ -29,8 +29,10 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.BuffersUtil;
-import com.baidu.hugegraph.computer.core.store.DataFileManager;
+import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.SorterImpl;
+import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.config.RpcOptions;
 
 public class EdgeMessageRecvPartitionTest {
@@ -48,18 +50,18 @@ public class EdgeMessageRecvPartitionTest {
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
-        DataFileManager fileManager = new DataFileManager();
+        FileManager fileManager = new FileManager();
         fileManager.init(config);
+        Sorter sorter = new SorterImpl(config);
         EdgeMessageRecvPartition partition = new EdgeMessageRecvPartition(
-                                             config, fileManager);
+                                             config, fileManager, sorter);
         Assert.assertEquals("edge", partition.type());
         for (int i = 0; i < 25; i++) {
-            BuffersUtil.addMockBufferToPartition(partition, 100);
+            ReceiverUtil.addMockBufferToPartition(partition, 100);
         }
 
         List<String> files1 = partition.outputFiles();
         Assert.assertEquals(2,files1.size());
-        partition.flushAllBuffersAndWaitSorted();
 
         List<String> files2 = partition.outputFiles();
         Assert.assertEquals(3,files2.size());

@@ -29,8 +29,8 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.BuffersUtil;
-import com.baidu.hugegraph.computer.core.store.DataFileManager;
+import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
+import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.config.RpcOptions;
 
 public class ComputeMessageRecvPartitionTest {
@@ -48,7 +48,7 @@ public class ComputeMessageRecvPartitionTest {
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
-        DataFileManager fileManager = new DataFileManager();
+        FileManager fileManager = new FileManager();
         fileManager.init(config);
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
                                                 config,
@@ -56,7 +56,7 @@ public class ComputeMessageRecvPartitionTest {
                                                 0);
         Assert.assertEquals("message", partition.type());
         for (int i = 0; i < 25; i++) {
-            BuffersUtil.addMockBufferToPartition(partition, 100);
+            ReceiverUtil.addMockBufferToPartition(partition, 100);
         }
 
         List<String> files1 = partition.outputFiles();

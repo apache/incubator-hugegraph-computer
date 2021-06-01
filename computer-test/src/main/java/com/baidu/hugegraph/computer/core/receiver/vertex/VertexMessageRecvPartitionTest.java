@@ -20,23 +20,37 @@
 package com.baidu.hugegraph.computer.core.receiver.vertex;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.receiver.BuffersUtil;
-import com.baidu.hugegraph.computer.core.store.DataFileManager;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.value.NullValue;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.io.GraphOutput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.SorterImpl;
+import com.baidu.hugegraph.computer.core.store.FileManager;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.config.RpcOptions;
+import com.baidu.hugegraph.testutil.Assert;
 
 public class VertexMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
-    public void testVertexMessageRecvPartition() {
+    public void testVertexMessageRecvPartition() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_001",
@@ -48,26 +62,55 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
-        DataFileManager fileManager = new DataFileManager();
+        FileManager fileManager = new FileManager();
         fileManager.init(config);
+        Sorter sorter = new SorterImpl(config);
         VertexMessageRecvPartition partition = new VertexMessageRecvPartition(
-                                               config, fileManager);
+                                               config, fileManager, sorter);
         Assert.assertEquals("vertex", partition.type());
-        for (int i = 0; i < 25; i++) {
-            BuffersUtil.addMockBufferToPartition(partition, 100);
+        for (long i = 0L; i < 10L; i++) {
+            Vertex vertex = graphFactory().createVertex();
+            vertex.id(new LongId(i));
+            vertex.properties(graphFactory().createProperties());
+            ReceiverUtil.comsumeBuffer(writeVertex(vertex),
+                                       (ManagedBuffer buffer) -> {
+                                          partition.addBuffer(buffer);
+                                      });
         }
 
-        List<String> files1 = partition.outputFiles();
-        Assert.assertEquals(2, files1.size());
+        for (long i = 0L; i < 10L; i++) {
+            Vertex vertex = graphFactory().createVertex();
+            vertex.id(new LongId(i));
+            vertex.properties(graphFactory().createProperties());
+            ReceiverUtil.comsumeBuffer(writeVertex(vertex),
+                                       (ManagedBuffer buffer) -> {
+                                          partition.addBuffer(buffer);
+                                      });
+        }
 
-        partition.flushAllBuffersAndWaitSorted();
-        List<String> files2 = partition.outputFiles();
-        Assert.assertEquals(3, files2.size());
-
-        partition.mergeOutputFiles(1);
-        List<String> files3 = partition.outputFiles();
-        Assert.assertEquals(1, files3.size());
-
+        Iterator<KvEntry> it = partition.iterator();
+        for (long i = 0L; i < 10L; i++) {
+            Assert.assertTrue(it.hasNext());
+            KvEntry entry = it.next();
+            Id id = ReceiverUtil.readId(context(), entry.key().input());
+            Assert.assertEquals(new LongId(i), id);
+        }
+        Assert.assertFalse(it.hasNext());
         fileManager.close(config);
+    }
+
+    private byte[] writeVertex(Vertex vertex) throws IOException {
+        UnsafeBytesOutput bytesOutput = new UnsafeBytesOutput();
+        EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
+        GraphOutput graphOutput = new StreamGraphOutput(context(),
+                                                        bytesOutput);
+        /*
+         * TODO: write properties, but properties does't implement
+         *       Readable & Writable
+         */
+        entryOutput.writeEntry(vertex.id(), NullValue.get());
+        graphOutput.writeId(vertex.id());
+        graphOutput.writeProperties(vertex.properties());
+        return bytesOutput.toByteArray();
     }
 }

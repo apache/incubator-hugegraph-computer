@@ -41,13 +41,13 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addMockBufferToBuffers(buffers, size);
+            ReceiverUtil.addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertFalse(buffers.full());
         Assert.assertEquals(1000L, buffers.totalBytes());
 
-        BuffersUtil.addMockBufferToBuffers(buffers, size);
+        ReceiverUtil.addMockBufferToBuffers(buffers, size);
         Assert.assertTrue(buffers.full());
 
         // Sort buffer
@@ -57,13 +57,13 @@ public class MessageRecvBuffersTest {
         buffers.signalSorted();
 
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addMockBufferToBuffers(buffers, size);
+            ReceiverUtil.addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertEquals(1000L, buffers.totalBytes());
         Assert.assertFalse(buffers.full());
 
-        BuffersUtil.addMockBufferToBuffers(buffers, size);
+        ReceiverUtil.addMockBufferToBuffers(buffers, size);
 
         Assert.assertTrue(buffers.full());
 
@@ -80,7 +80,7 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addMockBufferToBuffers(buffers, size);
+            ReceiverUtil.addMockBufferToBuffers(buffers, size);
         }
         CountDownLatch countDownLatch = new CountDownLatch(2);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -107,7 +107,7 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addMockBufferToBuffers(buffers, size);
+            ReceiverUtil.addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertThrows(ComputerException.class, () -> {
@@ -126,7 +126,7 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            BuffersUtil.addMockBufferToBuffers(buffers, size);
+            ReceiverUtil.addMockBufferToBuffers(buffers, size);
         }
         AtomicBoolean success = new AtomicBoolean(false);
         CountDownLatch countDownLatch = new CountDownLatch(1);

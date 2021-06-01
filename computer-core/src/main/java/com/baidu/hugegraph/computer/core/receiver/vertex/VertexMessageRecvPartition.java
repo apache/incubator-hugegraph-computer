@@ -19,31 +19,51 @@
 
 package com.baidu.hugegraph.computer.core.receiver.vertex;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import java.io.IOException;
+import java.util.Collections;
+
+import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
-import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public class VertexMessageRecvPartition extends MessageRecvPartition {
 
     public static final String TYPE = MessageType.VERTEX.name();
 
+    private OuterSortFlusher flusher;
+
     public VertexMessageRecvPartition(Config config,
-                                      DataFileGenerator fileGenerator) {
-        super(config, fileGenerator, Constants.INPUT_SUPERSTEP);
+                                      FileGenerator fileGenerator,
+                                      Sorter sorter) {
+        super(config, fileGenerator, sorter, Constants.INPUT_SUPERSTEP);
+        // TODO: use customized properties combiner.
+        this.flusher = new CombineKvOuterSortFlusher(new OverwriteCombiner<>());
     }
 
-
     @Override
-    protected Combiner combiner() {
-        // TODO: implement
-        return null;
+    protected OuterSortFlusher outerSortFlusher() {
+        return this.flusher;
     }
 
     @Override
     protected String type() {
         return TYPE;
+    }
+
+    @Override
+    public PeekableIterator<KvEntry> iterator() throws IOException {
+        this.flushAllBuffersAndWaitSorted();
+        if (this.outputFiles().size() == 0) {
+            return Collections.emptyIterator();
+        }
+        return this.sorter.iterator(this.outputFiles, false);
     }
 }

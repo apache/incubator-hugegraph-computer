@@ -19,21 +19,50 @@
 
 package com.baidu.hugegraph.computer.core.receiver.vertex;
 
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
-import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.store.FileGenerator;
 
 public class VertexMessageRecvPartitions
        extends MessageRecvPartitions<VertexMessageRecvPartition> {
 
+    private ComputerContext context;
+    private Combiner<Properties> combiner;
+
     public VertexMessageRecvPartitions(Config config,
-                                       DataFileGenerator fileGenerator) {
-        super(config, fileGenerator, Constants.INPUT_SUPERSTEP);
+                                       FileGenerator fileGenerator,
+                                       ComputerContext context,
+                                       Sorter sorter) {
+        super(config, fileGenerator, sorter, Constants.INPUT_SUPERSTEP);
+        this.context = context;
+        this.combiner = this.config.createObject(
+        ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
     }
 
     @Override
-    public VertexMessageRecvPartition createPartition(int superstep) {
-        return new VertexMessageRecvPartition(this.config, this.fileGenerator);
+    public VertexMessageRecvPartition createPartition(int superstep,
+                                                      Sorter sorter) {
+        return new VertexMessageRecvPartition(this.config,
+                                              this.fileGenerator,
+                                              this.sorter);
+    }
+
+    private OuterSortFlusher createOuterSortFlusher() {
+        GraphFactory graphFactory = this.context.graphFactory();
+        Properties v1 = graphFactory.createProperties();
+        Properties v2 = graphFactory.createProperties();
+
+        return new CombineKvOuterSortFlusher(new PointerCombiner(v1,
+                                                          v2, combiner));
     }
 }

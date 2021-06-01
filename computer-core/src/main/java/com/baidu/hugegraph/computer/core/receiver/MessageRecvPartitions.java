@@ -19,32 +19,38 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
-import java.util.Collections;
+import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.store.FileGenerator;
 
 public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
     protected final Config config;
-    protected final DataFileGenerator fileGenerator;
+    protected final FileGenerator fileGenerator;
+    protected final Sorter sorter;
 
     private final Map<Integer, P> partitions;
     private final int superstep;
 
     public MessageRecvPartitions(Config config,
-                                 DataFileGenerator fileGenerator,
+                                 FileGenerator fileGenerator,
+                                 Sorter sorter,
                                  int superstep) {
         this.config = config;
         this.fileGenerator = fileGenerator;
+        this.sorter = sorter;
         this.superstep = superstep;
         this.partitions = new ConcurrentHashMap<>();
     }
 
-    public abstract P createPartition(int superstep);
+    public abstract P createPartition(int superstep, Sorter sorter);
 
     public void addBuffer(int partitionId, ManagedBuffer buffer) {
         P partition = this.partition(partitionId);
@@ -57,7 +63,8 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
             synchronized (this.partitions) {
                 partition = this.partitions.get(partitionId);
                 if (partition == null) {
-                    partition = this.createPartition(this.superstep);
+                    partition = this.createPartition(this.superstep,
+                                                     this.sorter);
                     this.partitions.put(partitionId, partition);
                 }
             }
@@ -65,13 +72,11 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         return partition;
     }
 
-    public void flushAllBuffersAndWaitSorted() {
-        for (MessageRecvPartition p : this.partitions.values()) {
-            p.flushAllBuffersAndWaitSorted();
+    public Map<Integer, Iterator<KeyStore.Entry>> entryIterators() {
+        Map<Integer, Iterator<KeyStore.Entry>> entries = new HashMap<>();
+        for (Map.Entry<Integer, P> entry : this.partitions.entrySet()) {
+            entries.put(entry.getKey(), entry.getValue().iterator());
         }
-    }
-
-    public Map<Integer, P> partitions() {
-        return Collections.unmodifiableMap(this.partitions);
+        return entries;
     }
 }

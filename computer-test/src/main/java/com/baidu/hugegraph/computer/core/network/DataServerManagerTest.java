@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
-import com.baidu.hugegraph.computer.core.store.DataFileManager;
+import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.worker.MockComputation;
 import com.baidu.hugegraph.computer.core.worker.MockMasterComputation;
 import com.baidu.hugegraph.config.RpcOptions;
@@ -49,7 +49,7 @@ public class DataServerManagerTest {
             ComputerOptions.MASTER_COMPUTATION_CLASS,
             MockMasterComputation.class.getName()
         );
-        DataFileManager fileManager = new DataFileManager();
+        FileManager fileManager = new FileManager();
         fileManager.init(config);
         MessageRecvManager recvManager = new MessageRecvManager(fileManager);
         recvManager.init(config);
@@ -62,8 +62,8 @@ public class DataServerManagerTest {
         ConnectionId connectionId = ConnectionId.parseConnectionId(
                                                  address.getHostName(),
                                                  address.getPort());
-        recvManager.channelActive(connectionId);
-        recvManager.channelInactive(connectionId);
+        recvManager.onChannelActive(connectionId);
+        recvManager.onChannelInactive(connectionId);
         TransportException e = new TransportException("test transport " +
                                                       "exception");
         recvManager.exceptionCaught(e, connectionId);

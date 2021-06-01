@@ -19,30 +19,39 @@
 
 package com.baidu.hugegraph.computer.core.receiver.edge;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import java.util.Iterator;
+
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
-import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public class EdgeMessageRecvPartition extends MessageRecvPartition {
 
     public static final String TYPE = MessageType.EDGE.name();
 
     public EdgeMessageRecvPartition(Config config,
-                                    DataFileGenerator fileGenerator) {
-        super(config, fileGenerator, Constants.INPUT_SUPERSTEP);
+                                    FileGenerator fileGenerator,
+                                    Sorter sorter) {
+        super(config, fileGenerator, sorter, Constants.INPUT_SUPERSTEP);
     }
 
     @Override
-    protected Combiner combiner() {
-        // TODO: implement
+    protected OuterSortFlusher outerSortFlusher() {
         return null;
     }
 
     @Override
     protected String type() {
         return TYPE;
+    }
+
+    @Override
+    public Iterator<KvEntry> iterator() {
+        return null;
     }
 }

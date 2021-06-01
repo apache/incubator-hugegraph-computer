@@ -19,16 +19,21 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.store.DataFileGenerator;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.util.E;
 
 /**
@@ -44,24 +49,29 @@ public abstract class MessageRecvPartition {
      * ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT.
      */
     private MessageRecvBuffers sortBuffers;
+    protected Sorter sorter;
 
-    private List<String> outputFiles;
-    private final DataFileGenerator fileGenerator;
+    protected List<String> outputFiles;
+    private final FileGenerator fileGenerator;
     private final int superstep;
+    private int mergeFileNum;
 
     public MessageRecvPartition(Config config,
-                                DataFileGenerator fileGenerator,
+                                FileGenerator fileGenerator,
+                                Sorter sorter,
                                 int superstep) {
         long buffersLimit = config.get(
              ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT);
         long waitSortTimeout = config.get(
                                ComputerOptions.WORKER_WAIT_SORT_TIMEOUT);
+        this.mergeFileNum = config.get(ComputerOptions.HGKV_MERGE_FILES_NUM);
         this.recvBuffers = new MessageRecvBuffers(buffersLimit,
                                                   waitSortTimeout);
         this.sortBuffers = new MessageRecvBuffers(buffersLimit,
                                                   waitSortTimeout);
         this.outputFiles = new ArrayList<>();
         this.fileGenerator = fileGenerator;
+        this.sorter = sorter;
         this.superstep = superstep;
     }
 
@@ -77,13 +87,54 @@ public abstract class MessageRecvPartition {
         }
     }
 
+    public List<String> outputFiles() {
+        return Collections.unmodifiableList(this.outputFiles);
+    }
+
+    /**
+     * Merge the the outputFiles if needed.
+     */
+    protected void mergeOutputFilesIfNeeded() {
+        List<String> inputs = this.outputFiles;
+        int size = inputs.size();
+        if (size <= this.mergeFileNum) {
+            return;
+        }
+        int targetSize = this.mergeFileNum;
+        // If mergeFileNum = 200 and size = 400, target = 20.
+        if (size < this.mergeFileNum * this.mergeFileNum) {
+            targetSize = (int) Math.sqrt(size);
+        }
+        E.checkState(targetSize > 0,
+                     "The parameter targetSize must be > 0, but got %s",
+                     targetSize);
+        List<String> outputs = new ArrayList<>();
+        for (int i = 0; i < targetSize; i++) {
+            String[] paths = {this.type(), Integer.toString(this.superstep)};
+            outputs.add(this.fileGenerator.nextDirectory(paths));
+        }
+        try {
+            this.sorter.mergeInputs(this.outputFiles, this.outerSortFlusher(),
+                                    outputs, false);
+        } catch (Exception e) {
+            throw new ComputerException(
+                      "Merge inputs failed, input-size=%s, output-size=%s",
+                      this.outputFiles.size(), outputs.size());
+        }
+        this.outputFiles = outputs;
+    }
+
+    protected abstract OuterSortFlusher outerSortFlusher();
+
+    protected abstract String type();
+
     /**
      * Flush the receive buffers to file, and wait both recvBuffers and
      * sortBuffers to finish sorting.
      * After this method be called, can not call
      * {@link #addBuffer(ManagedBuffer)} any more.
      */
-    public void flushAllBuffersAndWaitSorted() {
+    protected void flushAllBuffersAndWaitSorted() {
         this.sortBuffers.waitSorted();
         if (this.recvBuffers.totalBytes() > 0) {
             this.sortBuffers(this.recvBuffers);
@@ -91,41 +142,22 @@ public abstract class MessageRecvPartition {
         this.recvBuffers.waitSorted();
     }
 
-    public List<String> outputFiles() {
-        return Collections.unmodifiableList(this.outputFiles);
-    }
-
-    /**
-     * Merge the the outputFiles to n files. The vertex and edge files merge
-     * into one file at the end of inputstep.
-     */
-    public void mergeOutputFiles(int n) {
-        E.checkArgument(n > 0, "The parameter n must be > 0, but got %s", n);
-        List<String> outputs = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            outputs.add(this.fileGenerator.nextFile(this.type(), this.superstep)
-                                          .getAbsolutePath());
-        }
-        // TODO: call sort manager to merge m files into n files.
-        this.outputFiles = outputs;
-    }
-
-    /**
-     * @return The combiner used to sort buffers.
-     */
-    protected abstract Combiner<?> combiner();
-
-    // TODO: create OuterSortFlusher;
-    // protected abstract OuterSortFlusher outerSortFlusher();
-
-    protected abstract String type();
-
     // TODO: use another thread to sort buffers.
     private void sortBuffers(MessageRecvBuffers buffers) {
-        Combiner<?> combiner = this.combiner();
-        File file = this.fileGenerator.nextFile(this.type(), this.superstep);
-        // TODO: sort the buffers to file.
-        this.outputFiles.add(file.getAbsolutePath());
+
+        String[] paths = {this.type(), Integer.toString(this.superstep)};
+        String path = this.fileGenerator.nextDirectory(paths);
+
+        List<RandomAccessInput> inputs = buffers.buffers();
+        try {
+            this.sorter.mergeBuffers(inputs, this.outerSortFlusher(),
+                                     path, false);
+        } catch (Exception e) {
+            throw new ComputerException("Failed merge buffers, buffers size %s",
+                                        e, inputs.size());
+        }
+
+        this.outputFiles.add(path);
         buffers.signalSorted();
     }
 
@@ -134,4 +166,6 @@ public abstract class MessageRecvPartition {
         this.recvBuffers = this.sortBuffers;
         this.sortBuffers = tmp;
     }
+
+    public abstract Iterator<KvEntry> iterator() throws IOException;
 }

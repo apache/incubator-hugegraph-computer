@@ -262,11 +262,11 @@ public class WorkerService {
                                               this.context);
         aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
-
         FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
 
-        MessageRecvManager recvManager = new MessageRecvManager(fileManager);
+        MessageRecvManager recvManager = new MessageRecvManager(fileManager,
+                                                                this.context);
         this.managers.add(recvManager);
 
         DataServerManager serverManager = new DataServerManager(recvManager);
@@ -316,11 +316,11 @@ public class WorkerService {
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
 
-        MessageRecvManager receiveManager =
+        MessageRecvManager recvManager =
                            this.managers.get(MessageRecvManager.NAME);
-        receiveManager.waitReceivedAllMessages();
+        recvManager.waitReceivedAllMessages();
 
-        WorkerStat workerStat = receiveManager.mergeGraph();
+        WorkerStat workerStat = recvManager.mergeGraph();
 
         this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
                                        workerStat);

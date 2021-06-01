@@ -19,10 +19,19 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
+import java.security.KeyStore;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.manager.Manager;
@@ -33,7 +42,9 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitions;
-import com.baidu.hugegraph.computer.core.store.DataFileManager;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.SorterImpl;
+import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.Log;
 
@@ -43,16 +54,27 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     public static final String NAME = "message_recv";
 
-    private final DataFileManager fileManager;
+    private Config config;
+    private final FileManager fileManager;
+    private ComputerContext context;
 
     private VertexMessageRecvPartitions vertexPartitions;
     private EdgeMessageRecvPartitions edgePartitions;
     private ComputeMessageRecvPartitions messagePartitions;
 
-    private Config config;
+    private int workerCount;
+    private int expectedFinishMessages;
+    private CountDownLatch finishMessagesLatch;
+    private long waitFinishMessagesTimeout;
+    private long superstep;
+    private Sorter sorter;
 
-    public MessageRecvManager(DataFileManager fileManager) {
+
+    public MessageRecvManager(FileManager fileManager,
+                              ComputerContext context) {
         this.fileManager = fileManager;
+        this.superstep = Constants.INPUT_SUPERSTEP;
+        this.context = context;
     }
 
     @Override
@@ -60,40 +82,47 @@ public class MessageRecvManager implements Manager, MessageHandler {
         return NAME;
     }
 
+    @Override
     public void init(Config config) {
         this.config = config;
+        this.sorter = new SorterImpl(this.config);
         this.vertexPartitions = new VertexMessageRecvPartitions(
-                                this.config, this.fileManager);
+                                this.config, this.fileManager,
+                                this.context, this.sorter);
         this.edgePartitions = new EdgeMessageRecvPartitions(
-                              this.config, this.fileManager);
-        /*
-         * TODO: create CountDownLatch to trace MessageType.FINISH messages for
-         *       inputstep.
-         */
+                              this.config, this.fileManager,
+                              this.context, this.sorter);
+        this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
+        // One for vertex and one for edge.
+        this.expectedFinishMessages = this.workerCount * 2;
+        this.finishMessagesLatch =
+        new CountDownLatch(this.expectedFinishMessages);
+        this.waitFinishMessagesTimeout =
+        config.get(ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT);
     }
 
     @Override
     public void beforeSuperstep(Config config, int superstep) {
-        /*
-         * TODO: create countdown latch to trace MessageType.FINISH messages for
-         *       current superstep.
-         */
         this.messagePartitions = new ComputeMessageRecvPartitions(
-                                 this.config, this.fileManager);
+                                 this.config, this.fileManager, this.sorter);
+        this.expectedFinishMessages = this.workerCount;
+        this.finishMessagesLatch =
+        new CountDownLatch(this.expectedFinishMessages);
+        this.superstep = superstep;
     }
 
     @Override
     public void afterSuperstep(Config config, int superstep) {
-        this.messagePartitions.flushAllBuffersAndWaitSorted();
-    }
-
-    @Override
-    public void channelActive(ConnectionId connectionId) {
         // pass
     }
 
     @Override
-    public void channelInactive(ConnectionId connectionId) {
+    public void onChannelActive(ConnectionId connectionId) {
+        // pass
+    }
+
+    @Override
+    public void onChannelInactive(ConnectionId connectionId) {
         // pass
     }
 
@@ -119,16 +148,23 @@ public class MessageRecvManager implements Manager, MessageHandler {
     }
 
     public void waitReceivedAllMessages() {
-        // TODO: wait receive MessageType.FINISH type of messages.
+        try {
+            this.finishMessagesLatch.await(this.waitFinishMessagesTimeout,
+                                           TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            throw new ComputerException(
+                      "Expected %s finish messages in %sms, %s absence in " +
+                      "superstep %s",
+                      this.expectedFinishMessages,
+                      this.waitFinishMessagesTimeout,
+                      this.finishMessagesLatch.getCount(),
+                      this.superstep);
+        }
     }
 
     @Override
     public void handle(MessageType messageType, int partition,
                        ManagedBuffer buffer) {
-        /*
-         * TODO: handle MessageType.FINISH type of messages to indicate received
-         *       all messages.
-         */
         switch (messageType) {
             case VERTEX:
                 this.vertexPartitions.addBuffer(partition, buffer);
@@ -146,21 +182,35 @@ public class MessageRecvManager implements Manager, MessageHandler {
         }
     }
 
-    public VertexMessageRecvPartitions removeVertexPartitions() {
+    @Override
+    public void onStarted(ConnectionId connectionId) {
+        LOG.debug("ConnectionId {} started", connectionId);
+    }
+
+    @Override
+    public void onFinished(ConnectionId connectionId) {
+        LOG.debug("ConnectionId {} finished", connectionId);
+        this.finishMessagesLatch.countDown();
+    }
+
+    /**
+     * Get the Iterator<KeyStore.Entry> of each partition.
+     */
+    public Map<Integer, Iterator<KeyStore.Entry>> vertexPartitions() {
         VertexMessageRecvPartitions partitions = this.vertexPartitions;
         this.vertexPartitions = null;
-        return partitions;
+        return partitions.entryIterators();
     }
 
-    public EdgeMessageRecvPartitions removeEdgePartitions() {
+    public Map<Integer, Iterator<KeyStore.Entry>> edgePartitions() {
         EdgeMessageRecvPartitions partitions = this.edgePartitions;
         this.edgePartitions = null;
-        return partitions;
+        return partitions.entryIterators();
     }
 
-    public ComputeMessageRecvPartitions removeMessagePartitions() {
+    public Map<Integer, Iterator<KeyStore.Entry>> messagePartitions() {
         ComputeMessageRecvPartitions partitions = this.messagePartitions;
         this.messagePartitions = null;
-        return partitions;
+        return partitions.entryIterators();
     }
 }
