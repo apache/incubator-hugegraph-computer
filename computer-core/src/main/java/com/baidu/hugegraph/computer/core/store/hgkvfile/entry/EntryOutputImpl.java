@@ -62,6 +62,6 @@ public class EntryOutputImpl implements EntryOutput {
         data.write(this.output);
         // Fill data length placeholder
         int dataLength = (int) (this.output.position() - position);
-        this.output.writeInt(position - Integer.BYTES, dataLength);
+        this.output.writeFixedInt(position - Integer.BYTES, dataLength);
     }
 }

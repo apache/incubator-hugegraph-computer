@@ -49,7 +49,7 @@ public class MessageSendBuffers {
              * It depends on the concrete implementation of the
              * partition algorithm, which is not elegant.
              */
-            this.buffers[i] = new WriteBuffers(threshold, capacity);
+            this.buffers[i] = new WriteBuffers(context, threshold, capacity);
         }
     }
 

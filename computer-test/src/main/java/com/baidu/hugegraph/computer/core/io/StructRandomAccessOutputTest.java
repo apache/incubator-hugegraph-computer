@@ -74,9 +74,10 @@ public class StructRandomAccessOutputTest {
         try (UnsafeBytesOutput output = new UnsafeBytesOutput();
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             Assert.assertEquals(0L, srao.position());
-            srao.writeInt(4, 1000);
-            Assert.assertEquals(8L, srao.position());
-            srao.writeInt(4, 2000);
+            srao.writeFixedInt(4, 1000);
+            Assert.assertEquals(0L, srao.position());
+            srao.seek(8);
+            srao.writeFixedInt(4, 2000);
             Assert.assertEquals(8L, srao.position());
         }
     }

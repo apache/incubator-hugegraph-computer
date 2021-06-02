@@ -21,6 +21,8 @@ package com.baidu.hugegraph.computer.core.io;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 
 public class GraphOutputFactory {
 
@@ -29,7 +31,8 @@ public class GraphOutputFactory {
                                      RandomAccessOutput out) {
         switch (format) {
             case BIN:
-                return new StreamGraphOutput(context, out);
+                EntryOutput entryOutput = new EntryOutputImpl(out);
+                return new StreamGraphOutput(context, entryOutput);
             case CSV:
                 StructRandomAccessOutput srao;
                 srao = new StructRandomAccessOutput(out);

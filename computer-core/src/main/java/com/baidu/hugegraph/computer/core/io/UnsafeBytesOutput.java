@@ -120,12 +120,6 @@ public class UnsafeBytesOutput implements RandomAccessOutput, Closeable {
     }
 
     @Override
-    public void writeInt(long position, int v) throws IOException {
-        this.require(position, Constants.INT_LEN);
-        UNSAFE.putInt(this.buffer, this.offset(position), v);
-    }
-
-    @Override
     public void writeLong(long v) throws IOException {
         this.require(Constants.LONG_LEN);
         UNSAFE.putLong(this.buffer, this.offset(), v);
@@ -219,6 +213,12 @@ public class UnsafeBytesOutput implements RandomAccessOutput, Closeable {
             byte[] bytes = input.readBytes((int) length);
             this.write(bytes);
         }
+    }
+
+    @Override
+    public void writeFixedInt(long position, int v) throws IOException {
+        this.require(position, Constants.INT_LEN);
+        UNSAFE.putInt(this.buffer, this.offset(position), v);
     }
 
     /**

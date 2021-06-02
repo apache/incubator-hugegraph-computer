@@ -32,9 +32,9 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.io.OptimizedBytesOutput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
@@ -97,7 +97,8 @@ public class SortManager implements Manager {
         return CompletableFuture.supplyAsync(() -> {
             RandomAccessInput bufferForRead = buffer.wrapForRead();
             // TODO：This ByteBuffer should be allocated from the off-heap
-            UnsafeBytesOutput output = new UnsafeBytesOutput(this.capacity);
+            OptimizedBytesOutput output = new OptimizedBytesOutput(
+                                          this.capacity);
             InnerSortFlusher flusher = this.createSortFlusher(
                                        type, output,
                                        this.flushThreshold);

@@ -51,7 +51,6 @@ import com.baidu.hugegraph.util.Log;
     CombinerTestSuite.class,
     GraphTestSuite.class,
     IOTestSuite.class,
-    BspTestSuite.class,
     InputTestSuite.class,
     WorkerTestSuite.class,
     NetworkTestSuite.class,

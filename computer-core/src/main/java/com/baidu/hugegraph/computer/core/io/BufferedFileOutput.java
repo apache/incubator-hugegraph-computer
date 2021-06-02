@@ -75,20 +75,6 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
     }
 
     @Override
-    public void writeInt(long position, int v) throws IOException {
-        // The write position is in the buffer
-        if (this.fileOffset <= position &&
-            position <= this.position() - Constants.INT_LEN) {
-            super.writeInt(position - this.fileOffset, v);
-            return;
-        }
-        long latestPosition = this.position();
-        this.seek(position);
-        super.writeInt(v);
-        this.seek(latestPosition);
-    }
-
-    @Override
     public long position() {
         return this.fileOffset + super.position();
     }
@@ -123,6 +109,20 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
             this.file.seek(this.fileOffset);
         }
         return positionBeforeSkip;
+    }
+
+    @Override
+    public void writeFixedInt(long position, int v) throws IOException {
+        // The write position is in the buffer
+        if (this.fileOffset <= position &&
+            position <= this.position() - Constants.INT_LEN) {
+            super.writeFixedInt(position - this.fileOffset, v);
+            return;
+        }
+        long latestPosition = this.position();
+        this.seek(position);
+        super.writeInt(v);
+        this.seek(latestPosition);
     }
 
     @Override

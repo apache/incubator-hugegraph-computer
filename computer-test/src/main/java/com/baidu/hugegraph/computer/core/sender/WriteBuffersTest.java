@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.sender;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -48,30 +49,30 @@ public class WriteBuffersTest extends UnitTestBase {
     @Test
     public void testConstructor() {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            new WriteBuffers(0, 20);
+            new WriteBuffers(context, 0, 20);
         }, e -> {
             Assert.assertTrue(e.getMessage().contains(
                               "The threshold of buffer must be > 0"));
         });
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            new WriteBuffers(10, -1);
+            new WriteBuffers(context, 10, -1);
         }, e -> {
             Assert.assertTrue(e.getMessage().contains(
                               "The capacity of buffer must be > 0"));
         });
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            new WriteBuffers(20, 10);
+            new WriteBuffers(context, 20, 10);
         }, e -> {
             Assert.assertTrue(e.getMessage().contains(
                               "The threshold must be <= capacity"));
         });
         @SuppressWarnings("unused")
-        WriteBuffers buffers = new WriteBuffers(10, 20);
+        WriteBuffers buffers = new WriteBuffers(context, 10, 20);
     }
 
     @Test
     public void testReachThreshold() throws IOException {
-        WriteBuffers buffers = new WriteBuffers(10, 50);
+        WriteBuffers buffers = new WriteBuffers(context, 10, 50);
         Assert.assertFalse(buffers.reachThreshold());
 
         Vertex vertex = context.graphFactory().createVertex(
@@ -91,7 +92,7 @@ public class WriteBuffersTest extends UnitTestBase {
 
     @Test
     public void testIsEmpty() throws IOException {
-        WriteBuffers buffers = new WriteBuffers(10, 20);
+        WriteBuffers buffers = new WriteBuffers(context, 10, 20);
         Assert.assertTrue(buffers.isEmpty());
 
         Vertex vertex = context.graphFactory().createVertex(
@@ -105,14 +106,14 @@ public class WriteBuffersTest extends UnitTestBase {
         GraphFactory graphFactory = context.graphFactory();
 
         // NOTE: need ensure the buffer size can hold follow writed bytes
-        WriteBuffers buffers = new WriteBuffers(100, 110);
+        WriteBuffers buffers = new WriteBuffers(context, 100, 110);
         Vertex vertex = graphFactory.createVertex(new LongId(1L),
                                                   new DoubleValue(0.5d));
         buffers.writeVertex(vertex);
         WriteBuffer buffer = Whitebox.getInternalState(buffers,
                                                        "writingBuffer");
-        int position1 = Whitebox.getInternalState(buffer.output(), "position");
-        Assert.assertGt(0, position1);
+        long position1 = buffer.output().position();
+        Assert.assertGt(0L, position1);
 
         vertex = graphFactory.createVertex(new LongId(1L),
                                            new DoubleValue(0.5d));
@@ -125,7 +126,7 @@ public class WriteBuffersTest extends UnitTestBase {
         vertex.properties(properties);
         buffers.writeVertex(vertex);
         buffer = Whitebox.getInternalState(buffers, "writingBuffer");
-        int position2 = Whitebox.getInternalState(buffer.output(), "position");
+        long position2 = buffer.output().position();
         Assert.assertGt(position1, position2);
 
         vertex = graphFactory.createVertex(new LongId(1L),
@@ -136,7 +137,7 @@ public class WriteBuffersTest extends UnitTestBase {
                                                new LongId(4L)));
         buffers.writeEdges(vertex);
         buffer = Whitebox.getInternalState(buffers, "writingBuffer");
-        int position3 = Whitebox.getInternalState(buffer.output(), "position");
+        long position3 = buffer.output().position();
         Assert.assertGt(position2, position3);
     }
 
@@ -144,7 +145,7 @@ public class WriteBuffersTest extends UnitTestBase {
     public void testPrepareSorting() throws IOException {
         GraphFactory graphFactory = context.graphFactory();
 
-        WriteBuffers buffers = new WriteBuffers(50, 100);
+        WriteBuffers buffers = new WriteBuffers(context, 50, 100);
         Vertex vertex = graphFactory.createVertex(new LongId(1L),
                                                   new DoubleValue(0.5d));
         vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
@@ -166,7 +167,7 @@ public class WriteBuffersTest extends UnitTestBase {
                                                     InterruptedException {
         GraphFactory graphFactory = context.graphFactory();
 
-        WriteBuffers buffers = new WriteBuffers(50, 100);
+        WriteBuffers buffers = new WriteBuffers(context, 50, 100);
         Vertex vertex = graphFactory.createVertex(new LongId(1L),
                                                   new DoubleValue(0.5d));
         vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
@@ -215,20 +216,20 @@ public class WriteBuffersTest extends UnitTestBase {
         thread2.join();
     }
 
-//    @Test
+    @Test
     public void wrapForRead() throws IOException {
         GraphFactory graphFactory = context.graphFactory();
 
-        WriteBuffers buffers = new WriteBuffers(10, 20);
+        WriteBuffers buffers = new WriteBuffers(context, 10, 20);
         Vertex vertex = graphFactory.createVertex(new LongId(1L),
                                                   new DoubleValue(0.5d));
         buffers.writeVertex(vertex);
 
         try (RandomAccessInput input = buffers.wrapForRead()) {
-            StreamGraphInput graphInput = new StreamGraphInput(context,
-                                                               input);
-            Vertex readVertex = graphInput.readVertex();
-            Assert.assertEquals(vertex, readVertex);
+            StreamGraphInput graphInput = new StreamGraphInput(context, input);
+            Assert.assertThrows(NotImplementedException.class, () -> {
+                graphInput.readVertex();
+            });
         }
     }
 }

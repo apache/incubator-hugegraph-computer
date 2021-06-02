@@ -74,11 +74,11 @@ public class KvEntryWriterImpl implements KvEntryWriter {
     @Override
     public void writeFinish() throws IOException {
         // Fill total value length
-        this.output.writeInt(this.placeholderPosition,
-                             (int) this.total + Integer.BYTES);
+        this.output.writeFixedInt(this.placeholderPosition,
+                                  (int) this.total + Integer.BYTES);
         // Fill sub-entry count
-        this.output.writeInt(this.placeholderPosition + Integer.BYTES,
-                             this.subEntryCount);
+        this.output.writeFixedInt(this.placeholderPosition + Integer.BYTES,
+                                  this.subEntryCount);
 
         if (this.needSort) {
             // Sort subKvs
@@ -114,7 +114,7 @@ public class KvEntryWriterImpl implements KvEntryWriter {
         data.write(output);
         // Fill data length placeholder
         long dataLength = output.position() - position - Integer.BYTES;
-        output.writeInt(position, (int) dataLength);
+        output.writeFixedInt(position, (int) dataLength);
         this.total += Integer.BYTES + dataLength;
     }
 }

@@ -26,10 +26,8 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
 import com.baidu.hugegraph.computer.core.graph.id.UuidId;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.OptimizedBytesInput;
+import com.baidu.hugegraph.computer.core.io.OptimizedBytesOutput;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -125,13 +123,13 @@ public class IdValueTest extends UnitTestBase {
         IdValue value1 = new Utf8Id("long id").idValue();
         IdValue value2 = new Utf8Id("short").idValue();
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
+        try (OptimizedBytesOutput bao = new OptimizedBytesOutput()) {
             value1.write(bao);
             value2.write(bao);
             bytes = bao.toByteArray();
         }
         IdValue value3 = new Utf8Id().idValue();
-        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
+        try (OptimizedBytesInput bai = new OptimizedBytesInput(bytes)) {
             value3.read(bai);
             Assert.assertEquals(value1, value3);
             value3.read(bai);

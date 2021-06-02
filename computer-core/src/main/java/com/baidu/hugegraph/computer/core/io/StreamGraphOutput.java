@@ -32,19 +32,16 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
 
 public class StreamGraphOutput implements GraphComputeOutput {
 
     private final EntryOutput out;
-
-    public StreamGraphOutput(ComputerContext context, RandomAccessOutput out) {
-        this(context, new EntryOutputImpl(out));
-    }
+    private final Config config;
 
     public StreamGraphOutput(ComputerContext context, EntryOutput out) {
         this.out = out;
+        this.config = context.config();
     }
 
     @Override
@@ -61,8 +58,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
 
     @Override
     public void writeEdges(Vertex vertex) throws IOException {
-        Config config = ComputerContext.instance().config();
-        EdgeFrequency frequency = config.get(ComputerOptions.INPUT_EDGE_FREQ);
+        EdgeFrequency frequency = this.config.get(
+                                  ComputerOptions.INPUT_EDGE_FREQ);
         KvEntryWriter writer = this.out.writeEntry(out -> {
             // Write id
             out.writeByte(vertex.id().type().code());

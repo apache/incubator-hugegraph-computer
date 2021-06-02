@@ -21,11 +21,12 @@ package com.baidu.hugegraph.computer.core.sender;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.OptimizedBytesInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.util.E;
 
@@ -36,7 +37,7 @@ public class WriteBuffers {
     // For sorting
     private WriteBuffer sortingBuffer;
 
-    public WriteBuffers(int threshold, int capacity) {
+    public WriteBuffers(ComputerContext context, int threshold, int capacity) {
         E.checkArgument(threshold > 0,
                         "The threshold of buffer must be > 0, actual got %s",
                         threshold);
@@ -46,8 +47,8 @@ public class WriteBuffers {
         E.checkArgument(threshold <= capacity,
                         "The threshold must be <= capacity, actual got %s > %s",
                         threshold, capacity);
-        this.writingBuffer = new WriteBuffer(threshold, capacity);
-        this.sortingBuffer = new WriteBuffer(threshold, capacity);
+        this.writingBuffer = new WriteBuffer(context, threshold, capacity);
+        this.sortingBuffer = new WriteBuffer(context, threshold, capacity);
     }
 
     public boolean reachThreshold() {
@@ -104,7 +105,6 @@ public class WriteBuffers {
     }
 
     public synchronized RandomAccessInput wrapForRead() {
-        return new OptimizedUnsafeBytesInput(this.sortingBuffer.output()
-                                                               .buffer());
+        return new OptimizedBytesInput(this.sortingBuffer.output().buffer());
     }
 }

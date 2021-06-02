@@ -27,7 +27,7 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.GraphComputeOutput;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.OptimizedBytesOutput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
@@ -42,16 +42,15 @@ class WriteBuffer {
      * to continue write
      */
     private final int threshold;
-    private final OptimizedUnsafeBytesOutput bytesOutput;
+    private final OptimizedBytesOutput bytesOutput;
     private final GraphComputeOutput graphOutput;
 
-    public WriteBuffer(int threshold, int capacity) {
+    public WriteBuffer(ComputerContext context, int threshold, int capacity) {
         assert threshold > 0 && capacity > 0 && threshold <= capacity;
         this.threshold = threshold;
-        this.bytesOutput = new OptimizedUnsafeBytesOutput(capacity);
+        this.bytesOutput = new OptimizedBytesOutput(capacity);
         EntryOutput entryOutput = new EntryOutputImpl(this.bytesOutput);
-        this.graphOutput = new StreamGraphOutput(ComputerContext.instance(),
-                                                 entryOutput);
+        this.graphOutput = new StreamGraphOutput(context, entryOutput);
     }
 
     public boolean reachThreshold() {
@@ -70,7 +69,7 @@ class WriteBuffer {
         }
     }
 
-    public OptimizedUnsafeBytesOutput output() {
+    public OptimizedBytesOutput output() {
         return this.bytesOutput;
     }
 

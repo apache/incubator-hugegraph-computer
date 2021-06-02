@@ -30,33 +30,33 @@ public class OptimizedUnsafeBytesTest {
 
     @Test
     public void testConstructor() {
-        UnsafeBytesOutput output = new OptimizedUnsafeBytesOutput();
+        OptimizedBytesOutput output = new OptimizedBytesOutput();
         Assert.assertEquals(0, output.position());
 
-        UnsafeBytesOutput output2 = new OptimizedUnsafeBytesOutput(16);
+        OptimizedBytesOutput output2 = new OptimizedBytesOutput(16);
         Assert.assertEquals(0, output2.position());
 
-        UnsafeBytesInput input = new OptimizedUnsafeBytesInput(output.buffer());
+        OptimizedBytesInput input = new OptimizedBytesInput(output.buffer());
         Assert.assertEquals(0, input.position());
 
-        UnsafeBytesInput input2 = new OptimizedUnsafeBytesInput(output.buffer(),
-                                                                4L);
+        OptimizedBytesInput input2 = new OptimizedBytesInput(output.buffer(),
+                                                             4L);
         Assert.assertEquals(0, input2.position());
     }
 
     @Test
     public void testDuplicate() throws IOException {
-        OptimizedUnsafeBytesInput raw = inputByString("apple");
-        OptimizedUnsafeBytesInput dup = raw.duplicate();
+        OptimizedBytesInput raw = inputByString("apple");
+        OptimizedBytesInput dup = raw.duplicate();
         raw.readByte();
         Assert.assertEquals(1, raw.position());
         Assert.assertEquals(0, dup.position());
     }
 
-    private static OptimizedUnsafeBytesInput inputByString(String s)
-                                                           throws IOException {
-        OptimizedUnsafeBytesOutput output = new OptimizedUnsafeBytesOutput();
+    private static OptimizedBytesInput inputByString(String s)
+                                                     throws IOException {
+        OptimizedBytesOutput output = new OptimizedBytesOutput();
         output.writeBytes(s);
-        return new OptimizedUnsafeBytesInput(output.toByteArray());
+        return new OptimizedBytesInput(output.toByteArray());
     }
 }
