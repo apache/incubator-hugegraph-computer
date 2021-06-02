@@ -29,10 +29,10 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 public class PointerCombiner<V extends Readable & Writable>
        implements Combiner<Pointer> {
 
-    private V v1;
-    private V v2;
-    private Combiner<V> combiner;
-    private OptimizedUnsafeBytesOutput bytesOutput;
+    private final V v1;
+    private final V v2;
+    private final Combiner<V> combiner;
+    private final OptimizedUnsafeBytesOutput bytesOutput;
 
     public PointerCombiner(V v1, V v2, Combiner<V> combiner) {
         this.v1 = v1;

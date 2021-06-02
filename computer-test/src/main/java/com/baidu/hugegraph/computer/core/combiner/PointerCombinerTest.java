@@ -50,10 +50,10 @@ public class PointerCombinerTest extends UnitTestBase {
         Combiner<DoubleValue> combiner = config.createObject(
                               ComputerOptions.WORKER_COMBINER_CLASS);
 
-        PointerCombiner<DoubleValue> pointerCombiner =
-                                     new PointerCombiner<>(new DoubleValue(),
-                                                           new DoubleValue(),
-                                                           combiner);
+        PointerCombiner<DoubleValue> pointerCombiner = new PointerCombiner<>(
+                                                       new DoubleValue(),
+                                                       new DoubleValue(),
+                                                       combiner);
 
         try (OptimizedUnsafeBytesOutput bytesOutput1 =
                                         new OptimizedUnsafeBytesOutput();

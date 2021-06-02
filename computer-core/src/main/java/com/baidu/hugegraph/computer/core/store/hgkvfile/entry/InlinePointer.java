@@ -38,8 +38,8 @@ public class InlinePointer implements Pointer {
     }
 
     public InlinePointer(byte[] bytes, long length) {
-        this.bytes = bytes;
         this.length = length;
+        this.bytes = bytes;
     }
 
     @Override
