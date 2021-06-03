@@ -27,6 +27,7 @@ import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
@@ -282,6 +283,26 @@ public class ComputerOptions extends OptionHolder {
                     "messages of a vertex to a sum value.",
                     disallowEmpty(),
                     Null.class
+            );
+
+    public static final ConfigOption<Class<?>>
+            WORKER_VERTEX_PROPERTIES_COMBINER_CLASS =
+            new ConfigOption<>(
+                    "worker.vertex_properties_combiner_class",
+                    "The combiner can combine several properties of the same " +
+                    "vertex into one properties at inputstep.",
+                    disallowEmpty(),
+                    OverwriteCombiner.class
+            );
+
+    public static final ConfigOption<Class<?>>
+            WORKER_EDGE_PROPERTIES_COMBINER_CLASS =
+            new ConfigOption<>(
+                    "worker.edge_properties_combiner_class",
+                    "The combiner can combine several properties of the same " +
+                    "edge into one properties at inputstep.",
+                    disallowEmpty(),
+                    OverwriteCombiner.class
             );
 
     public static final ConfigOption<Long> WORKER_RECEIVED_BUFFERS_BYTES_LIMIT =

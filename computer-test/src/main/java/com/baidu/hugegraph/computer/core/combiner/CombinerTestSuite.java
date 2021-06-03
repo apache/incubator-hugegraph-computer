@@ -32,7 +32,8 @@ import org.junit.runners.Suite;
     FloatValueSumCombinerTest.class,
     DoubleValueSumCombinerTest.class,
     ValueMinCombinerTest.class,
-    ValueMaxCombinerTest.class
+    ValueMaxCombinerTest.class,
+    PointerCombinerTest.class
 })
 public class CombinerTestSuite {
 }
