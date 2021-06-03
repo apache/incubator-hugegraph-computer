@@ -28,9 +28,9 @@ import org.junit.runners.Suite;
     HgkvFileTest.class,
     EntryOutputTest.class,
     PointerTest.class,
-    FileManagerTest.class,
     EntriesUtilTest.class,
-    FileManagerTest.class
+    FileManagerTest.class,
+    ValueFileTest.class
 })
 public class StoreTestSuite {
 }

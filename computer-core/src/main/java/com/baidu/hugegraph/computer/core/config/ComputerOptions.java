@@ -686,4 +686,12 @@ public class ComputerOptions extends OptionHolder {
                     disallowEmpty(),
                     "/tmp/hgkv"
             );
+
+    public static final ConfigOption<Long> VALUE_FILE_MAX_SEGMENT_SIZE =
+            new ConfigOption<>(
+                    "valuefile.max_segment_size",
+                    "The max number of bytes in each segment of value-file.",
+                    positiveInt(),
+                    Bytes.GB
+            );
 }
