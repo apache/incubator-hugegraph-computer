@@ -119,10 +119,10 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
             super.writeFixedInt(position - this.fileOffset, v);
             return;
         }
-        long latestPosition = this.position();
+        long oldPosition = this.position();
         this.seek(position);
         super.writeInt(v);
-        this.seek(latestPosition);
+        this.seek(oldPosition);
     }
 
     @Override

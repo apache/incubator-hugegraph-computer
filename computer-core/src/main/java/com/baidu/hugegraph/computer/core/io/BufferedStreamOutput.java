@@ -124,6 +124,13 @@ public class BufferedStreamOutput extends UnsafeBytesOutput {
         return positionBeforeSkip;
     }
 
+    /**
+     * The valid range of position is [the output position correspond to buffer
+     * start, the output position correspond to
+     * the current position - Constants.INT_LEN], it can't write data to the
+     * position before the buffer or after
+     * the current position.
+     */
     @Override
     public void writeFixedInt(long position, int v) throws IOException {
         if (position >= this.outputOffset &&

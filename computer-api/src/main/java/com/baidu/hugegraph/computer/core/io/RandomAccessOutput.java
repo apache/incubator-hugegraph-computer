@@ -25,8 +25,16 @@ import java.io.IOException;
 
 public interface RandomAccessOutput extends DataOutput, Closeable {
 
+    /**
+     * Get the current write pointer position
+     * @return the current postion
+     */
     long position();
 
+    /**
+     * Move write pointer to specified position
+     * @param position the new postion
+     */
     void seek(long position) throws IOException;
 
     /**
@@ -35,8 +43,21 @@ public interface RandomAccessOutput extends DataOutput, Closeable {
      */
     long skip(long n) throws IOException;
 
+    /**
+     * Read some bytes from the input in range [offset, offset + length],
+     * then write the bytes to this output at current position
+     * @param input the source input
+     * @param offset the start offset to read from input
+     * @param length the total length to read from input
+     */
     void write(RandomAccessInput input, long offset, long length)
                throws IOException;
 
+    /**
+     * Seek to specified position, and write a int value that fixed in 4
+     * bytes length, then seek back to old postion
+     * @param position the new postion to write
+     * @param v the int value write
+     */
     void writeFixedInt(long position, int v) throws IOException;
 }

@@ -30,7 +30,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
 
@@ -113,26 +112,17 @@ public class BufferedFileTest {
                 for (int i = -128; i <= 127; i++) {
                     output.writeInt(i);
                 }
-                System.out.println("1=>" + Arrays.toString(output.buffer()));
                 output.writeFixedInt(0, 1);
-                System.out.println("2=>" + Arrays.toString(output.buffer()));
                 output.writeFixedInt(12, 2);
-                System.out.println("3=>" + Arrays.toString(output.buffer()));
                 // Next buffer
                 output.writeFixedInt(200, 3);
-                System.out.println("4=>" + Arrays.toString(output.buffer()));
                 // Previous buffer
                 output.writeFixedInt(100, 4);
-                System.out.println("5=>" + Arrays.toString(output.buffer()));
                 output.writeInt(Integer.MAX_VALUE);
-                System.out.println("6=>" + Arrays.toString(output.buffer()));
                 output.writeInt(Integer.MIN_VALUE);
-                System.out.println("7=>" + Arrays.toString(output.buffer()));
                 // Current buffer
                 output.writeInt(5);
-                System.out.println("8=>" + Arrays.toString(output.buffer()));
                 output.writeFixedInt(output.position() - Integer.BYTES, 6);
-                System.out.println("9=>" + Arrays.toString(output.buffer()));
             }
 
             try (BufferedFileInput input = createInput(file)) {
