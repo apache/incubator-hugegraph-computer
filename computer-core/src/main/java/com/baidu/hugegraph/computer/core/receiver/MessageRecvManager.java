@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
-import java.security.KeyStore;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +42,9 @@ import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPart
 import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.FileManager;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.Log;
 
@@ -87,8 +87,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.config = config;
         this.sorter = new SorterImpl(this.config);
         this.vertexPartitions = new VertexMessageRecvPartitions(
-                                this.config, this.fileManager,
-                                this.context, this.sorter);
+                                this.context, this.fileManager, this.sorter);
         this.edgePartitions = new EdgeMessageRecvPartitions(
                               this.config, this.fileManager,
                               this.context, this.sorter);
@@ -104,7 +103,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
     @Override
     public void beforeSuperstep(Config config, int superstep) {
         this.messagePartitions = new ComputeMessageRecvPartitions(
-                                 this.config, this.fileManager, this.sorter);
+                                 this.context, this.fileManager, this.sorter);
         this.expectedFinishMessages = this.workerCount;
         this.finishMessagesLatch =
         new CountDownLatch(this.expectedFinishMessages);
@@ -196,21 +195,21 @@ public class MessageRecvManager implements Manager, MessageHandler {
     /**
      * Get the Iterator<KeyStore.Entry> of each partition.
      */
-    public Map<Integer, Iterator<KeyStore.Entry>> vertexPartitions() {
+    public Map<Integer, PeekableIterator<KvEntry>> vertexPartitions() {
         VertexMessageRecvPartitions partitions = this.vertexPartitions;
         this.vertexPartitions = null;
-        return partitions.entryIterators();
+        return partitions.iterators();
     }
 
-    public Map<Integer, Iterator<KeyStore.Entry>> edgePartitions() {
+    public Map<Integer, PeekableIterator<KvEntry>> edgePartitions() {
         EdgeMessageRecvPartitions partitions = this.edgePartitions;
         this.edgePartitions = null;
-        return partitions.entryIterators();
+        return partitions.iterators();
     }
 
-    public Map<Integer, Iterator<KeyStore.Entry>> messagePartitions() {
+    public Map<Integer, PeekableIterator<KvEntry>> messagePartitions() {
         ComputeMessageRecvPartitions partitions = this.messagePartitions;
         this.messagePartitions = null;
-        return partitions.entryIterators();
+        return partitions.iterators();
     }
 }

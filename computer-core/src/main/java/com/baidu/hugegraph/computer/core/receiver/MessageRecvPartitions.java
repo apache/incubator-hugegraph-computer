@@ -19,16 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
-import java.security.KeyStore;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
@@ -72,8 +72,8 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         return partition;
     }
 
-    public Map<Integer, Iterator<KeyStore.Entry>> entryIterators() {
-        Map<Integer, Iterator<KeyStore.Entry>> entries = new HashMap<>();
+    public Map<Integer, PeekableIterator<KvEntry>> iterators() {
+        Map<Integer, PeekableIterator<KvEntry>> entries = new HashMap<>();
         for (Map.Entry<Integer, P> entry : this.partitions.entrySet()) {
             entries.put(entry.getKey(), entry.getValue().iterator());
         }

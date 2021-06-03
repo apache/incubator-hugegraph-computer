@@ -25,34 +25,39 @@ import com.baidu.hugegraph.iterator.CIter;
 
 public interface PeekableIterator<T> extends CIter<T> {
 
-    public static PeekableIterator EMPTY_ITERATOR = new PeekableIterator() {
-
-        @Override
-        public boolean hasNext() {
-            return false;
-        }
-
-        @Override
-        public Object next() {
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void close() throws Exception {
-            // pass
-        }
-
-        @Override
-        public Object metadata(String s, Object... objects) {
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public Object peek() {
-            throw new NoSuchElementException();
-        }
+    static <V> PeekableIterator<V> emptyIterator() {
+        return (PeekableIterator<V>) EmptyIterator.EMPTY_ITERATOR;
     }
 
     T peek();
+}
 
+class EmptyIterator<E> implements PeekableIterator<E> {
+
+    static final EmptyIterator<Object> EMPTY_ITERATOR = new EmptyIterator<>();
+
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
+
+    @Override
+    public E next() {
+        throw new NoSuchElementException();
+    }
+
+    @Override
+    public void close() throws Exception {
+        // pass
+    }
+
+    @Override
+    public Object metadata(String s, Object... objects) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public E peek() {
+        throw new NoSuchElementException();
+    }
 }

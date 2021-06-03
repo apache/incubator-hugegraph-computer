@@ -213,7 +213,6 @@ public class WorkerService {
              */
             MessageRecvManager receiveManager =
                                this.managers.get(MessageRecvManager.NAME);
-            receiveManager.waitReceivedAllMessages();
 
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
@@ -318,7 +317,6 @@ public class WorkerService {
 
         MessageRecvManager recvManager =
                            this.managers.get(MessageRecvManager.NAME);
-        recvManager.waitReceivedAllMessages();
 
         WorkerStat workerStat = recvManager.mergeGraph();
 

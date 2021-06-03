@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.worker.MockMasterComputation;
 import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class DataServerManagerTest {
+public class DataServerManagerTest extends UnitTestBase {
 
     @Test
     public void test() {
@@ -51,7 +51,8 @@ public class DataServerManagerTest {
         );
         FileManager fileManager = new FileManager();
         fileManager.init(config);
-        MessageRecvManager recvManager = new MessageRecvManager(fileManager);
+        MessageRecvManager recvManager = new MessageRecvManager(fileManager,
+                                                                context());
         recvManager.init(config);
         DataServerManager serverManager = new DataServerManager(recvManager);
         serverManager.init(config);

@@ -22,33 +22,30 @@ package com.baidu.hugegraph.computer.core.receiver;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.GraphInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 public class ReceiverUtil {
+//
+//    public static void addMockBufferToPartition(
+//    MessageRecvPartition partition,
+//                                                int mockBufferLength) {
+//        comsumeBuffer(mockBufferLength, (ManagedBuffer buffer) -> {
+//            partition.addBuffer(buffer);
+//        });
+//    }
 
-    public static void addMockBufferToPartition(MessageRecvPartition partition,
-                                                int mockBufferLength) {
-        comsumeBuffer(mockBufferLength, (ManagedBuffer buffer) -> {
-            partition.addBuffer(buffer);
-        });
-    }
 
-    public static void addMockBufferToBuffers(MessageRecvBuffers buffers,
-                                              int mockBufferLength) {
-        comsumeBuffer(mockBufferLength, (ManagedBuffer buffer) -> {
-            buffers.addBuffer(buffer);
-        });
-    }
 
     public static void comsumeBuffer(byte[] bytes,
                                      Consumer<ManagedBuffer> consumer) {
@@ -62,9 +59,25 @@ public class ReceiverUtil {
         }
     }
 
-    public static Id readId(ComputerContext context, RandomAccessInput input)
+    public static Id readId(ComputerContext context, Pointer pointer)
                             throws IOException {
-        GraphInput graphInput = new StreamGraphInput(context, input);
-        return graphInput.readId();
+        RandomAccessInput input = pointer.input();
+        long position = input.position();
+        input.seek(pointer.offset());
+        GraphInput graphInput = new StreamGraphInput(context, pointer.input());
+        Id id =  graphInput.readId();
+        input.seek(position);
+        return id;
+    }
+
+    public static void readValue(ComputerContext context,
+                                 Pointer pointer,
+                                 Readable value)
+                                 throws IOException {
+        RandomAccessInput input = pointer.input();
+        long position = input.position();
+        input.seek(pointer.offset());
+        value.read(input);
+        input.seek(position);
     }
 }

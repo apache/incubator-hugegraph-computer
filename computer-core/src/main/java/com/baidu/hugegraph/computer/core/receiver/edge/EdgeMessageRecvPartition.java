@@ -19,39 +19,40 @@
 
 package com.baidu.hugegraph.computer.core.receiver.edge;
 
-import java.util.Iterator;
-
+import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.store.FileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public class EdgeMessageRecvPartition extends MessageRecvPartition {
 
-    public static final String TYPE = MessageType.EDGE.name();
+    private static final String TYPE = MessageType.EDGE.name();
 
+    private final OuterSortFlusher flusher;
     public EdgeMessageRecvPartition(Config config,
                                     FileGenerator fileGenerator,
                                     Sorter sorter) {
-        super(config, fileGenerator, sorter, Constants.INPUT_SUPERSTEP);
+        super(config, fileGenerator, sorter, true, Constants.INPUT_SUPERSTEP);
+        int flushThreshold = config.get(
+                             ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
+
+        this.flusher = new CombineSubKvOuterSortFlusher(
+                       new OverwriteCombiner<>(), flushThreshold);
     }
 
     @Override
     protected OuterSortFlusher outerSortFlusher() {
-        return null;
+        return this.flusher;
     }
 
     @Override
     protected String type() {
         return TYPE;
-    }
-
-    @Override
-    public Iterator<KvEntry> iterator() {
-        return null;
     }
 }

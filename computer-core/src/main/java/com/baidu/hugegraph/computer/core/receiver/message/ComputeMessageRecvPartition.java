@@ -19,39 +19,54 @@
 
 package com.baidu.hugegraph.computer.core.receiver.message;
 
-import java.util.Iterator;
-
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.store.FileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public class ComputeMessageRecvPartition extends MessageRecvPartition {
 
     public static final String TYPE = MessageType.MSG.name();
+    private final OuterSortFlusher flusher;
 
-    public ComputeMessageRecvPartition(Config config,
+    public ComputeMessageRecvPartition(ComputerContext context,
                                        FileGenerator fileGenerator,
                                        Sorter sorter,
                                        int superstep) {
-        super(config, fileGenerator, sorter, superstep);
+        super(context.config(), fileGenerator, sorter, false, superstep);
+        Config config = context.config();
+        Combiner<?> valueCombiner = config.createObject(
+                                    ComputerOptions.WORKER_COMBINER_CLASS);
+        if (valueCombiner == null) {
+            this.flusher = new KvOuterSortFlusher();
+        } else {
+            String valueTypeStr = config.get(ComputerOptions.VALUE_TYPE);
+            ValueType valueType = ValueType.valueOf(valueTypeStr);
+            Value<?> value1 = context.valueFactory().createValue(valueType);
+            Value<?> value2 = context.valueFactory().createValue(valueType);
+            PointerCombiner pointerCombiner = new PointerCombiner(
+                                              value1, value2, valueCombiner);
+            this.flusher = new CombineKvOuterSortFlusher(pointerCombiner);
+        }
     }
 
     @Override
     protected OuterSortFlusher outerSortFlusher() {
-        return null;
+        return this.flusher;
     }
 
     @Override
     protected String type() {
         return TYPE;
-    }
-
-    @Override
-    public Iterator<KvEntry> iterator() {
-        return null;
     }
 }

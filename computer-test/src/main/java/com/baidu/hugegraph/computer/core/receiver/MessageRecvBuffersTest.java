@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class MessageRecvBuffersTest {
@@ -41,13 +42,13 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            ReceiverUtil.addMockBufferToBuffers(buffers, size);
+            addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertFalse(buffers.full());
         Assert.assertEquals(1000L, buffers.totalBytes());
 
-        ReceiverUtil.addMockBufferToBuffers(buffers, size);
+        addMockBufferToBuffers(buffers, size);
         Assert.assertTrue(buffers.full());
 
         // Sort buffer
@@ -57,13 +58,13 @@ public class MessageRecvBuffersTest {
         buffers.signalSorted();
 
         for (int i = 0; i < 10; i++) {
-            ReceiverUtil.addMockBufferToBuffers(buffers, size);
+            addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertEquals(1000L, buffers.totalBytes());
         Assert.assertFalse(buffers.full());
 
-        ReceiverUtil.addMockBufferToBuffers(buffers, size);
+        addMockBufferToBuffers(buffers, size);
 
         Assert.assertTrue(buffers.full());
 
@@ -80,7 +81,7 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            ReceiverUtil.addMockBufferToBuffers(buffers, size);
+            addMockBufferToBuffers(buffers, size);
         }
         CountDownLatch countDownLatch = new CountDownLatch(2);
         ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -107,7 +108,7 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            ReceiverUtil.addMockBufferToBuffers(buffers, size);
+            addMockBufferToBuffers(buffers, size);
         }
 
         Assert.assertThrows(ComputerException.class, () -> {
@@ -126,7 +127,7 @@ public class MessageRecvBuffersTest {
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
                                                             maxWaitTime);
         for (int i = 0; i < 10; i++) {
-            ReceiverUtil.addMockBufferToBuffers(buffers, size);
+            addMockBufferToBuffers(buffers, size);
         }
         AtomicBoolean success = new AtomicBoolean(false);
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -146,5 +147,13 @@ public class MessageRecvBuffersTest {
         sortThread.interrupt();
         countDownLatch.await();
         Assert.assertTrue(success.get());
+    }
+
+    public static void addMockBufferToBuffers(MessageRecvBuffers buffers,
+                                              int mockBufferLength) {
+        ReceiverUtil.comsumeBuffer(new byte[mockBufferLength],
+                                   (ManagedBuffer buffer) -> {
+            buffers.addBuffer(buffer);
+        });
     }
 }

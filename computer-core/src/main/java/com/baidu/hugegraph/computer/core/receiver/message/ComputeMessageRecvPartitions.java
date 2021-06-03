@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.receiver.message;
 
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.store.FileGenerator;
@@ -27,16 +27,19 @@ import com.baidu.hugegraph.computer.core.store.FileGenerator;
 public class ComputeMessageRecvPartitions
        extends MessageRecvPartitions<ComputeMessageRecvPartition> {
 
-    public ComputeMessageRecvPartitions(Config config,
+    private final ComputerContext context;
+
+    public ComputeMessageRecvPartitions(ComputerContext context,
                                         FileGenerator fileGenerator,
                                         Sorter sorter) {
-        super(config, fileGenerator, sorter, -1);
+        super(context.config(), fileGenerator, sorter, -1);
+        this.context = context;
     }
 
     @Override
     public ComputeMessageRecvPartition createPartition(int superstep,
                                                        Sorter sorter) {
-        return new ComputeMessageRecvPartition(this.config,
+        return new ComputeMessageRecvPartition(this.context,
                                                this.fileGenerator,
                                                sorter,
                                                superstep);

@@ -20,51 +20,113 @@
 package com.baidu.hugegraph.computer.core.receiver.message;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
+import com.baidu.hugegraph.computer.core.sort.Sorter;
+import com.baidu.hugegraph.computer.core.sort.SorterImpl;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.FileManager;
-import com.baidu.hugegraph.config.RpcOptions;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.testutil.Assert;
 
-public class ComputeMessageRecvPartitionTest {
+public class ComputeMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
-    public void testComputeMessageRecvPartition() {
+    public void testCombinableMessageRecvPartition() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
-            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.BSP_LOG_INTERVAL, "30000",
-            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000"
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                ComputerOptions.WORKER_COMBINER_CLASS,
+                DoubleValueSumCombiner.class.getName(),
+                ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
         FileManager fileManager = new FileManager();
         fileManager.init(config);
+        Sorter sorter = new SorterImpl(config);
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
-                                                config,
-                                                fileManager,
-                                                0);
-        Assert.assertEquals("message", partition.type());
-        for (int i = 0; i < 25; i++) {
-            ReceiverUtil.addMockBufferToPartition(partition, 100);
-        }
+                                                context(), fileManager,
+                                                sorter, 0);
+        Assert.assertEquals(MessageType.MSG.name(), partition.type());
 
-        List<String> files1 = partition.outputFiles();
-        Assert.assertEquals(2, files1.size());
-        partition.flushAllBuffersAndWaitSorted();
-        List<String> files2 = partition.outputFiles();
-        Assert.assertEquals(3, files2.size());
+        consumeMockedMessageBuffer((ManagedBuffer buffer) -> {
+            partition.addBuffer(buffer);
+        });
+
+        checkPartitionIterator(partition.iterator());
 
         fileManager.close(config);
+    }
+
+    public static void consumeMockedMessageBuffer(
+                       Consumer<ManagedBuffer> consumer)
+                       throws IOException {
+        for (long i = 0L; i < 10L; i++) {
+            Id id = new LongId(i);
+            DoubleValue message = new DoubleValue(i);
+            ReceiverUtil.comsumeBuffer(writeMessage(id, message),
+                                       (ManagedBuffer buffer) -> {
+                consumer.accept(buffer);
+            });
+        }
+    }
+    private static byte[] writeMessage(Id id, Writable message)
+                                       throws IOException {
+        UnsafeBytesOutput bytesOutput = new UnsafeBytesOutput();
+        EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
+
+        entryOutput.writeEntry(out -> {
+            out.writeByte(id.type().code());
+            id.write(out);
+        }, out -> {
+            message.write(out);
+        });
+        return bytesOutput.toByteArray();
+    }
+
+    public static void checkPartitionIterator(PeekableIterator<KvEntry> it)
+            throws IOException {
+        Assert.assertTrue(it.hasNext());
+        KvEntry lastEntry = it.next();
+        Id lastId = ReceiverUtil.readId(context(), lastEntry.key());
+        DoubleValue lastSumValue = new DoubleValue();
+        ReceiverUtil.readValue(context(), lastEntry.value(), lastSumValue);
+        while (it.hasNext()) {
+            KvEntry currentEntry = it.next();
+            Id currentId = ReceiverUtil.readId(context(), currentEntry.key());
+            DoubleValue currentValue = new DoubleValue();
+            ReceiverUtil.readValue(context(), lastEntry.value(), currentValue);
+            if (lastId.equals(currentId)) {
+                lastSumValue.value(lastSumValue.value() + currentValue.value());
+            } else {
+                Assert.assertEquals(lastId.asLong() * 2.0D,
+                                    lastSumValue.value(), 0.0D);
+            }
+        }
+        Assert.assertEquals(lastId.asLong() * 2.0D,
+                            lastSumValue.value(), 0.0D);
     }
 }

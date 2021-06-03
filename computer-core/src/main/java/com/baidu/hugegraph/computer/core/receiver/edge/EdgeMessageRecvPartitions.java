@@ -36,7 +36,8 @@ public class EdgeMessageRecvPartitions
     }
 
     @Override
-    public EdgeMessageRecvPartition createPartition(int superstep, Sorter sorter) {
+    public EdgeMessageRecvPartition createPartition(int superstep,
+                                                    Sorter sorter) {
         return new EdgeMessageRecvPartition(this.config,
                                             this.fileGenerator,
                                             this.sorter);
