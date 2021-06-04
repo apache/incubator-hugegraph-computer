@@ -78,13 +78,11 @@ public class EntriesUtilTest {
         input.seek(0);
 
         // Test cachedPointer kvEntry
-        entry = EntriesUtil.kvEntryFromInput(input, true, true);
+        entry = EntriesUtil.kvEntryFromInput(input, false, true);
         Assert.assertEquals(100,
                             StoreTestUtil.dataFromPointer(entry.key())
                                          .intValue());
         try (EntryIterator iter = new SubKvEntriesInput(entry, false)) {
-
-
             Assert.assertEquals(10,
                                 StoreTestUtil.dataFromPointer(iter.next().key())
                                              .intValue());
