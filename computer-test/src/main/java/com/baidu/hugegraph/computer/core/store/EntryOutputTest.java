@@ -82,10 +82,13 @@ public class EntryOutputTest {
 
         // Assert entry1
         KvEntry kvEntry1 = iter.next();
+        Assert.assertEquals(3, kvEntry1.numSubEntries());
         int key1 = StoreTestUtil.dataFromPointer(kvEntry1.key());
         Assert.assertEquals(5, key1);
         EntryIterator kvEntry1SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry1);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 6, 6);
+        KvEntry subKv1 = kvEntry1SubKvs.next();
+        Assert.assertEquals(0, subKv1.numSubEntries());
+        SorterTestUtil.assertKvEntry(subKv1, 6, 6);
         SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 2, 1);
         SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 4, 8);
         // Assert entry2
@@ -113,14 +116,22 @@ public class EntryOutputTest {
         KvEntry kvEntry1 = iter.next();
         int key1 = StoreTestUtil.dataFromPointer(kvEntry1.key());
         Assert.assertEquals(5, key1);
+
         EntryIterator kvEntry1SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry1);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 2, 1);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 4, 8);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 6, 6);
+        KvEntry subKv1 = kvEntry1SubKvs.next();
+        Assert.assertEquals(0, subKv1.numSubEntries());
+        SorterTestUtil.assertKvEntry(subKv1, 2, 1);
+        KvEntry subKv2 = kvEntry1SubKvs.next();
+        Assert.assertEquals(0, subKv2.numSubEntries());
+        SorterTestUtil.assertKvEntry(subKv2, 4, 8);
+        KvEntry subKv3 = kvEntry1SubKvs.next();
+        Assert.assertEquals(0, subKv3.numSubEntries());
+        SorterTestUtil.assertKvEntry(subKv3, 6, 6);
         // Assert entry2
         KvEntry kvEntry2 = iter.next();
         int key2 = StoreTestUtil.dataFromPointer(kvEntry2.key());
         Assert.assertEquals(1, key2);
+
         EntryIterator kvEntry2SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry2);
         SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 2, 2);
         SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 6, 1);

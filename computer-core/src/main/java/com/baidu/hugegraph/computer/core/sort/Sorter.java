@@ -41,7 +41,7 @@ public interface Sorter {
      * If some key exists several time, combine the values.
      * @param input The input buffer.
      * @param flusher The flusher for the same key.
-     * @param withSubKv  Is true if need sort subKv.
+     * @param withSubKv True if need sort subKv.
      */
     void sortBuffer(RandomAccessInput input, InnerSortFlusher flusher,
                     boolean withSubKv) throws Exception;
@@ -67,7 +67,7 @@ public interface Sorter {
      * @param inputBuffers The input buffer list.
      * @param flusher The flusher for the same key.
      * @param output Sort result output location.
-     * @param withSubKv Is true if need sort subKv.
+     * @param withSubKv True if need sort subKv.
      */
      void mergeBuffers(List<RandomAccessInput> inputBuffers,
                        OuterSortFlusher flusher, String output,
@@ -100,7 +100,7 @@ public interface Sorter {
      * @param inputs The input file list.
      * @param flusher The flusher for the same key.
      * @param outputs Sort result output locations.
-     * @param withSubKv Is true if need sort subKv.
+     * @param withSubKv True if need sort subKv.
      */
     void mergeInputs(List<String> inputs, OuterSortFlusher flusher,
                      List<String> outputs, boolean withSubKv) throws Exception;
