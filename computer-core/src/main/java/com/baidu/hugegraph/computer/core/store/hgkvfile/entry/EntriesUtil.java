@@ -20,10 +20,12 @@
 package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 import java.io.IOException;
+
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.SubKvEntriesInput;
 
@@ -50,7 +52,7 @@ public final class EntriesUtil {
                                            boolean valueWithSubKv) {
         return kvEntryFromInput(input, input, useInlinePointer, valueWithSubKv);
     }
-    
+
     private static KvEntry cachedPointerKvEntry(
                            RandomAccessInput input,
                            RandomAccessInput userAccessInput,
@@ -59,15 +61,15 @@ public final class EntriesUtil {
         int numSubKvEntries = 0;
 
         // Read key
-        int keyLength = input.readInt();
+        int keyLength = input.readFixedInt();
         long keyPosition = input.position();
         input.skip(keyLength);
 
         // Read value
-        int valueLength = input.readInt();
+        int valueLength = input.readFixedInt();
         long valuePosition = input.position();
         if (valueWithSubKv) {
-            numSubKvEntries = input.readInt();
+            numSubKvEntries = input.readFixedInt();
             input.skip(valueLength - Integer.BYTES);
         } else {
             input.skip(valueLength);
@@ -77,7 +79,7 @@ public final class EntriesUtil {
                                         keyLength);
         Pointer value = new CachedPointer(userAccessInput, valuePosition,
                                           valueLength);
-        
+
         return new DefaultKvEntry(key, value, numSubKvEntries);
     }
 
@@ -86,14 +88,14 @@ public final class EntriesUtil {
                                                 throws IOException {
         int numSubEntries = 0;
         // Read key
-        int keyLength = input.readInt();
+        int keyLength = input.readFixedInt();
         byte[] keyBytes = input.readBytes(keyLength);
 
         // Read value
-        int valueLength = input.readInt();
+        int valueLength = input.readFixedInt();
         byte[] valueBytes = new byte[valueLength];
         if (valueWithSubKv) {
-            numSubEntries = input.readInt();
+            numSubEntries = input.readFixedInt();
             valueBytes[0] = (byte) (numSubEntries & 0xFF);
             valueBytes[1] = (byte) ((numSubEntries >> 8) & 0xFF);
             valueBytes[2] = (byte) ((numSubEntries >> 16) & 0xFF);
@@ -115,18 +117,18 @@ public final class EntriesUtil {
         try {
             Pointer key, value;
             if (useInlinePointer) {
-                byte[] keyBytes = input.readBytes(input.readInt());
+                byte[] keyBytes = input.readBytes(input.readFixedInt());
                 key = new InlinePointer(keyBytes);
 
-                byte[] valueBytes = input.readBytes(input.readInt());
+                byte[] valueBytes = input.readBytes(input.readFixedInt());
                 value = new InlinePointer(valueBytes);
             } else {
-                int keyLength = input.readInt();
+                int keyLength = input.readFixedInt();
                 key = new CachedPointer(userAccessInput, input.position(),
                                         keyLength);
                 input.skip(keyLength);
 
-                int valueLength = input.readInt();
+                int valueLength = input.readFixedInt();
                 value = new CachedPointer(userAccessInput, input.position(),
                                           valueLength);
                 input.skip(valueLength);
@@ -144,8 +146,8 @@ public final class EntriesUtil {
 
     public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry) {
         try {
-            RandomAccessInput input = new UnsafeBytesInput(
-                                      entry.value().bytes());
+            BytesInput input = IOFactory.createBytesInput(entry.value()
+                                                               .bytes());
             // Skip sub-entry size
             input.skip(Integer.BYTES);
             KvEntry firstSubKv = EntriesUtil.subKvEntryFromInput(input, true);
@@ -157,8 +159,9 @@ public final class EntriesUtil {
         }
     }
 
-    public static UnsafeBytesInput inputFromOutput(UnsafeBytesOutput output) {
-        return new UnsafeBytesInput(output.buffer(), output.position());
+    public static BytesInput inputFromOutput(BytesOutput output) {
+        return IOFactory.createBytesInput(output.buffer(),
+                                          (int) output.position());
     }
 
     public static EntryIterator subKvIterFromEntry(KvEntry entry) {

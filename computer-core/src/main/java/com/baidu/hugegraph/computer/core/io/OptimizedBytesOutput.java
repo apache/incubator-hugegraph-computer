@@ -26,19 +26,15 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
 
-public class OptimizedBytesOutput implements RandomAccessOutput {
+public class OptimizedBytesOutput implements BytesOutput {
 
     private final UnsafeBytesOutput out;
 
-    public OptimizedBytesOutput() {
-        this(new UnsafeBytesOutput());
-    }
-
-    public OptimizedBytesOutput(int size) {
+    OptimizedBytesOutput(int size) {
         this(new UnsafeBytesOutput(size));
     }
 
-    public OptimizedBytesOutput(UnsafeBytesOutput out) {
+    OptimizedBytesOutput(UnsafeBytesOutput out) {
         this.out = out;
     }
 
@@ -139,14 +135,21 @@ public class OptimizedBytesOutput implements RandomAccessOutput {
     }
 
     @Override
+    public void writeFixedInt(int v) throws IOException {
+        this.out.writeFixedInt(v);
+    }
+
+    @Override
     public void writeFixedInt(long position, int v) throws IOException {
         this.out.writeFixedInt(position, v);
     }
 
+    @Override
     public byte[] buffer() {
         return this.out.buffer();
     }
 
+    @Override
     public byte[] toByteArray() {
         return this.out.toByteArray();
     }

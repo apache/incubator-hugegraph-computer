@@ -55,6 +55,7 @@ public class WorkerServiceTest extends UnitTestBase {
                     RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                     ComputerOptions.JOB_ID, "local_002",
                     ComputerOptions.JOB_WORKERS_COUNT, "1",
+                    ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
                     ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
                     ComputerOptions.BSP_LOG_INTERVAL, "30000",
                     ComputerOptions.BSP_MAX_SUPER_STEP, "2",
@@ -62,6 +63,7 @@ public class WorkerServiceTest extends UnitTestBase {
                     MockComputation.class.getName()
                 );
                 try {
+                    Thread.sleep(2000);
                     workerService.init(config);
                     workerService.execute();
                 } catch (Throwable e) {
@@ -75,6 +77,7 @@ public class WorkerServiceTest extends UnitTestBase {
             pool.submit(() -> {
                 Config config = UnitTestBase.updateWithRequiredOptions(
                     RpcOptions.RPC_SERVER_HOST, "localhost",
+                    RpcOptions.RPC_SERVER_PORT, "8090",
                     ComputerOptions.JOB_ID, "local_002",
                     ComputerOptions.JOB_WORKERS_COUNT, "1",
                     ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
@@ -123,6 +126,7 @@ public class WorkerServiceTest extends UnitTestBase {
                 RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                 ComputerOptions.JOB_ID, "local_003",
                 ComputerOptions.JOB_WORKERS_COUNT, "2",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
                 ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
                 ComputerOptions.BSP_LOG_INTERVAL, "10000",
@@ -132,6 +136,7 @@ public class WorkerServiceTest extends UnitTestBase {
             );
             WorkerService workerService = new MockWorkerService();
             try {
+                Thread.sleep(2000);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
@@ -148,6 +153,7 @@ public class WorkerServiceTest extends UnitTestBase {
                 RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                 ComputerOptions.JOB_ID, "local_003",
                 ComputerOptions.JOB_WORKERS_COUNT, "2",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "8087",
                 ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
                 ComputerOptions.BSP_LOG_INTERVAL, "10000",
@@ -157,6 +163,7 @@ public class WorkerServiceTest extends UnitTestBase {
             );
             WorkerService workerService = new MockWorkerService();
             try {
+                Thread.sleep(2000);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
@@ -171,8 +178,10 @@ public class WorkerServiceTest extends UnitTestBase {
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
                 RpcOptions.RPC_SERVER_HOST, "localhost",
+                RpcOptions.RPC_SERVER_PORT, "8090",
                 ComputerOptions.JOB_ID, "local_003",
                 ComputerOptions.JOB_WORKERS_COUNT, "2",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
                 ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
                 ComputerOptions.BSP_LOG_INTERVAL, "10000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",

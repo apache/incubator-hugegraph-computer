@@ -33,16 +33,16 @@ import com.baidu.hugegraph.util.E;
 class SortedBufferQueue {
 
     private final BlockingQueue<SortedBufferMessage> queue;
-    private final Runnable notifyNotEmptyCallback;
+    private final Runnable notEmptyNotifer;
     private final AtomicBoolean empty;
 
-    public SortedBufferQueue(Runnable notifyNotEmpty) {
-        E.checkArgumentNotNull(notifyNotEmpty,
+    public SortedBufferQueue(Runnable notEmptyNotifer) {
+        E.checkArgumentNotNull(notEmptyNotifer,
                                "The callback to notify any queue not empty " +
                                "can't be null");
         // TODO: replace with conversant queue
         this.queue = new LinkedBlockingQueue<>(128);
-        this.notifyNotEmptyCallback = notifyNotEmpty;
+        this.notEmptyNotifer = notEmptyNotifer;
         this.empty = new AtomicBoolean(true);
     }
 
@@ -62,7 +62,7 @@ class SortedBufferQueue {
              * Only invoke callback when queue from empty to not empty
              * to avoid frequently acquiring locks
              */
-            this.notifyNotEmptyCallback.run();
+            this.notEmptyNotifer.run();
         }
     }
 

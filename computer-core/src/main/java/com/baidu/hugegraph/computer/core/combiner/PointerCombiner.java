@@ -19,8 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
@@ -32,13 +34,13 @@ public class PointerCombiner<V extends Readable & Writable>
     private final V v1;
     private final V v2;
     private final Combiner<V> combiner;
-    private final OptimizedUnsafeBytesOutput bytesOutput;
+    private final BytesOutput bytesOutput;
 
     public PointerCombiner(V v1, V v2, Combiner<V> combiner) {
         this.v1 = v1;
         this.v2 = v2;
         this.combiner = combiner;
-        this.bytesOutput = new OptimizedUnsafeBytesOutput();
+        this.bytesOutput = IOFactory.createBytesOutput(Constants.DEFAULT_SIZE);
     }
 
     @Override

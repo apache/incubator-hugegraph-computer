@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.io;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -39,7 +38,7 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
     private final RandomAccessFile file;
     private long fileOffset;
 
-    public BufferedFileOutput(File file) throws FileNotFoundException {
+    BufferedFileOutput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_WRITE),
              Constants.DEFAULT_BUFFER_SIZE);
     }
@@ -109,6 +108,11 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
             this.file.seek(this.fileOffset);
         }
         return positionBeforeSkip;
+    }
+
+    @Override
+    public void writeFixedInt(int v) throws IOException {
+        super.writeFixedInt(v);
     }
 
     @Override

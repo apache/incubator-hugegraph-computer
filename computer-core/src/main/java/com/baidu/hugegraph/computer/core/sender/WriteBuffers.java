@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.io.OptimizedBytesInput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.util.E;
 
@@ -105,6 +105,7 @@ public class WriteBuffers {
     }
 
     public synchronized RandomAccessInput wrapForRead() {
-        return new OptimizedBytesInput(this.sortingBuffer.output().buffer());
+        return IOFactory.createBytesInput(this.sortingBuffer.output()
+                                                            .toByteArray());
     }
 }

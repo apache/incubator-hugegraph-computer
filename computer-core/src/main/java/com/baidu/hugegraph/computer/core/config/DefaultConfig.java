@@ -44,6 +44,7 @@ public final class DefaultConfig implements Config {
     public DefaultConfig(Map<String, String> options) {
         this.allConfig = this.parseOptions(options);
         this.hotConfig = this.extractHotConfig(this.allConfig);
+        this.checkOptions();
     }
 
     private HugeConfig parseOptions(Map<String, String> options) {
@@ -74,6 +75,18 @@ public final class DefaultConfig implements Config {
         hotConfig.outputEdgeProperties(
                   allConfig.get(ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES));
         return hotConfig;
+    }
+
+    private void checkOptions() {
+        int partitionsCount = this.allConfig.get(
+                              ComputerOptions.JOB_PARTITIONS_COUNT);
+        int workersCount = this.allConfig.get(
+                           ComputerOptions.JOB_WORKERS_COUNT);
+        if (partitionsCount < workersCount) {
+            throw new ComputerException("The partitions count must be >= " +
+                                        "workers count, but got %s < %s",
+                                        partitionsCount, workersCount);
+        }
     }
 
     @Override

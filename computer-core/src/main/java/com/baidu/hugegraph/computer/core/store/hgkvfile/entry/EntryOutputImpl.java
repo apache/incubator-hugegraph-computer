@@ -56,7 +56,7 @@ public class EntryOutputImpl implements EntryOutput {
 
     private void writeData(Writable data) throws IOException {
         // Write data length placeholder
-        this.output.writeInt(0);
+        this.output.writeFixedInt(0);
         long position = this.output.position();
         // Write data
         data.write(this.output);

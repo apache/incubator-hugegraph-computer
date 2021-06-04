@@ -24,16 +24,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.io.OptimizedBytesInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 
 public final class SerializeUtil {
 
     public static byte[] toBytes(Writable obj) {
-        try (OptimizedBytesOutput bao = new OptimizedBytesOutput()) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(
+                               Constants.DEFAULT_SIZE)) {
             obj.write(bao);
             return bao.toByteArray();
         } catch (IOException e) {
@@ -43,7 +46,8 @@ public final class SerializeUtil {
     }
 
     public static byte[] toBytes(List<? extends Writable> list) {
-        try (OptimizedBytesOutput bao = new OptimizedBytesOutput()) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(
+                               Constants.DEFAULT_SIZE)) {
             bao.writeInt(list.size());
             for (Writable obj : list) {
                 obj.write(bao);
@@ -57,7 +61,7 @@ public final class SerializeUtil {
     }
 
     public static void fromBytes(byte[] bytes, Readable obj) {
-        try (OptimizedBytesInput bai = new OptimizedBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             obj.read(bai);
         } catch (IOException e) {
             throw new ComputerException("Failed to read from byte array", e);
@@ -66,7 +70,7 @@ public final class SerializeUtil {
 
     public static <V extends Readable> List<V> fromBytes(byte[] bytes,
                                                          Supplier<V> supplier) {
-        try (OptimizedBytesInput bai = new OptimizedBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             int size = bai.readInt();
             List<V> list = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {

@@ -17,52 +17,19 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
+package com.baidu.hugegraph.computer.core.io;
 
-import java.io.Closeable;
-import java.io.IOException;
-
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-
-public interface HgkvFile extends Closeable {
+public interface BytesOutput extends RandomAccessOutput {
 
     /**
-     * The absolute path includes file name.
+     * Get the internal bytes buffer
+     * @return buffer
      */
-    String path();
+    byte[] buffer();
 
     /**
-     * Number of entries in file.
+     * Get the actual bytes buffer that contains value, will make a copy
+     * @return copied buffer
      */
-    long numEntries();
-
-    /**
-     * Number of sub entries in file.
-     */
-    long numSubEntries();
-
-    /**
-     * File version.
-     */
-    String version();
-
-    /**
-     * Max key in file.
-     */
-    byte[] max();
-
-    /**
-     * Min key in file.
-     */
-    byte[] min();
-
-    /**
-     * File verification string.
-     */
-    String magic();
-
-    /**
-     * Output of hgkv file.
-     */
-    RandomAccessOutput output() throws IOException;
+    byte[] toByteArray();
 }

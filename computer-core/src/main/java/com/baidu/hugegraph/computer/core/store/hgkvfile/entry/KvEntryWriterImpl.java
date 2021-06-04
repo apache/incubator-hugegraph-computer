@@ -22,10 +22,12 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
@@ -39,16 +41,16 @@ public class KvEntryWriterImpl implements KvEntryWriter {
     private long total;
     private int subEntryCount;
 
-    private final UnsafeBytesOutput subKvBuffer;
+    private final BytesOutput subKvBuffer;
 
     public KvEntryWriterImpl(RandomAccessOutput output, boolean needSort) {
         this.output = output;
         this.placeholderPosition = output.position();
         try {
             // Write total subKv length placeholder
-            this.output.writeInt(0);
+            this.output.writeFixedInt(0);
             // Write total subKv count placeholder
-            this.output.writeInt(0);
+            this.output.writeFixedInt(0);
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);
         }
@@ -57,7 +59,8 @@ public class KvEntryWriterImpl implements KvEntryWriter {
         this.subEntryCount = 0;
 
         if (needSort) {
-            this.subKvBuffer = new UnsafeBytesOutput();
+            this.subKvBuffer = IOFactory.createBytesOutput(
+                               Constants.DEFAULT_BUFFER_SIZE);
         } else {
             this.subKvBuffer = null;
         }
@@ -87,7 +90,7 @@ public class KvEntryWriterImpl implements KvEntryWriter {
     }
 
     private void sortAndWriteSubKvs() throws IOException {
-        UnsafeBytesInput input = EntriesUtil.inputFromOutput(this.subKvBuffer);
+        BytesInput input = EntriesUtil.inputFromOutput(this.subKvBuffer);
         InputSorter sorter = new JavaInputSorter();
         Iterator<KvEntry> subKvs = sorter.sort(new KvEntriesInput(input));
 
@@ -109,7 +112,7 @@ public class KvEntryWriterImpl implements KvEntryWriter {
 
         long position = output.position();
         // Write data length placeholder
-        output.writeInt(0);
+        output.writeFixedInt(0);
         // Write data
         data.write(output);
         // Fill data length placeholder

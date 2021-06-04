@@ -22,8 +22,10 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.sorter.SubKvSorter;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
@@ -35,14 +37,15 @@ import com.baidu.hugegraph.util.E;
 public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
 
     private final Combiner<Pointer> combiner;
-    private final UnsafeBytesOutput output;
+    private final BytesOutput output;
     private final int subKvFlushThreshold;
     private int sources;
 
     public CombineSubKvOuterSortFlusher(Combiner<Pointer> combiner,
                                         int subKvFlushThreshold) {
         this.combiner = combiner;
-        this.output = new UnsafeBytesOutput();
+        this.output = IOFactory.createBytesOutput(
+                      Constants.DEFAULT_BUFFER_SIZE);
         this.subKvFlushThreshold = subKvFlushThreshold;
     }
 
@@ -64,10 +67,10 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
         while (true) {
             currentKv.key().write(this.output);
             long position = this.output.position();
-            // Write value length placeholder
-            this.output.writeInt(0);
-            // Write subKv count placeholder
-            this.output.writeInt(0);
+            // Write total sub-entry length placeholder
+            this.output.writeFixedInt(0);
+            // Write sub-entry count placeholder
+            this.output.writeFixedInt(0);
             int writtenCount = 0;
 
             // Iterate subKv of currentKv
@@ -96,8 +99,9 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
                     writtenCount == this.subKvFlushThreshold) {
                     long currentPosition = this.output.position();
                     this.output.seek(position);
-                    this.output.writeInt((int)(currentPosition - position - 4));
-                    this.output.writeInt(writtenCount);
+                    this.output.writeFixedInt((int) (currentPosition -
+                                              position - Integer.BYTES));
+                    this.output.writeFixedInt(writtenCount);
                     this.output.seek(currentPosition);
                     // Write kvEntry to file.
                     RandomAccessInput input = EntriesUtil.inputFromOutput(
@@ -112,9 +116,9 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
                     currentKv.key().write(this.output);
                     position = this.output.position();
                     // Write value length placeholder
-                    this.output.writeInt(0);
+                    this.output.writeFixedInt(0);
                     // Write subKv count placeholder
-                    this.output.writeInt(0);
+                    this.output.writeFixedInt(0);
                     writtenCount = 0;
                 }
 

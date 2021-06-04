@@ -59,20 +59,20 @@ public class WriteBufferTest extends UnitTestBase {
 
     @Test
     public void testReachThreshold() throws IOException {
-        WriteBuffer buffer = new WriteBuffer(context, 10, 50);
+        WriteBuffer buffer = new WriteBuffer(context, 20, 50);
         Assert.assertFalse(buffer.reachThreshold());
 
         Vertex vertex = context.graphFactory().createVertex(
                         new LongId(1L), new DoubleValue(0.5d));
-        // After write, the position is 5
+        // After write, the position is 11
         buffer.writeVertex(vertex);
         Assert.assertFalse(buffer.reachThreshold());
 
-        // After write, the position is 10
+        // After write, the position is 22
         buffer.writeVertex(vertex);
         Assert.assertTrue(buffer.reachThreshold());
 
-        // After write, the position is 15
+        // After write, the position is 33
         buffer.writeVertex(vertex);
         Assert.assertTrue(buffer.reachThreshold());
     }

@@ -146,9 +146,12 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
         this.numEntries = this.segments.stream()
                                        .mapToLong(HgkvFile::numEntries)
                                        .sum();
-        this.numSubEntries = this.segments.stream()
-                                          .mapToLong(HgkvFile::numSubEntries)
-                                          .sum();
+        for (HgkvFile file : this.segments) {
+            this.numSubEntries += file.numSubEntries();
+        }
+//        this.numSubEntries = this.segments.stream()
+//                                          .mapToLong(HgkvFile::numSubEntries)
+//                                          .sum();
         this.max = this.segments.stream()
                                 .map(HgkvFile::max)
                                 .max(BytesUtil::compare)

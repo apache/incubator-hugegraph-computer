@@ -133,14 +133,7 @@ public class MessageSendManager implements Manager {
         Set<Integer> workerIds = all.keySet().stream()
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
-        try {
-            for (Integer workerId : workerIds) {
-                this.sender.send(workerId, SortedBufferMessage.START);
-            }
-        } catch (InterruptedException e) {
-            throw new ComputerException("Waiting to put buffer into " +
-                                        "queue was interrupted");
-        }
+        this.sendControlMessageToWorkers(workerIds, SortedBufferMessage.START);
         LOG.info("Start send message(type={})", type);
     }
 
@@ -156,25 +149,8 @@ public class MessageSendManager implements Manager {
         Set<Integer> workerIds = all.keySet().stream()
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
-        List<Future<?>> futures = new ArrayList<>(workerIds.size());
-        try {
-            for (Integer workerId : workerIds) {
-                futures.add(this.sender.send(workerId,
-                                             SortedBufferMessage.END));
-            }
-        } catch (InterruptedException e) {
-            throw new ComputerException("Waiting to put buffer into " +
-                                        "queue was interrupted");
-        }
+        this.sendControlMessageToWorkers(workerIds, SortedBufferMessage.END);
 
-        try {
-            for (Future<?> future : futures) {
-                future.get();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            throw new ComputerException("Failed to wait close session finished",
-                                        e);
-        }
         LOG.info("Finish send message(type={})", type);
     }
 
@@ -242,6 +218,28 @@ public class MessageSendManager implements Manager {
         } catch (InterruptedException | ExecutionException e) {
             throw new ComputerException("Failed to wait sort future finished",
                                         e);
+        }
+    }
+
+    private void sendControlMessageToWorkers(Set<Integer> workerIds,
+                                             SortedBufferMessage message) {
+        List<Future<?>> futures = new ArrayList<>(workerIds.size());
+        try {
+            for (Integer workerId : workerIds) {
+                futures.add(this.sender.send(workerId, message));
+            }
+        } catch (InterruptedException e) {
+            throw new ComputerException("Waiting to put buffer into " +
+                                        "queue was interrupted");
+        }
+
+        try {
+            for (Future<?> future : futures) {
+                future.get();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new ComputerException("Failed to wait control message(%s) " +
+                                        "finished", e, message.type());
         }
     }
 

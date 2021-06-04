@@ -77,6 +77,7 @@ public class QueuedMessageSender implements MessageSender {
                                   this.anyQueueNotEmptyEvent::signal);
         WorkerChannel channel = new WorkerChannel(workerId, queue, client);
         this.workerChannels.put(workerId, channel);
+        LOG.info("Add channel for worker {}", workerId);
     }
 
     @Override
@@ -88,7 +89,8 @@ public class QueuedMessageSender implements MessageSender {
             throw new ComputerException("Invalid workerId %s", workerId);
         }
         channel.queue.put(message);
-        return channel.newFuture();
+        channel.newFuture();
+        return channel.future;
     }
 
     public Runnable notBusyNotifier() {
@@ -256,9 +258,8 @@ public class QueuedMessageSender implements MessageSender {
             this.future = null;
         }
 
-        public CompletableFuture<Void> newFuture() {
+        public void newFuture() {
             this.future = new CompletableFuture<>();
-            return this.future;
         }
     }
 }

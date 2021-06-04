@@ -19,16 +19,58 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 
-public class GraphOutputFactory {
+public final class IOFactory {
 
-    public static GraphOutput create(ComputerContext context,
-                                     OutputFormat format,
-                                     RandomAccessOutput out) {
+    public static BytesOutput createBytesOutput(int size) {
+        return new OptimizedBytesOutput(size);
+    }
+
+    public static BytesInput createBytesInput(byte[] buffer) {
+        return new OptimizedBytesInput(buffer);
+    }
+
+    public static BytesInput createBytesInput(byte[] buffer, int limit) {
+        return new OptimizedBytesInput(buffer, limit);
+    }
+
+    public static BytesInput createBytesInput(byte[] buffer, int position,
+                                              int limit) {
+        return new OptimizedBytesInput(buffer, position, limit);
+    }
+
+    public static RandomAccessOutput createFileOutput(File file)
+                                     throws IOException {
+        return new OptimizedBytesOutput(new BufferedFileOutput(file));
+    }
+
+    public static RandomAccessInput createFileInput(File file)
+                                    throws IOException {
+        return new OptimizedBytesInput(new BufferedFileInput(file));
+    }
+
+    public static RandomAccessOutput createStreamOutput(OutputStream stream)
+                                     throws IOException {
+        return new OptimizedBytesOutput(new BufferedStreamOutput(stream));
+    }
+
+    public static RandomAccessInput createStreamInput(InputStream stream)
+                                    throws IOException {
+        return new OptimizedBytesInput(new BufferedStreamInput(stream));
+    }
+
+    public static GraphOutput createGraphOutput(ComputerContext context,
+                                                OutputFormat format,
+                                                RandomAccessOutput out) {
         switch (format) {
             case BIN:
                 EntryOutput entryOutput = new EntryOutputImpl(out);

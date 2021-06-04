@@ -23,9 +23,11 @@ import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.SubKvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
@@ -39,7 +41,8 @@ public class EntriesUtilTest {
 
     @Test
     public void testSubKvEntriesInput() throws Exception {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.DEFAULT_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(output);
 
         KvEntryWriter subKvWriter = entryOutput.writeEntry(new LongId(100));
@@ -50,7 +53,7 @@ public class EntriesUtilTest {
         subKvWriter.writeSubKv(new LongId(10), new LongId(1));
         subKvWriter.writeFinish();
 
-        UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
+        BytesInput input = EntriesUtil.inputFromOutput(output);
 
         // Test inlinePointer kvEntry
         KvEntry entry = EntriesUtil.kvEntryFromInput(input, true, true);

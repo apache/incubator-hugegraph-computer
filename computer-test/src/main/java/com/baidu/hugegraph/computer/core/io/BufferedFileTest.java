@@ -643,7 +643,8 @@ public class BufferedFileTest {
         File file3 = createTempFile();
         try (BufferedFileInput fileInput = inputByString(file3, "apple")) {
             @SuppressWarnings("resource")
-            UnsafeBytesOutput output = new UnsafeBytesOutput();
+            UnsafeBytesOutput output = new UnsafeBytesOutput(
+                                       Constants.DEFAULT_SIZE);
             output.writeBytes("banana");
             @SuppressWarnings("resource")
             RandomAccessInput input = new UnsafeBytesInput(output.buffer());
@@ -662,7 +663,8 @@ public class BufferedFileTest {
         // BufferedFileInput compare to other RandomAccessInput
         file1 = createTempFile();
         try (BufferedFileInput input1 = inputByString(file1, "hugegraph")) {
-            UnsafeBytesOutput output = new UnsafeBytesOutput();
+            UnsafeBytesOutput output = new UnsafeBytesOutput(
+                                       Constants.DEFAULT_SIZE);
             output.writeBytes("banana");
             RandomAccessInput input = EntriesUtil.inputFromOutput(output);
 

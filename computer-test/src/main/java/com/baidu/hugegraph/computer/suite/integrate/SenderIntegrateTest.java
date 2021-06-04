@@ -81,13 +81,17 @@ public class SenderIntegrateTest {
                                           .withTransoprtServerPort(8091)
                                           .withRpcServerRemote("127.0.0.1:8090")
                                           .build();
+            WorkerService service = null;
             try {
                 Thread.sleep(2000);
-                WorkerService service = initWorker(args);
+                service = initWorker(args);
                 service.execute();
-                service.close();
             } catch (Exception e) {
                 Assert.fail(e.getMessage());
+            } finally {
+                if (service != null) {
+                    service.close();
+                }
             }
         });
         masterThread.start();

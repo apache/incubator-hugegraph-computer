@@ -38,7 +38,6 @@ public class DataBlockBuilderImpl implements BlockBuilder {
     public void add(KvEntry entry) throws IOException {
         entry.key().write(this.output);
         entry.value().write(this.output);
-
         this.entriesBytes += this.sizeOfEntry(entry);
     }
 

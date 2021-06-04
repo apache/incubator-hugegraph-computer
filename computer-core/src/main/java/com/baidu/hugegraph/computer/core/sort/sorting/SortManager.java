@@ -32,7 +32,8 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.io.OptimizedBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
@@ -97,13 +98,13 @@ public class SortManager implements Manager {
         return CompletableFuture.supplyAsync(() -> {
             RandomAccessInput bufferForRead = buffer.wrapForRead();
             // TODO：This ByteBuffer should be allocated from the off-heap
-            OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                          this.capacity);
+            BytesOutput output = IOFactory.createBytesOutput(this.capacity);
             InnerSortFlusher flusher = this.createSortFlusher(
                                        type, output,
                                        this.flushThreshold);
             try {
-                this.sorter.sortBuffer(bufferForRead, flusher);
+                this.sorter.sortBuffer(bufferForRead, flusher,
+                                       type == MessageType.EDGE);
             } catch (Exception e) {
                 throw new ComputerException("Failed to sort buffer", e);
             }

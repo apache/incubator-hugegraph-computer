@@ -26,9 +26,9 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.io.OptimizedBytesInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedBytesOutput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 
 public class IdValueUtil {
 
@@ -41,7 +41,7 @@ public class IdValueUtil {
          * NOTE: must use OptimizedUnsafeBytesInput, it make sure to
          * write bytes in big-end-aligned way
          */
-        try (RandomAccessInput bai = new OptimizedBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             byte type = bai.readByte();
             Id id = IdFactory.createId(type);
             id.read(bai);
@@ -53,7 +53,7 @@ public class IdValueUtil {
     }
 
     public static IdValue toIdValue(Id id, int len) {
-        try (OptimizedBytesOutput bao = new OptimizedBytesOutput(len)) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(len)) {
             bao.writeByte(id.type().code());
             id.write(bao);
             return new IdValue(bao.buffer(), (int) bao.position());

@@ -29,11 +29,13 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
@@ -41,26 +43,38 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuil
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class StoreTestUtil {
 
     public static final String FILE_DIR = "hgkv";
 
+    private static void writeData(BytesOutput output, Integer value)
+                                  throws IOException {
+        // Write data length placeholder
+        output.writeFixedInt(0);
+        long position = output.position();
+        // Write data
+        output.writeInt(value);
+        // Fill data length placeholder
+        int dataLength = (int) (output.position() - position);
+        output.writeFixedInt(position - Integer.BYTES, dataLength);
+    }
+
     public static List<KvEntry> kvEntriesFromMap(List<Integer> map)
                                                  throws IOException {
-        UnsafeBytesOutput data = new UnsafeBytesOutput();
+        BytesOutput data = IOFactory.createBytesOutput(
+                           Constants.DEFAULT_SIZE);
         Iterator<Integer> iterator = map.iterator();
         while (iterator.hasNext()) {
-            data.writeInt(Integer.BYTES);
-            data.writeInt(iterator.next());
-            data.writeInt(Integer.BYTES);
-            data.writeInt(iterator.next());
+            // Write key length
+            writeData(data, iterator.next());
+            // Write value length
+            writeData(data, iterator.next());
         }
 
-        RandomAccessInput input = new UnsafeBytesInput(data.buffer(),
-                                                       data.position());
+        BytesInput input = IOFactory.createBytesInput(data.buffer(),
+                                                      (int) data.position());
         Iterator<KvEntry> entriesIter = new KvEntriesInput(input);
         List<KvEntry> entries = new ArrayList<>();
         while (entriesIter.hasNext()) {
@@ -88,7 +102,7 @@ public class StoreTestUtil {
     public static void hgkvDirFromSubKvMap(Config config,
                                            List<List<Integer>> map,
                                            String path) throws IOException {
-        UnsafeBytesInput input = SorterTestUtil.inputFromSubKvMap(map);
+        BytesInput input = SorterTestUtil.inputFromSubKvMap(map);
         Iterator<KvEntry> iter = new KvEntriesInput(input, true);
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config, path)) {
             while (iter.hasNext()) {
@@ -107,7 +121,11 @@ public class StoreTestUtil {
                 builder.add(entry);
             }
             builder.finish();
-            Assert.assertEquals(56, builder.headerLength());
+            /*
+             * Some fields are written in a variable-length way,
+             * so it's not recommended to assert length value.
+             */
+            Assert.assertEquals(19, builder.headerLength());
         } catch (Exception e) {
             FileUtils.deleteQuietly(file);
             throw e;
@@ -129,19 +147,14 @@ public class StoreTestUtil {
         return availablePathById(String.valueOf(id));
     }
 
-    public static int byteArrayToInt(byte[] bytes) {
-        return bytes[0] & 0xFF |
-               (bytes[1] & 0xFF) << 8 |
-               (bytes[2] & 0xFF) << 16 |
-               (bytes[3] & 0xFF) << 24;
+    public static int byteArrayToInt(byte[] bytes) throws IOException {
+        return IOFactory.createBytesInput(bytes).readInt();
     }
 
-    public static byte[] intToByteArray(int data) {
-        return new byte[] {
-                (byte) (data & 0xFF),
-                (byte) ((data >> 8) & 0xFF),
-                (byte) ((data >> 16) & 0xFF),
-                (byte) ((data >> 24) & 0xFF)
-        };
+    public static byte[] intToByteArray(int data) throws IOException {
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.DEFAULT_SIZE);
+        output.writeInt(data);
+        return output.toByteArray();
     }
 }

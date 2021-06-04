@@ -25,7 +25,7 @@ import java.util.List;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
@@ -36,7 +36,7 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
     // Max entries size of a block
     private final long maxDataBlockSize;
 
-    private final BufferedFileOutput output;
+    private final RandomAccessOutput output;
     private final BlockBuilder dataBlockBuilder;
     private final IndexBlockBuilder indexBlockBuilder;
     private boolean buildFinished;
@@ -146,30 +146,27 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
     }
 
     private void writeFooter() throws IOException {
+        long startPostion = this.output.position();
         // Write magic
         this.output.writeBytes(HgkvFileImpl.MAGIC);
-        this.footerLength += HgkvFileImpl.MAGIC.length();
         // Write numEntries
         this.output.writeLong(this.numEntries);
-        this.footerLength += Long.BYTES;
         // Write numSubEntries
         this.output.writeLong(this.numSubEntries);
-        this.footerLength += Long.BYTES;
         // Write length of dataBlock
         this.output.writeLong(this.dataLength);
-        this.footerLength += Long.BYTES;
         // Write length of indexBlock
         this.output.writeLong(this.indexLength());
-        this.footerLength += Long.BYTES;
         // Write max key offset
         this.output.writeLong(this.maxKeyOffset);
-        this.footerLength += Long.BYTES;
         // Write min key offset
         this.output.writeLong(this.minKeyOffset);
-        this.footerLength += Long.BYTES;
         // Write version
         this.output.writeShort(HgkvFileImpl.MAJOR_VERSION);
         this.output.writeShort(HgkvFileImpl.MINOR_VERSION);
-        this.footerLength += Short.BYTES * 2;
+        // Write footerLength
+        this.footerLength = (int) (this.output.position() - startPostion);
+        this.footerLength += Integer.BYTES;
+        this.output.writeFixedInt(this.footerLength);
     }
 }

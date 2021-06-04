@@ -24,8 +24,10 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
@@ -38,13 +40,14 @@ public class PointerTest {
         byte[] data = new byte[]{100, 0, 0, 0};
         byte[] expectedWriteResult = {4, 0, 0, 0, 100, 0, 0, 0,
                                       4, 0, 0, 0, 100, 0, 0, 0};
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
-        output.writeInt(Integer.BYTES);
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.DEFAULT_SIZE);
+        output.writeFixedInt(data.length);
         output.write(data);
-        output.writeInt(Integer.BYTES);
+        output.writeFixedInt(data.length);
         output.write(data);
 
-        UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
+        BytesInput input = EntriesUtil.inputFromOutput(output);
         KvEntry inlineKvEntry = EntriesUtil.kvEntryFromInput(input, true,
                                                              false);
         Pointer inlineKey = inlineKvEntry.key();
@@ -56,7 +59,8 @@ public class PointerTest {
         Assert.assertEquals(4L, inlineValue.length());
         Assert.assertEquals(0, BytesUtil.compare(data, inlineValue.bytes()));
 
-        UnsafeBytesOutput writeOutput = new UnsafeBytesOutput();
+        BytesOutput writeOutput = IOFactory.createBytesOutput(
+                                  Constants.DEFAULT_SIZE);
         inlineKey.write(writeOutput);
         inlineValue.write(writeOutput);
         int result = BytesUtil.compare(expectedWriteResult,
@@ -78,7 +82,7 @@ public class PointerTest {
         Assert.assertEquals(4L, cachedValue.length());
         Assert.assertEquals(0, BytesUtil.compare(data, cachedValue.bytes()));
 
-        writeOutput = new UnsafeBytesOutput();
+        writeOutput = IOFactory.createBytesOutput(Constants.DEFAULT_SIZE);
         cachedKey.write(writeOutput);
         cachedValue.write(writeOutput);
         result = BytesUtil.compare(expectedWriteResult,

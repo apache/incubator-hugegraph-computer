@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -33,13 +34,14 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
-import com.baidu.hugegraph.computer.core.io.GraphOutputFactory;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.OutputFormat;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.config.TypedOption;
@@ -55,13 +57,14 @@ public class UnitTestBase {
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(
+                               Constants.DEFAULT_SIZE)) {
             oldId.write(bao);
             bytes = bao.toByteArray();
         }
 
         Id newId = IdFactory.createId(oldId.type());
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newId.read(bai);
             Assert.assertEquals(oldId, newId);
         }
@@ -70,13 +73,14 @@ public class UnitTestBase {
     public static void assertValueEqualAfterWriteAndRead(Value<?> oldValue)
                                                          throws IOException {
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(
+                               Constants.DEFAULT_SIZE)) {
             oldValue.write(bao);
             bytes = bao.toByteArray();
         }
 
         Value<?> newValue = valueFactory().createValue(oldValue.type());
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newValue.read(bai);
             Assert.assertEquals(oldValue, newValue);
         }
@@ -122,12 +126,13 @@ public class UnitTestBase {
                                                     Readable readObj)
                                                     throws IOException {
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(
+                               Constants.DEFAULT_SIZE)) {
             writeObj.write(bao);
             bytes = bao.toByteArray();
         }
 
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             readObj.read(bai);
             Assert.assertEquals(writeObj, readObj);
         }
@@ -176,10 +181,9 @@ public class UnitTestBase {
         return new StreamGraphInput(context(), bai);
     }
 
-    protected static StreamGraphOutput newStreamGraphOutput(
-                                       UnsafeBytesOutput bao) {
-        return (StreamGraphOutput) GraphOutputFactory.create(context(),
-                                                             OutputFormat.BIN,
-                                                             bao);
+    protected static StreamGraphOutput newStreamGraphOutput(BytesOutput bao) {
+        return (StreamGraphOutput) IOFactory.createGraphOutput(
+                                                 context(), OutputFormat.BIN,
+                                                 bao);
     }
 }

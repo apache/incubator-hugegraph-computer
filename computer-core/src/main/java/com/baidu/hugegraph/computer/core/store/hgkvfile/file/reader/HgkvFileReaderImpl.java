@@ -23,12 +23,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 
 public class HgkvFileReaderImpl implements HgkvFileReader {
 
@@ -57,8 +58,8 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
 
     private static class EntryIter implements EntryIterator {
 
-        private final BufferedFileInput input;
-        private final BufferedFileInput userAccessInput;
+        private final RandomAccessInput input;
+        private final RandomAccessInput userAccessInput;
         private long numEntries;
         private final boolean useInlinePointer;
         private final boolean withSubKv;
@@ -68,7 +69,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
                          throws IOException {
             this.numEntries = hgkvFile.numEntries();
             File file = new File(hgkvFile.path());
-            this.input = new BufferedFileInput(file);
+            this.input = IOFactory.createFileInput(file);
             this.userAccessInput = this.input.duplicate();
             this.useInlinePointer = useInlinePointer;
             this.withSubKv = withSubKv;

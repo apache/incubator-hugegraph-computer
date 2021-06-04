@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -44,7 +45,8 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         LongValue longValue = new LongValue(999L);
         Vertex vertex1 = graphFactory().createVertex(longId, longValue);
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput(
+                                     Constants.DEFAULT_SIZE)) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeVertex(vertex1);
             bytes = bao.toByteArray();

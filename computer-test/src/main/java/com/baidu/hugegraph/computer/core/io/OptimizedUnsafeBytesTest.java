@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.testutil.Assert;
 
 @SuppressWarnings("resource")
@@ -30,7 +31,8 @@ public class OptimizedUnsafeBytesTest {
 
     @Test
     public void testConstructor() {
-        OptimizedBytesOutput output = new OptimizedBytesOutput();
+        OptimizedBytesOutput output = new OptimizedBytesOutput(
+                                      Constants.DEFAULT_SIZE);
         Assert.assertEquals(0, output.position());
 
         OptimizedBytesOutput output2 = new OptimizedBytesOutput(16);
@@ -40,7 +42,7 @@ public class OptimizedUnsafeBytesTest {
         Assert.assertEquals(0, input.position());
 
         OptimizedBytesInput input2 = new OptimizedBytesInput(output.buffer(),
-                                                             4L);
+                                                             4);
         Assert.assertEquals(0, input2.position());
     }
 
@@ -55,7 +57,8 @@ public class OptimizedUnsafeBytesTest {
 
     private static OptimizedBytesInput inputByString(String s)
                                                      throws IOException {
-        OptimizedBytesOutput output = new OptimizedBytesOutput();
+        OptimizedBytesOutput output = new OptimizedBytesOutput(
+                                      Constants.DEFAULT_SIZE);
         output.writeBytes(s);
         return new OptimizedBytesInput(output.toByteArray());
     }

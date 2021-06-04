@@ -135,6 +135,11 @@ public class StructRandomAccessOutput implements RandomAccessOutput {
     }
 
     @Override
+    public void writeFixedInt(int v) throws IOException {
+        this.writeInt(v);
+    }
+
+    @Override
     public void writeFixedInt(long position, int v) throws IOException {
         long oldPosition = this.position();
         this.seek(position);

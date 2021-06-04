@@ -36,12 +36,12 @@ public class BufferedFileInput extends UnsafeBytesInput {
     private final RandomAccessFile file;
     private long fileOffset;
 
-    public BufferedFileInput(File file) throws IOException {
+    BufferedFileInput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_READ),
              Constants.DEFAULT_BUFFER_SIZE);
     }
 
-    public BufferedFileInput(RandomAccessFile file, int bufferCapacity)
+    BufferedFileInput(RandomAccessFile file, int bufferCapacity)
                              throws IOException {
         super(new byte[bufferCapacity], 0);
         E.checkArgument(bufferCapacity >= 8,

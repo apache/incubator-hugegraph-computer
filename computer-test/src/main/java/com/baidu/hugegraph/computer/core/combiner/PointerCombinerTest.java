@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -33,10 +33,12 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class PointerCombinerTest extends UnitTestBase {
@@ -55,10 +57,10 @@ public class PointerCombinerTest extends UnitTestBase {
                                                        new DoubleValue(),
                                                        combiner);
 
-        try (OptimizedUnsafeBytesOutput bytesOutput1 =
-                                        new OptimizedUnsafeBytesOutput();
-             OptimizedUnsafeBytesOutput bytesOutput2 =
-                                        new OptimizedUnsafeBytesOutput()) {
+        try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
+                                        Constants.DEFAULT_SIZE);
+             BytesOutput bytesOutput2 = IOFactory.createBytesOutput(
+                                        Constants.DEFAULT_SIZE);) {
             DoubleValue value1 = new DoubleValue(1.0D);
             DoubleValue value2 = new DoubleValue(2.0D);
             value1.write(bytesOutput1);
@@ -72,8 +74,7 @@ public class PointerCombinerTest extends UnitTestBase {
 
             Pointer pointer = pointerCombiner.combine(pointer1, pointer2);
 
-            OptimizedUnsafeBytesInput input =
-            new OptimizedUnsafeBytesInput(pointer.bytes());
+            BytesInput input = IOFactory.createBytesInput(pointer.bytes());
 
             DoubleValue combinedValue = new DoubleValue();
             combinedValue.read(input);
@@ -98,10 +99,10 @@ public class PointerCombinerTest extends UnitTestBase {
                                     graphFactory.createProperties(),
                                     combiner);
 
-        try (OptimizedUnsafeBytesOutput bytesOutput1 =
-                                        new OptimizedUnsafeBytesOutput();
-             OptimizedUnsafeBytesOutput bytesOutput2 =
-                                        new OptimizedUnsafeBytesOutput()) {
+        try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
+                                        Constants.DEFAULT_SIZE);
+             BytesOutput bytesOutput2 = IOFactory.createBytesOutput(
+                                        Constants.DEFAULT_SIZE)) {
             Properties value1 = graphFactory.createProperties();
             value1.put("p1", new LongValue(1L));
             Properties value2 = graphFactory.createProperties();
@@ -117,8 +118,7 @@ public class PointerCombinerTest extends UnitTestBase {
 
             Pointer pointer = pointerCombiner.combine(pointer1, pointer2);
 
-            OptimizedUnsafeBytesInput input =
-            new OptimizedUnsafeBytesInput(pointer.bytes());
+            BytesInput input = IOFactory.createBytesInput(pointer.bytes());
 
             Properties combinedValue = graphFactory.createProperties();
             combinedValue.read(input);
@@ -147,10 +147,10 @@ public class PointerCombinerTest extends UnitTestBase {
                                     graphFactory.createProperties(),
                                     combiner);
 
-        try (OptimizedUnsafeBytesOutput bytesOutput1 =
-                                        new OptimizedUnsafeBytesOutput();
-             OptimizedUnsafeBytesOutput bytesOutput2 =
-                                        new OptimizedUnsafeBytesOutput()) {
+        try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
+                                        Constants.DEFAULT_SIZE);
+             BytesOutput bytesOutput2 = IOFactory.createBytesOutput(
+                                        Constants.DEFAULT_SIZE);) {
             Properties value1 = graphFactory.createProperties();
             value1.put("p1", new LongValue(1L));
             Properties value2 = graphFactory.createProperties();

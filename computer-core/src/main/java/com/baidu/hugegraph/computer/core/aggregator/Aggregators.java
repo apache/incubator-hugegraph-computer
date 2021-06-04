@@ -37,7 +37,7 @@ public class Aggregators {
         this(ImmutableMap.of());
     }
 
-    public Aggregators(Map<String, Aggregator<?>> aggrs) {
+    public Aggregators(Map<String, Aggregator<? extends Value<?>>> aggrs) {
         this.aggregators = new ConcurrentHashMap<>(aggrs);
     }
 

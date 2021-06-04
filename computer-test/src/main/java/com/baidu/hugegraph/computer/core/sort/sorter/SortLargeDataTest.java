@@ -34,13 +34,16 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
+import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
 import com.baidu.hugegraph.computer.core.sort.combiner.MockIntSumCombiner;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
@@ -97,7 +100,8 @@ public class SortLargeDataTest {
         long value = 0;
 
         Random random = new Random();
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.DEFAULT_SIZE);
         List<RandomAccessInput> buffers = new ArrayList<>(mergeBufferNum);
         List<String> mergeBufferFiles = new ArrayList<>();
         int fileNum = 10;
@@ -105,16 +109,14 @@ public class SortLargeDataTest {
 
         watcher.start();
         for (int i = 0; i < dataSize; i++) {
-            output.writeInt(Integer.BYTES);
-            output.writeInt(random.nextInt(dataSize));
-            output.writeInt(Integer.BYTES);
+            SorterTestUtil.writeData(output, random.nextInt(dataSize));
             int entryValue = random.nextInt(5);
+            SorterTestUtil.writeData(output, entryValue);
             value = value + entryValue;
-            output.writeInt(entryValue);
 
             // Write data to buffer and sort buffer
             if (output.position() >= bufferSize || (i + 1) == dataSize) {
-                UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
+                BytesInput input = EntriesUtil.inputFromOutput(output);
                 buffers.add(sortBuffer(sorter, input));
                 output.seek(0);
             }
@@ -151,16 +153,15 @@ public class SortLargeDataTest {
         Random random = new Random();
         List<RandomAccessInput> buffers = new ArrayList<>();
         for (int i = 0; i < bufferNum; i++) {
-            UnsafeBytesOutput buffer = new UnsafeBytesOutput();
+            BytesOutput buffer = IOFactory.createBytesOutput(
+                                 Constants.DEFAULT_SIZE);
             while (buffer.position() < bufferSize) {
                 // Write data
-                buffer.writeInt(Integer.BYTES);
                 int key = random.nextInt(keyRange);
-                buffer.writeInt(key);
-                buffer.writeInt(Integer.BYTES);
+                SorterTestUtil.writeData(buffer, key);
                 int value = random.nextInt(100);
+                SorterTestUtil.writeData(buffer, value);
                 totalValue += value;
-                buffer.writeInt(value);
             }
             buffers.add(EntriesUtil.inputFromOutput(buffer));
         }
@@ -199,13 +200,12 @@ public class SortLargeDataTest {
     public void testMergeBuffersAllSameKey() throws Exception {
         List<RandomAccessInput> buffers = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            UnsafeBytesOutput buffer = new UnsafeBytesOutput();
+            BytesOutput buffer = IOFactory.createBytesOutput(
+                                 Constants.DEFAULT_SIZE);
             for (int j = 0; j < 100; j++) {
                 // Write data
-                buffer.writeInt(Integer.BYTES);
-                buffer.writeInt(1);
-                buffer.writeInt(Integer.BYTES);
-                buffer.writeInt(1);
+                SorterTestUtil.writeData(buffer, 1);
+                SorterTestUtil.writeData(buffer, 1);
             }
             buffers.add(EntriesUtil.inputFromOutput(buffer));
         }
@@ -263,7 +263,8 @@ public class SortLargeDataTest {
     private static RandomAccessInput sortBuffer(Sorter sorter,
                                                 RandomAccessInput input)
                                                 throws Exception {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.DEFAULT_SIZE);
         Combiner<Pointer> combiner = new MockIntSumCombiner();
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);

@@ -54,7 +54,13 @@ public interface RandomAccessOutput extends DataOutput, Closeable {
                throws IOException;
 
     /**
-     * Seek to specified position, and write a int value that fixed in 4
+     * At current position, write an int value that fixed in 4 bytes length
+     * @param v the int value write
+     */
+    void writeFixedInt(int v) throws IOException;
+
+    /**
+     * Seek to specified position, and write an int value that fixed in 4
      * bytes length, then seek back to old postion
      * @param position the new postion to write
      * @param v the int value write

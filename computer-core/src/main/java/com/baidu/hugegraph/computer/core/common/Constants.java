@@ -38,6 +38,8 @@ public final class Constants {
     public static final int UINT16_MAX = 0xffff;
     public static final long UINT32_MAX = 0xffffffffL;
 
+    public static final int DEFAULT_SIZE = 32;
+
     /*
      * The default buffer size for buffered input & output in package
      * com.baidu.hugegraph.computer.core.io

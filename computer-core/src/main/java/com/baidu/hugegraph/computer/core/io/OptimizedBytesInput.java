@@ -25,27 +25,23 @@ import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.Bytes;
 import com.baidu.hugegraph.util.E;
 
-public class OptimizedBytesInput implements RandomAccessInput {
+public class OptimizedBytesInput implements BytesInput {
 
     private final UnsafeBytesInput in;
 
-    public OptimizedBytesInput(byte[] buffer) {
+    OptimizedBytesInput(byte[] buffer) {
         this(buffer, buffer.length);
     }
 
-    public OptimizedBytesInput(byte[] buffer, int limit) {
+    OptimizedBytesInput(byte[] buffer, int limit) {
         this(buffer, 0, limit);
     }
 
-    public OptimizedBytesInput(byte[] buffer, long limit) {
-        this(buffer, 0, (int) limit);
-    }
-
-    public OptimizedBytesInput(byte[] buffer, int position, int limit) {
+    OptimizedBytesInput(byte[] buffer, int position, int limit) {
         this(new UnsafeBytesInput(buffer, position, limit));
     }
 
-    public OptimizedBytesInput(UnsafeBytesInput in) {
+    OptimizedBytesInput(UnsafeBytesInput in) {
         this.in = in;
     }
 
