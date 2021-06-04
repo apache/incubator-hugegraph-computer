@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
@@ -32,25 +33,27 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
+    protected final ComputerContext context;
     protected final Config config;
     protected final FileGenerator fileGenerator;
     protected final Sorter sorter;
+    protected final int superstep;
 
     private final Map<Integer, P> partitions;
-    private final int superstep;
 
-    public MessageRecvPartitions(Config config,
+    public MessageRecvPartitions(ComputerContext context,
                                  FileGenerator fileGenerator,
                                  Sorter sorter,
                                  int superstep) {
-        this.config = config;
+        this.context = context;
+        this.config = context.config();
         this.fileGenerator = fileGenerator;
         this.sorter = sorter;
         this.superstep = superstep;
         this.partitions = new ConcurrentHashMap<>();
     }
 
-    public abstract P createPartition(int superstep, Sorter sorter);
+    public abstract P createPartition();
 
     public void addBuffer(int partitionId, ManagedBuffer buffer) {
         P partition = this.partition(partitionId);
@@ -63,8 +66,7 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
             synchronized (this.partitions) {
                 partition = this.partitions.get(partitionId);
                 if (partition == null) {
-                    partition = this.createPartition(this.superstep,
-                                                     this.sorter);
+                    partition = this.createPartition();
                     this.partitions.put(partitionId, partition);
                 }
             }

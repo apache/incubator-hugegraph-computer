@@ -46,7 +46,8 @@ public class ComputeMessageRecvPartition extends MessageRecvPartition {
         super(context.config(), fileGenerator, sorter, false, superstep);
         Config config = context.config();
         Combiner<?> valueCombiner = config.createObject(
-                                    ComputerOptions.WORKER_COMBINER_CLASS);
+                                    ComputerOptions.WORKER_COMBINER_CLASS,
+                                    false);
         if (valueCombiner == null) {
             this.flusher = new KvOuterSortFlusher();
         } else {

@@ -17,47 +17,34 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
+package com.baidu.hugegraph.computer.core.sort.sorter;
 
 import java.util.NoSuchElementException;
 
-import com.baidu.hugegraph.iterator.CIter;
+import org.junit.Test;
 
-public interface PeekableIterator<T> extends CIter<T> {
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.testutil.Assert;
 
-    static <V> PeekableIterator<V> emptyIterator() {
-        return (PeekableIterator<V>) EmptyIterator.EMPTY_ITERATOR;
-    }
+public class EmptyFlusherTest {
 
-    T peek();
-}
+    @Test
+    public void test() throws Exception {
+        PeekableIterator<Double> it = PeekableIterator.emptyIterator();
+        Assert.assertFalse(it.hasNext());
 
-class EmptyIterator<E> implements PeekableIterator<E> {
+        Assert.assertThrows(NoSuchElementException.class, () -> {
+            it.next();
+        });
 
-    static final EmptyIterator<Object> EMPTY_ITERATOR = new EmptyIterator<>();
+        Assert.assertThrows(UnsupportedOperationException.class, () -> {
+            it.metadata("key");
+        });
 
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
+        Assert.assertThrows(NoSuchElementException.class, () -> {
+            it.peek();
+        });
 
-    @Override
-    public E next() {
-        throw new NoSuchElementException();
-    }
-
-    @Override
-    public Object metadata(String s, Object... objects) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public E peek() {
-        throw new NoSuchElementException();
-    }
-
-    @Override
-    public void close() throws Exception {
-        // pass
+        it.close();
     }
 }

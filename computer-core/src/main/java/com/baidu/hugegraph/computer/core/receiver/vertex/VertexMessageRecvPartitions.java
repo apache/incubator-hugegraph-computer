@@ -28,33 +28,17 @@ import com.baidu.hugegraph.computer.core.store.FileGenerator;
 public class VertexMessageRecvPartitions
        extends MessageRecvPartitions<VertexMessageRecvPartition> {
 
-//    private final ComputerContext context;
-//    private final Combiner<Properties> combiner;
 
     public VertexMessageRecvPartitions(ComputerContext context,
                                        FileGenerator fileGenerator,
                                        Sorter sorter) {
-        super(context.config(), fileGenerator,
-              sorter, Constants.INPUT_SUPERSTEP);
-//        this.context = context;
-//        this.combiner = this.config.createObject(
-//        ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
+        super(context, fileGenerator, sorter, Constants.INPUT_SUPERSTEP);
     }
 
     @Override
-    public VertexMessageRecvPartition createPartition(int superstep,
-                                                      Sorter sorter) {
-        return new VertexMessageRecvPartition(this.config,
+    public VertexMessageRecvPartition createPartition() {
+        return new VertexMessageRecvPartition(this.context,
                                               this.fileGenerator,
                                               this.sorter);
     }
-
-//    private OuterSortFlusher createOuterSortFlusher() {
-//        GraphFactory graphFactory = this.context.graphFactory();
-//        Properties v1 = graphFactory.createProperties();
-//        Properties v2 = graphFactory.createProperties();
-//
-//        return new CombineKvOuterSortFlusher(new PointerCombiner(v1,
-//                                                          v2, combiner));
-//    }
 }

@@ -24,13 +24,19 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.combiner.MergeNewPropertiesCombiner;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
@@ -47,44 +53,153 @@ import com.baidu.hugegraph.testutil.Assert;
 
 public class VertexMessageRecvPartitionTest extends UnitTestBase {
 
-    @Test
-    public void testVertexMessageRecvPartition() throws IOException {
-        Config config = UnitTestBase.updateWithRequiredOptions(
+    private Config config;
+    private VertexMessageRecvPartition partition;
+    private FileManager fileManager;
+
+    @Before
+    public void setup() {
+        this.config = UnitTestBase.updateWithRequiredOptions(
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.JOB_PARTITIONS_COUNT, "1",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "20",
+            ComputerOptions.HGKV_MERGE_FILES_NUM, "5"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
-        FileManager fileManager = new FileManager();
-        fileManager.init(config);
-        Sorter sorter = new SorterImpl(config);
-        VertexMessageRecvPartition partition = new VertexMessageRecvPartition(
-                                               config, fileManager, sorter);
-        Assert.assertEquals(MessageType.VERTEX.name(), partition.type());
-        consumeMockedVertexBuffer((ManagedBuffer buffer) -> {
-            partition.addBuffer(buffer);
-        });
-
-        PeekableIterator<KvEntry> it = partition.iterator();
-        checkPartitionIterator(it);
-        Assert.assertFalse(it.hasNext());
-        fileManager.close(config);
+        this.fileManager = new FileManager();
+        this.fileManager.init(this.config);
+        Sorter sorter = new SorterImpl(this.config);
+        this.partition = new VertexMessageRecvPartition(context(),
+                                                        this.fileManager,
+                                                        sorter);
     }
 
-    public static void consumeMockedVertexBuffer(
+    @After
+    public void teardown() {
+        this.fileManager.close(this.config);
+    }
+
+    @Test
+    public void testVertexMessageRecvPartition() throws IOException {
+        Assert.assertEquals(MessageType.VERTEX.name(), this.partition.type());
+        addTenVertexBuffer(this.partition::addBuffer);
+
+        PeekableIterator<KvEntry> it = this.partition.iterator();
+        checkPartitionIterator(it);
+        Assert.assertFalse(it.hasNext());
+    }
+
+    @Test
+    public void testOverwriteCombiner() throws IOException {
+        this.config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
+            ComputerOptions.HGKV_MERGE_FILES_NUM, "5"
+        );
+        FileUtils.deleteQuietly(new File("data_dir1"));
+        FileUtils.deleteQuietly(new File("data_dir2"));
+        this.fileManager = new FileManager();
+        this.fileManager.init(this.config);
+        Sorter sorter = new SorterImpl(this.config);
+        this.partition = new VertexMessageRecvPartition(context(),
+                                                        this.fileManager,
+                                                        sorter);
+        addTenVertexBuffer(this.partition::addBuffer);
+        addTenVertexBuffer(this.partition::addBuffer);
+
+        checkPartitionIterator(this.partition.iterator());
+
+        this.fileManager.close(this.config);
+    }
+
+    @Test
+    public void testMergePropertiesCombiner() throws IOException {
+        this.config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "5",
+                ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS,
+                MergeNewPropertiesCombiner.class.getName()
+        );
+        FileUtils.deleteQuietly(new File("data_dir1"));
+        FileUtils.deleteQuietly(new File("data_dir2"));
+        this.fileManager = new FileManager();
+        this.fileManager.init(this.config);
+        Sorter sorter = new SorterImpl(this.config);
+        this.partition = new VertexMessageRecvPartition(context(),
+                                                       this.fileManager,
+                                                       sorter);
+
+        addTwentyDuplicateVertexBuffer(this.partition::addBuffer);
+
+        checkTenVertexWithMergedProperties(this.partition.iterator());
+
+        this.fileManager.close(this.config);
+    }
+
+    @Test
+    public void testMergeBuffersFailed() {
+        addTwoEmptyBuffer(this.partition::addBuffer);
+
+        Assert.assertThrows(ComputerException.class, () -> {
+            this.partition.iterator();
+        }, e -> {
+            Assert.assertContains("Failed merge buffers", e.getMessage());
+        });
+    }
+
+    @Test
+    public void testEmptyIterator() {
+        PeekableIterator<KvEntry> it = this.partition.iterator();
+        Assert.assertFalse(it.hasNext());
+    }
+
+    public static void addTenVertexBuffer(Consumer<ManagedBuffer> consumer)
+                                          throws IOException {
+        for (long i = 0L; i < 10L; i++) {
+            Vertex vertex = graphFactory().createVertex();
+            vertex.id(new LongId(i));
+            vertex.properties(graphFactory().createProperties());
+            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+        }
+    }
+
+    public static void addTwentyDuplicateVertexBuffer(
                        Consumer<ManagedBuffer> consumer)
                        throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
             vertex.id(new LongId(i));
-            vertex.properties(graphFactory().createProperties());
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex),
-                                       (ManagedBuffer buffer) -> {
-                consumer.accept(buffer);
-            });
+            Properties properties = graphFactory().createProperties();
+            properties.put("p1", new LongValue(i));
+            vertex.properties(properties);
+
+            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+        }
+
+        for (long i = 0L; i < 10L; i++) {
+            Vertex vertex = graphFactory().createVertex();
+            vertex.id(new LongId(i));
+            Properties properties = graphFactory().createProperties();
+            properties.put("p2", new LongValue(2L * i));
+            vertex.properties(properties);
+
+            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+        }
+    }
+
+    private static void addTwoEmptyBuffer(Consumer<ManagedBuffer> consumer) {
+        for (int i = 0; i < 2; i++) {
+            ReceiverUtil.comsumeBuffer(new byte[2], consumer);
         }
     }
 
@@ -100,6 +215,25 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         });
 
         return bytesOutput.toByteArray();
+    }
+
+    private void checkTenVertexWithMergedProperties(
+                 PeekableIterator<KvEntry> it)
+                 throws IOException {
+        for (long i = 0L; i < 10L; i++) {
+            Assert.assertTrue(it.hasNext());
+            KvEntry entry = it.next();
+            Id id = ReceiverUtil.readId(context(), entry.key());
+            Assert.assertEquals(new LongId(i), id);
+            Properties properties = graphFactory().createProperties();
+
+            ReceiverUtil.readValue(entry.value(), properties);
+            Assert.assertEquals(2, properties.size());
+            LongValue v1 = properties.get("p1");
+            Assert.assertEquals(new LongValue(i), v1);
+            LongValue v2 = properties.get("p2");
+            Assert.assertEquals(new LongValue(2L * i), v2);
+        }
     }
 
     public static void checkPartitionIterator(PeekableIterator<KvEntry> it)

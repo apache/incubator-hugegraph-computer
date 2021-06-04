@@ -26,7 +26,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
     FlusherTest.class,
     SortLargeDataTest.class,
-    SorterTest.class
+    SorterTest.class,
+    EmptyFlusherTest.class
 })
 public class SorterTestSuite {
 }

@@ -27,21 +27,15 @@ import com.baidu.hugegraph.computer.core.store.FileGenerator;
 public class ComputeMessageRecvPartitions
        extends MessageRecvPartitions<ComputeMessageRecvPartition> {
 
-    private final ComputerContext context;
-
     public ComputeMessageRecvPartitions(ComputerContext context,
                                         FileGenerator fileGenerator,
                                         Sorter sorter) {
-        super(context.config(), fileGenerator, sorter, -1);
-        this.context = context;
+        super(context, fileGenerator, sorter, -1);
     }
 
     @Override
-    public ComputeMessageRecvPartition createPartition(int superstep,
-                                                       Sorter sorter) {
-        return new ComputeMessageRecvPartition(this.context,
-                                               this.fileGenerator,
-                                               sorter,
-                                               superstep);
+    public ComputeMessageRecvPartition createPartition() {
+        return new ComputeMessageRecvPartition(this.context, this.fileGenerator,
+                                               this.sorter, this.superstep);
     }
 }

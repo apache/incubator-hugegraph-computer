@@ -54,8 +54,9 @@ public class DefaultProperties implements Properties {
     }
 
     @Override
-    public Value<?> get(String key) {
-        return this.keyValues.get(key);
+    @SuppressWarnings("unchecked")
+    public <T extends Value> T get(String key) {
+        return (T) this.keyValues.get(key);
     }
 
     @Override
@@ -68,10 +69,14 @@ public class DefaultProperties implements Properties {
         this.keyValues.putIfAbsent(key, value);
     }
 
+    public int size() {
+        return this.keyValues.size();
+    }
+
     @Override
     public void read(RandomAccessInput in) throws IOException {
         this.keyValues.clear();
-        int size = in.readInt();
+        int size = in.readFixedInt();
         for (int i = 0; i < size; i++) {
             String key = in.readUTF();
             ValueType valueType = SerialEnum.fromCode(ValueType.class,

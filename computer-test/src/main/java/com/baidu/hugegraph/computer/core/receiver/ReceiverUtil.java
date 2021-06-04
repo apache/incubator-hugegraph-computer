@@ -70,9 +70,7 @@ public class ReceiverUtil {
         return id;
     }
 
-    public static void readValue(ComputerContext context,
-                                 Pointer pointer,
-                                 Readable value)
+    public static void readValue(Pointer pointer, Readable value)
                                  throws IOException {
         RandomAccessInput input = pointer.input();
         long position = input.position();

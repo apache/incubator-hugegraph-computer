@@ -30,9 +30,11 @@ import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.config.Null;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
@@ -51,11 +53,13 @@ import com.baidu.hugegraph.testutil.Assert;
 public class ComputeMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
-    public void testCombinableMessageRecvPartition() throws IOException {
+    public void testCombineMessageRecvPartition() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.JOB_ID, "local_001",
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                // Make sure all buffers within this limit.
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
                 ComputerOptions.WORKER_COMBINER_CLASS,
                 DoubleValueSumCombiner.class.getName(),
                 ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
@@ -72,27 +76,90 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                                                 sorter, 0);
         Assert.assertEquals(MessageType.MSG.name(), partition.type());
 
-        consumeMockedMessageBuffer((ManagedBuffer buffer) -> {
-            partition.addBuffer(buffer);
-        });
+        addTwentyCombineMessageBuffer(partition::addBuffer);
 
-        checkPartitionIterator(partition.iterator());
+        checkTenCombineMessages(partition.iterator());
 
         fileManager.close(config);
     }
 
-    public static void consumeMockedMessageBuffer(
+    @Test
+    public void testNotCombineMessageRecvPartition() throws IOException {
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                ComputerOptions.WORKER_COMBINER_CLASS,
+                Null.class.getName(),
+                ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
+        );
+        FileUtils.deleteQuietly(new File("data_dir1"));
+        FileUtils.deleteQuietly(new File("data_dir2"));
+        FileManager fileManager = new FileManager();
+        fileManager.init(config);
+        Sorter sorter = new SorterImpl(config);
+        ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
+                                                context(), fileManager,
+                                                sorter, 0);
+        Assert.assertEquals(MessageType.MSG.name(), partition.type());
+
+        addTwentyDuplicateIdValueListMessageBuffer(partition::addBuffer);
+
+        checkIdValueListMessages(partition.iterator());
+
+        fileManager.close(config);
+    }
+
+    public static void addTwentyCombineMessageBuffer(
                        Consumer<ManagedBuffer> consumer)
                        throws IOException {
         for (long i = 0L; i < 10L; i++) {
-            Id id = new LongId(i);
-            DoubleValue message = new DoubleValue(i);
-            ReceiverUtil.comsumeBuffer(writeMessage(id, message),
-                                       (ManagedBuffer buffer) -> {
-                consumer.accept(buffer);
-            });
+            for (int j = 0; j < 2; j++) {
+                Id id = new LongId(i);
+                DoubleValue message = new DoubleValue(i);
+                ReceiverUtil.comsumeBuffer(writeMessage(id, message), consumer);
+            }
         }
     }
+
+    public static void checkTenCombineMessages(PeekableIterator<KvEntry> it)
+                                               throws IOException {
+        Assert.assertTrue(it.hasNext());
+        KvEntry lastEntry = it.next();
+        Id lastId = ReceiverUtil.readId(context(), lastEntry.key());
+        DoubleValue lastSumValue = new DoubleValue();
+        ReceiverUtil.readValue(lastEntry.value(), lastSumValue);
+        while (it.hasNext()) {
+            KvEntry currentEntry = it.next();
+            Id currentId = ReceiverUtil.readId(context(), currentEntry.key());
+            DoubleValue currentValue = new DoubleValue();
+            ReceiverUtil.readValue(lastEntry.value(), currentValue);
+            if (lastId.equals(currentId)) {
+                lastSumValue.value(lastSumValue.value() + currentValue.value());
+            } else {
+                Assert.assertEquals(lastId.asLong() * 2.0D,
+                                    lastSumValue.value(), 0.0D);
+            }
+        }
+        Assert.assertEquals(lastId.asLong() * 2.0D,
+                            lastSumValue.value(), 0.0D);
+    }
+
+    private static void addTwentyDuplicateIdValueListMessageBuffer
+                        (Consumer<ManagedBuffer> consumer)
+                        throws IOException {
+        for (long i = 0L; i < 10L; i++) {
+            for (int j = 0; j < 2; j++) {
+                Id id = new LongId(i);
+                IdValueList message = new IdValueList();
+                message.add(id.idValue());
+                ReceiverUtil.comsumeBuffer(writeMessage(id, message), consumer);
+            }
+        }
+    }
+
     private static byte[] writeMessage(Id id, Writable message)
                                        throws IOException {
         UnsafeBytesOutput bytesOutput = new UnsafeBytesOutput();
@@ -107,26 +174,24 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         return bytesOutput.toByteArray();
     }
 
-    public static void checkPartitionIterator(PeekableIterator<KvEntry> it)
-            throws IOException {
-        Assert.assertTrue(it.hasNext());
-        KvEntry lastEntry = it.next();
-        Id lastId = ReceiverUtil.readId(context(), lastEntry.key());
-        DoubleValue lastSumValue = new DoubleValue();
-        ReceiverUtil.readValue(context(), lastEntry.value(), lastSumValue);
-        while (it.hasNext()) {
-            KvEntry currentEntry = it.next();
-            Id currentId = ReceiverUtil.readId(context(), currentEntry.key());
-            DoubleValue currentValue = new DoubleValue();
-            ReceiverUtil.readValue(context(), lastEntry.value(), currentValue);
-            if (lastId.equals(currentId)) {
-                lastSumValue.value(lastSumValue.value() + currentValue.value());
-            } else {
-                Assert.assertEquals(lastId.asLong() * 2.0D,
-                                    lastSumValue.value(), 0.0D);
+    private static void checkIdValueListMessages(PeekableIterator<KvEntry> it)
+                                                 throws IOException {
+        for (long i = 0L; i < 10L; i++) {
+            for (int j = 0; j < 2; j++) {
+                Assert.assertTrue(it.hasNext());
+                KvEntry currentEntry = it.next();
+                Id currentId = ReceiverUtil.readId(context(),
+                                                   currentEntry.key());
+                Id expectId = new LongId(i);
+                Assert.assertEquals(expectId, currentId);
+
+                IdValueList expectMessage = new IdValueList();
+                expectMessage.add(expectId.idValue());
+                IdValueList currentValue = new IdValueList();
+                ReceiverUtil.readValue(currentEntry.value(), currentValue);
+                Assert.assertEquals(expectMessage, currentValue);
             }
         }
-        Assert.assertEquals(lastId.asLong() * 2.0D,
-                            lastSumValue.value(), 0.0D);
+        Assert.assertFalse(it.hasNext());
     }
 }

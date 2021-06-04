@@ -54,9 +54,8 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     public static final String NAME = "message_recv";
 
-    private Config config;
     private final FileManager fileManager;
-    private ComputerContext context;
+    private final ComputerContext context;
 
     private VertexMessageRecvPartitions vertexPartitions;
     private EdgeMessageRecvPartitions edgePartitions;
@@ -84,20 +83,20 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     @Override
     public void init(Config config) {
-        this.config = config;
-        this.sorter = new SorterImpl(this.config);
+        // TODO: use SortManager
+        this.sorter = new SorterImpl(config);
         this.vertexPartitions = new VertexMessageRecvPartitions(
                                 this.context, this.fileManager, this.sorter);
-        this.edgePartitions = new EdgeMessageRecvPartitions(
-                              this.config, this.fileManager,
-                              this.context, this.sorter);
+        this.edgePartitions = new EdgeMessageRecvPartitions(this.context,
+                                                            this.fileManager,
+                                                            this.sorter);
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
-        this.finishMessagesLatch =
-        new CountDownLatch(this.expectedFinishMessages);
-        this.waitFinishMessagesTimeout =
-        config.get(ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT);
+        this.finishMessagesLatch = new CountDownLatch(
+                                   this.expectedFinishMessages);
+        this.waitFinishMessagesTimeout = config.get(
+        ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT);
     }
 
     @Override
@@ -105,8 +104,8 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.messagePartitions = new ComputeMessageRecvPartitions(
                                  this.context, this.fileManager, this.sorter);
         this.expectedFinishMessages = this.workerCount;
-        this.finishMessagesLatch =
-        new CountDownLatch(this.expectedFinishMessages);
+        this.finishMessagesLatch = new CountDownLatch(
+                                   this.expectedFinishMessages);
         this.superstep = superstep;
     }
 
@@ -148,16 +147,20 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     public void waitReceivedAllMessages() {
         try {
-            this.finishMessagesLatch.await(this.waitFinishMessagesTimeout,
-                                           TimeUnit.MILLISECONDS);
+            boolean status = this.finishMessagesLatch.await(
+                             this.waitFinishMessagesTimeout,
+                             TimeUnit.MILLISECONDS);
+            if (!status) {
+                throw new ComputerException(
+                          "Expect %s finish messages in %sms, %s absence " +
+                          "in superstep %s",
+                          this.expectedFinishMessages,
+                          this.waitFinishMessagesTimeout,
+                          this.finishMessagesLatch.getCount(),
+                          this.superstep);
+            }
         } catch (InterruptedException e) {
-            throw new ComputerException(
-                      "Expected %s finish messages in %sms, %s absence in " +
-                      "superstep %s",
-                      this.expectedFinishMessages,
-                      this.waitFinishMessagesTimeout,
-                      this.finishMessagesLatch.getCount(),
-                      this.superstep);
+            throw new ComputerException("Thread is interrupted", e);
         }
     }
 

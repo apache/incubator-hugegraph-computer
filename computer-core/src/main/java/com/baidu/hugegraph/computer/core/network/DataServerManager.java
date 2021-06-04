@@ -38,6 +38,7 @@ public class DataServerManager implements Manager {
     private final MessageHandler messageHandler;
 
     public DataServerManager(MessageHandler messageHandler) {
+        // TODO: move connectionManager to WorkerService.
         this.connectionManager = new TransportConnectionManager();
         this.messageHandler = messageHandler;
     }

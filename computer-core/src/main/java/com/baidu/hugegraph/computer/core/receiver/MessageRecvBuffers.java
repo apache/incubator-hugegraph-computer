@@ -36,12 +36,12 @@ public class MessageRecvBuffers {
      * bytesLimit after {@link #addBuffer(ManagedBuffer)}.
      * If totalBytes >= bytesLimit, the buffers will be sorted into a file.
      */
-    private long bytesLimit;
+    private final long bytesLimit;
     private long totalBytes;
 
-    private List<byte[]> buffers;
-    private BarrierEvent event;
-    private long waitSortedTimeout;
+    private final List<byte[]> buffers;
+    private final BarrierEvent event;
+    private final long waitSortedTimeout;
 
     public MessageRecvBuffers(long bytesLimit, long waitSortedTimeout) {
         this.totalBytes = 0L;

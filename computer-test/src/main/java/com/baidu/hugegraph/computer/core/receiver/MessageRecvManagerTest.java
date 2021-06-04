@@ -61,8 +61,8 @@ public class MessageRecvManagerTest extends UnitTestBase {
             DoubleValueSumCombiner.class.getName(),
             ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
-            ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
+            ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "100"
         );
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
@@ -85,12 +85,12 @@ public class MessageRecvManagerTest extends UnitTestBase {
         // Send vertex message
         this.receiveManager.onStarted(this.connectionId);
         this.receiveManager.onFinished(this.connectionId);
-        VertexMessageRecvPartitionTest.consumeMockedVertexBuffer(
+        VertexMessageRecvPartitionTest.addTenVertexBuffer(
                                        (ManagedBuffer buffer) -> {
             this.receiveManager.handle(MessageType.VERTEX, 0, buffer);
         });
 
-        EdgeMessageRecvPartitionTest.consumeMockedEdgeBuffer(
+        EdgeMessageRecvPartitionTest.addTenEdgeBuffer(
                                      (ManagedBuffer buffer) -> {
             this.receiveManager.handle(MessageType.EDGE, 0, buffer);
         });
@@ -107,18 +107,18 @@ public class MessageRecvManagerTest extends UnitTestBase {
         Assert.assertEquals(1, edgePartitions.size());
         VertexMessageRecvPartitionTest.checkPartitionIterator(
                                        vertexPartitions.get(0));
-        EdgeMessageRecvPartitionTest.checkPartitionIterator(
-                                     edgePartitions.get(0));
+        EdgeMessageRecvPartitionTest.checkTenEdges(edgePartitions.get(0));
     }
 
     @Test
     public void testComputeMessage() throws IOException {
         // Superstep 0
         this.receiveManager.beforeSuperstep(this.config, 0);
-        ComputeMessageRecvPartitionTest.consumeMockedMessageBuffer(
+        ComputeMessageRecvPartitionTest.addTwentyCombineMessageBuffer(
                                         (ManagedBuffer buffer) -> {
              this.receiveManager.handle(MessageType.MSG, 0, buffer);
         });
+        this.receiveManager.onFinished(this.connectionId);
 
         this.receiveManager.waitReceivedAllMessages();
         this.receiveManager.afterSuperstep(this.config, 0);
@@ -126,7 +126,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
         Map<Integer, PeekableIterator<KvEntry>> messagePartitions =
         this.receiveManager.messagePartitions();
         Assert.assertEquals(1, messagePartitions.size());
-        ComputeMessageRecvPartitionTest.checkPartitionIterator(
+        ComputeMessageRecvPartitionTest.checkTenCombineMessages(
                                         messagePartitions.get(0));
     }
 
@@ -140,6 +140,17 @@ public class MessageRecvManagerTest extends UnitTestBase {
         }, e -> {
             Assert.assertEquals("Unable handle ManagedBuffer with type 'ACK'",
                                 e.getMessage());
+        });
+    }
+
+    @Test
+    public void testNotEnoughFinishMessages() {
+        this.receiveManager.beforeSuperstep(this.config, 0);
+        Assert.assertThrows(ComputerException.class, () -> {
+            this.receiveManager.waitReceivedAllMessages();
+        }, e -> {
+            Assert.assertContains("Expect 1 finish messages",
+                                  e.getMessage());
         });
     }
 }

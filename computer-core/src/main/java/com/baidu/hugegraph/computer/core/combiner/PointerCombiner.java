@@ -23,6 +23,7 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
@@ -47,8 +48,12 @@ public class PointerCombiner<V extends Readable & Writable>
     @Override
     public Pointer combine(Pointer v1, Pointer v2) {
         try {
-            this.v1.read(v1.input());
-            this.v2.read(v2.input());
+            RandomAccessInput input1 = v1.input();
+            RandomAccessInput input2 = v2.input();
+            input1.seek(v1.offset());
+            input2.seek(v2.offset());
+            this.v1.read(input1);
+            this.v2.read(input2);
             V combinedValue = this.combiner.combine(this.v1, this.v2);
             this.bytesOutput.seek(0L);
             combinedValue.write(this.bytesOutput);
