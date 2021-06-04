@@ -19,29 +19,33 @@
 
 package com.baidu.hugegraph.computer.k8s.crd;
 
-import com.baidu.hugegraph.computer.k8s.crd.models.ComputerJobSpec;
-import com.baidu.hugegraph.computer.k8s.crd.models.ComputerJobStatus;
+import java.util.HashMap;
+import java.util.Map;
 
-import io.fabric8.kubernetes.api.model.Namespaced;
-import io.fabric8.kubernetes.client.CustomResource;
-import io.fabric8.kubernetes.model.annotation.Group;
-import io.fabric8.kubernetes.model.annotation.Kind;
-import io.fabric8.kubernetes.model.annotation.Plural;
-import io.fabric8.kubernetes.model.annotation.Singular;
-import io.fabric8.kubernetes.model.annotation.Version;
+import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 
-@Version(ComputerJob.VERSION)
-@Group(ComputerJob.GROUP)
-@Kind(ComputerJob.KIND)
-@Plural(ComputerJob.PLURAL)
-@Singular(ComputerJob.SINGULAR)
-public class ComputerJob
-       extends CustomResource<ComputerJobSpec, ComputerJobStatus>
-       implements Namespaced {
+import io.fabric8.kubernetes.api.KubernetesResourceMappingProvider;
+import io.fabric8.kubernetes.api.model.KubernetesResource;
+
+public class ComputerJobProvider implements KubernetesResourceMappingProvider {
 
     public static final String VERSION = "v1";
     public static final String GROUP = "computer.hugegraph.io";
     public static final String KIND = "HugeGraphComputerJob";
-    public static final String PLURAL = "HugeGraphComputerJobs";
-    public static final String SINGULAR = "HugeGraphComputerJob";
+    public static final String PLURAL = "hugegraphcomputerjobs";
+    public static final String SINGULAR = "hugegraphcomputerjob";
+    public static final String API_VERSION = GROUP + "/" + VERSION;
+
+    public final Map<String, Class<? extends KubernetesResource>> mappings =
+           new HashMap<>();
+
+    public ComputerJobProvider() {
+        mappings.put("computer.hugegraph.io/v1#HugeGraphComputerJob",
+                     HugeGraphComputerJob.class);
+    }
+
+    @Override
+    public Map<String, Class<? extends KubernetesResource>> getMappings() {
+        return mappings;
+    }
 }

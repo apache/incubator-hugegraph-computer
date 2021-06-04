@@ -57,7 +57,9 @@ test: manifests generate fmt vet ## Run tests.
 
 ##@ Build
 
-build: generate fmt vet ## Build manager binary.
+gen-all: generate manifests gen-jsonschema ## Generate code containing DeepCopy, CRD, JsonSchema
+
+build: generate manifests gen-jsonschema fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
 run: manifests generate fmt vet ## Run a controller from your host.
@@ -68,6 +70,9 @@ docker-build: test ## Build docker image with the manager.
 
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG}
+
+gen-jsonschema: ## Generate JsonSchema for java
+	go run cmd/generate.go
 
 ##@ Deployment
 

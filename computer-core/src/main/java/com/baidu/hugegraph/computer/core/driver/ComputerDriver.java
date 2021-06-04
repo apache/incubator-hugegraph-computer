@@ -29,12 +29,12 @@ public interface ComputerDriver {
 
     /**
      * This method is called when create algorithm, the user will upload a jar.
-     * @param input The input from which to create a jar.
      * @param algorithmName The algorithm name is unique. If the jar
      *                      correspond to the algorithm name is exist, it
      *                      will overwrite the previous jar.
+     * @param input The input from which to create a jar.
      */
-    void uploadAlgorithmJar(InputStream input, String algorithmName);
+    void uploadAlgorithmJar(String algorithmName, InputStream input);
 
     /**
      * Submit the algorithm to the cluster, the parameters are in config.

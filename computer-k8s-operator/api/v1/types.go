@@ -20,17 +20,16 @@ under the License.
 package v1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// NOTE: json tags are required.
+// Any new fields you add must have json tags for the fields to be serialized.
 
 // HugeGraphComputerJobSpec defines the desired state of HugeGraphComputerJob
 type HugeGraphComputerJobSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	AlgorithmName *string `json:"algorithmName,omitempty"`
 
 	JobId *string `json:"jobId,omitempty"`
@@ -48,24 +47,43 @@ type HugeGraphComputerJobSpec struct {
 
 	WorkerMemory *string `json:"workerMemory,omitempty"`
 
-	ComputerConf *map[string]string `json:"computerConf,omitempty"`
+	ComputerConf map[string]string `json:"computerConf,omitempty"`
 
 	ConfigMap *string `json:"configMap,omitempty"`
 
-	EnvVars *map[string]string `json:"envVars,omitempty"`
+	// Environment variables shared by all JobManager, TaskManager and job
+	// containers.
+	EnvVars []corev1.EnvVar `json:"envVars,omitempty"`
+
+	// Environment variables injected from a source, shared by all JobManager,
+	// TaskManager and job containers.
+	EnvFrom []corev1.EnvFromSource `json:"envFrom,omitempty"`
+}
+
+type JobState struct {
+	Superstep *int32 `json:"superstep,omitempty"`
+
+	MaxSuperstep *int32 `json:"maxSuperstep,omitempty"`
+
+	LastSuperstepStat *string `json:"lastSuperstepStat,omitempty"`
 }
 
 // HugeGraphComputerJobStatus defines the observed state of HugeGraphComputerJob
 type HugeGraphComputerJobStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	JobStatus *string `json:"jobStatus,omitempty"`
 
-	JobState *string `json:"jobStatus,omitempty"`
+	JobState *JobState `json:"jobState,omitempty"`
+
+	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:JSONPath=".status.jobStatus",name=JobStatus, type=string
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:JSONPath=".spec.jobId",name=JobId,type=string
+// +kubebuilder:printcolumn:JSONPath=".status.jobStatus",name=JobStatus,type=string
+// +kubebuilder:printcolumn:JSONPath=".status.jobState.superstep",name=Superstep,type=integer
+// +kubebuilder:printcolumn:JSONPath=".status.jobState.maxSuperstep",name=JobStatus,type=integer
+// +kubebuilder:printcolumn:JSONPath=".status.jobState.lastSuperstepStat",name=SuperstepStat,type=string
 
 // HugeGraphComputerJob is the Schema for the hugegraphcomputerjobs API
 type HugeGraphComputerJob struct {
@@ -76,13 +94,14 @@ type HugeGraphComputerJob struct {
 	Status HugeGraphComputerJobStatus `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
+// +kubebuilder:object:root=true
 
 // HugeGraphComputerJobList contains a list of HugeGraphComputerJob
 type HugeGraphComputerJobList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []HugeGraphComputerJob `json:"items"`
+
+	Items []HugeGraphComputerJob `json:"items"`
 }
 
 func init() {

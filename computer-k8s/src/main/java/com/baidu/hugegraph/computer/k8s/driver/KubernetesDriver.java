@@ -40,7 +40,7 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     @Override
-    public void uploadAlgorithmJar(InputStream input, String algorithmName) {
+    public void uploadAlgorithmJar(String algorithmName, InputStream input) {
         // TODO: implement
     }
 
