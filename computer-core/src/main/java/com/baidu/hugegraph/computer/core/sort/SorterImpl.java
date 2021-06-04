@@ -42,9 +42,9 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuil
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDir4SubKvReaderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesSubKvInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesWithFirstSubKvInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.DisperseEvenlySelector;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.InputFilesSelector;
@@ -59,9 +59,9 @@ public class SorterImpl implements Sorter {
     }
 
     @Override
-    public void sortBuffer(RandomAccessInput input, InnerSortFlusher flusher)
-                           throws Exception {
-        try (EntryIterator entries = new EntriesInput(input)) {
+    public void sortBuffer(RandomAccessInput input, InnerSortFlusher flusher,
+                           boolean withSubKv) throws Exception {
+        try (EntryIterator entries = new KvEntriesInput(input, withSubKv)) {
             InputSorter sorter = new JavaInputSorter();
             flusher.flush(sorter.sort(entries));
         }
@@ -75,11 +75,11 @@ public class SorterImpl implements Sorter {
         try {
             if (withSubKv) {
                 entries = inputs.stream()
-                                .map(EntriesSubKvInput::new)
+                                .map(KvEntriesWithFirstSubKvInput::new)
                                 .collect(Collectors.toList());
             } else {
                 entries = inputs.stream()
-                                .map(EntriesInput::new)
+                                .map(KvEntriesInput::new)
                                 .collect(Collectors.toList());
             }
         } finally {

@@ -41,7 +41,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -63,10 +63,10 @@ public class FlusherTest {
 
         UnsafeBytesOutput output = new UnsafeBytesOutput();
         Sorter sorter = new SorterImpl(CONFIG);
-        sorter.sortBuffer(input, new KvInnerSortFlusher(output));
+        sorter.sortBuffer(input, new KvInnerSortFlusher(output), false);
 
         UnsafeBytesInput result = EntriesUtil.inputFromOutput(output);
-        EntryIterator iter = new EntriesInput(result);
+        EntryIterator iter = new KvEntriesInput(result);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 3, 1);
@@ -126,11 +126,11 @@ public class FlusherTest {
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
         Sorter sorter = new SorterImpl(CONFIG);
-        sorter.sortBuffer(input, flusher);
+        sorter.sortBuffer(input, flusher, false);
 
         UnsafeBytesInput result = EntriesUtil.inputFromOutput(output);
         // Assert result
-        Iterator<KvEntry> kvIter = new EntriesInput(result);
+        Iterator<KvEntry> kvIter = new KvEntriesInput(result);
         SorterTestUtil.assertKvEntry(kvIter.next(), 1, 1);
         SorterTestUtil.assertKvEntry(kvIter.next(), 3, 4);
     }

@@ -41,7 +41,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuil
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class StoreTestUtil {
@@ -61,7 +61,7 @@ public class StoreTestUtil {
 
         RandomAccessInput input = new UnsafeBytesInput(data.buffer(),
                                                        data.position());
-        Iterator<KvEntry> entriesIter = new EntriesInput(input);
+        Iterator<KvEntry> entriesIter = new KvEntriesInput(input);
         List<KvEntry> entries = new ArrayList<>();
         while (entriesIter.hasNext()) {
             entries.add(entriesIter.next());
@@ -89,7 +89,7 @@ public class StoreTestUtil {
                                            List<List<Integer>> map,
                                            String path) throws IOException {
         UnsafeBytesInput input = SorterTestUtil.inputFromSubKvMap(map);
-        Iterator<KvEntry> iter = new EntriesInput(input);
+        Iterator<KvEntry> iter = new KvEntriesInput(input, true);
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config, path)) {
             while (iter.hasNext()) {
                 builder.write(iter.next());

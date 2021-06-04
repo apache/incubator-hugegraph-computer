@@ -24,7 +24,6 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    EntriesUtilTest.class,
     FlusherTest.class,
     SortLargeDataTest.class,
     SorterTest.class

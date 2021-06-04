@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
@@ -61,7 +61,7 @@ public class EntryOutputTest {
 
         // Assert result
         UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
-        EntryIterator iter = new EntriesInput(input);
+        EntryIterator iter = new KvEntriesInput(input);
         SorterTestUtil.assertKvEntry(iter.next(), 1, 5);
         SorterTestUtil.assertKvEntry(iter.next(), 6, 6);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
@@ -77,7 +77,8 @@ public class EntryOutputTest {
                                                  1,
                                                  2, 2,
                                                  6, 1);
-        EntryIterator iter = new EntriesInput(inputFromEntries(entries, false));
+        UnsafeBytesInput input = inputFromEntries(entries, false);
+        EntryIterator iter = new KvEntriesInput(input, true);
 
         // Assert entry1
         KvEntry kvEntry1 = iter.next();
@@ -105,7 +106,8 @@ public class EntryOutputTest {
                                                  1,
                                                  2, 2,
                                                  6, 1);
-        EntryIterator iter = new EntriesInput(inputFromEntries(entries, true));
+        UnsafeBytesInput input = inputFromEntries(entries, true);
+        EntryIterator iter = new KvEntriesInput(input, true);
 
         // Assert entry1
         KvEntry kvEntry1 = iter.next();

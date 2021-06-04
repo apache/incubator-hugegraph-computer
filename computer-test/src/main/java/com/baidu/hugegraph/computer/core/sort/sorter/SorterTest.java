@@ -48,7 +48,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
@@ -101,11 +101,12 @@ public class SorterTest {
 
         SorterImpl sorter = new SorterImpl(CONFIG);
         Combiner<Pointer> combiner = new MockIntSumCombiner();
-        sorter.sortBuffer(input, new CombineKvInnerSortFlusher(output,
-                                                               combiner));
+        sorter.sortBuffer(input,
+                          new CombineKvInnerSortFlusher(output, combiner),
+                          false);
 
         UnsafeBytesInput resultInput = EntriesUtil.inputFromOutput(output);
-        Iterator<KvEntry> iter = new EntriesInput(resultInput);
+        Iterator<KvEntry> iter = new KvEntriesInput(resultInput);
         SorterTestUtil.assertKvEntry(iter.next(), 1, 43);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 5);
         SorterTestUtil.assertKvEntry(iter.next(), 5, 9);
@@ -260,7 +261,7 @@ public class SorterTest {
                                        output, combiner, flushThreshold);
 
         Sorter sorter = new SorterImpl(config);
-        sorter.sortBuffer(input, flusher);
+        sorter.sortBuffer(input, flusher, true);
 
         return EntriesUtil.inputFromOutput(output);
     }
@@ -279,7 +280,8 @@ public class SorterTest {
          * key 3 subKv 2 2, 3 1
          * key 3 subKv 4 1
          */
-        EntryIterator kvIter = new EntriesInput(this.sortedSubKvBuffer(config));
+        UnsafeBytesInput input = this.sortedSubKvBuffer(config);
+        EntryIterator kvIter = new KvEntriesInput(input, true);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 1, 3, 1, 5, 1);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 5, 1, 8, 2);
         SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 9, 1);

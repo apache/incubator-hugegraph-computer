@@ -45,7 +45,8 @@ public class PointerTest {
         output.write(data);
 
         UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
-        KvEntry inlineKvEntry = EntriesUtil.entryFromInput(input, true, false);
+        KvEntry inlineKvEntry = EntriesUtil.kvEntryFromInput(input, true,
+                                                             false);
         Pointer inlineKey = inlineKvEntry.key();
         Pointer inlineValue = inlineKvEntry.value();
         Assert.assertEquals(0L, inlineKey.offset());
@@ -66,7 +67,8 @@ public class PointerTest {
 
         input.seek(0);
 
-        KvEntry cachedKvEntry = EntriesUtil.entryFromInput(input, false, false);
+        KvEntry cachedKvEntry = EntriesUtil.kvEntryFromInput(input, false,
+                                                             false);
         Pointer cachedKey = cachedKvEntry.key();
         Pointer cachedValue = cachedKvEntry.value();
         Assert.assertEquals(4L, cachedKey.offset());

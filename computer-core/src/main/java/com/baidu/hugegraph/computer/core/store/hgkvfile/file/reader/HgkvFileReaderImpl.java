@@ -86,10 +86,10 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
             }
 
             this.numEntries--;
-            return EntriesUtil.entryFromInput(this.input,
-                                              this.userAccessInput,
-                                              this.useInlinePointer,
-                                              this.withSubKv);
+            return EntriesUtil.kvEntryFromInput(this.input,
+                                                this.userAccessInput,
+                                                this.useInlinePointer,
+                                                this.withSubKv);
         }
 
         @Override
