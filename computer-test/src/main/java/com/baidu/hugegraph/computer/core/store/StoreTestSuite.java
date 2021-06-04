@@ -29,7 +29,8 @@ import org.junit.runners.Suite;
     EntryOutputTest.class,
     PointerTest.class,
     EntryOutputTest.class,
-    FileManagerTest.class
+    FileManagerTest.class,
+    EntriesUtilTest.class
 })
 public class StoreTestSuite {
 }

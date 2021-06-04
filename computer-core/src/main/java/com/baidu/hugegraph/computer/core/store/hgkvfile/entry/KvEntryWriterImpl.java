@@ -29,7 +29,7 @@ import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 
 public class KvEntryWriterImpl implements KvEntryWriter {
 
@@ -89,7 +89,7 @@ public class KvEntryWriterImpl implements KvEntryWriter {
     private void sortAndWriteSubKvs() throws IOException {
         UnsafeBytesInput input = EntriesUtil.inputFromOutput(this.subKvBuffer);
         InputSorter sorter = new JavaInputSorter();
-        Iterator<KvEntry> subKvs = sorter.sort(new EntriesInput(input));
+        Iterator<KvEntry> subKvs = sorter.sort(new KvEntriesInput(input));
 
         while (subKvs.hasNext()) {
             KvEntry subKv = subKvs.next();

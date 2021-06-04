@@ -26,15 +26,15 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 
-public class EntriesInput implements EntryIterator {
+public class KvEntriesInput implements EntryIterator {
 
     private final RandomAccessInput input;
-    private final boolean useInlinePointer;
+    private final boolean withSubKv;
     private final RandomAccessInput userAccessInput;
 
-    public EntriesInput(RandomAccessInput input, boolean useInlinePointer) {
+    public KvEntriesInput(RandomAccessInput input, boolean withSubKv) {
         this.input = input;
-        this.useInlinePointer = useInlinePointer;
+        this.withSubKv = withSubKv;
         try {
             this.userAccessInput = this.input.duplicate();
         } catch (IOException e) {
@@ -42,8 +42,8 @@ public class EntriesInput implements EntryIterator {
         }
     }
 
-    public EntriesInput(RandomAccessInput input) {
-        this(input, true);
+    public KvEntriesInput(RandomAccessInput input) {
+        this(input, false);
     }
 
     @Override
@@ -57,8 +57,8 @@ public class EntriesInput implements EntryIterator {
 
     @Override
     public KvEntry next() {
-        return EntriesUtil.entryFromInput(this.input, this.userAccessInput,
-                                          this.useInlinePointer, false);
+        return EntriesUtil.kvEntryFromInput(this.input, this.userAccessInput,
+                                            true, this.withSubKv);
     }
 
     @Override

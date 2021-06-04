@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
@@ -61,7 +61,7 @@ public class EntryOutputTest {
 
         // Assert result
         UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
-        EntryIterator iter = new EntriesInput(input);
+        EntryIterator iter = new KvEntriesInput(input);
         SorterTestUtil.assertKvEntry(iter.next(), 1, 5);
         SorterTestUtil.assertKvEntry(iter.next(), 6, 6);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
@@ -77,14 +77,18 @@ public class EntryOutputTest {
                                                  1,
                                                  2, 2,
                                                  6, 1);
-        EntryIterator iter = new EntriesInput(inputFromEntries(entries, false));
+        UnsafeBytesInput input = inputFromEntries(entries, false);
+        EntryIterator iter = new KvEntriesInput(input, true);
 
         // Assert entry1
         KvEntry kvEntry1 = iter.next();
+        Assert.assertEquals(3, kvEntry1.numSubEntries());
         int key1 = StoreTestUtil.dataFromPointer(kvEntry1.key());
         Assert.assertEquals(5, key1);
         EntryIterator kvEntry1SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry1);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 6, 6);
+        KvEntry subKv1 = kvEntry1SubKvs.next();
+        Assert.assertEquals(0, subKv1.numSubEntries());
+        SorterTestUtil.assertKvEntry(subKv1, 6, 6);
         SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 2, 1);
         SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 4, 8);
         // Assert entry2
@@ -105,20 +109,29 @@ public class EntryOutputTest {
                                                  1,
                                                  2, 2,
                                                  6, 1);
-        EntryIterator iter = new EntriesInput(inputFromEntries(entries, true));
+        UnsafeBytesInput input = inputFromEntries(entries, true);
+        EntryIterator iter = new KvEntriesInput(input, true);
 
         // Assert entry1
         KvEntry kvEntry1 = iter.next();
         int key1 = StoreTestUtil.dataFromPointer(kvEntry1.key());
         Assert.assertEquals(5, key1);
+
         EntryIterator kvEntry1SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry1);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 2, 1);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 4, 8);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 6, 6);
+        KvEntry subKv1 = kvEntry1SubKvs.next();
+        Assert.assertEquals(0, subKv1.numSubEntries());
+        SorterTestUtil.assertKvEntry(subKv1, 2, 1);
+        KvEntry subKv2 = kvEntry1SubKvs.next();
+        Assert.assertEquals(0, subKv2.numSubEntries());
+        SorterTestUtil.assertKvEntry(subKv2, 4, 8);
+        KvEntry subKv3 = kvEntry1SubKvs.next();
+        Assert.assertEquals(0, subKv3.numSubEntries());
+        SorterTestUtil.assertKvEntry(subKv3, 6, 6);
         // Assert entry2
         KvEntry kvEntry2 = iter.next();
         int key2 = StoreTestUtil.dataFromPointer(kvEntry2.key());
         Assert.assertEquals(1, key2);
+
         EntryIterator kvEntry2SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry2);
         SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 2, 2);
         SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 6, 1);

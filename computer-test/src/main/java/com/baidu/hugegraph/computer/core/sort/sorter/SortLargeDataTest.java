@@ -267,7 +267,7 @@ public class SortLargeDataTest {
         Combiner<Pointer> combiner = new MockIntSumCombiner();
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
-        sorter.sortBuffer(input, flusher);
+        sorter.sortBuffer(input, flusher, false);
         return EntriesUtil.inputFromOutput(output);
     }
 

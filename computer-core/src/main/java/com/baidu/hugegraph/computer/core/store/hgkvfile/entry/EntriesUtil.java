@@ -20,86 +20,19 @@
 package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.SubKvEntriesInput;
 
 public final class EntriesUtil {
 
-    private static final int DEFAULT_CAPACITY = 100000;
-
-    public static List<KvEntry> readInput(RandomAccessInput input)
-                                          throws IOException {
-        List<KvEntry> pointers = new ArrayList<>(DEFAULT_CAPACITY);
-        try (EntriesInput entriesInput = new EntriesInput(input)) {
-            while (entriesInput.hasNext()) {
-                pointers.add(entriesInput.next());
-            }
-        }
-
-        return pointers;
-    }
-
-    public static EntryIterator subKvIterFromEntry(KvEntry entry) {
-        return new SubKvIterator(entry);
-    }
-
-    private static class SubKvIterator implements EntryIterator {
-
-        private final RandomAccessInput input;
-        private final RandomAccessInput useAccessInput;
-        private long size;
-        private final boolean useInlinePointer;
-
-        public SubKvIterator(KvEntry kvEntry, boolean useInlinePointer) {
-            try {
-                this.input = new UnsafeBytesInput(kvEntry.value().bytes());
-                this.useAccessInput = this.input.duplicate();
-                this.size = this.input.readInt();
-                this.useInlinePointer = useInlinePointer;
-            } catch (IOException e) {
-                throw new ComputerException(e.getMessage(), e);
-            }
-        }
-
-        public SubKvIterator(KvEntry kvEntry) {
-            this(kvEntry, true);
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.size > 0;
-        }
-
-        @Override
-        public KvEntry next() {
-            if (!this.hasNext()) {
-                throw new NoSuchElementException();
-            }
-
-            this.size--;
-            return EntriesUtil.entryFromInput(this.input, this.useAccessInput,
-                                              this.useInlinePointer, true);
-        }
-
-        @Override
-        public void close() throws Exception {
-            this.input.close();
-            this.useAccessInput.close();
-        }
-    }
-
-    public static KvEntry entryFromInput(RandomAccessInput input,
-                                         RandomAccessInput userAccessInput,
-                                         boolean useInlinePointer,
-                                         boolean valueWithSubKv) {
+    public static KvEntry kvEntryFromInput(RandomAccessInput input,
+                                           RandomAccessInput userAccessInput,
+                                           boolean useInlinePointer,
+                                           boolean valueWithSubKv) {
         try {
             if (useInlinePointer) {
                 return inlinePointerKvEntry(input, valueWithSubKv);
@@ -112,10 +45,10 @@ public final class EntriesUtil {
         }
     }
 
-    public static KvEntry entryFromInput(RandomAccessInput input,
-                                         boolean useInlinePointer,
-                                         boolean valueWithSubKv) {
-        return entryFromInput(input, input, useInlinePointer, valueWithSubKv);
+    public static KvEntry kvEntryFromInput(RandomAccessInput input,
+                                           boolean useInlinePointer,
+                                           boolean valueWithSubKv) {
+        return kvEntryFromInput(input, input, useInlinePointer, valueWithSubKv);
     }
     
     private static KvEntry cachedPointerKvEntry(
@@ -176,13 +109,46 @@ public final class EntriesUtil {
         return new DefaultKvEntry(key, value, numSubEntries);
     }
 
+    public static KvEntry subKvEntryFromInput(RandomAccessInput input,
+                                              RandomAccessInput userAccessInput,
+                                              boolean useInlinePointer) {
+        try {
+            Pointer key, value;
+            if (useInlinePointer) {
+                byte[] keyBytes = input.readBytes(input.readInt());
+                key = new InlinePointer(keyBytes);
+
+                byte[] valueBytes = input.readBytes(input.readInt());
+                value = new InlinePointer(valueBytes);
+            } else {
+                int keyLength = input.readInt();
+                key = new CachedPointer(userAccessInput, input.position(),
+                                        keyLength);
+                input.skip(keyLength);
+
+                int valueLength = input.readInt();
+                value = new CachedPointer(userAccessInput, input.position(),
+                                          valueLength);
+                input.skip(valueLength);
+            }
+            return new DefaultKvEntry(key, value);
+        } catch (IOException e) {
+            throw new ComputerException(e.getMessage(), e);
+        }
+    }
+
+    public static KvEntry subKvEntryFromInput(RandomAccessInput input,
+                                              boolean useInlinePointer) {
+        return subKvEntryFromInput(input, input, useInlinePointer);
+    }
+
     public static KvEntryWithFirstSubKv kvEntryWithFirstSubKv(KvEntry entry) {
         try {
             RandomAccessInput input = new UnsafeBytesInput(
                                       entry.value().bytes());
             // Skip sub-entry size
             input.skip(Integer.BYTES);
-            KvEntry firstSubKv = EntriesUtil.entryFromInput(input, true, true);
+            KvEntry firstSubKv = EntriesUtil.subKvEntryFromInput(input, true);
 
             return new KvEntryWithFirstSubKv(entry.key(), entry.value(),
                                              firstSubKv);
@@ -193,5 +159,9 @@ public final class EntriesUtil {
 
     public static UnsafeBytesInput inputFromOutput(UnsafeBytesOutput output) {
         return new UnsafeBytesInput(output.buffer(), output.position());
+    }
+
+    public static EntryIterator subKvIterFromEntry(KvEntry entry) {
+        return new SubKvEntriesInput(entry);
     }
 }

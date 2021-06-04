@@ -25,19 +25,14 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.iterator.CIter;
 import com.baidu.hugegraph.iterator.MapperIterator;
 
-public class EntriesSubKvInput implements EntryIterator {
+public class KvEntriesWithFirstSubKvInput implements EntryIterator {
 
     private final CIter<KvEntry> entries;
 
-    public EntriesSubKvInput(RandomAccessInput input,
-                             boolean useInlinePointer) {
+    public KvEntriesWithFirstSubKvInput(RandomAccessInput input) {
         this.entries = new MapperIterator<>(
-                       new EntriesInput(input, useInlinePointer),
+                       new KvEntriesInput(input),
                        EntriesUtil::kvEntryWithFirstSubKv);
-    }
-
-    public EntriesSubKvInput(RandomAccessInput input) {
-        this(input, true);
     }
 
     @Override
