@@ -47,7 +47,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: HugeGraphComputerJobSpec defines the desired state of HugeGraphComputerJob
+          description: ComputerJobSpec defines the desired state of HugeGraphComputerJob
           properties:
             algorithmName:
               type: string
@@ -186,7 +186,7 @@ spec:
               type: string
           type: object
         status:
-          description: HugeGraphComputerJobStatus defines the observed state of HugeGraphComputerJob
+          description: ComputerJobStatus defines the observed state of HugeGraphComputerJob
           properties:
             jobState:
               properties:

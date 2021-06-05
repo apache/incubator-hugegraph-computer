@@ -86,8 +86,10 @@ func main() {
 	)
 
 	// fix must start with "io.fabric8."
-	json = strings.ReplaceAll(json, "io.fabric8.xxxx",
-		"com.baidu.hugegraph.computer.k8s.crd.model")
+	json = strings.ReplaceAll(
+		json, "io.fabric8.xxxx",
+		"com.baidu.hugegraph.computer.k8s.crd.model",
+	)
 
 	err := ioutil.WriteFile("./schema/kube-schema.json", []byte(json), 0644)
 	if err != nil {

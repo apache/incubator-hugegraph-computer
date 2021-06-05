@@ -33,10 +33,10 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 
 public class KubernetesDriver implements ComputerDriver {
 
-    private final KubernetesClient k8sClient;
+    private final KubernetesClient kubeClient;
 
     public KubernetesDriver() {
-        this.k8sClient = new DefaultKubernetesClient();
+        this.kubeClient = new DefaultKubernetesClient();
     }
 
     @Override
@@ -88,6 +88,6 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     public void close() {
-        this.k8sClient.close();
+        this.kubeClient.close();
     }
 }

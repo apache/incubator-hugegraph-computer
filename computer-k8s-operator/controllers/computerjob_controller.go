@@ -22,15 +22,14 @@ package controllers
 import (
 	"context"
 
+	computerv1 "computer.hugegraph.io/operator/api/v1"
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
-	eventv1beta1 "k8s.io/api/events/v1beta1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	computerv1 "computer.hugegraph.io/operator/api/v1"
 )
 
 // ComputerJobReconciler reconciles a HugeGraphComputerJob object
@@ -66,13 +65,15 @@ type ComputerJobReconciler struct {
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 func (reconciler *ComputerJobReconciler) Reconcile(
-	ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
+	ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	log := reconciler.Log.WithValues(ctx, "ComputerJob", req.NamespacedName)
+	log.Info("reconclice request", "request", req)
 
-	var log = reconciler.Log.WithValues(
-		"computerJob", request.NamespacedName,
-	)
-
-	log.Info("Reconclice request", "request", request)
+	var computerJob *computerv1.HugeGraphComputerJob
+	if err := reconciler.Get(ctx, req.NamespacedName, computerJob); err != nil {
+		log.Error(err, "Unable to fetch ComputerJob")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
 	// TODO: Modify the Reconcile function to compare the state
 	return ctrl.Result{}, nil
@@ -85,7 +86,7 @@ func (reconciler *ComputerJobReconciler) SetupWithManager(
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&computerv1.HugeGraphComputerJob{}).
 		Owns(&appsv1.Deployment{}).
-		Owns(&eventv1beta1.Event{}).
+		Owns(&corev1.Event{}).
 		Complete(reconciler)
 }
 
@@ -96,5 +97,4 @@ type ComputerJobHandler struct {
 	context   context.Context
 	log       logr.Logger
 	recorder  record.EventRecorder
-	//observed  ObservedClusterState
 }

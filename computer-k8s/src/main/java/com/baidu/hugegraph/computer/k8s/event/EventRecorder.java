@@ -25,27 +25,35 @@ import java.util.Map;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.driver.JobState;
-import com.baidu.hugegraph.computer.k8s.crd.ComputerJobProvider;
+import com.baidu.hugegraph.computer.k8s.crd.ComputerJob;
+import com.baidu.hugegraph.computer.k8s.crd.ComputerJobList;
+import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobState;
 import com.baidu.hugegraph.util.JsonUtil;
 import com.baidu.hugegraph.util.Log;
 
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.EventBuilder;
 import io.fabric8.kubernetes.api.model.EventSource;
+import io.fabric8.kubernetes.api.model.EventSourceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
+import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class EventRecorder {
 
     private static final Logger LOG = Log.logger(EventRecorder.class);
 
-    private static final String HOST_NAME_KEY = "host";
-    private static final String OPERATOR_NAMESPACE_NAME = "default";
+    private static final String HOST_NAME_KEY = "hostname";
     private static final String REASON = "SuperStepStatChanged";
 
-    private final KubernetesClient k8sClient;
+    private final KubernetesClient kubeClient;
+    private final MixedOperation<ComputerJob, ComputerJobList,
+                                 Resource<ComputerJob>> computerJonClient;
 
     private static final Map<String, String> ENV_MAP;
 
@@ -54,29 +62,58 @@ public class EventRecorder {
     }
 
     public EventRecorder() {
-        this.k8sClient = new DefaultKubernetesClient();
+        this.kubeClient = new DefaultKubernetesClient();
+        this.computerJonClient = this.kubeClient.customResources(
+                                                 ComputerJob.class,
+                                                 ComputerJobList.class);
     }
 
     public void recordSuperStep(String jobId, JobState jobState) {
-        String name = jobId + "-event";
+        String name = jobId + "-superstep-event";
 
-        String message = String.format("%s\n%s\n%s", jobState.superstep(),
-                                       jobState.maxSuperstep(),
-                                       JsonUtil.toJson(
-                                       jobState.lastSuperstepStat()));
+        String namespace = this.kubeClient.getNamespace();
+        if (namespace.isEmpty()) {
+            namespace = "default";
+        }
 
-        String now = OffsetDateTime.now().toString();
+        ComputerJobState computerJobState = new ComputerJobState()
+                .withSuperstep(jobState.superstep())
+                .withMaxSuperstep(jobState.maxSuperstep())
+                .withLastSuperstepStat(
+                 JsonUtil.toJson(jobState.lastSuperstepStat()));
 
-        EventSource eventSource = new EventSource();
-        eventSource.setHost(ENV_MAP.getOrDefault(HOST_NAME_KEY,
-                                                 "localhost"));
-        eventSource.setComponent(ComputerJobProvider.SINGULAR + "-master");
+        String message = JsonUtil.toJson(computerJobState);
+
+        ComputerJob computerJob = this.computerJonClient.inNamespace(namespace)
+                                                        .withName(jobId)
+                                                        .get();
+        if (computerJob == null) {
+            LOG.warn("The ComputerJob Resource don't exists");
+            return;
+        }
 
         ObjectReference objectReference = new ObjectReferenceBuilder()
-                .withApiVersion(ComputerJobProvider.API_VERSION)
-                .withKind(ComputerJobProvider.KIND)
-                .withName(jobId)
+                .withKind(computerJob.getKind())
+                .withName(computerJob.getMetadata().getName())
+                .withUid(computerJob.getMetadata().getUid())
+                .withApiVersion(ComputerJob.API_VERSION)
+                .withNamespace(namespace)
                 .build();
+
+        OwnerReference ownerReference = new OwnerReferenceBuilder()
+                .withKind(computerJob.getKind())
+                .withName(computerJob.getMetadata().getName())
+                .withUid(computerJob.getMetadata().getUid())
+                .withController(true)
+                .withBlockOwnerDeletion(false)
+                .build();
+
+        EventSource eventSource = new EventSourceBuilder()
+                .withHost(ENV_MAP.getOrDefault(HOST_NAME_KEY, "localhost"))
+                .withComponent(ComputerJob.SINGULAR + "-master")
+                .build();
+
+        String now = OffsetDateTime.now().toString();
 
         Event event = new EventBuilder()
                 .withNewMetadata().withName(name).endMetadata()
@@ -86,12 +123,15 @@ public class EventRecorder {
                 .withInvolvedObject(objectReference)
                 .withSource(eventSource)
                 .withReason(REASON)
+                .withNewMetadata()
+                    .withOwnerReferences(ownerReference)
+                    .endMetadata()
                 .build();
 
-        LOG.info("Create a event for superStep: {}", event.toString());
-        this.k8sClient.v1().events()
-                      .inNamespace(OPERATOR_NAMESPACE_NAME)
-                      .createOrReplace(event);
+        LOG.debug("Create a event for superStep: {}", event.toString());
+        this.kubeClient.v1().events()
+                       .inNamespace(namespace)
+                       .createOrReplace(event);
 
     }
 

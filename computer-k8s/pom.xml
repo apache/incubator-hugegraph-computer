@@ -13,23 +13,8 @@
 
     <properties>
         <jsonschema2pojo.version>1.1.0</jsonschema2pojo.version>
-        <sundrio.version>0.40.1</sundrio.version>
-        <maven.bundle.plugin.version>5.1.2</maven.bundle.plugin.version>
         <maven.antrun.plugin.version>3.0.0</maven.antrun.plugin.version>
-        <lombok.version>1.18.20</lombok.version>
         <fabric8.version>5.4.0</fabric8.version>
-<!--        <osgi.import>-->
-<!--            io.fabric8.kubernetes.api.builder,-->
-<!--            !com.baidu.hugegraph.computer.k8s.*,-->
-<!--            *-->
-<!--        </osgi.import>-->
-<!--        <osgi.export>-->
-<!--            com.baidu.hugegraph.computer.k8s.*-->
-<!--        </osgi.export>-->
-<!--        <osgi.include.resources>-->
-<!--            {maven-resources},-->
-<!--            /camel-k-v1.properties=target/classes/model.properties-->
-<!--        </osgi.include.resources>-->
     </properties>
 
     <dependencies>
@@ -42,31 +27,6 @@
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
             <version>${fabric8.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.sundr</groupId>
-            <artifactId>builder-annotations</artifactId>
-            <version>${sundrio.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.sun</groupId>
-                    <artifactId>tools</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>io.sundr</groupId>
-            <artifactId>transform-annotations</artifactId>
-            <version>${sundrio.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -81,10 +41,11 @@
                     <targetPackage>com.baidu.hugegraph.computer.k8s.crd.model</targetPackage>
                     <includeConstructors>true</includeConstructors>
                     <includeJsr303Annotations>false</includeJsr303Annotations>
-                    <includeToString>false</includeToString>
-                    <includeHashcodeAndEquals>false</includeHashcodeAndEquals>
-                    <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
-                    <customAnnotator>io.fabric8.kubernetes.ModelAnnotator</customAnnotator>
+                    <includeToString>true</includeToString>
+                    <includeHashcodeAndEquals>true</includeHashcodeAndEquals>
+                    <generateBuilders>true</generateBuilders>
+                    <outputDirectory>${project.build.directory}/generated-sources/src/gen/java</outputDirectory>
+                    <includeAdditionalProperties>false</includeAdditionalProperties>
                 </configuration>
                 <executions>
                     <execution>
@@ -95,13 +56,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>io.fabric8</groupId>
-                        <artifactId>model-annotator</artifactId>
-                        <version>${fabric8.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -113,7 +67,13 @@
                             <target>
                                 <!-- removing the generated Schema class -->
                                 <delete
-                                        file="${project.build.directory}/generated-sources/com/baidu/hugegraph/computer/k8s/crd/model/KubeSchema.java"
+                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/KubeSchema.java"
+                                        verbose="true" />
+                                <delete
+                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/HugeGraphComputerJob.java"
+                                        verbose="true" />
+                                <delete
+                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/HugeGraphComputerJobList.java"
                                         verbose="true" />
                             </target>
                         </configuration>

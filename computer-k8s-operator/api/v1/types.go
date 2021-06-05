@@ -28,8 +28,8 @@ import (
 // NOTE: json tags are required.
 // Any new fields you add must have json tags for the fields to be serialized.
 
-// HugeGraphComputerJobSpec defines the desired state of HugeGraphComputerJob
-type HugeGraphComputerJobSpec struct {
+// ComputerJobSpec defines the desired state of HugeGraphComputerJob
+type ComputerJobSpec struct {
 	AlgorithmName *string `json:"algorithmName,omitempty"`
 
 	JobId *string `json:"jobId,omitempty"`
@@ -60,7 +60,7 @@ type HugeGraphComputerJobSpec struct {
 	EnvFrom []corev1.EnvFromSource `json:"envFrom,omitempty"`
 }
 
-type JobState struct {
+type ComputerJobState struct {
 	Superstep *int32 `json:"superstep,omitempty"`
 
 	MaxSuperstep *int32 `json:"maxSuperstep,omitempty"`
@@ -68,11 +68,11 @@ type JobState struct {
 	LastSuperstepStat *string `json:"lastSuperstepStat,omitempty"`
 }
 
-// HugeGraphComputerJobStatus defines the observed state of HugeGraphComputerJob
-type HugeGraphComputerJobStatus struct {
+// ComputerJobStatus defines the observed state of HugeGraphComputerJob
+type ComputerJobStatus struct {
 	JobStatus *string `json:"jobStatus,omitempty"`
 
-	JobState *JobState `json:"jobState,omitempty"`
+	JobState *ComputerJobState `json:"jobState,omitempty"`
 
 	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
 }
@@ -90,8 +90,8 @@ type HugeGraphComputerJob struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   HugeGraphComputerJobSpec   `json:"spec,omitempty"`
-	Status HugeGraphComputerJobStatus `json:"status,omitempty"`
+	Spec   ComputerJobSpec   `json:"spec,omitempty"`
+	Status ComputerJobStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
