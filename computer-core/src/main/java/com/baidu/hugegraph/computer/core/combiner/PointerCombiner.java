@@ -40,7 +40,8 @@ public class PointerCombiner<V extends Readable & Writable>
         this.v1 = v1;
         this.v2 = v2;
         this.combiner = combiner;
-        this.bytesOutput = IOFactory.createBytesOutput(Constants.DEFAULT_SIZE);
+        this.bytesOutput = IOFactory.createBytesOutput(
+                           Constants.SMALL_BUF_SIZE);
     }
 
     @Override

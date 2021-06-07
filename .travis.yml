@@ -35,4 +35,4 @@ after_success:
 env:
   global:
     - TRAVIS_DIR=computer-dist/src/assembly/travis
-    - COMMIT_ID=c0dff5b233e853716ca6f3f28a5cda05e6f3d639
+    - COMMIT_ID=83f66129733430c4cf3dd48870905678a8b0b61b

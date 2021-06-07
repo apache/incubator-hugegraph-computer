@@ -101,7 +101,7 @@ public class SortLargeDataTest {
 
         Random random = new Random();
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         List<RandomAccessInput> buffers = new ArrayList<>(mergeBufferNum);
         List<String> mergeBufferFiles = new ArrayList<>();
         int fileNum = 10;
@@ -154,7 +154,7 @@ public class SortLargeDataTest {
         List<RandomAccessInput> buffers = new ArrayList<>();
         for (int i = 0; i < bufferNum; i++) {
             BytesOutput buffer = IOFactory.createBytesOutput(
-                                 Constants.DEFAULT_SIZE);
+                                 Constants.SMALL_BUF_SIZE);
             while (buffer.position() < bufferSize) {
                 // Write data
                 int key = random.nextInt(keyRange);
@@ -201,7 +201,7 @@ public class SortLargeDataTest {
         List<RandomAccessInput> buffers = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             BytesOutput buffer = IOFactory.createBytesOutput(
-                                 Constants.DEFAULT_SIZE);
+                                 Constants.SMALL_BUF_SIZE);
             for (int j = 0; j < 100; j++) {
                 // Write data
                 SorterTestUtil.writeData(buffer, 1);
@@ -264,7 +264,7 @@ public class SortLargeDataTest {
                                                 RandomAccessInput input)
                                                 throws Exception {
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         Combiner<Pointer> combiner = new MockIntSumCombiner();
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);

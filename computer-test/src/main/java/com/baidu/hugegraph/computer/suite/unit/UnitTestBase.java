@@ -58,7 +58,7 @@ public class UnitTestBase {
                                                       throws IOException {
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
-                               Constants.DEFAULT_SIZE)) {
+                               Constants.SMALL_BUF_SIZE)) {
             oldId.write(bao);
             bytes = bao.toByteArray();
         }
@@ -74,7 +74,7 @@ public class UnitTestBase {
                                                          throws IOException {
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
-                               Constants.DEFAULT_SIZE)) {
+                               Constants.SMALL_BUF_SIZE)) {
             oldValue.write(bao);
             bytes = bao.toByteArray();
         }
@@ -127,7 +127,7 @@ public class UnitTestBase {
                                                     throws IOException {
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
-                               Constants.DEFAULT_SIZE)) {
+                               Constants.SMALL_BUF_SIZE)) {
             writeObj.write(bao);
             bytes = bao.toByteArray();
         }

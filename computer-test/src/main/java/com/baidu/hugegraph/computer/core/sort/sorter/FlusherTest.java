@@ -63,7 +63,7 @@ public class FlusherTest {
         BytesInput input = SorterTestUtil.inputFromKvMap(map);
 
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         Sorter sorter = new SorterImpl(CONFIG);
         sorter.sortBuffer(input, new KvInnerSortFlusher(output), false);
 
@@ -107,7 +107,7 @@ public class FlusherTest {
     @Test
     public void testExceptionCaseForFlusher() {
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         InnerSortFlusher flusher = new KvInnerSortFlusher(output);
         List<KvEntry> entries = new ArrayList<>();
 
@@ -129,7 +129,7 @@ public class FlusherTest {
         BytesInput input = SorterTestUtil.inputFromKvMap(data);
 
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         Combiner<Pointer> combiner = new OverwriteCombiner<>();
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);

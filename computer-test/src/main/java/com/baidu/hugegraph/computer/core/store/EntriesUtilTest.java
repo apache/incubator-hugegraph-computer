@@ -42,7 +42,7 @@ public class EntriesUtilTest {
     @Test
     public void testSubKvEntriesInput() throws Exception {
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(output);
 
         KvEntryWriter subKvWriter = entryOutput.writeEntry(new LongId(100));

@@ -100,7 +100,7 @@ public class SorterTest {
                                              1, 20);
         BytesInput input = SorterTestUtil.inputFromKvMap(map);
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
 
         SorterImpl sorter = new SorterImpl(CONFIG);
         Combiner<Pointer> combiner = new MockIntSumCombiner();
@@ -256,7 +256,7 @@ public class SorterTest {
 
         BytesInput input = SorterTestUtil.inputFromSubKvMap(data);
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         Combiner<Pointer> combiner = new MockIntSumCombiner();
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);

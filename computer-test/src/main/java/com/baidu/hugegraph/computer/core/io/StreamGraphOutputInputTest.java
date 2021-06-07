@@ -46,7 +46,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         Vertex vertex1 = graphFactory().createVertex(longId, longValue);
         byte[] bytes;
         try (UnsafeBytesOutput bao = new UnsafeBytesOutput(
-                                     Constants.DEFAULT_SIZE)) {
+                                     Constants.SMALL_BUF_SIZE)) {
             StreamGraphOutput output = newStreamGraphOutput(bao);
             output.writeVertex(vertex1);
             bytes = bao.toByteArray();

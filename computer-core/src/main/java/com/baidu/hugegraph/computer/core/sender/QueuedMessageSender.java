@@ -35,7 +35,7 @@ public class QueuedMessageSender implements MessageSender {
 
     public static final Logger LOG = Log.logger(QueuedMessageSender.class);
 
-    private static final String PREFIX = "send-executor-";
+    private static final String PREFIX = "send-executor";
 
     // Each target worker has a WorkerChannel
     private final Map<Integer, WorkerChannel> workerChannels;
@@ -77,7 +77,8 @@ public class QueuedMessageSender implements MessageSender {
                                   this.anyQueueNotEmptyEvent::signal);
         WorkerChannel channel = new WorkerChannel(workerId, queue, client);
         this.workerChannels.put(workerId, channel);
-        LOG.info("Add channel for worker {}", workerId);
+        LOG.info("Add client {} for worker {}",
+                 client.connectionId(), workerId);
     }
 
     @Override
@@ -88,8 +89,8 @@ public class QueuedMessageSender implements MessageSender {
         if (channel == null)  {
             throw new ComputerException("Invalid workerId %s", workerId);
         }
-        channel.queue.put(message);
         channel.newFuture();
+        channel.queue.put(message);
         return channel.future;
     }
 
@@ -159,7 +160,6 @@ public class QueuedMessageSender implements MessageSender {
                                     TransportException, InterruptedException {
         CompletableFuture<Void> future = channel.client.startSessionAsync();
         channel.queue.take();
-        ++this.activeClientCount;
 
         future.whenComplete((r, e) -> {
             if (e != null) {
@@ -169,6 +169,7 @@ public class QueuedMessageSender implements MessageSender {
             } else {
                 LOG.info("Start session connected to worker {}({})",
                          channel.workerId, channel.client.remoteAddress());
+                ++this.activeClientCount;
                 channel.future.complete(null);
             }
         });
@@ -178,7 +179,6 @@ public class QueuedMessageSender implements MessageSender {
                                      TransportException, InterruptedException {
         CompletableFuture<Void> future = channel.client.finishSessionAsync();
         channel.queue.take();
-        --this.activeClientCount;
 
         future.whenComplete((r, e) -> {
             if (e != null) {
@@ -188,6 +188,7 @@ public class QueuedMessageSender implements MessageSender {
             } else {
                 LOG.info("Finish session connected to worker {}({})",
                          channel.workerId, channel.client.remoteAddress());
+                --this.activeClientCount;
                 channel.future.complete(null);
             }
         });

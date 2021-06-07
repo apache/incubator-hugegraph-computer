@@ -36,7 +36,7 @@ public final class SerializeUtil {
 
     public static byte[] toBytes(Writable obj) {
         try (BytesOutput bao = IOFactory.createBytesOutput(
-                               Constants.DEFAULT_SIZE)) {
+                               Constants.SMALL_BUF_SIZE)) {
             obj.write(bao);
             return bao.toByteArray();
         } catch (IOException e) {
@@ -47,7 +47,7 @@ public final class SerializeUtil {
 
     public static byte[] toBytes(List<? extends Writable> list) {
         try (BytesOutput bao = IOFactory.createBytesOutput(
-                               Constants.DEFAULT_SIZE)) {
+                               Constants.SMALL_BUF_SIZE)) {
             bao.writeInt(list.size());
             for (Writable obj : list) {
                 obj.write(bao);

@@ -49,15 +49,15 @@ public class UnsafeBytesInput implements BytesInput {
         }
     }
 
-    UnsafeBytesInput(byte[] buffer) {
+    public UnsafeBytesInput(byte[] buffer) {
         this(buffer, buffer.length);
     }
 
-    UnsafeBytesInput(byte[] buffer, int limit) {
+    public UnsafeBytesInput(byte[] buffer, int limit) {
         this(buffer, 0, limit);
     }
 
-    UnsafeBytesInput(byte[] buffer, int position, int limit) {
+    public UnsafeBytesInput(byte[] buffer, int position, int limit) {
         E.checkArgumentNotNull(buffer, "The buffer can't be null");
         this.buffer = buffer;
         this.limit = limit;

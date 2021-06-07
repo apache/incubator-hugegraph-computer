@@ -58,9 +58,9 @@ public class PointerCombinerTest extends UnitTestBase {
                                                        combiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
-                                        Constants.DEFAULT_SIZE);
+                                        Constants.SMALL_BUF_SIZE);
              BytesOutput bytesOutput2 = IOFactory.createBytesOutput(
-                                        Constants.DEFAULT_SIZE);) {
+                                        Constants.SMALL_BUF_SIZE);) {
             DoubleValue value1 = new DoubleValue(1.0D);
             DoubleValue value2 = new DoubleValue(2.0D);
             value1.write(bytesOutput1);
@@ -100,9 +100,9 @@ public class PointerCombinerTest extends UnitTestBase {
                                     combiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
-                                        Constants.DEFAULT_SIZE);
+                                        Constants.SMALL_BUF_SIZE);
              BytesOutput bytesOutput2 = IOFactory.createBytesOutput(
-                                        Constants.DEFAULT_SIZE)) {
+                                        Constants.SMALL_BUF_SIZE)) {
             Properties value1 = graphFactory.createProperties();
             value1.put("p1", new LongValue(1L));
             Properties value2 = graphFactory.createProperties();
@@ -148,9 +148,9 @@ public class PointerCombinerTest extends UnitTestBase {
                                     combiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
-                                        Constants.DEFAULT_SIZE);
+                                        Constants.SMALL_BUF_SIZE);
              BytesOutput bytesOutput2 = IOFactory.createBytesOutput(
-                                        Constants.DEFAULT_SIZE);) {
+                                        Constants.SMALL_BUF_SIZE);) {
             Properties value1 = graphFactory.createProperties();
             value1.put("p1", new LongValue(1L));
             Properties value2 = graphFactory.createProperties();

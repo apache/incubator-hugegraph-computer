@@ -51,7 +51,7 @@ public class SorterTestUtil {
     public static BytesOutput writeKvMapToOutput(List<Integer> map)
                                                  throws IOException {
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
 
         for (int i = 0; i < map.size(); ) {
             writeData(output, map.get(i++));
@@ -63,7 +63,7 @@ public class SorterTestUtil {
     public static BytesOutput writeSubKvMapToOutput(List<List<Integer>> data)
                                                     throws IOException {
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         for (List<Integer> entry : data) {
             Integer key = entry.get(0);
             // Write key

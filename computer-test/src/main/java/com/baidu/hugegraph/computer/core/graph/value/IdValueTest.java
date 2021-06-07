@@ -126,7 +126,7 @@ public class IdValueTest extends UnitTestBase {
         IdValue value2 = new Utf8Id("short").idValue();
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
-                               Constants.DEFAULT_SIZE)) {
+                               Constants.SMALL_BUF_SIZE)) {
             value1.write(bao);
             value2.write(bao);
             bytes = bao.toByteArray();

@@ -45,7 +45,7 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
                                         int subKvFlushThreshold) {
         this.combiner = combiner;
         this.output = IOFactory.createBytesOutput(
-                      Constants.DEFAULT_BUFFER_SIZE);
+                      Constants.BIG_BUF_SIZE);
         this.subKvFlushThreshold = subKvFlushThreshold;
     }
 

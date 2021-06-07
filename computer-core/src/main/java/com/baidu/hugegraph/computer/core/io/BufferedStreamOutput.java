@@ -35,8 +35,8 @@ public class BufferedStreamOutput extends UnsafeBytesOutput {
     private final OutputStream output;
     private long outputOffset;
 
-    BufferedStreamOutput(OutputStream output) {
-        this(output, Constants.DEFAULT_BUFFER_SIZE);
+    public BufferedStreamOutput(OutputStream output) {
+        this(output, Constants.BIG_BUF_SIZE);
     }
 
     public BufferedStreamOutput(OutputStream output, int bufferCapacity) {
@@ -122,11 +122,6 @@ public class BufferedStreamOutput extends UnsafeBytesOutput {
             }
         }
         return positionBeforeSkip;
-    }
-
-    @Override
-    public void writeFixedInt(int v) throws IOException {
-        super.writeFixedInt(v);
     }
 
     /**

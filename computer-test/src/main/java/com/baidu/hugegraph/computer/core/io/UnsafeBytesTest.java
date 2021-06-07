@@ -35,7 +35,7 @@ import com.baidu.hugegraph.testutil.Assert;
 @SuppressWarnings("resource")
 public class UnsafeBytesTest {
 
-    private static final int SIZE = Constants.DEFAULT_SIZE;
+    private static final int SIZE = Constants.SMALL_BUF_SIZE;
 
     @Test
     public void testConstructor() {

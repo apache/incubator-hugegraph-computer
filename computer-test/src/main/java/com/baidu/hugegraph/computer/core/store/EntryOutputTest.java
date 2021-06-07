@@ -53,7 +53,7 @@ public class EntryOutputTest {
         List<LongId> data = intListToLongIds(entries);
 
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(output);
 
         for (int i = 0; i < data.size(); ) {
@@ -146,7 +146,7 @@ public class EntryOutputTest {
         List<LongId> data = intListToLongIds(entries);
 
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(output, needSort);
         int index = 0;
         KvEntryWriter entry1 = entryOutput.writeEntry(data.get(index++));

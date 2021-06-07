@@ -64,7 +64,7 @@ public class StoreTestUtil {
     public static List<KvEntry> kvEntriesFromMap(List<Integer> map)
                                                  throws IOException {
         BytesOutput data = IOFactory.createBytesOutput(
-                           Constants.DEFAULT_SIZE);
+                           Constants.SMALL_BUF_SIZE);
         Iterator<Integer> iterator = map.iterator();
         while (iterator.hasNext()) {
             // Write key length
@@ -153,7 +153,7 @@ public class StoreTestUtil {
 
     public static byte[] intToByteArray(int data) throws IOException {
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         output.writeInt(data);
         return output.toByteArray();
     }

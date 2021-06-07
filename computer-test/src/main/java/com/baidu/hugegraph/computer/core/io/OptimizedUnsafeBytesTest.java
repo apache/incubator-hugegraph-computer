@@ -32,7 +32,7 @@ public class OptimizedUnsafeBytesTest {
     @Test
     public void testConstructor() {
         OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                      Constants.DEFAULT_SIZE);
+                                      Constants.SMALL_BUF_SIZE);
         Assert.assertEquals(0, output.position());
 
         OptimizedBytesOutput output2 = new OptimizedBytesOutput(16);
@@ -58,7 +58,7 @@ public class OptimizedUnsafeBytesTest {
     private static OptimizedBytesInput inputByString(String s)
                                                      throws IOException {
         OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                      Constants.DEFAULT_SIZE);
+                                      Constants.SMALL_BUF_SIZE);
         output.writeBytes(s);
         return new OptimizedBytesInput(output.toByteArray());
     }

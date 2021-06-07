@@ -29,19 +29,19 @@ public class OptimizedBytesInput implements BytesInput {
 
     private final UnsafeBytesInput in;
 
-    OptimizedBytesInput(byte[] buffer) {
+    public OptimizedBytesInput(byte[] buffer) {
         this(buffer, buffer.length);
     }
 
-    OptimizedBytesInput(byte[] buffer, int limit) {
+    public OptimizedBytesInput(byte[] buffer, int limit) {
         this(buffer, 0, limit);
     }
 
-    OptimizedBytesInput(byte[] buffer, int position, int limit) {
+    public OptimizedBytesInput(byte[] buffer, int position, int limit) {
         this(new UnsafeBytesInput(buffer, position, limit));
     }
 
-    OptimizedBytesInput(UnsafeBytesInput in) {
+    public OptimizedBytesInput(UnsafeBytesInput in) {
         this.in = in;
     }
 

@@ -26,12 +26,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -150,7 +153,6 @@ public class MessageSendManager implements Manager {
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
         this.sendControlMessageToWorkers(workerIds, SortedBufferMessage.END);
-
         LOG.info("Finish send message(type={})", type);
     }
 
@@ -213,8 +215,10 @@ public class MessageSendManager implements Manager {
         // Wait all future finished
         try {
             for (Future<?> future : futures) {
-                future.get();
+                future.get(Constants.FUTURE_TIMEOUT, TimeUnit.SECONDS);
             }
+        } catch (TimeoutException e) {
+            throw new ComputerException("Wait sort future finished timeout", e);
         } catch (InterruptedException | ExecutionException e) {
             throw new ComputerException("Failed to wait sort future finished",
                                         e);
@@ -235,8 +239,11 @@ public class MessageSendManager implements Manager {
 
         try {
             for (Future<?> future : futures) {
-                future.get();
+                future.get(Constants.FUTURE_TIMEOUT, TimeUnit.SECONDS);
             }
+        } catch (TimeoutException e) {
+            throw new ComputerException("Wait control message(%s) finished " +
+                                        "timeout", e, message.type());
         } catch (InterruptedException | ExecutionException e) {
             throw new ComputerException("Failed to wait control message(%s) " +
                                         "finished", e, message.type());

@@ -38,13 +38,22 @@ public final class Constants {
     public static final int UINT16_MAX = 0xffff;
     public static final long UINT32_MAX = 0xffffffffL;
 
-    public static final int DEFAULT_SIZE = 32;
+    /*
+     * The small buffer size for buffered input & output,
+     * mainly used in input & output of memory
+     */
+    public static final int SMALL_BUF_SIZE = 32;
 
     /*
-     * The default buffer size for buffered input & output in package
-     * com.baidu.hugegraph.computer.core.io
+     * The big buffer size for buffered input & output,
+     * mainly used in input & output of file and stream
      */
-    public static final int DEFAULT_BUFFER_SIZE = (int) Bytes.KB * 8;
+    public static final int BIG_BUF_SIZE = (int) Bytes.KB * 8;
+
+    /*
+     * The timeout in seconds for asynchronous tasks
+     */
+    public static final int FUTURE_TIMEOUT = 300;
 
     // The mode to read a file
     public static final String FILE_MODE_READ = "r";

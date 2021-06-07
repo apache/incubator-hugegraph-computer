@@ -81,14 +81,14 @@ public class HgkvFileImpl extends AbstractHgkvFile {
 
     private void readFooter() throws IOException {
         File file = new File(this.path);
-        // The footerLength occupied 4 bytes
+        // The footerLength occupied 4 bytes, versionLength 2 * 2 bytes
         long versionOffset = file.length() - Short.BYTES * 2 - Integer.BYTES;
         this.input.seek(versionOffset);
-        // Read Version
+        // Read version
         short majorVersion = this.input.readShort();
         short minorVersion = this.input.readShort();
         String version = majorVersion + "." + minorVersion;
-        // Read Footer
+        // Read footerLength
         int footerLength = this.input.readFixedInt();
         switch (version) {
             case "1.0":

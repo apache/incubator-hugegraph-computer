@@ -30,11 +30,11 @@ public class OptimizedBytesOutput implements BytesOutput {
 
     private final UnsafeBytesOutput out;
 
-    OptimizedBytesOutput(int size) {
+    public OptimizedBytesOutput(int size) {
         this(new UnsafeBytesOutput(size));
     }
 
-    OptimizedBytesOutput(UnsafeBytesOutput out) {
+    public OptimizedBytesOutput(UnsafeBytesOutput out) {
         this.out = out;
     }
 

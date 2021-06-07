@@ -35,7 +35,7 @@ import sun.misc.Unsafe;
  * Use unsafe method to write the value to the buffer to improve the write
  * performance. The buffer is auto extendable.
  */
-class UnsafeBytesOutput implements BytesOutput {
+public class UnsafeBytesOutput implements BytesOutput {
 
     private static final sun.misc.Unsafe UNSAFE;
 

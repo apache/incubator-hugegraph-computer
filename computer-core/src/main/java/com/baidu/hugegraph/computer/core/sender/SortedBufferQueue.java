@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.util.E;
 
 /**
- * It's not a public class
+ * It's not a public class, need package access
  */
 class SortedBufferQueue {
 

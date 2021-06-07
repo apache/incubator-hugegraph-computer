@@ -34,7 +34,7 @@ public class StructRandomAccessOutputTest {
     @Test
     public void testPosition() throws IOException {
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             Assert.assertEquals(0L, srao.position());
             srao.writeLong(12345678);
@@ -45,7 +45,7 @@ public class StructRandomAccessOutputTest {
     @Test
     public void testSeek() throws IOException {
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             for (int i = -128; i <= 127; i++) {
                 srao.writeInt(i);
@@ -61,7 +61,8 @@ public class StructRandomAccessOutputTest {
 
     @Test
     public void testSkip() throws IOException {
-        try (BytesOutput output = new UnsafeBytesOutput(Constants.DEFAULT_SIZE);
+        try (BytesOutput output = new UnsafeBytesOutput(
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             Assert.assertEquals(0L, srao.position());
             output.writeInt(1000);
@@ -75,7 +76,7 @@ public class StructRandomAccessOutputTest {
     @Test
     public void testWriteIntWithPosition() throws IOException {
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             Assert.assertEquals(0L, srao.position());
             srao.writeFixedInt(4, 1000);
@@ -92,7 +93,7 @@ public class StructRandomAccessOutputTest {
         String uuid = UUID.randomUUID().toString();
         UnsafeBytesInput input = inputByString(uuid);
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         RandomAccessOutput srao = new StructRandomAccessOutput(output);
         srao.write(input, 0, input.available());
         Assert.assertEquals(50L, srao.position());
@@ -124,7 +125,7 @@ public class StructRandomAccessOutputTest {
     @Test
     public void testByte() throws IOException {
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             for (int i = -128; i <= 127; i++) {
                 srao.write(i);
@@ -133,7 +134,7 @@ public class StructRandomAccessOutputTest {
         }
 
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             for (int i = -128; i <= 127; i++) {
                 srao.writeByte(i);
@@ -146,7 +147,7 @@ public class StructRandomAccessOutputTest {
     public void testByteArray() throws IOException {
         byte[] bytes = "testByteArray".getBytes();
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             srao.write(bytes);
             Assert.assertEquals(22L, srao.position());
@@ -157,7 +158,7 @@ public class StructRandomAccessOutputTest {
     public void testWritePartByteArray() throws IOException {
         byte[] bytes = "testByteArray".getBytes();
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             srao.write(bytes, 1, bytes.length - 1);
             Assert.assertEquals(18L, srao.position());
@@ -167,7 +168,7 @@ public class StructRandomAccessOutputTest {
     @Test
     public void testShort() throws IOException {
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             for (short i = -128; i <= 127; i++) {
                 srao.writeShort(i);
@@ -181,7 +182,7 @@ public class StructRandomAccessOutputTest {
     @Test
     public void testChar() throws IOException {
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             for (char i = 'a'; i <= 'z'; i++) {
                 srao.writeChar(i);
@@ -194,7 +195,7 @@ public class StructRandomAccessOutputTest {
     public void testBytes() throws IOException {
         String bytes = "testByteArray";
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             srao.writeBytes(bytes);
             Assert.assertEquals(15L, srao.position());
@@ -205,7 +206,7 @@ public class StructRandomAccessOutputTest {
     public void testChars() throws IOException {
         String chars = "testByteArray";
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             srao.writeChars(chars);
             Assert.assertEquals(15L, srao.position());
@@ -216,7 +217,7 @@ public class StructRandomAccessOutputTest {
     public void testUTF() throws IOException {
         String prefix = "random string";
         try (BytesOutput output = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
             for (int i = 0; i <= 9; i++) {
                 srao.writeUTF(prefix + i);
@@ -227,7 +228,7 @@ public class StructRandomAccessOutputTest {
 
     private static UnsafeBytesInput inputByString(String s) throws IOException {
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         output.writeBytes(s);
         return new UnsafeBytesInput(output.toByteArray());
     }

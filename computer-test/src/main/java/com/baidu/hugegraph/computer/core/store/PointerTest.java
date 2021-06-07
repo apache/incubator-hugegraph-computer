@@ -41,7 +41,7 @@ public class PointerTest {
         byte[] expectedWriteResult = {4, 0, 0, 0, 100, 0, 0, 0,
                                       4, 0, 0, 0, 100, 0, 0, 0};
         BytesOutput output = IOFactory.createBytesOutput(
-                             Constants.DEFAULT_SIZE);
+                             Constants.SMALL_BUF_SIZE);
         output.writeFixedInt(data.length);
         output.write(data);
         output.writeFixedInt(data.length);
@@ -60,7 +60,7 @@ public class PointerTest {
         Assert.assertEquals(0, BytesUtil.compare(data, inlineValue.bytes()));
 
         BytesOutput writeOutput = IOFactory.createBytesOutput(
-                                  Constants.DEFAULT_SIZE);
+                                  Constants.SMALL_BUF_SIZE);
         inlineKey.write(writeOutput);
         inlineValue.write(writeOutput);
         int result = BytesUtil.compare(expectedWriteResult,
@@ -82,7 +82,7 @@ public class PointerTest {
         Assert.assertEquals(4L, cachedValue.length());
         Assert.assertEquals(0, BytesUtil.compare(data, cachedValue.bytes()));
 
-        writeOutput = IOFactory.createBytesOutput(Constants.DEFAULT_SIZE);
+        writeOutput = IOFactory.createBytesOutput(Constants.SMALL_BUF_SIZE);
         cachedKey.write(writeOutput);
         cachedValue.write(writeOutput);
         result = BytesUtil.compare(expectedWriteResult,

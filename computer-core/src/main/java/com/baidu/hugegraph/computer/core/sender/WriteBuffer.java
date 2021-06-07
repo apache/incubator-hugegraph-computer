@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 
 /**
- * It's not a public class
+ * It's not a public class, need package access
  */
 class WriteBuffer {
 

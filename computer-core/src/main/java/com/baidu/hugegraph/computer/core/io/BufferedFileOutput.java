@@ -38,9 +38,9 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
     private final RandomAccessFile file;
     private long fileOffset;
 
-    BufferedFileOutput(File file) throws IOException {
+    public BufferedFileOutput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_WRITE),
-             Constants.DEFAULT_BUFFER_SIZE);
+             Constants.BIG_BUF_SIZE);
     }
 
     public BufferedFileOutput(RandomAccessFile file, int bufferCapacity) {
@@ -108,11 +108,6 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
             this.file.seek(this.fileOffset);
         }
         return positionBeforeSkip;
-    }
-
-    @Override
-    public void writeFixedInt(int v) throws IOException {
-        super.writeFixedInt(v);
     }
 
     @Override

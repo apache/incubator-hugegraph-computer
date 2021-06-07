@@ -60,7 +60,7 @@ public class KvEntryWriterImpl implements KvEntryWriter {
 
         if (needSort) {
             this.subKvBuffer = IOFactory.createBytesOutput(
-                               Constants.DEFAULT_BUFFER_SIZE);
+                               Constants.BIG_BUF_SIZE);
         } else {
             this.subKvBuffer = null;
         }
