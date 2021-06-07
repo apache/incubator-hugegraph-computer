@@ -58,19 +58,18 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
          * second, no need to deserialize the properties and then serialize
          * the second properties.
          */
+        Combiner<Pointer> combiner;
         if (propertiesCombiner instanceof OverwriteCombiner) {
-            this.flusher = new CombineSubKvOuterSortFlusher(
-                           new OverwriteCombiner<>(), flushThreshold);
+            combiner = new OverwriteCombiner<>();
         } else {
             GraphFactory graphFactory = context.graphFactory();
             Properties v1 = graphFactory.createProperties();
             Properties v2 = graphFactory.createProperties();
 
-            Combiner<Pointer> pointerCombiner = new PointerCombiner<>(
-                                                v1, v2, propertiesCombiner);
-            this.flusher = new CombineSubKvOuterSortFlusher(pointerCombiner,
-                                                            flushThreshold);
+            combiner = new PointerCombiner<>(v1, v2, propertiesCombiner);
         }
+        this.flusher = new CombineSubKvOuterSortFlusher(combiner,
+                                                        flushThreshold);
     }
 
     @Override

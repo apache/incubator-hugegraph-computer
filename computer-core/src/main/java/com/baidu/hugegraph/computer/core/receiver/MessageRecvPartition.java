@@ -99,8 +99,8 @@ public abstract class MessageRecvPartition {
         try {
             return this.sorter.iterator(this.outputFiles, this.withSubKv);
         } catch (IOException e) {
-            throw new ComputerException("Sorter.iterator failed with files=" +
-                                        "{%s} and withSubKv=%s",
+            throw new ComputerException("Iterator failed, inputs={%s}, " +
+                                        "withSubKv=%s",
                                         this.outputFiles, this.withSubKv);
         }
     }
@@ -136,7 +136,7 @@ public abstract class MessageRecvPartition {
             this.sorter.mergeBuffers(inputs, flusher,
                                      path, this.withSubKv);
         } catch (Exception e) {
-            throw new ComputerException("Failed merge buffers, buffers size %s",
+            throw new ComputerException("Merge buffers failed, buffers-size=%s",
                                         e, inputs.size());
         }
 
@@ -152,7 +152,7 @@ public abstract class MessageRecvPartition {
 
 
     /**
-     * Merge the the outputFiles if needed.
+     * Merge outputFiles if needed, like merge 10000 files into 100 files.
      */
     private void mergeOutputFilesIfNeeded() {
         List<String> inputs = this.outputFiles;
@@ -179,8 +179,8 @@ public abstract class MessageRecvPartition {
                                     outputs, this.withSubKv);
         } catch (Exception e) {
             throw new ComputerException(
-                    "Merge inputs failed, input-size=%s, output-size=%s",
-                    e, this.outputFiles.size(), outputs.size());
+                      "Merge inputs failed, input-size=%s, output-size=%s",
+                      e, this.outputFiles.size(), outputs.size());
         }
         this.outputFiles = outputs;
     }
@@ -190,5 +190,4 @@ public abstract class MessageRecvPartition {
                           UUID.randomUUID().toString()};
         return this.fileGenerator.nextDirectory(paths);
     }
-
 }

@@ -76,7 +76,7 @@ public class DefaultProperties implements Properties {
     @Override
     public void read(RandomAccessInput in) throws IOException {
         this.keyValues.clear();
-        int size = in.readFixedInt();
+        int size = in.readInt();
         for (int i = 0; i < size; i++) {
             String key = in.readUTF();
             ValueType valueType = SerialEnum.fromCode(ValueType.class,
