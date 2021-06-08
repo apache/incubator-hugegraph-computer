@@ -21,9 +21,11 @@ package com.baidu.hugegraph.computer.core.sender;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -136,7 +138,7 @@ public class MessageSendManager implements Manager {
         Set<Integer> workerIds = all.keySet().stream()
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
-        this.sendControlMessageToWorkers(workerIds, SortedBufferMessage.START);
+        this.sendControlMessageToWorkers(workerIds, MessageType.START);
         LOG.info("Start send message(type={})", type);
     }
 
@@ -152,7 +154,7 @@ public class MessageSendManager implements Manager {
         Set<Integer> workerIds = all.keySet().stream()
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
-        this.sendControlMessageToWorkers(workerIds, SortedBufferMessage.END);
+        this.sendControlMessageToWorkers(workerIds, MessageType.FINISH);
         LOG.info("Finish send message(type={})", type);
     }
 
@@ -174,14 +176,13 @@ public class MessageSendManager implements Manager {
             // The following code is also executed in sort thread
             buffer.finishSorting();
             // Each target worker has a buffer queue
-            SortedBufferMessage message = new SortedBufferMessage(partitionId,
-                                                                  type,
-                                                                  sortedBuffer);
+            QueuedMessage message = new QueuedMessage(partitionId, workerId,
+                                                      type, sortedBuffer);
             try {
                 this.sender.send(workerId, message);
             } catch (InterruptedException e) {
                 throw new ComputerException("Waiting to put buffer into " +
-                                                    "queue was interrupted");
+                                            "queue was interrupted");
             }
         }).whenComplete((r, e) -> {
             if (e != null) {
@@ -226,27 +227,33 @@ public class MessageSendManager implements Manager {
     }
 
     private void sendControlMessageToWorkers(Set<Integer> workerIds,
-                                             SortedBufferMessage message) {
-        List<Future<?>> futures = new ArrayList<>(workerIds.size());
+                                             MessageType type) {
+        Map<Integer, CompletableFuture<Void>> futures = new HashMap<>();
         try {
             for (Integer workerId : workerIds) {
-                futures.add(this.sender.send(workerId, message));
+                QueuedMessage message = new QueuedMessage(-1, workerId,
+                                                          type, null);
+                futures.put(workerId, this.sender.send(workerId, message));
             }
         } catch (InterruptedException e) {
-            throw new ComputerException("Waiting to put buffer into " +
-                                        "queue was interrupted");
+            throw new ComputerException("Waiting to send message async " +
+                                        "was interrupted");
         }
 
         try {
-            for (Future<?> future : futures) {
+            for (Map.Entry<Integer, CompletableFuture<Void>> entry :
+                futures.entrySet()) {
+                CompletableFuture<Void> future = entry.getValue();
                 future.get(Constants.FUTURE_TIMEOUT, TimeUnit.SECONDS);
+
+                this.sender.reset(entry.getKey(), future);
             }
         } catch (TimeoutException e) {
             throw new ComputerException("Wait control message(%s) finished " +
-                                        "timeout", e, message.type());
+                                        "timeout", e, type);
         } catch (InterruptedException | ExecutionException e) {
             throw new ComputerException("Failed to wait control message(%s) " +
-                                        "finished", e, message.type());
+                                        "finished", e, type);
         }
     }
 

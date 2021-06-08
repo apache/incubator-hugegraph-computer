@@ -51,6 +51,7 @@ public class SenderIntegrateTest {
     public void testOneWorker() throws InterruptedException {
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
+                                          .withJobId("local_002")
                                           .withValueName("rank")
                                           .withValueType("DOUBLE")
                                           .withMaxSuperStep(3)
@@ -73,6 +74,7 @@ public class SenderIntegrateTest {
         });
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
+                                          .withJobId("local_002")
                                           .withValueName("rank")
                                           .withValueType("DOUBLE")
                                           .withMaxSuperStep(3)
@@ -105,6 +107,7 @@ public class SenderIntegrateTest {
     public void testTwoWorkers() throws InterruptedException {
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
+                                          .withJobId("local_003")
                                           .withValueName("rank")
                                           .withValueType("DOUBLE")
                                           .withMaxSuperStep(3)
@@ -124,6 +127,7 @@ public class SenderIntegrateTest {
         });
         Thread workerThread1 = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
+                                          .withJobId("local_003")
                                           .withValueName("rank")
                                           .withValueType("DOUBLE")
                                           .withMaxSuperStep(3)
@@ -144,6 +148,7 @@ public class SenderIntegrateTest {
         });
         Thread workerThread2 = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
+                                          .withJobId("local_003")
                                           .withValueName("rank")
                                           .withValueType("DOUBLE")
                                           .withMaxSuperStep(3)
@@ -202,6 +207,12 @@ public class SenderIntegrateTest {
 
         public String[] build() {
             return this.options.toArray(new String[0]);
+        }
+
+        public OptionsBuilder withJobId(String jobId) {
+            this.options.add(ComputerOptions.JOB_ID.name());
+            this.options.add(jobId);
+            return this;
         }
 
         public OptionsBuilder withValueName(String name) {

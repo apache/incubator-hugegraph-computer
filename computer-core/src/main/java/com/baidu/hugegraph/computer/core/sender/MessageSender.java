@@ -23,6 +23,8 @@ import java.util.concurrent.CompletableFuture;
 
 public interface MessageSender {
 
-    CompletableFuture<Void> send(int workerId, SortedBufferMessage message)
+    CompletableFuture<Void> send(int workerId, QueuedMessage message)
                                  throws InterruptedException;
+
+    void reset(int workerId, CompletableFuture<Void> future);
 }

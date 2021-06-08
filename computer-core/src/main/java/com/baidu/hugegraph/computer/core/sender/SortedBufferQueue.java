@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.sender;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.util.E;
@@ -32,49 +32,46 @@ import com.baidu.hugegraph.util.E;
  */
 class SortedBufferQueue {
 
-    private final BlockingQueue<SortedBufferMessage> queue;
+    private final BlockingQueue<QueuedMessage> queue;
+    private final AtomicReference<Boolean> hungry;
     private final Runnable notEmptyNotifer;
-    private final AtomicBoolean empty;
 
-    public SortedBufferQueue(Runnable notEmptyNotifer) {
+    public SortedBufferQueue(AtomicReference<Boolean> hungry,
+                             Runnable notEmptyNotifer) {
         E.checkArgumentNotNull(notEmptyNotifer,
                                "The callback to notify any queue not empty " +
                                "can't be null");
         // TODO: replace with conversant queue
         this.queue = new LinkedBlockingQueue<>(128);
+        this.hungry = hungry;
         this.notEmptyNotifer = notEmptyNotifer;
-        this.empty = new AtomicBoolean(true);
     }
 
     public boolean isEmpty() {
         return this.queue.isEmpty();
     }
 
-    public void put(int partitionId, MessageType type, ByteBuffer buffer)
-                    throws InterruptedException {
-        this.put(new SortedBufferMessage(partitionId, type, buffer));
+    public void put(int partitionId, int workerId, MessageType type,
+                    ByteBuffer buffer) throws InterruptedException {
+        this.put(new QueuedMessage(partitionId, workerId, type, buffer));
     }
 
-    public void put(SortedBufferMessage message) throws InterruptedException {
+    public void put(QueuedMessage message) throws InterruptedException {
         this.queue.put(message);
-        if (this.empty.compareAndSet(true, false)) {
+        if (this.hungry.get()) {
             /*
-             * Only invoke callback when queue from empty to not empty
+             * Only invoke callback when send thread is hungry
              * to avoid frequently acquiring locks
              */
             this.notEmptyNotifer.run();
         }
     }
 
-    public SortedBufferMessage peek() {
-        SortedBufferMessage message = this.queue.peek();
-        if (message == null) {
-            this.empty.compareAndSet(false, true);
-        }
-        return message;
+    public QueuedMessage peek() {
+        return this.queue.peek();
     }
 
-    public SortedBufferMessage take() throws InterruptedException {
+    public QueuedMessage take() throws InterruptedException {
         return this.queue.take();
     }
 }

@@ -39,7 +39,7 @@ public class IntegrateTestSuite {
 
     @BeforeClass
     public static void setup() {
-        LOG.info("Setup for UnitTestSuite of hugegraph-computer");
+        LOG.info("Setup for IntegrateTestSuite of hugegraph-computer");
 
         // Don't forget to register options
         OptionSpace.register("computer",

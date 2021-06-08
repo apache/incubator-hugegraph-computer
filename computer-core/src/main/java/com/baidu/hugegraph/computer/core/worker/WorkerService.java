@@ -271,7 +271,7 @@ public class WorkerService {
         SortManager sortManager = new SortManager(this.context);
         this.managers.add(sortManager);
 
-        DataClientManager clientManager = new DataClientManager();
+        DataClientManager clientManager = new DataClientManager(this.context);
         this.managers.add(clientManager);
 
         MessageSendManager sendManager = new MessageSendManager(this.context,

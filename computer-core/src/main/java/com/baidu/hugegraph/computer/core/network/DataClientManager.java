@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.network;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -40,9 +41,9 @@ public class DataClientManager implements Manager {
     private final ConnectionManager connManager;
     private final QueuedMessageSender sender;
 
-    public DataClientManager() {
+    public DataClientManager(ComputerContext context) {
         this.connManager = new TransportConnectionManager();
-        this.sender = new QueuedMessageSender();
+        this.sender = new QueuedMessageSender(context.config());
     }
 
     public QueuedMessageSender sender() {

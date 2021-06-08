@@ -26,14 +26,14 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.testutil.Assert;
 
-public class SortedBufferMessageTest {
+public class QueuedMessageTest {
 
     @Test
     public void testGetter() {
-        SortedBufferMessage message = new SortedBufferMessage(
-                                      1, MessageType.VERTEX,
-                                      ByteBuffer.allocate(4));
+        QueuedMessage message = new QueuedMessage(1, 1, MessageType.VERTEX,
+                                                  ByteBuffer.allocate(4));
         Assert.assertEquals(1, message.partitionId());
+        Assert.assertEquals(1, message.workerId());
         Assert.assertEquals(MessageType.VERTEX, message.type());
         Assert.assertEquals(ByteBuffer.allocate(4), message.buffer());
     }

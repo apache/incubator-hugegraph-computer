@@ -23,26 +23,27 @@ import java.nio.ByteBuffer;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
-public class SortedBufferMessage {
-
-    public static final SortedBufferMessage START = new SortedBufferMessage(-1,
-                                                    MessageType.START, null);
-    public static final SortedBufferMessage END = new SortedBufferMessage(-1,
-                                                  MessageType.FINISH, null);
+public class QueuedMessage {
 
     private final int partitionId;
+    private final int workerId;
     private final MessageType type;
     private final ByteBuffer buffer;
 
-    public SortedBufferMessage(int partitionId, MessageType type,
-                               ByteBuffer buffer) {
-        this.type = type;
+    public QueuedMessage(int partitionId, int workerId,
+                         MessageType type, ByteBuffer buffer) {
         this.partitionId = partitionId;
+        this.workerId = workerId;
+        this.type = type;
         this.buffer = buffer;
     }
 
     public int partitionId() {
         return this.partitionId;
+    }
+
+    public int workerId() {
+        return this.workerId;
     }
 
     public MessageType type() {
@@ -51,5 +52,12 @@ public class SortedBufferMessage {
 
     public ByteBuffer buffer() {
         return this.buffer;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("QueuedMessage{partitionId=%s, workerId=%s, " +
+                             "type=%s}",
+                             this.partitionId, this.workerId, this.type);
     }
 }
