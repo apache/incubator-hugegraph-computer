@@ -100,7 +100,11 @@ public class WriteBuffers {
     }
 
     public synchronized void finishSorting() {
-        this.sortingBuffer.clear();
+        try {
+            this.sortingBuffer.clear();
+        } catch (IOException e) {
+            throw new ComputerException("Failed to clear sorting buffer");
+        }
         this.notify();
     }
 

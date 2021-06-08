@@ -22,10 +22,8 @@ package com.baidu.hugegraph.computer.core.sender;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.util.E;
 
 /**
  * It's not a public class, need package access
@@ -33,18 +31,10 @@ import com.baidu.hugegraph.util.E;
 class SortedBufferQueue {
 
     private final BlockingQueue<QueuedMessage> queue;
-    private final AtomicReference<Boolean> hungry;
-    private final Runnable notEmptyNotifer;
 
-    public SortedBufferQueue(AtomicReference<Boolean> hungry,
-                             Runnable notEmptyNotifer) {
-        E.checkArgumentNotNull(notEmptyNotifer,
-                               "The callback to notify any queue not empty " +
-                               "can't be null");
-        // TODO: replace with conversant queue
+    public SortedBufferQueue() {
+        // TODO: replace with disruptor queue
         this.queue = new LinkedBlockingQueue<>(128);
-        this.hungry = hungry;
-        this.notEmptyNotifer = notEmptyNotifer;
     }
 
     public boolean isEmpty() {
@@ -58,17 +48,6 @@ class SortedBufferQueue {
 
     public void put(QueuedMessage message) throws InterruptedException {
         this.queue.put(message);
-        if (this.hungry.get()) {
-            /*
-             * Only invoke callback when send thread is hungry
-             * to avoid frequently acquiring locks
-             */
-            this.notEmptyNotifer.run();
-        }
-    }
-
-    public QueuedMessage peek() {
-        return this.queue.peek();
     }
 
     public QueuedMessage take() throws InterruptedException {

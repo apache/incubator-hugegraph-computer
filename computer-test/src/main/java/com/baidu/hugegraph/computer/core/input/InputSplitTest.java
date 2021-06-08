@@ -17,40 +17,32 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sender;
+package com.baidu.hugegraph.computer.core.input;
 
-import java.nio.ByteBuffer;
+import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.testutil.Assert;
 
-public class QueuedMessage {
+public class InputSplitTest {
 
-    private final int partitionId;
-    private final int workerId;
-    private final MessageType type;
-    private final ByteBuffer buffer;
-
-    public QueuedMessage(int partitionId, int workerId,
-                         MessageType type, ByteBuffer buffer) {
-        this.partitionId = partitionId;
-        this.workerId = workerId;
-        this.type = type;
-        this.buffer = buffer;
+    @Test
+    public void testConstructor() {
+        InputSplit split = new InputSplit("0", "100");
+        Assert.assertEquals("0", split.start());
+        Assert.assertEquals("100", split.end());
     }
 
-    public int partitionId() {
-        return this.partitionId;
-    }
+    @Test
+    public void testEquals() {
+        InputSplit split1 = new InputSplit("0", "100");
+        InputSplit split2 = new InputSplit("0", "100");
+        Assert.assertEquals(split1, split1);
+        Assert.assertEquals(split1, split2);
 
-    public int workerId() {
-        return this.workerId;
-    }
+        Assert.assertNotEquals(split1, null);
+        Assert.assertNotEquals(split1, new Object());
 
-    public MessageType type() {
-        return this.type;
-    }
-
-    public ByteBuffer buffer() {
-        return this.buffer;
+        Assert.assertEquals(InputSplit.END_SPLIT, InputSplit.END_SPLIT);
+        Assert.assertNotEquals(InputSplit.END_SPLIT, split1);
     }
 }

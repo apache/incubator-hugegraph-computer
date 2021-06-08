@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.sender;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -62,12 +61,8 @@ class WriteBuffer {
         return this.bytesOutput.position() == 0L;
     }
 
-    public void clear() {
-        try {
-            this.bytesOutput.seek(0L);
-        } catch (IOException e) {
-            throw new ComputerException("Failed to seek to position 0");
-        }
+    public void clear() throws IOException {
+        this.bytesOutput.seek(0L);
     }
 
     public BytesOutput output() {

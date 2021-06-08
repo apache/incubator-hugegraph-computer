@@ -26,7 +26,6 @@ import org.apache.commons.configuration.MapConfiguration;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
@@ -36,10 +35,6 @@ public final class DefaultConfig implements Config {
 
     private final HugeConfig allConfig;
     private final HotConfig hotConfig;
-
-    public DefaultConfig(String... options) {
-        this(ComputerContextUtil.convertToMap(options));
-    }
 
     public DefaultConfig(Map<String, String> options) {
         this.allConfig = this.parseOptions(options);

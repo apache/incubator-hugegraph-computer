@@ -20,64 +20,40 @@
 package com.baidu.hugegraph.computer.core.sender;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.BlockingQueue;
 
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.testutil.Whitebox;
 
 public class SortedBufferQueueTest {
 
     @Test
-    public void testConstructor() {
-        Assert.assertThrows(IllegalArgumentException.class, () -> {
-            new SortedBufferQueue(new AtomicReference<>(true), null);
-        });
-
-        BarrierEvent event = new BarrierEvent();
-        @SuppressWarnings("unused")
-        SortedBufferQueue queue = new SortedBufferQueue(
-                                  new AtomicReference<>(true), event::signal);
-    }
-
-    @Test
     public void testIsEmpty() throws InterruptedException {
-        BarrierEvent event = new BarrierEvent();
-        SortedBufferQueue queue = new SortedBufferQueue(
-                                  new AtomicReference<>(true), event::signal);
+        SortedBufferQueue queue = new SortedBufferQueue();
         Assert.assertTrue(queue.isEmpty());
 
         queue.put(new QueuedMessage(1, 1, MessageType.START, null));
         Assert.assertFalse(queue.isEmpty());
     }
 
-//    @Test
+    @Test
     public void testPutAndTake() throws InterruptedException {
-        BarrierEvent event = new BarrierEvent();
-        AtomicInteger counter = new AtomicInteger();
-        SortedBufferQueue queue = new SortedBufferQueue(
-                                  new AtomicReference<>(true), () -> {
-            event.signal();
-            counter.incrementAndGet();
-        });
+        SortedBufferQueue queue = new SortedBufferQueue();
 
         queue.put(1, 2, MessageType.VERTEX, ByteBuffer.allocate(4));
-        // This time will not trigger callback
         queue.put(new QueuedMessage(2, 1, MessageType.EDGE,
                                     ByteBuffer.allocate(4)));
-        Assert.assertEquals(1, counter.get());
 
-        QueuedMessage message = queue.take();
-        Assert.assertEquals(1, message.partitionId());
-        message = queue.take();
-        Assert.assertEquals(2, message.partitionId());
+        BlockingQueue<?> blockQueue = Whitebox.getInternalState(queue, "queue");
+        Assert.assertEquals(2, blockQueue.size());
 
-        Assert.assertNull(queue.peek());
+        queue.take();
+        Assert.assertEquals(1, blockQueue.size());
 
-        queue.put(3, 2, MessageType.VERTEX, ByteBuffer.allocate(4));
-        Assert.assertEquals(2, counter.get());
+        queue.take();
+        Assert.assertEquals(0, blockQueue.size());
     }
 }

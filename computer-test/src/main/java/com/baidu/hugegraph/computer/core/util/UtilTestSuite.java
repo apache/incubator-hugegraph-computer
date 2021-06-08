@@ -17,16 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.input;
+package com.baidu.hugegraph.computer.core.util;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    InputSplitTest.class,
-    InputSplitDataTest.class,
-    HugeConverterTest.class
+    ComputerContextUtilTest.class,
+    IdValueUtilTest.class,
+    JsonUtilTest.class,
+    SerializeUtilTest.class
 })
-public class InputTestSuite {
+public class UtilTestSuite {
 }

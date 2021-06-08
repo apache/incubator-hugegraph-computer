@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.sender;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -207,8 +206,7 @@ public class MessageSendManager implements Manager {
              */
             if (!buffer.isEmpty()) {
                 buffer.prepareSorting();
-                Future<?> future = this.sortThenSend(partitionId, type, buffer);
-                futures.add(partitionId, future);
+                futures.add(this.sortThenSend(partitionId, type, buffer));
             }
         }
         this.checkException();
@@ -228,12 +226,10 @@ public class MessageSendManager implements Manager {
 
     private void sendControlMessageToWorkers(Set<Integer> workerIds,
                                              MessageType type) {
-        Map<Integer, CompletableFuture<Void>> futures = new HashMap<>();
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
         try {
             for (Integer workerId : workerIds) {
-                QueuedMessage message = new QueuedMessage(-1, workerId,
-                                                          type, null);
-                futures.put(workerId, this.sender.send(workerId, message));
+                futures.add(this.sender.send(workerId, type));
             }
         } catch (InterruptedException e) {
             throw new ComputerException("Waiting to send message async " +
@@ -241,12 +237,8 @@ public class MessageSendManager implements Manager {
         }
 
         try {
-            for (Map.Entry<Integer, CompletableFuture<Void>> entry :
-                futures.entrySet()) {
-                CompletableFuture<Void> future = entry.getValue();
+            for (CompletableFuture<Void> future : futures) {
                 future.get(Constants.FUTURE_TIMEOUT, TimeUnit.SECONDS);
-
-                this.sender.reset(entry.getKey(), future);
             }
         } catch (TimeoutException e) {
             throw new ComputerException("Wait control message(%s) finished " +

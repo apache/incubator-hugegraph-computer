@@ -21,18 +21,28 @@ package com.baidu.hugegraph.computer.suite.integrate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.function.Function;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.master.MasterService;
+import com.baidu.hugegraph.computer.core.network.DataClientManager;
+import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
+import com.baidu.hugegraph.computer.core.network.message.Message;
+import com.baidu.hugegraph.computer.core.network.netty.NettyTransportClient;
+import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.testutil.Whitebox;
 
 public class SenderIntegrateTest {
 
@@ -44,7 +54,6 @@ public class SenderIntegrateTest {
 
     @AfterClass
     public static void clear() {
-        // pass
     }
 
     @Test
@@ -57,6 +66,8 @@ public class SenderIntegrateTest {
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
+                                          .withBufferThreshold(50)
+                                          .withBufferCapacity(60)
                                           .withRpcServerHost("127.0.0.1")
                                           .withRpcServerPort(8090)
                                           .build();
@@ -80,6 +91,8 @@ public class SenderIntegrateTest {
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
+                                          .withBufferThreshold(50)
+                                          .withBufferCapacity(60)
                                           .withTransoprtServerPort(8091)
                                           .withRpcServerRemote("127.0.0.1:8090")
                                           .build();
@@ -177,6 +190,93 @@ public class SenderIntegrateTest {
         masterThread.join();
     }
 
+    @Test
+    public void testOneWorkerWithBusyClient() throws InterruptedException {
+        Thread masterThread = new Thread(() -> {
+            String[] args = OptionsBuilder.newInstance()
+                                          .withJobId("local_002")
+                                          .withValueName("rank")
+                                          .withValueType("DOUBLE")
+                                          .withMaxSuperStep(3)
+                                          .withComputationClass(COMPUTATION)
+                                          .withWorkerCount(1)
+                                          .withWriteBufferHighMark(10)
+                                          .withWriteBufferLowMark(5)
+                                          .withRpcServerHost("127.0.0.1")
+                                          .withRpcServerPort(8090)
+                                          .build();
+            MasterService service = null;
+            try {
+                service = initMaster(args);
+                service.execute();
+            } catch (Exception e) {
+                Assert.fail(e.getMessage());
+            } finally {
+                if (service != null) {
+                    service.close();
+                }
+            }
+        });
+        Thread workerThread = new Thread(() -> {
+            String[] args = OptionsBuilder.newInstance()
+                                          .withJobId("local_002")
+                                          .withValueName("rank")
+                                          .withValueType("DOUBLE")
+                                          .withMaxSuperStep(3)
+                                          .withComputationClass(COMPUTATION)
+                                          .withWorkerCount(1)
+                                          .withTransoprtServerPort(8091)
+                                          .withWriteBufferHighMark(20)
+                                          .withWriteBufferLowMark(10)
+                                          .withRpcServerRemote("127.0.0.1:8090")
+                                          .build();
+            WorkerService service = null;
+            try {
+                Thread.sleep(2000);
+                service = initWorker(args);
+                // Let send rate slowly
+                this.slowSendFunc(service);
+                service.execute();
+            } catch (Exception e) {
+                Assert.fail(e.getMessage());
+            } finally {
+                if (service != null) {
+                    service.close();
+                }
+            }
+        });
+        masterThread.start();
+        workerThread.start();
+
+        workerThread.join();
+        masterThread.join();
+    }
+
+    private void slowSendFunc(WorkerService service) throws TransportException {
+        Managers managers = Whitebox.getInternalState(service, "managers");
+        DataClientManager clientManager = managers.get(
+                                          DataClientManager.NAME);
+        ConnectionManager connManager = Whitebox.getInternalState(
+                                        clientManager, "connManager");
+        NettyTransportClient client = (NettyTransportClient)
+                                      connManager.getOrCreateClient(
+                                      "127.0.0.1", 8091);
+        ClientSession clientSession = Whitebox.invoke(client.getClass(),
+                                                      "clientSession", client);
+        Function<Message, Future<Void>> sendFuncBak = Whitebox.getInternalState(
+                                                      clientSession,
+                                                      "sendFunction");
+        Function<Message, Future<Void>> sendFunc = message -> {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return sendFuncBak.apply(message);
+        };
+        Whitebox.setInternalState(clientSession, "sendFunction", sendFunc);
+    }
+
     private MasterService initMaster(String[] args) {
         ComputerContextUtil.initContext(args);
         ComputerContext context = ComputerContext.instance();
@@ -251,9 +351,37 @@ public class SenderIntegrateTest {
             return this;
         }
 
+        public OptionsBuilder withBufferThreshold(int sizeInByte) {
+            this.options.add(ComputerOptions.WORKER_WRITE_BUFFER_THRESHOLD
+                                            .name());
+            this.options.add(String.valueOf(sizeInByte));
+            return this;
+        }
+
+        public OptionsBuilder withBufferCapacity(int sizeInByte) {
+            this.options.add(ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY
+                                            .name());
+            this.options.add(String.valueOf(sizeInByte));
+            return this;
+        }
+
         public OptionsBuilder withTransoprtServerPort(int dataPort) {
             this.options.add(ComputerOptions.TRANSPORT_SERVER_PORT.name());
             this.options.add(String.valueOf(dataPort));
+            return this;
+        }
+
+        public OptionsBuilder withWriteBufferHighMark(int mark) {
+            this.options.add(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK
+                                            .name());
+            this.options.add(String.valueOf(mark));
+            return this;
+        }
+
+        public OptionsBuilder withWriteBufferLowMark(int mark) {
+            this.options.add(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK
+                                            .name());
+            this.options.add(String.valueOf(mark));
             return this;
         }
 

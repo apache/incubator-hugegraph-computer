@@ -54,7 +54,10 @@ public class DefaultPropertiesTest extends UnitTestBase {
         Assert.assertEquals(0, properties.get().size());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
+
+        Assert.assertEquals(new LongValue(1L), properties.get("p1"));
         properties.put("p1", new LongValue(2L));
+        Assert.assertEquals(new LongValue(2L), properties.get("p1"));
 
         Map<String, Value<?>> props = properties.get();
         Assert.assertEquals(2, props.size());

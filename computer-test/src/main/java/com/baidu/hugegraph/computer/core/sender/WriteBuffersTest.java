@@ -26,6 +26,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
@@ -142,7 +143,22 @@ public class WriteBuffersTest extends UnitTestBase {
     }
 
     @Test
-    public void testPrepareSorting() throws IOException {
+    public void testWriteMessage() throws IOException {
+        WriteBuffers buffers = new WriteBuffers(context, 50, 100);
+        WriteBuffer buffer = Whitebox.getInternalState(buffers,
+                                                       "writingBuffer");
+
+        buffers.writeMessage(new LongId(1L), new DoubleValue(0.85D));
+        long position1 = buffer.output().position();
+        Assert.assertGt(0L, position1);
+
+        buffers.writeMessage(new LongId(2L), new DoubleValue(0.15D));
+        long position2 = buffer.output().position();
+        Assert.assertGt(position1, position2);
+    }
+
+    @Test
+    public void testPrepareSorting() throws IOException, InterruptedException {
         GraphFactory graphFactory = context.graphFactory();
 
         WriteBuffers buffers = new WriteBuffers(context, 50, 100);
@@ -160,6 +176,18 @@ public class WriteBuffersTest extends UnitTestBase {
         buffers.prepareSorting();
         Assert.assertFalse(buffers.reachThreshold());
         Assert.assertTrue(buffers.isEmpty());
+
+        Thread thread1 = new Thread(() -> {
+            Assert.assertThrows(ComputerException.class, () -> {
+                buffers.prepareSorting();
+            }, e -> {
+                Assert.assertTrue(e.getMessage().contains("was interrupted"));
+            });
+        });
+        thread1.start();
+
+        Thread.sleep(100);
+        thread1.interrupt();
     }
 
     @Test

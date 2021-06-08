@@ -184,4 +184,17 @@ public class WriteBufferTest extends UnitTestBase {
         long position3 = buffer.output().position();
         Assert.assertGt(position2, position3);
     }
+
+    @Test
+    public void testWriteMessage() throws IOException {
+        WriteBuffer buffer = new WriteBuffer(context, 50, 100);
+
+        buffer.writeMessage(new LongId(1L), new DoubleValue(0.85D));
+        long position1 = buffer.output().position();
+        Assert.assertGt(0L, position1);
+
+        buffer.writeMessage(new LongId(2L), new DoubleValue(0.15D));
+        long position2 = buffer.output().position();
+        Assert.assertGt(position1, position2);
+    }
 }

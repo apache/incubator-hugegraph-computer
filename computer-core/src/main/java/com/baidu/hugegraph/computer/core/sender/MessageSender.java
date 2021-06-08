@@ -21,10 +21,22 @@ package com.baidu.hugegraph.computer.core.sender;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
+
 public interface MessageSender {
 
-    CompletableFuture<Void> send(int workerId, QueuedMessage message)
+    /**
+     * Send control message, like START and FINISH
+     * @param workerId target workerId
+     * @param type message type
+     */
+    CompletableFuture<Void> send(int workerId, MessageType type)
                                  throws InterruptedException;
 
-    void reset(int workerId, CompletableFuture<Void> future);
+    /**
+     * Send data message, like VERTEX, EDGE or MSG
+     * @param workerId target workerId
+     * @param message message payload
+     */
+    void send(int workerId, QueuedMessage message) throws InterruptedException;
 }
