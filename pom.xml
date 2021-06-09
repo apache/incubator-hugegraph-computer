@@ -43,6 +43,7 @@
         <module>computer-driver</module>
         <module>computer-yarn</module>
         <module>computer-k8s</module>
+        <module>computer-k8s-operator</module>
         <module>computer-dist</module>
         <module>computer-test</module>
     </modules>

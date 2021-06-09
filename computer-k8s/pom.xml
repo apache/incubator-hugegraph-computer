@@ -12,21 +12,33 @@
     <artifactId>computer-k8s</artifactId>
 
     <properties>
-        <jsonschema2pojo.version>1.1.0</jsonschema2pojo.version>
+        <fabric8.version>5.4.1</fabric8.version>
+        <lombok.version>1.18.0</lombok.version>
+        <sundrio.version>0.40.1</sundrio.version>
+        <maven.jsonschema2pojo.plugin.version>1.1.0</maven.jsonschema2pojo.plugin.version>
+        <maven.bundle.plugin.version>5.1.2</maven.bundle.plugin.version>
         <maven.antrun.plugin.version>3.0.0</maven.antrun.plugin.version>
-        <fabric8.version>5.4.0</fabric8.version>
+        <maven.apt.plugin.version>1.1.3</maven.apt.plugin.version>
+        <mavem.replacer.plugin.version>1.5.3</mavem.replacer.plugin.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
-            <artifactId>computer-core</artifactId>
-            <version>0.1.0</version>
+            <artifactId>computer-driver</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
             <version>${fabric8.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -35,17 +47,18 @@
             <plugin>
                 <groupId>org.jsonschema2pojo</groupId>
                 <artifactId>jsonschema2pojo-maven-plugin</artifactId>
-                <version>${jsonschema2pojo.version}</version>
+                <version>${maven.jsonschema2pojo.plugin.version}</version>
                 <configuration>
                     <sourceDirectory>${project.parent.basedir}/computer-k8s-operator/schema</sourceDirectory>
                     <targetPackage>com.baidu.hugegraph.computer.k8s.crd.model</targetPackage>
                     <includeConstructors>true</includeConstructors>
                     <includeJsr303Annotations>false</includeJsr303Annotations>
-                    <includeToString>true</includeToString>
-                    <includeHashcodeAndEquals>true</includeHashcodeAndEquals>
-                    <generateBuilders>true</generateBuilders>
+                    <includeToString>false</includeToString>
+                    <includeHashcodeAndEquals>false</includeHashcodeAndEquals>
+                    <generateBuilders>false</generateBuilders>
                     <outputDirectory>${project.build.directory}/generated-sources/src/gen/java</outputDirectory>
                     <includeAdditionalProperties>false</includeAdditionalProperties>
+                    <customAnnotator>io.fabric8.kubernetes.ModelAnnotator</customAnnotator>
                 </configuration>
                 <executions>
                     <execution>
@@ -56,6 +69,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>model-annotator</artifactId>
+                        <version>${fabric8.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -80,6 +100,75 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mysema.maven</groupId>
+                <artifactId>apt-maven-plugin</artifactId>
+                <version>${maven.apt.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/generated-sources/annotations</outputDirectory>
+                            <processor>io.sundr.builder.internal.processor.BuildableProcessor</processor>
+                            <showWarnings>false</showWarnings>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>io.sundr</groupId>
+                        <artifactId>builder-annotations</artifactId>
+                        <version>${sundrio.version}</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>com.sun</groupId>
+                                <artifactId>tools</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>io.sundr</groupId>
+                        <artifactId>transform-annotations</artifactId>
+                        <version>${sundrio.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>${mavem.replacer.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <basedir>${project.basedir}</basedir>
+                            <includes>
+                                <include>target/generated-sources/**/*.java</include>
+                            </includes>
+                            <regex>true</regex>
+                            <replacements>
+                                <replacement>
+                                    <token>(?s)@Buildable.*\}\)\s</token>
+                                    <value/>
+                                </replacement>
+                                <replacement>
+                                    <token>import\sio\.sundr.*\s</token>
+                                    <value/>
+                                </replacement>
+                                <replacement>
+                                    <token>public[\s]class</token>
+                                    <value>@SuppressWarnings({"unchecked", "deprecation"})&#x000A;public class</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

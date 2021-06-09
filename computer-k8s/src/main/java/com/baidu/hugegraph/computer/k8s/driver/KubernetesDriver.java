@@ -23,10 +23,10 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import com.baidu.hugegraph.computer.core.driver.ComputerDriver;
-import com.baidu.hugegraph.computer.core.driver.JobObserver;
-import com.baidu.hugegraph.computer.core.driver.JobState;
-import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
+import com.baidu.hugegraph.computer.driver.ComputerDriver;
+import com.baidu.hugegraph.computer.driver.JobObserver;
+import com.baidu.hugegraph.computer.driver.JobState;
+import com.baidu.hugegraph.computer.driver.SuperstepStat;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;

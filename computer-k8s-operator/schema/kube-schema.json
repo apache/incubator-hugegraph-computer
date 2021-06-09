@@ -1,5 +1,5 @@
 {
-  "id": "http://fabric8.io/hugegraph-computer/v1/ComputerSchema#",
+  "id": "http://fabric8.io/hugegraph-computer/ComputerSchema#",
   "$schema": "http://json-schema.org/draft-05/schema#",
   "definitions": {
     "computer_hugegraph_io_operator_api_v1_ComputerJobSpec": {
@@ -40,24 +40,19 @@
           "existingJavaType": "String"
         },
         "masterCpu": {
-          "type": "string",
-          "existingJavaType": "String"
+          "existingJavaType": "io.fabric8.kubernetes.api.model.Quantity"
         },
         "masterMemory": {
-          "type": "string",
-          "existingJavaType": "String"
+          "existingJavaType": "io.fabric8.kubernetes.api.model.Quantity"
         },
         "workerCpu": {
-          "type": "integer",
-          "existingJavaType": "Integer"
+          "existingJavaType": "io.fabric8.kubernetes.api.model.Quantity"
         },
         "workerInstances": {
-          "type": "integer",
-          "existingJavaType": "Integer"
+          "type": "integer"
         },
         "workerMemory": {
-          "type": "string",
-          "existingJavaType": "String"
+          "existingJavaType": "io.fabric8.kubernetes.api.model.Quantity"
         }
       },
       "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec",
@@ -69,16 +64,13 @@
       "type": "object",
       "properties": {
         "lastSuperstepStat": {
-          "type": "string",
-          "existingJavaType": "String"
+          "type": "string"
         },
         "maxSuperstep": {
-          "type": "integer",
-          "existingJavaType": "Integer"
+          "type": "integer"
         },
         "superstep": {
-          "type": "integer",
-          "existingJavaType": "Integer"
+          "type": "integer"
         }
       },
       "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobState",
