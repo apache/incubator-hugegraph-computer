@@ -36,16 +36,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 public class ReceiverUtil {
-//
-//    public static void addMockBufferToPartition(
-//    MessageRecvPartition partition,
-//                                                int mockBufferLength) {
-//        comsumeBuffer(mockBufferLength, (ManagedBuffer buffer) -> {
-//            partition.addBuffer(buffer);
-//        });
-//    }
-
-
 
     public static void comsumeBuffer(byte[] bytes,
                                      Consumer<ManagedBuffer> consumer) {

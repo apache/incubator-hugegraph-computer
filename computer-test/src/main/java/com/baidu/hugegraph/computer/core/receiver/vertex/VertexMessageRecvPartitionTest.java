@@ -153,7 +153,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         Assert.assertThrows(ComputerException.class, () -> {
             this.partition.iterator();
         }, e -> {
-            Assert.assertContains("Merge buffers failed, buffers-size=2",
+            Assert.assertContains("Failed to merge 2 buffers to file",
                                   e.getMessage());
         });
     }

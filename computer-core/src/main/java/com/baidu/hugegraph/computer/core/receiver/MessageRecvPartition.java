@@ -99,8 +99,8 @@ public abstract class MessageRecvPartition {
         try {
             return this.sorter.iterator(this.outputFiles, this.withSubKv);
         } catch (IOException e) {
-            throw new ComputerException("Iterator failed, inputs={%s}, " +
-                                        "withSubKv=%s",
+            throw new ComputerException("Failed to iterate files: '%s', " +
+                                        "withSubKv: %s",
                                         this.outputFiles, this.withSubKv);
         }
     }
@@ -136,8 +136,9 @@ public abstract class MessageRecvPartition {
             this.sorter.mergeBuffers(inputs, flusher,
                                      path, this.withSubKv);
         } catch (Exception e) {
-            throw new ComputerException("Merge buffers failed, buffers-size=%s",
-                                        e, inputs.size());
+            throw new ComputerException(
+                      "Failed to merge %s buffers to file '%s'",
+                      e, inputs.size(), path);
         }
 
         this.outputFiles.add(path);
@@ -179,7 +180,7 @@ public abstract class MessageRecvPartition {
                                     outputs, this.withSubKv);
         } catch (Exception e) {
             throw new ComputerException(
-                      "Merge inputs failed, input-size=%s, output-size=%s",
+                      "Failed to merge %s files into %s files",
                       e, this.outputFiles.size(), outputs.size());
         }
         this.outputFiles = outputs;

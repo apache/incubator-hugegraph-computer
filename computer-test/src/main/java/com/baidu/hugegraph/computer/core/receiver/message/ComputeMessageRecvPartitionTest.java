@@ -184,7 +184,6 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                                                    currentEntry.key());
                 Id expectId = new LongId(i);
                 Assert.assertEquals(expectId, currentId);
-
                 IdValueList expectMessage = new IdValueList();
                 expectMessage.add(expectId.idValue());
                 IdValueList currentValue = new IdValueList();

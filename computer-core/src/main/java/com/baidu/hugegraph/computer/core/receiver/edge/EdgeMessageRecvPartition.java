@@ -50,8 +50,8 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
         Config config = context.config();
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
-        Combiner<Properties> propertiesCombiner = config.createObject(
-        ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
+        Combiner<Properties> propCombiner = config.createObject(
+                ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
 
         /*
          * If propertiesCombiner is OverwriteCombiner, just remain the
@@ -59,14 +59,14 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
          * the second properties.
          */
         Combiner<Pointer> combiner;
-        if (propertiesCombiner instanceof OverwriteCombiner) {
+        if (propCombiner instanceof OverwriteCombiner) {
             combiner = new OverwriteCombiner<>();
         } else {
             GraphFactory graphFactory = context.graphFactory();
             Properties v1 = graphFactory.createProperties();
             Properties v2 = graphFactory.createProperties();
 
-            combiner = new PointerCombiner<>(v1, v2, propertiesCombiner);
+            combiner = new PointerCombiner<>(v1, v2, propCombiner);
         }
         this.flusher = new CombineSubKvOuterSortFlusher(combiner,
                                                         flushThreshold);
