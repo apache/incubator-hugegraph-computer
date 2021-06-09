@@ -44,7 +44,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.DataClientManager;
-import com.baidu.hugegraph.computer.core.network.DataServerManager;
+import com.baidu.hugegraph.computer.core.network.FakeDataServerManager;
 import com.baidu.hugegraph.computer.core.recv.FakeMessageRecvHandler;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
@@ -265,7 +265,8 @@ public class WorkerService {
 
         // TODO: when recv module merged, change it
         FakeMessageRecvHandler recvManager = new FakeMessageRecvHandler();
-        DataServerManager serverManager = new DataServerManager(recvManager);
+        FakeDataServerManager serverManager = new FakeDataServerManager(
+                                              recvManager);
         this.managers.add(serverManager);
 
         SortManager sortManager = new SortManager(this.context);

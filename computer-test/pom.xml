@@ -105,6 +105,8 @@
                 <version>0.8.4</version>
                 <configuration>
                     <excludes>
+                        <exclude>com/baidu/hugegraph/computer/core/network/FakeDataServerManager.class</exclude>
+                        <exclude>com/baidu/hugegraph/computer/core/recv/FakeMessageRecvHandler.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

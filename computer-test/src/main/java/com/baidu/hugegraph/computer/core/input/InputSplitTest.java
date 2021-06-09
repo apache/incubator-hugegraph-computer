@@ -45,4 +45,10 @@ public class InputSplitTest {
         Assert.assertEquals(InputSplit.END_SPLIT, InputSplit.END_SPLIT);
         Assert.assertNotEquals(InputSplit.END_SPLIT, split1);
     }
+
+    @Test
+    public void testHashCode() {
+        InputSplit split = new InputSplit("0", "100");
+        Assert.assertEquals(51074, split.hashCode());
+    }
 }

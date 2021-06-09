@@ -72,8 +72,8 @@ public class QueuedMessageSender implements MessageSender {
         try {
             this.sendExecutor.join();
         } catch (InterruptedException e) {
-            throw new ComputerException("Wait send executor stopped " +
-                                        "was interrupted", e);
+            throw new ComputerException("interrupted when waiting for " +
+                                        "send-executor to stop", e);
         }
     }
 
@@ -91,7 +91,10 @@ public class QueuedMessageSender implements MessageSender {
         CompletableFuture<Void> future = channel.newFuture();
         future.whenComplete((r, e) -> {
             if (!channel.futureRef.compareAndSet(future, null)) {
-                throw new ComputerException("Failed to reset futureRef");
+                throw new ComputerException("Failed to reset futureRef, " +
+                                            "expect future object is %s, " +
+                                            "but some thread modified it",
+                                            future);
             }
         });
         this.queue.put(new QueuedMessage(-1, workerId, type, null));
@@ -119,7 +122,7 @@ public class QueuedMessageSender implements MessageSender {
                 try {
                     // Handle all pending messages first
                     for (int i = 0; pendingCount > 0 &&
-                        i < workerChannels.length; i++) {
+                                    i < workerChannels.length; i++) {
                         WorkerChannel channel = workerChannels[i];
                         if (channel.pendingMessage != null) {
                             doSend(channel.pendingMessage);
@@ -134,8 +137,9 @@ public class QueuedMessageSender implements MessageSender {
                     Thread.currentThread().interrupt();
                     // Any client is active means that sending task in running
                     if (activeClientCount > 0) {
-                        throw new ComputerException("Waiting queue not empty " +
-                                                    "was interrupted");
+                        throw new ComputerException(
+                                  "interrupted when waiting for message " +
+                                  "queue not empty");
                     }
                 } catch (TransportException e) {
                     // TODO: should handle this in main workflow thread

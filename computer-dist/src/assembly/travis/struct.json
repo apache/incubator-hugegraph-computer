@@ -2,101 +2,210 @@
   "version": "2.0",
   "structs": [
     {
-      "id": "data-1",
+      "id": "1",
       "skip": false,
       "input": {
-        "type": "file",
-        "path": "computer-dist/src/assembly/travis/movie.txt",
-        "format": "TEXT",
-        "charset": "UTF-8",
-        "delimiter": "\t",
-        "date_format": "yyyy",
-        "list_format": {
-          "start_symbol": "",
-          "elem_delimiter": "|",
-          "end_symbol": ""
+        "type": "FILE",
+        "path": "ml-latest-small/ratings.csv",
+        "file_filter": {
+          "extensions": [
+            "*"
+          ]
         },
+        "format": "CSV",
+        "delimiter": ",",
+        "date_format": "yyyy-MM-dd HH:mm:ss",
+        "time_zone": "GMT+8",
         "skipped_line": {
-          "regex": "(^#|^//).*"
-        }
+          "regex": "(^#|^//).*|"
+        },
+        "compression": "NONE",
+        "batch_size": 500,
+        "header": [
+          "userId",
+          "movieId",
+          "rating",
+          "timestamp"
+        ],
+        "charset": "UTF-8",
+        "list_format": null
       },
       "vertices": [
         {
+          "label": "user",
           "skip": false,
-          "label": "电影",
-          "id": "名称",
-          "null_values": ["NULL", "null", "", "0"],
-          "selected": ["名称","类型","发行时间"]
-        },
-        {
-          "skip": false,
-          "label": "艺人",
-          "id": "导演",
-          "unfold": true,
-          "null_values": ["NULL", "null", ""],
-          "selected": ["导演"]
-        },
-        {
-          "skip": false,
-          "label": "艺人",
-          "id": "演员",
-          "unfold": true,
-          "null_values": ["NULL", "null", ""],
-          "selected": ["演员"]
-        },
-        {
-          "skip": false,
-          "label": "类型",
-          "id": "类型",
-          "unfold": true,
-          "null_values": ["NULL", "null", ""],
-          "selected": ["类型"]
-        },
-        {
-          "skip": false,
-          "label": "年份",
-          "id": "发行时间",
-          "null_values": ["NULL", "null", ""],
-          "selected": ["发行时间"]
+          "id": null,
+          "unfold": false,
+          "field_mapping": {
+            "userId": "id"
+          },
+          "value_mapping": {},
+          "selected": [
+            "userId"
+          ],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
         }
       ],
       "edges": [
         {
+          "label": "rating",
           "skip": false,
-          "label": "导演",
-          "source": ["导演"],
-          "unfold_source": true,
-          "target": ["名称"],
-          "null_values": ["NULL", "null", ""],
-          "selected": ["导演","名称"]
-        },
-        {
-          "skip": false,
-          "label": "演出",
-          "source": ["演员"],
-          "unfold_source": true,
-          "target": ["名称"],
-          "null_values": ["NULL", "null", ""],
-          "selected": ["演员","名称"]
-        },
-        {
-          "skip": false,
-          "label": "属于",
-          "source": ["名称"],
-          "target": ["类型"],
-          "unfold_target": true,
-          "null_values": ["NULL", "null", ""],
-          "selected": ["名称","类型"]
-        },
-        {
-          "skip": false,
-          "label": "发行于",
-          "source": ["名称"],
-          "target": ["发行时间"],
-          "null_values": ["NULL", "null", ""],
-          "selected": ["名称","发行时间"]
+          "source": [
+            "userId"
+          ],
+          "unfold_source": false,
+          "target": [
+            "movieId"
+          ],
+          "unfold_target": false,
+          "field_mapping": {
+            "userId": "id",
+            "movieId": "id",
+            "rating": "rate",
+            "timestamp": "timestamp"
+          },
+          "value_mapping": {},
+          "selected": [],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
         }
       ]
+    },
+    {
+      "id": "2",
+      "skip": false,
+      "input": {
+        "type": "FILE",
+        "path": "ml-latest-small/tags.csv",
+        "file_filter": {
+          "extensions": [
+            "*"
+          ]
+        },
+        "format": "CSV",
+        "delimiter": ",",
+        "date_format": "yyyy-MM-dd HH:mm:ss",
+        "time_zone": "GMT+8",
+        "skipped_line": {
+          "regex": "(^#|^//).*|"
+        },
+        "compression": "NONE",
+        "batch_size": 500,
+        "header": [
+          "userId",
+          "movieId",
+          "tag",
+          "timestamp"
+        ],
+        "charset": "UTF-8",
+        "list_format": null
+      },
+      "vertices": [
+        {
+          "label": "user",
+          "skip": false,
+          "id": null,
+          "unfold": false,
+          "field_mapping": {
+            "userId": "id"
+          },
+          "value_mapping": {},
+          "selected": [
+            "userId"
+          ],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
+        }
+      ],
+      "edges": [
+        {
+          "label": "taged",
+          "skip": false,
+          "source": [
+            "userId"
+          ],
+          "unfold_source": false,
+          "target": [
+            "movieId"
+          ],
+          "unfold_target": false,
+          "field_mapping": {
+            "userId": "id",
+            "movieId": "id",
+            "tag": "tag",
+            "timestamp": "timestamp"
+          },
+          "value_mapping": {},
+          "selected": [],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
+        }
+      ]
+    },
+    {
+      "id": "3",
+      "skip": false,
+      "input": {
+        "type": "FILE",
+        "path": "ml-latest-small/movies.csv",
+        "file_filter": {
+          "extensions": [
+            "*"
+          ]
+        },
+        "format": "CSV",
+        "delimiter": ",",
+        "date_format": "yyyy-MM-dd HH:mm:ss",
+        "time_zone": "GMT+8",
+        "skipped_line": {
+          "regex": "(^#|^//).*|"
+        },
+        "compression": "NONE",
+        "batch_size": 500,
+        "header": [
+          "movieId",
+          "title",
+          "genres"
+        ],
+        "charset": "UTF-8",
+        "list_format": {
+          "start_symbol": "",
+          "elem_delimiter": "|",
+          "end_symbol": ""
+        }
+      },
+      "vertices": [
+        {
+          "label": "movie",
+          "skip": false,
+          "id": null,
+          "unfold": false,
+          "field_mapping": {
+            "movieId": "id"
+          },
+          "value_mapping": {},
+          "selected": [],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
+        }
+      ],
+      "edges": []
     }
   ]
 }

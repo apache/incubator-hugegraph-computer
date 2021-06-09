@@ -90,4 +90,14 @@ public class DefaultPropertiesTest extends UnitTestBase {
                                    UnitTestBase.valueFactory());
         Assert.assertEquals(props1, props2);
     }
+
+    @Test
+    public void testHashCode() {
+        DefaultProperties props = new DefaultProperties(graphFactory(),
+                                                        valueFactory());
+        props.put("p1", new LongValue(1L));
+        props.put("p2", new DoubleValue(2.0D));
+
+        Assert.assertEquals(1073748897, props.hashCode());
+    }
 }

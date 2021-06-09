@@ -26,14 +26,14 @@ import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 
-public class DataServerManager implements Manager {
+public class FakeDataServerManager implements Manager {
 
     public static final String NAME = "data_server";
 
     private final ConnectionManager connectionManager;
     private final MessageHandler messageHandler;
 
-    public DataServerManager(MessageHandler messageHandler) {
+    public FakeDataServerManager(MessageHandler messageHandler) {
         this.connectionManager = new TransportConnectionManager();
         this.messageHandler = messageHandler;
     }

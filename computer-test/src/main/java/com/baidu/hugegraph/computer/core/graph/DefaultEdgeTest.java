@@ -94,4 +94,19 @@ public class DefaultEdgeTest extends UnitTestBase {
 
         Assert.assertNotEquals(edge1, properties);
     }
+
+    @Test
+    public void testHashCode() {
+        DefaultEdge edge = new DefaultEdge(graphFactory());
+        edge.label("knows");
+        edge.name("2021-06-01");
+        edge.targetId(new LongId(1L));
+        Properties properties = new DefaultProperties(graphFactory(),
+                                                      valueFactory());
+        properties.put("p1", new LongValue(1L));
+        properties.put("p2", new DoubleValue(2.0D));
+        edge.properties(properties);
+
+        Assert.assertEquals(968888145, edge.hashCode());
+    }
 }
