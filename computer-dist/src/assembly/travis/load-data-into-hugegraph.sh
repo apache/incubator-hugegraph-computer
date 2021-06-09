@@ -3,7 +3,7 @@
 set -ev
 
 TRAVIS_DIR=`dirname $0`
-
+DATASET_DIR=${TRAVIS_DIR}/../dataset
 
 HUGEGRAPH_LOADER_GIT_URL="https://github.com/hugegraph/hugegraph-loader.git"
 
@@ -16,6 +16,6 @@ tar -zxf hugegraph-loader-*.tar.gz || exit 1
 cd ../
 
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
-unzip ml-latest-small.zip
+unzip -d ${DATASET_DIR} ml-latest-small.zip
 
-hugegraph-loader/hugegraph-loader-*/bin/hugegraph-loader.sh -g hugegraph -f ${TRAVIS_DIR}/struct.json -s ${TRAVIS_DIR}/schema.groovy || exit 1
+hugegraph-loader/hugegraph-loader-*/bin/hugegraph-loader.sh -g hugegraph -f ${DATASET_DIR}/struct.json -s ${DATASET_DIR}/schema.groovy || exit 1

@@ -41,7 +41,6 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.partition.Partitioner;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
@@ -115,18 +114,18 @@ public class MessageSendManager implements Manager {
         }
     }
 
-    public void sendMessage(Id targetId, Value<?> value) {
-        this.checkException();
-
-        WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
-                                                            MessageType.MSG);
-        try {
-            // Write vertex to buffer
-            buffer.writeMessage(targetId, value);
-        } catch (IOException e) {
-            throw new ComputerException("Failed to write message", e);
-        }
-    }
+//    public void sendMessage(Id targetId, Value<?> value) {
+//        this.checkException();
+//
+//        WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
+//                                                            MessageType.MSG);
+//        try {
+//            // Write vertex to buffer
+//            buffer.writeMessage(targetId, value);
+//        } catch (IOException e) {
+//            throw new ComputerException("Failed to write message", e);
+//        }
+//    }
 
     /**
      * Start send message, put an START signal into queue

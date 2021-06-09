@@ -263,7 +263,10 @@ public class WorkerService {
         FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
 
-        // TODO: when recv module merged, change it
+        /*
+         * TODO: when recv module merged, change it
+         * remove exclude config from test codecov
+         */
         FakeMessageRecvHandler recvManager = new FakeMessageRecvHandler();
         FakeDataServerManager serverManager = new FakeDataServerManager(
                                               recvManager);
@@ -390,7 +393,7 @@ public class WorkerService {
 
         @Override
         public void sendMessage(Id target, Value<?> value) {
-            this.sendManager.sendMessage(target, value);
+//            this.sendManager.sendMessage(target, value);
         }
 
         @Override

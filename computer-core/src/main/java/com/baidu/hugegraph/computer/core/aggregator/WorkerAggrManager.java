@@ -51,7 +51,6 @@ public class WorkerAggrManager implements Manager {
         this.context = context;
         this.service = null;
         this.registerAggregators = new RegisterAggregators();
-        // ImmutableMap can't clear
         this.lastAggregators = new HashMap<>();
         this.currentAggregators = new Aggregators();
     }
