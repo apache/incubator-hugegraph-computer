@@ -19,8 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -30,10 +33,11 @@ import com.baidu.hugegraph.testutil.Assert;
 @SuppressWarnings("resource")
 public class OptimizedUnsafeBytesTest {
 
+    private static final int SIZE = Constants.SMALL_BUF_SIZE;
+
     @Test
     public void testConstructor() {
-        OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                      Constants.SMALL_BUF_SIZE);
+        OptimizedBytesOutput output = new OptimizedBytesOutput(SIZE);
         Assert.assertEquals(0, output.position());
 
         OptimizedBytesOutput output2 = new OptimizedBytesOutput(16);
@@ -49,8 +53,7 @@ public class OptimizedUnsafeBytesTest {
 
     @Test
     public void testUnsignedByte() throws IOException {
-        OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                      Constants.BIG_BUF_SIZE);
+        OptimizedBytesOutput output = new OptimizedBytesOutput(SIZE);
         for (int i = 0; i <= 255; i++) {
             output.write(i);
         }
@@ -63,9 +66,26 @@ public class OptimizedUnsafeBytesTest {
     }
 
     @Test
+    public void testUnsignedShort() throws IOException {
+        OptimizedBytesOutput output = new OptimizedBytesOutput(SIZE);
+        for (short i = 0; i <= 255; i++) {
+            output.writeShort(i);
+        }
+        output.writeShort(Short.MAX_VALUE);
+        output.writeShort(Short.MIN_VALUE);
+        OptimizedBytesInput input = new OptimizedBytesInput(
+                                    output.toByteArray());
+        for (int i = 0; i <= 255; i++) {
+            Assert.assertEquals(i, input.readUnsignedShort());
+        }
+        Assert.assertEquals(Short.MAX_VALUE, input.readUnsignedShort());
+        Assert.assertEquals(Short.MIN_VALUE & 0xFFFF,
+                            input.readUnsignedShort());
+    }
+
+    @Test
     public void testChar() throws IOException {
-        OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                      Constants.BIG_BUF_SIZE);
+        OptimizedBytesOutput output = new OptimizedBytesOutput(SIZE);
         for (char i = 'a'; i <= 'z'; i++) {
             output.writeChar(i);
         }
@@ -80,14 +100,45 @@ public class OptimizedUnsafeBytesTest {
     @Test
     public void testWriteChars() throws IOException {
         String chars = "testByteArray";
-        OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                      Constants.BIG_BUF_SIZE);
+        OptimizedBytesOutput output = new OptimizedBytesOutput(SIZE);
         output.writeChars(chars);
         OptimizedBytesInput input = new OptimizedBytesInput(
                                     output.toByteArray());
         for (int i = 0; i < chars.length(); i++) {
             char c = input.readChar();
             Assert.assertEquals(chars.charAt(i), c);
+        }
+    }
+
+    @Test
+    public void testWriteByInput() throws IOException {
+        // Input class is OptimizedBytesInput
+        String uuid = UUID.randomUUID().toString();
+        OptimizedBytesInput input = inputByString(uuid);
+        OptimizedBytesOutput output = new OptimizedBytesOutput(SIZE);
+        output.write(input, 0, input.available());
+        Assert.assertEquals(uuid, new String(output.toByteArray()));
+
+        // Input class isn't OptimizedBytesInput
+        File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
+        BufferedFileOutput fileOutput = null;
+        BufferedFileInput fileInput = null;
+        try {
+            fileOutput = new BufferedFileOutput(tempFile);
+            fileOutput.writeBytes(uuid);
+            fileOutput.close();
+            fileInput = new BufferedFileInput(tempFile);
+            output = new OptimizedBytesOutput(SIZE);
+            output.write(fileInput, 0, fileInput.available());
+            Assert.assertEquals(uuid, new String(output.toByteArray()));
+        } finally {
+            if (fileInput != null) {
+                fileInput.close();
+            }
+            if (fileOutput != null) {
+                fileOutput.close();
+            }
+            FileUtils.deleteQuietly(tempFile);
         }
     }
 
@@ -120,8 +171,7 @@ public class OptimizedUnsafeBytesTest {
 
     @Test
     public void testSkipBytes() throws IOException {
-        OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                      Constants.SMALL_BUF_SIZE);
+        OptimizedBytesOutput output = new OptimizedBytesOutput(SIZE);
         long position = output.skip(4);
         Assert.assertEquals(0, position);
         output.writeFixedInt(Integer.MAX_VALUE);
@@ -135,8 +185,7 @@ public class OptimizedUnsafeBytesTest {
 
     private static OptimizedBytesInput inputByString(String s)
                                                      throws IOException {
-        OptimizedBytesOutput output = new OptimizedBytesOutput(
-                                      Constants.SMALL_BUF_SIZE);
+        OptimizedBytesOutput output = new OptimizedBytesOutput(SIZE);
         output.writeBytes(s);
         return new OptimizedBytesInput(output.toByteArray());
     }

@@ -28,11 +28,11 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 
-public class SortedBufferQueueTest {
+public class MessageQueueTest {
 
     @Test
     public void testIsEmpty() throws InterruptedException {
-        SortedBufferQueue queue = new SortedBufferQueue();
+        MessageQueue queue = new MessageQueue(1);
         Assert.assertTrue(queue.isEmpty());
 
         queue.put(new QueuedMessage(1, 1, MessageType.START, null));
@@ -41,19 +41,26 @@ public class SortedBufferQueueTest {
 
     @Test
     public void testPutAndTake() throws InterruptedException {
-        SortedBufferQueue queue = new SortedBufferQueue();
+        MessageQueue queue = new MessageQueue(3);
 
-        queue.put(1, 2, MessageType.VERTEX, ByteBuffer.allocate(4));
-        queue.put(new QueuedMessage(2, 1, MessageType.EDGE,
-                                    ByteBuffer.allocate(4)));
+        QueuedMessage message1 = new QueuedMessage(1, 2, MessageType.VERTEX,
+                                                   ByteBuffer.allocate(4));
+        queue.put(message1);
+        QueuedMessage message2 = new QueuedMessage(2, 1, MessageType.EDGE,
+                                                   ByteBuffer.allocate(4));
+        queue.put(message2);
 
         BlockingQueue<?> blockQueue = Whitebox.getInternalState(queue, "queue");
         Assert.assertEquals(2, blockQueue.size());
 
-        queue.take();
+        Assert.assertEquals(message1.partitionId(), queue.take().partitionId());
         Assert.assertEquals(1, blockQueue.size());
 
-        queue.take();
+        Assert.assertEquals(message2.partitionId(), queue.take().partitionId());
         Assert.assertEquals(0, blockQueue.size());
+
+        queue.putBack(message2);
+        Assert.assertEquals(0, blockQueue.size());
+        Assert.assertEquals(message2.partitionId(), queue.take().partitionId());
     }
 }

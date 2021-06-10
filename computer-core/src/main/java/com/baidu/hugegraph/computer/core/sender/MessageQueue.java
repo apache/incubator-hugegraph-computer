@@ -19,38 +19,43 @@
 
 package com.baidu.hugegraph.computer.core.sender;
 
-import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
 /**
  * It's not a public class, need package access
  */
-class SortedBufferQueue {
+class MessageQueue {
 
     private final BlockingQueue<QueuedMessage> queue;
+    private final Queue<QueuedMessage> pendings;
 
-    public SortedBufferQueue() {
+    public MessageQueue(int workerCount) {
         // TODO: replace with disruptor queue
         this.queue = new LinkedBlockingQueue<>(128);
+        this.pendings = new ArrayDeque<>(workerCount);
     }
 
     public boolean isEmpty() {
         return this.queue.isEmpty();
     }
 
-    public void put(int partitionId, int workerId, MessageType type,
-                    ByteBuffer buffer) throws InterruptedException {
-        this.put(new QueuedMessage(partitionId, workerId, type, buffer));
-    }
-
     public void put(QueuedMessage message) throws InterruptedException {
         this.queue.put(message);
     }
 
+    public void putBack(QueuedMessage message) {
+        this.pendings.add(message);
+    }
+
     public QueuedMessage take() throws InterruptedException {
+        // Handle all pending messages first
+        QueuedMessage pending = this.pendings.poll();
+        if (pending != null) {
+            return pending;
+        }
         return this.queue.take();
     }
 }

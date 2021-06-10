@@ -40,24 +40,24 @@ public class QueuedMessageSender implements MessageSender {
     private static final String PREFIX = "send-executor";
 
     // All target workers share one message queue
-    private final SortedBufferQueue queue;
+    private final MessageQueue queue;
     // Each target worker has a WorkerChannel
     private final WorkerChannel[] channels;
     // The thread used to send vertex/message, only one is enough
     private final Thread sendExecutor;
     private final BarrierEvent anyClientNotBusyEvent;
     // Just one thread modify these
-    private int pendingMsgCount;
+    private int activeClientCount;
     private int busyClientCount;
 
     public QueuedMessageSender(Config config) {
-        this.queue = new SortedBufferQueue();
         int workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
+        this.queue = new MessageQueue(workerCount);
         // NOTE: the workerId start from 1
         this.channels = new WorkerChannel[workerCount];
         this.sendExecutor = new Thread(new Sender(), PREFIX);
         this.anyClientNotBusyEvent = new BarrierEvent();
-        this.pendingMsgCount = 0;
+        this.activeClientCount = 0;
         this.busyClientCount = 0;
     }
 
@@ -113,24 +113,17 @@ public class QueuedMessageSender implements MessageSender {
             Thread thread = Thread.currentThread();
             while (!thread.isInterrupted()) {
                 try {
-                    // Handle all pending messages first
-                    for (int i = 0; pendingMsgCount > 0 && i < channels.length;
-                         i++) {
-                        WorkerChannel channel = channels[i];
-                        if (channel.pendingMessage != null) {
-                            QueuedMessageSender.this.doSend(
-                                    channel.pendingMessage);
-                        }
-                    }
-
                     // Take message from queue
                     QueuedMessage message = queue.take();
-                    QueuedMessageSender.this.doSend(message);
+                    if (!QueuedMessageSender.this.doSend(message)) {
+                        queue.putBack(message);
+                    }
                 } catch (InterruptedException e) {
                     // Reset interrupted flag
                     Thread.currentThread().interrupt();
                     // Any client is active means that sending task in running
-                    if (activeClientCount() > 0) {
+                    // client.active() is not accurate enough
+                    if (activeClientCount > 0) {
                         throw new ComputerException(
                                   "Interrupted when waiting for message " +
                                   "queue not empty");
@@ -144,24 +137,21 @@ public class QueuedMessageSender implements MessageSender {
         }
     }
 
-    private void doSend(QueuedMessage message) throws TransportException,
-                                                      InterruptedException {
+    private boolean doSend(QueuedMessage message) throws TransportException,
+                                                         InterruptedException {
         WorkerChannel channel = this.channels[message.workerId() - 1];
         switch (message.type()) {
             case START:
-                this.sendStartMessage(channel);
-                break;
+                return this.sendStartMessage(channel);
             case FINISH:
-                this.sendFinishMessage(channel);
-                break;
+                return this.sendFinishMessage(channel);
             default:
-                this.sendDataMessage(channel, message);
-                break;
+                return this.sendDataMessage(channel, message);
         }
     }
 
-    private void sendStartMessage(WorkerChannel channel)
-                                  throws TransportException {
+    private boolean sendStartMessage(WorkerChannel channel)
+                                     throws TransportException {
         channel.client.startSessionAsync().whenComplete((r, e) -> {
             CompletableFuture<Void> future = channel.futureRef.get();
             assert future != null;
@@ -173,13 +163,15 @@ public class QueuedMessageSender implements MessageSender {
             } else {
                 LOG.info("Start session connected to worker {}({})",
                          channel.workerId, channel.client.remoteAddress());
+                ++this.activeClientCount;
                 future.complete(null);
             }
         });
+        return true;
     }
 
-    private void sendFinishMessage(WorkerChannel channel)
-                                   throws TransportException {
+    private boolean sendFinishMessage(WorkerChannel channel)
+                                      throws TransportException {
         channel.client.finishSessionAsync().whenComplete((r, e) -> {
             CompletableFuture<Void> future = channel.futureRef.get();
             assert future != null;
@@ -191,31 +183,29 @@ public class QueuedMessageSender implements MessageSender {
             } else {
                 LOG.info("Finish session connected to worker {}({})",
                          channel.workerId, channel.client.remoteAddress());
+                --this.activeClientCount;
                 future.complete(null);
             }
         });
+        return true;
     }
 
-    private void sendDataMessage(WorkerChannel channel, QueuedMessage message)
-                                 throws TransportException {
+    private boolean sendDataMessage(WorkerChannel channel,
+                                    QueuedMessage message)
+                                    throws TransportException {
         if (channel.client.send(message.type(), message.partitionId(),
                                 message.buffer())) {
-            if (this.pendingMsgCount > 0) {
-                --this.pendingMsgCount;
-            }
-            channel.pendingMessage = null;
-        } else {
-            ++this.pendingMsgCount;
-            channel.pendingMessage = message;
-            if (++this.busyClientCount >= this.channels.length) {
-                /*
-                 * If all clients are busy, let send thread wait
-                 * until any client is available
-                 */
-                this.waitAnyClientNotBusy();
-                --this.busyClientCount;
-            }
+            return true;
         }
+        if (++this.busyClientCount >= this.channels.length) {
+            /*
+             * If all clients are busy, let send thread wait
+             * until any client is available
+             */
+            this.waitAnyClientNotBusy();
+            --this.busyClientCount;
+        }
+        return false;
     }
 
     private void waitAnyClientNotBusy() {
@@ -231,29 +221,17 @@ public class QueuedMessageSender implements MessageSender {
         }
     }
 
-    private int activeClientCount() {
-        int count = 0;
-        for (WorkerChannel channel : this.channels) {
-            if (channel.client.active()) {
-                count++;
-            }
-        }
-        return count;
-    }
-
     private static class WorkerChannel {
 
         private final int workerId;
         // Each target worker has a TransportClient
         private final TransportClient client;
         private final AtomicReference<CompletableFuture<Void>> futureRef;
-        private QueuedMessage pendingMessage;
 
         public WorkerChannel(int workerId, TransportClient client) {
             this.workerId = workerId;
             this.client = client;
             this.futureRef = new AtomicReference<>();
-            this.pendingMessage = null;
         }
 
         public CompletableFuture<Void> newFuture() {

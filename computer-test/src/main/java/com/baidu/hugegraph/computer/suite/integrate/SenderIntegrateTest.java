@@ -50,10 +50,12 @@ public class SenderIntegrateTest {
 
     @BeforeClass
     public static void init() {
+        // pass
     }
 
     @AfterClass
     public static void clear() {
+        // pass
     }
 
     @Test

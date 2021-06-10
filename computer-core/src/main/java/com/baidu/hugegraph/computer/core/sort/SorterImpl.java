@@ -71,7 +71,7 @@ public class SorterImpl implements Sorter {
     public void mergeBuffers(List<RandomAccessInput> inputs,
                              OuterSortFlusher flusher, String output,
                              boolean withSubKv) throws Exception {
-        List<EntryIterator> entries = new ArrayList<>(inputs.size());
+        List<EntryIterator> entries = null;
         try {
             if (withSubKv) {
                 entries = inputs.stream()
@@ -83,8 +83,10 @@ public class SorterImpl implements Sorter {
                                 .collect(Collectors.toList());
             }
         } finally {
-            for (EntryIterator iterator : entries) {
-                iterator.close();
+            if (entries != null) {
+                for (EntryIterator iterator : entries) {
+                    iterator.close();
+                }
             }
         }
 

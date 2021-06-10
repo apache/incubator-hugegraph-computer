@@ -74,7 +74,20 @@ public class StructRandomAccessOutputTest {
     }
 
     @Test
-    public void testWriteIntWithPosition() throws IOException {
+    public void testWriteFixedInt() throws IOException {
+        try (BytesOutput output = IOFactory.createBytesOutput(
+                                  Constants.SMALL_BUF_SIZE);
+             RandomAccessOutput srao = new StructRandomAccessOutput(output)) {
+            Assert.assertEquals(0L, srao.position());
+            srao.writeFixedInt(1000);
+            Assert.assertEquals(4L, srao.position());
+            srao.writeFixedInt(2000);
+            Assert.assertEquals(8L, srao.position());
+        }
+    }
+
+    @Test
+    public void testWriteFixedIntWithPosition() throws IOException {
         try (BytesOutput output = IOFactory.createBytesOutput(
                                   Constants.SMALL_BUF_SIZE);
              RandomAccessOutput srao = new StructRandomAccessOutput(output)) {

@@ -118,7 +118,7 @@ public class OptimizedBytesInput implements BytesInput {
 
     @Override
     public int readUnsignedShort() throws IOException {
-        return this.in.readUnsignedByte();
+        return this.in.readUnsignedShort();
     }
 
     @Override

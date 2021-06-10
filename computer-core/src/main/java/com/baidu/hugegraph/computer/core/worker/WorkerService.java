@@ -393,7 +393,7 @@ public class WorkerService {
 
         @Override
         public void sendMessage(Id target, Value<?> value) {
-//            this.sendManager.sendMessage(target, value);
+            this.sendManager.sendMessage(target, value);
         }
 
         @Override
