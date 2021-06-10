@@ -19,13 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.sender;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.util.InsertionOrderUtil;
 
 public class MessageSendBuffers {
 
@@ -55,13 +55,13 @@ public class MessageSendBuffers {
 
     public WriteBuffers get(int partitionId) {
         if (partitionId < 0 || partitionId >= this.buffers.length)  {
-            throw new ComputerException("Invalid partitionId %s", partitionId);
+            throw new ComputerException("Invalid partition id %s", partitionId);
         }
         return this.buffers[partitionId];
     }
 
     public Map<Integer, WriteBuffers> all() {
-        Map<Integer, WriteBuffers> all = new LinkedHashMap<>();
+        Map<Integer, WriteBuffers> all = InsertionOrderUtil.newMap();
         for (int i = 0; i < this.buffers.length; i++) {
             all.put(i, this.buffers[i]);
         }

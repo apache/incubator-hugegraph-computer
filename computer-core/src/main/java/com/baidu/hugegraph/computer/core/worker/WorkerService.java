@@ -398,7 +398,6 @@ public class WorkerService {
 
         @Override
         public void sendMessageToAllEdges(Vertex vertex, Value<?> value) {
-            // Copied from ComptutaionContext
             for (Edge edge : vertex.edges()) {
                 this.sendMessage(edge.targetId(), value);
             }

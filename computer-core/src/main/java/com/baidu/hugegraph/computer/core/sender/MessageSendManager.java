@@ -98,7 +98,8 @@ public class MessageSendManager implements Manager {
             // Write vertex to buffer
             buffer.writeVertex(vertex);
         } catch (IOException e) {
-            throw new ComputerException("Failed to write vertex", e);
+            throw new ComputerException("Failed to write vertex '%s'",
+                                        e, vertex.id());
         }
     }
 
@@ -111,22 +112,22 @@ public class MessageSendManager implements Manager {
             // Write edge to buffer
             buffer.writeEdges(vertex);
         } catch (IOException e) {
-            throw new ComputerException("Failed to write vertex", e);
+            throw new ComputerException("Failed to write edges of vertex '%s'",
+                                        e, vertex.id());
         }
     }
 
     public void sendMessage(Id targetId, Value<?> value) {
-        // TODO: when iterate computation implement, uncomment it
-//        this.checkException();
-//
-//        WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
-//                                                            MessageType.MSG);
-//        try {
-//            // Write vertex to buffer
-//            buffer.writeMessage(targetId, value);
-//        } catch (IOException e) {
-//            throw new ComputerException("Failed to write message", e);
-//        }
+        this.checkException();
+
+        WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
+                                                            MessageType.MSG);
+        try {
+            // Write vertex to buffer
+            buffer.writeMessage(targetId, value);
+        } catch (IOException e) {
+            throw new ComputerException("Failed to write message", e);
+        }
     }
 
     /**
@@ -139,7 +140,7 @@ public class MessageSendManager implements Manager {
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
         this.sendControlMessageToWorkers(workerIds, MessageType.START);
-        LOG.info("Start send message(type={})", type);
+        LOG.info("Start sending message(type={})", type);
     }
 
     /**
@@ -155,7 +156,7 @@ public class MessageSendManager implements Manager {
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
         this.sendControlMessageToWorkers(workerIds, MessageType.FINISH);
-        LOG.info("Finish send message(type={})", type);
+        LOG.info("Finish sending message(type={})", type);
     }
 
     private WriteBuffers sortIfTargetBufferIsFull(Id id, MessageType type) {
@@ -181,8 +182,8 @@ public class MessageSendManager implements Manager {
             try {
                 this.sender.send(workerId, message);
             } catch (InterruptedException e) {
-                throw new ComputerException("Waiting to put buffer into " +
-                                            "queue was interrupted");
+                throw new ComputerException("Interrupted when waiting to " +
+                                            "put buffer into queue");
             }
         }).whenComplete((r, e) -> {
             if (e != null) {
@@ -218,10 +219,11 @@ public class MessageSendManager implements Manager {
                 future.get(Constants.FUTURE_TIMEOUT, TimeUnit.SECONDS);
             }
         } catch (TimeoutException e) {
-            throw new ComputerException("Wait sort future finished timeout", e);
+            throw new ComputerException("Timed out to wait for sorting task " +
+                                        "to finished", e);
         } catch (InterruptedException | ExecutionException e) {
-            throw new ComputerException("Failed to wait sort future finished",
-                                        e);
+            throw new ComputerException("Failed to wait for sorting task " +
+                                        "to finished", e);
         }
     }
 
@@ -233,8 +235,8 @@ public class MessageSendManager implements Manager {
                 futures.add(this.sender.send(workerId, type));
             }
         } catch (InterruptedException e) {
-            throw new ComputerException("Waiting to send message async " +
-                                        "was interrupted");
+            throw new ComputerException("Interrupted when waiting to " +
+                                        "send message async");
         }
 
         try {
@@ -242,11 +244,11 @@ public class MessageSendManager implements Manager {
                 future.get(Constants.FUTURE_TIMEOUT, TimeUnit.SECONDS);
             }
         } catch (TimeoutException e) {
-            throw new ComputerException("Wait control message(%s) finished " +
-                                        "timeout", e, type);
+            throw new ComputerException("Timed out to wait for controling " +
+                                        "message(%s) to finished", e, type);
         } catch (InterruptedException | ExecutionException e) {
-            throw new ComputerException("Failed to wait control message(%s) " +
-                                        "finished", e, type);
+            throw new ComputerException("Failed to wait for controling " +
+                                        "message(%s) to finished", e, type);
         }
     }
 

@@ -74,7 +74,7 @@ public class FakeMessageRecvHandler implements MessageHandler {
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionId connectionId) {
-        LOG.warn("Exception caught for connection:{}, root cause:{}",
+        LOG.warn("Exception caught for connection: {}, root cause: {}",
                  connectionId, cause);
     }
 }

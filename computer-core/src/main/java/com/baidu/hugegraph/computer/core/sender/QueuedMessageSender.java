@@ -37,7 +37,7 @@ public class QueuedMessageSender implements MessageSender {
 
     public static final Logger LOG = Log.logger(QueuedMessageSender.class);
 
-    private static final String PREFIX = "send-executor";
+    private static final String NAME = "send-executor";
 
     // All target workers share one message queue
     private final MessageQueue queue;
@@ -46,8 +46,7 @@ public class QueuedMessageSender implements MessageSender {
     // The thread used to send vertex/message, only one is enough
     private final Thread sendExecutor;
     private final BarrierEvent anyClientNotBusyEvent;
-    // Just one thread modify these
-    private int activeClientCount;
+    // Just one thread modify it
     private int busyClientCount;
 
     public QueuedMessageSender(Config config) {
@@ -55,9 +54,8 @@ public class QueuedMessageSender implements MessageSender {
         this.queue = new MessageQueue(workerCount);
         // NOTE: the workerId start from 1
         this.channels = new WorkerChannel[workerCount];
-        this.sendExecutor = new Thread(new Sender(), PREFIX);
+        this.sendExecutor = new Thread(new Sender(), NAME);
         this.anyClientNotBusyEvent = new BarrierEvent();
-        this.activeClientCount = 0;
         this.busyClientCount = 0;
     }
 
@@ -101,7 +99,10 @@ public class QueuedMessageSender implements MessageSender {
     }
 
     public Runnable notBusyNotifier() {
-        // DataClientHandler.sendAvailable will call it
+        /*
+         * DataClientHandler.sendAvailable() will call it when client
+         * is available
+         */
         return this.anyClientNotBusyEvent::signal;
     }
 
@@ -109,7 +110,7 @@ public class QueuedMessageSender implements MessageSender {
 
         @Override
         public void run() {
-            LOG.info("Start run send exector");
+            LOG.info("The send-executor is running");
             Thread thread = Thread.currentThread();
             while (!thread.isInterrupted()) {
                 try {
@@ -122,8 +123,7 @@ public class QueuedMessageSender implements MessageSender {
                     // Reset interrupted flag
                     Thread.currentThread().interrupt();
                     // Any client is active means that sending task in running
-                    // client.active() is not accurate enough
-                    if (activeClientCount > 0) {
+                    if (QueuedMessageSender.this.activeClientCount() > 0) {
                         throw new ComputerException(
                                   "Interrupted when waiting for message " +
                                   "queue not empty");
@@ -133,7 +133,7 @@ public class QueuedMessageSender implements MessageSender {
                     throw new ComputerException("Failed to send message", e);
                 }
             }
-            LOG.info("Finish run send exector");
+            LOG.info("The send-executor is terminated");
         }
     }
 
@@ -157,13 +157,10 @@ public class QueuedMessageSender implements MessageSender {
             assert future != null;
 
             if (e != null) {
-                LOG.info("Failed to start session connected to worker {}({})",
-                         channel.workerId, channel.client.remoteAddress());
+                LOG.info("Failed to start session connected to {}", channel);
                 future.completeExceptionally(e);
             } else {
-                LOG.info("Start session connected to worker {}({})",
-                         channel.workerId, channel.client.remoteAddress());
-                ++this.activeClientCount;
+                LOG.info("Start session connected to {}", channel);
                 future.complete(null);
             }
         });
@@ -177,13 +174,10 @@ public class QueuedMessageSender implements MessageSender {
             assert future != null;
 
             if (e != null) {
-                LOG.info("Failed to finish session connected to worker {}({})",
-                         channel.workerId, channel.client.remoteAddress());
+                LOG.info("Failed to finish session connected to {}", channel);
                 future.completeExceptionally(e);
             } else {
-                LOG.info("Finish session connected to worker {}({})",
-                         channel.workerId, channel.client.remoteAddress());
-                --this.activeClientCount;
+                LOG.info("Finish session connected to {}", channel);
                 future.complete(null);
             }
         });
@@ -214,11 +208,21 @@ public class QueuedMessageSender implements MessageSender {
         } catch (InterruptedException e) {
             // Reset interrupted flag
             Thread.currentThread().interrupt();
-            throw new ComputerException("Waiting any client not busy " +
-                                        "was interrupted");
+            throw new ComputerException("Interrupted when waiting any client " +
+                                        "not busy");
         } finally {
             this.anyClientNotBusyEvent.reset();
         }
+    }
+
+    private int activeClientCount() {
+        int count = 0;
+        for (WorkerChannel channel : this.channels) {
+            if (channel.client.sessionActive()) {
+                ++count;
+            }
+        }
+        return count;
     }
 
     private static class WorkerChannel {
@@ -249,6 +253,12 @@ public class QueuedMessageSender implements MessageSender {
                                             "but some thread modified it",
                                             future);
             }
+        }
+
+        @Override
+        public String toString() {
+            return String.format("workerId=%s(remoteAddress=%s)",
+                                 this.workerId, this.client.remoteAddress());
         }
     }
 }

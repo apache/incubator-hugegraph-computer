@@ -89,7 +89,7 @@ public class SortManager implements Manager {
         try {
             this.sortExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            LOG.warn("Waiting sort executor terminated was interrupted");
+            LOG.warn("Interrupted when waiting sort executor terminated");
         }
     }
 
@@ -106,7 +106,9 @@ public class SortManager implements Manager {
                 this.sorter.sortBuffer(bufferForRead, flusher,
                                        type == MessageType.EDGE);
             } catch (Exception e) {
-                throw new ComputerException("Failed to sort buffer", e);
+                throw new ComputerException("Failed to sort %s buffers of %s" +
+                                            "message", e, buffer.size(),
+                                            type.name());
             }
             return ByteBuffer.wrap(output.buffer());
         }, this.sortExecutor);

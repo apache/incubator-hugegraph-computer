@@ -78,12 +78,13 @@ public class DataClientManager implements Manager {
         try {
             TransportClient client = this.connManager.getOrCreateClient(
                                      hostname, dataPort);
-            LOG.info("Connect to worker succeed {}({}:{})",
+            LOG.info("Successfully connect to worker: {}({}:{})",
                      workerId, hostname, dataPort);
             this.sender.addWorkerClient(workerId, client);
         } catch (TransportException e) {
-            throw new ComputerException("Failed to connect worker server {}:{}",
-                                        hostname, dataPort);
+            throw new ComputerException(
+                      "Failed to connect to worker: {}({}:{})",
+                      workerId, hostname, dataPort);
         }
     }
 

@@ -26,6 +26,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.util.E;
@@ -89,8 +90,8 @@ public class WriteBuffers {
             try {
                 this.wait();
             } catch (InterruptedException e) {
-                throw new ComputerException("Waiting sorting buffer empty " +
-                                            "was interrupted");
+                throw new ComputerException("Interrupted when waiting " +
+                                            "sorting buffer empty");
             }
         }
         // Swap the writing buffer and sorting buffer pointer
@@ -109,7 +110,12 @@ public class WriteBuffers {
     }
 
     public synchronized RandomAccessInput wrapForRead() {
-        return IOFactory.createBytesInput(this.sortingBuffer.output()
-                                                            .toByteArray());
+        BytesOutput output = this.sortingBuffer.output();
+        return IOFactory.createBytesInput(output.buffer(),
+                                          (int) output.position());
+    }
+
+    public long size() {
+        return this.sortingBuffer.output().position();
     }
 }
