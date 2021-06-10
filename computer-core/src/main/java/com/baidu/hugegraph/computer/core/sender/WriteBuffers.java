@@ -114,8 +114,4 @@ public class WriteBuffers {
         return IOFactory.createBytesInput(output.buffer(),
                                           (int) output.position());
     }
-
-    public long size() {
-        return this.sortingBuffer.output().position();
-    }
 }

@@ -54,6 +54,7 @@ public class QueuedMessageSender implements MessageSender {
         this.queue = new MessageQueue(workerCount);
         // NOTE: the workerId start from 1
         this.channels = new WorkerChannel[workerCount];
+        // TODO: pass send-executor in and share executor with others
         this.sendExecutor = new Thread(new Sender(), NAME);
         this.anyClientNotBusyEvent = new BarrierEvent();
         this.busyClientCount = 0;

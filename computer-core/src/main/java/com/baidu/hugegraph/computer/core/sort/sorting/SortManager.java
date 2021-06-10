@@ -53,7 +53,7 @@ public class SortManager implements Manager {
     public static final Logger LOG = Log.logger(SortManager.class);
 
     private static final String NAME = "sort";
-    private static final String PREFIX = "sort-executor-";
+    private static final String PREFIX = "sort-executor-%s";
 
     private final ExecutorService sortExecutor;
     private final Sorter sorter;
@@ -106,9 +106,8 @@ public class SortManager implements Manager {
                 this.sorter.sortBuffer(bufferForRead, flusher,
                                        type == MessageType.EDGE);
             } catch (Exception e) {
-                throw new ComputerException("Failed to sort %s buffers of %s" +
-                                            "message", e, buffer.size(),
-                                            type.name());
+                throw new ComputerException("Failed to sort buffers of %s " +
+                                            "message", e, type.name());
             }
             return ByteBuffer.wrap(output.buffer());
         }, this.sortExecutor);
