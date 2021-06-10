@@ -82,6 +82,12 @@ public interface TransportClient {
     boolean active();
 
     /**
+     * To check whether the session is active to use
+     * @return true if session is active
+     */
+    boolean sessionActive();
+
+    /**
      * Close the client.
      * NOTE: If the client is created with {@link ConnectionManager}, need to
      * use {@link ConnectionManager#closeClient(ConnectionId)} to close it,
