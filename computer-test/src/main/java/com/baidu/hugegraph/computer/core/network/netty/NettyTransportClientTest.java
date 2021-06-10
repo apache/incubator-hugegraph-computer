@@ -392,5 +392,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         finishFuture.get(5, TimeUnit.SECONDS);
         Assert.assertFalse(client.sessionActive());
+
+        client.close();
+        Assert.assertFalse(client.sessionActive());
     }
 }
