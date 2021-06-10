@@ -22,8 +22,11 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
@@ -368,5 +371,29 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         Assert.assertThrows(IllegalArgumentException.class,
                             conf::minPendingRequests);
+    }
+
+    @Test
+    public void testSessionActive() throws IOException, InterruptedException,
+                                           ExecutionException,
+                                           TimeoutException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+
+        Assert.assertFalse(client.sessionActive());
+
+        CompletableFuture<Void> future = client.startSessionAsync();
+        Assert.assertFalse(client.sessionActive());
+
+        future.get(5, TimeUnit.SECONDS);
+        Assert.assertTrue(client.sessionActive());
+
+        CompletableFuture<Void> finishFuture = client.finishSessionAsync();
+        Assert.assertTrue(client.sessionActive());
+
+        finishFuture.get(5, TimeUnit.SECONDS);
+        Assert.assertFalse(client.sessionActive());
+
+        client.close();
+        Assert.assertFalse(client.sessionActive());
     }
 }

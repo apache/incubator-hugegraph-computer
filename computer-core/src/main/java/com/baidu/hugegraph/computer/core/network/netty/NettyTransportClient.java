@@ -31,6 +31,7 @@ import com.baidu.hugegraph.computer.core.network.ClientHandler;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.TransportState;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
@@ -85,6 +86,16 @@ public class NettyTransportClient implements TransportClient {
     @Override
     public boolean active() {
         return this.channel.isActive();
+    }
+
+    @Override
+    public boolean sessionActive() {
+        if (!this.active()) {
+            return false;
+        }
+        TransportState state = this.session.state();
+        return state == TransportState.ESTABLISHED ||
+               state == TransportState.FINISH_SENT;
     }
 
     protected ClientSession clientSession() {
