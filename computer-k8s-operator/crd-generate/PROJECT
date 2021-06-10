@@ -1,8 +1,8 @@
-domain: hugegraph.io
+domain: baidu.com
 layout:
 - go.kubebuilder.io/v3
 projectName: hugegraph-computer-operator
-repo: computer.hugegraph.io/operator
+repo: hugegraph.baidu.com/operator
 resources:
 - api:
     crdVersion: v1beta1
@@ -11,6 +11,5 @@ resources:
   domain: hugegraph.io
   group: computer
   kind: HugeGraphComputerJob
-  path: computer.hugegraph.io/operator/api/v1
   version: v1
 version: "3"

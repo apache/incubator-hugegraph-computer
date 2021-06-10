@@ -61,32 +61,6 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - computer.hugegraph.io
-  resources:
-  - hugegraphcomputerjobs
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - computer.hugegraph.io
-  resources:
-  - hugegraphcomputerjobs/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - computer.hugegraph.io
-  resources:
-  - hugegraphcomputerjobs/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
   - ""
   resources:
   - configmaps
@@ -166,3 +140,29 @@ rules:
   - ingresses/status
   verbs:
   - get
+- apiGroups:
+  - hugegraph.baidu.com
+  resources:
+  - hugegraphcomputerjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - hugegraph.baidu.com
+  resources:
+  - hugegraphcomputerjobs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - hugegraph.baidu.com
+  resources:
+  - hugegraphcomputerjobs/status
+  verbs:
+  - get
+  - patch
+  - update

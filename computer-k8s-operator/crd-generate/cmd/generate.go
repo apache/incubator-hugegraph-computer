@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"strings"
 
-	computerv1 "computer.hugegraph.io/operator/api/v1"
 	"github.com/fabric8io/kubernetes-client/generator/pkg/schemagen"
+	operatorv1 "hugegraph.baidu.com/operator/api/v1"
 	machinery "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -35,8 +35,8 @@ import (
 const (
 	packageToken = "io.fabric8.xxxx"
 	javaPackage = "com.baidu.hugegraph.computer.k8s.crd.model"
-	goPackage = "computer.hugegraph.io/operator/api/v1"
-	schemaFilePath = "../schema/kube-schema.json"
+	goPackage = "hugegraph.baidu.com/operator/api/v1"
+	schemaFilePath = "../../computer-k8s/schema/kube-schema.json"
 )
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 	// no other types need to be defined as they are auto discovered
 	crdLists := map[reflect.Type]schemagen.CrdScope{
 		// v1
-		reflect.TypeOf(computerv1.HugeGraphComputerJobList{}): schemagen.Namespaced,
+		reflect.TypeOf(operatorv1.HugeGraphComputerJobList{}): schemagen.Namespaced,
 	}
 
 	// constraints and patterns for fields
@@ -71,8 +71,8 @@ func main() {
 		// v1
 		goPackage: {
 			JavaPackage: packageToken,
-			ApiGroup:    computerv1.GroupVersion.Group,
-			ApiVersion:  computerv1.GroupVersion.Version,
+			ApiGroup:    operatorv1.GroupVersion.Group,
+			ApiVersion:  operatorv1.GroupVersion.Version,
 		},
 	}
 

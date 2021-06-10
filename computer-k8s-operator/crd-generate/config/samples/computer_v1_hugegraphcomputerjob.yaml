@@ -1,6 +1,8 @@
-apiVersion: computer.hugegraph.io/v1
+apiVersion: hugegraph.baidu.com/v1
 kind: HugeGraphComputerJob
 metadata:
   name: hugegraphcomputerjob-sample
 spec:
+  jobId: "12345667"
+  image: baidu.com/ssss
   # Add fields here

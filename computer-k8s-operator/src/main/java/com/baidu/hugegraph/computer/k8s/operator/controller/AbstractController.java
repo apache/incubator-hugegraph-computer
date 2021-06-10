@@ -75,9 +75,9 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     private final Duration readyTimeout;
     private final Duration readyCheckInternal;
 
-    public AbstractController(String kind, KubernetesClient kubeClient) {
-        this.kind = kind;
+    public AbstractController(KubernetesClient kubeClient) {
         this.crClass = this.crClass();
+        this.kind = HasMetadata.getKind(this.crClass);
         this.kubeClient = kubeClient;
         this.workQueue = new ArrayBlockingQueue<>(WORK_QUEUE_CAPACITY);
         this.informerMap = new ConcurrentHashMap<>();
@@ -96,7 +96,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         this.registerOwnsEvent(informerFactory, resyncPeriod);
     }
 
-    public void run() {
+    public void run(CountDownLatch readyLatch) {
         LOG.info("Starting the {}-controller...", this.kind);
 
         if (!this.hasSynced()) {
@@ -122,10 +122,12 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
             );
         }
 
+        readyLatch.countDown();
+
         try {
             latch.await();
         } catch (InterruptedException e) {
-            LOG.error("Aborting controller.", e);
+            LOG.error("Aborting {}-controller.", this.kind, e);
         } finally {
             LOG.info("The {}-controller exited", this.kind);
         }
@@ -141,7 +143,8 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     protected abstract void onCRDelete(T cr, boolean deletedStateUnknown);
 
     private void worker() {
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!this.executor.isShutdown() &&
+               !Thread.currentThread().isInterrupted()) {
             LOG.info("Trying to get item from work queue of {}-controller",
                      this.kind);
             Request request = null;
@@ -152,7 +155,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                           this.kind, e);
             }
             if (request == null) {
-                LOG.info("The {}-controller worker exiting..", this.kind);
+                LOG.info("The {}-controller worker exiting...", this.kind);
                 return;
             }
             Result result;
@@ -170,33 +173,27 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     protected void registerCREvent(SharedInformerFactory informerFactory,
                                    long resyncPeriod) {
         SharedIndexInformer<T> crInformer =
-                informerFactory.sharedIndexInformerForCustomResource(
-                        this.crClass, resyncPeriod);
+        informerFactory.sharedIndexInformerForCustomResource(this.crClass,
+                                                             resyncPeriod);
 
         crInformer.addEventHandler(new ResourceEventHandler<T>() {
             @Override
             public void onAdd(T cr) {
                 Request request = Request.parseRequestByCR(cr);
-                if (request != null) {
-                    AbstractController.this.enqueueRequest(request);
-                }
+                AbstractController.this.enqueueRequest(request);
             }
 
             @Override
             public void onUpdate(T oldCr, T newCr) {
                 Request request = Request.parseRequestByCR(newCr);
-                if (request != null) {
-                    AbstractController.this.enqueueRequest(request);
-                }
+                AbstractController.this.enqueueRequest(request);
             }
 
             @Override
             public void onDelete(T cr, boolean deletedStateUnknown) {
                 AbstractController.this.onCRDelete(cr, deletedStateUnknown);
                 Request request = Request.parseRequestByCR(cr);
-                if (request != null) {
-                    AbstractController.this.enqueueRequest(request);
-                }
+                AbstractController.this.enqueueRequest(request);
             }
         });
         this.informerMap.put(this.crClass, crInformer);
@@ -299,13 +296,14 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         }
         synced = KubeUtil
                 .waitUntilReady(Duration.ZERO,
-                                this.readyTimeout,
                                 this.readyCheckInternal,
+                                this.readyTimeout,
                                 () -> {
                                 return this.informerMap
-                                        .values().stream()
-                                        .allMatch(SharedInformer::hasSynced);
-                                });
+                                           .values().stream()
+                                           .allMatch(SharedInformer::hasSynced);
+                                },
+                                this.executor);
         return synced;
     }
 

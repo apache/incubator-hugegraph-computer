@@ -38,8 +38,8 @@ public class ComputerJobController
             Resource<HugeGraphComputerJob>> operation;
 
 
-    public ComputerJobController(String kind, KubernetesClient kubeClient) {
-        super(kind, kubeClient);
+    public ComputerJobController(KubernetesClient kubeClient) {
+        super(kubeClient);
         this.operation = this.kubeClient.customResources(
                                          HugeGraphComputerJob.class,
                                          HugeGraphComputerJobList.class);

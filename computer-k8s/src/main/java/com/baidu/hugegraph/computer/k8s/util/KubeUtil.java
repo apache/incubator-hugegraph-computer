@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.k8s.util;
 
 import java.time.Duration;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -41,26 +40,24 @@ public class KubeUtil {
     public static boolean waitUntilReady(Duration initialDelay,
                                          Duration interval,
                                          Duration timeout,
-                                         Supplier<Boolean> condition) {
-        ScheduledExecutorService executorService =
-        Executors.newSingleThreadScheduledExecutor();
-
+                                         Supplier<Boolean> condition,
+                                         ScheduledExecutorService
+                                                 executorService) {
         AtomicBoolean result = new AtomicBoolean(false);
-        long dueDate = System.currentTimeMillis() + timeout.toMillis();
-        ScheduledFuture<?> future =
-                executorService.scheduleAtFixedRate(
-                        () -> {
-                            try {
-                                result.set(condition.get());
-                            } catch (Exception e) {
-                                result.set(false);
-                            }
-                        },
-                        initialDelay.toMillis(),
-                        interval.toMillis(),
-                        TimeUnit.MILLISECONDS);
+        long deadline = System.currentTimeMillis() + timeout.toMillis();
+        ScheduledFuture<?> future = executorService.scheduleAtFixedRate(
+                                    () -> {
+                                        try {
+                                            result.set(condition.get());
+                                        } catch (Exception e) {
+                                            result.set(false);
+                                        }
+                                    },
+                                    initialDelay.toMillis(),
+                                    interval.toMillis(),
+                                    TimeUnit.MILLISECONDS);
         try {
-            while (System.currentTimeMillis() < dueDate) {
+            while (System.currentTimeMillis() < deadline) {
                 if (result.get()) {
                     future.cancel(true);
                     return true;

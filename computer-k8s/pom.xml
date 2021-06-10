@@ -49,7 +49,7 @@
                 <artifactId>jsonschema2pojo-maven-plugin</artifactId>
                 <version>${maven.jsonschema2pojo.plugin.version}</version>
                 <configuration>
-                    <sourceDirectory>${project.parent.basedir}/computer-k8s-operator/schema</sourceDirectory>
+                    <sourceDirectory>${project.basedir}/schema</sourceDirectory>
                     <targetPackage>com.baidu.hugegraph.computer.k8s.crd.model</targetPackage>
                     <includeConstructors>true</includeConstructors>
                     <includeJsr303Annotations>false</includeJsr303Annotations>

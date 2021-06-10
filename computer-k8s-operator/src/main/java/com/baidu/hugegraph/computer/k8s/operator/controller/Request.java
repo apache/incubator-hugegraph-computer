@@ -24,6 +24,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baidu.hugegraph.computer.driver.util.JsonUtil;
+import com.baidu.hugegraph.util.E;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.CustomResource;
@@ -35,17 +36,11 @@ public class Request {
     private String namespace;
 
     public static Request parseRequestByCR(CustomResource<?, ?> resource) {
-        if (resource == null) {
-            return null;
-        }
+        E.checkNotNull(resource, "resource");
         ObjectMeta metadata = resource.getMetadata();
-        if (metadata == null) {
-            return null;
-        }
+        E.checkNotNull(resource, "metadata");
         String name = metadata.getName();
-        if (StringUtils.isBlank(name)) {
-            return null;
-        }
+        E.checkArgument(StringUtils.isNotBlank(name), "resourceName");
         return new Request(metadata.getNamespace(), name);
     }
 
@@ -62,16 +57,18 @@ public class Request {
         return this.name;
     }
 
-    public void name(String name) {
+    public Request name(String name) {
         this.name = name;
+        return this;
     }
 
     public String namespace() {
         return this.namespace;
     }
 
-    public void namespace(String namespace) {
+    public Request namespace(String namespace) {
         this.namespace = namespace;
+        return this;
     }
 
     @Override

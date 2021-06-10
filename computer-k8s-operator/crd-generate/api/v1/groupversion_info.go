@@ -19,7 +19,7 @@ under the License.
 
 // Package v1 contains API Schema definitions for the computer v1 API group
 //+kubebuilder:object:generate=true
-//+groupName=computer.hugegraph.io
+//+groupName=hugegraph.baidu.com
 package v1
 
 import (
@@ -27,9 +27,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
-// +kubebuilder:rbac:groups=computer.hugegraph.io,resources=hugegraphcomputerjobs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=computer.hugegraph.io,resources=hugegraphcomputerjobs/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=computer.hugegraph.io,resources=hugegraphcomputerjobs/finalizers,verbs=update
+// +kubebuilder:rbac:groups=hugegraph.baidu.com,resources=hugegraphcomputerjobs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=hugegraph.baidu.com,resources=hugegraphcomputerjobs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=hugegraph.baidu.com,resources=hugegraphcomputerjobs/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get
 // +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;patch;delete
@@ -49,7 +49,7 @@ import (
 var (
 	// GroupVersion is group version used to register these objects
 	GroupVersion = schema.GroupVersion{
-		Group: "computer.hugegraph.io", Version: "v1",
+		Group: "hugegraph.baidu.com", Version: "v1",
 	}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme

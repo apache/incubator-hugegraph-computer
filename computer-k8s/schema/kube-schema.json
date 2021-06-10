@@ -2,7 +2,7 @@
   "id": "http://fabric8.io/hugegraph-computer/ComputerSchema#",
   "$schema": "http://json-schema.org/draft-05/schema#",
   "definitions": {
-    "computer_hugegraph_io_operator_api_v1_ComputerJobSpec": {
+    "hugegraph_baidu_com_operator_api_v1_ComputerJobSpec": {
       "type": "object",
       "properties": {
         "algorithmName": {
@@ -60,7 +60,7 @@
         "io.fabric8.kubernetes.api.model.KubernetesResource"
       ]
     },
-    "computer_hugegraph_io_operator_api_v1_ComputerJobState": {
+    "hugegraph_baidu_com_operator_api_v1_ComputerJobState": {
       "type": "object",
       "properties": {
         "lastSuperstepStat": {
@@ -78,11 +78,11 @@
         "io.fabric8.kubernetes.api.model.KubernetesResource"
       ]
     },
-    "computer_hugegraph_io_operator_api_v1_ComputerJobStatus": {
+    "hugegraph_baidu_com_operator_api_v1_ComputerJobStatus": {
       "type": "object",
       "properties": {
         "jobState": {
-          "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_ComputerJobState",
+          "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_ComputerJobState",
           "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobState"
         },
         "jobStatus": {
@@ -98,12 +98,12 @@
         "io.fabric8.kubernetes.api.model.KubernetesResource"
       ]
     },
-    "computer_hugegraph_io_operator_api_v1_HugeGraphComputerJob": {
+    "hugegraph_baidu_com_operator_api_v1_HugeGraphComputerJob": {
       "type": "object",
       "properties": {
         "apiVersion": {
           "type": "string",
-          "default": "computer.hugegraph.io/v1",
+          "default": "hugegraph.baidu.com/v1",
           "required": true
         },
         "kind": {
@@ -115,11 +115,11 @@
           "existingJavaType": "io.fabric8.kubernetes.api.model.ObjectMeta"
         },
         "spec": {
-          "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_ComputerJobSpec",
+          "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_ComputerJobSpec",
           "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec"
         },
         "status": {
-          "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_ComputerJobStatus",
+          "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_ComputerJobStatus",
           "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus"
         }
       },
@@ -129,18 +129,18 @@
         "io.fabric8.kubernetes.api.model.Namespaced"
       ]
     },
-    "computer_hugegraph_io_operator_api_v1_HugeGraphComputerJobList": {
+    "hugegraph_baidu_com_operator_api_v1_HugeGraphComputerJobList": {
       "type": "object",
       "properties": {
         "apiVersion": {
           "type": "string",
-          "default": "computer.hugegraph.io/v1",
+          "default": "hugegraph.baidu.com/v1",
           "required": true
         },
         "items": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_HugeGraphComputerJob",
+            "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_HugeGraphComputerJob",
             "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob"
           }
         },
@@ -162,24 +162,24 @@
   },
   "type": "object",
   "properties": {
-    "computer_hugegraph_io_operator_api_v1_ComputerJobSpec": {
-      "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_ComputerJobSpec",
+    "hugegraph_baidu_com_operator_api_v1_ComputerJobSpec": {
+      "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_ComputerJobSpec",
       "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec"
     },
-    "computer_hugegraph_io_operator_api_v1_ComputerJobState": {
-      "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_ComputerJobState",
+    "hugegraph_baidu_com_operator_api_v1_ComputerJobState": {
+      "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_ComputerJobState",
       "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobState"
     },
-    "computer_hugegraph_io_operator_api_v1_ComputerJobStatus": {
-      "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_ComputerJobStatus",
+    "hugegraph_baidu_com_operator_api_v1_ComputerJobStatus": {
+      "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_ComputerJobStatus",
       "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus"
     },
-    "computer_hugegraph_io_operator_api_v1_HugeGraphComputerJob": {
-      "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_HugeGraphComputerJob",
+    "hugegraph_baidu_com_operator_api_v1_HugeGraphComputerJob": {
+      "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_HugeGraphComputerJob",
       "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob"
     },
-    "computer_hugegraph_io_operator_api_v1_HugeGraphComputerJobList": {
-      "$ref": "#/definitions/computer_hugegraph_io_operator_api_v1_HugeGraphComputerJobList",
+    "hugegraph_baidu_com_operator_api_v1_HugeGraphComputerJobList": {
+      "$ref": "#/definitions/hugegraph_baidu_com_operator_api_v1_HugeGraphComputerJobList",
       "existingJavaType": "com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList"
     }
   },
