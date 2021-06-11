@@ -60,17 +60,21 @@ type ComputerJobSpec struct {
 }
 
 type ComputerJobState struct {
+	//+optional
 	Superstep int32 `json:"superstep"`
 
+	//+optional
 	MaxSuperstep int32 `json:"maxSuperstep"`
 
-	LastSuperstepStat string `json:"lastSuperstepStat"`
+	//+optional
+	LastSuperstepStat *string `json:"lastSuperstepStat"`
 }
 
 // ComputerJobStatus defines the observed state of HugeGraphComputerJob
 type ComputerJobStatus struct {
 	JobStatus *string `json:"jobStatus"`
 
+	//+optional
 	JobState *ComputerJobState `json:"jobState"`
 
 	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
@@ -78,6 +82,7 @@ type ComputerJobStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:shortName=hcjob
 // +kubebuilder:printcolumn:JSONPath=".spec.jobId",name=JobId,type=string
 // +kubebuilder:printcolumn:JSONPath=".status.jobStatus",name=JobStatus,type=string
 // +kubebuilder:printcolumn:JSONPath=".status.jobState.superstep",name=Superstep,type=integer

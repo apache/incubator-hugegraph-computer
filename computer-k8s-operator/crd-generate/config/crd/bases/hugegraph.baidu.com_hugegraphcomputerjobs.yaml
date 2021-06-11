@@ -29,6 +29,8 @@ spec:
     kind: HugeGraphComputerJob
     listKind: HugeGraphComputerJobList
     plural: hugegraphcomputerjobs
+    shortNames:
+    - hcjob
     singular: hugegraphcomputerjob
   preserveUnknownFields: false
   scope: Namespaced
@@ -213,10 +215,6 @@ spec:
                 superstep:
                   format: int32
                   type: integer
-              required:
-              - lastSuperstepStat
-              - maxSuperstep
-              - superstep
               type: object
             jobStatus:
               type: string
@@ -224,7 +222,6 @@ spec:
               format: date-time
               type: string
           required:
-          - jobState
           - jobStatus
           type: object
       type: object

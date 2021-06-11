@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.k8s.operator.controller;
+package com.baidu.hugegraph.computer.k8s.operator.common;
 
 import java.time.Duration;
 import java.util.Objects;

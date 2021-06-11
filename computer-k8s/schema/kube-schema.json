@@ -64,7 +64,8 @@
       "type": "object",
       "properties": {
         "lastSuperstepStat": {
-          "type": "string"
+          "type": "string",
+          "existingJavaType": "String"
         },
         "maxSuperstep": {
           "type": "integer"

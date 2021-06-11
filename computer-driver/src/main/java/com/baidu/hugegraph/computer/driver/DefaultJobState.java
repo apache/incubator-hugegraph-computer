@@ -63,6 +63,6 @@ public class DefaultJobState implements JobState {
 
     @Override
     public JobStatus jobStatus() {
-        return null;
+        return this.jobStatus;
     }
 }

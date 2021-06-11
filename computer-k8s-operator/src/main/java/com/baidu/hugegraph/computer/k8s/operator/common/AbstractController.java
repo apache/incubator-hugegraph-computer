@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.k8s.operator.controller;
+package com.baidu.hugegraph.computer.k8s.operator.common;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -33,12 +33,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 
@@ -51,16 +53,18 @@ import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
+import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
+import io.fabric8.kubernetes.client.utils.Serialization;
+import jersey.repackaged.com.google.common.collect.Lists;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private static final Logger LOG = Log.logger(AbstractController.class);
 
-    private static final int WORK_QUEUE_CAPACITY = 1024;
-    private static final Duration RECONCILE_PERIOD = Duration.ofSeconds(1L);
     private static final Duration READY_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration READY_CHECK_INTERNAL = Duration.ofSeconds(1);
+    private static final int WORK_QUEUE_CAPACITY = 1024;
     private static final int WORKER_COUNT =
             Runtime.getRuntime().availableProcessors();
 
@@ -118,7 +122,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                         }
                     },
                     Duration.ZERO.toMillis(),
-                    RECONCILE_PERIOD.toMillis(), TimeUnit.MILLISECONDS
+                    Duration.ofSeconds(1L).toMillis(), TimeUnit.MILLISECONDS
             );
         }
 
@@ -162,7 +166,8 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
             try {
                 result = this.reconcile(request);
             } catch (Throwable e) {
-                result = Result.REQUEUE;
+                LOG.error("Reconcile occur error, stop reconcile: ", e);
+                return;
             }
             if (result.requeue()) {
                 this.workQueue.add(request);
@@ -236,11 +241,8 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         });
     }
 
-    @SuppressWarnings("unchecked")
     protected T getCRByKey(String key) {
-        SharedIndexInformer<T> informer = (SharedIndexInformer<T>)
-                                          this.informerMap.get(this.crClass);
-        return informer.getIndexer().getByKey(key);
+        return this.getResourceByKey(key, this.crClass);
     }
 
     @SuppressWarnings("unchecked")
@@ -248,7 +250,11 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                                                          Class<R> rClass) {
         SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
                                           this.informerMap.get(rClass);
-        return informer.getIndexer().getByKey(key);
+        R resource = informer.getIndexer().getByKey(key);
+        if (resource == null) {
+            return null;
+        }
+        return Serialization.clone(resource);
     }
 
     @SuppressWarnings("unchecked")
@@ -256,7 +262,42 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                                                               Class<R> rClass) {
         SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
                                           this.informerMap.get(rClass);
-        return informer.getIndexer().byIndex(namespace, Cache.NAMESPACE_INDEX);
+        List<R> rs = informer.getIndexer()
+                             .byIndex(namespace, Cache.NAMESPACE_INDEX);
+        if (CollectionUtils.isEmpty(rs)) {
+            return rs;
+        }
+        return Serialization.clone(rs);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <R extends HasMetadata> List<R> getResourceListWithLabels(
+        String namespace, Class<R> rClass, Map<String, String> matchLabels) {
+
+        E.checkNotNull(matchLabels, "matchLabels");
+
+        SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
+                                          this.informerMap.get(rClass);
+        List<R> rs = informer.getIndexer()
+                             .byIndex(namespace, Cache.NAMESPACE_INDEX);
+        if (CollectionUtils.isEmpty(rs)) {
+            return rs;
+        }
+
+        List<R> matchRS = Lists.newArrayList();
+
+        Set<Map.Entry<String, String>> matchLabelSet = matchLabels.entrySet();
+        for (R r : rs) {
+            Map<String, String> label = KubernetesResourceUtil
+                                        .getLabels(r.getMetadata());
+            if (MapUtils.isEmpty(label)) {
+                continue;
+            }
+            if (label.entrySet().containsAll(matchLabelSet)) {
+                matchRS.add(r);
+            }
+        }
+        return Serialization.clone(matchRS);
     }
 
     private void handleOwnsResource(HasMetadata resource) {
@@ -284,16 +325,16 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private void enqueueRequest(Request request) {
         if (request != null) {
-            LOG.info("Adding to enqueue request: {}", request);
+            LOG.info("Enqueue an request: {}", request);
             this.workQueue.add(request);
         }
     }
 
     private boolean hasSynced() {
-        boolean synced = true;
         if (MapUtils.isEmpty(this.informerMap)) {
-            return synced;
+            return true;
         }
+        boolean synced;
         synced = KubeUtil
                 .waitUntilReady(Duration.ZERO,
                                 this.readyCheckInternal,

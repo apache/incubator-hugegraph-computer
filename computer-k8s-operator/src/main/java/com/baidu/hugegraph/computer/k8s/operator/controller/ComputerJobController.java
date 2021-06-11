@@ -19,10 +19,18 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.controller;
 
+import java.time.Instant;
+
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.driver.JobStatus;
+import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
+import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatusBuilder;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
+import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
+import com.baidu.hugegraph.computer.k8s.operator.common.Request;
+import com.baidu.hugegraph.computer.k8s.operator.common.Result;
 import com.baidu.hugegraph.util.Log;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -30,7 +38,7 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class ComputerJobController
-       extends AbstractController<HugeGraphComputerJob>{
+       extends AbstractController<HugeGraphComputerJob> {
 
     private static final Logger LOG = Log.logger(AbstractController.class);
 
@@ -53,6 +61,18 @@ public class ComputerJobController
                      "it may have been deleted");
             return Result.NO_REQUEUE;
         }
+
+        if (computerJob.getStatus() == null) {
+            // create
+            ComputerJobStatus status = new ComputerJobStatusBuilder()
+                    .withJobStatus(JobStatus.INITIALIZING.name())
+                    .withLastUpdateTime(Instant.now().toString())
+                    .build();
+            computerJob.setStatus(status);
+        }
+
+        this.operation.inNamespace(request.namespace())
+                      .updateStatus(computerJob);
         // TODO: implement it
         return Result.NO_REQUEUE;
     }

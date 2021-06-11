@@ -1,8 +1,8 @@
 apiVersion: hugegraph.baidu.com/v1
 kind: HugeGraphComputerJob
 metadata:
-  name: hugegraphcomputerjob-sample
+  name: xsajgsdgas
 spec:
-  jobId: "12345667"
+  jobId: xsajgsdgas
   image: baidu.com/ssss
   # Add fields here

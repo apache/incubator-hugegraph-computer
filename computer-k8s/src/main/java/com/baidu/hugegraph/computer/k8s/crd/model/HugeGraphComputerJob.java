@@ -17,7 +17,7 @@ import io.fabric8.kubernetes.model.annotation.Version;
 @Plural(HugeGraphComputerJob.PLURAL)
 @Singular(HugeGraphComputerJob.SINGULAR)
 public class HugeGraphComputerJob
-       extends CustomResource<ComputerJobSpec, ComputerJobState>
+       extends CustomResource<ComputerJobSpec, ComputerJobStatus>
        implements Namespaced {
 
     private static final long serialVersionUID = 6788317713035067450L;

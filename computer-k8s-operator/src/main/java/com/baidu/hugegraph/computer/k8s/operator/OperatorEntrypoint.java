@@ -33,12 +33,13 @@ import java.util.concurrent.ForkJoinPool;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.k8s.operator.controller.AbstractController;
+import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.controller.ComputerJobController;
 import com.baidu.hugegraph.util.Log;
 import com.sun.net.httpserver.HttpServer;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -52,42 +53,44 @@ public class OperatorEntrypoint {
     private static final int PROBE_PORT = 8081;
     private static final int PROBE_BACK_LOG = 50;
 
-    private final KubernetesClient kubeClient;
-    private final SharedInformerFactory informerFactory;
-    private final List<AbstractController<?>> controllers;
+    private KubernetesClient kubeClient;
+    private SharedInformerFactory informerFactory;
+    private List<AbstractController<?>> controllers;
     private HttpServer httpServer;
 
     public static void main(String[] args) {
         OperatorEntrypoint operatorEntrypoint = new OperatorEntrypoint();
-        operatorEntrypoint.start();
         Runtime.getRuntime().addShutdownHook(
                 new Thread(operatorEntrypoint::shutdown));
-    }
-
-    public OperatorEntrypoint() {
-        this.kubeClient = new DefaultKubernetesClient();
-        this.informerFactory = this.kubeClient.informers();
-        this.controllers = new ArrayList<>();
+        operatorEntrypoint.start();
     }
 
     public void start() {
         try {
+            this.kubeClient = new DefaultKubernetesClient();
+            this.informerFactory = this.kubeClient.informers();
+            this.controllers = new ArrayList<>();
+
+            this.addHealthCheck();
+
             String namespace = this.kubeClient.getNamespace();
             if (namespace == null) {
-                LOG.warn("No namespace found via config, assuming default.");
+                LOG.warn("No namespace found via config, assuming default");
                 namespace = "default";
             }
             LOG.info("Using namespace: " + namespace);
 
-            // Registered controller
+            // Registered all controller
             this.registerControllers();
 
             this.informerFactory.startAllRegisteredInformers();
             this.informerFactory.addSharedInformerEventListener(exception -> {
                 LOG.error("Informer Exception occurred, but caught", exception);
+                System.exit(1);
             });
 
-            CountDownLatch readyLatch = new CountDownLatch(this.controllers.size());
+            CountDownLatch readyLatch = new CountDownLatch(
+            this.controllers.size());
             List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (AbstractController<?> controller : this.controllers) {
                 futures.add(CompletableFuture.runAsync(() -> {
@@ -95,13 +98,13 @@ public class OperatorEntrypoint {
                 }));
             }
 
-            this.addHealthCheck();
-
             CompletableFuture.runAsync(() -> {
                 try {
                     readyLatch.await();
                     this.addReadyCheck();
-                } catch (InterruptedException | IOException e) {
+                    LOG.info("The Operator has been ready");
+                } catch (Throwable e) {
+                    LOG.error("Failed to set up ready check");
                     System.exit(1);
                 }
             });
@@ -146,7 +149,7 @@ public class OperatorEntrypoint {
 
     private void registerControllers() {
         this.registerController(new ComputerJobController(this.kubeClient),
-                                Deployment.class, ConfigMap.class);
+                                Deployment.class, ConfigMap.class, Event.class);
     }
 
     @SafeVarargs
@@ -160,7 +163,7 @@ public class OperatorEntrypoint {
     private void addHealthCheck() throws IOException {
         InetSocketAddress address = new InetSocketAddress(PROBE_PORT);
         this.httpServer = HttpServer.create(address, PROBE_BACK_LOG);
-        this.httpServer.createContext("/health", httpExchange -> {
+        this.httpServer.createContext("/healthz", httpExchange -> {
             byte[] bytes = "ALL GOOD!".getBytes(StandardCharsets.UTF_8);
             httpExchange.sendResponseHeaders(HttpStatus.SC_OK, bytes.length);
             OutputStream responseBody = httpExchange.getResponseBody();
@@ -171,8 +174,8 @@ public class OperatorEntrypoint {
         this.httpServer.start();
     }
 
-    private void addReadyCheck() throws IOException {
-        this.httpServer.createContext("/ready", httpExchange -> {
+    private void addReadyCheck() {
+        this.httpServer.createContext("/readyz", httpExchange -> {
             byte[] bytes = "ALL Ready!".getBytes(StandardCharsets.UTF_8);
             httpExchange.sendResponseHeaders(HttpStatus.SC_OK, bytes.length);
             OutputStream responseBody = httpExchange.getResponseBody();
