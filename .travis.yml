@@ -27,8 +27,8 @@ before_script:
   - $TRAVIS_DIR/load-data-into-hugegraph.sh
 
 script:
-  - mvn test -P unit-test
-  - mvn test -P integrate-test
+  - mvn clean test -P unit-test
+  - mvn clean test -P integrate-test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

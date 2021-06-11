@@ -33,9 +33,9 @@ import (
 )
 
 const (
-	packageToken = "io.fabric8.xxxx"
-	javaPackage = "com.baidu.hugegraph.computer.k8s.crd.model"
-	goPackage = "hugegraph.baidu.com/operator/api/v1"
+	packageToken   = "io.fabric8.xxxx"
+	javaPackage    = "com.baidu.hugegraph.computer.k8s.crd.model"
+	goPackage      = "hugegraph.baidu.com/operator/api/v1"
 	schemaFilePath = "../../computer-k8s/schema/kube-schema.json"
 )
 
@@ -95,7 +95,7 @@ func main() {
 	// fix must start with "io.fabric8."
 	json = strings.ReplaceAll(json, packageToken, javaPackage)
 
-	err := ioutil.WriteFile(schemaFilePath, []byte(json), 0644)
+	err := ioutil.WriteFile(schemaFilePath, []byte(json+"\n"), 0644)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
