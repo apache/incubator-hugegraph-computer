@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.receiver.edge;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.FileUtils;
@@ -30,6 +31,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.combiner.MergeNewPropertiesCombiner;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
@@ -47,6 +49,7 @@ import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.FileManager;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
@@ -76,8 +79,11 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
         Sorter sorter = new SorterImpl(this.config);
+        SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
+                                               this.fileManager,
+                                               Constants.INPUT_SUPERSTEP);
         this.partition = new EdgeMessageRecvPartition(context(),
-                                                      this.fileManager,
+                                                      fileGenerator,
                                                       sorter);
     }
 
@@ -128,8 +134,11 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
         Sorter sorter = new SorterImpl(this.config);
+        SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
+                                               this.fileManager,
+                                               Constants.INPUT_SUPERSTEP);
         this.partition = new EdgeMessageRecvPartition(context(),
-                                                      this.fileManager,
+                                                      fileGenerator,
                                                       sorter);
         Assert.assertEquals(MessageType.EDGE.name(), this.partition.type());
 
@@ -222,7 +231,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
     }
 
     private static void checkTenEdgesWithCombinedProperties(
-                        PeekableIterator<KvEntry> it)
+                        Iterator<KvEntry> it)
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Assert.assertTrue(it.hasNext());

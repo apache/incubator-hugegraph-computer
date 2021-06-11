@@ -20,19 +20,18 @@
 package com.baidu.hugegraph.computer.core.receiver.vertex;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 
 public class VertexMessageRecvPartitions
        extends MessageRecvPartitions<VertexMessageRecvPartition> {
 
 
     public VertexMessageRecvPartitions(ComputerContext context,
-                                       FileGenerator fileGenerator,
+                                       SuperstepFileGenerator fileGenerator,
                                        Sorter sorter) {
-        super(context, fileGenerator, sorter, Constants.INPUT_SUPERSTEP);
+        super(context, fileGenerator, sorter);
     }
 
     @Override

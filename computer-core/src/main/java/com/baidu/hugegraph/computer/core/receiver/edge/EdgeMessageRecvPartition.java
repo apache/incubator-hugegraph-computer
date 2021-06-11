@@ -23,7 +23,6 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
@@ -33,7 +32,7 @@ import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class EdgeMessageRecvPartition extends MessageRecvPartition {
@@ -43,10 +42,9 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
     private final OuterSortFlusher flusher;
 
     public EdgeMessageRecvPartition(ComputerContext context,
-                                    FileGenerator fileGenerator,
+                                    SuperstepFileGenerator fileGenerator,
                                     Sorter sorter) {
-        super(context.config(), fileGenerator, sorter,
-              true, Constants.INPUT_SUPERSTEP);
+        super(context.config(), fileGenerator, sorter, true);
         Config config = context.config();
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);

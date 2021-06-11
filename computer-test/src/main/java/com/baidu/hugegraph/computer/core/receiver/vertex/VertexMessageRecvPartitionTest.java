@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.combiner.MergeNewPropertiesCombiner;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -46,6 +47,7 @@ import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.FileManager;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -72,8 +74,11 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
         Sorter sorter = new SorterImpl(this.config);
+        SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
+                                               this.fileManager,
+                                               Constants.INPUT_SUPERSTEP);
         this.partition = new VertexMessageRecvPartition(context(),
-                                                        this.fileManager,
+                                                        fileGenerator,
                                                         sorter);
     }
 
@@ -106,9 +111,12 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         FileUtils.deleteQuietly(new File("data_dir2"));
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
+        SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
+                               this.fileManager,
+                               Constants.INPUT_SUPERSTEP);
         Sorter sorter = new SorterImpl(this.config);
         this.partition = new VertexMessageRecvPartition(context(),
-                                                        this.fileManager,
+                                                        fileGenerator,
                                                         sorter);
         addTenVertexBuffer(this.partition::addBuffer);
         addTenVertexBuffer(this.partition::addBuffer);
@@ -134,10 +142,13 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         FileUtils.deleteQuietly(new File("data_dir2"));
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
+        SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
+                                               this.fileManager,
+                                               Constants.INPUT_SUPERSTEP);
         Sorter sorter = new SorterImpl(this.config);
         this.partition = new VertexMessageRecvPartition(context(),
-                                                       this.fileManager,
-                                                       sorter);
+                                                        fileGenerator,
+                                                        sorter);
 
         addTwentyDuplicateVertexBuffer(this.partition::addBuffer);
 
@@ -174,9 +185,9 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         }
     }
 
-    public static void addTwentyDuplicateVertexBuffer(
-                       Consumer<ManagedBuffer> consumer)
-                       throws IOException {
+    private static void addTwentyDuplicateVertexBuffer(
+                        Consumer<ManagedBuffer> consumer)
+                        throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
             vertex.id(new LongId(i));

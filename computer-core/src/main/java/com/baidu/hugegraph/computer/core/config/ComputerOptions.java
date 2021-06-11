@@ -371,7 +371,7 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "worker.wait_finish_messages_timeout",
                     "The max timeout(in ms) message-handler wait for " +
-                    "finish messages.",
+                    "finish-message of all workers.",
                     positiveInt(),
                     TimeUnit.HOURS.toMillis(24)
             );

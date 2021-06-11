@@ -204,14 +204,9 @@ public class WorkerService {
             WorkerStat workerStat = this.compute();
 
             /*
-             * TODO: signal the MessageSendManager that no more messages
-             *       and send FINISH signal after send all messages.
-             */
-
-            /*
              * Wait for all workers to do compute()
              */
-            MessageRecvManager receiveManager =
+            MessageRecvManager messageRecvManager =
                                this.managers.get(MessageRecvManager.NAME);
 
             this.bsp4Worker.workerStepComputeDone(superstep);

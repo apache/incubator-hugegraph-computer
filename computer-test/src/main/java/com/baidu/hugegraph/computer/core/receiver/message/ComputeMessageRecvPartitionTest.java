@@ -45,6 +45,7 @@ import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.FileManager;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -71,9 +72,11 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         FileManager fileManager = new FileManager();
         fileManager.init(config);
         Sorter sorter = new SorterImpl(config);
+        SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
+                                               fileManager, 0);
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
-                                                context(), fileManager,
-                                                sorter, 0);
+                                                context(), fileGenerator,
+                                                sorter);
         Assert.assertEquals(MessageType.MSG.name(), partition.type());
 
         addTwentyCombineMessageBuffer(partition::addBuffer);
@@ -100,9 +103,11 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         FileManager fileManager = new FileManager();
         fileManager.init(config);
         Sorter sorter = new SorterImpl(config);
+        SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
+                                               fileManager, 0);
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
-                                                context(), fileManager,
-                                                sorter, 0);
+                                                context(), fileGenerator,
+                                                sorter);
         Assert.assertEquals(MessageType.MSG.name(), partition.type());
 
         addTwentyDuplicateIdValueListMessageBuffer(partition::addBuffer);

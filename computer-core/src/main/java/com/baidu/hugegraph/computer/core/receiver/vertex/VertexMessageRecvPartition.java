@@ -23,7 +23,6 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
@@ -33,20 +32,19 @@ import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class VertexMessageRecvPartition extends MessageRecvPartition {
 
-    public static final String TYPE = MessageType.VERTEX.name();
+    private static final String TYPE = MessageType.VERTEX.name();
 
     private final OuterSortFlusher flusher;
 
     public VertexMessageRecvPartition(ComputerContext context,
-                                      FileGenerator fileGenerator,
+                                      SuperstepFileGenerator fileGenerator,
                                       Sorter sorter) {
-        super(context.config(), fileGenerator, sorter,
-              false, Constants.INPUT_SUPERSTEP);
+        super(context.config(), fileGenerator, sorter, false);
         Config config = context.config();
         Combiner<Properties> propertiesCombiner = config.createObject(
         ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);

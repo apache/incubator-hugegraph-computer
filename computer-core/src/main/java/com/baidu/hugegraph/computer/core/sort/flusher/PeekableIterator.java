@@ -30,34 +30,37 @@ public interface PeekableIterator<T> extends CIter<T> {
     }
 
     T peek();
+
+    class EmptyIterator<E> implements PeekableIterator<E> {
+
+        static final EmptyIterator<Object> EMPTY_ITERATOR =
+                                           new EmptyIterator<>();
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public E next() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public Object metadata(String s, Object... objects) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public E peek() {
+            throw new NoSuchElementException();
+        }
+
+        @Override
+        public void close() throws Exception {
+            // pass
+        }
+    }
 }
 
-class EmptyIterator<E> implements PeekableIterator<E> {
 
-    static final EmptyIterator<Object> EMPTY_ITERATOR = new EmptyIterator<>();
-
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
-
-    @Override
-    public E next() {
-        throw new NoSuchElementException();
-    }
-
-    @Override
-    public Object metadata(String s, Object... objects) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public E peek() {
-        throw new NoSuchElementException();
-    }
-
-    @Override
-    public void close() throws Exception {
-        // pass
-    }
-}

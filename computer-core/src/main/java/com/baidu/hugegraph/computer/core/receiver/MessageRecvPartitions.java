@@ -21,36 +21,32 @@ package com.baidu.hugegraph.computer.core.receiver;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
-import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
     protected final ComputerContext context;
     protected final Config config;
-    protected final FileGenerator fileGenerator;
+    protected final SuperstepFileGenerator fileGenerator;
     protected final Sorter sorter;
-    protected final int superstep;
 
     private final Map<Integer, P> partitions;
 
     public MessageRecvPartitions(ComputerContext context,
-                                 FileGenerator fileGenerator,
-                                 Sorter sorter,
-                                 int superstep) {
+                                 SuperstepFileGenerator fileGenerator,
+                                 Sorter sorter) {
         this.context = context;
         this.config = context.config();
         this.fileGenerator = fileGenerator;
         this.sorter = sorter;
-        this.superstep = superstep;
-        this.partitions = new ConcurrentHashMap<>();
+        this.partitions = new HashMap<>();
     }
 
     public abstract P createPartition();
@@ -64,6 +60,10 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         P partition = this.partitions.get(partitionId);
         if (partition == null) {
             synchronized (this.partitions) {
+                /*
+                 * Not use putIfAbsent because it may create too many partition
+                 * object.
+                 */
                 partition = this.partitions.get(partitionId);
                 if (partition == null) {
                     partition = this.createPartition();

@@ -32,18 +32,17 @@ import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 
 public class ComputeMessageRecvPartition extends MessageRecvPartition {
 
-    public static final String TYPE = MessageType.MSG.name();
+    private static final String TYPE = MessageType.MSG.name();
     private final OuterSortFlusher flusher;
 
     public ComputeMessageRecvPartition(ComputerContext context,
-                                       FileGenerator fileGenerator,
-                                       Sorter sorter,
-                                       int superstep) {
-        super(context.config(), fileGenerator, sorter, false, superstep);
+                                       SuperstepFileGenerator fileGenerator,
+                                       Sorter sorter) {
+        super(context.config(), fileGenerator, sorter, false);
         Config config = context.config();
         Combiner<?> valueCombiner = config.createObject(
                                     ComputerOptions.WORKER_COMBINER_CLASS,
@@ -55,8 +54,8 @@ public class ComputeMessageRecvPartition extends MessageRecvPartition {
             ValueType valueType = ValueType.valueOf(valueTypeStr);
             Value<?> value1 = context.valueFactory().createValue(valueType);
             Value<?> value2 = context.valueFactory().createValue(valueType);
-            PointerCombiner pointerCombiner = new PointerCombiner(
-                                              value1, value2, valueCombiner);
+            PointerCombiner<?> pointerCombiner = new PointerCombiner(
+                                                 value1, value2, valueCombiner);
             this.flusher = new CombineKvOuterSortFlusher(pointerCombiner);
         }
     }

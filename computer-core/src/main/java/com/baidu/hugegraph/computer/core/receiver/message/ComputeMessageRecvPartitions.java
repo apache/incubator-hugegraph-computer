@@ -22,20 +22,20 @@ package com.baidu.hugegraph.computer.core.receiver.message;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.store.FileGenerator;
+import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 
 public class ComputeMessageRecvPartitions
        extends MessageRecvPartitions<ComputeMessageRecvPartition> {
 
     public ComputeMessageRecvPartitions(ComputerContext context,
-                                        FileGenerator fileGenerator,
+                                        SuperstepFileGenerator fileGenerator,
                                         Sorter sorter) {
-        super(context, fileGenerator, sorter, -1);
+        super(context, fileGenerator, sorter);
     }
 
     @Override
     public ComputeMessageRecvPartition createPartition() {
         return new ComputeMessageRecvPartition(this.context, this.fileGenerator,
-                                               this.sorter, this.superstep);
+                                               this.sorter);
     }
 }
