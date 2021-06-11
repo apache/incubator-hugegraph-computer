@@ -66,6 +66,7 @@ public class SortManager implements Manager {
         int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
         this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, PREFIX);
         this.sorter = new SorterImpl(config);
+        // TODO: sort different type of message use different combiner
         this.combiner = new OverwriteCombiner<>();
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
@@ -87,7 +88,7 @@ public class SortManager implements Manager {
     public void close(Config config) {
         this.sortExecutor.shutdown();
         try {
-            this.sortExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
+            this.sortExecutor.awaitTermination(5000L, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             LOG.warn("Interrupted when waiting sort executor terminated");
         }

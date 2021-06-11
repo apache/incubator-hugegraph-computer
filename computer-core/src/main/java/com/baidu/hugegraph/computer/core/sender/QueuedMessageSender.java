@@ -39,8 +39,8 @@ public class QueuedMessageSender implements MessageSender {
 
     private static final String NAME = "send-executor";
 
-    // All target workers share one message queue
-    private final MessageQueue queue;
+    // All target worker share one message queue
+    private final MultiQueue queue;
     // Each target worker has a WorkerChannel
     private final WorkerChannel[] channels;
     // The thread used to send vertex/message, only one is enough
@@ -51,12 +51,13 @@ public class QueuedMessageSender implements MessageSender {
 
     public QueuedMessageSender(Config config) {
         int workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
-        this.queue = new MessageQueue(workerCount);
+        this.queue = new MultiQueue(workerCount);
         // NOTE: the workerId start from 1
         this.channels = new WorkerChannel[workerCount];
         // TODO: pass send-executor in and share executor with others
         this.sendExecutor = new Thread(new Sender(), NAME);
         this.anyClientNotBusyEvent = new BarrierEvent();
+
         this.busyClientCount = 0;
     }
 
@@ -89,14 +90,16 @@ public class QueuedMessageSender implements MessageSender {
         future.whenComplete((r, e) -> {
             channel.resetFuture(future);
         });
-        this.queue.put(new QueuedMessage(-1, workerId, type, null));
+        this.queue.put(workerId - 1,
+                       new QueuedMessage(-1, workerId, type, null));
         return future;
     }
 
     @Override
     public void send(int workerId, QueuedMessage message)
                      throws InterruptedException {
-        this.queue.put(message);
+        WorkerChannel channel = this.channels[workerId - 1];
+        this.queue.put(workerId - 1, message);
     }
 
     public Runnable notBusyNotifier() {
@@ -115,14 +118,14 @@ public class QueuedMessageSender implements MessageSender {
             Thread thread = Thread.currentThread();
             while (!thread.isInterrupted()) {
                 try {
-                    // Take message from queue
                     QueuedMessage message = queue.take();
                     if (!QueuedMessageSender.this.doSend(message)) {
-                        queue.putBack(message);
+                        int workerId = message.workerId();
+                        queue.putAtFront(workerId - 1, message);
                     }
                 } catch (InterruptedException e) {
                     // Reset interrupted flag
-                    Thread.currentThread().interrupt();
+                    thread.interrupt();
                     // Any client is active means that sending task in running
                     if (QueuedMessageSender.this.activeClientCount() > 0) {
                         throw new ComputerException(
@@ -143,16 +146,18 @@ public class QueuedMessageSender implements MessageSender {
         WorkerChannel channel = this.channels[message.workerId() - 1];
         switch (message.type()) {
             case START:
-                return this.sendStartMessage(channel);
+                this.sendStartMessage(channel);
+                return true;
             case FINISH:
-                return this.sendFinishMessage(channel);
+                this.sendFinishMessage(channel);
+                return true;
             default:
                 return this.sendDataMessage(channel, message);
         }
     }
 
-    private boolean sendStartMessage(WorkerChannel channel)
-                                     throws TransportException {
+    private void sendStartMessage(WorkerChannel channel)
+                                  throws TransportException {
         channel.client.startSessionAsync().whenComplete((r, e) -> {
             CompletableFuture<Void> future = channel.futureRef.get();
             assert future != null;
@@ -165,11 +170,10 @@ public class QueuedMessageSender implements MessageSender {
                 future.complete(null);
             }
         });
-        return true;
     }
 
-    private boolean sendFinishMessage(WorkerChannel channel)
-                                      throws TransportException {
+    private void sendFinishMessage(WorkerChannel channel)
+                                   throws TransportException {
         channel.client.finishSessionAsync().whenComplete((r, e) -> {
             CompletableFuture<Void> future = channel.futureRef.get();
             assert future != null;
@@ -182,7 +186,6 @@ public class QueuedMessageSender implements MessageSender {
                 future.complete(null);
             }
         });
-        return true;
     }
 
     private boolean sendDataMessage(WorkerChannel channel,

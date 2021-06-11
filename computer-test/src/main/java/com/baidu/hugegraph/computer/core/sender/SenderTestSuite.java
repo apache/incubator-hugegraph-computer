@@ -28,7 +28,6 @@ import org.junit.runners.Suite;
     MessageSendManagerTest.class,
     QueuedMessageTest.class,
     QueuedMessageSenderTest.class,
-    MessageQueueTest.class,
     WriteBufferTest.class,
     WriteBuffersTest.class
 })

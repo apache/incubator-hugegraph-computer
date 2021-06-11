@@ -57,11 +57,15 @@ public class DataClientManager implements Manager {
 
     @Override
     public void init(Config config) {
-        this.sender.init();
         ClientHandler clientHandler = new DataClientHandler(
                                       this.sender.notBusyNotifier());
         this.connManager.initClientManager(config, clientHandler);
         LOG.info("DataClientManager inited");
+    }
+
+    @Override
+    public void inited(Config config) {
+        this.sender.init();
     }
 
     @Override
