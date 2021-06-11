@@ -51,9 +51,19 @@ public final class Constants {
     public static final int BIG_BUF_SIZE = (int) Bytes.KB * 8;
 
     /*
-     * The timeout in seconds for asynchronous tasks
+     * The capacity of message queue
+     */
+    public static final int QUEUE_CAPACITY = 128;
+
+    /*
+     * The timeout in second for asynchronous tasks
      */
     public static final int FUTURE_TIMEOUT = 300;
+
+    /*
+     * The timeout in millisecond for threadpool shutdown
+     */
+    public static final long SHUTDOWN_TIMEOUT = 5000L;
 
     // The mode to read a file
     public static final String FILE_MODE_READ = "r";

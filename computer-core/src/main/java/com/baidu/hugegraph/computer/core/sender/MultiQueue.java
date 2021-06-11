@@ -22,6 +22,8 @@ package com.baidu.hugegraph.computer.core.sender;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
+
 public class MultiQueue {
 
     private final Deque<QueuedMessage>[] deques;
@@ -30,9 +32,10 @@ public class MultiQueue {
     // TODO: use ReadWriteLock to optimize
 
     public MultiQueue(int size) {
-        this(size, 128);
+        this(size, Constants.QUEUE_CAPACITY);
     }
 
+    @SuppressWarnings("unchecked")
     public MultiQueue(int size, int capacityPerQueue) {
         this.deques = new ArrayDeque[size];
         for (int i = 0; i < size; i++) {
@@ -49,6 +52,7 @@ public class MultiQueue {
         Deque<QueuedMessage> deque = this.deques[queueId];
         deque.addLast(message);
         if (deque.size() == 1) {
+            // Notify when the queue is empty before put
             this.notify();
         }
     }
@@ -57,6 +61,7 @@ public class MultiQueue {
         Deque<QueuedMessage> deque = this.deques[queueId];
         deque.addFirst(message);
         if (deque.size() == 1) {
+            // Notify when the queue is empty before put
             this.notify();
         }
     }
@@ -73,6 +78,7 @@ public class MultiQueue {
                 return message;
             }
             if (++traverse >= this.deques.length) {
+                // Block if all queue are empty
                 this.wait();
                 traverse = 0;
             }

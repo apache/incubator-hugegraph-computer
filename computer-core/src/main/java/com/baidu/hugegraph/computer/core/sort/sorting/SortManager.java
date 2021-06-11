@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -88,7 +89,8 @@ public class SortManager implements Manager {
     public void close(Config config) {
         this.sortExecutor.shutdown();
         try {
-            this.sortExecutor.awaitTermination(5000L, TimeUnit.MILLISECONDS);
+            this.sortExecutor.awaitTermination(Constants.SHUTDOWN_TIMEOUT,
+                                               TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             LOG.warn("Interrupted when waiting sort executor terminated");
         }

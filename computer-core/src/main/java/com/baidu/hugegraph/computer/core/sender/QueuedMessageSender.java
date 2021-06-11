@@ -57,7 +57,6 @@ public class QueuedMessageSender implements MessageSender {
         // TODO: pass send-executor in and share executor with others
         this.sendExecutor = new Thread(new Sender(), NAME);
         this.anyClientNotBusyEvent = new BarrierEvent();
-
         this.busyClientCount = 0;
     }
 
@@ -77,7 +76,7 @@ public class QueuedMessageSender implements MessageSender {
 
     public void addWorkerClient(int workerId, TransportClient client) {
         WorkerChannel channel = new WorkerChannel(workerId, client);
-        this.channels[workerId - 1] = channel;
+        this.channels[this.normalize(workerId)] = channel;
         LOG.info("Add client {} for worker {}",
                  client.connectionId(), workerId);
     }
@@ -85,12 +84,12 @@ public class QueuedMessageSender implements MessageSender {
     @Override
     public CompletableFuture<Void> send(int workerId, MessageType type)
                                         throws InterruptedException {
-        WorkerChannel channel = this.channels[workerId - 1];
+        WorkerChannel channel = this.channels[this.normalize(workerId)];
         CompletableFuture<Void> future = channel.newFuture();
         future.whenComplete((r, e) -> {
             channel.resetFuture(future);
         });
-        this.queue.put(workerId - 1,
+        this.queue.put(this.normalize(workerId),
                        new QueuedMessage(-1, workerId, type, null));
         return future;
     }
@@ -98,8 +97,7 @@ public class QueuedMessageSender implements MessageSender {
     @Override
     public void send(int workerId, QueuedMessage message)
                      throws InterruptedException {
-        WorkerChannel channel = this.channels[workerId - 1];
-        this.queue.put(workerId - 1, message);
+        this.queue.put(this.normalize(workerId), message);
     }
 
     public Runnable notBusyNotifier() {
@@ -121,7 +119,7 @@ public class QueuedMessageSender implements MessageSender {
                     QueuedMessage message = queue.take();
                     if (!QueuedMessageSender.this.doSend(message)) {
                         int workerId = message.workerId();
-                        queue.putAtFront(workerId - 1, message);
+                        queue.putAtFront(normalize(workerId), message);
                     }
                 } catch (InterruptedException e) {
                     // Reset interrupted flag
@@ -217,6 +215,10 @@ public class QueuedMessageSender implements MessageSender {
         } finally {
             this.anyClientNotBusyEvent.reset();
         }
+    }
+
+    private int normalize(int workerId) {
+        return workerId - 1;
     }
 
     private int activeClientCount() {

@@ -58,7 +58,8 @@ public class QueuedMessageSenderTest {
 
         Thread sendExecutor = Whitebox.getInternalState(sender, "sendExecutor");
         Assert.assertTrue(ImmutableSet.of(Thread.State.NEW,
-                                          Thread.State.RUNNABLE)
+                                          Thread.State.RUNNABLE,
+                                          Thread.State.WAITING)
                                       .contains(sendExecutor.getState()));
 
         sender.close();
