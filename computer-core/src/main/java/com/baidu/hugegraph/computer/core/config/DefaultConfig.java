@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -37,13 +36,10 @@ public final class DefaultConfig implements Config {
     private final HugeConfig allConfig;
     private final HotConfig hotConfig;
 
-    public DefaultConfig(String... options) {
-        this(convertToMap(options));
-    }
-
     public DefaultConfig(Map<String, String> options) {
         this.allConfig = this.parseOptions(options);
         this.hotConfig = this.extractHotConfig(this.allConfig);
+        this.checkOptions();
     }
 
     private HugeConfig parseOptions(Map<String, String> options) {
@@ -64,8 +60,6 @@ public final class DefaultConfig implements Config {
         HotConfig hotConfig = new HotConfig();
         hotConfig.vertexValueName(
                   allConfig.get(ComputerOptions.VALUE_NAME));
-        hotConfig.edgeValueName(
-                  allConfig.get(ComputerOptions.EDGES_NAME));
         hotConfig.valueType(ValueType.valueOf(
                   allConfig.get(ComputerOptions.VALUE_TYPE)));
 
@@ -76,6 +70,18 @@ public final class DefaultConfig implements Config {
         hotConfig.outputEdgeProperties(
                   allConfig.get(ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES));
         return hotConfig;
+    }
+
+    private void checkOptions() {
+        int partitionsCount = this.allConfig.get(
+                              ComputerOptions.JOB_PARTITIONS_COUNT);
+        int workersCount = this.allConfig.get(
+                           ComputerOptions.JOB_WORKERS_COUNT);
+        if (partitionsCount < workersCount) {
+            throw new ComputerException("The partitions count must be >= " +
+                                        "workers count, but got %s < %s",
+                                        partitionsCount, workersCount);
+        }
     }
 
     @Override
@@ -194,11 +200,6 @@ public final class DefaultConfig implements Config {
     }
 
     @Override
-    public String edgeValueName() {
-        return this.hotConfig.edgeValueName();
-    }
-
-    @Override
     public ValueType valueType() {
         return this.hotConfig.valueType();
     }
@@ -216,20 +217,5 @@ public final class DefaultConfig implements Config {
     @Override
     public Boolean outputEdgeProperties() {
         return this.hotConfig.outputEdgeProperties();
-    }
-
-    private static Map<String, String> convertToMap(String... options) {
-        if (options == null || options.length == 0) {
-            throw new ComputerException("Config options can't be null " +
-                                        "or empty");
-        }
-        if ((options.length & 0x01) == 1) {
-            throw new ComputerException("Config options length must be even");
-        }
-        Map<String, String> map = new HashMap<>();
-        for (int i = 0; i < options.length; i += 2) {
-            map.put(options[i], options[i + 1]);
-        }
-        return map;
     }
 }

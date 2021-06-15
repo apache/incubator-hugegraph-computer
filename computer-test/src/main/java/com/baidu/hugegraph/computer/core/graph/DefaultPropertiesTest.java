@@ -24,11 +24,11 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class DefaultPropertiesTest extends UnitTestBase {
@@ -54,7 +54,10 @@ public class DefaultPropertiesTest extends UnitTestBase {
         Assert.assertEquals(0, properties.get().size());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
+
+        Assert.assertEquals(new LongValue(1L), properties.get("p1"));
         properties.put("p1", new LongValue(2L));
+        Assert.assertEquals(new LongValue(2L), properties.get("p1"));
 
         Map<String, Value<?>> props = properties.get();
         Assert.assertEquals(2, props.size());
@@ -86,5 +89,15 @@ public class DefaultPropertiesTest extends UnitTestBase {
                                    props1.get(),
                                    UnitTestBase.valueFactory());
         Assert.assertEquals(props1, props2);
+    }
+
+    @Test
+    public void testHashCode() {
+        DefaultProperties props = new DefaultProperties(graphFactory(),
+                                                        valueFactory());
+        props.put("p1", new LongValue(1L));
+        props.put("p2", new DoubleValue(2.0D));
+
+        Assert.assertEquals(1073748897, props.hashCode());
     }
 }

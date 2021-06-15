@@ -25,8 +25,16 @@ import java.io.IOException;
 
 public interface RandomAccessOutput extends DataOutput, Closeable {
 
+    /**
+     * Get the current write pointer position
+     * @return the current postion
+     */
     long position();
 
+    /**
+     * Move write pointer to specified position
+     * @param position the new postion
+     */
     void seek(long position) throws IOException;
 
     /**
@@ -35,24 +43,27 @@ public interface RandomAccessOutput extends DataOutput, Closeable {
      */
     long skip(long n) throws IOException;
 
-    void writeInt(long position, int v) throws IOException;
-
+    /**
+     * Read some bytes from the input in range [offset, offset + length],
+     * then write the bytes to this output at current position
+     * @param input the source input
+     * @param offset the start offset to read from input
+     * @param length the total length to read from input
+     */
     void write(RandomAccessInput input, long offset, long length)
                throws IOException;
 
-    default long writeIntLength(int v) throws IOException {
-        long position = this.position();
-        this.writeInt(v);
-        return position;
-    }
+    /**
+     * At current position, write an int value that fixed in 4 bytes length
+     * @param v the int value write
+     */
+    void writeFixedInt(int v) throws IOException;
 
-    default void writeIntLength(long position, int v) throws IOException {
-        this.writeInt(position, v);
-    }
-
-    default long writeLongLength(long v) throws IOException {
-        long position = this.position();
-        this.writeLong(v);
-        return position;
-    }
+    /**
+     * Seek to specified position, and write an int value that fixed in 4
+     * bytes length, then seek back to old postion
+     * @param position the new postion to write
+     * @param v the int value write
+     */
+    void writeFixedInt(long position, int v) throws IOException;
 }

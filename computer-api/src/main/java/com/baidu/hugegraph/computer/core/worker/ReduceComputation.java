@@ -60,8 +60,7 @@ public interface ReduceComputation<M extends Value<?>>
     default void compute(ComputationContext context,
                          Vertex vertex,
                          Iterator<M> messages) {
-        @SuppressWarnings("unchecked")
-        Combiner<M> combiner = (Combiner<M>) context.combiner();
+        Combiner<M> combiner = context.combiner();
         M message = Combiner.combineAll(combiner, messages);
         M result = this.computeMessage(context, vertex, message);
         if (result != null) {

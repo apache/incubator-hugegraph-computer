@@ -37,9 +37,9 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
@@ -112,17 +112,17 @@ public class BufferedFileTest {
                 for (int i = -128; i <= 127; i++) {
                     output.writeInt(i);
                 }
-                output.writeInt(0, 1);
-                output.writeInt(12, 2);
+                output.writeFixedInt(0, 1);
+                output.writeFixedInt(12, 2);
                 // Next buffer
-                output.writeInt(200, 3);
+                output.writeFixedInt(200, 3);
                 // Previous buffer
-                output.writeInt(100, 4);
+                output.writeFixedInt(100, 4);
                 output.writeInt(Integer.MAX_VALUE);
                 output.writeInt(Integer.MIN_VALUE);
                 // Current buffer
                 output.writeInt(5);
-                output.writeInt(output.position() - Integer.BYTES, 6);
+                output.writeFixedInt(output.position() - Integer.BYTES, 6);
             }
 
             try (BufferedFileInput input = createInput(file)) {
@@ -643,7 +643,8 @@ public class BufferedFileTest {
         File file3 = createTempFile();
         try (BufferedFileInput fileInput = inputByString(file3, "apple")) {
             @SuppressWarnings("resource")
-            UnsafeBytesOutput output = new UnsafeBytesOutput();
+            UnsafeBytesOutput output = new UnsafeBytesOutput(
+                                       Constants.SMALL_BUF_SIZE);
             output.writeBytes("banana");
             @SuppressWarnings("resource")
             RandomAccessInput input = new UnsafeBytesInput(output.buffer());
@@ -662,7 +663,8 @@ public class BufferedFileTest {
         // BufferedFileInput compare to other RandomAccessInput
         file1 = createTempFile();
         try (BufferedFileInput input1 = inputByString(file1, "hugegraph")) {
-            UnsafeBytesOutput output = new UnsafeBytesOutput();
+            UnsafeBytesOutput output = new UnsafeBytesOutput(
+                                       Constants.SMALL_BUF_SIZE);
             output.writeBytes("banana");
             RandomAccessInput input = EntriesUtil.inputFromOutput(output);
 

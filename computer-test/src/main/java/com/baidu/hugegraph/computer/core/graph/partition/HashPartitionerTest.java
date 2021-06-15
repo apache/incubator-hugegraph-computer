@@ -22,15 +22,16 @@ package com.baidu.hugegraph.computer.core.graph.partition;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
 public class HashPartitionerTest extends UnitTestBase {
@@ -72,12 +73,12 @@ public class HashPartitionerTest extends UnitTestBase {
         int workerId4 = partitioner.workerId(partition4);
         int workerId5 = partitioner.workerId(partition5);
         int workerId6 = partitioner.workerId(partition6);
-        Assert.assertEquals(0, workerId1);
-        Assert.assertEquals(0, workerId2);
-        Assert.assertEquals(0, workerId3);
-        Assert.assertEquals(0, workerId4);
-        Assert.assertEquals(0, workerId5);
-        Assert.assertEquals(0, workerId6);
+        Assert.assertEquals(1, workerId1);
+        Assert.assertEquals(1, workerId2);
+        Assert.assertEquals(1, workerId3);
+        Assert.assertEquals(1, workerId4);
+        Assert.assertEquals(1, workerId5);
+        Assert.assertEquals(1, workerId6);
     }
 
     @Test
@@ -115,12 +116,12 @@ public class HashPartitionerTest extends UnitTestBase {
         int workerId4 = partitioner.workerId(partition4);
         int workerId5 = partitioner.workerId(partition5);
         int workerId6 = partitioner.workerId(partition6);
-        Assert.assertEquals(0, workerId1);
-        Assert.assertEquals(0, workerId2);
-        Assert.assertEquals(0, workerId3);
-        Assert.assertEquals(0, workerId4);
-        Assert.assertEquals(0, workerId5);
-        Assert.assertEquals(0, workerId6);
+        Assert.assertEquals(1, workerId1);
+        Assert.assertEquals(1, workerId2);
+        Assert.assertEquals(1, workerId3);
+        Assert.assertEquals(1, workerId4);
+        Assert.assertEquals(1, workerId5);
+        Assert.assertEquals(1, workerId6);
     }
 
     @Test
@@ -158,55 +159,25 @@ public class HashPartitionerTest extends UnitTestBase {
         int workerId4 = partitioner.workerId(partition4);
         int workerId5 = partitioner.workerId(partition5);
         int workerId6 = partitioner.workerId(partition6);
-        Assert.assertEquals(0, workerId1);
-        Assert.assertEquals(0, workerId2);
-        Assert.assertEquals(0, workerId3);
-        Assert.assertEquals(0, workerId4);
-        Assert.assertEquals(0, workerId5);
-        Assert.assertEquals(0, workerId6);
+        Assert.assertEquals(1, workerId1);
+        Assert.assertEquals(1, workerId2);
+        Assert.assertEquals(1, workerId3);
+        Assert.assertEquals(1, workerId4);
+        Assert.assertEquals(1, workerId5);
+        Assert.assertEquals(1, workerId6);
     }
 
     @Test
     public void test3Worker1Partition() {
-        Config config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_WORKERS_COUNT, "3",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "1"
-        );
-        Partitioner partitioner = config.createObject(
-                                  ComputerOptions.WORKER_PARTITIONER);
-        partitioner.init(config);
-        Id vertexId1 = new LongId(1L);
-        Id vertexId2 = new LongId(2L);
-        Id vertexId3 = new LongId(-1L);
-        Id vertexId4 = new LongId(-100L);
-        Id vertexId5 = new LongId(Long.MIN_VALUE);
-        Id vertexId6 = new LongId(Long.MAX_VALUE);
-
-        int partition1 = partitioner.partitionId(vertexId1);
-        int partition2 = partitioner.partitionId(vertexId2);
-        int partition3 = partitioner.partitionId(vertexId3);
-        int partition4 = partitioner.partitionId(vertexId4);
-        int partition5 = partitioner.partitionId(vertexId5);
-        int partition6 = partitioner.partitionId(vertexId6);
-        Assert.assertEquals(0, partition1);
-        Assert.assertEquals(0, partition2);
-        Assert.assertEquals(0, partition3);
-        Assert.assertEquals(0, partition4);
-        Assert.assertEquals(0, partition5);
-        Assert.assertEquals(0, partition6);
-
-        int workerId1 = partitioner.workerId(partition1);
-        int workerId2 = partitioner.workerId(partition2);
-        int workerId3 = partitioner.workerId(partition3);
-        int workerId4 = partitioner.workerId(partition4);
-        int workerId5 = partitioner.workerId(partition5);
-        int workerId6 = partitioner.workerId(partition6);
-        Assert.assertEquals(0, workerId1);
-        Assert.assertEquals(0, workerId2);
-        Assert.assertEquals(0, workerId3);
-        Assert.assertEquals(0, workerId4);
-        Assert.assertEquals(0, workerId5);
-        Assert.assertEquals(0, workerId6);
+        Assert.assertThrows(ComputerException.class, () -> {
+            UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.JOB_WORKERS_COUNT, "3",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1"
+            );
+        }, e -> {
+            Assert.assertTrue(e.getMessage().contains(
+                              "The partitions count must be >= workers count"));
+        });
     }
 
     @Test
@@ -230,7 +201,7 @@ public class HashPartitionerTest extends UnitTestBase {
                               new LongId(random.nextLong()));
             partitionStat[partitionId]++;
             int workerId = partitioner.workerId(partitionId);
-            workerStat[workerId]++;
+            workerStat[--workerId]++;
         }
         LOG.info("Partition distribution: {}", Arrays.toString(partitionStat));
         LOG.info("Worker distribution: {}", Arrays.toString(workerStat));

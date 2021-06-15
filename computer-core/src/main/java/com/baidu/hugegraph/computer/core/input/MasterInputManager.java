@@ -39,6 +39,8 @@ public class MasterInputManager implements Manager {
     public void init(Config config) {
         this.fetcher = InputSourceFactory.createInputSplitFetcher(config);
         this.handler = new MasterInputHandler(this.fetcher);
+        this.handler.createVertexInputSplits();
+        this.handler.createEdgeInputSplits();
     }
 
     @Override

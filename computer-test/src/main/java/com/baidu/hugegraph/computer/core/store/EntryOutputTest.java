@@ -26,13 +26,15 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
@@ -50,7 +52,8 @@ public class EntryOutputTest {
                                                  4, 8);
         List<LongId> data = intListToLongIds(entries);
 
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(output);
 
         for (int i = 0; i < data.size(); ) {
@@ -60,7 +63,7 @@ public class EntryOutputTest {
         }
 
         // Assert result
-        UnsafeBytesInput input = EntriesUtil.inputFromOutput(output);
+        BytesInput input = EntriesUtil.inputFromOutput(output);
         EntryIterator iter = new KvEntriesInput(input);
         SorterTestUtil.assertKvEntry(iter.next(), 1, 5);
         SorterTestUtil.assertKvEntry(iter.next(), 6, 6);
@@ -77,7 +80,7 @@ public class EntryOutputTest {
                                                  1,
                                                  2, 2,
                                                  6, 1);
-        UnsafeBytesInput input = inputFromEntries(entries, false);
+        BytesInput input = inputFromEntries(entries, false);
         EntryIterator iter = new KvEntriesInput(input, true);
 
         // Assert entry1
@@ -109,7 +112,7 @@ public class EntryOutputTest {
                                                  1,
                                                  2, 2,
                                                  6, 1);
-        UnsafeBytesInput input = inputFromEntries(entries, true);
+        BytesInput input = inputFromEntries(entries, true);
         EntryIterator iter = new KvEntriesInput(input, true);
 
         // Assert entry1
@@ -137,12 +140,13 @@ public class EntryOutputTest {
         SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 6, 1);
     }
 
-    private static UnsafeBytesInput inputFromEntries(List<Integer> entries,
-                                                     boolean needSort)
-                                                     throws IOException {
+    private static BytesInput inputFromEntries(List<Integer> entries,
+                                               boolean needSort)
+                                               throws IOException {
         List<LongId> data = intListToLongIds(entries);
 
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(output, needSort);
         int index = 0;
         KvEntryWriter entry1 = entryOutput.writeEntry(data.get(index++));

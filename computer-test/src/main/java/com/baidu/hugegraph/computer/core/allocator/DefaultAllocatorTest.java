@@ -24,7 +24,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -150,7 +150,6 @@ public class DefaultAllocatorTest extends UnitTestBase {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD, capacityValue
         );
         Allocator allocator = context().allocator();

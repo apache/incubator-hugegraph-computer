@@ -21,14 +21,13 @@ package com.baidu.hugegraph.computer.core.combiner;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
@@ -70,13 +69,13 @@ public class OverwriteCombinerTest extends UnitTestBase {
         LongId longId1 = new LongId(1L);
         DoubleValue value1 = new DoubleValue(0.1D);
         Vertex vertex1 = factory.createVertex(longId1, value1);
-        vertex1.addEdge(factory.createEdge(new LongId(2L), NullValue.get()));
-        vertex1.addEdge(factory.createEdge(new LongId(3L), NullValue.get()));
+        vertex1.addEdge(factory.createEdge(new LongId(2L)));
+        vertex1.addEdge(factory.createEdge(new LongId(3L)));
 
         LongId longId2 = new LongId(1L);
         DoubleValue value2 = new DoubleValue(0.2D);
         Vertex vertex2 = factory.createVertex(longId2, value2);
-        vertex2.addEdge(factory.createEdge(new LongId(1L), NullValue.get()));
+        vertex2.addEdge(factory.createEdge(new LongId(1L)));
 
         OverwriteCombiner<Vertex> combiner = new OverwriteCombiner<>();
         Vertex vertex = combiner.combine(vertex1, vertex2);

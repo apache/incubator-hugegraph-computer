@@ -21,25 +21,48 @@ package com.baidu.hugegraph.computer.core.graph.edge;
 
 import java.util.Objects;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultEdge implements Edge {
 
+    private String label;
+    private String name;
     private Id targetId;
-    private Value<?> value;
     private Properties properties;
 
     public DefaultEdge(GraphFactory graphFactory) {
-        this(graphFactory, null, null);
+        this(graphFactory, Constants.EMPTY_STR, Constants.EMPTY_STR, null);
     }
 
-    public DefaultEdge(GraphFactory graphFactory, Id targetId, Value<?> value) {
+    public DefaultEdge(GraphFactory graphFactory, String label,
+                       String name, Id targetId) {
+        this.label = label;
+        this.name = name;
         this.targetId = targetId;
-        this.value = value;
         this.properties = graphFactory.createProperties();
+    }
+
+    @Override
+    public String label() {
+        return this.label;
+    }
+
+    @Override
+    public void label(String label) {
+        this.label = label;
+    }
+
+    @Override
+    public String name() {
+        return this.name;
+    }
+
+    @Override
+    public void name(String name) {
+        this.name = name;
     }
 
     @Override
@@ -50,17 +73,6 @@ public class DefaultEdge implements Edge {
     @Override
     public void targetId(Id targetId) {
         this.targetId = targetId;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <V extends Value<?>> V value() {
-        return (V) this.value;
-    }
-
-    @Override
-    public <V extends Value<?>> void value(V value) {
-        this.value = value;
     }
 
     @Override
@@ -82,19 +94,21 @@ public class DefaultEdge implements Edge {
             return false;
         }
         DefaultEdge other = (DefaultEdge) obj;
-        return this.targetId.equals(other.targetId) &&
-               this.value.equals(other.value) &&
+        return Objects.equals(this.label, other.label) &&
+               Objects.equals(this.targetId, other.targetId) &&
+               Objects.equals(this.name, other.name) &&
                this.properties.equals(other.properties);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.targetId, this.value, this.properties);
+        return Objects.hash(this.label, this.name, this.targetId,
+                            this.properties);
     }
 
     @Override
     public String toString() {
-        return String.format("DefaultEdge{targetId=%s, value=%s}",
-                             this.targetId, this.value);
+        return String.format("DefaultEdge{label=%s, name=%s, targetId=%s}",
+                             this.label, this.name, this.targetId);
     }
 }

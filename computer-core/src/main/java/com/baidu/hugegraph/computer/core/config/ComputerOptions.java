@@ -29,12 +29,15 @@ import java.util.concurrent.TimeUnit;
 
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
+import com.baidu.hugegraph.computer.core.input.DefaultInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportProvider;
+import com.baidu.hugegraph.config.ConfigConvOption;
 import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
+import com.baidu.hugegraph.structure.constant.Direction;
 import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -84,14 +87,6 @@ public class ComputerOptions extends OptionHolder {
                     "value"
             );
 
-    public static final ConfigOption<String> EDGES_NAME =
-            new ConfigOption<>(
-                    "algorithm.edges_name",
-                    "The algorithm value name of edges",
-                    disallowEmpty(),
-                    "value"
-            );
-
     public static final ConfigOption<String> INPUT_SOURCE_TYPE =
             new ConfigOption<>(
                     "input.source_type",
@@ -124,6 +119,63 @@ public class ComputerOptions extends OptionHolder {
                     500
             );
 
+    public static final ConfigOption<Class<?>> INPUT_FILTER_CLASS =
+            new ConfigOption<>(
+                    "input.filter_class",
+                    "The class to create input-filter object, " +
+                    "input-filter is used to Filter vertex edges " +
+                    "according to user needs.",
+                    disallowEmpty(),
+                    DefaultInputFilter.class
+            );
+
+    public static final ConfigConvOption<String, Direction>
+            INPUT_EDGE_DIRECTION = new ConfigConvOption<>(
+                    "input.edge_direction",
+                    "The data of the edge in which direction is loaded, " +
+                    "when the value is BOTH, the edges in both OUT and IN " +
+                    "direction will be loaded.",
+                    allowValues("OUT", "IN", "BOTH"),
+                    Direction::valueOf,
+                    "OUT"
+            );
+
+    public static final ConfigConvOption<String, EdgeFrequency>
+            INPUT_EDGE_FREQ = new ConfigConvOption<>(
+                    "input.edge_freq",
+                    "The frequency of edges can exist between a pair of " +
+                    "vertices, allowed values: [SINGLE, SINGLE_PER_LABEL, " +
+                    "MULTIPLE]. SINGLE means that only one edge can exist " +
+                    "between a pair of vertices, use sourceId + targetId to " +
+                    "identify it; SINGLE_PER_LABEL means that each edge " +
+                    "label can exist one edge between a pair of vertices, " +
+                    "use sourceId + edgelabel + targetId to identify it; " +
+                    "MULTIPLE means that many edge can exist between a pair " +
+                    "of vertices, use sourceId + edgelabel + sortValues + " +
+                    "targetId to identify it.",
+                    allowValues("SINGLE", "SINGLE_PER_LABEL", "MULTIPLE"),
+                    EdgeFrequency::valueOf,
+                    "SINGLE"
+            );
+
+    public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
+            new ConfigOption<>(
+                    "input.max_edges_in_one_vertex",
+                    "The maximum number of adjacent edges allowed to be " +
+                    "attached to a vertex, the adjacent edges will be " +
+                    "stored and transferred together as a batch unit.",
+                    positiveInt(),
+                    200
+            );
+
+    public static final ConfigOption<Integer> SORT_THREAD_NUMS =
+            new ConfigOption<>(
+                    "sort.thread_nums",
+                    "The number of threads performing internal sorting.",
+                    positiveInt(),
+                    4
+            );
+
     public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =
             new ConfigOption<>(
                     "output.with_adjacent_edges",
@@ -148,14 +200,6 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
-    public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
-            new ConfigOption<>(
-                    "input.max_edges_in_one_vertex",
-                    "The number of edges of a vertex in kvEntry.",
-                    positiveInt(),
-                    500
-            );
-
     public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
             new ConfigOption<>(
                     "computer.vertex_average_degree",
@@ -166,8 +210,7 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static final ConfigOption<Integer>
-           ALLOCATOR_MAX_VERTICES_PER_THREAD =
-            new ConfigOption<>(
+           ALLOCATOR_MAX_VERTICES_PER_THREAD = new ConfigOption<>(
                     "allocator.max_vertices_per_thread",
                     "Maximum number of vertices per thread processed " +
                     "in each memory allocator",
@@ -177,8 +220,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
             VALUE_TYPE.name(),
-            VALUE_NAME.name(),
-            EDGES_NAME.name()
+            VALUE_NAME.name()
     );
 
     public static final ConfigOption<String> JOB_ID =
@@ -325,6 +367,25 @@ public class ComputerOptions extends OptionHolder {
                     disallowEmpty(),
                     String.class,
                     ImmutableList.of("jobs")
+            );
+
+    public static final ConfigOption<Integer> WORKER_WRITE_BUFFER_THRESHOLD =
+            new ConfigOption<>(
+                    "worker.write_buffer_threshold",
+                    "The threshold of write buffer, exceeding it will " +
+                    "trigger sorting, the write buffer is used to store " +
+                    "vertex or message.",
+                    positiveInt(),
+                    (int) (50 * Bytes.KB)
+            );
+
+    public static final ConfigOption<Integer>
+            WORKER_WRITE_BUFFER_INIT_CAPACITY = new ConfigOption<>(
+                    "worker.write_buffer_capacity",
+                    "The initial size of write buffer that used to store " +
+                    "vertex or message.",
+                    positiveInt(),
+                    (int) (60 * Bytes.KB)
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =

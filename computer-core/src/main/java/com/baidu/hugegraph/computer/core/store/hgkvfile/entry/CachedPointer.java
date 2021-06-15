@@ -66,7 +66,7 @@ public class CachedPointer implements Pointer {
 
     @Override
     public void write(RandomAccessOutput output) throws IOException {
-        output.writeInt((int) this.length);
+        output.writeFixedInt((int) this.length);
         output.write(this.bytes());
     }
 

@@ -38,7 +38,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
 
     public BufferedFileInput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_READ),
-             Constants.DEFAULT_BUFFER_SIZE);
+             Constants.BIG_BUF_SIZE);
     }
 
     public BufferedFileInput(RandomAccessFile file, int bufferCapacity)

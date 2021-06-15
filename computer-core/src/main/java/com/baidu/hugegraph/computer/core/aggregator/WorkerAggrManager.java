@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.aggregator;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -27,7 +28,6 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
 import com.baidu.hugegraph.util.E;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Aggregator manager manages aggregators in worker.
@@ -51,7 +51,7 @@ public class WorkerAggrManager implements Manager {
         this.context = context;
         this.service = null;
         this.registerAggregators = new RegisterAggregators();
-        this.lastAggregators = ImmutableMap.of();
+        this.lastAggregators = new HashMap<>();
         this.currentAggregators = new Aggregators();
     }
 

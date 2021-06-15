@@ -33,17 +33,23 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
+import com.baidu.hugegraph.computer.core.network.DataClientManager;
+import com.baidu.hugegraph.computer.core.network.FakeDataServerManager;
+import com.baidu.hugegraph.computer.core.recv.FakeMessageRecvHandler;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
+import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
+import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -114,11 +120,10 @@ public class WorkerService {
         LOG.info("{} register WorkerService", this);
         this.bsp4Worker.workerInitDone();
         List<ContainerInfo> workers = this.bsp4Worker.waitMasterAllInitDone();
+        DataClientManager dm = this.managers.get(DataClientManager.NAME);
         for (ContainerInfo worker : workers) {
             this.workers.put(worker.id(), worker);
-            // TODO: Connect to other workers for data transport
-            //DataClientManager dm = this.managers.get(DataClientManager.NAME);
-            //dm.connect(container.hostname(), container.dataPort());
+            dm.connect(worker.id(), worker.hostname(), worker.dataPort());
         }
 
         this.managers.initedAll(this.config);
@@ -234,10 +239,7 @@ public class WorkerService {
         // TODO: Start data-transport server and get its host and port.
         String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
         int port = this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
-        InetSocketAddress dataAddress = InetSocketAddress.createUnresolved(
-                                        host, port);
-
-        return dataAddress;
+        return InetSocketAddress.createUnresolved(host, port);
     }
 
     private void initManagers(ContainerInfo masterInfo) {
@@ -253,16 +255,39 @@ public class WorkerService {
                                                      masterInfo.rpcPort());
         rpcManager.init(this.config);
 
-        WorkerInputManager inputManager = new WorkerInputManager();
-        inputManager.service(rpcManager.inputSplitService());
-        this.managers.add(inputManager);
-
         WorkerAggrManager aggregatorManager = new WorkerAggrManager(
                                               this.context);
         aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
 
-        // Init managers
+        FileManager fileManager = new FileManager();
+        this.managers.add(fileManager);
+
+        /*
+         * TODO: when recv module merged, change it
+         * remove exclude config from test codecov
+         */
+        FakeMessageRecvHandler recvManager = new FakeMessageRecvHandler();
+        FakeDataServerManager serverManager = new FakeDataServerManager(
+                                              recvManager);
+        this.managers.add(serverManager);
+
+        SortManager sortManager = new SortManager(this.context);
+        this.managers.add(sortManager);
+
+        DataClientManager clientManager = new DataClientManager(this.context);
+        this.managers.add(clientManager);
+
+        MessageSendManager sendManager = new MessageSendManager(this.context,
+                                         sortManager, clientManager.sender());
+        this.managers.add(sendManager);
+
+        WorkerInputManager inputManager = new WorkerInputManager(this.context,
+                                                                 sendManager);
+        inputManager.service(rpcManager.inputSplitService());
+        this.managers.add(inputManager);
+
+        // Init all managers
         this.managers.initAll(this.config);
 
         LOG.info("{} WorkerService initialized managers", this);
@@ -281,9 +306,6 @@ public class WorkerService {
      */
     private SuperstepStat inputstep() {
         LOG.info("{} WorkerService inputstep started", this);
-        /*
-         * TODO: Load vertices and edges parallel.
-         */
         WorkerInputManager manager = this.managers.get(WorkerInputManager.NAME);
         manager.loadGraph();
 
@@ -337,12 +359,15 @@ public class WorkerService {
         private final int superstep;
         private final SuperstepStat superstepStat;
         private final WorkerAggrManager aggrManager;
+        private final MessageSendManager sendManager;
 
         private SuperstepContext(int superstep, SuperstepStat superstepStat) {
             this.superstep = superstep;
             this.superstepStat = superstepStat;
             this.aggrManager = WorkerService.this.managers.get(
                                WorkerAggrManager.NAME);
+            this.sendManager = WorkerService.this.managers.get(
+                               MessageSendManager.NAME);
         }
 
         @Override
@@ -368,14 +393,14 @@ public class WorkerService {
 
         @Override
         public void sendMessage(Id target, Value<?> value) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
+            this.sendManager.sendMessage(target, value);
         }
 
         @Override
         public void sendMessageToAllEdges(Vertex vertex, Value<?> value) {
-            // TODO: implement
-            throw new ComputerException("Not implemented");
+            for (Edge edge : vertex.edges()) {
+                this.sendMessage(edge.targetId(), value);
+            }
         }
 
         @Override

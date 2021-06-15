@@ -24,9 +24,11 @@ install: mvn compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloade
 before_script:
   - $TRAVIS_DIR/install-env.sh
   - $TRAVIS_DIR/install-hugegraph-from-source.sh $TRAVIS_BRANCH | grep -v "Downloading\|Downloaded"
+  - $TRAVIS_DIR/load-data-into-hugegraph.sh
 
 script:
   - mvn test -P unit-test
+  - mvn test -P integrate-test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

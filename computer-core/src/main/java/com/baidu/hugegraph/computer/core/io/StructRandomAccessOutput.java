@@ -50,12 +50,6 @@ public class StructRandomAccessOutput implements RandomAccessOutput {
     }
 
     @Override
-    public void writeInt(long position, int v) throws IOException {
-        this.output.seek(position);
-        this.writeNumber(v);
-    }
-
-    @Override
     public void write(RandomAccessInput input, long offset, long length)
                       throws IOException {
         if (UnsafeBytesInput.class == input.getClass()) {
@@ -138,6 +132,19 @@ public class StructRandomAccessOutput implements RandomAccessOutput {
     @Override
     public void writeUTF(String s) throws IOException {
         this.writeString(s);
+    }
+
+    @Override
+    public void writeFixedInt(int v) throws IOException {
+        this.writeInt(v);
+    }
+
+    @Override
+    public void writeFixedInt(long position, int v) throws IOException {
+        long oldPosition = this.position();
+        this.seek(position);
+        this.writeInt(v);
+        this.seek(oldPosition);
     }
 
     @Override

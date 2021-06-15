@@ -26,14 +26,51 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
 
-public class OptimizedUnsafeBytesOutput extends UnsafeBytesOutput {
+public class OptimizedBytesOutput implements BytesOutput {
 
-    public OptimizedUnsafeBytesOutput() {
-        super();
+    private final UnsafeBytesOutput out;
+
+    public OptimizedBytesOutput(int size) {
+        this(new UnsafeBytesOutput(size));
     }
 
-    public OptimizedUnsafeBytesOutput(int size) {
-        super(size);
+    public OptimizedBytesOutput(UnsafeBytesOutput out) {
+        this.out = out;
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        this.out.write(b);
+    }
+
+    @Override
+    public void write(byte[] b) throws IOException {
+        this.out.write(b);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        this.out.write(b, off, len);
+    }
+
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+        this.out.writeBoolean(v);
+    }
+
+    @Override
+    public void writeByte(int v) throws IOException {
+        this.out.writeByte(v);
+    }
+
+    @Override
+    public void writeShort(int v) throws IOException {
+        this.out.writeShort(v);
+    }
+
+    @Override
+    public void writeChar(int v) throws IOException {
+        this.out.writeChar(v);
     }
 
     @Override
@@ -47,8 +84,74 @@ public class OptimizedUnsafeBytesOutput extends UnsafeBytesOutput {
     }
 
     @Override
+    public void writeFloat(float v) throws IOException {
+        this.out.writeFloat(v);
+    }
+
+    @Override
+    public void writeDouble(double v) throws IOException {
+        this.out.writeDouble(v);
+    }
+
+    @Override
+    public void writeBytes(String s) throws IOException {
+        this.out.writeBytes(s);
+    }
+
+    @Override
+    public void writeChars(String s) throws IOException {
+        this.out.writeChars(s);
+    }
+
+    @Override
+    public long position() {
+        return this.out.position();
+    }
+
+    @Override
+    public void seek(long position) throws IOException {
+        this.out.seek(position);
+    }
+
+    @Override
+    public long skip(long n) throws IOException {
+        return this.out.skip(n);
+    }
+
+    @Override
+    public void write(RandomAccessInput input, long offset, long length)
+                      throws IOException {
+        this.out.write(input, offset, length);
+    }
+
+    @Override
     public void writeUTF(String s) throws IOException {
         this.writeString(s);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.out.close();
+    }
+
+    @Override
+    public void writeFixedInt(int v) throws IOException {
+        this.out.writeFixedInt(v);
+    }
+
+    @Override
+    public void writeFixedInt(long position, int v) throws IOException {
+        this.out.writeFixedInt(position, v);
+    }
+
+    @Override
+    public byte[] buffer() {
+        return this.out.buffer();
+    }
+
+    @Override
+    public byte[] toByteArray() {
+        return this.out.toByteArray();
     }
 
     private void writeVInt(int value) throws IOException {

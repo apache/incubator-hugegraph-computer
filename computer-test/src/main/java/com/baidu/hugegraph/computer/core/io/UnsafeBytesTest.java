@@ -27,20 +27,22 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 @SuppressWarnings("resource")
 public class UnsafeBytesTest {
 
+    private static final int SIZE = Constants.SMALL_BUF_SIZE;
+
     @Test
     public void testConstructor() {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         Assert.assertEquals(0, output.position());
 
-        UnsafeBytesOutput output2 = new UnsafeBytesOutput(16);
+        UnsafeBytesOutput output2 = new UnsafeBytesOutput(SIZE);
         Assert.assertEquals(0, output2.position());
 
         UnsafeBytesInput input = new UnsafeBytesInput(output.buffer());
@@ -49,7 +51,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testBoolean() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.writeBoolean(true);
         output.writeBoolean(false);
         UnsafeBytesInput input = new UnsafeBytesInput(output.toByteArray());
@@ -59,7 +61,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testByte() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (int i = -128; i <= 127; i++) {
             output.write(i);
         }
@@ -72,7 +74,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testUnsignedByte() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (int i = 0; i <= 255; i++) {
             output.write(i);
         }
@@ -85,7 +87,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testShort() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (short i = -128; i <= 127; i++) {
             output.writeShort(i);
         }
@@ -101,7 +103,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testUnsignedShort() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (short i = 0; i <= 255; i++) {
             output.writeShort(i);
         }
@@ -118,7 +120,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testChar() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (char i = 'a'; i <= 'z'; i++) {
             output.writeChar(i);
         }
@@ -131,7 +133,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testInt() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (int i = -128; i <= 127; i++) {
             output.writeInt(i);
         }
@@ -147,10 +149,10 @@ public class UnsafeBytesTest {
 
     @Test
     public void testWriteIntWithPosition() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         long position = output.skip(Constants.INT_LEN);
         output.writeInt(2);
-        output.writeInt(position, 1);
+        output.writeFixedInt(position, 1);
 
         UnsafeBytesInput input = new UnsafeBytesInput(output.toByteArray());
         Assert.assertEquals(1, input.readInt());
@@ -161,28 +163,28 @@ public class UnsafeBytesTest {
     public void testOverWriteWithPosition() {
         Assert.assertThrows(ComputerException.class, () -> {
             UnsafeBytesOutput output = new UnsafeBytesOutput(4);
-            output.writeInt(1, 100);
+            output.writeFixedInt(1, 100);
         });
 
         Assert.assertThrows(ComputerException.class, () -> {
             UnsafeBytesOutput output = new UnsafeBytesOutput(4);
-            output.writeInt(2, 100);
+            output.writeFixedInt(2, 100);
         });
 
         Assert.assertThrows(ComputerException.class, () -> {
             UnsafeBytesOutput output = new UnsafeBytesOutput(4);
-            output.writeInt(3, 100);
+            output.writeFixedInt(3, 100);
         });
 
         Assert.assertThrows(ComputerException.class, () -> {
             UnsafeBytesOutput output = new UnsafeBytesOutput(4);
-            output.writeInt(4, 100);
+            output.writeFixedInt(4, 100);
         });
     }
 
     @Test
     public void testLong() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (long i = -128; i <= 127; i++) {
             output.writeLong(i);
         }
@@ -198,7 +200,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testFloat() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (int i = -128; i <= 127; i++) {
             output.writeFloat(i);
         }
@@ -214,7 +216,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testDouble() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (int i = -128; i <= 127; i++) {
             output.writeDouble(i);
         }
@@ -231,7 +233,7 @@ public class UnsafeBytesTest {
     @Test
     public void testByteArray() throws IOException {
         byte[] bytes = "testByteArray".getBytes();
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.write(bytes);
         byte[] bytesRead = new byte[bytes.length];
         UnsafeBytesInput input = new UnsafeBytesInput(output.toByteArray());
@@ -242,7 +244,7 @@ public class UnsafeBytesTest {
     @Test
     public void testWritePartByteArray() throws IOException {
         byte[] bytes = "testByteArray".getBytes();
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.write(bytes, 1, bytes.length - 1);
         byte[] bytesRead = new byte[bytes.length];
         UnsafeBytesInput input = new UnsafeBytesInput(output.toByteArray());
@@ -254,7 +256,7 @@ public class UnsafeBytesTest {
     @Test
     public void testWriteChars() throws IOException {
         String chars = "testByteArray";
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.writeChars(chars);
         UnsafeBytesInput input = new UnsafeBytesInput(output.toByteArray());
         for (int i = 0; i < chars.length(); i++) {
@@ -274,7 +276,7 @@ public class UnsafeBytesTest {
     @Test
     public void testUTFWithChineseCharacters() throws IOException {
         String s = "带汉字的字符串";
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.writeUTF(s);
         UnsafeBytesInput input = new UnsafeBytesInput(output.toByteArray());
         String value = input.readUTF();
@@ -284,7 +286,7 @@ public class UnsafeBytesTest {
     @Test
     public void testUTF() throws IOException {
         String prefix = "random string";
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (int i = -128; i <= 127; i++) {
             output.writeUTF(prefix + i);
         }
@@ -297,7 +299,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testUTFBoundary() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         String s1 = UnitTestBase.randomString(65535);
         output.writeUTF(s1);
         String s2 = UnitTestBase.randomString(65536);
@@ -311,7 +313,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testSkipBytes() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         long position = output.skip(4);
         Assert.assertEquals(0, position);
         output.writeInt(Integer.MAX_VALUE);
@@ -326,7 +328,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testSkip() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.skip(4);
         output.writeInt(Integer.MAX_VALUE);
         UnsafeBytesInput input = new UnsafeBytesInput(output.toByteArray());
@@ -339,19 +341,19 @@ public class UnsafeBytesTest {
 
     @Test
     public void testBuffer() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.writeInt(Integer.MAX_VALUE);
         UnsafeBytesInput input = new UnsafeBytesInput(output.buffer(),
-                                                      output.position());
+                                                      (int) output.position());
         Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
     }
 
     @Test
     public void testOverRead() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.writeInt(Integer.MAX_VALUE);
         UnsafeBytesInput input = new UnsafeBytesInput(output.buffer(),
-                                                      output.position());
+                                                      (int) output.position());
         Assert.assertEquals(Integer.MAX_VALUE, input.readInt());
         Assert.assertThrows(ComputerException.class, () -> {
             input.readInt();
@@ -360,7 +362,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testSeek() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (int i = -128; i <= 127; i++) {
             output.writeInt(i);
         }
@@ -381,7 +383,7 @@ public class UnsafeBytesTest {
 
     @Test
     public void testAvailable() throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         for (int i = -128; i <= 127; i++) {
             output.write(i);
         }
@@ -395,7 +397,7 @@ public class UnsafeBytesTest {
     @Test
     public void testPosition() throws IOException {
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (UnsafeBytesOutput bao = new UnsafeBytesOutput(SIZE)) {
             Assert.assertEquals(0L, bao.position());
             bao.writeLong(Long.MAX_VALUE);
             Assert.assertEquals(8L, bao.position());
@@ -414,7 +416,7 @@ public class UnsafeBytesTest {
         // Input class is UnsafeBytesInput
         String uuid = UUID.randomUUID().toString();
         UnsafeBytesInput input = inputByString(uuid);
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.write(input, 0, input.available());
         Assert.assertEquals(uuid, new String(output.toByteArray()));
 
@@ -427,7 +429,7 @@ public class UnsafeBytesTest {
             fileOutput.writeBytes(uuid);
             fileOutput.close();
             fileInput = new BufferedFileInput(tempFile);
-            output = new UnsafeBytesOutput();
+            output = new UnsafeBytesOutput(SIZE);
             output.write(fileInput, 0, fileInput.available());
             Assert.assertEquals(uuid, new String(output.toByteArray()));
         } finally {
@@ -444,7 +446,7 @@ public class UnsafeBytesTest {
     @Test
     public void testReadBytes() throws IOException {
         String uuid = UUID.randomUUID().toString();
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.writeBytes(uuid);
         UnsafeBytesInput input = new UnsafeBytesInput(output.toByteArray());
         byte[] bytes = input.readBytes(uuid.length());
@@ -490,40 +492,6 @@ public class UnsafeBytesTest {
                 fileOutput.close();
             }
             FileUtils.deleteQuietly(tempFile);
-        }
-    }
-
-    @Test
-    public void testReadWriteFullInt() throws IOException {
-        byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
-            bao.writeIntLength(Integer.MIN_VALUE);
-            bao.writeIntLength(Integer.MAX_VALUE);
-            bao.writeIntLength(0);
-            bytes = bao.toByteArray();
-        }
-
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
-            Assert.assertEquals(Integer.MIN_VALUE, bai.readIntLength());
-            Assert.assertEquals(Integer.MAX_VALUE, bai.readIntLength());
-            Assert.assertEquals(0, bai.readIntLength());
-        }
-    }
-
-    @Test
-    public void testReadWriteFullLong() throws IOException {
-        byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
-            bao.writeLongLength(Long.MIN_VALUE);
-            bao.writeLongLength(Long.MAX_VALUE);
-            bao.writeLongLength(0L);
-            bytes = bao.toByteArray();
-        }
-
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
-            Assert.assertEquals(Long.MIN_VALUE, bai.readLongLength());
-            Assert.assertEquals(Long.MAX_VALUE, bai.readLongLength());
-            Assert.assertEquals(0L, bai.readLongLength());
         }
     }
 
@@ -598,12 +566,12 @@ public class UnsafeBytesTest {
 
     public static void assertEqualAfterWriteAndReadVInt(int value, byte[] bytes)
                                                         throws IOException {
-        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput(5)) {
+        try (OptimizedBytesOutput bao = new OptimizedBytesOutput(5)) {
             bao.writeInt(value);
             Assert.assertArrayEquals(bytes, bao.toByteArray());
         }
 
-        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
+        try (OptimizedBytesInput bai = new OptimizedBytesInput(bytes)) {
             int readValue = bai.readInt();
             Assert.assertEquals(value, readValue);
         }
@@ -612,12 +580,12 @@ public class UnsafeBytesTest {
     public static void assertEqualAfterWriteAndReadVLong(long value,
                                                          byte[] bytes)
                                                          throws IOException {
-        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput(9)) {
+        try (OptimizedBytesOutput bao = new OptimizedBytesOutput(9)) {
             bao.writeLong(value);
             Assert.assertArrayEquals(bytes, bao.toByteArray());
         }
 
-        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
+        try (OptimizedBytesInput bai = new OptimizedBytesInput(bytes)) {
             long readValue = bai.readLong();
             Assert.assertEquals(value, readValue);
         }
@@ -626,19 +594,19 @@ public class UnsafeBytesTest {
     public static void assertEqualAfterWriteAndReadString(String value,
                                                           byte[] bytes)
                                                           throws IOException {
-        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput()) {
+        try (OptimizedBytesOutput bao = new OptimizedBytesOutput(SIZE)) {
             bao.writeUTF(value);
             Assert.assertArrayEquals(bytes, bao.toByteArray());
         }
 
-        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes)) {
+        try (OptimizedBytesInput bai = new OptimizedBytesInput(bytes)) {
             String readValue = bai.readUTF();
             Assert.assertEquals(value, readValue);
         }
     }
 
     private static UnsafeBytesInput inputByString(String s) throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+        UnsafeBytesOutput output = new UnsafeBytesOutput(SIZE);
         output.writeBytes(s);
         return new UnsafeBytesInput(output.toByteArray());
     }

@@ -22,17 +22,20 @@ package com.baidu.hugegraph.computer.core.graph.edge;
 import com.baidu.hugegraph.computer.core.allocator.Recyclable;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public interface Edge extends Recyclable {
+
+    String label();
+
+    void label(String label);
+
+    String name();
+
+    void name(String name);
 
     Id targetId();
 
     void targetId(Id targetId);
-
-    <V extends Value<?>> V value();
-
-    <V extends Value<?>> void value(V value);
 
     Properties properties();
 

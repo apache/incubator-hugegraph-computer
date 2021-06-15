@@ -36,7 +36,7 @@ public class BufferedStreamOutput extends UnsafeBytesOutput {
     private long outputOffset;
 
     public BufferedStreamOutput(OutputStream output) {
-        this(output, Constants.DEFAULT_BUFFER_SIZE);
+        this(output, Constants.BIG_BUF_SIZE);
     }
 
     public BufferedStreamOutput(OutputStream output, int bufferCapacity) {
@@ -66,31 +66,6 @@ public class BufferedStreamOutput extends UnsafeBytesOutput {
             // The len > the buffer size, write out directly
             this.output.write(b, off, len);
             this.outputOffset += len;
-        }
-    }
-
-    /**
-     * The valid range of position is [the output position correspond to buffer
-     * start, the output position correspond to
-     * the current position - Constants.INT_LEN], it can't write data to the
-     * position before the buffer or after
-     * the current position.
-     */
-    @Override
-    public void writeInt(long position, int v) throws IOException {
-        if (position >= this.outputOffset &&
-            position <= this.position() - Constants.INT_LEN) {
-            super.writeInt(position - this.outputOffset, v);
-        } else if (position < this.outputOffset) {
-            throw new IOException(String.format(
-                      "Write int to position %s underflows the " +
-                      "start position %s of the buffer",
-                      position, this.outputOffset));
-        } else {
-            throw new IOException(String.format(
-                      "Write int to position %s overflows the write " +
-                      "position %s",
-                      position, this.position()));
         }
     }
 
@@ -147,6 +122,30 @@ public class BufferedStreamOutput extends UnsafeBytesOutput {
             }
         }
         return positionBeforeSkip;
+    }
+
+    /**
+     * The valid range of position is [the output position correspond to buffer
+     * start, the output position correspond to
+     * the current position - Constants.INT_LEN], it can't write data to the
+     * position before the buffer or after
+     * the current position.
+     */
+    @Override
+    public void writeFixedInt(long position, int v) throws IOException {
+        if (position >= this.outputOffset &&
+            position <= this.position() - Constants.INT_LEN) {
+            super.writeFixedInt(position - this.outputOffset, v);
+        } else if (position < this.outputOffset) {
+            throw new IOException(String.format(
+                      "Write int to position %s underflows the " +
+                      "start position %s of the buffer",
+                      position, this.outputOffset));
+        } else {
+            throw new IOException(String.format(
+                      "Write int to position %s overflows the write " +
+                      "position %s", position, this.position()));
+        }
     }
 
     @Override

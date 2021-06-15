@@ -43,7 +43,6 @@ public class EntryOutputImpl implements EntryOutput {
     public KvEntryWriter writeEntry(Writable key) throws IOException {
         // Write key
         this.writeData(key);
-
         return new KvEntryWriterImpl(this.output, this.needSortSubKv);
     }
 
@@ -57,12 +56,12 @@ public class EntryOutputImpl implements EntryOutput {
 
     private void writeData(Writable data) throws IOException {
         // Write data length placeholder
-        this.output.writeInt(0);
+        this.output.writeFixedInt(0);
         long position = this.output.position();
         // Write data
         data.write(this.output);
         // Fill data length placeholder
         int dataLength = (int) (this.output.position() - position);
-        this.output.writeInt(position - Integer.BYTES, dataLength);
+        this.output.writeFixedInt(position - Integer.BYTES, dataLength);
     }
 }

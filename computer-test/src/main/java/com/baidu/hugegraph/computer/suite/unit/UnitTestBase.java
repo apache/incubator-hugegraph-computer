@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core;
+package com.baidu.hugegraph.computer.suite.unit;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -33,16 +34,17 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
-import com.baidu.hugegraph.computer.core.io.GraphOutputFactory;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.OutputFormat;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
-import com.baidu.hugegraph.config.ConfigOption;
+import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
 
@@ -55,13 +57,14 @@ public class UnitTestBase {
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(
+                               Constants.SMALL_BUF_SIZE)) {
             oldId.write(bao);
             bytes = bao.toByteArray();
         }
 
         Id newId = IdFactory.createId(oldId.type());
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newId.read(bai);
             Assert.assertEquals(oldId, newId);
         }
@@ -70,13 +73,14 @@ public class UnitTestBase {
     public static void assertValueEqualAfterWriteAndRead(Value<?> oldValue)
                                                          throws IOException {
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(
+                               Constants.SMALL_BUF_SIZE)) {
             oldValue.write(bao);
             bytes = bao.toByteArray();
         }
 
         Value<?> newValue = valueFactory().createValue(oldValue.type());
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newValue.read(bai);
             Assert.assertEquals(oldValue, newValue);
         }
@@ -92,12 +96,12 @@ public class UnitTestBase {
         Map<String, String> map = new HashMap<>();
         for (int i = 0; i < optionKeyValues.length; i += 2) {
             Object key = optionKeyValues[i];
-            E.checkArgument(key instanceof ConfigOption,
-                            "The option key must be ConfigOption class");
+            E.checkArgument(key instanceof TypedOption,
+                            "The option key must be TypedOption class");
             Object value = optionKeyValues[i + 1];
             E.checkArgument(value instanceof String,
                             "The option value must be String class");
-            map.put(((ConfigOption<?>) key).name(), (String) value);
+            map.put(((TypedOption<?, ?>) key).name(), (String) value);
         }
         ComputerContextUtil.initContext(map);
     }
@@ -106,8 +110,8 @@ public class UnitTestBase {
                                       Object... options) {
         Object[] requiredOptions = new Object[] {
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
-            ComputerOptions.VALUE_TYPE, "LONG"};
+            ComputerOptions.VALUE_TYPE, "LONG"
+        };
         Object[] allOptions = new Object[requiredOptions.length +
                                          options.length];
         System.arraycopy(requiredOptions, 0, allOptions, 0,
@@ -122,12 +126,13 @@ public class UnitTestBase {
                                                     Readable readObj)
                                                     throws IOException {
         byte[] bytes;
-        try (UnsafeBytesOutput bao = new UnsafeBytesOutput()) {
+        try (BytesOutput bao = IOFactory.createBytesOutput(
+                               Constants.SMALL_BUF_SIZE)) {
             writeObj.write(bao);
             bytes = bao.toByteArray();
         }
 
-        try (UnsafeBytesInput bai = new UnsafeBytesInput(bytes)) {
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             readObj.read(bai);
             Assert.assertEquals(writeObj, readObj);
         }
@@ -176,10 +181,9 @@ public class UnitTestBase {
         return new StreamGraphInput(context(), bai);
     }
 
-    protected static StreamGraphOutput newStreamGraphOutput(
-                                       UnsafeBytesOutput bao) {
-        return (StreamGraphOutput) GraphOutputFactory.create(context(),
-                                                             OutputFormat.BIN,
-                                                             bao);
+    protected static StreamGraphOutput newStreamGraphOutput(BytesOutput bao) {
+        return (StreamGraphOutput) IOFactory.createGraphOutput(
+                                                 context(), OutputFormat.BIN,
+                                                 bao);
     }
 }

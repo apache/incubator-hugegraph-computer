@@ -24,7 +24,6 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 public final class HotConfig {
 
     private String vertexValueName;
-    private String edgeValueName;
     private ValueType valueType;
 
     private boolean outputVertexAdjacentEdges;
@@ -37,14 +36,6 @@ public final class HotConfig {
 
     public void vertexValueName(String vertexValueName) {
         this.vertexValueName = vertexValueName;
-    }
-
-    public String edgeValueName() {
-        return this.edgeValueName;
-    }
-
-    public void edgeValueName(String edgeValueName) {
-        this.edgeValueName = edgeValueName;
     }
 
     public ValueType valueType() {

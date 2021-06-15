@@ -83,6 +83,20 @@
                             </includes>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>integrate-test</id>
+                        <configuration>
+                            <testSourceDirectory>
+                                ${basedir}/src/main/java/
+                            </testSourceDirectory>
+                            <testClassesDirectory>
+                                ${basedir}/target/classes/
+                            </testClassesDirectory>
+                            <includes>
+                                <include>**/IntegrateTestSuite.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -91,6 +105,8 @@
                 <version>0.8.4</version>
                 <configuration>
                     <excludes>
+                        <exclude>com/baidu/hugegraph/computer/core/network/FakeDataServerManager.class</exclude>
+                        <exclude>com/baidu/hugegraph/computer/core/recv/FakeMessageRecvHandler.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

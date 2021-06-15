@@ -19,27 +19,38 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
+import java.util.Iterator;
+
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
+import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
-import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.computer.core.worker.load.LoadService;
 
 public class WorkerInputManager implements Manager {
 
     public static final String NAME = "worker_input";
 
     /*
-     * InputGraphFetcher include:
-     *   VertexFetcher vertexFetcher;
-     *   EdgeFetcher edgeFetcher;
+     * Fetch vertices and edges from the data source and convert them
+     * to computer-vertices and computer-edges
      */
-    private GraphFetcher fetcher;
+    private final LoadService loadService;
     /*
-     * Service proxy on the client
+     * Send vertex/edge or message to target worker
      */
-    private InputSplitRpcService service;
+    private final MessageSendManager sendManager;
+
+    public WorkerInputManager(ComputerContext context,
+                              MessageSendManager sendManager) {
+        this.loadService = new LoadService(context);
+        this.sendManager = sendManager;
+    }
 
     @Override
     public String name() {
@@ -48,23 +59,41 @@ public class WorkerInputManager implements Manager {
 
     @Override
     public void init(Config config) {
-        assert this.service != null;
-        this.fetcher = InputSourceFactory.createGraphFetcher(config,
-                                                             this.service);
+        this.loadService.init();
+        this.sendManager.init(config);
     }
 
     @Override
     public void close(Config config) {
-        this.fetcher.close();
+        this.loadService.close();
+        this.sendManager.close(config);
     }
 
-    public void service(InputSplitRpcService service) {
-        E.checkNotNull(service, "service");
-        this.service = service;
+    public void service(InputSplitRpcService rpcService) {
+        this.loadService.rpcService(rpcService);
     }
 
+    /**
+     * TODO: Load vertices and edges parallel.
+     * When this method finish, it means that all vertices and edges are sent,
+     * but there is no guarantee that all of them has been received.
+     */
     public void loadGraph() {
-        // TODO: calls LoadService to load vertices and edges parallel
+        this.sendManager.startSend(MessageType.VERTEX);
+        Iterator<Vertex> iterator = this.loadService.createIteratorFromVertex();
+        while (iterator.hasNext()) {
+            Vertex vertex = iterator.next();
+            this.sendManager.sendVertex(vertex);
+        }
+        this.sendManager.finishSend(MessageType.VERTEX);
+
+        this.sendManager.startSend(MessageType.EDGE);
+        iterator = this.loadService.createIteratorFromEdge();
+        while (iterator.hasNext()) {
+            Vertex vertex = iterator.next();
+            this.sendManager.sendEdge(vertex);
+        }
+        this.sendManager.finishSend(MessageType.EDGE);
     }
 
     public WorkerStat mergeGraph() {

@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.graph.properties;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
@@ -49,12 +50,22 @@ public class DefaultProperties implements Properties {
 
     @Override
     public Map<String, Value<?>> get() {
-        return this.keyValues;
+        return Collections.unmodifiableMap(this.keyValues);
+    }
+
+    @Override
+    public Value<?> get(String key) {
+        return this.keyValues.get(key);
     }
 
     @Override
     public void put(String key, Value<?> value) {
         this.keyValues.put(key, value);
+    }
+
+    @Override
+    public void putIfAbsent(String key, Value<?> value) {
+        this.keyValues.putIfAbsent(key, value);
     }
 
     @Override

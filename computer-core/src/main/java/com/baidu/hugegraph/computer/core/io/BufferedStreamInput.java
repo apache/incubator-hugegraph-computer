@@ -32,7 +32,7 @@ public class BufferedStreamInput extends UnsafeBytesInput {
     private long inputOffset;
 
     public BufferedStreamInput(InputStream input) throws IOException {
-        this(input, Constants.DEFAULT_BUFFER_SIZE);
+        this(input, Constants.BIG_BUF_SIZE);
     }
 
     public BufferedStreamInput(InputStream input, int bufferCapacity)

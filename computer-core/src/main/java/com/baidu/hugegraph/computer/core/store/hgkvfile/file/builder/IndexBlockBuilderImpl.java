@@ -21,21 +21,21 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public class IndexBlockBuilderImpl implements IndexBlockBuilder {
 
-    private final BufferedFileOutput output;
+    private final RandomAccessOutput output;
     private long blockSize;
 
-    public IndexBlockBuilderImpl(BufferedFileOutput output) {
+    public IndexBlockBuilderImpl(RandomAccessOutput output) {
         this.output = output;
         this.blockSize = 0L;
     }
 
     @Override
     public void add(byte[] index) throws IOException {
-        this.output.writeInt(index.length);
+        this.output.writeFixedInt(index.length);
         this.output.write(index);
         this.blockSize += Integer.SIZE + index.length;
     }

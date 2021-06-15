@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
+import java.util.Objects;
+
 public class InputSplit {
 
     public static final InputSplit END_SPLIT = new InputSplit(null, null);
@@ -39,5 +41,29 @@ public class InputSplit {
 
     public String end() {
         return this.end;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || this.getClass() != object.getClass()) {
+            return false;
+        }
+        InputSplit other = (InputSplit) object;
+        return Objects.equals(this.start, other.start) &&
+               Objects.equals(this.end, other.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.start, this.end);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("InputSplit{start='%s', end='%s'}",
+                             this.start, this.end);
     }
 }

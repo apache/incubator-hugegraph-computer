@@ -25,7 +25,6 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
@@ -39,6 +38,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class JsonStructGraphOutputTest extends UnitTestBase {
@@ -47,7 +47,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
@@ -65,10 +64,10 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         try {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
-                                       GraphOutputFactory.create(
+                                       IOFactory.createGraphOutput(
                                        context, OutputFormat.JSON, dos);
             output.writeVertex(vertex);
-            output.close();
+            dos.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":999}" +
@@ -82,7 +81,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexWithEdges() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "true",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
@@ -96,26 +94,26 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         idValueList.add(new LongId(998L).idValue());
         idValueList.add(new LongId(999L).idValue());
         Vertex vertex = factory.createVertex(longId, idValueList);
-        vertex.addEdge(factory.createEdge(new LongId(200), new LongValue(1)));
-        vertex.addEdge(factory.createEdge(new LongId(300), new LongValue(-1)));
+        vertex.addEdge(factory.createEdge("knows", new LongId(200)));
+        vertex.addEdge(factory.createEdge("watch", "1111", new LongId(300)));
 
         String fileName = "output.json";
         File file = new File(fileName);
         try {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
-                                       GraphOutputFactory.create(
+                                       IOFactory.createGraphOutput(
                                        context, OutputFormat.JSON, dos);
             output.writeVertex(vertex);
-            output.close();
+            dos.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
                                 "\"adjacent_edges\":[{\"target_id\":200," +
-                                "\"value\":1},{\"target_id\":300," +
-                                "\"value\":-1}]}" + System.lineSeparator(),
-                                json);
-            dos.close();
+                                "\"label\":\"knows\",\"name\":\"\"}," +
+                                "{\"target_id\":300,\"label\":\"watch\"," +
+                                "\"name\":\"1111\"}]}" +
+                                System.lineSeparator(), json);
         } finally {
             FileUtils.deleteQuietly(file);
         }
@@ -125,7 +123,6 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     public void testWriteReadVertexWithProperties() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.EDGES_NAME, "value",
             ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",
@@ -159,10 +156,10 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         try {
             BufferedFileOutput dos = new BufferedFileOutput(file);
             StructGraphOutput output = (StructGraphOutput)
-                                       GraphOutputFactory.create(
+                                       IOFactory.createGraphOutput(
                                        context, OutputFormat.JSON, dos);
             output.writeVertex(vertex);
-            output.close();
+            dos.close();
 
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[[66],[998,999]]," +

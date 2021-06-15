@@ -24,15 +24,11 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.io.GraphInput;
-import com.baidu.hugegraph.computer.core.io.GraphOutput;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.OptimizedUnsafeBytesOutput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 
 public class IdValueUtil {
 
@@ -45,9 +41,11 @@ public class IdValueUtil {
          * NOTE: must use OptimizedUnsafeBytesInput, it make sure to
          * write bytes in big-end-aligned way
          */
-        try (UnsafeBytesInput bai = new OptimizedUnsafeBytesInput(bytes);
-             GraphInput input = new StreamGraphInput(CONTEXT, bai)) {
-            return input.readId();
+        try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
+            byte type = bai.readByte();
+            Id id = IdFactory.createId(type);
+            id.read(bai);
+            return id;
         } catch (IOException e) {
             throw new ComputerException("Failed to get id from idValue '%s'",
                                         e, idValue);
@@ -55,10 +53,10 @@ public class IdValueUtil {
     }
 
     public static IdValue toIdValue(Id id, int len) {
-        try (UnsafeBytesOutput bao = new OptimizedUnsafeBytesOutput(len);
-             GraphOutput output = new StreamGraphOutput(CONTEXT, bao)) {
-            output.writeId(id);
-            return new IdValue(bao.toByteArray());
+        try (BytesOutput bao = IOFactory.createBytesOutput(len)) {
+            bao.writeByte(id.type().code());
+            id.write(bao);
+            return new IdValue(bao.buffer(), (int) bao.position());
         } catch (IOException e) {
             throw new ComputerException("Failed to get idValue from id '%s'",
                                         e, id);

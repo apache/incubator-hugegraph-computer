@@ -63,7 +63,7 @@ public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
         E.checkArgument(entries.hasNext(), "Parameter entries can't be empty");
 
         KvEntry last = entries.next();
-        // TODO use byte buffer store all value pointer to avoid big collection.
+        // TODO: use byte buffer store all value pointer to avoid big collection
         List<KvEntry> sameKeyEntries = new ArrayList<>();
         sameKeyEntries.add(last);
 
@@ -107,9 +107,9 @@ public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
         kvEntry.key().write(this.output);
         long position = this.output.position();
         // Write value length placeholder
-        this.output.writeInt(0);
+        this.output.writeFixedInt(0);
         // Write subKv count placeholder
-        this.output.writeInt(0);
+        this.output.writeFixedInt(0);
 
         // Write subKv to output
         KvEntry lastSubKv = subKvIter.next();
@@ -137,9 +137,10 @@ public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
                 long currentPosition = this.output.position();
                 this.output.seek(position);
                 // Fill value length placeholder
-                this.output.writeInt((int) (currentPosition - position - 4));
+                this.output.writeFixedInt((int)
+                                          (currentPosition - position - 4));
                 // Fill subKv count placeholder
-                this.output.writeInt(writtenCount);
+                this.output.writeFixedInt(writtenCount);
                 this.output.seek(currentPosition);
 
                 if (current == null) {
@@ -150,9 +151,9 @@ public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
                 kvEntry.key().write(this.output);
                 position = this.output.position();
                 // Write value length placeholder
-                this.output.writeInt(0);
+                this.output.writeFixedInt(0);
                 // Write subKv count placeholder
-                this.output.writeInt(0);
+                this.output.writeFixedInt(0);
                 writtenCount = 0;
             }
 

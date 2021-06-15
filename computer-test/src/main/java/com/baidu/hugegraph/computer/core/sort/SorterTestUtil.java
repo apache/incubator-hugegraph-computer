@@ -25,9 +25,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.io.BytesInput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -35,74 +36,81 @@ import com.baidu.hugegraph.testutil.Assert;
 
 public class SorterTestUtil {
 
-    public static UnsafeBytesOutput writeKvMapToOutput(List<Integer> map)
-                                                       throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+    public static void writeData(BytesOutput output, Integer value)
+                                 throws IOException {
+        // Write data length placeholder
+        output.writeFixedInt(0);
+        long position = output.position();
+        // Write data
+        output.writeInt(value);
+        // Fill data length placeholder
+        int dataLength = (int) (output.position() - position);
+        output.writeFixedInt(position - Integer.BYTES, dataLength);
+    }
+
+    public static BytesOutput writeKvMapToOutput(List<Integer> map)
+                                                 throws IOException {
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.SMALL_BUF_SIZE);
 
         for (int i = 0; i < map.size(); ) {
-            output.writeInt(Integer.BYTES);
-            output.writeInt(map.get(i++));
-            output.writeInt(Integer.BYTES);
-            output.writeInt(map.get(i++));
+            writeData(output, map.get(i++));
+            writeData(output, map.get(i++));
         }
-
         return output;
     }
 
-    public static UnsafeBytesOutput writeSubKvMapToOutput(
-                                    List<List<Integer>> data)
-                                    throws IOException {
-        UnsafeBytesOutput output = new UnsafeBytesOutput();
+    public static BytesOutput writeSubKvMapToOutput(List<List<Integer>> data)
+                                                    throws IOException {
+        BytesOutput output = IOFactory.createBytesOutput(
+                             Constants.SMALL_BUF_SIZE);
         for (List<Integer> entry : data) {
             Integer key = entry.get(0);
             // Write key
-            output.writeInt(Integer.BYTES);
-            output.writeInt(key);
+            writeData(output, key);
             // Write subKv
             long position = output.position();
             int count = 0;
             // Write value length placeholder
-            output.writeInt(0);
+            output.writeFixedInt(0);
             // Write subKv count placeholder
-            output.writeInt(0);
+            output.writeFixedInt(0);
             for (int i = 1; i < entry.size(); ) {
                 Integer subKey = entry.get(i++);
                 Integer subValue = entry.get(i++);
-                output.writeInt(Integer.BYTES);
-                output.writeInt(subKey);
-                output.writeInt(Integer.BYTES);
-                output.writeInt(subValue);
+                writeData(output, subKey);
+                writeData(output, subValue);
                 count++;
             }
             long currentPosition = output.position();
             output.seek(position);
-            output.writeInt((int) (currentPosition - position - 4));
-            output.writeInt(count);
+            output.writeFixedInt((int) (currentPosition - position - 4));
+            output.writeFixedInt(count);
             output.seek(currentPosition);
         }
         return output;
     }
 
-    public static UnsafeBytesInput inputFromKvMap(List<Integer> map)
-                                                  throws IOException {
+    public static BytesInput inputFromKvMap(List<Integer> map)
+                                            throws IOException {
         return EntriesUtil.inputFromOutput(writeKvMapToOutput(map));
     }
 
-    public static UnsafeBytesInput inputFromSubKvMap(List<List<Integer>> map)
-                                                     throws IOException {
+    public static BytesInput inputFromSubKvMap(List<List<Integer>> map)
+                                               throws IOException {
         return EntriesUtil.inputFromOutput(writeSubKvMapToOutput(map));
     }
 
-    public static void assertOutputEqualsMap(UnsafeBytesOutput output,
+    public static void assertOutputEqualsMap(BytesOutput output,
                                              Map<Integer, List<Integer>> map)
                                              throws IOException {
         byte[] buffer = output.buffer();
-        RandomAccessInput input = new UnsafeBytesInput(buffer);
+        BytesInput input = IOFactory.createBytesInput(buffer);
         for (Map.Entry<Integer, List<Integer>> entry : map.entrySet()) {
             input.readInt();
             int key = input.readInt();
             Assert.assertEquals(entry.getKey().intValue(), key);
-            int valueLength = input.readInt();
+            int valueLength = input.readFixedInt();
             int valueCount = valueLength / Integer.BYTES;
             List<Integer> values = new ArrayList<>();
             for (int i = 0; i < valueCount; i++) {

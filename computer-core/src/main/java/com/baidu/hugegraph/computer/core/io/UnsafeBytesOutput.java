@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.lang.reflect.Field;
@@ -36,10 +35,9 @@ import sun.misc.Unsafe;
  * Use unsafe method to write the value to the buffer to improve the write
  * performance. The buffer is auto extendable.
  */
-public class UnsafeBytesOutput implements RandomAccessOutput, Closeable {
+public class UnsafeBytesOutput implements BytesOutput {
 
     private static final sun.misc.Unsafe UNSAFE;
-    private static final int DEFAULT_SIZE = 32;
 
     private byte[] buffer;
     private int position;
@@ -52,10 +50,6 @@ public class UnsafeBytesOutput implements RandomAccessOutput, Closeable {
         } catch (Exception e) {
             throw new ComputerException("Failed to get unsafe", e);
         }
-    }
-
-    public UnsafeBytesOutput() {
-        this(DEFAULT_SIZE);
     }
 
     public UnsafeBytesOutput(int size) {
@@ -117,12 +111,6 @@ public class UnsafeBytesOutput implements RandomAccessOutput, Closeable {
         this.require(Constants.INT_LEN);
         UNSAFE.putInt(this.buffer, this.offset(), v);
         this.position += Constants.INT_LEN;
-    }
-
-    @Override
-    public void writeInt(long position, int v) throws IOException {
-        this.require(position, Constants.INT_LEN);
-        UNSAFE.putInt(this.buffer, this.offset(position), v);
     }
 
     @Override
@@ -221,9 +209,24 @@ public class UnsafeBytesOutput implements RandomAccessOutput, Closeable {
         }
     }
 
+    @Override
+    public void writeFixedInt(int v) throws IOException {
+        this.require(Constants.INT_LEN);
+        UNSAFE.putInt(this.buffer, this.offset(), v);
+        this.position += Constants.INT_LEN;
+    }
+
+    @Override
+    public void writeFixedInt(long position, int v) throws IOException {
+        // The position is not changed after write
+        this.require(position, Constants.INT_LEN);
+        UNSAFE.putInt(this.buffer, this.offset(position), v);
+    }
+
     /**
      * @return the internal byte array, can't modify the returned byte array
      */
+    @Override
     public byte[] buffer() {
         return this.buffer;
     }

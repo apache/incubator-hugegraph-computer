@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
@@ -32,7 +31,7 @@ import com.baidu.hugegraph.util.E;
 import sun.misc.Unsafe;
 
 @SuppressWarnings("deprecation") // Unsafe.getXx
-public class UnsafeBytesInput implements RandomAccessInput, Closeable {
+public class UnsafeBytesInput implements BytesInput {
 
     private static final sun.misc.Unsafe UNSAFE;
 
@@ -56,10 +55,6 @@ public class UnsafeBytesInput implements RandomAccessInput, Closeable {
 
     public UnsafeBytesInput(byte[] buffer, int limit) {
         this(buffer, 0, limit);
-    }
-
-    public UnsafeBytesInput(byte[] buffer, long limit) {
-        this(buffer, 0, (int) limit);
     }
 
     public UnsafeBytesInput(byte[] buffer, int position, int limit) {

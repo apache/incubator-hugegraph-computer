@@ -17,54 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core;
+package com.baidu.hugegraph.computer.suite.integrate;
 
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.allocator.AllocatorTestSuite;
-import com.baidu.hugegraph.computer.core.bsp.BspTestSuite;
-import com.baidu.hugegraph.computer.core.combiner.CombinerTestSuite;
-import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.ConfigTestSuite;
-import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
-import com.baidu.hugegraph.computer.core.input.InputTestSuite;
-import com.baidu.hugegraph.computer.core.io.IOTestSuite;
-import com.baidu.hugegraph.computer.core.network.NetworkTestSuite;
-import com.baidu.hugegraph.computer.core.sort.sorter.SorterTestSuite;
-import com.baidu.hugegraph.computer.core.sort.sorting.SortingTestSuite;
-import com.baidu.hugegraph.computer.core.store.StoreTestSuite;
-import com.baidu.hugegraph.computer.core.worker.WorkerTestSuite;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    AllocatorTestSuite.class,
-    CommonTestSuite.class,
-    ConfigTestSuite.class,
-    BspTestSuite.class,
-    CombinerTestSuite.class,
-    GraphTestSuite.class,
-    IOTestSuite.class,
-    BspTestSuite.class,
-    InputTestSuite.class,
-    WorkerTestSuite.class,
-    NetworkTestSuite.class,
-    StoreTestSuite.class,
-    SorterTestSuite.class,
-    SortingTestSuite.class
+    SenderIntegrateTest.class
 })
-public class UnitTestSuite {
+public class IntegrateTestSuite {
 
-    private static final Logger LOG = Log.logger(UnitTestSuite.class);
+    private static final Logger LOG = Log.logger(IntegrateTestSuite.class);
 
     @BeforeClass
     public static void setup() {
-        LOG.info("Setup for UnitTestSuite of hugegraph-computer");
+        LOG.info("Setup for IntegrateTestSuite of hugegraph-computer");
 
         // Don't forget to register options
         OptionSpace.register("computer",
@@ -75,8 +50,7 @@ public class UnitTestSuite {
 
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
-            ComputerOptions.EDGES_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value"
         );
     }
 }

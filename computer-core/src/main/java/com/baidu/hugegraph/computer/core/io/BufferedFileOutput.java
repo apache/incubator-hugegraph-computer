@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.io;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -39,9 +38,9 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
     private final RandomAccessFile file;
     private long fileOffset;
 
-    public BufferedFileOutput(File file) throws FileNotFoundException {
+    public BufferedFileOutput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_WRITE),
-             Constants.DEFAULT_BUFFER_SIZE);
+             Constants.BIG_BUF_SIZE);
     }
 
     public BufferedFileOutput(RandomAccessFile file, int bufferCapacity) {
@@ -72,20 +71,6 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
             this.file.write(b, off, len);
             this.fileOffset += len;
         }
-    }
-
-    @Override
-    public void writeInt(long position, int v) throws IOException {
-        // The write position is in the buffer
-        if (this.fileOffset <= position &&
-            position <= this.position() - Constants.INT_LEN) {
-            super.writeInt(position - this.fileOffset, v);
-            return;
-        }
-        long latestPosition = this.position();
-        this.seek(position);
-        super.writeInt(v);
-        this.seek(latestPosition);
     }
 
     @Override
@@ -123,6 +108,20 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
             this.file.seek(this.fileOffset);
         }
         return positionBeforeSkip;
+    }
+
+    @Override
+    public void writeFixedInt(long position, int v) throws IOException {
+        // The write position is in the buffer
+        if (this.fileOffset <= position &&
+            position <= this.position() - Constants.INT_LEN) {
+            super.writeFixedInt(position - this.fileOffset, v);
+            return;
+        }
+        long oldPosition = this.position();
+        this.seek(position);
+        super.writeInt(v);
+        this.seek(oldPosition);
     }
 
     @Override

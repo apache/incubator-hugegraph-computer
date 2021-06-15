@@ -33,7 +33,6 @@ public interface EntryOutput {
      * | key length | key | total sub-entry length | sub-entry count |
      * | sub-key1 length | sub-key1 | sub-value1 length | sub-value1 |
      * | sub-key2 length | sub-key2 | sub-value2 length | sub-value2 |
-     * @param key
      */
     KvEntryWriter writeEntry(Writable key) throws IOException;
 

@@ -83,7 +83,6 @@ public class JsonStructGraphOutput extends StructGraphOutput {
 
     @Override
     public void writeEdge(Edge edge) throws IOException {
-
         this.writeObjectStart();
 
         this.writeKey("target_id");
@@ -91,10 +90,15 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeId(edge.targetId());
         this.writeSplitter();
 
-        String valueName = this.config.edgeValueName();
-        this.writeKey(valueName);
+        this.writeKey("label");
         this.writeJoiner();
-        this.writeValue(edge.value());
+        this.out.writeString(edge.label());
+        this.writeSplitter();
+
+        this.writeKey("name");
+        this.writeJoiner();
+        this.out.writeString(edge.name());
+
         if (this.config.outputEdgeProperties()) {
             this.writeSplitter();
             this.writeKey("properties");

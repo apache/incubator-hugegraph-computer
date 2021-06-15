@@ -48,7 +48,11 @@ public interface GraphFactory {
 
     Edge createEdge();
 
-    <V extends Value<?>> Edge createEdge(Id targetId, V value);
+    Edge createEdge(Id targetId);
+
+    Edge createEdge(String label, Id targetId);
+
+    Edge createEdge(String label, String name, Id targetId);
 
     Properties createProperties();
 

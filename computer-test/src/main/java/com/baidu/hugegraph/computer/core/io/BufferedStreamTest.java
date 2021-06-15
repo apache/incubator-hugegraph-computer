@@ -32,7 +32,7 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class BufferedStreamTest {
@@ -101,21 +101,21 @@ public class BufferedStreamTest {
                     output.writeInt(i);
                 }
                 // Write at start point of current buffer
-                output.writeInt(128, 1);
+                output.writeFixedInt(128, 1);
                 // Write at middle point of current buffer
-                output.writeInt(200, 2);
+                output.writeFixedInt(200, 2);
                 // Write at end point of current buffer
-                output.writeInt(252, 3);
+                output.writeFixedInt(252, 3);
                 // Write at previous buffer
                 Assert.assertThrows(IOException.class, () -> {
-                    output.writeInt(100, 4);
+                    output.writeFixedInt(100, 4);
                 }, e -> {
                     Assert.assertContains("underflows the start position",
                                           e.getMessage());
                 });
                 // Write at next buffer
                 Assert.assertThrows(IOException.class, () -> {
-                    output.writeInt(256, 5);
+                    output.writeFixedInt(256, 5);
                 }, e -> {
                     Assert.assertContains("overflows the write position",
                                           e.getMessage());

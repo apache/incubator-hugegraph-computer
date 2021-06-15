@@ -20,9 +20,9 @@
 package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
 
 import java.io.Closeable;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public interface HgkvFile extends Closeable {
 
@@ -64,5 +64,5 @@ public interface HgkvFile extends Closeable {
     /**
      * Output of hgkv file.
      */
-    BufferedFileOutput output() throws FileNotFoundException;
+    RandomAccessOutput output() throws IOException;
 }

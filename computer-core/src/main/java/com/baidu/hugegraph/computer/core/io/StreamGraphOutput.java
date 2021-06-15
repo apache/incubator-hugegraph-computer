@@ -23,93 +23,109 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
 
-public class StreamGraphOutput implements GraphOutput {
+public class StreamGraphOutput implements GraphComputeOutput {
 
-    private final RandomAccessOutput out;
-    protected final Config config;
+    private final EntryOutput out;
+    private final Config config;
 
-    public StreamGraphOutput(ComputerContext context, RandomAccessOutput out) {
-        this.config = context.config();
+    public StreamGraphOutput(ComputerContext context, EntryOutput out) {
         this.out = out;
+        this.config = context.config();
     }
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
-        // Write necessary
-        this.writeId(vertex.id());
-        this.writeValue(vertex.value());
-
-        if (this.config.outputVertexAdjacentEdges()) {
-            this.writeEdges(vertex.edges());
-        }
-        if (this.config.outputVertexProperties()) {
-            this.writeProperties(vertex.properties());
-        }
+        this.out.writeEntry(out -> {
+            // Write id
+            out.writeByte(vertex.id().type().code());
+            vertex.id().write(out);
+        }, out -> {
+            // Write properties
+            this.writeProperties(out, vertex.properties());
+        });
     }
 
     @Override
-    public void writeEdges(Edges edges) throws IOException {
-        int size = edges.size();
-        this.out.writeInt(size);
-        if (size == 0) {
-            return;
+    public void writeEdges(Vertex vertex) throws IOException {
+        EdgeFrequency frequency = this.config.get(
+                                  ComputerOptions.INPUT_EDGE_FREQ);
+        KvEntryWriter writer = this.out.writeEntry(out -> {
+            // Write id
+            out.writeByte(vertex.id().type().code());
+            vertex.id().write(out);
+        });
+        if (frequency == EdgeFrequency.SINGLE) {
+            for (Edge edge : vertex.edges()) {
+                // Only use targetId as subKey, use properties as subValue
+                writer.writeSubKv(out -> {
+                    out.writeByte(edge.targetId().type().code());
+                    edge.targetId().write(out);
+                }, out -> {
+                    this.writeProperties(out, edge.properties());
+                });
+            }
+        } else if (frequency == EdgeFrequency.SINGLE_PER_LABEL) {
+            for (Edge edge : vertex.edges()) {
+                // Use label + targetId as subKey, use properties as subValue
+                writer.writeSubKv(out -> {
+                    out.writeUTF(edge.label());
+                    out.writeByte(edge.targetId().type().code());
+                    edge.targetId().write(out);
+                }, out -> {
+                    this.writeProperties(out, edge.properties());
+                });
+            }
+        } else {
+            assert frequency == EdgeFrequency.MULTIPLE;
+            for (Edge edge : vertex.edges()) {
+                /*
+                 * Use label + sortValues + targetId as subKey,
+                 * use properties as subValue
+                 */
+                writer.writeSubKv(out -> {
+                    out.writeUTF(edge.label());
+                    out.writeUTF(edge.name());
+                    out.writeByte(edge.targetId().type().code());
+                    edge.targetId().write(out);
+                }, out -> {
+                    this.writeProperties(out, edge.properties());
+                });
+            }
         }
-        long startPosition = this.out.writeIntLength(0);
-        for (Edge edge : edges) {
-            this.writeEdge(edge);
-        }
-        long endPosition = this.out.position();
-        long length = endPosition - startPosition - Constants.INT_LEN;
-        this.out.writeIntLength(startPosition, (int) length);
+        writer.writeFinish();
     }
 
     @Override
-    public void writeEdge(Edge edge) throws IOException {
-        // TODO: try to reduce call ComputerContext.instance() directly.
-        ComputerContext context = ComputerContext.instance();
-        // Write necessary
-        this.writeId(edge.targetId());
-        this.writeValue(edge.value());
-
-        if (this.config.outputEdgeProperties()) {
-            this.writeProperties(edge.properties());
-        }
+    public void writeMessage(Id id, Value<?> value) throws IOException {
+        this.out.writeEntry(out -> {
+            // Write id
+            out.writeByte(id.type().code());
+            id.write(out);
+        }, out -> {
+            value.write(out);
+        });
     }
 
-    @Override
-    public void writeProperties(Properties properties) throws IOException {
+    private void writeProperties(RandomAccessOutput out, Properties properties)
+                                 throws IOException {
         Map<String, Value<?>> keyValues = properties.get();
-        this.out.writeInt(keyValues.size());
+        out.writeInt(keyValues.size());
         for (Map.Entry<String, Value<?>> entry : keyValues.entrySet()) {
-            this.out.writeUTF(entry.getKey());
+            out.writeUTF(entry.getKey());
             Value<?> value = entry.getValue();
-            this.out.writeByte(value.type().code());
-            value.write(this.out);
+            out.writeByte(value.type().code());
+            value.write(out);
         }
-    }
-
-    @Override
-    public void writeId(Id id) throws IOException {
-        this.out.writeByte(id.type().code());
-        id.write(this.out);
-    }
-
-    @Override
-    public void writeValue(Value<?> value) throws IOException {
-        value.write(this.out);
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.out.close();
     }
 }
