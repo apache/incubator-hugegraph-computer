@@ -135,12 +135,12 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                                                throws IOException {
         Assert.assertTrue(it.hasNext());
         KvEntry lastEntry = it.next();
-        Id lastId = ReceiverUtil.readId(lastEntry.key());
+        Id lastId = ReceiverUtil.readId(context(), lastEntry.key());
         DoubleValue lastSumValue = new DoubleValue();
         ReceiverUtil.readValue(lastEntry.value(), lastSumValue);
         while (it.hasNext()) {
             KvEntry currentEntry = it.next();
-            Id currentId = ReceiverUtil.readId(currentEntry.key());
+            Id currentId = ReceiverUtil.readId(context(), currentEntry.key());
             DoubleValue currentValue = new DoubleValue();
             ReceiverUtil.readValue(lastEntry.value(), currentValue);
             if (lastId.equals(currentId)) {
@@ -188,7 +188,8 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             for (int j = 0; j < 2; j++) {
                 Assert.assertTrue(it.hasNext());
                 KvEntry currentEntry = it.next();
-                Id currentId = ReceiverUtil.readId(currentEntry.key());
+                Id currentId = ReceiverUtil.readId(context(),
+                                                   currentEntry.key());
                 Id expectId = new LongId(i);
                 Assert.assertEquals(expectId, currentId);
                 IdValueList expectMessage = new IdValueList();

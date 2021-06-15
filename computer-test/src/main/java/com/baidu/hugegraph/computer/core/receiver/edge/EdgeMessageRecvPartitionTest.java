@@ -211,14 +211,14 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
         for (long i = 0L; i < 10L; i++) {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
-            Id id = ReceiverUtil.readId(entry.key());
+            Id id = ReceiverUtil.readId(context(), entry.key());
             Assert.assertEquals(new LongId(i), id);
 
             EntryIterator subKvIt = EntriesUtil.subKvIterFromEntry(entry);
             for (long j = i + 1; j < i + 3; j++) {
                 Assert.assertTrue(subKvIt.hasNext());
                 KvEntry subKv = subKvIt.next();
-                Id targetId = ReceiverUtil.readId(subKv.key());
+                Id targetId = ReceiverUtil.readId(context(), subKv.key());
                 Assert.assertEquals(new LongId(j), targetId);
 
                 Properties properties = graphFactory().createProperties();
@@ -237,13 +237,13 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
         for (long i = 0L; i < 10L; i++) {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
-            Id id = ReceiverUtil.readId(entry.key());
+            Id id = ReceiverUtil.readId(context(), entry.key());
             Assert.assertEquals(new LongId(i), id);
             EntryIterator subKvIt = EntriesUtil.subKvIterFromEntry(entry);
             for (long j = i + 1; j < i + 3; j++) {
                 Assert.assertTrue(subKvIt.hasNext());
                 KvEntry subKv = subKvIt.next();
-                Id targetId = ReceiverUtil.readId(subKv.key());
+                Id targetId = ReceiverUtil.readId(context(), subKv.key());
                 Assert.assertEquals(new LongId(j), targetId);
                 Properties properties = graphFactory().createProperties();
 

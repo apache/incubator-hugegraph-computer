@@ -62,7 +62,7 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         if (partition == null) {
             synchronized (this.partitions) {
                 /*
-                 * Not use putIfAbsent because it may create too many partition
+                 * Not use putIfAbsent because it may create useless partition
                  * object.
                  */
                 partition = this.partitions.get(partitionId);
