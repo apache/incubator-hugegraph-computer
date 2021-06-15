@@ -26,8 +26,8 @@ import java.util.function.Consumer;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.Null;
@@ -36,7 +36,8 @@ import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
@@ -49,6 +50,7 @@ import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class ComputeMessageRecvPartitionTest extends UnitTestBase {
@@ -133,12 +135,12 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                                                throws IOException {
         Assert.assertTrue(it.hasNext());
         KvEntry lastEntry = it.next();
-        Id lastId = ReceiverUtil.readId(context(), lastEntry.key());
+        Id lastId = ReceiverUtil.readId(lastEntry.key());
         DoubleValue lastSumValue = new DoubleValue();
         ReceiverUtil.readValue(lastEntry.value(), lastSumValue);
         while (it.hasNext()) {
             KvEntry currentEntry = it.next();
-            Id currentId = ReceiverUtil.readId(context(), currentEntry.key());
+            Id currentId = ReceiverUtil.readId(currentEntry.key());
             DoubleValue currentValue = new DoubleValue();
             ReceiverUtil.readValue(lastEntry.value(), currentValue);
             if (lastId.equals(currentId)) {
@@ -167,7 +169,8 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
 
     private static byte[] writeMessage(Id id, Writable message)
                                        throws IOException {
-        UnsafeBytesOutput bytesOutput = new UnsafeBytesOutput();
+        BytesOutput bytesOutput = IOFactory.createBytesOutput(
+                                  Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
 
         entryOutput.writeEntry(out -> {
@@ -185,8 +188,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             for (int j = 0; j < 2; j++) {
                 Assert.assertTrue(it.hasNext());
                 KvEntry currentEntry = it.next();
-                Id currentId = ReceiverUtil.readId(context(),
-                                                   currentEntry.key());
+                Id currentId = ReceiverUtil.readId(currentEntry.key());
                 Id expectId = new LongId(i);
                 Assert.assertEquals(expectId, currentId);
                 IdValueList expectMessage = new IdValueList();

@@ -28,7 +28,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.UnitTestBase;
 import com.baidu.hugegraph.computer.core.combiner.MergeNewPropertiesCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -39,7 +38,8 @@ import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
@@ -51,6 +51,7 @@ import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class VertexMessageRecvPartitionTest extends UnitTestBase {
@@ -216,7 +217,8 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
     }
 
     private static byte[] writeVertex(Vertex vertex) throws IOException {
-        UnsafeBytesOutput bytesOutput = new UnsafeBytesOutput();
+        BytesOutput bytesOutput = IOFactory.createBytesOutput(
+                                  Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
 
         entryOutput.writeEntry(out -> {
@@ -235,7 +237,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         for (long i = 0L; i < 10L; i++) {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
-            Id id = ReceiverUtil.readId(context(), entry.key());
+            Id id = ReceiverUtil.readId(entry.key());
             Assert.assertEquals(new LongId(i), id);
             Properties properties = graphFactory().createProperties();
 
@@ -253,7 +255,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         for (long i = 0L; i < 10L; i++) {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
-            Id id = ReceiverUtil.readId(context(), entry.key());
+            Id id = ReceiverUtil.readId(entry.key());
             Assert.assertEquals(new LongId(i), id);
         }
     }
