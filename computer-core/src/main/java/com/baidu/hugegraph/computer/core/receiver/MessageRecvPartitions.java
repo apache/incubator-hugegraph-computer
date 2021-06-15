@@ -37,6 +37,7 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
     protected final SuperstepFileGenerator fileGenerator;
     protected final Sorter sorter;
 
+    // The map of partition-id and the messages for the partition.
     private final Map<Integer, P> partitions;
 
     public MessageRecvPartitions(ComputerContext context,

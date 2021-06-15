@@ -89,6 +89,10 @@ public abstract class MessageRecvPartition {
     }
 
     public PeekableIterator<KvEntry> iterator() {
+        /*
+         * TODO: create iterator directly from buffers if there is no
+         *       outputFiles.
+         */
         this.flushAllBuffersAndWaitSorted();
         this.mergeOutputFilesIfNeeded();
         if (this.outputFiles.size() == 0) {
@@ -153,20 +157,20 @@ public abstract class MessageRecvPartition {
      * Merge outputFiles if needed, like merge 10000 files into 100 files.
      */
     private void mergeOutputFilesIfNeeded() {
-        int size = this.outputFiles.size();
-        if (size <= this.mergeFileNum) {
+        int actualSize = this.outputFiles.size();
+        if (actualSize <= this.mergeFileNum) {
             return;
         }
         int targetSize = this.mergeFileNum;
-        // If mergeFileNum = 200 and size = 400, target = 20.
-        if (size < this.mergeFileNum * this.mergeFileNum) {
-            targetSize = (int) Math.sqrt(size);
+        // If mergeFileNum = 200 and actual = 400, target = 20.
+        if (actualSize < this.mergeFileNum * this.mergeFileNum) {
+            targetSize = (int) Math.sqrt(actualSize);
         }
 
         List<String> outputs = this.genOutputFileNames(targetSize);
         OuterSortFlusher flusher = this.outerSortFlusher();
         if (this.withSubKv) {
-            flusher.sources(size);
+            flusher.sources(actualSize);
         }
         try {
             this.sorter.mergeInputs(this.outputFiles, flusher,

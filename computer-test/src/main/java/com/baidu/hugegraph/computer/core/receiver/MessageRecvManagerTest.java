@@ -100,9 +100,9 @@ public class MessageRecvManagerTest extends UnitTestBase {
 
         this.receiveManager.waitReceivedAllMessages();
         Map<Integer, PeekableIterator<KvEntry>> vertexPartitions =
-        this.receiveManager.vertexPartitions();
+                     this.receiveManager.vertexPartitions();
         Map<Integer, PeekableIterator<KvEntry>> edgePartitions =
-        this.receiveManager.edgePartitions();
+                     this.receiveManager.edgePartitions();
         Assert.assertEquals(1, vertexPartitions.size());
         Assert.assertEquals(1, edgePartitions.size());
         VertexMessageRecvPartitionTest.checkPartitionIterator(
@@ -149,7 +149,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
         Assert.assertThrows(ComputerException.class, () -> {
             this.receiveManager.waitReceivedAllMessages();
         }, e -> {
-            Assert.assertContains("Expect 1 finish messages",
+            Assert.assertContains("Expect 1 finish-messages",
                                   e.getMessage());
         });
     }

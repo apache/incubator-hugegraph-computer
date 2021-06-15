@@ -47,6 +47,7 @@ import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 public class MessageRecvManager implements Manager, MessageHandler {
@@ -101,7 +102,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.finishMessagesLatch = new CountDownLatch(
                                    this.expectedFinishMessages);
         this.waitFinishMessagesTimeout = config.get(
-        ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT);
+             ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT);
     }
 
     @Override
@@ -159,15 +160,23 @@ public class MessageRecvManager implements Manager, MessageHandler {
                              TimeUnit.MILLISECONDS);
             if (!status) {
                 throw new ComputerException(
-                          "Expect %s finish messages in %sms, %s absence " +
-                          "in superstep %s",
+                          "Expect %s finish-messages received in %s ms, " +
+                          "%s absence in superstep %s",
                           this.expectedFinishMessages,
                           this.waitFinishMessagesTimeout,
                           this.finishMessagesLatch.getCount(),
                           this.superstep);
             }
         } catch (InterruptedException e) {
-            throw new ComputerException("Thread is interrupted", e);
+            throw new ComputerException(
+                      "Thread is interrupted while waiting %s " +
+                      "finish-messages received in %s ms, " +
+                      "%s absence in superstep %s",
+                      e,
+                      this.expectedFinishMessages,
+                      this.waitFinishMessagesTimeout,
+                      this.finishMessagesLatch.getCount(),
+                      this.superstep);
         }
     }
 
@@ -206,18 +215,24 @@ public class MessageRecvManager implements Manager, MessageHandler {
      * Get the Iterator<KeyStore.Entry> of each partition.
      */
     public Map<Integer, PeekableIterator<KvEntry>> vertexPartitions() {
+        E.checkState(this.vertexPartitions != null,
+                     "The vertexPartitions can't be null");
         VertexMessageRecvPartitions partitions = this.vertexPartitions;
         this.vertexPartitions = null;
         return partitions.iterators();
     }
 
     public Map<Integer, PeekableIterator<KvEntry>> edgePartitions() {
+        E.checkState(this.edgePartitions != null,
+                     "The edgePartitions can't be null");
         EdgeMessageRecvPartitions partitions = this.edgePartitions;
         this.edgePartitions = null;
         return partitions.iterators();
     }
 
     public Map<Integer, PeekableIterator<KvEntry>> messagePartitions() {
+        E.checkState(this.messagePartitions != null,
+                     "The messagePartitions can't be null");
         ComputeMessageRecvPartitions partitions = this.messagePartitions;
         this.messagePartitions = null;
         return partitions.iterators();
