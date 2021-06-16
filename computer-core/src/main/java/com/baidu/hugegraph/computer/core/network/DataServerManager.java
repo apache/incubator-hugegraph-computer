@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
-import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.util.Log;
 
 public class DataServerManager implements Manager {
@@ -37,9 +36,9 @@ public class DataServerManager implements Manager {
     private final ConnectionManager connectionManager;
     private final MessageHandler messageHandler;
 
-    public DataServerManager(MessageHandler messageHandler) {
-        // TODO: move connectionManager to WorkerService.
-        this.connectionManager = new TransportConnectionManager();
+    public DataServerManager(ConnectionManager connectionManager,
+                             MessageHandler messageHandler) {
+        this.connectionManager = connectionManager;
         this.messageHandler = messageHandler;
     }
 

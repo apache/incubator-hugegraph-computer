@@ -44,12 +44,14 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.DataClientManager;
+import com.baidu.hugegraph.computer.core.network.DataServerManager;
+import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
+import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
+import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
-import com.baidu.hugegraph.computer.core.network.DataServerManager;
-import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -261,14 +263,18 @@ public class WorkerService {
                                                                 this.context);
         this.managers.add(recvManager);
 
-        DataServerManager serverManager = new DataServerManager(recvManager);
+        ConnectionManager connManager = new TransportConnectionManager();
+        DataServerManager serverManager = new DataServerManager(connManager,
+                                                                recvManager);
         this.managers.add(serverManager);
         this.managers.add(serverManager);
 
         SortManager sortManager = new SortManager(this.context);
         this.managers.add(sortManager);
 
-        DataClientManager clientManager = new DataClientManager(this.context);
+
+        DataClientManager clientManager = new DataClientManager(connManager,
+                                                                this.context);
         this.managers.add(clientManager);
 
         MessageSendManager sendManager = new MessageSendManager(this.context,

@@ -24,7 +24,6 @@ import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -37,13 +36,11 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
 public class StreamGraphOutput implements GraphComputeOutput {
 
     private final EntryOutput out;
-    private final Config config;
     private final EdgeFrequency frequency;
 
     public StreamGraphOutput(ComputerContext context, EntryOutput out) {
         this.out = out;
-        this.config = context.config();
-        this.frequency = this.config.get(ComputerOptions.INPUT_EDGE_FREQ);
+        this.frequency = context.config().get(ComputerOptions.INPUT_EDGE_FREQ);
     }
 
     @Override

@@ -62,5 +62,3 @@ public interface PeekableIterator<T> extends CIter<T> {
         }
     }
 }
-
-

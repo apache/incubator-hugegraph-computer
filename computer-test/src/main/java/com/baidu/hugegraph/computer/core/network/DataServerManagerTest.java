@@ -26,6 +26,8 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
+import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.worker.MockComputation;
@@ -54,7 +56,9 @@ public class DataServerManagerTest extends UnitTestBase {
         MessageRecvManager recvManager = new MessageRecvManager(fileManager,
                                                                 context());
         recvManager.init(config);
-        DataServerManager serverManager = new DataServerManager(recvManager);
+        ConnectionManager connManager = new TransportConnectionManager();
+        DataServerManager serverManager = new DataServerManager(connManager,
+                                                                recvManager);
         serverManager.init(config);
 
         Assert.assertEquals(DataServerManager.NAME, serverManager.name());

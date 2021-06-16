@@ -673,12 +673,12 @@ public class ComputerOptions extends OptionHolder {
                     Bytes.KB * 64
             );
 
-    // TODO: test if the value is appropriate.
     public static final ConfigOption<Integer> HGKV_MERGE_FILES_NUM =
             new ConfigOption<>(
                     "hgkv.max_merge_files",
                     "The max number of files to merge at one time.",
                     positiveInt(),
+                    // TODO: test if the default value is appropriate.
                     200
             );
 
