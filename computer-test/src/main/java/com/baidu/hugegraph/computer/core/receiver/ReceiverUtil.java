@@ -57,7 +57,7 @@ public class ReceiverUtil {
 
         GraphComputeInput graphInput = new StreamGraphInput(context,
                                                             pointer.input());
-        Id id =  graphInput.readId();
+        Id id = graphInput.readId();
         input.seek(position);
         return id;
     }

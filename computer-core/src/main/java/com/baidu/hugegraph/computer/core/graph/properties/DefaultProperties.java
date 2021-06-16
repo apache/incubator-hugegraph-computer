@@ -55,7 +55,7 @@ public class DefaultProperties implements Properties {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Value> T get(String key) {
+    public <T extends Value<T>> T get(String key) {
         return (T) this.keyValues.get(key);
     }
 

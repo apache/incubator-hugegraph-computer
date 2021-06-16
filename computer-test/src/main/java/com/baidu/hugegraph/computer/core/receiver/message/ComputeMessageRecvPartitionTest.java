@@ -45,6 +45,7 @@ import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
@@ -73,12 +74,14 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         FileUtils.deleteQuietly(new File("data_dir2"));
         FileManager fileManager = new FileManager();
         fileManager.init(config);
+        SortManager sortManager = new SortManager(context());
+        sortManager.init(config);
         Sorter sorter = new SorterImpl(config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                fileManager, 0);
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
                                                 context(), fileGenerator,
-                                                sorter);
+                                                sortManager, sorter);
         Assert.assertEquals(MessageType.MSG.name(), partition.type());
 
         addTwentyCombineMessageBuffer(partition::addBuffer);
@@ -86,6 +89,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         checkTenCombineMessages(partition.iterator());
 
         fileManager.close(config);
+        sortManager.close(config);
     }
 
     @Test
@@ -104,12 +108,14 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         FileUtils.deleteQuietly(new File("data_dir2"));
         FileManager fileManager = new FileManager();
         fileManager.init(config);
+        SortManager sortManager = new SortManager(context());
+        sortManager.init(config);
         Sorter sorter = new SorterImpl(config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                fileManager, 0);
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
                                                 context(), fileGenerator,
-                                                sorter);
+                                                sortManager, sorter);
         Assert.assertEquals(MessageType.MSG.name(), partition.type());
 
         addTwentyDuplicateIdValueListMessageBuffer(partition::addBuffer);
@@ -117,6 +123,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         checkIdValueListMessages(partition.iterator());
 
         fileManager.close(config);
+        sortManager.close(config);
     }
 
     public static void addTwentyCombineMessageBuffer(

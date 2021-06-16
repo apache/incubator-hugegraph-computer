@@ -43,6 +43,7 @@ import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartit
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -56,8 +57,9 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     private static final Logger LOG = Log.logger(MessageRecvManager.class);
 
-    private final FileManager fileManager;
     private final ComputerContext context;
+    private final FileManager fileManager;
+    private final SortManager sortManager;
 
     private VertexMessageRecvPartitions vertexPartitions;
     private EdgeMessageRecvPartitions edgePartitions;
@@ -71,11 +73,13 @@ public class MessageRecvManager implements Manager, MessageHandler {
     private Sorter sorter;
 
 
-    public MessageRecvManager(FileManager fileManager,
-                              ComputerContext context) {
-        this.fileManager = fileManager;
-        this.superstep = Constants.INPUT_SUPERSTEP;
+    public MessageRecvManager(ComputerContext context,
+                              FileManager fileManager,
+                              SortManager sortManager) {
         this.context = context;
+        this.fileManager = fileManager;
+        this.sortManager = sortManager;
+        this.superstep = Constants.INPUT_SUPERSTEP;
     }
 
     @Override
@@ -85,17 +89,16 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     @Override
     public void init(Config config) {
-        // TODO: use SortManager
         this.sorter = new SorterImpl(config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
-        this.vertexPartitions = new VertexMessageRecvPartitions(this.context,
-                                                                fileGenerator,
-                                                                this.sorter);
-        this.edgePartitions = new EdgeMessageRecvPartitions(this.context,
-                                                            fileGenerator,
-                                                            this.sorter);
+        this.vertexPartitions = new VertexMessageRecvPartitions(
+                                this.context, fileGenerator,
+                                this.sortManager, this.sorter);
+        this.edgePartitions = new EdgeMessageRecvPartitions(
+                              this.context, fileGenerator,
+                              this.sortManager, this.sorter);
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
@@ -110,7 +113,8 @@ public class MessageRecvManager implements Manager, MessageHandler {
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager, superstep);
         this.messagePartitions = new ComputeMessageRecvPartitions(
-                                 this.context, fileGenerator, this.sorter);
+                                 this.context, fileGenerator,
+                                 this.sortManager, this.sorter);
         this.expectedFinishMessages = this.workerCount;
         this.finishMessagesLatch = new CountDownLatch(
                                    this.expectedFinishMessages);

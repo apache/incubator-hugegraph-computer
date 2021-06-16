@@ -27,6 +27,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
@@ -35,6 +36,7 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
     protected final ComputerContext context;
     protected final Config config;
     protected final SuperstepFileGenerator fileGenerator;
+    protected final SortManager sortManager;
     protected final Sorter sorter;
 
     // The map of partition-id and the messages for the partition.
@@ -42,10 +44,12 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
     public MessageRecvPartitions(ComputerContext context,
                                  SuperstepFileGenerator fileGenerator,
+                                 SortManager sortManager,
                                  Sorter sorter) {
         this.context = context;
         this.config = context.config();
         this.fileGenerator = fileGenerator;
+        this.sortManager = sortManager;
         this.sorter = sorter;
         this.partitions = new HashMap<>();
     }

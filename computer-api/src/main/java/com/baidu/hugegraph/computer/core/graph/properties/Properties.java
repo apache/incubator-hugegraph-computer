@@ -29,7 +29,7 @@ public interface Properties extends Readable, Writable {
 
     Map<String, Value<?>> get();
 
-    <T extends Value> T get(String key);
+    <T extends Value<T>> T get(String key);
 
     void put(String key, Value<?> value);
 

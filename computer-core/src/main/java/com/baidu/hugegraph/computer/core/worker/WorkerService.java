@@ -259,8 +259,12 @@ public class WorkerService {
         FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
 
-        MessageRecvManager recvManager = new MessageRecvManager(fileManager,
-                                                                this.context);
+        SortManager sortManager = new SortManager(this.context);
+        this.managers.add(sortManager);
+
+        MessageRecvManager recvManager = new MessageRecvManager(this.context,
+                                                                fileManager,
+                                                                sortManager);
         this.managers.add(recvManager);
 
         ConnectionManager connManager = new TransportConnectionManager();
@@ -268,10 +272,6 @@ public class WorkerService {
                                                                 recvManager);
         this.managers.add(serverManager);
         this.managers.add(serverManager);
-
-        SortManager sortManager = new SortManager(this.context);
-        this.managers.add(sortManager);
-
 
         DataClientManager clientManager = new DataClientManager(connManager,
                                                                 this.context);

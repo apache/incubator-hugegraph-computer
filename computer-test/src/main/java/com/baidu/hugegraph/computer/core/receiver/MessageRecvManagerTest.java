@@ -39,6 +39,7 @@ import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitionT
 import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitionTest;
 import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitionTest;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
@@ -48,6 +49,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
 
     private Config config;
     private FileManager fileManager;
+    private SortManager sortManager;
     private MessageRecvManager receiveManager;
     private ConnectionId connectionId;
 
@@ -66,8 +68,11 @@ public class MessageRecvManagerTest extends UnitTestBase {
         );
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
-        this.receiveManager = new MessageRecvManager(this.fileManager,
-                                                     context());
+        this.sortManager = new SortManager(context());
+        this.sortManager.init(this.config);
+        this.receiveManager = new MessageRecvManager(context(),
+                                                     this.fileManager,
+                                                     this.sortManager);
         this.receiveManager.init(this.config);
         this.connectionId = new ConnectionId(
                             new InetSocketAddress("localhost",8081),
@@ -78,6 +83,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
     public void teardown() {
         this.receiveManager.close(this.config);
         this.fileManager.close(this.config);
+        this.sortManager.close(this.config);
     }
 
     @Test

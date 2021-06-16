@@ -26,11 +26,11 @@ import java.util.List;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
@@ -47,37 +47,43 @@ public abstract class MessageRecvPartition {
      * ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT.
      */
     private MessageRecvBuffers sortBuffers;
+    private final SortManager sortManager;
     private final Sorter sorter;
 
     private List<String> outputFiles;
     private final SuperstepFileGenerator fileGenerator;
     private final boolean withSubKv;
     private final int mergeFileNum;
+    private long totalBytes;
 
     public MessageRecvPartition(Config config,
                                 SuperstepFileGenerator fileGenerator,
+                                SortManager sortManager,
                                 Sorter sorter,
                                 boolean withSubKv) {
+        this.fileGenerator = fileGenerator;
+        this.sortManager = sortManager;
+        this.sorter = sorter;
+        this.withSubKv = withSubKv;
         long buffersLimit = config.get(
              ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT);
 
         long waitSortTimeout = config.get(
                                ComputerOptions.WORKER_WAIT_SORT_TIMEOUT);
         this.mergeFileNum = config.get(ComputerOptions.HGKV_MERGE_FILES_NUM);
-        this.fileGenerator = fileGenerator;
         this.recvBuffers = new MessageRecvBuffers(buffersLimit,
                                                   waitSortTimeout);
         this.sortBuffers = new MessageRecvBuffers(buffersLimit,
                                                   waitSortTimeout);
         this.outputFiles = new ArrayList<>();
-        this.withSubKv = withSubKv;
-        this.sorter = sorter;
+        this.totalBytes = 0L;
     }
 
     /**
      * Only one thread can call this method.
      */
     public synchronized void addBuffer(ManagedBuffer buffer) {
+        this.totalBytes += buffer.length();
         this.recvBuffers.addBuffer(buffer);
         if (this.recvBuffers.full()) {
             this.sortBuffers.waitSorted();
@@ -106,6 +112,10 @@ public abstract class MessageRecvPartition {
         }
     }
 
+    public long totalBytes() {
+        return this.totalBytes;
+    }
+
     protected abstract OuterSortFlusher outerSortFlusher();
 
     protected abstract String type();
@@ -126,24 +136,9 @@ public abstract class MessageRecvPartition {
         this.recvBuffers.waitSorted();
     }
 
-    // TODO: use another thread to sort buffers.
     private void mergeBuffers(MessageRecvBuffers buffers, String path) {
-        List<RandomAccessInput> inputs = buffers.buffers();
-        OuterSortFlusher flusher = this.outerSortFlusher();
-
-        if (this.withSubKv) {
-            flusher.sources(inputs.size());
-        }
-        try {
-            this.sorter.mergeBuffers(inputs, flusher,
-                                     path, this.withSubKv);
-        } catch (Exception e) {
-            throw new ComputerException(
-                      "Failed to merge %s buffers to file '%s'",
-                      e, inputs.size(), path);
-        }
-
-        buffers.signalSorted();
+        this.sortManager.sortBuffers(buffers, path, this.withSubKv,
+                                     this.outerSortFlusher());
     }
 
     private void swapReceiveAndSortBuffers() {
@@ -151,7 +146,6 @@ public abstract class MessageRecvPartition {
         this.recvBuffers = this.sortBuffers;
         this.sortBuffers = tmp;
     }
-
 
     /**
      * Merge outputFiles if needed, like merge 10000 files into 100 files.

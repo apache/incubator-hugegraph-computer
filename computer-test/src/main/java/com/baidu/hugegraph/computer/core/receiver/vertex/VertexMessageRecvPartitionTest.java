@@ -46,6 +46,7 @@ import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
@@ -59,6 +60,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
     private Config config;
     private VertexMessageRecvPartition partition;
     private FileManager fileManager;
+    private SortManager sortManager;
 
     @Before
     public void setup() {
@@ -74,23 +76,28 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         FileUtils.deleteQuietly(new File("data_dir2"));
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
+        this.sortManager = new SortManager(context());
+        this.sortManager.init(this.config);
         Sorter sorter = new SorterImpl(this.config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
         this.partition = new VertexMessageRecvPartition(context(),
                                                         fileGenerator,
+                                                        sortManager,
                                                         sorter);
     }
 
     @After
     public void teardown() {
         this.fileManager.close(this.config);
+        this.sortManager.close(this.config);
     }
 
     @Test
     public void testVertexMessageRecvPartition() throws IOException {
         Assert.assertEquals(MessageType.VERTEX.name(), this.partition.type());
+        Assert.assertEquals(0L, this.partition.totalBytes());
         addTenVertexBuffer(this.partition::addBuffer);
 
         PeekableIterator<KvEntry> it = this.partition.iterator();
@@ -118,6 +125,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         Sorter sorter = new SorterImpl(this.config);
         this.partition = new VertexMessageRecvPartition(context(),
                                                         fileGenerator,
+                                                        this.sortManager,
                                                         sorter);
         addTenVertexBuffer(this.partition::addBuffer);
         addTenVertexBuffer(this.partition::addBuffer);
@@ -149,6 +157,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         Sorter sorter = new SorterImpl(this.config);
         this.partition = new VertexMessageRecvPartition(context(),
                                                         fileGenerator,
+                                                        this.sortManager,
                                                         sorter);
 
         addTwentyDuplicateVertexBuffer(this.partition::addBuffer);
