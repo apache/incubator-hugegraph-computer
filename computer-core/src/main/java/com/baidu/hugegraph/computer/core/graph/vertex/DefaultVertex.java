@@ -124,10 +124,10 @@ public class DefaultVertex implements Vertex {
         }
         DefaultVertex other = (DefaultVertex) obj;
         return this.active == other.active &&
-               this.id.equals(other.id) &&
-               this.value.equals(other.value) &&
-               this.edges.equals(other.edges) &&
-               this.properties.equals(other.properties);
+               Objects.equals(this.id, other.id) &&
+               Objects.equals(this.value, other.value) &&
+               Objects.equals(this.edges, other.edges) &&
+               Objects.equals(this.properties, other.properties);
     }
 
     @Override

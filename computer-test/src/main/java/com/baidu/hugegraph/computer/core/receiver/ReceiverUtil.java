@@ -30,6 +30,8 @@ import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 import io.netty.buffer.ByteBuf;
@@ -55,9 +57,10 @@ public class ReceiverUtil {
         long position = input.position();
         input.seek(pointer.offset());
 
+        EntryInput entryInput = new EntryInputImpl(pointer.input());
         GraphComputeInput graphInput = new StreamGraphInput(context,
-                                                            pointer.input());
-        Id id = graphInput.readId();
+                                                            entryInput);
+        Id id = graphInput.readMessage().getKey();
         input.seek(position);
         return id;
     }

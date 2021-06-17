@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.sender;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -38,6 +37,8 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
@@ -254,10 +255,10 @@ public class WriteBuffersTest extends UnitTestBase {
         buffers.writeVertex(vertex);
 
         try (RandomAccessInput input = buffers.wrapForRead()) {
-            StreamGraphInput graphInput = new StreamGraphInput(context, input);
-            Assert.assertThrows(NotImplementedException.class, () -> {
-                graphInput.readVertex();
-            });
+            EntryInput entryInput = new EntryInputImpl(input);
+            StreamGraphInput graphInput = new StreamGraphInput(context,
+                                                               entryInput);
+            Assert.assertEquals(vertex, graphInput.readVertex());
         }
     }
 }

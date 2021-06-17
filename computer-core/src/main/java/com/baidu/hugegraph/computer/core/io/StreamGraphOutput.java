@@ -46,7 +46,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
         this.out.writeEntry(out -> {
-            writeId(out, vertex.id());
+            // Write id
+            this.writeId(out, vertex.id());
         }, out -> {
             // Write properties
             this.writeProperties(out, vertex.properties());
@@ -56,13 +57,14 @@ public class StreamGraphOutput implements GraphComputeOutput {
     @Override
     public void writeEdges(Vertex vertex) throws IOException {
         KvEntryWriter writer = this.out.writeEntry(out -> {
-            writeId(out, vertex.id());
+            // Write id
+            this.writeId(out, vertex.id());
         });
         if (this.frequency == EdgeFrequency.SINGLE) {
             for (Edge edge : vertex.edges()) {
                 // Only use targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
-                    writeId(out, edge.targetId());
+                    this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
                 });
@@ -72,7 +74,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                 // Use label + targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
                     out.writeUTF(edge.label());
-                    writeId(out, edge.targetId());
+                    this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
                 });
@@ -87,7 +89,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                 writer.writeSubKv(out -> {
                     out.writeUTF(edge.label());
                     out.writeUTF(edge.name());
-                    writeId(out, edge.targetId());
+                    this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
                 });
@@ -99,10 +101,22 @@ public class StreamGraphOutput implements GraphComputeOutput {
     @Override
     public void writeMessage(Id id, Value<?> value) throws IOException {
         this.out.writeEntry(out -> {
-            writeId(out, id);
+            // Write id
+            this.writeId(out, id);
         }, out -> {
-            value.write(out);
+            this.writeValue(out, value);
         });
+    }
+
+    private void writeId(RandomAccessOutput out, Id id) throws IOException {
+        out.writeByte(id.type().code());
+        id.write(out);
+    }
+
+    private void writeValue(RandomAccessOutput out, Value<?> value)
+                            throws IOException {
+        out.writeByte(value.type().code());
+        value.write(out);
     }
 
     private void writeProperties(RandomAccessOutput out, Properties properties)
@@ -111,15 +125,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
         out.writeInt(keyValues.size());
         for (Map.Entry<String, Value<?>> entry : keyValues.entrySet()) {
             out.writeUTF(entry.getKey());
-            Value<?> value = entry.getValue();
-            out.writeByte(value.type().code());
-            value.write(out);
+            this.writeValue(out, entry.getValue());
         }
-    }
-
-    public static void writeId(RandomAccessOutput out, Id id)
-                               throws IOException {
-        out.writeByte(id.type().code());
-        id.write(out);
     }
 }

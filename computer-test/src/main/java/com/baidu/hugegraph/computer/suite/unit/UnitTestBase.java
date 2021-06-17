@@ -38,11 +38,14 @@ import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.OutputFormat;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.testutil.Assert;
@@ -177,13 +180,15 @@ public class UnitTestBase {
     }
 
     protected static StreamGraphInput newStreamGraphInput(
-                                      UnsafeBytesInput bai) {
-        return new StreamGraphInput(context(), bai);
+                                      RandomAccessInput input) {
+        EntryInput entryInput = new EntryInputImpl(input);
+        return new StreamGraphInput(context(), entryInput);
     }
 
-    protected static StreamGraphOutput newStreamGraphOutput(BytesOutput bao) {
-        return (StreamGraphOutput) IOFactory.createGraphOutput(
-                                                 context(), OutputFormat.BIN,
-                                                 bao);
+    protected static StreamGraphOutput newStreamGraphOutput(
+                                       RandomAccessOutput output) {
+        return (StreamGraphOutput) IOFactory.createGraphOutput(context(),
+                                                               OutputFormat.BIN,
+                                                               output);
     }
 }
