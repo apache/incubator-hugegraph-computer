@@ -29,7 +29,6 @@ import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
-import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
@@ -44,9 +43,8 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
 
     public EdgeMessageRecvPartition(ComputerContext context,
                                     SuperstepFileGenerator fileGenerator,
-                                    SortManager sortManager,
-                                    Sorter sorter) {
-        super(context.config(), fileGenerator, sortManager, sorter, true);
+                                    SortManager sortManager) {
+        super(context.config(), fileGenerator, sortManager, true);
         Config config = context.config();
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);

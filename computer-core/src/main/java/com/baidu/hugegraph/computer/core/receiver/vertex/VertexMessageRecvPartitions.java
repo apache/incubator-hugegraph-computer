@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.receiver.vertex;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
-import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 
@@ -31,14 +30,13 @@ public class VertexMessageRecvPartitions
 
     public VertexMessageRecvPartitions(ComputerContext context,
                                        SuperstepFileGenerator fileGenerator,
-                                       SortManager sortManager,
-                                       Sorter sorter) {
-        super(context, fileGenerator, sortManager, sorter);
+                                       SortManager sortManager) {
+        super(context, fileGenerator, sortManager);
     }
 
     @Override
     public VertexMessageRecvPartition createPartition() {
         return new VertexMessageRecvPartition(this.context, this.fileGenerator,
-                                              this.sortManager, this.sorter);
+                                              this.sortManager);
     }
 }

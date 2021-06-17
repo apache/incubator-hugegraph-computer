@@ -43,8 +43,6 @@ import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
-import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
@@ -78,14 +76,12 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         this.fileManager.init(this.config);
         this.sortManager = new SortManager(context());
         this.sortManager.init(this.config);
-        Sorter sorter = new SorterImpl(this.config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
         this.partition = new VertexMessageRecvPartition(context(),
                                                         fileGenerator,
-                                                        sortManager,
-                                                        sorter);
+                                                        this.sortManager);
     }
 
     @After
@@ -122,11 +118,9 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                this.fileManager,
                                Constants.INPUT_SUPERSTEP);
-        Sorter sorter = new SorterImpl(this.config);
         this.partition = new VertexMessageRecvPartition(context(),
                                                         fileGenerator,
-                                                        this.sortManager,
-                                                        sorter);
+                                                        this.sortManager);
         addTenVertexBuffer(this.partition::addBuffer);
         addTenVertexBuffer(this.partition::addBuffer);
 
@@ -154,11 +148,9 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
-        Sorter sorter = new SorterImpl(this.config);
         this.partition = new VertexMessageRecvPartition(context(),
                                                         fileGenerator,
-                                                        this.sortManager,
-                                                        sorter);
+                                                        this.sortManager);
 
         addTwentyDuplicateVertexBuffer(this.partition::addBuffer);
 
@@ -240,9 +232,9 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         return bytesOutput.toByteArray();
     }
 
-    private void checkTenVertexWithMergedProperties(
-                 PeekableIterator<KvEntry> it)
-                 throws IOException {
+    private static void checkTenVertexWithMergedProperties(
+                        PeekableIterator<KvEntry> it)
+                        throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();

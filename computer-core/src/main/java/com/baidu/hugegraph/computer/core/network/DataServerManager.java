@@ -31,6 +31,7 @@ import com.baidu.hugegraph.util.Log;
 public class DataServerManager implements Manager {
 
     private static final Logger LOG = Log.logger(DataServerManager.class);
+
     public static final String NAME = "data_server";
 
     private final ConnectionManager connectionManager;

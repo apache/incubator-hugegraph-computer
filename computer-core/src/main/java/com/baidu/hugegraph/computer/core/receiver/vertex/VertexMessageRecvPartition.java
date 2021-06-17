@@ -29,7 +29,6 @@ import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
-import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
@@ -44,9 +43,8 @@ public class VertexMessageRecvPartition extends MessageRecvPartition {
 
     public VertexMessageRecvPartition(ComputerContext context,
                                       SuperstepFileGenerator fileGenerator,
-                                      SortManager sortManager,
-                                      Sorter sorter) {
-        super(context.config(), fileGenerator, sortManager, sorter, false);
+                                      SortManager sortManager) {
+        super(context.config(), fileGenerator, sortManager, false);
         Config config = context.config();
         Combiner<Properties> propertiesCombiner = config.createObject(
         ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);

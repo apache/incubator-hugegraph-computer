@@ -28,7 +28,6 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
-import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
@@ -43,9 +42,8 @@ public class ComputeMessageRecvPartition extends MessageRecvPartition {
 
     public ComputeMessageRecvPartition(ComputerContext context,
                                        SuperstepFileGenerator fileGenerator,
-                                       SortManager sortManager,
-                                       Sorter sorter) {
-        super(context.config(), fileGenerator, sortManager, sorter, false);
+                                       SortManager sortManager) {
+        super(context.config(), fileGenerator, sortManager, false);
         Config config = context.config();
         Combiner<?> valueCombiner = config.createObject(
                                     ComputerOptions.WORKER_COMBINER_CLASS,

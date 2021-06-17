@@ -40,8 +40,6 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitions;
-import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
@@ -70,8 +68,6 @@ public class MessageRecvManager implements Manager, MessageHandler {
     private CountDownLatch finishMessagesLatch;
     private long waitFinishMessagesTimeout;
     private long superstep;
-    private Sorter sorter;
-
 
     public MessageRecvManager(ComputerContext context,
                               FileManager fileManager,
@@ -89,16 +85,13 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     @Override
     public void init(Config config) {
-        this.sorter = new SorterImpl(config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
         this.vertexPartitions = new VertexMessageRecvPartitions(
-                                this.context, fileGenerator,
-                                this.sortManager, this.sorter);
+                                this.context, fileGenerator, this.sortManager);
         this.edgePartitions = new EdgeMessageRecvPartitions(
-                              this.context, fileGenerator,
-                              this.sortManager, this.sorter);
+                              this.context, fileGenerator, this.sortManager);
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
@@ -113,8 +106,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager, superstep);
         this.messagePartitions = new ComputeMessageRecvPartitions(
-                                 this.context, fileGenerator,
-                                 this.sortManager, this.sorter);
+                                 this.context, fileGenerator, this.sortManager);
         this.expectedFinishMessages = this.workerCount;
         this.finishMessagesLatch = new CountDownLatch(
                                    this.expectedFinishMessages);

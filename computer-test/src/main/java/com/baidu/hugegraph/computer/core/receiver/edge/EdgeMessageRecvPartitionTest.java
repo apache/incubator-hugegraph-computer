@@ -29,6 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.combiner.MergeNewPropertiesCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -44,8 +45,6 @@ import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
-import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
@@ -82,14 +81,11 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
         this.fileManager.init(this.config);
         this.sortManager = new SortManager(context());
         this.sortManager.init(this.config);
-        Sorter sorter = new SorterImpl(this.config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
-        this.partition = new EdgeMessageRecvPartition(context(),
-                                                      fileGenerator,
-                                                      this.sortManager,
-                                                      sorter);
+        this.partition = new EdgeMessageRecvPartition(context(), fileGenerator,
+                                                      this.sortManager);
     }
 
     @After
@@ -125,14 +121,25 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
     public void testNotOverwritePropertiesCombiner() throws IOException {
-        Sorter sorter = new SorterImpl(this.config);
+        this.config = UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
+            ComputerOptions.HGKV_MERGE_FILES_NUM, "5",
+            ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS,
+            MergeNewPropertiesCombiner.class.getName()
+        );
+        FileUtils.deleteQuietly(new File("data_dir1"));
+        FileUtils.deleteQuietly(new File("data_dir2"));
+        this.fileManager = new FileManager();
+        this.fileManager.init(this.config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
-        this.partition = new EdgeMessageRecvPartition(context(),
-                                                      fileGenerator,
-                                                      this.sortManager,
-                                                      sorter);
+        this.partition = new EdgeMessageRecvPartition(context(), fileGenerator,
+                                                      this.sortManager);
         Assert.assertEquals(MessageType.EDGE.name(), this.partition.type());
 
         addTenDuplicateEdgeBuffer(this.partition::addBuffer);

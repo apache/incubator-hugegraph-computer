@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -40,7 +41,6 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.computer.core.receiver.MessageRecvBuffers;
 import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
@@ -48,6 +48,8 @@ import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
@@ -119,12 +121,11 @@ public class SortManager implements Manager {
         }, this.sortExecutor);
     }
 
-    public CompletableFuture<Void> sortBuffers(MessageRecvBuffers buffers,
-                                               String path,
-                                               boolean withSubKv,
-                                               OuterSortFlusher flusher) {
+    public CompletableFuture<Void> mergeBuffers(List<RandomAccessInput> inputs,
+                                                String path,
+                                                boolean withSubKv,
+                                                OuterSortFlusher flusher) {
         return CompletableFuture.runAsync(() -> {
-            List<RandomAccessInput> inputs = buffers.buffers();
             if (withSubKv) {
                 flusher.sources(inputs.size());
             }
@@ -135,8 +136,32 @@ public class SortManager implements Manager {
                           "Failed to merge %s buffers to file '%s'",
                           e, inputs.size(), path);
             }
-            buffers.signalSorted();
+
         }, this.sortExecutor);
+    }
+
+    public void mergeInputs(List<String> inputs, List<String> outputs,
+                            boolean withSubKv, OuterSortFlusher flusher) {
+        if (withSubKv) {
+            flusher.sources(inputs.size());
+        }
+        try {
+            this.sorter.mergeInputs(inputs, flusher, outputs, withSubKv);
+        } catch (Exception e) {
+            throw new ComputerException(
+                      "Failed to merge %s files into %s files",
+                      e, inputs.size(), outputs.size());
+        }
+    }
+
+    public PeekableIterator<KvEntry> iterator(List<String> outputs,
+                                              boolean withSubKv) {
+        try {
+            return this.sorter.iterator(outputs, withSubKv);
+        } catch (IOException e) {
+            throw new ComputerException("Failed to iterate files: '%s'",
+                                        outputs);
+        }
     }
 
     private InnerSortFlusher createSortFlusher(MessageType type,

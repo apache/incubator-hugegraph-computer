@@ -35,7 +35,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
     private final int bufferCapacity;
     private final RandomAccessFile file;
     private long fileOffset;
-    private long fileLength;
+    private final long fileLength;
 
     public BufferedFileInput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_READ),
@@ -145,7 +145,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
     }
 
     @Override
-    public long available() throws IOException {
+    public long available() {
         return this.fileLength - this.position();
     }
 

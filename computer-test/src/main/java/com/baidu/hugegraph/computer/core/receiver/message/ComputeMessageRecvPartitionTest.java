@@ -42,8 +42,6 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
-import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
@@ -59,16 +57,16 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
     @Test
     public void testCombineMessageRecvPartition() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_ID, "local_001",
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
-                // Make sure all buffers within this limit.
-                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
-                ComputerOptions.WORKER_COMBINER_CLASS,
-                DoubleValueSumCombiner.class.getName(),
-                ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
-                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+            // Make sure all buffers within this limit.
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
+            ComputerOptions.WORKER_COMBINER_CLASS,
+            DoubleValueSumCombiner.class.getName(),
+            ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
+            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -76,12 +74,11 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         fileManager.init(config);
         SortManager sortManager = new SortManager(context());
         sortManager.init(config);
-        Sorter sorter = new SorterImpl(config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                fileManager, 0);
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
                                                 context(), fileGenerator,
-                                                sortManager, sorter);
+                                                sortManager);
         Assert.assertEquals(MessageType.MSG.name(), partition.type());
 
         addTwentyCombineMessageBuffer(partition::addBuffer);
@@ -95,14 +92,14 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
     @Test
     public void testNotCombineMessageRecvPartition() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_ID, "local_001",
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
-                ComputerOptions.WORKER_COMBINER_CLASS,
-                Null.class.getName(),
-                ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
-                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1",
+            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+            ComputerOptions.WORKER_COMBINER_CLASS,
+            Null.class.getName(),
+            ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
+            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -110,12 +107,11 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         fileManager.init(config);
         SortManager sortManager = new SortManager(context());
         sortManager.init(config);
-        Sorter sorter = new SorterImpl(config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                fileManager, 0);
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
                                                 context(), fileGenerator,
-                                                sortManager, sorter);
+                                                sortManager);
         Assert.assertEquals(MessageType.MSG.name(), partition.type());
 
         addTwentyDuplicateIdValueListMessageBuffer(partition::addBuffer);
@@ -183,9 +179,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         entryOutput.writeEntry(out -> {
             out.writeByte(id.type().code());
             id.write(out);
-        }, out -> {
-            message.write(out);
-        });
+        }, message);
         return bytesOutput.toByteArray();
     }
 
