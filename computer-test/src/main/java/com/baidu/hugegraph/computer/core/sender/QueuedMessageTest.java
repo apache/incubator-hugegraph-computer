@@ -30,10 +30,9 @@ public class QueuedMessageTest {
 
     @Test
     public void testGetter() {
-        QueuedMessage message = new QueuedMessage(1, 1, MessageType.VERTEX,
+        QueuedMessage message = new QueuedMessage(1, MessageType.VERTEX,
                                                   ByteBuffer.allocate(4));
         Assert.assertEquals(1, message.partitionId());
-        Assert.assertEquals(1, message.workerId());
         Assert.assertEquals(MessageType.VERTEX, message.type());
         Assert.assertEquals(ByteBuffer.allocate(4), message.buffer());
     }

@@ -177,8 +177,8 @@ public class MessageSendManager implements Manager {
             // The following code is also executed in sort thread
             buffer.finishSorting();
             // Each target worker has a buffer queue
-            QueuedMessage message = new QueuedMessage(partitionId, workerId,
-                                                      type, sortedBuffer);
+            QueuedMessage message = new QueuedMessage(partitionId, type,
+                                                      sortedBuffer);
             try {
                 this.sender.send(workerId, message);
             } catch (InterruptedException e) {

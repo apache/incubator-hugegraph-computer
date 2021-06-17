@@ -26,24 +26,17 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 public class QueuedMessage {
 
     private final int partitionId;
-    private final int workerId;
     private final MessageType type;
     private final ByteBuffer buffer;
 
-    public QueuedMessage(int partitionId, int workerId,
-                         MessageType type, ByteBuffer buffer) {
+    public QueuedMessage(int partitionId, MessageType type, ByteBuffer buffer) {
         this.partitionId = partitionId;
-        this.workerId = workerId;
         this.type = type;
         this.buffer = buffer;
     }
 
     public int partitionId() {
         return this.partitionId;
-    }
-
-    public int workerId() {
-        return this.workerId;
     }
 
     public MessageType type() {
