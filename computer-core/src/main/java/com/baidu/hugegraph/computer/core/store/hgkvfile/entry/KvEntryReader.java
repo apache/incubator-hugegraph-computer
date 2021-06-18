@@ -17,21 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.io;
+package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.tuple.Pair;
+import com.baidu.hugegraph.computer.core.io.Readable;
 
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+public interface KvEntryReader {
 
-public interface GraphComputeInput extends GraphInput {
+    void readSubKv(Readable subKey, Readable subValue) throws IOException;
 
-    Vertex readVertex() throws IOException;
-
-    Vertex readEdges() throws IOException;
-
-    Pair<Id, Value<?>> readMessage() throws IOException;
+    boolean hasRemaining() throws IOException;
 }

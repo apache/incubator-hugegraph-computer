@@ -21,41 +21,134 @@ package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryReader;
+
 
 public class StreamGraphInput implements GraphComputeInput {
 
-    private final RandomAccessInput in;
-    private final Config config;
     private final GraphFactory graphFactory;
     private final ValueFactory valueFactory;
+    private final EdgeFrequency frequency;
+    private final EntryInput in;
 
-    public StreamGraphInput(ComputerContext context, RandomAccessInput in) {
-        this.config = context.config();
+    public StreamGraphInput(ComputerContext context, EntryInput in) {
         this.graphFactory = context.graphFactory();
         this.valueFactory = context.valueFactory();
+        this.frequency = context.config().get(ComputerOptions.INPUT_EDGE_FREQ);
         this.in = in;
     }
 
     @Override
     public Vertex readVertex() throws IOException {
-        // When data receiver merged, implement it
-        throw new NotImplementedException("StreamGraphInput.readVertex()");
+        Vertex vertex = this.graphFactory.createVertex();
+        this.in.readEntry(in -> {
+            vertex.id(this.readId(in));
+        }, in -> {
+            vertex.properties(this.readProperties(in));
+        });
+        return vertex;
     }
 
     @Override
-    public Id readId() throws IOException {
-        byte code = this.in.readByte();
+    public Vertex readEdges() throws IOException {
+        Vertex vertex = this.graphFactory.createVertex();
+        KvEntryReader reader = this.in.readEntry(in -> {
+            // Read id
+            vertex.id(this.readId(in));
+        });
+        if (this.frequency == EdgeFrequency.SINGLE) {
+            while (reader.hasRemaining()) {
+                Edge edge = this.graphFactory.createEdge();
+                // Only use targetId as subKey, use properties as subValue
+                reader.readSubKv(in -> {
+                    edge.targetId(this.readId(in));
+                }, in -> {
+                    edge.properties(this.readProperties(in));
+                });
+                vertex.addEdge(edge);
+            }
+        } else if (frequency == EdgeFrequency.SINGLE_PER_LABEL) {
+            while (reader.hasRemaining()) {
+                Edge edge = this.graphFactory.createEdge();
+                // Use label + targetId as subKey, use properties as subValue
+                reader.readSubKv(in -> {
+                    edge.label(in.readUTF());
+                    edge.targetId(this.readId(in));
+                }, in -> {
+                    edge.properties(this.readProperties(in));
+                });
+                vertex.addEdge(edge);
+            }
+        } else {
+            assert frequency == EdgeFrequency.MULTIPLE;
+            while (reader.hasRemaining()) {
+                Edge edge = this.graphFactory.createEdge();
+                /*
+                 * Use label + sortValues + targetId as subKey,
+                 * use properties as subValue
+                 */
+                reader.readSubKv(in -> {
+                    edge.label(in.readUTF());
+                    edge.name(in.readUTF());
+                    edge.targetId(this.readId(in));
+                }, in -> {
+                    edge.properties(this.readProperties(in));
+                });
+                vertex.addEdge(edge);
+            }
+        }
+        return vertex;
+    }
+
+    @Override
+    public Pair<Id, Value<?>> readMessage() throws IOException {
+        MutablePair<Id, Value<?>> pair = MutablePair.of(null, null);
+        this.in.readEntry(in -> {
+            // Read id
+            pair.setLeft(this.readId(in));
+        }, in -> {
+            pair.setRight(this.readValue(in));
+        });
+        return pair;
+    }
+
+    private Id readId(RandomAccessInput in) throws IOException {
+        byte code = in.readByte();
         Id id = IdFactory.createId(code);
-        id.read(this.in);
+        id.read(in);
         return id;
+    }
+
+    private Value<?> readValue(RandomAccessInput in) throws IOException {
+        byte code = in.readByte();
+        Value<?> value = this.valueFactory.createValue(code);
+        value.read(in);
+        return value;
+    }
+
+    private Properties readProperties(RandomAccessInput in) throws IOException {
+        Properties properties = this.graphFactory.createProperties();
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            String key = in.readUTF();
+            Value<?> value = this.readValue(in);
+            properties.put(key, value);
+        }
+        return properties;
     }
 }
