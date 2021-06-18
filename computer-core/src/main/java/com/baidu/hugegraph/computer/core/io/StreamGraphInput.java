@@ -20,7 +20,9 @@
 package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -36,7 +38,6 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryReader;
 
-import javafx.util.Pair;
 
 public class StreamGraphInput implements GraphComputeInput {
 
@@ -116,15 +117,14 @@ public class StreamGraphInput implements GraphComputeInput {
 
     @Override
     public Pair<Id, Value<?>> readMessage() throws IOException {
-        AtomicReference<Id> idRef = new AtomicReference<>();
-        AtomicReference<Value<?>> valueRef = new AtomicReference<>();
+        MutablePair<Id, Value<?>> pair = MutablePair.of(null, null);
         this.in.readEntry(in -> {
             // Read id
-            idRef.set(this.readId(in));
+            pair.setLeft(this.readId(in));
         }, in -> {
-            valueRef.set(this.readValue(in));
+            pair.setRight(this.readValue(in));
         });
-        return new Pair<>(idRef.get(), valueRef.get());
+        return pair;
     }
 
     private Id readId(RandomAccessInput in) throws IOException {

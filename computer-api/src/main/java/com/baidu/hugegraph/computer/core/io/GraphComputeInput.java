@@ -21,11 +21,11 @@ package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-
-import javafx.util.Pair;
 
 public interface GraphComputeInput extends GraphInput {
 

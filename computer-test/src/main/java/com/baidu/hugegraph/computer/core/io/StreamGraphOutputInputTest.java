@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -37,8 +38,6 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
-
-import javafx.util.Pair;
 
 public class StreamGraphOutputInputTest extends UnitTestBase {
 
@@ -195,7 +194,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             StreamGraphInput input = newStreamGraphInput(bai);
-            Assert.assertEquals(new Pair<>(id, value), input.readMessage());
+            Assert.assertEquals(Pair.of(id, value), input.readMessage());
         }
     }
 
