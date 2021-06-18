@@ -253,11 +253,13 @@ public class WriteBuffersTest extends UnitTestBase {
         Vertex vertex = graphFactory.createVertex(new LongId(1L),
                                                   new DoubleValue(0.5d));
         buffers.writeVertex(vertex);
+        buffers.prepareSorting();
 
         try (RandomAccessInput input = buffers.wrapForRead()) {
             EntryInput entryInput = new EntryInputImpl(input);
             StreamGraphInput graphInput = new StreamGraphInput(context,
                                                                entryInput);
+            vertex.value(null);
             Assert.assertEquals(vertex, graphInput.readVertex());
         }
     }

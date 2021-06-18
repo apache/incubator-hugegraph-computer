@@ -123,7 +123,7 @@ public class QueuedMessageSender implements MessageSender {
                             continue;
                         }
                         if (channel.doSend(message)) {
-                            // Only taked message after it send
+                            // Only consume the message after it is sent
                             channel.queue.take();
                         } else {
                             ++busyClientCount;

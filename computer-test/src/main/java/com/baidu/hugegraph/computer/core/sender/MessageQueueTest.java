@@ -23,7 +23,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.checkerframework.checker.units.qual.A;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;

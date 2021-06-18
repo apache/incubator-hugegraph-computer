@@ -34,8 +34,8 @@ class MessageQueue {
 
     public MessageQueue(Runnable notEmptyNotifier) {
         E.checkArgumentNotNull(notEmptyNotifier,
-                               "The callback to notify any queue not empty " +
-                               "can't be null");
+                               "The callback to notify that a queue is " +
+                               "not empty can't be null");
         // TODO: replace with disruptor queue
         this.queue = new LinkedBlockingQueue<>(128);
         this.notEmptyNotifier = notEmptyNotifier;

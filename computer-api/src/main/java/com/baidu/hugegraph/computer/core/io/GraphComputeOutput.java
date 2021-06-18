@@ -32,4 +32,8 @@ public interface GraphComputeOutput extends GraphOutput {
     void writeEdges(Vertex vertex) throws IOException;
 
     void writeMessage(Id id, Value<?> value) throws IOException;
+
+    void writeId(RandomAccessOutput out, Id id) throws IOException;
+
+    void writeValue(RandomAccessOutput out, Value<?> value) throws IOException;
 }

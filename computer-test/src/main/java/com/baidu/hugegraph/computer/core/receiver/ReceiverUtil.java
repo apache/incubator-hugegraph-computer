@@ -60,7 +60,7 @@ public class ReceiverUtil {
         EntryInput entryInput = new EntryInputImpl(pointer.input());
         GraphComputeInput graphInput = new StreamGraphInput(context,
                                                             entryInput);
-        Id id = graphInput.readMessage().getKey();
+        Id id = graphInput.readId(input);
         input.seek(position);
         return id;
     }
