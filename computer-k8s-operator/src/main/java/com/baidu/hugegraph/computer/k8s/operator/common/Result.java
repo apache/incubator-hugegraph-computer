@@ -27,12 +27,13 @@ public class Result {
     private final boolean requeue;
     private final Duration requeueAfter;
 
-    public static final Result NO_REQUEUE = new Result(false, null);
-    public static final Result REQUEUE = new Result(true, null);
+    public static final Result NO_REQUEUE = new Result(false);
+    public static final Result REQUEUE = new Result(true);
 
-    public Result(boolean requeue, Duration requeueAfter) {
+
+    public Result(boolean requeue) {
         this.requeue = requeue;
-        this.requeueAfter = requeueAfter;
+        this.requeueAfter = Duration.ZERO;
     }
 
     public boolean requeue() {

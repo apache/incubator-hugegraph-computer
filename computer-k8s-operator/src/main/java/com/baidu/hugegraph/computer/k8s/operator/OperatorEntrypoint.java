@@ -28,20 +28,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ExecutorService;
 
+import org.apache.commons.configuration.MapConfiguration;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
+import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.operator.controller.ComputerJobController;
+import com.baidu.hugegraph.config.HugeConfig;
+import com.baidu.hugegraph.config.OptionSpace;
+import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 import com.sun.net.httpserver.HttpServer;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
@@ -49,13 +54,12 @@ import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 public class OperatorEntrypoint {
 
     private static final Logger LOG = Log.logger(OperatorEntrypoint.class);
-    private static final int RESYNC_PERIOD = 10 * 60 * 1000;
-    private static final int PROBE_PORT = 8081;
-    private static final int PROBE_BACK_LOG = 50;
 
+    private HugeConfig config;
     private KubernetesClient kubeClient;
     private SharedInformerFactory informerFactory;
     private List<AbstractController<?>> controllers;
+    private ExecutorService controllerPool;
     private HttpServer httpServer;
 
     public static void main(String[] args) {
@@ -65,13 +69,20 @@ public class OperatorEntrypoint {
         operatorEntrypoint.start();
     }
 
+    static {
+        OptionSpace.register(
+              "computer-k8s-operator",
+              "com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions"
+        );
+    }
+
     public void start() {
         try {
+            this.config = new HugeConfig(new MapConfiguration(System.getenv()));
+
             this.kubeClient = new DefaultKubernetesClient();
             this.informerFactory = this.kubeClient.informers();
             this.controllers = new ArrayList<>();
-
-            this.addHealthCheck();
 
             String namespace = this.kubeClient.getNamespace();
             if (namespace == null) {
@@ -80,7 +91,8 @@ public class OperatorEntrypoint {
             }
             LOG.info("Using namespace: " + namespace);
 
-            // Registered all controller
+            this.addHealthCheck();
+
             this.registerControllers();
 
             this.informerFactory.startAllRegisteredInformers();
@@ -89,18 +101,19 @@ public class OperatorEntrypoint {
                 System.exit(1);
             });
 
-            CountDownLatch readyLatch = new CountDownLatch(
-            this.controllers.size());
+            this.controllerPool = ExecutorUtil.newFixedThreadPool(
+                                  this.controllers.size(), "controllers-%d");
+            CountDownLatch latch = new CountDownLatch(this.controllers.size());
             List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (AbstractController<?> controller : this.controllers) {
                 futures.add(CompletableFuture.runAsync(() -> {
-                    controller.run(readyLatch);
-                }));
+                    controller.run(latch);
+                }, this.controllerPool));
             }
 
             CompletableFuture.runAsync(() -> {
                 try {
-                    readyLatch.await();
+                    latch.await();
                     this.addReadyCheck();
                     LOG.info("The Operator has been ready");
                 } catch (Throwable e) {
@@ -133,6 +146,10 @@ public class OperatorEntrypoint {
             }
         }
 
+        if (this.controllerPool != null) {
+            this.controllerPool.shutdown();
+        }
+
         if (this.informerFactory != null) {
             this.informerFactory.stopAllRegisteredInformers();
         }
@@ -148,21 +165,25 @@ public class OperatorEntrypoint {
     }
 
     private void registerControllers() {
-        this.registerController(new ComputerJobController(this.kubeClient),
-                                Deployment.class, ConfigMap.class, Event.class);
+        ComputerJobController jobController = new ComputerJobController(
+                                                  this.config, this.kubeClient);
+        this.registerController(jobController,
+                                Deployment.class, ConfigMap.class, Job.class);
     }
 
     @SafeVarargs
     private final void registerController(
                        AbstractController<?> controller,
                        Class<? extends HasMetadata>...ownsClass) {
-        controller.register(this.informerFactory, RESYNC_PERIOD, ownsClass);
+        controller.register(this.informerFactory, ownsClass);
         this.controllers.add(controller);
     }
 
     private void addHealthCheck() throws IOException {
-        InetSocketAddress address = new InetSocketAddress(PROBE_PORT);
-        this.httpServer = HttpServer.create(address, PROBE_BACK_LOG);
+        Integer probePort = this.config.get(OperatorOptions.PROBE_PORT);
+        InetSocketAddress address = new InetSocketAddress(probePort);
+        Integer probeBacklog = this.config.get(OperatorOptions.PROBE_BACKLOG);
+        this.httpServer = HttpServer.create(address, probeBacklog);
         this.httpServer.createContext("/healthz", httpExchange -> {
             byte[] bytes = "ALL GOOD!".getBytes(StandardCharsets.UTF_8);
             httpExchange.sendResponseHeaders(HttpStatus.SC_OK, bytes.length);
@@ -170,7 +191,6 @@ public class OperatorEntrypoint {
             responseBody.write(bytes);
             responseBody.close();
         });
-        this.httpServer.setExecutor(ForkJoinPool.commonPool());
         this.httpServer.start();
     }
 

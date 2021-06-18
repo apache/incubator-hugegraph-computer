@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,10 +37,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
+import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -55,47 +56,39 @@ import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
 import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
 import io.fabric8.kubernetes.client.utils.Serialization;
-import jersey.repackaged.com.google.common.collect.Lists;
-import jersey.repackaged.com.google.common.collect.Sets;
 
 public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private static final Logger LOG = Log.logger(AbstractController.class);
 
-    private static final Duration READY_TIMEOUT = Duration.ofSeconds(30);
-    private static final Duration READY_CHECK_INTERNAL = Duration.ofSeconds(1);
-    private static final int WORK_QUEUE_CAPACITY = 1024;
-    private static final int WORKER_COUNT =
-            Runtime.getRuntime().availableProcessors();
-
+    protected final HugeConfig config;
     protected final String kind;
     protected final KubernetesClient kubeClient;
-    private final BlockingQueue<Request> workQueue;
-    private final ScheduledExecutorService executor;
     private final Class<T> crClass;
+    private final WorkQueue<Request> workQueue;
+    private final ScheduledExecutorService executor;
     private Set<Class<? extends HasMetadata>> ownsClassSet;
-    private final Map<Class<? extends HasMetadata>,
+    private Map<Class<? extends HasMetadata>,
             SharedIndexInformer<? extends HasMetadata>> informerMap;
-    private final Duration readyTimeout;
-    private final Duration readyCheckInternal;
 
-    public AbstractController(KubernetesClient kubeClient) {
+    public AbstractController(HugeConfig config, KubernetesClient kubeClient) {
+        this.config = config;
         this.crClass = this.crClass();
-        this.kind = HasMetadata.getKind(this.crClass);
+        this.kind = HasMetadata.getSingular(this.crClass);
         this.kubeClient = kubeClient;
-        this.workQueue = new ArrayBlockingQueue<>(WORK_QUEUE_CAPACITY);
-        this.informerMap = new ConcurrentHashMap<>();
-        this.readyTimeout = READY_TIMEOUT;
-        this.readyCheckInternal = READY_CHECK_INTERNAL;
-        this.executor = ExecutorUtil.newScheduledThreadPool(WORKER_COUNT,
-                                                            "reconciler");
+        this.workQueue = new WorkQueue<>();
+        Integer workCount = this.config.get(OperatorOptions.WORKER_COUNT);
+        this.executor = ExecutorUtil.newScheduledThreadPool(workCount,
+                                                            this.kind +
+                                                            "-reconciler-%d");
     }
 
     @SafeVarargs
     public final void register(SharedInformerFactory informerFactory,
-                               long resyncPeriod,
                                Class<? extends HasMetadata>...ownsClass) {
+        Long resyncPeriod = this.config.get(OperatorOptions.RESYNC_PERIOD);
         this.ownsClassSet = Sets.newHashSet(ownsClass);
+        this.informerMap = new ConcurrentHashMap<>();
         this.registerCREvent(informerFactory, resyncPeriod);
         this.registerOwnsEvent(informerFactory, resyncPeriod);
     }
@@ -108,11 +101,11 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                       "for informer to be synced", this.kind);
             return;
         }
-        CountDownLatch latch = new CountDownLatch(WORKER_COUNT);
-        // Spawns worker threads for the controller.
-        for (int i = 0; i < WORKER_COUNT; i++) {
-            this.executor.scheduleWithFixedDelay(
-                    () -> {
+
+        Integer workCount = this.config.get(OperatorOptions.WORKER_COUNT);
+        CountDownLatch latch = new CountDownLatch(workCount);
+        for (int i = 0; i < workCount; i++) {
+            this.executor.scheduleWithFixedDelay(() -> {
                         try {
                             this.worker();
                         } catch (Throwable e) {
@@ -138,39 +131,43 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     }
 
     public void shutdown() {
+        this.workQueue.shutDown();
         this.executor.shutdown();
-        this.workQueue.clear();
     }
 
     protected abstract Result reconcile(Request request);
 
-    protected abstract void onCRDelete(T cr, boolean deletedStateUnknown);
-
     private void worker() {
         while (!this.executor.isShutdown() &&
+               !this.workQueue.isShutdown() &&
                !Thread.currentThread().isInterrupted()) {
-            LOG.info("Trying to get item from work queue of {}-controller",
-                     this.kind);
+            LOG.debug("Trying to get item from work queue of {}-controller",
+                      this.kind);
             Request request = null;
             try {
-                request = this.workQueue.take();
+                request = this.workQueue.get();
             } catch (InterruptedException e) {
-                LOG.error("The {}-controller worker interrupted...",
-                          this.kind, e);
+                LOG.warn("The {}-controller worker interrupted...",
+                         this.kind, e);
             }
             if (request == null) {
                 LOG.info("The {}-controller worker exiting...", this.kind);
-                return;
+                break;
             }
             Result result;
             try {
                 result = this.reconcile(request);
-            } catch (Throwable e) {
-                LOG.error("Reconcile occur error, stop reconcile: ", e);
-                return;
+            } catch (Exception e) {
+                LOG.error("Reconcile occur error, requeue request: ", e);
+                result = Result.REQUEUE;
             }
-            if (result.requeue()) {
-                this.workQueue.add(request);
+
+            try {
+                if (result.requeue()) {
+                    this.enqueueRequest(request);
+                }
+            } finally {
+                this.workQueue.done(request);
             }
         }
     }
@@ -180,7 +177,6 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         SharedIndexInformer<T> crInformer =
         informerFactory.sharedIndexInformerForCustomResource(this.crClass,
                                                              resyncPeriod);
-
         crInformer.addEventHandler(new ResourceEventHandler<T>() {
             @Override
             public void onAdd(T cr) {
@@ -196,7 +192,6 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
             @Override
             public void onDelete(T cr, boolean deletedStateUnknown) {
-                AbstractController.this.onCRDelete(cr, deletedStateUnknown);
                 Request request = Request.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
@@ -210,7 +205,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
             @SuppressWarnings("unchecked")
             SharedIndexInformer<HasMetadata> informer =
                     informerFactory.sharedIndexInformerFor(
-                    (Class<HasMetadata>) ownsClass, resyncPeriod);
+                            (Class<HasMetadata>) ownsClass, resyncPeriod);
 
             informer.addEventHandler(new ResourceEventHandler<HasMetadata>() {
                 @Override
@@ -233,7 +228,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
                 @Override
                 public void onDelete(HasMetadata resource, boolean b) {
-                    // Do nothing
+                    AbstractController.this.handleOwnsResource(resource);
                 }
             });
 
@@ -241,15 +236,18 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         });
     }
 
-    protected T getCRByKey(String key) {
-        return this.getResourceByKey(key, this.crClass);
+    protected T getCR(Request request) {
+        return this.getResourceByName(request.namespace(), request.name(),
+                                      this.crClass);
     }
 
-    @SuppressWarnings("unchecked")
-    protected <R extends HasMetadata> R getResourceByKey(String key,
-                                                         Class<R> rClass) {
+    protected <R extends HasMetadata> R getResourceByName(String namespace,
+                                                          String name,
+                                                          Class<R> rClass) {
+        @SuppressWarnings("unchecked")
         SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
                                           this.informerMap.get(rClass);
+        String key = new Request(namespace, name).key();
         R resource = informer.getIndexer().getByKey(key);
         if (resource == null) {
             return null;
@@ -257,9 +255,9 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         return Serialization.clone(resource);
     }
 
-    @SuppressWarnings("unchecked")
     protected <R extends HasMetadata> List<R> getResourceList(String namespace,
                                                               Class<R> rClass) {
+        @SuppressWarnings("unchecked")
         SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
                                           this.informerMap.get(rClass);
         List<R> rs = informer.getIndexer()
@@ -270,18 +268,20 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         return Serialization.clone(rs);
     }
 
-    @SuppressWarnings("unchecked")
     protected <R extends HasMetadata> List<R> getResourceListWithLabels(
-        String namespace, Class<R> rClass, Map<String, String> matchLabels) {
-
-        E.checkNotNull(matchLabels, "matchLabels");
-
+                                              String namespace, Class<R> rClass,
+                                              Map<String, String> matchLabels) {
+        @SuppressWarnings("unchecked")
         SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
                                           this.informerMap.get(rClass);
         List<R> rs = informer.getIndexer()
                              .byIndex(namespace, Cache.NAMESPACE_INDEX);
         if (CollectionUtils.isEmpty(rs)) {
             return rs;
+        }
+
+        if (MapUtils.isEmpty(matchLabels)) {
+            return this.getResourceList(namespace, rClass);
         }
 
         List<R> matchRS = Lists.newArrayList();
@@ -297,6 +297,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                 matchRS.add(r);
             }
         }
+
         return Serialization.clone(matchRS);
     }
 
@@ -334,11 +335,14 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         if (MapUtils.isEmpty(this.informerMap)) {
             return true;
         }
+
+        Long internal = this.config.get(OperatorOptions.READY_CHECK_INTERNAL);
+        Long timeout = this.config.get(OperatorOptions.READY_TIMEOUT);
         boolean synced;
         synced = KubeUtil
                 .waitUntilReady(Duration.ZERO,
-                                this.readyCheckInternal,
-                                this.readyTimeout,
+                                Duration.ofMillis(internal),
+                                Duration.ofMillis(timeout),
                                 () -> {
                                 return this.informerMap
                                            .values().stream()
@@ -348,11 +352,12 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         return synced;
     }
 
-    @SuppressWarnings("unchecked")
     private Class<T> crClass() {
         Type type = this.getClass().getGenericSuperclass();
-        ParameterizedType parameterizedType = (ParameterizedType)type;
+        ParameterizedType parameterizedType = (ParameterizedType) type;
         Type[] types = parameterizedType.getActualTypeArguments();
-        return (Class<T>) types[0];
+        @SuppressWarnings("unchecked")
+        Class<T> crClass = (Class<T>) types[0];
+        return crClass;
     }
 }

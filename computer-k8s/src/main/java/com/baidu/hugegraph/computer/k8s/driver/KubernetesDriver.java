@@ -27,16 +27,25 @@ import com.baidu.hugegraph.computer.driver.ComputerDriver;
 import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobState;
 import com.baidu.hugegraph.computer.driver.SuperstepStat;
+import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
+import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
 
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.MixedOperation;
+import io.fabric8.kubernetes.client.dsl.Resource;
 
 public class KubernetesDriver implements ComputerDriver {
 
     private final KubernetesClient kubeClient;
+    private final MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
+            Resource<HugeGraphComputerJob>> operation;
 
     public KubernetesDriver() {
         this.kubeClient = new DefaultKubernetesClient();
+        this.operation = this.kubeClient.customResources(
+                         HugeGraphComputerJob.class,
+                         HugeGraphComputerJobList.class);
     }
 
     @Override

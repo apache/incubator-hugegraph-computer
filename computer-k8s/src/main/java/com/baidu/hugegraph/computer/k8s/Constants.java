@@ -17,25 +17,16 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.driver;
+package com.baidu.hugegraph.computer.k8s;
 
-import java.util.Objects;
+public class Constants {
 
-public enum JobStatus {
+    public static final int MASTER_INSTANCES = 1;
 
-    INITIALIZING,
-    RUNNING,
-    CANCELLED,
-    FAILED,
-    SUCCEEDED;
+    public static final int TOTAL_COMPONENTS = 2;
+    public static final int ALLOW_FAILED_JOB = 0;
 
-    public static boolean finished(JobStatus status) {
-        return status == CANCELLED || status == FAILED || status == SUCCEEDED;
-    }
-
-    public static boolean finished(String status) {
-        return Objects.equals(status, CANCELLED.name()) ||
-               Objects.equals(status, FAILED.name()) ||
-               Objects.equals(status, SUCCEEDED.name());
-    }
+    public static final String COMPONENT_STATE_NOT_READY = "NotReady";
+    public static final String COMPONENT_STATE_READY = "Ready";
+    public static final String COMPONENT_STATE_DELETED = "Deleted";
 }

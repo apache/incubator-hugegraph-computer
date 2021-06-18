@@ -20,11 +20,17 @@
 package com.baidu.hugegraph.computer.k8s.util;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 
 public class KubeUtil {
 
@@ -41,11 +47,10 @@ public class KubeUtil {
                                          Duration interval,
                                          Duration timeout,
                                          Supplier<Boolean> condition,
-                                         ScheduledExecutorService
-                                                 executorService) {
+                                         ScheduledExecutorService executor) {
         AtomicBoolean result = new AtomicBoolean(false);
         long deadline = System.currentTimeMillis() + timeout.toMillis();
-        ScheduledFuture<?> future = executorService.scheduleAtFixedRate(
+        ScheduledFuture<?> future = executor.scheduleAtFixedRate(
                                     () -> {
                                         try {
                                             result.set(condition.get());
@@ -59,15 +64,49 @@ public class KubeUtil {
         try {
             while (System.currentTimeMillis() < deadline) {
                 if (result.get()) {
-                    future.cancel(true);
                     return true;
                 }
             }
-        } catch (Exception e) {
-            return result.get();
+        } finally {
+            future.cancel(true);
         }
-        future.cancel(true);
         return result.get();
     }
 
+
+    public static void setOwnerReference(HasMetadata owner,
+                                         HasMetadata...resources) {
+        final OwnerReference ownerReference = new OwnerReferenceBuilder()
+                .withName(owner.getMetadata().getName())
+                .withApiVersion(owner.getApiVersion())
+                .withUid(owner.getMetadata().getUid())
+                .withKind(owner.getKind())
+                .withController(true)
+                .withBlockOwnerDeletion(true)
+                .build();
+        for (HasMetadata resource : resources) {
+            resource.getMetadata().setOwnerReferences(
+                                   Collections.singletonList(ownerReference));
+        }
+    }
+
+    public static String masterJobName(String name) {
+        return name + "-master";
+    }
+
+    public static String workerJobName(String name) {
+        return name + "-worker";
+    }
+
+    public static String configMapName(String name) {
+        return name + "-configMap";
+    }
+
+    public static String now() {
+        return OffsetDateTime.now().toString();
+    }
+
+    public static int intVal(Integer integer) {
+        return integer != null ? integer : -1;
+    }
 }

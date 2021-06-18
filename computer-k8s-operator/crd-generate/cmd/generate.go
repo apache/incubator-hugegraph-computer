@@ -36,7 +36,7 @@ const (
 	packageToken   = "io.fabric8.xxxx"
 	javaPackage    = "com.baidu.hugegraph.computer.k8s.crd.model"
 	goPackage      = "hugegraph.baidu.com/operator/api/v1"
-	schemaFilePath = "../../computer-k8s/schema/kube-schema.json"
+	schemaFilePath = "../../computer-k8s/schema/crd-schema.json"
 )
 
 func main() {

@@ -31,14 +31,24 @@ import (
 
 // ComputerJobSpec defines the desired state of HugeGraphComputerJob
 type ComputerJobSpec struct {
-	AlgorithmName *string `json:"algorithmName,omitempty"`
+	AlgorithmName *string `json:"algorithmName"`
 
-	JobId *string `json:"jobId,omitempty"`
+	JobId *string `json:"jobId"`
 
-	Image *string `json:"image,omitempty"`
+	Image *string `json:"image"`
+
+	// Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always
+	// if :latest tag is specified, or IfNotPresent otherwise.
+	// +kubebuilder:validation:Enum=Always;Never;IfNotPresent
+	PullPolicy corev1.PullPolicy `json:"pullPolicy,omitempty"`
+
+	// Secrets for image pull.
+	PullSecrets []corev1.LocalObjectReference `json:"pullSecrets,omitempty"`
+
+	RestartPolicy corev1.RestartPolicy `json:"restartPolicy,omitempty"`
 
 	//+kubebuilder:validation:Minimum=1
-	WorkerInstances int32 `json:"workerInstances,omitempty"`
+	WorkerInstances int32 `json:"workerInstances"`
 
 	MasterCpu resource.Quantity `json:"masterCpu,omitempty"`
 
@@ -48,7 +58,7 @@ type ComputerJobSpec struct {
 
 	WorkerMemory resource.Quantity `json:"workerMemory,omitempty"`
 
-	ComputerConf map[string]string `json:"computerConf,omitempty"`
+	ComputerConf map[string]string `json:"computerConf"`
 
 	ConfigMap *string `json:"configMap,omitempty"`
 
@@ -75,9 +85,31 @@ type ComputerJobStatus struct {
 	JobStatus *string `json:"jobStatus"`
 
 	//+optional
-	JobState *ComputerJobState `json:"jobState"`
+	JobState ComputerJobState `json:"jobState"`
+
+	//+optional
+	Components ComponentsStatus `json:"componentStates"`
 
 	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+}
+
+type ComponentState struct {
+	// The resource name of the component.
+	Name string `json:"name"`
+
+	// The state of the component.
+	State string `json:"state"`
+}
+
+type ComponentsStatus struct {
+	// +optional
+	ConfigMap ComponentState `json:"configMap"`
+
+	// +optional
+	MasterJob ComponentState `json:"masterJob"`
+
+	// +optional
+	WorkerJob ComponentState `json:"workerJob"`
 }
 
 // +kubebuilder:object:root=true

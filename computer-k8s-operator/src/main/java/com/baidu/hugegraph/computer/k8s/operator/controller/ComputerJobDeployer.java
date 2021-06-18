@@ -17,25 +17,8 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.driver;
+package com.baidu.hugegraph.computer.k8s.operator.controller;
 
-import java.util.Objects;
+public class ComputerJobDeployer {
 
-public enum JobStatus {
-
-    INITIALIZING,
-    RUNNING,
-    CANCELLED,
-    FAILED,
-    SUCCEEDED;
-
-    public static boolean finished(JobStatus status) {
-        return status == CANCELLED || status == FAILED || status == SUCCEEDED;
-    }
-
-    public static boolean finished(String status) {
-        return Objects.equals(status, CANCELLED.name()) ||
-               Objects.equals(status, FAILED.name()) ||
-               Objects.equals(status, SUCCEEDED.name());
-    }
 }

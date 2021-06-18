@@ -1,6 +1,6 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= hugegraph-computer-operator:latest
+IMG ?= czcoder/hugegraph-computer-operator:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1"
 
@@ -37,11 +37,20 @@ help: ## Display this help.
 
 ##@ Development
 
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+gen-all: gen-code manifests gen-jsonschema ## Generate code containing DeepCopy, CRD, Operator, JsonSchema
 
-generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+manifests: controller-gen kustomize ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/crd > ../manifest/hugegraph-computer-crd.yaml
+	$(KUSTOMIZE) build config/default > ../manifest/hugegraph-computer-operator.yaml
+	rm -rf config/crd/bases
+
+gen-code: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+gen-jsonschema: ## Generate JsonSchema for java
+	go run cmd/generate.go
 
 fmt: ## Run go fmt against code.
 	go fmt ./...
@@ -49,46 +58,18 @@ fmt: ## Run go fmt against code.
 vet: ## Run go vet against code.
 	go vet ./...
 
-#ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
-#test: manifests generate fmt vet ## Run tests.
-#	mkdir -p ${ENVTEST_ASSETS_DIR}
-#	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-#	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
-
-##@ Build
-
-gen-all: generate manifests gen-jsonschema ## Generate code containing DeepCopy, CRD, JsonSchema
-
-#build: generate manifests gen-jsonschema fmt vet ## Build manager binary.
-#	go build -o bin/manager main.go
+#install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+#	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 #
-#run: manifests generate fmt vet ## Run a controller from your host.
-#	go run ./main.go
+#uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
+#	$(KUSTOMIZE) build config/crd | kubectl delete -f -
+
+#deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+#	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+#	$(KUSTOMIZE) build config/default | kubectl apply -f -
 #
-#docker-build: test ## Build docker image with the manager.
-#	docker build -t ${IMG} .
-#
-#docker-push: ## Push docker image with the manager.
-#	docker push ${IMG}
-
-gen-jsonschema: ## Generate JsonSchema for java
-	go run cmd/generate.go
-
-##@ Deployment
-
-install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | kubectl apply -f -
-
-uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | kubectl delete -f -
-
-deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default | kubectl apply -f -
-
-undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/default | kubectl delete -f -
-
+#undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
+#	$(KUSTOMIZE) build config/default | kubectl delete -f -
 
 CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
 controller-gen: ## Download controller-gen locally if necessary.

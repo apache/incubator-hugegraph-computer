@@ -55,7 +55,7 @@
                     <includeJsr303Annotations>false</includeJsr303Annotations>
                     <includeToString>false</includeToString>
                     <includeHashcodeAndEquals>false</includeHashcodeAndEquals>
-                    <generateBuilders>false</generateBuilders>
+                    <generateBuilders>true</generateBuilders>
                     <outputDirectory>${project.build.directory}/generated-sources/src/gen/java</outputDirectory>
                     <includeAdditionalProperties>false</includeAdditionalProperties>
                     <customAnnotator>io.fabric8.kubernetes.ModelAnnotator</customAnnotator>
@@ -87,7 +87,10 @@
                             <target>
                                 <!-- removing the generated Schema class -->
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/KubeSchema.java"
+                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/crdSchema.java"
+                                        verbose="true" />
+                                <delete
+                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/EnumSchema.java"
                                         verbose="true" />
                                 <delete
                                         file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/HugeGraphComputerJob.java"

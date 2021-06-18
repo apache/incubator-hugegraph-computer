@@ -1,5 +1,3 @@
-
----
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -185,6 +183,26 @@ spec:
               - type: string
               pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
               x-kubernetes-int-or-string: true
+            pullPolicy:
+              description: Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise.
+              enum:
+              - Always
+              - Never
+              - IfNotPresent
+              type: string
+            pullSecrets:
+              description: Secrets for image pull.
+              items:
+                description: LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+                    type: string
+                type: object
+              type: array
+            restartPolicy:
+              description: RestartPolicy describes how the container should be restarted. Only one of the following restart policies may be specified. If none of the following policies is specified, the default one is RestartPolicyAlways.
+              type: string
             workerCpu:
               anyOf:
               - type: integer
@@ -201,10 +219,55 @@ spec:
               - type: string
               pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
               x-kubernetes-int-or-string: true
+          required:
+          - algorithmName
+          - computerConf
+          - image
+          - jobId
+          - workerInstances
           type: object
         status:
           description: ComputerJobStatus defines the observed state of HugeGraphComputerJob
           properties:
+            componentStates:
+              properties:
+                configMap:
+                  properties:
+                    name:
+                      description: The resource name of the component.
+                      type: string
+                    state:
+                      description: The state of the component.
+                      type: string
+                  required:
+                  - name
+                  - state
+                  type: object
+                masterJob:
+                  properties:
+                    name:
+                      description: The resource name of the component.
+                      type: string
+                    state:
+                      description: The state of the component.
+                      type: string
+                  required:
+                  - name
+                  - state
+                  type: object
+                workerJob:
+                  properties:
+                    name:
+                      description: The resource name of the component.
+                      type: string
+                    state:
+                      description: The state of the component.
+                      type: string
+                  required:
+                  - name
+                  - state
+                  type: object
+              type: object
             jobState:
               properties:
                 lastSuperstepStat:
