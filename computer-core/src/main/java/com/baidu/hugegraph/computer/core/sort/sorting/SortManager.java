@@ -136,7 +136,6 @@ public class SortManager implements Manager {
                           "Failed to merge %s buffers to file '%s'",
                           e, inputs.size(), path);
             }
-
         }, this.sortExecutor);
     }
 
