@@ -44,8 +44,10 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.DataClientManager;
-import com.baidu.hugegraph.computer.core.network.FakeDataServerManager;
-import com.baidu.hugegraph.computer.core.recv.FakeMessageRecvHandler;
+import com.baidu.hugegraph.computer.core.network.DataServerManager;
+import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
+import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
+import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
@@ -65,6 +67,7 @@ public class WorkerService {
     private Config config;
     private Bsp4Worker bsp4Worker;
     private ContainerInfo workerInfo;
+
     private Computation<?> computation;
     private Combiner<Value<?>> combiner;
 
@@ -85,10 +88,7 @@ public class WorkerService {
 
         this.config = config;
 
-        InetSocketAddress dataAddress = this.initDataTransportManagers();
-
-        this.workerInfo = new ContainerInfo(dataAddress.getHostName(),
-                                            0, dataAddress.getPort());
+        this.workerInfo = new ContainerInfo();
         LOG.info("{} Start to initialize worker", this);
 
         this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
@@ -99,7 +99,8 @@ public class WorkerService {
          */
         this.masterInfo = this.bsp4Worker.waitMasterInitDone();
 
-        this.initManagers(this.masterInfo);
+        InetSocketAddress address = this.initManagers(this.masterInfo);
+        this.workerInfo.updateAddress(address);
 
         this.computation = this.config.createObject(
                            ComputerOptions.WORKER_COMPUTATION_CLASS);
@@ -205,6 +206,9 @@ public class WorkerService {
             /*
              * Wait for all workers to do compute()
              */
+            MessageRecvManager messageRecvManager =
+                               this.managers.get(MessageRecvManager.NAME);
+
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
 
@@ -235,14 +239,7 @@ public class WorkerService {
         return String.format("[worker %s]", id);
     }
 
-    private InetSocketAddress initDataTransportManagers() {
-        // TODO: Start data-transport server and get its host and port.
-        String host = this.config.get(ComputerOptions.TRANSPORT_SERVER_HOST);
-        int port = this.config.get(ComputerOptions.TRANSPORT_SERVER_PORT);
-        return InetSocketAddress.createUnresolved(host, port);
-    }
-
-    private void initManagers(ContainerInfo masterInfo) {
+    private InetSocketAddress initManagers(ContainerInfo masterInfo) {
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
@@ -259,23 +256,25 @@ public class WorkerService {
                                               this.context);
         aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
-
         FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
-
-        /*
-         * TODO: when recv module merged, change it
-         * remove exclude config from test codecov
-         */
-        FakeMessageRecvHandler recvManager = new FakeMessageRecvHandler();
-        FakeDataServerManager serverManager = new FakeDataServerManager(
-                                              recvManager);
-        this.managers.add(serverManager);
 
         SortManager sortManager = new SortManager(this.context);
         this.managers.add(sortManager);
 
-        DataClientManager clientManager = new DataClientManager(this.context);
+        MessageRecvManager recvManager = new MessageRecvManager(this.context,
+                                                                fileManager,
+                                                                sortManager);
+        this.managers.add(recvManager);
+
+        ConnectionManager connManager = new TransportConnectionManager();
+        DataServerManager serverManager = new DataServerManager(connManager,
+                                                                recvManager);
+        this.managers.add(serverManager);
+        this.managers.add(serverManager);
+
+        DataClientManager clientManager = new DataClientManager(connManager,
+                                                                this.context);
         this.managers.add(clientManager);
 
         MessageSendManager sendManager = new MessageSendManager(this.context,
@@ -290,7 +289,10 @@ public class WorkerService {
         // Init all managers
         this.managers.initAll(this.config);
 
-        LOG.info("{} WorkerService initialized managers", this);
+        InetSocketAddress address = serverManager.address();
+        LOG.info("{} WorkerService initialized managers with data server " +
+                 "address '{}'", this, address);
+        return address;
     }
 
     private void checkInited() {
@@ -312,11 +314,10 @@ public class WorkerService {
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
 
-        /*
-         * Merge vertices and edges in each partition parallel,
-         * and get the workerStat.
-         */
-        WorkerStat workerStat = manager.mergeGraph();
+        MessageRecvManager recvManager =
+                           this.managers.get(MessageRecvManager.NAME);
+
+        WorkerStat workerStat = recvManager.mergeGraph();
 
         this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
                                        workerStat);

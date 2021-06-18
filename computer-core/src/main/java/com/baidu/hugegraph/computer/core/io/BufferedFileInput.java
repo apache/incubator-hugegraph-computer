@@ -35,6 +35,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
     private final int bufferCapacity;
     private final RandomAccessFile file;
     private long fileOffset;
+    private final long fileLength;
 
     public BufferedFileInput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_READ),
@@ -47,6 +48,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
         E.checkArgument(bufferCapacity >= 8,
                         "The parameter bufferSize must be >= 8");
         this.file = file;
+        this.fileLength = file.length();
         this.bufferCapacity = bufferCapacity;
         this.fillBuffer();
     }
@@ -86,7 +88,7 @@ public class BufferedFileInput extends UnsafeBytesInput {
             super.seek(position - bufferStart);
             return;
         }
-        if (position >= this.file.length()) {
+        if (position >= this.fileLength) {
             throw new EOFException(String.format(
                                    "Can't seek to %s, reach the end of file",
                                    position));
@@ -143,8 +145,8 @@ public class BufferedFileInput extends UnsafeBytesInput {
     }
 
     @Override
-    public long available() throws IOException {
-        return this.file.length() - this.position();
+    public long available() {
+        return this.fileLength - this.position();
     }
 
     private void shiftAndFillBuffer() throws IOException {
@@ -153,9 +155,8 @@ public class BufferedFileInput extends UnsafeBytesInput {
     }
 
     private void fillBuffer() throws IOException {
-        long fileLength = this.file.length();
-        int readLen = Math.min(this.bufferCapacity - this.limit(),
-                               (int) (fileLength - this.fileOffset));
+        int readLen = (int) Math.min(this.bufferCapacity - this.limit(),
+                                     this.fileLength - this.fileOffset);
         this.fileOffset += readLen;
         this.file.readFully(this.buffer(), this.limit(), readLen);
         this.limit(this.limit() + readLen);

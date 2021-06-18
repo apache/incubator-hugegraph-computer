@@ -17,23 +17,22 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.properties;
+package com.baidu.hugegraph.computer.core.receiver;
 
-import java.util.Map;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitionTest;
+import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitionTest;
+import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitionTest;
 
-public interface Properties extends Readable, Writable {
-
-    Map<String, Value<?>> get();
-
-    <T extends Value<T>> T get(String key);
-
-    void put(String key, Value<?> value);
-
-    void putIfAbsent(String key, Value<?> value);
-
-    int size();
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    MessageRecvManagerTest.class,
+    MessageRecvBuffersTest.class,
+    VertexMessageRecvPartitionTest.class,
+    EdgeMessageRecvPartitionTest.class,
+    ComputeMessageRecvPartitionTest.class
+})
+public class ReceiverTestSuite {
 }

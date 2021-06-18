@@ -358,6 +358,24 @@ public class ComputerOptions extends OptionHolder {
                     100 * Bytes.MB
             );
 
+    public static final ConfigOption<Long> WORKER_WAIT_SORT_TIMEOUT =
+            new ConfigOption<>(
+                    "worker.wait_sort_timeout",
+                    "The max timeout(in ms) message-handler wait for " +
+                    "sort-thread to sort one batch of buffers.",
+                    positiveInt(),
+                    TimeUnit.MINUTES.toMillis(10)
+            );
+
+    public static final ConfigOption<Long> WORKER_WAIT_FINISH_MESSAGES_TIMEOUT =
+            new ConfigOption<>(
+                    "worker.wait_finish_messages_timeout",
+                    "The max timeout(in ms) message-handler wait for " +
+                    "finish-message of all workers.",
+                    positiveInt(),
+                    TimeUnit.HOURS.toMillis(24)
+            );
+
     public static final ConfigListOption<String> WORKER_DATA_DIRS =
             new ConfigListOption<>(
                     "worker.data_dirs",
@@ -660,6 +678,7 @@ public class ComputerOptions extends OptionHolder {
                     "hgkv.max_merge_files",
                     "The max number of files to merge at one time.",
                     positiveInt(),
+                    // TODO: test if the default value is appropriate.
                     200
             );
 

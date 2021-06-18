@@ -42,7 +42,8 @@ import com.baidu.hugegraph.computer.core.network.session.TransportSessionTest;
     NettyTransportClientTest.class,
     NettyEncodeDecodeHandlerTest.class,
     HeartbeatHandlerTest.class,
-    ManagedBufferTest.class
+    ManagedBufferTest.class,
+    DataServerManagerTest.class
 })
 public class NetworkTestSuite {
 }

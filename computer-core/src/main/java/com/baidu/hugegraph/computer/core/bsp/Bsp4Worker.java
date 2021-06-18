@@ -44,6 +44,23 @@ public class Bsp4Worker extends BspBase {
     }
 
     /**
+     * Wait master registered, get master's information includes hostname
+     * and port.
+     */
+    public ContainerInfo waitMasterInitDone() {
+        LOG.info("Worker({}) is waiting for master init-done",
+                 this.workerInfo.uniqueName());
+        String path = this.constructPath(BspEvent.BSP_MASTER_INIT_DONE);
+        byte[] bytes = this.bspClient().get(path, this.registerTimeout(),
+                                            this.logInterval());
+        ContainerInfo masterInfo = new ContainerInfo();
+        SerializeUtil.fromBytes(bytes, masterInfo);
+        LOG.info("Worker({}) waited master init-done: {}",
+                 this.workerInfo.uniqueName(), masterInfo);
+        return masterInfo;
+    }
+
+    /**
      * Register this worker, worker's information is passed by constructor.
      */
     public void workerInitDone() {
@@ -57,23 +74,6 @@ public class Bsp4Worker extends BspBase {
                                          this.workerInfo.uniqueName());
         this.bspClient().put(path, SerializeUtil.toBytes(this.workerInfo));
         LOG.info("Worker set init-done: {}", this.workerInfo.uniqueName());
-    }
-
-    /**
-     * Wait master registered, get master's information includes hostname
-     * and port.
-     */
-    public ContainerInfo waitMasterInitDone() {
-        LOG.info("Worker({}) is waiting for master init-done",
-                 this.workerInfo.id());
-        String path = this.constructPath(BspEvent.BSP_MASTER_INIT_DONE);
-        byte[] bytes = this.bspClient().get(path, this.registerTimeout(),
-                                            this.logInterval());
-        ContainerInfo masterInfo = new ContainerInfo();
-        SerializeUtil.fromBytes(bytes, masterInfo);
-        LOG.info("Worker({}) waited master init-done: {}",
-                 this.workerInfo.id(), masterInfo);
-        return masterInfo;
     }
 
     /**

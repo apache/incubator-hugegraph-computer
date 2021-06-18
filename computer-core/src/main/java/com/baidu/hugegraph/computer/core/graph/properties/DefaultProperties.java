@@ -54,8 +54,9 @@ public class DefaultProperties implements Properties {
     }
 
     @Override
-    public Value<?> get(String key) {
-        return this.keyValues.get(key);
+    @SuppressWarnings("unchecked")
+    public <T extends Value<T>> T get(String key) {
+        return (T) this.keyValues.get(key);
     }
 
     @Override
@@ -66,6 +67,10 @@ public class DefaultProperties implements Properties {
     @Override
     public void putIfAbsent(String key, Value<?> value) {
         this.keyValues.putIfAbsent(key, value);
+    }
+
+    public int size() {
+        return this.keyValues.size();
     }
 
     @Override

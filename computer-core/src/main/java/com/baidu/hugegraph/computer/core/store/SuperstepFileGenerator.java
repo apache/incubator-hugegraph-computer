@@ -17,23 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.properties;
+package com.baidu.hugegraph.computer.core.store;
 
-import java.util.Map;
+import java.util.UUID;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+public class SuperstepFileGenerator {
 
-public interface Properties extends Readable, Writable {
+    private final FileGenerator fileGenerator;
+    private final int superstep;
 
-    Map<String, Value<?>> get();
+    public SuperstepFileGenerator(FileGenerator fileGenerator,
+                                  int superstep) {
+        this.fileGenerator = fileGenerator;
+        this.superstep = superstep;
+    }
 
-    <T extends Value<T>> T get(String key);
-
-    void put(String key, Value<?> value);
-
-    void putIfAbsent(String key, Value<?> value);
-
-    int size();
+    public String nextPath(String type) {
+        String[] paths = {type, Integer.toString(this.superstep),
+                          UUID.randomUUID().toString()};
+        return this.fileGenerator.nextDirectory(paths);
+    }
 }

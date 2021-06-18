@@ -24,7 +24,6 @@ import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -37,19 +36,17 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
 public class StreamGraphOutput implements GraphComputeOutput {
 
     private final EntryOutput out;
-    private final Config config;
+    private final EdgeFrequency frequency;
 
     public StreamGraphOutput(ComputerContext context, EntryOutput out) {
         this.out = out;
-        this.config = context.config();
+        this.frequency = context.config().get(ComputerOptions.INPUT_EDGE_FREQ);
     }
 
     @Override
     public void writeVertex(Vertex vertex) throws IOException {
         this.out.writeEntry(out -> {
-            // Write id
-            out.writeByte(vertex.id().type().code());
-            vertex.id().write(out);
+            writeId(out, vertex.id());
         }, out -> {
             // Write properties
             this.writeProperties(out, vertex.properties());
@@ -58,36 +55,30 @@ public class StreamGraphOutput implements GraphComputeOutput {
 
     @Override
     public void writeEdges(Vertex vertex) throws IOException {
-        EdgeFrequency frequency = this.config.get(
-                                  ComputerOptions.INPUT_EDGE_FREQ);
         KvEntryWriter writer = this.out.writeEntry(out -> {
-            // Write id
-            out.writeByte(vertex.id().type().code());
-            vertex.id().write(out);
+            writeId(out, vertex.id());
         });
-        if (frequency == EdgeFrequency.SINGLE) {
+        if (this.frequency == EdgeFrequency.SINGLE) {
             for (Edge edge : vertex.edges()) {
                 // Only use targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
-                    out.writeByte(edge.targetId().type().code());
-                    edge.targetId().write(out);
+                    writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
                 });
             }
-        } else if (frequency == EdgeFrequency.SINGLE_PER_LABEL) {
+        } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
             for (Edge edge : vertex.edges()) {
                 // Use label + targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
                     out.writeUTF(edge.label());
-                    out.writeByte(edge.targetId().type().code());
-                    edge.targetId().write(out);
+                    writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
                 });
             }
         } else {
-            assert frequency == EdgeFrequency.MULTIPLE;
+            assert this.frequency == EdgeFrequency.MULTIPLE;
             for (Edge edge : vertex.edges()) {
                 /*
                  * Use label + sortValues + targetId as subKey,
@@ -96,8 +87,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                 writer.writeSubKv(out -> {
                     out.writeUTF(edge.label());
                     out.writeUTF(edge.name());
-                    out.writeByte(edge.targetId().type().code());
-                    edge.targetId().write(out);
+                    writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
                 });
@@ -109,9 +99,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
     @Override
     public void writeMessage(Id id, Value<?> value) throws IOException {
         this.out.writeEntry(out -> {
-            // Write id
-            out.writeByte(id.type().code());
-            id.write(out);
+            writeId(out, id);
         }, out -> {
             value.write(out);
         });
@@ -127,5 +115,11 @@ public class StreamGraphOutput implements GraphComputeOutput {
             out.writeByte(value.type().code());
             value.write(out);
         }
+    }
+
+    public static void writeId(RandomAccessOutput out, Id id)
+                               throws IOException {
+        out.writeByte(id.type().code());
+        id.write(out);
     }
 }

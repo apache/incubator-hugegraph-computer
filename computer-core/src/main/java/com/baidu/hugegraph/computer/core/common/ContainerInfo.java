@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.common;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
@@ -43,6 +44,7 @@ public class ContainerInfo implements Readable, Writable {
 
     // For reflexion.
     public ContainerInfo() {
+        this(-1, "", -1, -1);
     }
 
     public ContainerInfo(int id, String hostname, int rpcPort) {
@@ -87,6 +89,11 @@ public class ContainerInfo implements Readable, Writable {
           .append(":")
           .append(this.dataPort);
         return sb.toString();
+    }
+
+    public void updateAddress(InetSocketAddress address) {
+        this.hostname = address.getHostName();
+        this.dataPort = address.getPort();
     }
 
     @Override

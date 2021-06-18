@@ -21,9 +21,12 @@ package com.baidu.hugegraph.computer.core.io;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public interface GraphComputeInput extends GraphInput {
+
+    Id readId() throws IOException;
 
     Vertex readVertex() throws IOException;
 }

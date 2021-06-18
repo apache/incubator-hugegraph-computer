@@ -17,23 +17,34 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.properties;
+package com.baidu.hugegraph.computer.core.sort.sorter;
 
-import java.util.Map;
+import java.util.NoSuchElementException;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+import org.junit.Test;
 
-public interface Properties extends Readable, Writable {
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.testutil.Assert;
 
-    Map<String, Value<?>> get();
+public class EmptyFlusherTest {
 
-    <T extends Value<T>> T get(String key);
+    @Test
+    public void test() throws Exception {
+        PeekableIterator<Double> it = PeekableIterator.emptyIterator();
+        Assert.assertFalse(it.hasNext());
 
-    void put(String key, Value<?> value);
+        Assert.assertThrows(NoSuchElementException.class, () -> {
+            it.next();
+        });
 
-    void putIfAbsent(String key, Value<?> value);
+        Assert.assertThrows(UnsupportedOperationException.class, () -> {
+            it.metadata("key");
+        });
 
-    int size();
+        Assert.assertThrows(NoSuchElementException.class, () -> {
+            it.peek();
+        });
+
+        it.close();
+    }
 }
