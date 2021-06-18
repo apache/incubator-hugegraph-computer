@@ -17,40 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.compute;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.sender.MessageSender;
+import com.baidu.hugegraph.computer.core.sender.QueuedMessage;
 
-public class IdValueList extends ListValue<IdValue> {
+public class MockMessageSender implements MessageSender {
 
-    public IdValueList() {
-        super(ValueType.ID_VALUE);
+    @Override
+    public CompletableFuture<Void> send(int workerId, MessageType type) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        future.complete(null);
+        return future;
     }
 
     @Override
-    public ValueType type() {
-        return ValueType.ID_VALUE_LIST;
-    }
-
-    @Override
-    public void read(RandomAccessInput in) throws IOException {
-        this.read(in, false);
-    }
-
-    @Override
-    public void write(RandomAccessOutput out) throws IOException {
-        this.write(out, false);
-    }
-
-    @Override
-    public IdValueList copy() {
-        IdValueList values = new IdValueList();
-        for (IdValue value : this.values()) {
-            values.add(value);
-        }
-        return values;
+    public void send(int workerId, QueuedMessage message) {
+        // pass
     }
 }

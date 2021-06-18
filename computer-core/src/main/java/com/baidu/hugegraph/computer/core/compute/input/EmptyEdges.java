@@ -17,40 +17,39 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.compute.input;
 
-import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 
-public class IdValueList extends ListValue<IdValue> {
+public class EmptyEdges implements Edges {
 
-    public IdValueList() {
-        super(ValueType.ID_VALUE);
+    private static final EmptyEdges INSTANCE = new EmptyEdges();
+
+    private EmptyEdges() {
+        // pass
+    }
+
+    public static EmptyEdges instance() {
+        return INSTANCE;
     }
 
     @Override
-    public ValueType type() {
-        return ValueType.ID_VALUE_LIST;
+    public int size() {
+        return 0;
     }
 
     @Override
-    public void read(RandomAccessInput in) throws IOException {
-        this.read(in, false);
+    public void add(Edge edge) {
+        throw new ComputerException("Can't add edge '{}'", edge);
     }
 
     @Override
-    public void write(RandomAccessOutput out) throws IOException {
-        this.write(out, false);
-    }
-
-    @Override
-    public IdValueList copy() {
-        IdValueList values = new IdValueList();
-        for (IdValue value : this.values()) {
-            values.add(value);
-        }
-        return values;
+    public Iterator<Edge> iterator() {
+        return Collections.emptyIterator();
     }
 }
