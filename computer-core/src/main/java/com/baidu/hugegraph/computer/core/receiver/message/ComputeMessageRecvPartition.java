@@ -25,7 +25,6 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
@@ -51,12 +50,10 @@ public class ComputeMessageRecvPartition extends MessageRecvPartition {
         if (valueCombiner == null) {
             this.flusher = new KvOuterSortFlusher();
         } else {
-            String valueTypeStr = config.get(ComputerOptions.VALUE_TYPE);
-            ValueType valueType = ValueType.valueOf(valueTypeStr);
-            Value<?> value1 = context.valueFactory().createValue(valueType);
-            Value<?> value2 = context.valueFactory().createValue(valueType);
+            Value<?> v1 = config.createObject(ComputerOptions.MESSAGE_CLASS);
+            Value<?> v2 = config.createObject(ComputerOptions.MESSAGE_CLASS);
             PointerCombiner<Value<?>> pointerCombiner = new PointerCombiner(
-                                                 value1, value2, valueCombiner);
+                                                        v1, v2, valueCombiner);
             this.flusher = new CombineKvOuterSortFlusher(pointerCombiner);
         }
     }

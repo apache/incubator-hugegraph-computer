@@ -238,7 +238,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         for (long i = 0L; i < 10L; i++) {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
-            Id id = ReceiverUtil.readId(context(), entry.key());
+            Id id = ReceiverUtil.readId(entry.key());
             Assert.assertEquals(new LongId(i), id);
             Properties properties = graphFactory().createProperties();
 
@@ -256,7 +256,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         for (long i = 0L; i < 10L; i++) {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
-            Id id = ReceiverUtil.readId(context(), entry.key());
+            Id id = ReceiverUtil.readId(entry.key());
             Assert.assertEquals(new LongId(i), id);
         }
     }

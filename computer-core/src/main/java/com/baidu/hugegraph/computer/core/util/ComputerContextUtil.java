@@ -30,8 +30,6 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.DefaultConfig;
 import com.baidu.hugegraph.computer.core.graph.BuiltinGraphFactory;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.value.BuiltinValueFactory;
-import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 
 public class ComputerContextUtil {
 
@@ -41,12 +39,9 @@ public class ComputerContextUtil {
 
     public static void initContext(Map<String, String> params) {
         Config config = new DefaultConfig(params);
-        ValueFactory valueFactory = new BuiltinValueFactory(config);
-        GraphFactory graphFactory = new BuiltinGraphFactory(config,
-                                                            valueFactory);
+        GraphFactory graphFactory = new BuiltinGraphFactory(config);
         Allocator allocator = new DefaultAllocator(config, graphFactory);
-        ComputerContext.initContext(config, graphFactory,
-                                    valueFactory, allocator);
+        ComputerContext.initContext(config, graphFactory, allocator);
     }
 
     public static Map<String, String> convertToMap(String... options) {

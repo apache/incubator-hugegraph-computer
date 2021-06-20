@@ -35,7 +35,5 @@ public interface GraphComputeInput extends GraphInput {
 
     Pair<Id, Value<?>> readMessage() throws IOException;
 
-    Id readId(RandomAccessInput in) throws IOException;
-
     Value<?> readValue(RandomAccessInput in) throws IOException;
 }

@@ -38,8 +38,6 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     // TODO: try to reduce call ComputerContext.instance() directly.
     private static final GraphFactory GRAPH_FACTORY =
                                       ComputerContext.instance().graphFactory();
-    private static final ValueFactory VALUE_FACTORY =
-                                      ComputerContext.instance().valueFactory();
 
     private ValueType elemType;
     private List<T> values;
@@ -142,7 +140,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
-            T value = (T) VALUE_FACTORY.createValue(this.elemType);
+            T value = (T) GRAPH_FACTORY.createValue(this.elemType);
             value.read(in);
             this.values.add(value);
         }

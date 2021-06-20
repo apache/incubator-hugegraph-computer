@@ -22,16 +22,12 @@ package com.baidu.hugegraph.computer.core.receiver;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.io.GraphComputeInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 import io.netty.buffer.ByteBuf;
@@ -51,18 +47,10 @@ public class ReceiverUtil {
         }
     }
 
-    public static Id readId(ComputerContext context, Pointer pointer)
-                            throws IOException {
-        RandomAccessInput input = pointer.input();
-        long position = input.position();
+    public static Id readId(Pointer pointer) throws IOException {
+        RandomAccessInput input  = pointer.input();
         input.seek(pointer.offset());
-
-        EntryInput entryInput = new EntryInputImpl(pointer.input());
-        GraphComputeInput graphInput = new StreamGraphInput(context,
-                                                            entryInput);
-        Id id = graphInput.readId(input);
-        input.seek(position);
-        return id;
+        return StreamGraphInput.readId(input);
     }
 
     public static void readValue(Pointer pointer, Readable value)

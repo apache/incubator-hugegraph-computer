@@ -178,7 +178,8 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     public void testWriteReadMessage() throws IOException {
         UnitTestBase.updateOptions(
             ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value"
+            ComputerOptions.VALUE_NAME, "value",
+            ComputerOptions.MESSAGE_CLASS, DoubleValue.class.getName()
         );
 
         Id id = new LongId(999L);

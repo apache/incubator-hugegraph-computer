@@ -66,7 +66,8 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             DoubleValueSumCombiner.class.getName(),
             ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10",
+            ComputerOptions.MESSAGE_CLASS, DoubleValue.class.getName()
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -99,7 +100,8 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             Null.class.getName(),
             ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10",
+            ComputerOptions.MESSAGE_CLASS, IdValueList.class.getName()
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -138,12 +140,12 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                                                throws IOException {
         Assert.assertTrue(it.hasNext());
         KvEntry lastEntry = it.next();
-        Id lastId = ReceiverUtil.readId(context(), lastEntry.key());
+        Id lastId = ReceiverUtil.readId(lastEntry.key());
         DoubleValue lastSumValue = new DoubleValue();
         ReceiverUtil.readValue(lastEntry.value(), lastSumValue);
         while (it.hasNext()) {
             KvEntry currentEntry = it.next();
-            Id currentId = ReceiverUtil.readId(context(), currentEntry.key());
+            Id currentId = ReceiverUtil.readId(currentEntry.key());
             DoubleValue currentValue = new DoubleValue();
             ReceiverUtil.readValue(lastEntry.value(), currentValue);
             if (lastId.equals(currentId)) {
@@ -189,8 +191,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             for (int j = 0; j < 2; j++) {
                 Assert.assertTrue(it.hasNext());
                 KvEntry currentEntry = it.next();
-                Id currentId = ReceiverUtil.readId(context(),
-                                                   currentEntry.key());
+                Id currentId = ReceiverUtil.readId(currentEntry.key());
                 Id expectId = new LongId(i);
                 Assert.assertEquals(expectId, currentId);
                 IdValueList expectMessage = new IdValueList();

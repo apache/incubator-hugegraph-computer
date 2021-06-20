@@ -63,7 +63,7 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "algorithm.value_type",
                     "The value type of current algorithm, used by " +
-                    "ValueFactory to create value. If value_type is " +
+                    "GraphFactory to create value. If value_type is " +
                     "CUSTOM_VALUE, value_class is used to create value.",
                     disallowEmpty(),
                     "NULL"
@@ -85,6 +85,14 @@ public class ComputerOptions extends OptionHolder {
                     "The algorithm value name of vertex",
                     disallowEmpty(),
                     "value"
+            );
+
+    public static final ConfigOption<Class<?>> MESSAGE_CLASS =
+            new ConfigOption<>(
+                    "algorithm.message_class",
+                    "The class of message passed when compute vertex.",
+                    disallowEmpty(),
+                    Null.class
             );
 
     public static final ConfigOption<String> INPUT_SOURCE_TYPE =

@@ -21,15 +21,18 @@ package com.baidu.hugegraph.computer.core.graph;
 
 import java.util.UUID;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
 import com.baidu.hugegraph.computer.core.graph.id.UuidId;
+import com.baidu.hugegraph.computer.core.graph.value.MockCustomValue;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.testutil.Assert;
 
 public class BuiltinGraphFactoryTest extends UnitTestBase {
 
@@ -58,5 +61,53 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         Id id = graphFactory.createId(uuid);
         Assert.assertEquals(IdType.UUID, id.type());
         Assert.assertEquals(new UuidId(uuid), id);
+    }
+
+    @Test
+    public void testCreateValue() {
+        GraphFactory factory = context().graphFactory();
+        Assert.assertEquals(ValueType.NULL,
+                            factory.createValue(ValueType.NULL.code()).type());
+        Assert.assertEquals(ValueType.LONG,
+                            factory.createValue(ValueType.LONG.code()).type());
+        Assert.assertEquals(ValueType.DOUBLE,
+                            factory.createValue(ValueType.DOUBLE.code())
+                                   .type());
+        Assert.assertEquals(ValueType.ID_VALUE,
+                            factory.createValue(ValueType.ID_VALUE.code())
+                                   .type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST,
+                            factory.createValue(ValueType.ID_VALUE_LIST.code())
+                                   .type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
+                            factory.createValue(
+                                    ValueType.ID_VALUE_LIST_LIST.code())
+                                   .type());
+
+        Assert.assertEquals(ValueType.NULL,
+                            factory.createValue(ValueType.NULL).type());
+        Assert.assertEquals(ValueType.LONG,
+                            factory.createValue(ValueType.LONG).type());
+        Assert.assertEquals(ValueType.DOUBLE,
+                            factory.createValue(ValueType.DOUBLE).type());
+        Assert.assertEquals(ValueType.ID_VALUE,
+                            factory.createValue(ValueType.ID_VALUE).type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST,
+                            factory.createValue(ValueType.ID_VALUE_LIST)
+                                   .type());
+        Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
+                            factory.createValue(ValueType.ID_VALUE_LIST_LIST)
+                                   .type());
+    }
+
+    @Test
+    public void testCreateUserDefinedValue() {
+        UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.VALUE_TYPE, ValueType.CUSTOM_VALUE.name(),
+                ComputerOptions.VALUE_CLASS, MockCustomValue.class.getName()
+        );
+        GraphFactory factory = context().graphFactory();
+        Assert.assertEquals(ValueType.CUSTOM_VALUE,
+                            factory.createValue(ValueType.CUSTOM_VALUE).type());
     }
 }

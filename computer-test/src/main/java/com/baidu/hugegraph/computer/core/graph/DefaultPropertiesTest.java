@@ -35,8 +35,7 @@ public class DefaultPropertiesTest extends UnitTestBase {
 
     @Test
     public void testConstructor() {
-        DefaultProperties properties = new DefaultProperties(graphFactory(),
-                                                             valueFactory());
+        DefaultProperties properties = new DefaultProperties(graphFactory());
         Assert.assertEquals(0, properties.get().size());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
@@ -49,8 +48,7 @@ public class DefaultPropertiesTest extends UnitTestBase {
 
     @Test
     public void testOverwrite() {
-        DefaultProperties properties = new DefaultProperties(graphFactory(),
-                                                             valueFactory());
+        DefaultProperties properties = new DefaultProperties(graphFactory());
         Assert.assertEquals(0, properties.get().size());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
@@ -67,34 +65,30 @@ public class DefaultPropertiesTest extends UnitTestBase {
 
     @Test
     public void testReadWrite() throws IOException {
-        DefaultProperties properties = new DefaultProperties(graphFactory(),
-                                                             valueFactory());
+        DefaultProperties properties = new DefaultProperties(graphFactory());
         Assert.assertEquals(0, properties.get().size());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
 
-        DefaultProperties props2 = new DefaultProperties(graphFactory(),
-                                                         valueFactory());
+        DefaultProperties props2 = new DefaultProperties(graphFactory());
         UnitTestBase.assertEqualAfterWriteAndRead(properties, props2);
     }
 
     @Test
-    public void testEquals() throws IOException {
-        DefaultProperties props1 = new DefaultProperties(graphFactory(),
-                                                         valueFactory());
+    public void testEquals() {
+        DefaultProperties props1 = new DefaultProperties(graphFactory());
         props1.put("p1", new LongValue(1L));
         props1.put("p2", new DoubleValue(2.0D));
 
         DefaultProperties props2 = new DefaultProperties(
                                    props1.get(),
-                                   UnitTestBase.valueFactory());
+                                   UnitTestBase.graphFactory());
         Assert.assertEquals(props1, props2);
     }
 
     @Test
     public void testHashCode() {
-        DefaultProperties props = new DefaultProperties(graphFactory(),
-                                                        valueFactory());
+        DefaultProperties props = new DefaultProperties(graphFactory());
         props.put("p1", new LongValue(1L));
         props.put("p2", new DoubleValue(2.0D));
 

@@ -27,7 +27,6 @@ import java.util.Objects;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
@@ -35,17 +34,16 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 public class DefaultProperties implements Properties {
 
     private final Map<String, Value<?>> keyValues;
-    private final ValueFactory valueFactory;
+    private final GraphFactory graphFactory;
 
-    public DefaultProperties(GraphFactory graphFactory,
-                             ValueFactory valueFactory) {
-        this(graphFactory.createMap(), valueFactory);
+    public DefaultProperties(GraphFactory graphFactory) {
+        this(graphFactory.createMap(), graphFactory);
     }
 
     public DefaultProperties(Map<String, Value<?>> keyValues,
-                             ValueFactory valueFactory) {
+                             GraphFactory graphFactory) {
         this.keyValues = keyValues;
-        this.valueFactory = valueFactory;
+        this.graphFactory = graphFactory;
     }
 
     @Override
@@ -81,7 +79,7 @@ public class DefaultProperties implements Properties {
             String key = in.readUTF();
             ValueType valueType = SerialEnum.fromCode(ValueType.class,
                                                       in.readByte());
-            Value<?> value = this.valueFactory.createValue(valueType);
+            Value<?> value = this.graphFactory.createValue(valueType);
             value.read(in);
             this.keyValues.put(key, value);
         }

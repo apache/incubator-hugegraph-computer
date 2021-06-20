@@ -31,6 +31,7 @@ import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
@@ -64,7 +65,8 @@ public class MessageRecvManagerTest extends UnitTestBase {
             ComputerOptions.VALUE_TYPE, ValueType.DOUBLE.name(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
-            ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "100"
+            ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "100",
+            ComputerOptions.MESSAGE_CLASS, DoubleValue.class.getName()
         );
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);

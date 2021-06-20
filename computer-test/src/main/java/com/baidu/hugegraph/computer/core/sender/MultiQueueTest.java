@@ -121,7 +121,7 @@ public class MultiQueueTest {
                 queue.put(1, new QueuedMessage(4, MessageType.VERTEX, null));
                 queue.put(1, new QueuedMessage(6, MessageType.VERTEX, null));
             } catch (Throwable e) {
-                exceptions[0] = e;
+                exceptions[1] = e;
             }
         });
 
@@ -155,7 +155,7 @@ public class MultiQueueTest {
                 Assert.assertTrue(ImmutableSet.of(5, 6).contains(
                                   queue.take().partitionId()));
             } catch (Throwable e) {
-                exceptions[0] = e;
+                exceptions[2] = e;
             }
         });
 
