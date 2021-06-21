@@ -38,9 +38,9 @@ public class MultiQueueTest {
         Thread thread1 = new Thread(() -> {
             try {
                 latch.await();
-                queue.put(0, new QueuedMessage(1, 0, MessageType.VERTEX, null));
-                queue.put(0, new QueuedMessage(3, 0, MessageType.VERTEX, null));
-                queue.put(0, new QueuedMessage(5, 0, MessageType.VERTEX, null));
+                queue.put(0, new QueuedMessage(1, MessageType.VERTEX, null));
+                queue.put(0, new QueuedMessage(3, MessageType.VERTEX, null));
+                queue.put(0, new QueuedMessage(5, MessageType.VERTEX, null));
             } catch (Throwable e) {
                 exceptions[0] = e;
             }
@@ -49,9 +49,9 @@ public class MultiQueueTest {
         Thread thread2 = new Thread(() -> {
             try {
                 latch.await();
-                queue.put(1, new QueuedMessage(2, 1, MessageType.VERTEX, null));
-                queue.put(1, new QueuedMessage(4, 1, MessageType.VERTEX, null));
-                queue.put(1, new QueuedMessage(6, 1, MessageType.VERTEX, null));
+                queue.put(1, new QueuedMessage(2, MessageType.VERTEX, null));
+                queue.put(1, new QueuedMessage(4, MessageType.VERTEX, null));
+                queue.put(1, new QueuedMessage(6, MessageType.VERTEX, null));
             } catch (Throwable e) {
                 exceptions[1] = e;
             }
@@ -101,12 +101,12 @@ public class MultiQueueTest {
         CountDownLatch takeLatch = new CountDownLatch(1);
         Thread thread1 = new Thread(() -> {
             try {
-                queue.put(0, new QueuedMessage(1, 0, MessageType.VERTEX, null));
+                queue.put(0, new QueuedMessage(1, MessageType.VERTEX, null));
                 putLatch.countDown();
 
                 takeLatch.await();
-                queue.put(0, new QueuedMessage(3, 0, MessageType.VERTEX, null));
-                queue.put(0, new QueuedMessage(5, 0, MessageType.VERTEX, null));
+                queue.put(0, new QueuedMessage(3, MessageType.VERTEX, null));
+                queue.put(0, new QueuedMessage(5, MessageType.VERTEX, null));
             } catch (Throwable e) {
                 exceptions[0] = e;
             }
@@ -114,12 +114,12 @@ public class MultiQueueTest {
 
         Thread thread2 = new Thread(() -> {
             try {
-                queue.put(1, new QueuedMessage(2, 1, MessageType.VERTEX, null));
+                queue.put(1, new QueuedMessage(2, MessageType.VERTEX, null));
                 putLatch.countDown();
 
                 takeLatch.await();
-                queue.put(1, new QueuedMessage(4, 1, MessageType.VERTEX, null));
-                queue.put(1, new QueuedMessage(6, 1, MessageType.VERTEX, null));
+                queue.put(1, new QueuedMessage(4, MessageType.VERTEX, null));
+                queue.put(1, new QueuedMessage(6, MessageType.VERTEX, null));
             } catch (Throwable e) {
                 exceptions[0] = e;
             }
@@ -139,7 +139,11 @@ public class MultiQueueTest {
                                   message.partitionId()));
 
                 // Put the message at the front of the original queue
-                queue.putAtFront(message.workerId(), message);
+                if ((message.partitionId() & 0x01) == 1) {
+                    queue.putAtFront(0, message);
+                } else {
+                    queue.putAtFront(1, message);
+                }
 
                 Assert.assertTrue(ImmutableSet.of(3, 4).contains(
                                   queue.take().partitionId()));

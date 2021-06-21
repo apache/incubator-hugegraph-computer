@@ -127,14 +127,16 @@ public class StreamGraphInput implements GraphComputeInput {
         return pair;
     }
 
-    private Id readId(RandomAccessInput in) throws IOException {
+    @Override
+    public Id readId(RandomAccessInput in) throws IOException {
         byte code = in.readByte();
         Id id = IdFactory.createId(code);
         id.read(in);
         return id;
     }
 
-    private Value<?> readValue(RandomAccessInput in) throws IOException {
+    @Override
+    public Value<?> readValue(RandomAccessInput in) throws IOException {
         byte code = in.readByte();
         Value<?> value = this.valueFactory.createValue(code);
         value.read(in);

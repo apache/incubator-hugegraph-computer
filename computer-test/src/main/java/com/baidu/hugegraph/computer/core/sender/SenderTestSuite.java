@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
     MessageSendBuffersTest.class,
     MessageSendManagerTest.class,
+    MessageQueueTest.class,
     MultiQueueTest.class,
     QueuedMessageTest.class,
     QueuedMessageSenderTest.class,

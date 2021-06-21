@@ -31,11 +31,10 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Checkout master
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
-          ref: master
 
       - name: Compile
         run: mvn compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
@@ -55,5 +54,9 @@ jobs:
       - name: Integrate test
         run: mvn test -P integrate-test
 
-      - name: Collect codecov
-        run: bash <(curl -s https://codecov.io/bash)
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: target/site/jacoco/jacoco.xml
+

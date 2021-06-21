@@ -39,25 +39,21 @@ public class QueuedMessageSender implements MessageSender {
 
     private static final String NAME = "send-executor";
 
-    // All target worker share one message queue
-    private final MultiQueue queue;
     // Each target worker has a WorkerChannel
     private final WorkerChannel[] channels;
     // The thread used to send vertex/message, only one is enough
     private final Thread sendExecutor;
+    private final BarrierEvent anyQueueNotEmptyEvent;
     private final BarrierEvent anyClientNotBusyEvent;
-    // Just one thread modify it
-    private int busyClientCount;
 
     public QueuedMessageSender(Config config) {
         int workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
-        this.queue = new MultiQueue(workerCount);
         // NOTE: the workerId start from 1
         this.channels = new WorkerChannel[workerCount];
         // TODO: pass send-executor in and share executor with others
         this.sendExecutor = new Thread(new Sender(), NAME);
+        this.anyQueueNotEmptyEvent = new BarrierEvent();
         this.anyClientNotBusyEvent = new BarrierEvent();
-        this.busyClientCount = 0;
     }
 
     public void init() {
@@ -75,8 +71,10 @@ public class QueuedMessageSender implements MessageSender {
     }
 
     public void addWorkerClient(int workerId, TransportClient client) {
-        WorkerChannel channel = new WorkerChannel(workerId, client);
-        this.channels[this.normalize(workerId)] = channel;
+        MessageQueue queue = new MessageQueue(
+                             this.anyQueueNotEmptyEvent::signal);
+        WorkerChannel channel = new WorkerChannel(workerId, queue, client);
+        this.channels[channelId(workerId)] = channel;
         LOG.info("Add client {} for worker {}",
                  client.connectionId(), workerId);
     }
@@ -84,20 +82,24 @@ public class QueuedMessageSender implements MessageSender {
     @Override
     public CompletableFuture<Void> send(int workerId, MessageType type)
                                         throws InterruptedException {
-        WorkerChannel channel = this.channels[this.normalize(workerId)];
+        WorkerChannel channel = this.channels[channelId(workerId)];
         CompletableFuture<Void> future = channel.newFuture();
         future.whenComplete((r, e) -> {
             channel.resetFuture(future);
         });
-        this.queue.put(this.normalize(workerId),
-                       new QueuedMessage(-1, workerId, type, null));
+        /*
+         * Control message just need message type is enough,
+         * partitionId = -1 and buffer = null represents a meaningless value
+         */
+        channel.queue.put(new QueuedMessage(-1, type, null));
         return future;
     }
 
     @Override
     public void send(int workerId, QueuedMessage message)
                      throws InterruptedException {
-        this.queue.put(this.normalize(workerId), message);
+        WorkerChannel channel = this.channels[channelId(workerId)];
+        channel.queue.put(message);
     }
 
     public Runnable notBusyNotifier() {
@@ -116,10 +118,35 @@ public class QueuedMessageSender implements MessageSender {
             Thread thread = Thread.currentThread();
             while (!thread.isInterrupted()) {
                 try {
-                    QueuedMessage message = queue.take();
-                    if (!QueuedMessageSender.this.doSend(message)) {
-                        int workerId = message.workerId();
-                        queue.putAtFront(normalize(workerId), message);
+                    int emptyQueueCount = 0;
+                    int busyClientCount = 0;
+                    for (WorkerChannel channel : channels) {
+                        QueuedMessage message = channel.queue.peek();
+                        if (message == null) {
+                            ++emptyQueueCount;
+                            continue;
+                        }
+                        if (channel.doSend(message)) {
+                            // Only consume the message after it is sent
+                            channel.queue.take();
+                        } else {
+                            ++busyClientCount;
+                        }
+                    }
+                    int channelCount = channels.length;
+                    /*
+                     * If all queues are empty, let send thread wait
+                     * until any queue is available
+                     */
+                    if (emptyQueueCount >= channelCount) {
+                        QueuedMessageSender.this.waitAnyQueueNotEmpty();
+                    }
+                    /*
+                     * If all clients are busy, let send thread wait
+                     * until any client is available
+                     */
+                    if (busyClientCount >= channelCount) {
+                        QueuedMessageSender.this.waitAnyClientNotBusy();
                     }
                 } catch (InterruptedException e) {
                     // Reset interrupted flag
@@ -139,69 +166,15 @@ public class QueuedMessageSender implements MessageSender {
         }
     }
 
-    private boolean doSend(QueuedMessage message) throws TransportException,
-                                                         InterruptedException {
-        WorkerChannel channel = this.channels[message.workerId() - 1];
-        switch (message.type()) {
-            case START:
-                this.sendStartMessage(channel);
-                return true;
-            case FINISH:
-                this.sendFinishMessage(channel);
-                return true;
-            default:
-                return this.sendDataMessage(channel, message);
+    private void waitAnyQueueNotEmpty() {
+        try {
+            this.anyQueueNotEmptyEvent.await();
+        } catch (InterruptedException e) {
+            // Reset interrupted flag
+            Thread.currentThread().interrupt();
+        } finally {
+            this.anyQueueNotEmptyEvent.reset();
         }
-    }
-
-    private void sendStartMessage(WorkerChannel channel)
-                                  throws TransportException {
-        channel.client.startSessionAsync().whenComplete((r, e) -> {
-            CompletableFuture<Void> future = channel.futureRef.get();
-            assert future != null;
-
-            if (e != null) {
-                LOG.info("Failed to start session connected to {}", channel);
-                future.completeExceptionally(e);
-            } else {
-                LOG.info("Start session connected to {}", channel);
-                future.complete(null);
-            }
-        });
-    }
-
-    private void sendFinishMessage(WorkerChannel channel)
-                                   throws TransportException {
-        channel.client.finishSessionAsync().whenComplete((r, e) -> {
-            CompletableFuture<Void> future = channel.futureRef.get();
-            assert future != null;
-
-            if (e != null) {
-                LOG.info("Failed to finish session connected to {}", channel);
-                future.completeExceptionally(e);
-            } else {
-                LOG.info("Finish session connected to {}", channel);
-                future.complete(null);
-            }
-        });
-    }
-
-    private boolean sendDataMessage(WorkerChannel channel,
-                                    QueuedMessage message)
-                                    throws TransportException {
-        if (channel.client.send(message.type(), message.partitionId(),
-                                message.buffer())) {
-            return true;
-        }
-        if (++this.busyClientCount >= this.channels.length) {
-            /*
-             * If all clients are busy, let send thread wait
-             * until any client is available
-             */
-            this.waitAnyClientNotBusy();
-            --this.busyClientCount;
-        }
-        return false;
     }
 
     private void waitAnyClientNotBusy() {
@@ -217,10 +190,6 @@ public class QueuedMessageSender implements MessageSender {
         }
     }
 
-    private int normalize(int workerId) {
-        return workerId - 1;
-    }
-
     private int activeClientCount() {
         int count = 0;
         for (WorkerChannel channel : this.channels) {
@@ -231,15 +200,24 @@ public class QueuedMessageSender implements MessageSender {
         return count;
     }
 
+    private static int channelId(int workerId) {
+        assert workerId > 0;
+        return workerId - 1;
+    }
+
     private static class WorkerChannel {
 
         private final int workerId;
+        // Each target worker has a MessageQueue
+        private final MessageQueue queue;
         // Each target worker has a TransportClient
         private final TransportClient client;
         private final AtomicReference<CompletableFuture<Void>> futureRef;
 
-        public WorkerChannel(int workerId, TransportClient client) {
+        public WorkerChannel(int workerId, MessageQueue queue,
+                             TransportClient client) {
             this.workerId = workerId;
+            this.queue = queue;
             this.client = client;
             this.futureRef = new AtomicReference<>();
         }
@@ -259,6 +237,56 @@ public class QueuedMessageSender implements MessageSender {
                                             "but some thread modified it",
                                             future);
             }
+        }
+
+        public boolean doSend(QueuedMessage message)
+                              throws TransportException, InterruptedException {
+            switch (message.type()) {
+                case START:
+                    this.sendStartMessage();
+                    return true;
+                case FINISH:
+                    this.sendFinishMessage();
+                    return true;
+                default:
+                    return this.sendDataMessage(message);
+            }
+        }
+
+        public void sendStartMessage() throws TransportException {
+            this.client.startSessionAsync().whenComplete((r, e) -> {
+                CompletableFuture<Void> future = this.futureRef.get();
+                assert future != null;
+
+                if (e != null) {
+                    LOG.info("Failed to start session connected to {}", this);
+                    future.completeExceptionally(e);
+                } else {
+                    LOG.info("Start session connected to {}", this);
+                    future.complete(null);
+                }
+            });
+        }
+
+        public void sendFinishMessage() throws TransportException {
+            this.client.finishSessionAsync().whenComplete((r, e) -> {
+                CompletableFuture<Void> future = this.futureRef.get();
+                assert future != null;
+
+                if (e != null) {
+                    LOG.info("Failed to finish session connected to {}", this);
+                    future.completeExceptionally(e);
+                } else {
+                    LOG.info("Finish session connected to {}", this);
+                    future.complete(null);
+                }
+            });
+        }
+
+        public boolean sendDataMessage(QueuedMessage message)
+                                       throws TransportException {
+            return this.client.send(message.type(), message.partitionId(),
+                                    message.buffer());
         }
 
         @Override
