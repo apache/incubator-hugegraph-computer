@@ -23,13 +23,11 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
 import com.baidu.hugegraph.computer.core.graph.id.UuidId;
-import com.baidu.hugegraph.computer.core.graph.value.MockCustomValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -98,16 +96,5 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
                             factory.createValue(ValueType.ID_VALUE_LIST_LIST)
                                    .type());
-    }
-
-    @Test
-    public void testCreateUserDefinedValue() {
-        UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.VALUE_TYPE, ValueType.CUSTOM_VALUE.name(),
-                ComputerOptions.VALUE_CLASS, MockCustomValue.class.getName()
-        );
-        GraphFactory factory = context().graphFactory();
-        Assert.assertEquals(ValueType.CUSTOM_VALUE,
-                            factory.createValue(ValueType.CUSTOM_VALUE).type());
     }
 }

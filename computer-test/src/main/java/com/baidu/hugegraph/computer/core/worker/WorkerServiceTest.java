@@ -211,7 +211,6 @@ public class WorkerServiceTest extends UnitTestBase {
 
     @Test
     public void testFailToConnectEtcd() {
-        WorkerService workerService = new MockWorkerService();
         Config config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             // Unavailable etcd endpoints
@@ -223,7 +222,7 @@ public class WorkerServiceTest extends UnitTestBase {
             ComputerOptions.WORKER_COMPUTATION_CLASS,
             MockComputation.class.getName()
         );
-
+        WorkerService workerService = new MockWorkerService();
         Assert.assertThrows(ComputerException.class, () -> {
             workerService.init(config);
             try {

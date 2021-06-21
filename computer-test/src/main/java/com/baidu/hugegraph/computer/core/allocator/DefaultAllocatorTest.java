@@ -148,8 +148,6 @@ public class DefaultAllocatorTest extends UnitTestBase {
             throws InvocationTargetException, IllegalAccessException {
         String capacityValue = String.valueOf(maxCapacity);
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.ALLOCATOR_MAX_VERTICES_PER_THREAD, capacityValue
         );
         Allocator allocator = context().allocator();

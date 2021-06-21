@@ -19,32 +19,11 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-
 public final class HotConfig {
-
-    private String vertexValueName;
-    private ValueType valueType;
 
     private boolean outputVertexAdjacentEdges;
     private boolean outputVertexProperties;
     private boolean outputEdgeProperties;
-
-    public String vertexValueName() {
-        return this.vertexValueName;
-    }
-
-    public void vertexValueName(String vertexValueName) {
-        this.vertexValueName = vertexValueName;
-    }
-
-    public ValueType valueType() {
-        return this.valueType;
-    }
-
-    public void valueType(ValueType valueType) {
-        this.valueType = valueType;
-    }
 
     public boolean outputVertexAdjacentEdges() {
         return this.outputVertexAdjacentEdges;

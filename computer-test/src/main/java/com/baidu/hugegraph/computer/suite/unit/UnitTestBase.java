@@ -27,7 +27,6 @@ import java.util.Random;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -111,8 +110,6 @@ public class UnitTestBase {
     public static synchronized Config updateWithRequiredOptions(
                                       Object... options) {
         Object[] requiredOptions = new Object[] {
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG"
         };
         Object[] allOptions = new Object[requiredOptions.length +
                                          options.length];

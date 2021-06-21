@@ -128,7 +128,8 @@ public class StreamGraphInput implements GraphComputeInput {
     }
 
     private Value<?> readMessage(RandomAccessInput in) throws IOException {
-        Value<?> v = this.config.createObject(ComputerOptions.MESSAGE_CLASS);
+        Value<?> v = this.config.createObject(
+                     ComputerOptions.ALGORITHM_MESSAGE_CLASS);
         v.read(in);
         return v;
     }

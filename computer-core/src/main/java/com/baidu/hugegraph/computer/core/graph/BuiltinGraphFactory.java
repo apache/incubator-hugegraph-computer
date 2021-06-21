@@ -146,7 +146,9 @@ public final class BuiltinGraphFactory implements GraphFactory {
         return createValue(type);
     }
 
-    // Can reuse Value
+    /**
+     * Create property value by type.
+     */
     public Value<?> createValue(ValueType type) {
         switch (type) {
             case NULL:
@@ -169,8 +171,6 @@ public final class BuiltinGraphFactory implements GraphFactory {
                 return new IdValueListList();
             case LIST_VALUE:
                 return new ListValue<>();
-            case CUSTOM_VALUE:
-                return this.config.createObject(ComputerOptions.VALUE_CLASS);
             default:
                 throw new ComputerException("Can't create Value for %s",
                                             type.name());

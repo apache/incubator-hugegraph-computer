@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
@@ -46,8 +45,6 @@ public interface Config {
                        boolean requiredNotNull);
 
     String vertexValueName();
-
-    ValueType valueType();
 
     Boolean outputVertexAdjacentEdges();
 

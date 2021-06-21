@@ -59,35 +59,16 @@ public class ComputerOptions extends OptionHolder {
         return INSTANCE;
     }
 
-    public static final ConfigOption<String> VALUE_TYPE =
+    public static final ConfigOption<Class<?>> ALGORITHM_RESULT_CLASS =
             new ConfigOption<>(
-                    "algorithm.value_type",
-                    "The value type of current algorithm, used by " +
-                    "GraphFactory to create value. If value_type is " +
-                    "CUSTOM_VALUE, value_class is used to create value.",
-                    disallowEmpty(),
-                    "NULL"
-            );
-
-    public static final ConfigOption<Class<?>> VALUE_CLASS =
-            new ConfigOption<>(
-                    "algorithm.value_class",
-                    "The class of user defined value, the value is used as " +
-                    "the algorithm result. Used when value_type is " +
-                    "CUSTOM_VALUE.",
+                    "algorithm.result_class",
+                    "The class of vertex's value, the instance is used to " +
+                    "store computation result for the vertex.",
                     disallowEmpty(),
                     Null.class
             );
 
-    public static final ConfigOption<String> VALUE_NAME =
-            new ConfigOption<>(
-                    "algorithm.value_name",
-                    "The algorithm value name of vertex",
-                    disallowEmpty(),
-                    "value"
-            );
-
-    public static final ConfigOption<Class<?>> MESSAGE_CLASS =
+    public static final ConfigOption<Class<?>> ALGORITHM_MESSAGE_CLASS =
             new ConfigOption<>(
                     "algorithm.message_class",
                     "The class of message passed when compute vertex.",
@@ -227,8 +208,6 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
-            VALUE_TYPE.name(),
-            VALUE_NAME.name()
     );
 
     public static final ConfigOption<String> JOB_ID =

@@ -46,11 +46,11 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     @Test
     public void testWriteReadVertexOnlyIdAndValue() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
-            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
+            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false",
+            ComputerOptions.WORKER_COMPUTATION_CLASS,
+            MockRankComputation.class.getName()
         );
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();
@@ -80,11 +80,11 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     @Test
     public void testWriteReadVertexWithEdges() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "true",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
-            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
+            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false",
+            ComputerOptions.WORKER_COMPUTATION_CLASS,
+            MockRankComputation.class.getName()
         );
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();
@@ -122,11 +122,11 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
     @Test
     public void testWriteReadVertexWithProperties() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",
-            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false"
+            ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false",
+            ComputerOptions.WORKER_COMPUTATION_CLASS,
+            MockRankComputation.class.getName()
         );
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();

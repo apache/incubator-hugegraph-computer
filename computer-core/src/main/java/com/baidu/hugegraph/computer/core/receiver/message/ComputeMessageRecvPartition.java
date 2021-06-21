@@ -50,8 +50,9 @@ public class ComputeMessageRecvPartition extends MessageRecvPartition {
         if (valueCombiner == null) {
             this.flusher = new KvOuterSortFlusher();
         } else {
-            Value<?> v1 = config.createObject(ComputerOptions.MESSAGE_CLASS);
-            Value<?> v2 = config.createObject(ComputerOptions.MESSAGE_CLASS);
+            Value<?> v1 = config.createObject(
+                          ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+            Value<?> v2 = v1.copy();
             PointerCombiner<Value<?>> pointerCombiner = new PointerCombiner(
                                                         v1, v2, valueCombiner);
             this.flusher = new CombineKvOuterSortFlusher(pointerCombiner);

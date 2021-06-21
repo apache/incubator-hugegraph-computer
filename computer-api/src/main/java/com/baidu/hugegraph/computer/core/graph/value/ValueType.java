@@ -34,8 +34,7 @@ public enum ValueType implements SerialEnum {
     ID_VALUE(20, -1, "id"),
     ID_VALUE_LIST(30, -1, "idlist"),
     ID_VALUE_LIST_LIST(40, -1, "idlistlist"),
-    LIST_VALUE(80, -1, "list"),
-    CUSTOM_VALUE(100, -1, "custom");
+    LIST_VALUE(80, -1, "list");
 
     private final byte code;
     // Length in bytes if it's a fixed value type, -1 means not fixed.
