@@ -87,6 +87,10 @@ public class QueuedMessageSender implements MessageSender {
         future.whenComplete((r, e) -> {
             channel.resetFuture(future);
         });
+        /*
+         * Control message just need message type is enough,
+         * partitionId = -1 and buffer = null represents a meaningless value
+         */
         channel.queue.put(new QueuedMessage(-1, type, null));
         return future;
     }
@@ -129,18 +133,19 @@ public class QueuedMessageSender implements MessageSender {
                             ++busyClientCount;
                         }
                     }
+                    int channelCount = channels.length;
                     /*
                      * If all queues are empty, let send thread wait
                      * until any queue is available
                      */
-                    if (emptyQueueCount >= channels.length) {
+                    if (emptyQueueCount >= channelCount) {
                         QueuedMessageSender.this.waitAnyQueueNotEmpty();
                     }
                     /*
                      * If all clients are busy, let send thread wait
                      * until any client is available
                      */
-                    if (busyClientCount >= channels.length) {
+                    if (busyClientCount >= channelCount) {
                         QueuedMessageSender.this.waitAnyClientNotBusy();
                     }
                 } catch (InterruptedException e) {
@@ -196,6 +201,7 @@ public class QueuedMessageSender implements MessageSender {
     }
 
     private static int channelId(int workerId) {
+        assert workerId > 0;
         return workerId - 1;
     }
 

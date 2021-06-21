@@ -31,7 +31,7 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Checkout master
+      - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 2
