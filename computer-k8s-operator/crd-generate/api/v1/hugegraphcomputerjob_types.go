@@ -45,8 +45,6 @@ type ComputerJobSpec struct {
 	// Secrets for image pull.
 	PullSecrets []corev1.LocalObjectReference `json:"pullSecrets,omitempty"`
 
-	RestartPolicy corev1.RestartPolicy `json:"restartPolicy,omitempty"`
-
 	//+kubebuilder:validation:Minimum=1
 	WorkerInstances int32 `json:"workerInstances"`
 
@@ -99,6 +97,9 @@ type ComponentState struct {
 
 	// The state of the component.
 	State string `json:"state"`
+
+	//+optional
+	Message string `json:"message"`
 }
 
 type ComponentsStatus struct {

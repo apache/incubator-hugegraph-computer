@@ -46,7 +46,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.ListOptions;
+import io.fabric8.kubernetes.api.model.ListOptionsBuilder;
 import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
@@ -299,6 +304,21 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         }
 
         return Serialization.clone(matchRS);
+    }
+
+    protected List<Pod> getPodsByLabels(Job job) {
+        Map<String, String> matchLabels = job.getSpec().getSelector()
+                                             .getMatchLabels();
+
+        String labelString = KubeUtil.map2LabelString(matchLabels);
+        ListOptions listOptions = new ListOptionsBuilder()
+                .withLabelSelector(labelString)
+                .build();
+        PodList list = this.kubeClient
+                .pods()
+                .inNamespace(job.getMetadata().getNamespace())
+                .list(listOptions);
+        return list.getItems();
     }
 
     private void handleOwnsResource(HasMetadata resource) {

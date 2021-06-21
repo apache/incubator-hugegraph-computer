@@ -19,8 +19,12 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.controller;
 
+import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.driver.JobStatus;
@@ -29,8 +33,11 @@ import com.baidu.hugegraph.computer.k8s.crd.model.ComponentState;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComponentStateBuilder;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatusBuilder;
+import com.baidu.hugegraph.computer.k8s.crd.model.ConditionStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
+import com.baidu.hugegraph.computer.k8s.crd.model.JobComponentState;
+import com.baidu.hugegraph.computer.k8s.crd.model.PodPhase;
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.common.Request;
 import com.baidu.hugegraph.computer.k8s.operator.common.Result;
@@ -39,7 +46,10 @@ import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.Log;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodCondition;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import io.fabric8.kubernetes.api.model.batch.v1.JobCondition;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
@@ -82,7 +92,7 @@ public class ComputerJobController
         ComputerJobComponent observed = this.observeComponent(computerJob);
         if (this.updateStatus(observed)) {
             LOG.info("Wait status to be stable before taking further actions");
-            return Result.NO_REQUEUE;
+            return Result.REQUEUE;
         }
 
         // TODO: implement it
@@ -98,16 +108,17 @@ public class ComputerJobController
             this.updateStatus(computerJob);
             return true;
         }
-        return false;
+
+        return Objects.equals(newStatus.getJobStatus(),
+                              JobStatus.INITIALIZING.name());
     }
 
     private ComputerJobStatus deriveCRStatus(ComputerJobComponent observed) {
         HugeGraphComputerJob computerJob = observed.computerJob();
 
-        boolean jobFailed = false;
-        boolean jobSucceeded = false;
-
-        int runningComponents = 0;
+        MutableInt failedComponents = new MutableInt(0);
+        MutableInt succeededComponents = new MutableInt(0);
+        MutableInt runningComponents = new MutableInt(0);
         int totalComponents = Constants.TOTAL_COMPONENTS;
 
         ComputerJobStatus status = Serialization.clone(computerJob.getStatus());
@@ -126,81 +137,92 @@ public class ComputerJobController
         }
 
         // MasterJob
-        Job master = observed.masterJob();
-        String masterFailedMessage;
-        if (master != null) {
-            ComponentState masterState = new ComponentState();
-            masterState.setName(master.getMetadata().getName());
-
-            int active = KubeUtil.intVal(master.getStatus().getActive());
-            if (active > Constants.MASTER_INSTANCES) {
-                runningComponents++;
-                masterState.setState(Constants.COMPONENT_STATE_READY);
-            } else {
-                masterState.setState(Constants.COMPONENT_STATE_NOT_READY);
-            }
-
-            int succeeded = KubeUtil.intVal(master.getStatus().getActive());
-            int failed = KubeUtil.intVal(master.getStatus().getActive());
-            if (succeeded >= Constants.MASTER_INSTANCES) {
-                masterState.setState(JobStatus.SUCCEEDED.name());
-                jobSucceeded = true;
-            } else if (failed > Constants.ALLOW_FAILED_JOB) {
-                masterState.setState(JobStatus.FAILED.name());
-                jobFailed = true;
-            }
-            status.getComponentStates().setMasterJob(masterState);
-        } else if (status.getComponentStates().getMasterJob() != null) {
-            status.getComponentStates().getMasterJob()
-                  .setState(Constants.COMPONENT_STATE_DELETED);
-        }
+        Job masterJob = observed.masterJob();
+        ComponentState masterJobState = this.deriveJobStatus(
+                masterJob,
+                observed.masterPods(),
+                status.getComponentStates().getMasterJob(),
+                failedComponents,
+                succeededComponents,
+                runningComponents
+        );
+        status.getComponentStates().setMasterJob(masterJobState);
 
         // WorkerJob
-        Job worker = observed.workerJob();
-        if (worker != null) {
-            ComponentState workerState = new ComponentState();
-            workerState.setName(worker.getMetadata().getName());
+        Job workerJob = observed.masterJob();
+        ComponentState workerJobState = this.deriveJobStatus(
+                workerJob,
+                observed.workerPods(),
+                status.getComponentStates().getWorkerJob(),
+                failedComponents,
+                succeededComponents,
+                runningComponents
+        );
+        status.getComponentStates().setWorkerJob(workerJobState);
 
-            int active = KubeUtil.intVal(worker.getStatus().getActive());
-            if (active >= computerJob.getSpec().getWorkerInstances()) {
-                runningComponents++;
-                workerState.setState(Constants.COMPONENT_STATE_READY);
-            } else {
-                workerState.setState(Constants.COMPONENT_STATE_NOT_READY);
-            }
-
-            int succeeded = KubeUtil.intVal(worker.getStatus().getSucceeded());
-            int failed = KubeUtil.intVal(worker.getStatus().getActive());
-            if (succeeded >= computerJob.getSpec().getWorkerInstances()) {
-                workerState.setState(JobStatus.SUCCEEDED.name());
-                jobSucceeded = true;
-            } else if (failed > Constants.ALLOW_FAILED_JOB) {
-                workerState.setState(JobStatus.FAILED.name());
-                jobFailed = true;
-            }
-            status.getComponentStates().setWorkerJob(workerState);
-        } else if (status.getComponentStates().getWorkerJob() != null) {
-            status.getComponentStates().getWorkerJob()
-                  .setState(Constants.COMPONENT_STATE_DELETED);
-        }
-
-        // Derive the status
-        if (jobFailed || jobSucceeded) {
-            if (jobFailed) {
-                status.setJobStatus(JobStatus.FAILED.name());
-            } else {
-                status.setJobStatus(JobStatus.SUCCEEDED.name());
-            }
+        if (failedComponents.intValue() > Constants.ALLOW_FAILED_COMPONENTS) {
+            status.setJobStatus(JobStatus.FAILED.name());
+            return status;
+        } else if (succeededComponents.intValue() == totalComponents) {
+            status.setJobStatus(JobStatus.SUCCEEDED.name());
             return status;
         }
 
-        if (runningComponents < totalComponents) {
+        if (runningComponents.intValue() < totalComponents) {
             status.setJobStatus(JobStatus.INITIALIZING.name());
         } else {
             status.setJobStatus(JobStatus.RUNNING.name());
         }
 
         return status;
+    }
+
+    private ComponentState deriveJobStatus(Job job, List<Pod> pods,
+                                           ComponentState state,
+                                           MutableInt failedComponents,
+                                           MutableInt succeededComponents,
+                                           MutableInt runningComponents) {
+
+        if (job != null) {
+            ComponentState newState = new ComponentState();
+            newState.setName(job.getMetadata().getName());
+
+            int succeeded = KubeUtil.intVal(job.getStatus().getActive());
+            int failed = KubeUtil.intVal(job.getStatus().getActive());
+            Pair<Boolean, String> unSchedulablePair = this.unSchedulable(pods);
+
+            if (succeeded >= Constants.MASTER_INSTANCES) {
+                newState.setState(JobComponentState.SUCCEEDED.name());
+                succeededComponents.increment();
+            } else if (failed > Constants.ALLOW_FAILED_JOBS) {
+                newState.setState(JobComponentState.FAILED.name());
+                List<JobCondition> conditions = job.getStatus().getConditions();
+                if (CollectionUtils.isNotEmpty(conditions)) {
+                    newState.setMessage(conditions.get(0).getMessage());
+                }
+                failedComponents.increment();
+            } else if (unSchedulablePair.getKey()) {
+                newState.setState(JobStatus.FAILED.name());
+                newState.setMessage(unSchedulablePair.getValue());
+                failedComponents.increment();
+            } else {
+                int active = KubeUtil.intVal(job.getStatus().getActive());
+                boolean allPodRunning = pods.stream().allMatch(pod -> {
+                    return Objects.equals(pod.getStatus().getPhase(),
+                                          PodPhase.RUNNING.value());
+                });
+                if (active > Constants.MASTER_INSTANCES && allPodRunning) {
+                    newState.setState(JobComponentState.RUNNING.value());
+                    runningComponents.increment();
+                } else {
+                    newState.setState(JobComponentState.PENDING.value());
+                }
+            }
+        } else if (state != null) {
+            state.setState(JobComponentState.CANCELLED.value());
+        }
+
+        return state;
     }
 
     private void fillCRStatus(HugeGraphComputerJob computerJob) {
@@ -226,9 +248,19 @@ public class ComputerJobController
         Job master = this.getResourceByName(namespace, masterName, Job.class);
         observed.masterJob(master);
 
+        if (master != null) {
+            List<Pod> masterPods = this.getPodsByLabels(master);
+            observed.masterPods(masterPods);
+        }
+
         String workerName = KubeUtil.workerJobName(name);
         Job worker = this.getResourceByName(namespace, workerName, Job.class);
         observed.workerJob(worker);
+
+        if (worker != null) {
+            List<Pod> workerPods = this.getPodsByLabels(worker);
+            observed.workerPods(workerPods);
+        }
 
         String configMapName = KubeUtil.configMapName(name);
         ConfigMap configMap = this.getResourceByName(namespace, configMapName,
@@ -281,5 +313,25 @@ public class ComputerJobController
     private void deleteCR(HugeGraphComputerJob computerJob) {
         this.operation.inNamespace(computerJob.getMetadata().getNamespace())
                       .delete(computerJob);
+    }
+
+    private Pair<Boolean, String> unSchedulable(List<Pod> pods) {
+        if (CollectionUtils.isEmpty(pods)) {
+            return Pair.of(false, null);
+        }
+
+        for (Pod pod : pods) {
+            List<PodCondition> conditions = pod.getStatus()
+                                               .getConditions();
+            for (PodCondition condition : conditions) {
+                if (Objects.equals(condition.getStatus(),
+                                   ConditionStatus.FALSE.value()) &&
+                    Objects.equals(condition.getReason(),
+                                   Constants.POD_REASON_UNSCHEDULABLE)) {
+                    return Pair.of(true, condition.getMessage());
+                }
+            }
+        }
+        return Pair.of(false, null);
     }
 }

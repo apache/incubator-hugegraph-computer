@@ -200,9 +200,6 @@ spec:
                     type: string
                 type: object
               type: array
-            restartPolicy:
-              description: RestartPolicy describes how the container should be restarted. Only one of the following restart policies may be specified. If none of the following policies is specified, the default one is RestartPolicyAlways.
-              type: string
             workerCpu:
               anyOf:
               - type: integer
@@ -233,6 +230,8 @@ spec:
               properties:
                 configMap:
                   properties:
+                    message:
+                      type: string
                     name:
                       description: The resource name of the component.
                       type: string
@@ -245,6 +244,8 @@ spec:
                   type: object
                 masterJob:
                   properties:
+                    message:
+                      type: string
                     name:
                       description: The resource name of the component.
                       type: string
@@ -257,6 +258,8 @@ spec:
                   type: object
                 workerJob:
                   properties:
+                    message:
+                      type: string
                     name:
                       description: The resource name of the component.
                       type: string

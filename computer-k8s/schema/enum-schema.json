@@ -22,6 +22,21 @@
       "type" : "string",
       "enum" : ["Always", "Never", "IfNotPresent"],
       "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.PullPolicy"
+    },
+    "PodPhase" : {
+      "type" : "string",
+      "enum" : ["Pending", "Running", "Succeeded", "Failed", "Unknown"],
+      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.PodPhase"
+    },
+    "ConditionStatus" : {
+      "type" : "string",
+      "enum" : ["True", "False", "Unknown"],
+      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.ConditionStatus"
+    },
+    "JobComponentState" : {
+      "type" : "string",
+      "enum" : ["Pending", "Running", "Succeeded", "Failed", "Cancelled", "Unknown"],
+      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.JobComponentState"
     }
   },
   "properties": {
@@ -36,6 +51,15 @@
     },
     "PullPolicy" : {
       "$ref": "#/definitions/PullPolicy"
+    },
+    "PodPhase" : {
+      "$ref": "#/definitions/PodPhase"
+    },
+    "ConditionStatus" : {
+      "$ref": "#/definitions/ConditionStatus"
+    },
+    "JobComponentState" : {
+      "$ref": "#/definitions/JobComponentState"
     }
   }
 }

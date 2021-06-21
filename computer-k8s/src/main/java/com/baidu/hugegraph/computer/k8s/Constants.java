@@ -24,9 +24,12 @@ public class Constants {
     public static final int MASTER_INSTANCES = 1;
 
     public static final int TOTAL_COMPONENTS = 2;
-    public static final int ALLOW_FAILED_JOB = 0;
+    public static final int ALLOW_FAILED_JOBS = 0;
+    public static final int ALLOW_FAILED_COMPONENTS = 0;
 
     public static final String COMPONENT_STATE_NOT_READY = "NotReady";
     public static final String COMPONENT_STATE_READY = "Ready";
     public static final String COMPONENT_STATE_DELETED = "Deleted";
+
+    public static final String POD_REASON_UNSCHEDULABLE = "Unschedulable";
 }

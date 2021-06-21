@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.k8s.util;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -108,5 +109,18 @@ public class KubeUtil {
 
     public static int intVal(Integer integer) {
         return integer != null ? integer : -1;
+    }
+
+    public static String map2LabelString(Map<String, String> labels) {
+        StringBuilder labelQueryBuilder = new StringBuilder();
+        for (Map.Entry<String, String> entry : labels.entrySet()) {
+            if (labelQueryBuilder.length() > 0) {
+                labelQueryBuilder.append(",");
+            }
+            labelQueryBuilder.append(entry.getKey())
+                             .append("=")
+                             .append(entry.getValue());
+        }
+        return labelQueryBuilder.toString();
     }
 }

@@ -19,9 +19,12 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.controller;
 
+import java.util.List;
+
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 
 public class ComputerJobComponent {
@@ -29,6 +32,8 @@ public class ComputerJobComponent {
     private HugeGraphComputerJob computerJob;
     private Job masterJob;
     private Job workerJob;
+    private List<Pod> masterPods;
+    private List<Pod> workerPods;
     private ConfigMap configMap;
 
     public HugeGraphComputerJob computerJob() {
@@ -38,6 +43,22 @@ public class ComputerJobComponent {
     public ComputerJobComponent computerJob(HugeGraphComputerJob computerJob) {
         this.computerJob = computerJob;
         return this;
+    }
+
+    public List<Pod> masterPods() {
+        return this.masterPods;
+    }
+
+    public void masterPods(List<Pod> masterPods) {
+        this.masterPods = masterPods;
+    }
+
+    public List<Pod> workerPods() {
+        return this.workerPods;
+    }
+
+    public void workerPods(List<Pod> workerPods) {
+        this.workerPods = workerPods;
     }
 
     public Job masterJob() {

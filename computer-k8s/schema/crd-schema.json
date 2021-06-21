@@ -5,6 +5,9 @@
     "hugegraph_baidu_com_operator_api_v1_ComponentState": {
       "type": "object",
       "properties": {
+        "message": {
+          "type": "string"
+        },
         "name": {
           "type": "string"
         },
@@ -90,9 +93,6 @@
           "items": {
             "existingJavaType": "io.fabric8.kubernetes.api.model.LocalObjectReference"
           }
-        },
-        "restartPolicy": {
-          "type": "string"
         },
         "workerCpu": {
           "existingJavaType": "io.fabric8.kubernetes.api.model.Quantity"
