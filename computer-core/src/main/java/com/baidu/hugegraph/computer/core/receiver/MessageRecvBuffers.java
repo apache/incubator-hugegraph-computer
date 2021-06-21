@@ -78,6 +78,7 @@ public class MessageRecvBuffers {
      */
     public void waitSorted() {
         if (this.buffers.size() == 0) {
+            this.event.reset();
             return;
         }
         try {

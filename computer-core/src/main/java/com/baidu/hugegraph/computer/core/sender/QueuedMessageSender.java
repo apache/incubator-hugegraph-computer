@@ -121,6 +121,10 @@ public class QueuedMessageSender implements MessageSender {
                     int emptyQueueCount = 0;
                     int busyClientCount = 0;
                     for (WorkerChannel channel : channels) {
+                        // The channel can't be null in online environment.
+                        if (channel == null) {
+                            continue;
+                        }
                         QueuedMessage message = channel.queue.peek();
                         if (message == null) {
                             ++emptyQueueCount;

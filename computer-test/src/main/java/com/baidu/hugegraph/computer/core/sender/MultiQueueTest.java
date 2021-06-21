@@ -34,12 +34,18 @@ public class MultiQueueTest {
         MultiQueue queue = new MultiQueue(2);
         Throwable[] exceptions = new Throwable[3];
 
-        CountDownLatch latch = new CountDownLatch(1);
+        CountDownLatch[] latches = new CountDownLatch[3];
+        for (int i = 0; i < latches.length; i++) {
+            latches[i] = new CountDownLatch(1);
+        }
+
         Thread thread1 = new Thread(() -> {
             try {
-                latch.await();
+                latches[0].await();
                 queue.put(0, new QueuedMessage(1, MessageType.VERTEX, null));
+                latches[1].await();
                 queue.put(0, new QueuedMessage(3, MessageType.VERTEX, null));
+                latches[2].await();
                 queue.put(0, new QueuedMessage(5, MessageType.VERTEX, null));
             } catch (Throwable e) {
                 exceptions[0] = e;
@@ -48,9 +54,11 @@ public class MultiQueueTest {
 
         Thread thread2 = new Thread(() -> {
             try {
-                latch.await();
+                latches[0].await();
                 queue.put(1, new QueuedMessage(2, MessageType.VERTEX, null));
+                latches[1].await();
                 queue.put(1, new QueuedMessage(4, MessageType.VERTEX, null));
+                latches[2].await();
                 queue.put(1, new QueuedMessage(6, MessageType.VERTEX, null));
             } catch (Throwable e) {
                 exceptions[1] = e;
@@ -59,17 +67,19 @@ public class MultiQueueTest {
 
         Thread thread3 = new Thread(() -> {
             try {
-                latch.countDown();
+                latches[0].countDown();
                 Assert.assertTrue(ImmutableSet.of(1, 2).contains(
                                   queue.take().partitionId()));
                 Assert.assertTrue(ImmutableSet.of(1, 2).contains(
                                   queue.take().partitionId()));
 
+                latches[1].countDown();
                 Assert.assertTrue(ImmutableSet.of(3, 4).contains(
                                   queue.take().partitionId()));
                 Assert.assertTrue(ImmutableSet.of(3, 4).contains(
                                   queue.take().partitionId()));
 
+                latches[2].countDown();
                 Assert.assertTrue(ImmutableSet.of(5, 6).contains(
                                   queue.take().partitionId()));
                 Assert.assertTrue(ImmutableSet.of(5, 6).contains(
@@ -93,19 +103,23 @@ public class MultiQueueTest {
     }
 
     @Test
-    public void testPutAndTakeWithHungry() throws InterruptedException {
+    public void testPutAndTakeWithPutAtFront() throws InterruptedException {
         MultiQueue queue = new MultiQueue(2);
         Throwable[] exceptions = new Throwable[3];
 
-        CountDownLatch putLatch = new CountDownLatch(2);
-        CountDownLatch takeLatch = new CountDownLatch(1);
+        CountDownLatch[] latches = new CountDownLatch[3];
+        for (int i = 0; i < latches.length; i++) {
+            latches[i] = new CountDownLatch(1);
+        }
+
         Thread thread1 = new Thread(() -> {
             try {
+                latches[0].await();
                 queue.put(0, new QueuedMessage(1, MessageType.VERTEX, null));
-                putLatch.countDown();
 
-                takeLatch.await();
+                latches[1].await();
                 queue.put(0, new QueuedMessage(3, MessageType.VERTEX, null));
+                latches[2].await();
                 queue.put(0, new QueuedMessage(5, MessageType.VERTEX, null));
             } catch (Throwable e) {
                 exceptions[0] = e;
@@ -114,11 +128,12 @@ public class MultiQueueTest {
 
         Thread thread2 = new Thread(() -> {
             try {
+                latches[0].await();
                 queue.put(1, new QueuedMessage(2, MessageType.VERTEX, null));
-                putLatch.countDown();
 
-                takeLatch.await();
+                latches[1].await();
                 queue.put(1, new QueuedMessage(4, MessageType.VERTEX, null));
+                latches[2].await();
                 queue.put(1, new QueuedMessage(6, MessageType.VERTEX, null));
             } catch (Throwable e) {
                 exceptions[1] = e;
@@ -127,13 +142,15 @@ public class MultiQueueTest {
 
         Thread thread3 = new Thread(() -> {
             try {
-                putLatch.await();
+                latches[0].countDown();
+                QueuedMessage m1 = queue.take();
+                QueuedMessage m2 = queue.take();
                 Assert.assertTrue(ImmutableSet.of(1, 2).contains(
-                                  queue.take().partitionId()));
+                                  m1.partitionId()));
                 Assert.assertTrue(ImmutableSet.of(1, 2).contains(
-                                  queue.take().partitionId()));
+                                  m2.partitionId()));
 
-                takeLatch.countDown();
+                latches[1].countDown();
                 QueuedMessage message = queue.take();
                 Assert.assertTrue(ImmutableSet.of(3, 4).contains(
                                   message.partitionId()));
@@ -150,6 +167,7 @@ public class MultiQueueTest {
                 Assert.assertTrue(ImmutableSet.of(3, 4).contains(
                                   queue.take().partitionId()));
 
+                latches[2].countDown();
                 Assert.assertTrue(ImmutableSet.of(5, 6).contains(
                                   queue.take().partitionId()));
                 Assert.assertTrue(ImmutableSet.of(5, 6).contains(

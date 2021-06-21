@@ -32,6 +32,7 @@ import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -46,6 +47,9 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         LongId longId = new LongId(100L);
         LongValue longValue = new LongValue(999L);
         Vertex vertex = graphFactory().createVertex(longId, longValue);
+        Properties properties = graphFactory().createProperties();
+        properties.put("age", new LongValue(20L));
+        vertex.properties(properties);
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
                                Constants.SMALL_BUF_SIZE)) {

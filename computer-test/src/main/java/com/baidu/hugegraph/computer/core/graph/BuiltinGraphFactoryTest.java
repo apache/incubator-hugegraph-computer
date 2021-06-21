@@ -96,5 +96,9 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
                             factory.createValue(ValueType.ID_VALUE_LIST_LIST)
                                    .type());
+
+        Assert.assertThrows(NullPointerException.class, () -> {
+            factory.createValue(null);
+        });
     }
 }

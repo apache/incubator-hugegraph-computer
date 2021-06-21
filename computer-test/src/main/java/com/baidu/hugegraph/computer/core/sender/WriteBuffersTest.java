@@ -179,7 +179,7 @@ public class WriteBuffersTest extends UnitTestBase {
             Assert.assertThrows(ComputerException.class, () -> {
                 buffers.prepareSorting();
             }, e -> {
-                Assert.assertTrue(e.getMessage().contains("interrupted"));
+                Assert.assertTrue(e.getMessage().contains("Interrupted"));
             });
         });
         thread1.start();
