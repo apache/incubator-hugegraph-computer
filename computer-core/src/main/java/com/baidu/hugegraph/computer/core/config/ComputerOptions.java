@@ -165,9 +165,9 @@ public class ComputerOptions extends OptionHolder {
                     4
             );
 
-    public static final ConfigOption<String> OUTPUT_VALUE_NAME =
+    public static final ConfigOption<String> OUTPUT_RESULT_NAME =
             new ConfigOption<>(
-                    "output.value_name",
+                    "output.result_name",
                     "The value is assigned dynamically by #name() of " +
                     "instance created by WORKER_COMPUTATION_CLASS.",
                     disallowEmpty(),

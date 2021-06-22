@@ -32,9 +32,18 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public class JsonStructGraphOutput extends StructGraphOutput {
 
+    private final String valueName;
+    private final boolean outputEdges;
+    private final boolean outputVertexProperties;
+    private final boolean outputEdgeProperties;
+
     public JsonStructGraphOutput(ComputerContext context,
                                  StructRandomAccessOutput out) {
         super(context, out);
+        this.valueName = this.config.get(ComputerOptions.OUTPUT_RESULT_NAME);
+        this.outputEdges = this.config.outputVertexAdjacentEdges();
+        this.outputVertexProperties = this.config.outputVertexProperties();
+        this.outputEdgeProperties = this.config.outputEdgeProperties();
     }
 
     @Override
@@ -47,18 +56,18 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeId(vertex.id());
         this.writeSplitter();
 
-        String valueName = this.config.get(ComputerOptions.OUTPUT_VALUE_NAME);
-        this.writeKey(valueName);
+
+        this.writeKey(this.valueName);
         this.writeJoiner();
         this.writeValue(vertex.value());
 
-        if (this.config.outputVertexAdjacentEdges()) {
+        if (this.outputEdges) {
             this.writeSplitter();
             this.writeKey("adjacent_edges");
             this.writeJoiner();
             this.writeEdges(vertex.edges());
         }
-        if (this.config.outputVertexProperties()) {
+        if (this.outputVertexProperties) {
             this.writeSplitter();
             this.writeKey("properties");
             this.writeJoiner();
@@ -100,7 +109,7 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeJoiner();
         this.out.writeString(edge.name());
 
-        if (this.config.outputEdgeProperties()) {
+        if (this.outputEdgeProperties) {
             this.writeSplitter();
             this.writeKey("properties");
             this.writeJoiner();

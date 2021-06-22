@@ -49,7 +49,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false",
-            ComputerOptions.OUTPUT_VALUE_NAME, "rank"
+            ComputerOptions.OUTPUT_RESULT_NAME, "rank"
         );
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();
@@ -82,7 +82,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "true",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "false",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false",
-            ComputerOptions.OUTPUT_VALUE_NAME, "rank"
+            ComputerOptions.OUTPUT_RESULT_NAME, "rank"
         );
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();
@@ -123,7 +123,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES, "false",
             ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES, "true",
             ComputerOptions.OUTPUT_WITH_EDGE_PROPERTIES, "false",
-            ComputerOptions.OUTPUT_VALUE_NAME, "rank"
+            ComputerOptions.OUTPUT_RESULT_NAME, "rank"
         );
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();

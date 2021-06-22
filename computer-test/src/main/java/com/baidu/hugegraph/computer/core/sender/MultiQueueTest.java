@@ -143,12 +143,12 @@ public class MultiQueueTest {
         Thread thread3 = new Thread(() -> {
             try {
                 latches[0].countDown();
-                QueuedMessage m1 = queue.take();
-                QueuedMessage m2 = queue.take();
+                QueuedMessage message1 = queue.take();
+                QueuedMessage message2 = queue.take();
                 Assert.assertTrue(ImmutableSet.of(1, 2).contains(
-                                  m1.partitionId()));
+                                  message1.partitionId()));
                 Assert.assertTrue(ImmutableSet.of(1, 2).contains(
-                                  m2.partitionId()));
+                                  message2.partitionId()));
 
                 latches[1].countDown();
                 QueuedMessage message = queue.take();

@@ -37,7 +37,7 @@ public class QueuedMessageSenderTest {
 
     @Before
     public void setup() {
-        config = UnitTestBase.updateWithRequiredOptions(
+        this.config = UnitTestBase.updateWithRequiredOptions(
             RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_002",
             ComputerOptions.JOB_WORKERS_COUNT, "2",
@@ -54,6 +54,8 @@ public class QueuedMessageSenderTest {
     @Test
     public void testInitAndClose() {
         QueuedMessageSender sender = new QueuedMessageSender(this.config);
+        sender.addWorkerClient(1, new MockTransportClient());
+        sender.addWorkerClient(2, new MockTransportClient());
         sender.init();
 
         Thread sendExecutor = Whitebox.getInternalState(sender, "sendExecutor");
