@@ -66,6 +66,9 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
     @Test
     public void testWriteReadEdgesWithSingleFrequency() throws Exception {
+        UnitTestBase.updateOptions(
+            ComputerOptions.INPUT_EDGE_FREQ, "SINGLE"
+        );
         ComputerContext context = ComputerContext.instance();
         GraphFactory graphFactory = context.graphFactory();
 
