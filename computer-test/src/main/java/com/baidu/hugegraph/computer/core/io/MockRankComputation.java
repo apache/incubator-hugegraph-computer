@@ -19,21 +19,34 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import java.io.IOException;
+import java.util.Iterator;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.worker.Computation;
+import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
-public interface GraphComputeInput extends GraphInput {
+public class MockRankComputation implements Computation<LongValue> {
 
-    Vertex readVertex() throws IOException;
+    @Override
+    public String name() {
+        return "rank";
+    }
 
-    Vertex readEdges() throws IOException;
+    @Override
+    public String category() {
+        return "rank";
+    }
 
-    Pair<Id, Value<?>> readMessage() throws IOException;
+    @Override
+    public void compute0(ComputationContext context, Vertex vertex) {
+        throw new ComputerException("Not implemented yet.");
+    }
 
-    Value<?> readValue(RandomAccessInput in) throws IOException;
+    @Override
+    public void compute(ComputationContext context, Vertex vertex,
+                        Iterator<LongValue> messages) {
+        throw new ComputerException("Not implemented yet.");
+    }
 }

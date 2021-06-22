@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.graph;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -41,8 +39,7 @@ public class DefaultEdgeTest extends UnitTestBase {
         Assert.assertEquals(Constants.EMPTY_STR, edge.label());
         Assert.assertEquals(Constants.EMPTY_STR, edge.name());
         Assert.assertNull(edge.targetId());
-        Assert.assertEquals(new DefaultProperties(graphFactory(),
-                                                  valueFactory()),
+        Assert.assertEquals(new DefaultProperties(graphFactory()),
                             edge.properties());
 
         edge = new DefaultEdge(graphFactory(), "knows", "2021-06-01",
@@ -50,8 +47,7 @@ public class DefaultEdgeTest extends UnitTestBase {
         Assert.assertEquals("knows", edge.label());
         Assert.assertEquals("2021-06-01", edge.name());
         Assert.assertEquals(new LongId(1L), edge.targetId());
-        Assert.assertEquals(new DefaultProperties(graphFactory(),
-                                                  valueFactory()),
+        Assert.assertEquals(new DefaultProperties(graphFactory()),
                             edge.properties());
     }
 
@@ -61,8 +57,7 @@ public class DefaultEdgeTest extends UnitTestBase {
         edge.label("knows");
         edge.name("2021-06-01");
         edge.targetId(new LongId(1L));
-        Properties properties = new DefaultProperties(graphFactory(),
-                                                      valueFactory());
+        Properties properties = new DefaultProperties(graphFactory());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
         edge.properties(properties);
@@ -74,13 +69,12 @@ public class DefaultEdgeTest extends UnitTestBase {
     }
 
     @Test
-    public void testEquals() throws IOException {
+    public void testEquals() {
         DefaultEdge edge1 = new DefaultEdge(graphFactory());
         edge1.label("knows");
         edge1.name("2021-06-01");
         edge1.targetId(new LongId(1L));
-        Properties properties = new DefaultProperties(graphFactory(),
-                                                      valueFactory());
+        Properties properties = new DefaultProperties(graphFactory());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
         edge1.properties(properties);
@@ -101,8 +95,7 @@ public class DefaultEdgeTest extends UnitTestBase {
         edge.label("knows");
         edge.name("2021-06-01");
         edge.targetId(new LongId(1L));
-        Properties properties = new DefaultProperties(graphFactory(),
-                                                      valueFactory());
+        Properties properties = new DefaultProperties(graphFactory());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
         edge.properties(properties);

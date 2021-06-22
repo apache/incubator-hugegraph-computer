@@ -24,8 +24,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.util.Log;
 
@@ -47,10 +45,5 @@ public class IntegrateTestSuite {
                              "ComputerOptions");
         OptionSpace.register("computer-rpc",
                              "com.baidu.hugegraph.config.RpcOptions");
-
-        UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value"
-        );
     }
 }

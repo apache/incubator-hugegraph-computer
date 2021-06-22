@@ -138,10 +138,6 @@ public abstract class MessageRecvPartition {
 
     private void mergeBuffers(MessageRecvBuffers buffers, String path) {
         this.checkException();
-        // First sortBuffers is empty.
-        if (buffers.totalBytes() <= 0L) {
-            return;
-        }
         this.sortManager.mergeBuffers(buffers.buffers(), path, this.withSubKv,
                                       this.outerSortFlusher())
                         .whenComplete((r , e) -> {

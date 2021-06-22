@@ -32,6 +32,7 @@ import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -43,14 +44,12 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
     @Test
     public void testWriteReadVertex() throws Exception {
-        UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value"
-        );
-
         LongId longId = new LongId(100L);
         LongValue longValue = new LongValue(999L);
         Vertex vertex = graphFactory().createVertex(longId, longValue);
+        Properties properties = graphFactory().createProperties();
+        properties.put("age", new LongValue(20L));
+        vertex.properties(properties);
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
                                Constants.SMALL_BUF_SIZE)) {
@@ -68,8 +67,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadEdgesWithSingleFrequency() throws Exception {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value"
+            ComputerOptions.INPUT_EDGE_FREQ, "SINGLE"
         );
         ComputerContext context = ComputerContext.instance();
         GraphFactory graphFactory = context.graphFactory();
@@ -104,8 +102,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     public void testWriteReadEdgesWithSinglePerLabelFrequency()
            throws Exception {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.INPUT_EDGE_FREQ, "SINGLE_PER_LABEL"
         );
         ComputerContext context = ComputerContext.instance();
@@ -141,8 +137,6 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadEdgesWithMultipleFrequency() throws Exception {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value",
             ComputerOptions.INPUT_EDGE_FREQ, "MULTIPLE"
         );
         ComputerContext context = ComputerContext.instance();
@@ -177,8 +171,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
     @Test
     public void testWriteReadMessage() throws IOException {
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value"
+            ComputerOptions.ALGORITHM_MESSAGE_CLASS, DoubleValue.class.getName()
         );
 
         Id id = new LongId(999L);

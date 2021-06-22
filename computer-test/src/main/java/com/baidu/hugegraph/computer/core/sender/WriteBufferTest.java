@@ -154,8 +154,6 @@ public class WriteBufferTest extends UnitTestBase {
                                                new LongId(4L)));
 
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.INPUT_EDGE_FREQ, "SINGLE"
         );
         buffer.writeEdges(vertex);
@@ -163,8 +161,6 @@ public class WriteBufferTest extends UnitTestBase {
         Assert.assertGt(0L, position1);
 
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.INPUT_EDGE_FREQ, "SINGLE_PER_LABEL"
         );
         // Pass a new context object, because config has updated
@@ -174,8 +170,6 @@ public class WriteBufferTest extends UnitTestBase {
         Assert.assertGt(position1, position2);
 
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG",
             ComputerOptions.INPUT_EDGE_FREQ, "MULTIPLE"
         );
         // Pass a new context object, because config has updated

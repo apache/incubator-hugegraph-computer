@@ -171,7 +171,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
 
     private V newValue(ComputerContext context) {
         @SuppressWarnings("unchecked")
-        V val = (V) context.valueFactory().createValue(this.type);
+        V val = (V) context.graphFactory().createValue(this.type);
         return val;
     }
 }

@@ -31,6 +31,8 @@ import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.ConfigTestSuite;
 import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
+import com.baidu.hugegraph.computer.core.graph.id.IdType;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.input.InputTestSuite;
 import com.baidu.hugegraph.computer.core.io.IOTestSuite;
 import com.baidu.hugegraph.computer.core.network.NetworkTestSuite;
@@ -68,19 +70,17 @@ public class UnitTestSuite {
     private static final Logger LOG = Log.logger(UnitTestSuite.class);
 
     @BeforeClass
-    public static void setup() {
+    public static void setup() throws ClassNotFoundException {
         LOG.info("Setup for UnitTestSuite of hugegraph-computer");
-
+        Class.forName(IdType.class.getName());
         // Don't forget to register options
         OptionSpace.register("computer",
                              "com.baidu.hugegraph.computer.core.config." +
                              "ComputerOptions");
         OptionSpace.register("computer-rpc",
                              "com.baidu.hugegraph.config.RpcOptions");
-
         UnitTestBase.updateOptions(
-            ComputerOptions.VALUE_TYPE, "LONG",
-            ComputerOptions.VALUE_NAME, "value"
+            ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()
         );
     }
 }

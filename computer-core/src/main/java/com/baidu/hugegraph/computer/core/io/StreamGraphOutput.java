@@ -104,7 +104,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
             // Write id
             this.writeId(out, id);
         }, out -> {
-            this.writeValue(out, value);
+            this.writeMessage(out, value);
         });
     }
 
@@ -118,6 +118,11 @@ public class StreamGraphOutput implements GraphComputeOutput {
     public void writeValue(RandomAccessOutput out, Value<?> value)
                            throws IOException {
         out.writeByte(value.type().code());
+        value.write(out);
+    }
+
+    private void writeMessage(RandomAccessOutput out, Value<?> value)
+                              throws IOException {
         value.write(out);
     }
 

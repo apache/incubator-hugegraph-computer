@@ -27,13 +27,11 @@ import java.util.Random;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -82,7 +80,7 @@ public class UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        Value<?> newValue = valueFactory().createValue(oldValue.type());
+        Value<?> newValue = graphFactory().createValue(oldValue.type());
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newValue.read(bai);
             Assert.assertEquals(oldValue, newValue);
@@ -112,8 +110,6 @@ public class UnitTestBase {
     public static synchronized Config updateWithRequiredOptions(
                                       Object... options) {
         Object[] requiredOptions = new Object[] {
-            ComputerOptions.VALUE_NAME, "rank",
-            ComputerOptions.VALUE_TYPE, "LONG"
         };
         Object[] allOptions = new Object[requiredOptions.length +
                                          options.length];
@@ -169,10 +165,6 @@ public class UnitTestBase {
 
     protected static ComputerContext context() {
         return ComputerContext.instance();
-    }
-
-    protected static ValueFactory valueFactory() {
-        return context().valueFactory();
     }
 
     protected static GraphFactory graphFactory() {

@@ -173,8 +173,6 @@ public class DefaultConfigTest extends UnitTestBase {
 
     private Map<String, String> initialOptions() {
         Map<String, String> options = new HashMap<>();
-        options.put(ComputerOptions.VALUE_NAME.name(), "rank");
-        options.put(ComputerOptions.VALUE_TYPE.name(), "LONG");
         options.put(ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES.name(), "false");
         options.put(ComputerOptions.OUTPUT_WITH_VERTEX_PROPERTIES.name(),
                     "false");

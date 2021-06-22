@@ -318,13 +318,11 @@ public class SenderIntegrateTest {
         }
 
         public OptionsBuilder withValueName(String name) {
-            this.options.add(ComputerOptions.VALUE_NAME.name());
             this.options.add(name);
             return this;
         }
 
         public OptionsBuilder withValueType(String type) {
-            this.options.add(ComputerOptions.VALUE_TYPE.name());
             this.options.add(type);
             return this;
         }

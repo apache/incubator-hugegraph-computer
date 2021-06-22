@@ -25,7 +25,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.configuration.MapConfiguration;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
@@ -58,10 +57,6 @@ public final class DefaultConfig implements Config {
     private HotConfig extractHotConfig(HugeConfig allConfig) {
         // Populate high frequency accessed options into HotConfig
         HotConfig hotConfig = new HotConfig();
-        hotConfig.vertexValueName(
-                  allConfig.get(ComputerOptions.VALUE_NAME));
-        hotConfig.valueType(ValueType.valueOf(
-                  allConfig.get(ComputerOptions.VALUE_TYPE)));
 
         hotConfig.outputVertexAdjacentEdges(
                   allConfig.get(ComputerOptions.OUTPUT_WITH_ADJACENT_EDGES));
@@ -169,7 +164,7 @@ public final class DefaultConfig implements Config {
      */
     @Override
     public <T> T createObject(ConfigOption<Class<?>> clazzOption) {
-        return createObject(clazzOption, true);
+        return this.createObject(clazzOption, true);
     }
 
     @Override
@@ -192,16 +187,6 @@ public final class DefaultConfig implements Config {
                                         "'%s', class='%s'",
                                         e, clazzOption.name(), clazz.getName());
         }
-    }
-
-    @Override
-    public String vertexValueName() {
-        return this.hotConfig.vertexValueName();
-    }
-
-    @Override
-    public ValueType valueType() {
-        return this.hotConfig.valueType();
     }
 
     @Override

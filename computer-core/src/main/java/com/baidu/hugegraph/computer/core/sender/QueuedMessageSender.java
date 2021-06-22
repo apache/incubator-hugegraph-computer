@@ -31,6 +31,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
 public class QueuedMessageSender implements MessageSender {
@@ -57,6 +58,9 @@ public class QueuedMessageSender implements MessageSender {
     }
 
     public void init() {
+        for (WorkerChannel channel : this.channels) {
+            E.checkNotNull(channel, "channel");
+        }
         this.sendExecutor.start();
     }
 

@@ -26,6 +26,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
@@ -33,7 +34,6 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueFactory;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryReader;
@@ -42,13 +42,13 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryReader;
 public class StreamGraphInput implements GraphComputeInput {
 
     private final GraphFactory graphFactory;
-    private final ValueFactory valueFactory;
+    private final Config config;
     private final EdgeFrequency frequency;
     private final EntryInput in;
 
     public StreamGraphInput(ComputerContext context, EntryInput in) {
         this.graphFactory = context.graphFactory();
-        this.valueFactory = context.valueFactory();
+        this.config = context.config();
         this.frequency = context.config().get(ComputerOptions.INPUT_EDGE_FREQ);
         this.in = in;
     }
@@ -57,7 +57,7 @@ public class StreamGraphInput implements GraphComputeInput {
     public Vertex readVertex() throws IOException {
         Vertex vertex = this.graphFactory.createVertex();
         this.in.readEntry(in -> {
-            vertex.id(this.readId(in));
+            vertex.id(readId(in));
         }, in -> {
             vertex.properties(this.readProperties(in));
         });
@@ -69,33 +69,33 @@ public class StreamGraphInput implements GraphComputeInput {
         Vertex vertex = this.graphFactory.createVertex();
         KvEntryReader reader = this.in.readEntry(in -> {
             // Read id
-            vertex.id(this.readId(in));
+            vertex.id(readId(in));
         });
         if (this.frequency == EdgeFrequency.SINGLE) {
             while (reader.hasRemaining()) {
                 Edge edge = this.graphFactory.createEdge();
                 // Only use targetId as subKey, use properties as subValue
                 reader.readSubKv(in -> {
-                    edge.targetId(this.readId(in));
+                    edge.targetId(readId(in));
                 }, in -> {
                     edge.properties(this.readProperties(in));
                 });
                 vertex.addEdge(edge);
             }
-        } else if (frequency == EdgeFrequency.SINGLE_PER_LABEL) {
+        } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
             while (reader.hasRemaining()) {
                 Edge edge = this.graphFactory.createEdge();
                 // Use label + targetId as subKey, use properties as subValue
                 reader.readSubKv(in -> {
                     edge.label(in.readUTF());
-                    edge.targetId(this.readId(in));
+                    edge.targetId(readId(in));
                 }, in -> {
                     edge.properties(this.readProperties(in));
                 });
                 vertex.addEdge(edge);
             }
         } else {
-            assert frequency == EdgeFrequency.MULTIPLE;
+            assert this.frequency == EdgeFrequency.MULTIPLE;
             while (reader.hasRemaining()) {
                 Edge edge = this.graphFactory.createEdge();
                 /*
@@ -105,7 +105,7 @@ public class StreamGraphInput implements GraphComputeInput {
                 reader.readSubKv(in -> {
                     edge.label(in.readUTF());
                     edge.name(in.readUTF());
-                    edge.targetId(this.readId(in));
+                    edge.targetId(readId(in));
                 }, in -> {
                     edge.properties(this.readProperties(in));
                 });
@@ -120,27 +120,33 @@ public class StreamGraphInput implements GraphComputeInput {
         MutablePair<Id, Value<?>> pair = MutablePair.of(null, null);
         this.in.readEntry(in -> {
             // Read id
-            pair.setLeft(this.readId(in));
+            pair.setLeft(readId(in));
         }, in -> {
-            pair.setRight(this.readValue(in));
+            pair.setRight(this.readMessage(in));
         });
         return pair;
     }
 
-    @Override
-    public Id readId(RandomAccessInput in) throws IOException {
-        byte code = in.readByte();
-        Id id = IdFactory.createId(code);
-        id.read(in);
-        return id;
+    private Value<?> readMessage(RandomAccessInput in) throws IOException {
+        Value<?> v = this.config.createObject(
+                     ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+        v.read(in);
+        return v;
     }
 
     @Override
     public Value<?> readValue(RandomAccessInput in) throws IOException {
         byte code = in.readByte();
-        Value<?> value = this.valueFactory.createValue(code);
+        Value<?> value = this.graphFactory.createValue(code);
         value.read(in);
         return value;
+    }
+
+    public static Id readId(RandomAccessInput in) throws IOException {
+        byte code = in.readByte();
+        Id id = IdFactory.createId(code);
+        id.read(in);
+        return id;
     }
 
     private Properties readProperties(RandomAccessInput in) throws IOException {
