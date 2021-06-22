@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.k8s.Constants;
+import com.baidu.hugegraph.computer.k8s.crd.model.CommonComponentState;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComponentState;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComponentStateBuilder;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
@@ -95,7 +96,9 @@ public class ComputerJobController
             return Result.REQUEUE;
         }
 
-        // TODO: implement it
+        ComputerJobDeployer deployer = new ComputerJobDeployer(this.kubeClient);
+        deployer.deploy(computerJob, observed);
+
         return Result.NO_REQUEUE;
     }
 
@@ -128,12 +131,12 @@ public class ComputerJobController
         if (configMap != null) {
             ComponentState configMapState = new ComponentStateBuilder()
                     .withName(configMap.getMetadata().getName())
-                    .withState(Constants.COMPONENT_STATE_READY)
+                    .withState(CommonComponentState.READY.value())
                     .build();
             status.getComponentStates().setConfigMap(configMapState);
         } else if (status.getComponentStates().getConfigMap() != null) {
             status.getComponentStates().getConfigMap()
-                  .setState(Constants.COMPONENT_STATE_DELETED);
+                  .setState(CommonComponentState.DELETED.value());
         }
 
         // MasterJob
@@ -242,9 +245,9 @@ public class ComputerJobController
         observed.computerJob(computerJob);
 
         String namespace = computerJob.getMetadata().getNamespace();
-        String name = computerJob.getMetadata().getName();
+        String crName = computerJob.getMetadata().getName();
 
-        String masterName = KubeUtil.masterJobName(name);
+        String masterName = KubeUtil.masterJobName(crName);
         Job master = this.getResourceByName(namespace, masterName, Job.class);
         observed.masterJob(master);
 
@@ -253,7 +256,7 @@ public class ComputerJobController
             observed.masterPods(masterPods);
         }
 
-        String workerName = KubeUtil.workerJobName(name);
+        String workerName = KubeUtil.workerJobName(crName);
         Job worker = this.getResourceByName(namespace, workerName, Job.class);
         observed.workerJob(worker);
 
@@ -262,7 +265,7 @@ public class ComputerJobController
             observed.workerPods(workerPods);
         }
 
-        String configMapName = KubeUtil.configMapName(name);
+        String configMapName = KubeUtil.configMapName(crName);
         ConfigMap configMap = this.getResourceByName(namespace, configMapName,
                                                      ConfigMap.class);
         observed.configMap(configMap);

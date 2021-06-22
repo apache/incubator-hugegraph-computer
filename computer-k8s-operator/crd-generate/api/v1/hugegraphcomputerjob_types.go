@@ -58,8 +58,6 @@ type ComputerJobSpec struct {
 
 	ComputerConf map[string]string `json:"computerConf"`
 
-	ConfigMap *string `json:"configMap,omitempty"`
-
 	// Environment variables shared by all Master and Worker.
 	EnvVars []corev1.EnvVar `json:"envVars,omitempty"`
 

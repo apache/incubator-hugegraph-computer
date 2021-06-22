@@ -33,6 +33,16 @@
       "enum" : ["True", "False", "Unknown"],
       "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.ConditionStatus"
     },
+    "Protocol" : {
+      "type" : "string",
+      "enum" : ["TCP", "UDP", "SCTP"],
+      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.Protocol"
+    },
+    "CommonComponentState" : {
+      "type" : "string",
+      "enum" : ["NotReady", "Ready", "Deleted"],
+      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.CommonComponentState"
+    },
     "JobComponentState" : {
       "type" : "string",
       "enum" : ["Pending", "Running", "Succeeded", "Failed", "Cancelled", "Unknown"],
@@ -57,6 +67,12 @@
     },
     "ConditionStatus" : {
       "$ref": "#/definitions/ConditionStatus"
+    },
+    "Protocol" : {
+      "$ref": "#/definitions/Protocol"
+    },
+    "CommonComponentState" : {
+      "$ref": "#/definitions/CommonComponentState"
     },
     "JobComponentState" : {
       "$ref": "#/definitions/JobComponentState"
