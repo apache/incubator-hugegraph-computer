@@ -165,6 +165,15 @@ public class ComputerOptions extends OptionHolder {
                     4
             );
 
+    public static final ConfigOption<String> OUTPUT_VALUE_NAME =
+            new ConfigOption<>(
+                    "output.value_name",
+                    "The value is assigned dynamically by #name() of " +
+                    "instance created by WORKER_COMPUTATION_CLASS.",
+                    disallowEmpty(),
+                    "value"
+            );
+
     public static final ConfigOption<Boolean> OUTPUT_WITH_ADJACENT_EDGES =
             new ConfigOption<>(
                     "output.with_adjacent_edges",

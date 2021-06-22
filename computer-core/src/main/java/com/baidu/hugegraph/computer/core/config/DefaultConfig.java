@@ -25,7 +25,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.configuration.MapConfiguration;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
@@ -35,7 +34,6 @@ public final class DefaultConfig implements Config {
 
     private final HugeConfig allConfig;
     private final HotConfig hotConfig;
-    private Computation computation;
 
     public DefaultConfig(Map<String, String> options) {
         this.allConfig = this.parseOptions(options);
@@ -166,7 +164,7 @@ public final class DefaultConfig implements Config {
      */
     @Override
     public <T> T createObject(ConfigOption<Class<?>> clazzOption) {
-        return createObject(clazzOption, true);
+        return this.createObject(clazzOption, true);
     }
 
     @Override
@@ -189,15 +187,6 @@ public final class DefaultConfig implements Config {
                                         "'%s', class='%s'",
                                         e, clazzOption.name(), clazz.getName());
         }
-    }
-
-    @Override
-    public String vertexValueName() {
-        if (this.computation == null) {
-            this.computation = this.createObject(
-                               ComputerOptions.WORKER_COMPUTATION_CLASS);
-        }
-        return this.computation.name();
     }
 
     @Override

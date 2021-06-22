@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
@@ -46,7 +47,7 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeId(vertex.id());
         this.writeSplitter();
 
-        String valueName = this.config.vertexValueName();
+        String valueName = this.config.get(ComputerOptions.OUTPUT_VALUE_NAME);
         this.writeKey(valueName);
         this.writeJoiner();
         this.writeValue(vertex.value());

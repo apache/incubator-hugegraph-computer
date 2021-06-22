@@ -44,8 +44,6 @@ public interface Config {
     <T> T createObject(ConfigOption<Class<?>> clazzOption,
                        boolean requiredNotNull);
 
-    String vertexValueName();
-
     Boolean outputVertexAdjacentEdges();
 
     Boolean outputVertexProperties();
