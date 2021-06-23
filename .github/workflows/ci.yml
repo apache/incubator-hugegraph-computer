@@ -37,7 +37,7 @@ jobs:
           fetch-depth: 2
 
       - name: Compile
-        run: mvn compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
+        run: mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
 
       - name: Prepare env and service
         env:
@@ -49,7 +49,7 @@ jobs:
           $TRAVIS_DIR/load-data-into-hugegraph.sh
 
       - name: Unit test
-        run: mvn test -P unit-test
+        run: mvn clean test -P unit-test
 
       - name: Integrate test
         run: mvn test -P integrate-test
