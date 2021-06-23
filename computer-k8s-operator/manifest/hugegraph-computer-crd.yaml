@@ -55,8 +55,6 @@ spec:
               additionalProperties:
                 type: string
               type: object
-            configMap:
-              type: string
             envFrom:
               description: Environment variables injected from a source, shared by all Master and Worker.
               items:

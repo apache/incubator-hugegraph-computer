@@ -95,11 +95,6 @@ func (in *ComputerJobSpec) DeepCopyInto(out *ComputerJobSpec) {
 			(*out)[key] = val
 		}
 	}
-	if in.ConfigMap != nil {
-		in, out := &in.ConfigMap, &out.ConfigMap
-		*out = new(string)
-		**out = **in
-	}
 	if in.EnvVars != nil {
 		in, out := &in.EnvVars, &out.EnvVars
 		*out = make([]corev1.EnvVar, len(*in))

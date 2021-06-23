@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.k8s.operator.common;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,6 +35,7 @@ public class Request {
 
     private String name;
     private String namespace;
+    private final AtomicInteger retryTimes;
 
     public static Request parseRequestByCR(CustomResource<?, ?> resource) {
         E.checkNotNull(resource, "resource");
@@ -51,6 +53,7 @@ public class Request {
     public Request(String namespace, String name) {
         this.name = name;
         this.namespace = namespace;
+        this.retryTimes = new AtomicInteger(0);
     }
 
     public String name() {
@@ -71,6 +74,14 @@ public class Request {
         return this;
     }
 
+    public String key() {
+        return Cache.namespaceKeyFunc(this.namespace, this.name);
+    }
+
+    public int retryIncrGet() {
+        return this.retryTimes.getAndIncrement();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -84,10 +95,6 @@ public class Request {
         final Request other = (Request) obj;
         return Objects.equals(other.namespace, this.namespace) &&
                Objects.equals(other.name, this.name);
-    }
-
-    public String key() {
-        return Cache.namespaceKeyFunc(this.namespace, this.name);
     }
 
     @Override

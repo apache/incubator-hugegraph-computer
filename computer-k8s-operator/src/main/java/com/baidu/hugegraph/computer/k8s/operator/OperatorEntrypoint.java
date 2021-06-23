@@ -26,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -34,9 +35,11 @@ import org.apache.commons.configuration.MapConfiguration;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.operator.controller.ComputerJobController;
+import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.util.ExecutorUtil;
@@ -45,6 +48,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
@@ -81,15 +85,17 @@ public class OperatorEntrypoint {
             this.config = new HugeConfig(new MapConfiguration(System.getenv()));
 
             this.kubeClient = new DefaultKubernetesClient();
-            this.informerFactory = this.kubeClient.informers();
             this.controllers = new ArrayList<>();
+            this.informerFactory = this.kubeClient.informers();
 
-            String namespace = this.kubeClient.getNamespace();
-            if (namespace == null) {
-                LOG.warn("No namespace found via config, assuming default");
-                namespace = "default";
+            String watchNamespace = this.config.get(
+                                    OperatorOptions.WATCH_NAMESPACE);
+            if (!Objects.equals(watchNamespace, Constants.ALL_NAMESPACE)) {
+                this.createNamespace(watchNamespace);
+                this.informerFactory = this.informerFactory.inNamespace(
+                                                            watchNamespace);
             }
-            LOG.info("Using namespace: " + namespace);
+            LOG.info("Watch namespace: " + watchNamespace);
 
             this.addHealthCheck();
 
@@ -201,6 +207,17 @@ public class OperatorEntrypoint {
             OutputStream responseBody = httpExchange.getResponseBody();
             responseBody.write(bytes);
             responseBody.close();
+        });
+    }
+
+    private void createNamespace(String namespace) {
+        NamespaceBuilder namespaceBuilder = new NamespaceBuilder()
+                .withNewMetadata()
+                .withName(namespace)
+                .endMetadata();
+        KubeUtil.ignoreExists(() -> {
+            return this.kubeClient.namespaces()
+                                  .create(namespaceBuilder.build());
         });
     }
 }

@@ -19,9 +19,9 @@
 
 package com.baidu.hugegraph.computer.k8s.util;
 
+import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -29,11 +29,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.util.Log;
+
+import io.fabric8.kubernetes.client.KubernetesClientException;
 
 public class KubeUtil {
+
+    private static final Logger LOG = Log.logger(KubeUtil.class);
 
     /**
      * Tries a condition func until the initial delay specified.
@@ -74,23 +79,6 @@ public class KubeUtil {
         return result.get();
     }
 
-
-    public static void setOwnerReference(HasMetadata owner,
-                                         HasMetadata...resources) {
-        final OwnerReference ownerReference = new OwnerReferenceBuilder()
-                .withName(owner.getMetadata().getName())
-                .withApiVersion(owner.getApiVersion())
-                .withUid(owner.getMetadata().getUid())
-                .withKind(owner.getKind())
-                .withController(true)
-                .withBlockOwnerDeletion(true)
-                .build();
-        for (HasMetadata resource : resources) {
-            resource.getMetadata().setOwnerReferences(
-                                   Collections.singletonList(ownerReference));
-        }
-    }
-
     public static String masterJobName(String name) {
         return name + "-master";
     }
@@ -100,7 +88,7 @@ public class KubeUtil {
     }
 
     public static String configMapName(String name) {
-        return name + "-configMap";
+        return name + "-configmap";
     }
 
     public static String now() {
@@ -111,7 +99,7 @@ public class KubeUtil {
         return integer != null ? integer : -1;
     }
 
-    public static String map2LabelString(Map<String, String> labels) {
+    public static String asLabelString(Map<String, String> labels) {
         StringBuilder labelQueryBuilder = new StringBuilder();
         for (Map.Entry<String, String> entry : labels.entrySet()) {
             if (labelQueryBuilder.length() > 0) {
@@ -122,5 +110,35 @@ public class KubeUtil {
                              .append(entry.getValue());
         }
         return labelQueryBuilder.toString();
+    }
+
+    public static String asProperties(Map<String, String> map) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (StringUtils.isNotBlank(key)) {
+                builder.append(key);
+                builder.append("=");
+                if (value != null) {
+                    builder.append(value);
+                }
+                builder.append("\n");
+            }
+        }
+        return builder.toString();
+    }
+
+    public static <T> T ignoreExists(Supplier<T> supplier) {
+        try {
+            return supplier.get();
+        } catch (KubernetesClientException exception) {
+            if (exception.getCode() == HttpURLConnection.HTTP_CONFLICT) {
+                LOG.warn("Resource already exists");
+            } else {
+                throw exception;
+            }
+        }
+        return null;
     }
 }

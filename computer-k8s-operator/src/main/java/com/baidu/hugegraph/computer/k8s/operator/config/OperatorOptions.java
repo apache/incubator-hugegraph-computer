@@ -19,8 +19,10 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.config;
 
+import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
 import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 
+import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 
@@ -40,6 +42,16 @@ public class OperatorOptions extends OptionHolder {
         }
         return INSTANCE;
     }
+
+    public static final ConfigOption<String> WATCH_NAMESPACE =
+            new ConfigOption<>(
+                    "WATCH_NAMESPACE",
+                    "The value is watch custom resources in the namespace, " +
+                    "ignore other namespaces, if empty all namespaces will " +
+                    "be watched.",
+                    disallowEmpty(),
+                    Constants.ALL_NAMESPACE
+            );
 
     public static final ConfigOption<Integer> PROBE_PORT =
             new ConfigOption<>(
@@ -64,7 +76,7 @@ public class OperatorOptions extends OptionHolder {
                     "The minimum frequency at which watched resources are " +
                     "reconciled.",
                     positiveInt(),
-                    10 * 60 * 1000L
+                    10 * 1000L
             );
 
     public static final ConfigOption<Integer> WORKER_COUNT =

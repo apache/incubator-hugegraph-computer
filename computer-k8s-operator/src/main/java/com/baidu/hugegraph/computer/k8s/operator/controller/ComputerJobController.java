@@ -97,13 +97,13 @@ public class ComputerJobController
         }
 
         ComputerJobDeployer deployer = new ComputerJobDeployer(this.kubeClient);
-        deployer.deploy(computerJob, observed);
+        deployer.deploy(observed);
 
         return Result.NO_REQUEUE;
     }
 
     private boolean updateStatus(ComputerJobComponent observed) {
-        ComputerJobStatus newStatus = this.deriveCRStatus(observed);
+        ComputerJobStatus newStatus = this.derivedCRStatus(observed);
         ComputerJobStatus oldStatus = observed.computerJob().getStatus();
         if (!Objects.deepEquals(oldStatus, newStatus)) {
             HugeGraphComputerJob computerJob = observed.computerJob();
@@ -112,11 +112,10 @@ public class ComputerJobController
             return true;
         }
 
-        return Objects.equals(newStatus.getJobStatus(),
-                              JobStatus.INITIALIZING.name());
+        return false;
     }
 
-    private ComputerJobStatus deriveCRStatus(ComputerJobComponent observed) {
+    private ComputerJobStatus derivedCRStatus(ComputerJobComponent observed) {
         HugeGraphComputerJob computerJob = observed.computerJob();
 
         MutableInt failedComponents = new MutableInt(0);

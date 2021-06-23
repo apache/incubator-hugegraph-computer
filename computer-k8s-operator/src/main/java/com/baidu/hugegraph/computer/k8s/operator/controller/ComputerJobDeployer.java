@@ -26,12 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.Protocol;
 import com.baidu.hugegraph.computer.k8s.crd.model.ResourceName;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
+import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -43,8 +46,10 @@ import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
-import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.OwnerReference;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
@@ -55,86 +60,109 @@ import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.utils.Serialization;
 
 public class ComputerJobDeployer {
+
+    private static final Logger LOG = Log.logger(ComputerJobDeployer.class);
+
     private final KubernetesClient kubeClient;
 
     public ComputerJobDeployer(KubernetesClient kubeClient) {
         this.kubeClient = kubeClient;
     }
 
-    public void deploy(HugeGraphComputerJob computerJob,
-                       ComputerJobComponent observed) {
+    public void deploy(ComputerJobComponent observed) {
+        HugeGraphComputerJob computerJob = observed.computerJob();
 
-        String namespace = computerJob.getMetadata().getNamespace();
-        String name = computerJob.getMetadata().getName();
-        ComputerJobSpec spec = computerJob.getSpec();
+        Set<ContainerPort> ports = this.handleConfig(computerJob.getSpec());
 
-        Set<ContainerPort> ports = this.handleConfig(spec);
+        ComputerJobComponent desired = new ComputerJobComponent();
+        desired.configMap(this.desiredConfigMap(computerJob));
+        desired.masterJob(this.desiredMasterJob(computerJob, ports));
+        desired.workerJob(this.desiredWorkerJob(computerJob, ports));
 
-        ConfigMap configMap = this.desiredConfigMap(namespace, name, spec);
-        Job masterJob = this.desiredMasterJob(namespace, name, spec, ports);
-        Job workerJob = this.desiredWorkerJob(namespace, name, spec, ports);
-
-        KubeUtil.setOwnerReference(configMap, masterJob, workerJob);
-
-        KubernetesList resources = new KubernetesListBuilder()
-                .addToItems(configMap, masterJob, workerJob)
-                .build();
-
-        this.kubeClient.resourceList(resources)
-                       .inNamespace(computerJob.getMetadata().getNamespace())
-                       .deletingExisting();
-
-        this.kubeClient.resourceList(resources)
-                       .inNamespace(computerJob.getMetadata().getNamespace())
-                       .createOrReplace();
+        this.reconcileComponent(computerJob.getMetadata().getNamespace(),
+                                desired, observed);
     }
 
-    private ConfigMap desiredConfigMap(String namespace, String crName,
-                                       ComputerJobSpec spec) {
-        String component = "configMap";
-        Map<String, String> computerConf = spec.getComputerConf();
-        Map<String, String> data = new HashMap<>();
-        data.put(Constants.COMPUTER_CONF_FILE,
-                 Serialization.asYaml(computerConf));
+    private void reconcileComponent(String namespace,
+                                    ComputerJobComponent desired,
+                                    ComputerJobComponent observed) {
+        ConfigMap desiredConfigMap = desired.configMap();
+        ConfigMap observedConfigMap = observed.configMap();
+        if (desiredConfigMap == null && observedConfigMap != null) {
+            this.kubeClient.configMaps()
+                           .inNamespace(namespace)
+                           .delete(observedConfigMap);
+        } else if (desiredConfigMap != null && observedConfigMap == null) {
+            KubeUtil.ignoreExists(() -> {
+                return this.kubeClient.configMaps()
+                                      .inNamespace(namespace)
+                                      .create(desiredConfigMap);
+            });
+        }
+        if (desiredConfigMap != null && observedConfigMap != null) {
+            LOG.info("ConfigMap already exists, no action");
+        }
 
-        return new ConfigMapBuilder()
-                .withNewMetadata()
-                .withNamespace(namespace)
-                .withName(KubeUtil.configMapName(crName))
-                .withLabels(this.geCommonLabels(crName, component))
-                .endMetadata()
-                .withData(data)
-                .build();
+        Job desiredMasterJob = desired.masterJob();
+        Job observedMasterJob = observed.masterJob();
+        if (desiredMasterJob == null && observedMasterJob != null) {
+            this.kubeClient.batch().v1().jobs().inNamespace(namespace)
+                           .delete(observedMasterJob);
+        } else if (desiredMasterJob != null && observedMasterJob == null) {
+            KubeUtil.ignoreExists(() -> {
+                return this.kubeClient.batch().v1().jobs()
+                                      .inNamespace(namespace)
+                                      .create(desiredMasterJob);
+            });
+        }
+        if (desiredMasterJob != null && observedMasterJob != null) {
+            LOG.info("MasterJob already exists, no action");
+        }
+
+        Job desiredWorkerJob = desired.workerJob();
+        Job observedWorkerJob = observed.workerJob();
+        if (desiredWorkerJob == null && observedWorkerJob != null) {
+            this.kubeClient.batch().v1().jobs().inNamespace(namespace)
+                           .delete(observedWorkerJob);
+        } else if (desiredWorkerJob != null && observedWorkerJob == null) {
+            KubeUtil.ignoreExists(() -> {
+                return this.kubeClient.batch().v1().jobs()
+                                      .inNamespace(namespace)
+                                      .create(desiredWorkerJob);
+            });
+        }
+        if (desiredWorkerJob != null && observedWorkerJob != null) {
+            LOG.info("WorkerJob already exists, no action");
+        }
     }
 
     private Set<ContainerPort> handleConfig(ComputerJobSpec spec) {
         Map<String, String> config = spec.getComputerConf();
 
-        config.put(Constants.WORKER_COUNT_KEY,
+        config.put(Constants.WORKER_COUNT,
                    String.valueOf(spec.getWorkerInstances()));
 
-        config.put(Constants.TRANSPORT_IP_KEY,
-                   String.format("${env:%s}", Constants.POD_IP));
-        config.put(Constants.RPC_IP_KEY,
-                   String.format("${env:%s}", Constants.POD_IP));
+        config.put(Constants.TRANSPORT_IP,
+                   String.format("${%s}", Constants.POD_IP));
+        config.put(Constants.RPC_IP,
+                   String.format("${%s}", Constants.POD_IP));
 
         String transportPort = config.computeIfAbsent(
-                Constants.TRANSPORT_PORT_KEY,
-                k -> String.valueOf(Constants.TRANSPORT_PORT));
+                Constants.TRANSPORT_PORT,
+                k -> String.valueOf(Constants.DEFAULT_TRANSPORT_PORT));
         String rpcPort = config.computeIfAbsent(
-                Constants.RPC_PORT_KEY,
-                k -> String.valueOf(Constants.RPC_PORT));
+                Constants.RPC_PORT,
+                k -> String.valueOf(Constants.DEFAULT_RPC_PORT));
 
         ContainerPort transportContainerPort = new ContainerPortBuilder()
-                .withName(Constants.TRANSPORT_PORT_KEY)
+                .withName(Constants.TRANSPORT_PORT)
                 .withContainerPort(Integer.valueOf(transportPort))
                 .withProtocol(Protocol.TCP.value())
                 .build();
         ContainerPort rpcContainerPort = new ContainerPortBuilder()
-                .withName(Constants.RPC_PORT_KEY)
+                .withName(Constants.RPC_PORT)
                 .withContainerPort(Integer.valueOf(rpcPort))
                 .withProtocol(Protocol.TCP.value())
                 .build();
@@ -142,42 +170,64 @@ public class ComputerJobDeployer {
         return Sets.newHashSet(transportContainerPort, rpcContainerPort);
     }
 
-    public Job desiredMasterJob(String namespace, String crName,
-                                ComputerJobSpec spec,
+    private ConfigMap desiredConfigMap(HugeGraphComputerJob computerJob) {
+        String crName = computerJob.getMetadata().getName();
+        ComputerJobSpec spec = computerJob.getSpec();
+
+        Map<String, String> computerConf = spec.getComputerConf();
+        Map<String, String> data = new HashMap<>();
+        data.put(Constants.COMPUTER_CONF_FILE,
+                 KubeUtil.asProperties(computerConf));
+
+        String name = KubeUtil.configMapName(crName);
+
+        return new ConfigMapBuilder()
+                .withMetadata(this.getMetadata(computerJob, name))
+                .withData(data)
+                .build();
+    }
+
+    public Job desiredMasterJob(HugeGraphComputerJob computerJob,
                                 Set<ContainerPort> ports) {
-        String component = "master";
+        String crName = computerJob.getMetadata().getName();
+        ComputerJobSpec spec = computerJob.getSpec();
 
         List<String> command = Lists.newArrayList("/bin/sh" , "-c");
         List<String> args = Lists.newArrayList("master.sh");
 
-        Container container = this.getContainer(component, spec, ports,
+        String name = KubeUtil.masterJobName(crName);
+
+        ObjectMeta metadata = this.getMetadata(computerJob, name);
+
+        Container container = this.getContainer(name, spec, ports,
                                                 command, args);
         List<Container> containers = Lists.newArrayList(container);
 
         int instances = Constants.MASTER_INSTANCES;
-        return this.getJob(namespace, crName, component, spec,
-                           instances, containers);
+        return this.getJob(crName, metadata, spec, instances, containers);
     }
 
-    public Job desiredWorkerJob(String namespace, String crName,
-                                ComputerJobSpec spec,
+    public Job desiredWorkerJob(HugeGraphComputerJob computerJob,
                                 Set<ContainerPort> ports) {
-        String component = "worker";
+        String crName = computerJob.getMetadata().getName();
+        ComputerJobSpec spec = computerJob.getSpec();
 
         List<String> command = Lists.newArrayList("/bin/sh" , "-c");
         List<String> args = Lists.newArrayList("worker.sh");
 
-        Container container = this.getContainer(component, spec, ports,
+        String name = KubeUtil.workerJobName(crName);
+
+        ObjectMeta metadata = this.getMetadata(computerJob, name);
+
+        Container container = this.getContainer(name, spec, ports,
                                                 command, args);
         List<Container> containers = Lists.newArrayList(container);
 
         int instances = spec.getWorkerInstances();
-        return this.getJob(namespace, crName, component, spec,
-                           instances, containers);
+        return this.getJob(crName, metadata, spec, instances, containers);
     }
 
-    private Job getJob(String namespace, String crName,
-                       String component, ComputerJobSpec spec,
+    private Job getJob(String crName, ObjectMeta meta, ComputerJobSpec spec,
                        int instances, List<Container> containers) {
         PodSpec podSpec = new PodSpecBuilder()
                 .withContainers(containers)
@@ -186,18 +236,14 @@ public class ComputerJobDeployer {
                 .build();
 
         return new JobBuilder()
-                .withNewMetadata()
-                .withNamespace(namespace)
-                .withName(KubeUtil.masterJobName(crName))
-                .addToLabels(this.geCommonLabels(crName, component))
-                .endMetadata()
+                .withMetadata(meta)
                 .withNewSpec()
                 .withParallelism(instances)
                 .withCompletions(instances)
                 .withBackoffLimit(Constants.JOB_BACKOFF_LIMIT)
                 .withNewTemplate()
                 .withNewMetadata()
-                .withLabels(this.geCommonLabels(crName, component + "-pod"))
+                .withLabels(meta.getLabels())
                 .endMetadata()
                 .withSpec(podSpec)
                 .endTemplate()
@@ -281,10 +327,33 @@ public class ComputerJobDeployer {
                 .build();
     }
 
-    public Map<String, String> geCommonLabels(String crName, String component) {
+    public ObjectMeta getMetadata(HugeGraphComputerJob computerJob,
+                                  String name) {
+        String namespace = computerJob.getMetadata().getNamespace();
+        String crName = computerJob.getMetadata().getName();
+
+        OwnerReference ownerReference = new OwnerReferenceBuilder()
+                .withName(crName)
+                .withApiVersion(computerJob.getApiVersion())
+                .withUid(computerJob.getMetadata().getUid())
+                .withKind(computerJob.getKind())
+                .withController(true)
+                .withBlockOwnerDeletion(true)
+                .build();
+
+        return new ObjectMetaBuilder()
+                .withNamespace(namespace)
+                .withName(computerJob.getMetadata().getName())
+                .addToLabels(this.geCommonLabels(crName, name))
+                .withOwnerReferences(ownerReference)
+                .build();
+    }
+
+    public Map<String, String> geCommonLabels(String crName,
+                                              String componentName) {
         Map<String, String> labels = new HashMap<>();
-        labels.put("app", HugeGraphComputerJob.KIND + "-" + crName);
-        labels.put("component", component);
+        labels.put("app", crName);
+        labels.put("component", componentName);
         return labels;
     }
 }

@@ -65,6 +65,7 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private static final Logger LOG = Log.logger(AbstractController.class);
+    private static final int MAX_RECONCILE_RETRY = 3;
 
     protected final HugeConfig config;
     protected final String kind;
@@ -146,7 +147,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         while (!this.executor.isShutdown() &&
                !this.workQueue.isShutdown() &&
                !Thread.currentThread().isInterrupted()) {
-            LOG.debug("Trying to get item from work queue of {}-controller",
+            LOG.info("Trying to get item from work queue of {}-controller",
                       this.kind);
             Request request = null;
             try {
@@ -164,7 +165,11 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                 result = this.reconcile(request);
             } catch (Exception e) {
                 LOG.error("Reconcile occur error, requeue request: ", e);
-                result = Result.REQUEUE;
+                if (request.retryIncrGet() > MAX_RECONCILE_RETRY) {
+                    result = Result.NO_REQUEUE;
+                } else {
+                    result = Result.REQUEUE;
+                }
             }
 
             try {
@@ -310,7 +315,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         Map<String, String> matchLabels = job.getSpec().getSelector()
                                              .getMatchLabels();
 
-        String labelString = KubeUtil.map2LabelString(matchLabels);
+        String labelString = KubeUtil.asLabelString(matchLabels);
         ListOptions listOptions = new ListOptionsBuilder()
                 .withLabelSelector(labelString)
                 .build();

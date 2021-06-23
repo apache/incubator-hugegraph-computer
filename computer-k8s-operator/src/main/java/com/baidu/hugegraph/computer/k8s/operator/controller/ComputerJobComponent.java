@@ -40,9 +40,8 @@ public class ComputerJobComponent {
         return this.computerJob;
     }
 
-    public ComputerJobComponent computerJob(HugeGraphComputerJob computerJob) {
+    public void computerJob(HugeGraphComputerJob computerJob) {
         this.computerJob = computerJob;
-        return this;
     }
 
     public List<Pod> masterPods() {
@@ -81,8 +80,7 @@ public class ComputerJobComponent {
         return this.configMap;
     }
 
-    public ComputerJobComponent configMap(ConfigMap configMap) {
+    public void configMap(ConfigMap configMap) {
         this.configMap = configMap;
-        return this;
     }
 }
