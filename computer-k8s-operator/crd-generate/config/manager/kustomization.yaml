@@ -6,3 +6,6 @@ images:
 - name: controller
   newName: czcoder/hugegraph-computer-operator
   newTag: latest
+commonLabels:
+  app.kubernetes.io/name: hugegraph-computer-operator
+  app.kubernetes.io/version: v1
