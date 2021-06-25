@@ -19,12 +19,15 @@
 
 package com.baidu.hugegraph.computer.k8s.driver;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.Pair;
@@ -83,11 +86,23 @@ public class KubernetesDriver implements ComputerDriver {
 
     @Override
     public void uploadAlgorithmJar(String algorithmName, InputStream input) {
-        // TODO: implement
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile(UUID.randomUUID().toString(),
+                                           ".jar");
+            FileUtils.copyInputStreamToFile(input, tempFile);
+
+        } catch (Throwable exception) {
+            throw new RuntimeException(exception);
+        } finally {
+            FileUtils.deleteQuietly(tempFile);
+        }
     }
 
     @Override
     public String submitJob(String algorithmName, Map<String, String> params) {
+        String jobId = KubeUtil.genJobId(algorithmName);
+        String crName = KubeUtil.crName(jobId);
         // TODO: implement
         return null;
     }

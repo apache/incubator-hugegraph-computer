@@ -37,8 +37,6 @@ public class Constants {
 
     public static final String POD_REASON_UNSCHEDULABLE = "Unschedulable";
 
-    public static final String COMPUTER_CONF_FILE = "computer.properties";
-
     public static final String POD_IP = "POD_IP";
     public static final String POD_NAMESPACE = "POD_NAMESPACE";
     public static final String POD_NAME = "POD_NAME";
@@ -49,6 +47,7 @@ public class Constants {
 
     public static final String CONFIG_MAP_VOLUME = "config-map-volume";
     public static final String CONFIG_DIR =  "/opt/hugegraph-computer/conf";
+    public static final String COMPUTER_CONF_FILE = "computer.properties";
 
     public static final int DEFAULT_TRANSPORT_PORT = 9000;
     public static final int DEFAULT_RPC_PORT = 8090;

@@ -42,6 +42,38 @@ public class KubeDriverOptions extends OptionHolder {
         return INSTANCE;
     }
 
+    public static final ConfigOption<String> IMAGE_REPOSITORY_REGISTRY =
+            new ConfigOption<>(
+                    "k8s.image_repository_registry",
+                    "The value is address for login image repository.",
+                    disallowEmpty(),
+                    "registry.hub.docker.com"
+            );
+
+    public static final ConfigOption<String> IMAGE_REPOSITORY_USERNAME =
+            new ConfigOption<>(
+                    "k8s.image_repository_username",
+                    "The value is username for login image repository.",
+                    disallowEmpty(),
+                    "username"
+            );
+
+    public static final ConfigOption<String> IMAGE_REPOSITORY_PASSWORD =
+            new ConfigOption<>(
+                    "k8s.image_repository_password",
+                    "The value is password for login image repository.",
+                    disallowEmpty(),
+                    "password"
+            );
+
+    public static final ConfigOption<String> IMAGE_REPOSITORY_URL =
+            new ConfigOption<>(
+                    "k8s.image_repository_url",
+                    "The value is url of image repository.",
+                    disallowEmpty(),
+                    "hugegraph"
+            );
+
     public static final ConfigOption<String> NAMESPACE =
             new ConfigOption<>(
                     "k8s.namespace",
@@ -49,4 +81,5 @@ public class KubeDriverOptions extends OptionHolder {
                     disallowEmpty(),
                     Constants.DEFAULT_NAMESPACE
             );
+
 }

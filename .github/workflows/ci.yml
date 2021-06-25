@@ -52,7 +52,7 @@ jobs:
         run: mvn clean test -P unit-test
 
       - name: Integrate test
-        run: mvn test -P integrate-test
+        run: mvn clean test -P integrate-test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1

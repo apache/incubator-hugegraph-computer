@@ -43,6 +43,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.utils.Utils;
 
 public class KubeUtil {
 
@@ -89,6 +90,18 @@ public class KubeUtil {
 
     public static String crName(String jobId) {
         return jobId.toLowerCase();
+    }
+
+    public static String genJobId(String algorithmName) {
+        return algorithmName + "-" + Utils.randomString(10);
+    }
+
+    public static String imageName(String repository, String algorithmName,
+                                   String tag) {
+        if (StringUtils.isBlank(tag)) {
+            tag = "latest";
+        }
+        return String.format("%s/%s:%s", repository, algorithmName, tag);
     }
 
     public static String masterJobName(String name) {
