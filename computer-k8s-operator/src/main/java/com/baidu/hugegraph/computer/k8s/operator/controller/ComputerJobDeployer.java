@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.k8s.Constants;
@@ -141,6 +142,8 @@ public class ComputerJobDeployer {
     private Set<ContainerPort> handleConfig(ComputerJobSpec spec) {
         Map<String, String> config = spec.getComputerConf();
 
+        config.put(Constants.JOB_ID, String.valueOf(spec.getJobId()));
+
         config.put(Constants.WORKER_COUNT,
                    String.valueOf(spec.getWorkerInstances()));
 
@@ -157,12 +160,12 @@ public class ComputerJobDeployer {
                 k -> String.valueOf(Constants.DEFAULT_RPC_PORT));
 
         ContainerPort transportContainerPort = new ContainerPortBuilder()
-                .withName(Constants.TRANSPORT_PORT)
+                .withName("transport")
                 .withContainerPort(Integer.valueOf(transportPort))
                 .withProtocol(Protocol.TCP.value())
                 .build();
         ContainerPort rpcContainerPort = new ContainerPortBuilder()
-                .withName(Constants.RPC_PORT)
+                .withName("rpc")
                 .withContainerPort(Integer.valueOf(rpcPort))
                 .withProtocol(Protocol.TCP.value())
                 .build();
@@ -192,8 +195,12 @@ public class ComputerJobDeployer {
         String crName = computerJob.getMetadata().getName();
         ComputerJobSpec spec = computerJob.getSpec();
 
-        List<String> command = Lists.newArrayList("/bin/sh" , "-c");
-        List<String> args = Lists.newArrayList("master.sh");
+        List<String> command = spec.getMasterCommand();
+        if (CollectionUtils.isEmpty(command)) {
+            command = Lists.newArrayList("/bin/sh", "-c");
+        }
+        List<String> args = spec.getMasterArgs();
+        args.add("-conf " + Constants.CONFIG_DIR);
 
         String name = KubeUtil.masterJobName(crName);
 
@@ -212,8 +219,12 @@ public class ComputerJobDeployer {
         String crName = computerJob.getMetadata().getName();
         ComputerJobSpec spec = computerJob.getSpec();
 
-        List<String> command = Lists.newArrayList("/bin/sh" , "-c");
-        List<String> args = Lists.newArrayList("worker.sh");
+        List<String> command = spec.getWorkerCommand();
+        if (CollectionUtils.isEmpty(command)) {
+            command = Lists.newArrayList("/bin/sh", "-c");
+        }
+        List<String> args = spec.getWorkerArgs();
+        args.add("-conf " + Constants.CONFIG_DIR);
 
         String name = KubeUtil.workerJobName(crName);
 
@@ -229,10 +240,15 @@ public class ComputerJobDeployer {
 
     private Job getJob(String crName, ObjectMeta meta, ComputerJobSpec spec,
                        int instances, List<Container> containers) {
+
+        String configMapName = KubeUtil.configMapName(crName);
+        Volume configVolume = this.getConfigVolume(configMapName);
+
         PodSpec podSpec = new PodSpecBuilder()
                 .withContainers(containers)
                 .withImagePullSecrets(spec.getPullSecrets())
-                .withVolumes(this.getConfigVolume(crName))
+                .withRestartPolicy(Constants.JOB_RESTART_POLICY)
+                .withVolumes(configVolume)
                 .build();
 
         return new JobBuilder()
@@ -242,10 +258,10 @@ public class ComputerJobDeployer {
                 .withCompletions(instances)
                 .withBackoffLimit(Constants.JOB_BACKOFF_LIMIT)
                 .withNewTemplate()
-                .withNewMetadata()
-                .withLabels(meta.getLabels())
-                .endMetadata()
-                .withSpec(podSpec)
+                    .withNewMetadata()
+                        .withLabels(meta.getLabels())
+                    .endMetadata()
+                    .withSpec(podSpec)
                 .endTemplate()
                 .endSpec()
                 .build();
@@ -299,7 +315,6 @@ public class ComputerJobDeployer {
                 .withImagePullPolicy(spec.getPullPolicy())
                 .withEnv(spec.getEnvVars())
                 .withEnvFrom(spec.getEnvFrom())
-                .withWorkingDir(Constants.WORKING_DIR)
                 .addToVolumeMounts(configMount)
                 .addAllToCommand(command)
                 .addAllToArgs(args)
@@ -314,7 +329,7 @@ public class ComputerJobDeployer {
     private VolumeMount getConfigMount() {
         return new VolumeMountBuilder()
                 .withName(Constants.CONFIG_MAP_VOLUME)
-                .withMountPath(Constants.CONFIG_FILE_PATH)
+                .withMountPath(Constants.CONFIG_DIR)
                 .build();
     }
 
@@ -328,7 +343,7 @@ public class ComputerJobDeployer {
     }
 
     public ObjectMeta getMetadata(HugeGraphComputerJob computerJob,
-                                  String name) {
+                                  String component) {
         String namespace = computerJob.getMetadata().getNamespace();
         String crName = computerJob.getMetadata().getName();
 
@@ -343,17 +358,9 @@ public class ComputerJobDeployer {
 
         return new ObjectMetaBuilder()
                 .withNamespace(namespace)
-                .withName(computerJob.getMetadata().getName())
-                .addToLabels(this.geCommonLabels(crName, name))
+                .withName(component)
+                .addToLabels(KubeUtil.commonLabels(crName, component))
                 .withOwnerReferences(ownerReference)
                 .build();
-    }
-
-    public Map<String, String> geCommonLabels(String crName,
-                                              String componentName) {
-        Map<String, String> labels = new HashMap<>();
-        labels.put("app", crName);
-        labels.put("component", componentName);
-        return labels;
     }
 }

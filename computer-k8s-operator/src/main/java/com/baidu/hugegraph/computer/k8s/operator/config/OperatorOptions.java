@@ -47,10 +47,10 @@ public class OperatorOptions extends OptionHolder {
             new ConfigOption<>(
                     "WATCH_NAMESPACE",
                     "The value is watch custom resources in the namespace, " +
-                    "ignore other namespaces, if empty all namespaces will " +
-                    "be watched.",
+                    "ignore other namespaces, the '*' means is all namespaces" +
+                    " will be watched.",
                     disallowEmpty(),
-                    Constants.ALL_NAMESPACE
+                    Constants.DEFAULT_NAMESPACE
             );
 
     public static final ConfigOption<Integer> PROBE_PORT =

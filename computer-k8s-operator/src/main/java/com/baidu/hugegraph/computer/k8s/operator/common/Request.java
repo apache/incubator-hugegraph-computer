@@ -33,8 +33,8 @@ import io.fabric8.kubernetes.client.informers.cache.Cache;
 
 public class Request {
 
-    private String name;
     private String namespace;
+    private String name;
     private final AtomicInteger retryTimes;
 
     public static Request parseRequestByCR(CustomResource<?, ?> resource) {
@@ -51,8 +51,8 @@ public class Request {
     }
 
     public Request(String namespace, String name) {
-        this.name = name;
         this.namespace = namespace;
+        this.name = name;
         this.retryTimes = new AtomicInteger(0);
     }
 

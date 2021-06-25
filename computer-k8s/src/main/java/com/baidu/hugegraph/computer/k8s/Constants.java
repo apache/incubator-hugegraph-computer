@@ -19,9 +19,12 @@
 
 package com.baidu.hugegraph.computer.k8s;
 
+import com.baidu.hugegraph.computer.k8s.crd.model.RestartPolicy;
+
 public class Constants {
 
     public static final String ALL_NAMESPACE = "*";
+    public static final String DEFAULT_NAMESPACE = "hugegraph-computer-system";
 
     public static final int MASTER_INSTANCES = 1;
     public static final int TOTAL_COMPONENTS = 2;
@@ -30,10 +33,10 @@ public class Constants {
 
     // NO BACKOFF
     public static final int JOB_BACKOFF_LIMIT = 0;
+    public static final String JOB_RESTART_POLICY = RestartPolicy.NEVER.value();
 
     public static final String POD_REASON_UNSCHEDULABLE = "Unschedulable";
 
-    public static final String WORKING_DIR = "/app/hugegraph-computer";
     public static final String COMPUTER_CONF_FILE = "computer.properties";
 
     public static final String POD_IP = "POD_IP";
@@ -45,7 +48,7 @@ public class Constants {
     public static final String POD_NAME_PATH = "metadata.name";
 
     public static final String CONFIG_MAP_VOLUME = "config-map-volume";
-    public static final String CONFIG_FILE_PATH = WORKING_DIR + "/conf";
+    public static final String CONFIG_DIR =  "/opt/hugegraph-computer/conf";
 
     public static final int DEFAULT_TRANSPORT_PORT = 9000;
     public static final int DEFAULT_RPC_PORT = 8090;
@@ -55,4 +58,5 @@ public class Constants {
     public static final String TRANSPORT_IP = "transport.server_host";
     public static final String RPC_IP = "rpc.server_host";
     public static final String WORKER_COUNT = "job.workers_count";
+    public static final String JOB_ID = "job.id";
 }

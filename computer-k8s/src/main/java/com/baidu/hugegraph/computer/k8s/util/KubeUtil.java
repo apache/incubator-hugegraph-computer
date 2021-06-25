@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.k8s.util;
 import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -32,8 +33,15 @@ import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.k8s.crd.model.EventType;
 import com.baidu.hugegraph.util.Log;
 
+import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.EventBuilder;
+import io.fabric8.kubernetes.api.model.EventSource;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.ObjectReference;
+import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
 public class KubeUtil {
@@ -79,6 +87,10 @@ public class KubeUtil {
         return result.get();
     }
 
+    public static String crName(String jobId) {
+        return jobId.toLowerCase();
+    }
+
     public static String masterJobName(String name) {
         return name + "-master";
     }
@@ -91,25 +103,16 @@ public class KubeUtil {
         return name + "-configmap";
     }
 
+    public static String failedEventName(String crName) {
+        return crName + "-failedEvent";
+    }
+
     public static String now() {
         return OffsetDateTime.now().toString();
     }
 
     public static int intVal(Integer integer) {
         return integer != null ? integer : -1;
-    }
-
-    public static String asLabelString(Map<String, String> labels) {
-        StringBuilder labelQueryBuilder = new StringBuilder();
-        for (Map.Entry<String, String> entry : labels.entrySet()) {
-            if (labelQueryBuilder.length() > 0) {
-                labelQueryBuilder.append(",");
-            }
-            labelQueryBuilder.append(entry.getKey())
-                             .append("=")
-                             .append(entry.getValue());
-        }
-        return labelQueryBuilder.toString();
     }
 
     public static String asProperties(Map<String, String> map) {
@@ -134,11 +137,48 @@ public class KubeUtil {
             return supplier.get();
         } catch (KubernetesClientException exception) {
             if (exception.getCode() == HttpURLConnection.HTTP_CONFLICT) {
-                LOG.warn("Resource already exists");
+                LOG.warn("Resource already exists, message: {}",
+                         exception.getMessage());
             } else {
                 throw exception;
             }
         }
         return null;
+    }
+
+    public static Map<String, String> commonLabels(String crName,
+                                                   String component) {
+        Map<String, String> labels = new HashMap<>();
+        labels.put("app", crName);
+        labels.put("component", component);
+        return labels;
+    }
+
+    public static Event buildEvent(HasMetadata eventRef,
+                                   EventSource eventSource,
+                                   EventType eventType, String eventName,
+                                   String reason, String message) {
+        String namespace = eventRef.getMetadata().getNamespace();
+        String eventRefName = eventRef.getMetadata().getName();
+        ObjectReference objectReference = new ObjectReferenceBuilder()
+                .withKind(eventRef.getKind())
+                .withNamespace(namespace)
+                .withName(eventRefName)
+                .withUid(eventRef.getMetadata().getUid())
+                .withApiVersion(HasMetadata.getApiVersion(eventRef.getClass()))
+                .build();
+
+        return new EventBuilder()
+                .withNewMetadata()
+                .withNamespace(namespace)
+                .withName(eventName)
+                .endMetadata()
+                .withMessage(message)
+                .withLastTimestamp(KubeUtil.now())
+                .withType(eventType.value())
+                .withInvolvedObject(objectReference)
+                .withSource(eventSource)
+                .withReason(reason)
+                .build();
     }
 }

@@ -63,6 +63,14 @@ type ComputerJobSpec struct {
 
 	// Environment variables injected from a source, shared by all Master and Worker.
 	EnvFrom []corev1.EnvFromSource `json:"envFrom,omitempty"`
+
+	MasterCommand []string `json:"masterCommand,omitempty"`
+
+	MasterArgs []string `json:"masterArgs"`
+
+	WorkerCommand []string `json:"workerCommand,omitempty"`
+
+	WorkerArgs []string `json:"workerArgs"`
 }
 
 type ComputerJobState struct {
@@ -98,6 +106,9 @@ type ComponentState struct {
 
 	//+optional
 	Message string `json:"message"`
+
+	//+optional
+	ErrorLog string `json:"errorLog"`
 }
 
 type ComponentsStatus struct {

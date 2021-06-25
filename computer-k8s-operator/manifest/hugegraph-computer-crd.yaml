@@ -169,6 +169,14 @@ spec:
               type: string
             jobId:
               type: string
+            masterArgs:
+              items:
+                type: string
+              type: array
+            masterCommand:
+              items:
+                type: string
+              type: array
             masterCpu:
               anyOf:
               - type: integer
@@ -198,6 +206,14 @@ spec:
                     type: string
                 type: object
               type: array
+            workerArgs:
+              items:
+                type: string
+              type: array
+            workerCommand:
+              items:
+                type: string
+              type: array
             workerCpu:
               anyOf:
               - type: integer
@@ -219,6 +235,8 @@ spec:
           - computerConf
           - image
           - jobId
+          - masterArgs
+          - workerArgs
           - workerInstances
           type: object
         status:
@@ -228,6 +246,8 @@ spec:
               properties:
                 configMap:
                   properties:
+                    errorLog:
+                      type: string
                     message:
                       type: string
                     name:
@@ -242,6 +262,8 @@ spec:
                   type: object
                 masterJob:
                   properties:
+                    errorLog:
+                      type: string
                     message:
                       type: string
                     name:
@@ -256,6 +278,8 @@ spec:
                   type: object
                 workerJob:
                   properties:
+                    errorLog:
+                      type: string
                     message:
                       type: string
                     name:

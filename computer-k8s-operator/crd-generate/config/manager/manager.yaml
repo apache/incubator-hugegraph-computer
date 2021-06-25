@@ -23,6 +23,10 @@ spec:
         env:
           - name: PROBE_PORT
             value: &probe_port 8081
+          - name: WATCH_NAMESPACE
+            value: hugegraph-computer-system
+          - name: WORKER_COUNT
+            value: 6
         securityContext:
           allowPrivilegeEscalation: false
         livenessProbe:

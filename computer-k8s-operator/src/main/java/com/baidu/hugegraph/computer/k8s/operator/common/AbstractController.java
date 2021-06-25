@@ -36,18 +36,20 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.k8s.crd.model.EventType;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
+import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.EventSource;
+import io.fabric8.kubernetes.api.model.EventSourceBuilder;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.ListOptions;
-import io.fabric8.kubernetes.api.model.ListOptionsBuilder;
+import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
@@ -59,7 +61,6 @@ import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
-import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
 import io.fabric8.kubernetes.client.utils.Serialization;
 
 public abstract class AbstractController<T extends CustomResource<?, ?>> {
@@ -278,52 +279,31 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         return Serialization.clone(rs);
     }
 
-    protected <R extends HasMetadata> List<R> getResourceListWithLabels(
-                                              String namespace, Class<R> rClass,
-                                              Map<String, String> matchLabels) {
-        @SuppressWarnings("unchecked")
-        SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
-                                          this.informerMap.get(rClass);
-        List<R> rs = informer.getIndexer()
-                             .byIndex(namespace, Cache.NAMESPACE_INDEX);
-        if (CollectionUtils.isEmpty(rs)) {
-            return rs;
-        }
+    protected List<Pod> getPodsByJob(Job job) {
+        String namespace = job.getMetadata().getNamespace();
+        LabelSelector selector = job.getSpec().getSelector();
 
-        if (MapUtils.isEmpty(matchLabels)) {
-            return this.getResourceList(namespace, rClass);
-        }
-
-        List<R> matchRS = Lists.newArrayList();
-
-        Set<Map.Entry<String, String>> matchLabelSet = matchLabels.entrySet();
-        for (R r : rs) {
-            Map<String, String> label = KubernetesResourceUtil
-                                        .getLabels(r.getMetadata());
-            if (MapUtils.isEmpty(label)) {
-                continue;
-            }
-            if (label.entrySet().containsAll(matchLabelSet)) {
-                matchRS.add(r);
-            }
-        }
-
-        return Serialization.clone(matchRS);
-    }
-
-    protected List<Pod> getPodsByLabels(Job job) {
-        Map<String, String> matchLabels = job.getSpec().getSelector()
-                                             .getMatchLabels();
-
-        String labelString = KubeUtil.asLabelString(matchLabels);
-        ListOptions listOptions = new ListOptionsBuilder()
-                .withLabelSelector(labelString)
-                .build();
         PodList list = this.kubeClient
                 .pods()
-                .inNamespace(job.getMetadata().getNamespace())
-                .list(listOptions);
+                .inNamespace(namespace)
+                .withLabelSelector(selector)
+                .list();
         return list.getItems();
+    }
+
+    protected void recordEvent(HasMetadata eventRef,
+                               EventType eventType, String eventName,
+                               String reason, String message) {
+        String component = HasMetadata.getKind(this.crClass) + "Operator";
+        EventSource eventSource = new EventSourceBuilder()
+                .withComponent(component)
+                .build();
+        Event event = KubeUtil.buildEvent(eventRef, eventSource,
+                                          eventType, eventName,
+                                          reason, message);
+        this.kubeClient.v1().events()
+                       .inNamespace(event.getMetadata().getNamespace())
+                       .createOrReplace(event);
     }
 
     private void handleOwnsResource(HasMetadata resource) {

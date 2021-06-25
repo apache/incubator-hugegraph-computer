@@ -56,8 +56,7 @@ public interface ComputerDriver {
      * @param params reserved for other parameters in addition to jobId used
      *               to wait job.
      */
-    void waitJob(String jobId,
-                 Map<String, String> params,
+    void waitJob(String jobId, Map<String, String> params,
                  JobObserver observer);
 
     /**

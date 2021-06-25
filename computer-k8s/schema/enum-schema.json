@@ -38,6 +38,11 @@
       "enum" : ["TCP", "UDP", "SCTP"],
       "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.Protocol"
     },
+    "EventType" : {
+      "type" : "string",
+      "enum" : ["Normal", "Warning"],
+      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.EventType"
+    },
     "CommonComponentState" : {
       "type" : "string",
       "enum" : ["NotReady", "Ready", "Deleted"],
@@ -70,6 +75,9 @@
     },
     "Protocol" : {
       "$ref": "#/definitions/Protocol"
+    },
+    "EventType" : {
+      "$ref": "#/definitions/EventType"
     },
     "CommonComponentState" : {
       "$ref": "#/definitions/CommonComponentState"

@@ -5,6 +5,9 @@
     "hugegraph_baidu_com_operator_api_v1_ComponentState": {
       "type": "object",
       "properties": {
+        "errorLog": {
+          "type": "string"
+        },
         "message": {
           "type": "string"
         },
@@ -74,6 +77,19 @@
           "type": "string",
           "existingJavaType": "String"
         },
+        "masterArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "masterCommand": {
+          "type": "array",
+          "javaOmitEmpty": true,
+          "items": {
+            "type": "string"
+          }
+        },
         "masterCpu": {
           "existingJavaType": "io.fabric8.kubernetes.api.model.Quantity"
         },
@@ -88,6 +104,19 @@
           "javaOmitEmpty": true,
           "items": {
             "existingJavaType": "io.fabric8.kubernetes.api.model.LocalObjectReference"
+          }
+        },
+        "workerArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "workerCommand": {
+          "type": "array",
+          "javaOmitEmpty": true,
+          "items": {
+            "type": "string"
           }
         },
         "workerCpu": {
