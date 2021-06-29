@@ -102,4 +102,12 @@ public class OperatorOptions extends OptionHolder {
                     positiveInt(),
                     30 * 1000L
             );
+
+    public static final ConfigOption<Integer> MAX_RECONCILE_RETRY =
+            new ConfigOption<>(
+                    "MAX_RECONCILE_RETRY",
+                    "The max retry times of reconcile.",
+                    positiveInt(),
+                    3
+            );
 }

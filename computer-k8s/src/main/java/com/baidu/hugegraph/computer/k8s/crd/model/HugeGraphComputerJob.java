@@ -33,4 +33,12 @@ public class HugeGraphComputerJob
         String yaml  = Serialization.asYaml(specMap);
         return Serialization.unmarshal(yaml, ComputerJobSpec.class);
     }
+
+    public static Map<String, Object> specToMap(ComputerJobSpec spec) {
+        String yaml  = Serialization.asYaml(spec);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> unmarshal = Serialization.unmarshal(yaml,
+                                                                Map.class);
+        return unmarshal;
+    }
 }

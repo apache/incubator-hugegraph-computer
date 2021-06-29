@@ -66,12 +66,12 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private static final Logger LOG = Log.logger(AbstractController.class);
-    private static final int MAX_RECONCILE_RETRY = 3;
 
     protected final HugeConfig config;
     protected final String kind;
-    protected final KubernetesClient kubeClient;
     private final Class<T> crClass;
+    protected final KubernetesClient kubeClient;
+    private final int maxReconcileRetry;
     private final WorkQueue<Request> workQueue;
     private final ScheduledExecutorService executor;
     private Set<Class<? extends HasMetadata>> ownsClassSet;
@@ -83,6 +83,8 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         this.crClass = this.crClass();
         this.kind = HasMetadata.getSingular(this.crClass);
         this.kubeClient = kubeClient;
+        this.maxReconcileRetry = this.config.get(
+                                      OperatorOptions.MAX_RECONCILE_RETRY);
         this.workQueue = new WorkQueue<>();
         Integer workCount = this.config.get(OperatorOptions.WORKER_COUNT);
         this.executor = ExecutorUtil.newScheduledThreadPool(workCount,
@@ -166,7 +168,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                 result = this.reconcile(request);
             } catch (Exception e) {
                 LOG.error("Reconcile occur error, requeue request: ", e);
-                if (request.retryIncrGet() > MAX_RECONCILE_RETRY) {
+                if (request.retryIncrGet() > this.maxReconcileRetry) {
                     result = Result.NO_REQUEUE;
                 } else {
                     result = Result.REQUEUE;

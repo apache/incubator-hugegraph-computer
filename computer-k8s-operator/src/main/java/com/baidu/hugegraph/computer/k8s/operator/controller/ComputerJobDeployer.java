@@ -29,6 +29,7 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
@@ -142,21 +143,21 @@ public class ComputerJobDeployer {
     private Set<ContainerPort> handleConfig(ComputerJobSpec spec) {
         Map<String, String> config = spec.getComputerConf();
 
-        config.put(Constants.JOB_ID, String.valueOf(spec.getJobId()));
+        config.put(ComputerOptions.JOB_ID.name(),
+                   String.valueOf(spec.getJobId()));
 
-        config.put(Constants.WORKER_COUNT,
+        config.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
                    String.valueOf(spec.getWorkerInstances()));
 
-        config.put(Constants.TRANSPORT_IP,
-                   String.format("${%s}", Constants.POD_IP));
-        config.put(Constants.RPC_IP,
-                   String.format("${%s}", Constants.POD_IP));
+        String ip = String.format("${%s}", Constants.ENV_POD_IP);
+        config.put(ComputerOptions.TRANSPORT_SERVER_HOST.name(), ip);
+        config.put(ComputerOptions.RPC_SERVER_HOST.name(), ip);
 
         String transportPort = config.computeIfAbsent(
-                Constants.TRANSPORT_PORT,
+                ComputerOptions.TRANSPORT_SERVER_PORT.name(),
                 k -> String.valueOf(Constants.DEFAULT_TRANSPORT_PORT));
         String rpcPort = config.computeIfAbsent(
-                Constants.RPC_PORT,
+                ComputerOptions.RPC_SERVER_PORT.name(),
                 k -> String.valueOf(Constants.DEFAULT_RPC_PORT));
 
         ContainerPort transportContainerPort = new ContainerPortBuilder()
@@ -200,7 +201,6 @@ public class ComputerJobDeployer {
             command = Lists.newArrayList("/bin/sh", "-c");
         }
         List<String> args = spec.getMasterArgs();
-        args.add("-conf " + Constants.CONFIG_DIR);
 
         String name = KubeUtil.masterJobName(crName);
 
@@ -224,7 +224,6 @@ public class ComputerJobDeployer {
             command = Lists.newArrayList("/bin/sh", "-c");
         }
         List<String> args = spec.getWorkerArgs();
-        args.add("-conf " + Constants.CONFIG_DIR);
 
         String name = KubeUtil.workerJobName(crName);
 
@@ -278,32 +277,41 @@ public class ComputerJobDeployer {
 
         // Add Pod info to env
         EnvVar podIP = new EnvVarBuilder()
-                .withName(Constants.POD_IP)
+                .withName(Constants.ENV_POD_IP)
                 .withNewValueFrom()
                 .withNewFieldRef()
-                .withFieldPath(Constants.POD_IP_PATH)
+                .withFieldPath(Constants.POD_IP_KEY)
                 .endFieldRef()
                 .endValueFrom()
                 .build();
         envVars.add(podIP);
         EnvVar podName = new EnvVarBuilder()
-                .withName(Constants.POD_NAME)
+                .withName(Constants.ENV_POD_NAME)
                 .withNewValueFrom()
                 .withNewFieldRef()
-                .withFieldPath(Constants.POD_NAME_PATH)
+                .withFieldPath(Constants.POD_NAME_KEY)
                 .endFieldRef()
                 .endValueFrom()
                 .build();
         envVars.add(podName);
         EnvVar podNamespace = new EnvVarBuilder()
-                .withName(Constants.POD_NAMESPACE)
+                .withName(Constants.ENV_POD_NAMESPACE)
                 .withNewValueFrom()
                 .withNewFieldRef()
-                .withFieldPath(Constants.POD_NAMESPACE_PATH)
+                .withFieldPath(Constants.POD_NAMESPACE_KEY)
                 .endFieldRef()
                 .endValueFrom()
                 .build();
         envVars.add(podNamespace);
+        EnvVar confPath = new EnvVarBuilder()
+                .withName(Constants.ENV_CONFIG_PATH)
+                .withNewValueFrom()
+                .withNewFieldRef()
+                .withFieldPath(Constants.CONFIG_PATH)
+                .endFieldRef()
+                .endValueFrom()
+                .build();
+        envVars.add(confPath);
 
         Quantity masterCpu = spec.getMasterCpu();
         Quantity masterMemory = spec.getMasterMemory();
@@ -329,7 +337,7 @@ public class ComputerJobDeployer {
     private VolumeMount getConfigMount() {
         return new VolumeMountBuilder()
                 .withName(Constants.CONFIG_MAP_VOLUME)
-                .withMountPath(Constants.CONFIG_DIR)
+                .withMountPath(Constants.CONFIG_PATH)
                 .build();
     }
 

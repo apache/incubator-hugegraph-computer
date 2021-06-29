@@ -29,6 +29,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -48,6 +50,9 @@ import io.fabric8.kubernetes.client.utils.Utils;
 public class KubeUtil {
 
     private static final Logger LOG = Log.logger(KubeUtil.class);
+
+    private static final String PREFIX_PATTERN  = "^k8s.";
+    private static final Pattern LINE_PATTERN = Pattern.compile("_([a-z])");
 
     /**
      * Tries a condition func until the initial delay specified.
@@ -193,5 +198,20 @@ public class KubeUtil {
                 .withSource(eventSource)
                 .withReason(reason)
                 .build();
+    }
+
+    /**
+     * Convert config key to spec key.
+     * eg. "k8s.master_cpu" -> "masterCpu"
+     */
+    public static String covertSpecKey(String key) {
+        key = key.replaceFirst(PREFIX_PATTERN, "");
+        Matcher matcher = LINE_PATTERN.matcher(key);
+        StringBuffer sb = new StringBuffer();
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, matcher.group(1).toUpperCase());
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }
