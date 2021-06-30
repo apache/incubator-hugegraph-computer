@@ -29,11 +29,6 @@ import com.google.common.base.Predicate;
  */
 public class NoDefaultConfigOption<T> extends ConfigOption<T> {
 
-    public NoDefaultConfigOption(String name, boolean required,
-                                 Predicate<T> pred, Class<T> type) {
-        this(name, required, StringUtils.EMPTY, pred, type);
-    }
-
     public NoDefaultConfigOption(String name, Predicate<T> pred,
                                  Class<T> type) {
         this(name, StringUtils.EMPTY, pred, type);
@@ -55,7 +50,7 @@ public class NoDefaultConfigOption<T> extends ConfigOption<T> {
 
     @Override
     protected void check(Object value) {
-        if (!this.required() && value == null) {
+        if (value == null) {
             return;
         }
         super.check(value);
@@ -63,7 +58,7 @@ public class NoDefaultConfigOption<T> extends ConfigOption<T> {
 
     @Override
     protected T parse(String value) {
-        if (!this.required() && value == null) {
+        if (value == null) {
             return null;
         }
         return super.parse(value);
@@ -71,7 +66,7 @@ public class NoDefaultConfigOption<T> extends ConfigOption<T> {
 
     @Override
     public T parseConvert(String value) {
-        if (!this.required() && value == null) {
+        if (value == null) {
             return null;
         }
         return super.parseConvert(value);

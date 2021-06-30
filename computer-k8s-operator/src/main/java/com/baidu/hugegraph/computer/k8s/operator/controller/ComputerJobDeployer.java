@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
@@ -153,12 +154,23 @@ public class ComputerJobDeployer {
         config.put(ComputerOptions.TRANSPORT_SERVER_HOST.name(), ip);
         config.put(ComputerOptions.RPC_SERVER_HOST.name(), ip);
 
-        String transportPort = config.computeIfAbsent(
-                ComputerOptions.TRANSPORT_SERVER_PORT.name(),
-                k -> String.valueOf(Constants.DEFAULT_TRANSPORT_PORT));
-        String rpcPort = config.computeIfAbsent(
-                ComputerOptions.RPC_SERVER_PORT.name(),
-                k -> String.valueOf(Constants.DEFAULT_RPC_PORT));
+
+        String randomPort = "0";
+        String transportPort = config.get(
+                               ComputerOptions.TRANSPORT_SERVER_PORT.name());
+        if (StringUtils.isBlank(transportPort) ||
+            randomPort.equals(transportPort)) {
+            transportPort = String.valueOf(Constants.DEFAULT_TRANSPORT_PORT);
+            config.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(),
+                       transportPort);
+        }
+
+        String rpcPort = config.get(
+                         ComputerOptions.RPC_SERVER_PORT.name());
+        if (StringUtils.isBlank(rpcPort) || randomPort.equals(rpcPort)) {
+            rpcPort = String.valueOf(Constants.DEFAULT_RPC_PORT);
+            config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
+        }
 
         ContainerPort transportContainerPort = new ContainerPortBuilder()
                 .withName("transport")

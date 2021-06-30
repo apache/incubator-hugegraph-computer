@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.k8s.driver;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +28,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +47,9 @@ import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.driver.SuperstepStat;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.driver.config.NoDefaultConfigOption;
+import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
+import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
@@ -62,6 +64,7 @@ import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
@@ -84,34 +87,50 @@ public class KubernetesDriver implements ComputerDriver {
     private volatile Watch watch;
     private final MutableBoolean watchActive;
     private final Map<String, Pair<CompletableFuture<Void>, JobObserver>> waits;
-    private final Map<String, String> defaultConf;
     private final Map<String, Object> defaultSpec;
+    private final Map<String, String> defaultConf;
 
     public KubernetesDriver(HugeConfig conf) {
+        this(conf, createKubeClient(conf));
+    }
+
+    public KubernetesDriver(HugeConfig conf, KubernetesClient kubeClient) {
         this.conf = conf;
         this.namespace = this.conf.get(KubeDriverOptions.NAMESPACE);
-        this.kubeClient = new DefaultKubernetesClient();
+        this.kubeClient = kubeClient;
         this.operation = this.kubeClient.customResources(
                          HugeGraphComputerJob.class,
                          HugeGraphComputerJobList.class);
-
         this.watch = this.initWatch();
         this.watchActive = new MutableBoolean(true);
         this.waits = new ConcurrentHashMap<>();
-        this.defaultConf = this.defaultComputerConf();
         this.defaultSpec = this.defaultSpec();
+        this.defaultConf = this.defaultComputerConf();
+    }
+
+    private static KubernetesClient createKubeClient(HugeConfig conf) {
+        String kubeConfig = conf.get(KubeDriverOptions.KUBE_CONFIG);
+        Config config;
+        try {
+            File file = new File(kubeConfig);
+            String kubeConfigContents = FileUtils.readFileToString(file);
+            config = Config.fromKubeconfig(kubeConfigContents);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new DefaultKubernetesClient(config);
     }
 
     @Override
     public void uploadAlgorithmJar(String algorithmName, InputStream input) {
         File tempFile = null;
         try {
-            final String suffix = ".jar";
             tempFile = File.createTempFile(UUID.randomUUID().toString(),
-                                           suffix);
+                                           ".jar");
             FileUtils.copyInputStreamToFile(input, tempFile);
 
-            String shell = this.conf.get(KubeDriverOptions.BUILD_IMAGE_SHELL);
+            String shell = this.conf.get(
+                                KubeDriverOptions.BUILD_IMAGE_BASH_PATH);
             String registry = this.conf.get(
                                    KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY)
                                   .trim();
@@ -154,21 +173,14 @@ public class KubernetesDriver implements ComputerDriver {
                 .build();
         computerJob.setMetadata(meta);
 
-        Map<String, Object> specMap = new HashMap<>(this.defaultSpec);
-        KubeDriverOptions.ALLOW_USER_SETTINGS.forEach((key, typeOption) -> {
-            String value = params.get(key);
-            if (StringUtils.isNotBlank(value)) {
-                Object parsed = typeOption.parseConvert(value);
-                String specKey = KubeUtil.covertSpecKey(key);
-                specMap.put(specKey, parsed);
-            }
-        });
+        String imageUrl = this.buildImageUrl(algorithmName);
+        Map<String, String> computerConf = this.computerConf(this.defaultConf,
+                                                             params);
 
-        ComputerJobSpec spec = HugeGraphComputerJob.mapToSpec(specMap);
-        Map<String, String> computerConf = this.computerConf(params);
+        ComputerJobSpec spec = this.computerJobSpec(this.defaultSpec, params);
         spec.withAlgorithmName(algorithmName)
             .withJobId(jobId)
-            .withImage(this.buildImageUrl(algorithmName))
+            .withImage(imageUrl)
             .withComputerConf(computerConf);
         computerJob.setSpec(spec);
 
@@ -239,12 +251,14 @@ public class KubernetesDriver implements ComputerDriver {
                     if (action == Action.ERROR) {
                         return;
                     }
-                    JobState jobState = KubernetesDriver.this
-                            .buildJobState(computerJob);
+                    KubernetesDriver driver = KubernetesDriver.this;
+                    JobState jobState = driver.buildJobState(computerJob);
+
                     observer.onJobStateChanged(jobState);
+
                     if (JobStatus.finished(jobState.jobStatus())) {
                         future.complete(null);
-                        KubernetesDriver.this.cancelWait(jobId);
+                        driver.cancelWait(jobId);
                     }
                 }
             }
@@ -323,6 +337,7 @@ public class KubernetesDriver implements ComputerDriver {
         return null;
     }
 
+    @Override
     public void close() {
         if (this.watch != null) {
             this.watch.close();
@@ -349,13 +364,15 @@ public class KubernetesDriver implements ComputerDriver {
         return KubeUtil.imageName(repository, algorithmName, null);
     }
 
-    private Map<String, String> computerConf(Map<String, String> params) {
-        Map<String, String> computerConf = new HashMap<>(this.defaultConf);
+    private Map<String, String> computerConf(Map<String, String> defaultConf,
+                                             Map<String, String> params) {
+        Map<String, String> computerConf = new HashMap<>(defaultConf);
         Map<String, TypedOption<?, ?>> allOptions = ComputerOptions.instance()
                                                                    .options();
         params.forEach((k, v) -> {
-            if (k != null && v != null) {
-                if (!ComputerOptions.PROHIBIT_USER_SETTINGS.contains(k)) {
+            if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
+                if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
+                    !ComputerOptions.PROHIBIT_USER_SETTINGS.contains(k)) {
                     NoDefaultConfigOption<?> typedOption =
                                              (NoDefaultConfigOption<?>)
                                              allOptions.get(k);
@@ -369,15 +386,35 @@ public class KubernetesDriver implements ComputerDriver {
         return computerConf;
     }
 
+    private ComputerJobSpec computerJobSpec(Map<String, Object> defaultSpec,
+                                            Map<String, String> params) {
+        Map<String, Object> specMap = new HashMap<>(defaultSpec);
+        KubeSpecOptions.ALLOW_USER_SETTINGS.forEach((key, typeOption) -> {
+            String value = params.get(key);
+            if (StringUtils.isNotBlank(value)) {
+                Object parsed = typeOption.parseConvert(value);
+                String specKey = KubeUtil.covertSpecKey(key);
+                specMap.put(specKey, parsed);
+            }
+        });
+        return HugeGraphComputerJob.mapToSpec(specMap);
+    }
+
     private Map<String, String> defaultComputerConf() {
         Map<String, String> defaultConf = new HashMap<>();
-        Map<String, TypedOption<?, ?>> allOptions =
-                                       ComputerOptions.instance().options();
-        Set<String> keys = allOptions.keySet();
-        for (String key : keys) {
-            String value = this.conf.getString(key);
+
+        Collection<TypedOption<?, ?>> options = KubeDriverOptions.instance()
+                                                                 .options()
+                                                                 .values();
+        for (TypedOption<?, ?> typedOption : options) {
+            Object value = this.conf.get(typedOption);
+            String key = typedOption.name();
             if (value != null) {
-                defaultConf.put(key, value);
+                defaultConf.put(key, String.valueOf(value));
+            } else {
+                boolean required = ComputerOptions.REQUIRED_OPTIONS
+                                                  .contains(key);
+                E.checkArgument(!required, "The %s option can't be null", key);
             }
         }
         return Collections.unmodifiableMap(defaultConf);
@@ -385,10 +422,11 @@ public class KubernetesDriver implements ComputerDriver {
 
     private Map<String, Object> defaultSpec() {
         Map<String, Object> defaultSpec = new HashMap<>();
-        Map<String, TypedOption<?, ?>> allOptions =
-                                       KubeDriverOptions.instance().options();
-        Collection<TypedOption<?, ?>> typedOptions = allOptions.values();
-        for (TypedOption<?, ?> typedOption : typedOptions) {
+
+        Collection<TypedOption<?, ?>> options = KubeSpecOptions.instance()
+                                                               .options()
+                                                               .values();
+        for (TypedOption<?, ?> typedOption : options) {
             Object value = this.conf.get(typedOption);
             if (value != null) {
                 String specKey = KubeUtil.covertSpecKey(typedOption.name());

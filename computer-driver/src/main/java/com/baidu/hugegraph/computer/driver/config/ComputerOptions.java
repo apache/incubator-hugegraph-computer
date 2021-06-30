@@ -198,7 +198,6 @@ public class ComputerOptions extends OptionHolder {
     public static final NoDefaultConfigOption<String> BSP_ETCD_ENDPOINTS =
             new NoDefaultConfigOption<>(
                     "bsp.etcd_endpoints",
-                    true,
                     disallowEmpty(),
                     String.class
             );
@@ -320,7 +319,6 @@ public class ComputerOptions extends OptionHolder {
     public static final NoDefaultConfigOption<String> HUGEGRAPH_URL =
             new NoDefaultConfigOption<>(
                     "hugegraph.url",
-                    true,
                     disallowEmpty(),
                     String.class
             );
@@ -624,9 +622,15 @@ public class ComputerOptions extends OptionHolder {
 
     public static Set<String> PROHIBIT_USER_SETTINGS = ImmutableSet.of(
             HUGEGRAPH_URL.name(),
+            BSP_ETCD_ENDPOINTS.name(),
             RPC_SERVER_HOST.name(),
             TRANSPORT_SERVER_HOST.name(),
             JOB_WORKERS_COUNT.name(),
             JOB_ID.name()
+    );
+
+    public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
+            HUGEGRAPH_URL.name(),
+            BSP_ETCD_ENDPOINTS.name()
     );
 }

@@ -50,6 +50,8 @@ public class Constants {
     public static final String CONFIG_PATH =  "/opt/hugegraph-computer/conf";
     public static final String COMPUTER_CONF_FILE = "computer.properties";
 
-    public static final int DEFAULT_TRANSPORT_PORT = 9000;
+    public static final int DEFAULT_TRANSPORT_PORT = 8099;
     public static final int DEFAULT_RPC_PORT = 8090;
+
+    public static final String K8S_SPEC_PREFIX  = "k8s.";
 }

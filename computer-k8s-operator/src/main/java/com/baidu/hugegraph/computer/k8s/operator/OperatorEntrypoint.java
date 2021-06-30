@@ -137,7 +137,7 @@ public class OperatorEntrypoint {
         }
     }
 
-    public void shutdown() {
+    public synchronized void shutdown() {
         LOG.info("The Operator shutdown...");
 
         if (this.controllers != null) {

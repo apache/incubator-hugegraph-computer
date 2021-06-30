@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.crd.model.EventType;
 import com.baidu.hugegraph.util.Log;
 
@@ -51,7 +52,6 @@ public class KubeUtil {
 
     private static final Logger LOG = Log.logger(KubeUtil.class);
 
-    private static final String PREFIX_PATTERN  = "^k8s.";
     private static final Pattern LINE_PATTERN = Pattern.compile("_([a-z])");
 
     /**
@@ -205,7 +205,7 @@ public class KubeUtil {
      * eg. "k8s.master_cpu" -> "masterCpu"
      */
     public static String covertSpecKey(String key) {
-        key = key.replaceFirst(PREFIX_PATTERN, "");
+        key = key.substring(Constants.K8S_SPEC_PREFIX.length());
         Matcher matcher = LINE_PATTERN.matcher(key);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {

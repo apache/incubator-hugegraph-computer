@@ -19,11 +19,12 @@
 
 package com.baidu.hugegraph.computer.driver;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public interface ComputerDriver {
+public interface ComputerDriver extends Closeable {
 
     /**
      * This method is called when create algorithm, the user will upload a jar.
