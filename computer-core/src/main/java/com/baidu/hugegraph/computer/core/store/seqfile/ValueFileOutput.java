@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -57,14 +59,16 @@ public class ValueFileOutput extends UnsafeBytesOutput {
                         "but get '%s'", Integer.MAX_VALUE, this.segmentMaxSize);
         E.checkArgument(bufferCapacity >= 8 &&
                         bufferCapacity <= this.segmentMaxSize,
-                        "The parameter bufferSize must be >= 8 " +
+                        "The parameter bufferCapacity must be >= 8 " +
                         "and <= %s", this.segmentMaxSize);
         E.checkArgument(dir.isDirectory(),
                         "The parameter dir must be a directory");
         this.dir = dir;
         this.bufferCapacity = bufferCapacity;
         this.segments = ValueFile.scanSegment(dir);
-
+        E.checkArgument(CollectionUtils.isNotEmpty(this.segments),
+                        "Can't find any segment in dir '%s'",
+                        dir.getAbsolutePath());
         this.segmentIndex = -1;
         this.currentSegment = this.nextSegment();
         this.fileOffset = 0L;
@@ -200,18 +204,18 @@ public class ValueFileOutput extends UnsafeBytesOutput {
 
     public void flush() throws IOException {
         int segmentRemain = this.currentSegmentRemain();
-        int bufferPosition = (int) super.position();
+        int bufferSize = (int) super.position();
 
-        if (segmentRemain >= bufferPosition) {
-            this.currentSegment.write(super.buffer(), 0, bufferPosition);
+        if (segmentRemain >= bufferSize) {
+            this.currentSegment.write(super.buffer(), 0, bufferSize);
         } else {
             this.currentSegment.write(super.buffer(), 0, segmentRemain);
             this.currentSegment.close();
             this.currentSegment = this.nextSegment();
             this.currentSegment.write(super.buffer(), segmentRemain,
-                                      bufferPosition - segmentRemain);
+                                      bufferSize - segmentRemain);
         }
-        this.fileOffset += bufferPosition;
+        this.fileOffset += bufferSize;
         super.seek(0L);
     }
 

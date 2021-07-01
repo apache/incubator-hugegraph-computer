@@ -70,8 +70,9 @@ public class ValueFileInput extends UnsafeBytesInput {
         this.bufferCapacity = bufferCapacity;
         this.dir = dir;
         this.segments = ValueFile.scanSegment(dir);
-        E.checkState(CollectionUtils.isNotEmpty(this.segments),
-                     "Can't found segment in dir '%s'", dir.getAbsolutePath());
+        E.checkArgument(CollectionUtils.isNotEmpty(this.segments),
+                        "Can't find any segment in dir '%s'",
+                        dir.getAbsolutePath());
         this.fileLength = this.segments.stream().mapToLong(File::length).sum();
 
         this.segmentIndex = -1;
@@ -161,8 +162,7 @@ public class ValueFileInput extends UnsafeBytesInput {
                     offset += this.segmentMaxSize;
                     length -= this.segmentMaxSize;
                 } else {
-                    this.currentSegment.readFully(b, offset,
-                                                  length);
+                    this.currentSegment.readFully(b, offset, length);
                     break;
                 }
             }

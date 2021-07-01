@@ -60,7 +60,7 @@ public class ValueFile {
     public static File segmentFromId(File dir, int segmentId) {
         E.checkArgument(dir.isDirectory(),
                         "The parameter dir must be a directory");
-        String name = StringUtils.join(SEGMENT_NAME_PREFIX + segmentId);
+        String name = SEGMENT_NAME_PREFIX + segmentId;
         return Paths.get(dir.getAbsolutePath(), name).toFile();
     }
 
