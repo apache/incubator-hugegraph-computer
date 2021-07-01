@@ -59,7 +59,7 @@ public class BitsFileWriterImpl implements BitsFileWriter {
 
     @Override
     public void flush() throws IOException {
-        this.output.flush();
+        this.output.flushBuffer();
     }
 
     @Override

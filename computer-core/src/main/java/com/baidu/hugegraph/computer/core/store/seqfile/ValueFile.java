@@ -62,6 +62,13 @@ public class ValueFile {
         return Paths.get(dir.getAbsolutePath(), name).toFile();
     }
 
+    public static long fileLength(File dir) {
+        return ValueFile.scanSegment(dir)
+                        .stream()
+                        .mapToLong(File::length)
+                        .sum();
+    }
+
     private static int idFromSegment(File segment) {
         String fileName = segment.getName();
         Matcher matcher = FILE_NUM_PATTERN.matcher(fileName);

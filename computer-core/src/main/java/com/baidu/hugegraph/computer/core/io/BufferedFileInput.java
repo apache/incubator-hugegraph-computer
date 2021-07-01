@@ -25,17 +25,14 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
 
-public class BufferedFileInput extends UnsafeBytesInput {
+public class BufferedFileInput extends AbstractBufferedFileInput {
 
     private final int bufferCapacity;
     private final RandomAccessFile file;
-    private long fileOffset;
-    private final long fileLength;
 
     public BufferedFileInput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_READ),
@@ -44,23 +41,12 @@ public class BufferedFileInput extends UnsafeBytesInput {
 
     public BufferedFileInput(RandomAccessFile file, int bufferCapacity)
                              throws IOException {
-        super(new byte[bufferCapacity], 0);
+        super(bufferCapacity, file.length());
         E.checkArgument(bufferCapacity >= 8,
                         "The parameter bufferSize must be >= 8");
         this.file = file;
-        this.fileLength = file.length();
         this.bufferCapacity = bufferCapacity;
         this.fillBuffer();
-    }
-
-    @Override
-    public long position() {
-        return this.fileOffset - super.remaining();
-    }
-
-    @Override
-    public void readFully(byte[] b) throws IOException {
-        this.readFully(b, 0, b.length);
     }
 
     @Override
@@ -102,59 +88,12 @@ public class BufferedFileInput extends UnsafeBytesInput {
     }
 
     @Override
-    public long skip(long bytesToSkip) throws IOException {
-        E.checkArgument(bytesToSkip >= 0,
-                        "The parameter bytesToSkip must be >=0, but got %s",
-                        bytesToSkip);
-        long positionBeforeSkip = this.position();
-        if (this.remaining() >= bytesToSkip) {
-            super.skip(bytesToSkip);
-            return positionBeforeSkip;
-        }
-        bytesToSkip -= this.remaining();
-        long position = this.fileOffset + bytesToSkip;
-        this.seek(position);
-        return positionBeforeSkip;
-    }
-
-    @Override
     public void close() throws IOException {
         this.file.close();
     }
 
     @Override
-    protected void require(int size) throws IOException {
-        if (this.remaining() >= size) {
-            return;
-        }
-        if (this.bufferCapacity >= size) {
-            this.shiftAndFillBuffer();
-        }
-        /*
-         * The buffer capacity must be >= 8, read primitive data like int,
-         * long, float, double can be read from buffer. Only read bytes may
-         * exceed the limit, and read bytes using readFully is overrode
-         * in this class. In conclusion, the required data can be
-         * supplied after shiftAndFillBuffer.
-         */
-        if (size > this.limit()) {
-            throw new IOException(String.format(
-                      "Read %s bytes from position %s overflows buffer %s",
-                       size, this.position(), this.limit()));
-        }
-    }
-
-    @Override
-    public long available() {
-        return this.fileLength - this.position();
-    }
-
-    private void shiftAndFillBuffer() throws IOException {
-        this.shiftBuffer();
-        this.fillBuffer();
-    }
-
-    private void fillBuffer() throws IOException {
+    protected void fillBuffer() throws IOException {
         int readLen = (int) Math.min(this.bufferCapacity - this.limit(),
                                      this.fileLength - this.fileOffset);
         this.fileOffset += readLen;
@@ -179,39 +118,6 @@ public class BufferedFileInput extends UnsafeBytesInput {
                                           "with BufferedFileInput");
         }
 
-        BufferedFileInput otherInput = (BufferedFileInput) other;
-        if ((offset + length) <= this.limit()) {
-            if ((otherOffset + otherLength) <= otherInput.limit()) {
-                return BytesUtil.compare(this.buffer(), (int) offset,
-                                         (int) length, otherInput.buffer(),
-                                         (int) otherOffset, (int) otherLength);
-            } else {
-                long otherOldPosition = other.position();
-                other.seek(otherOffset);
-                byte[] bytes = other.readBytes((int) otherLength);
-                other.seek(otherOldPosition);
-                return BytesUtil.compare(this.buffer(), (int) offset,
-                                         (int) length, bytes, 0,
-                                         bytes.length);
-            }
-        } else {
-            long oldPosition = this.position();
-            this.seek(offset);
-            byte[] bytes1 = this.readBytes((int) length);
-            this.seek(oldPosition);
-
-            if ((otherOffset + otherLength) <= otherInput.limit()) {
-                return BytesUtil.compare(bytes1, 0, bytes1.length,
-                                         otherInput.buffer(), (int) otherOffset,
-                                         (int) otherLength);
-            } else {
-                long otherOldPosition = other.position();
-                other.seek(otherOffset);
-                byte[] bytes2 = other.readBytes((int) otherLength);
-                other.seek(otherOldPosition);
-                return BytesUtil.compare(bytes1, 0, bytes1.length,
-                                         bytes2, 0, bytes2.length);
-            }
-        }
+        return super.compare(offset, length, other, otherOffset, otherLength);
     }
 }

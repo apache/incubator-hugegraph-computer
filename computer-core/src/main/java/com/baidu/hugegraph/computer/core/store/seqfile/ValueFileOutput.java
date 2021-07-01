@@ -28,19 +28,17 @@ import java.util.List;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
+import com.baidu.hugegraph.computer.core.io.AbstractBufferedFileOutput;
 import com.baidu.hugegraph.util.E;
 
-public class ValueFileOutput extends UnsafeBytesOutput {
+public class ValueFileOutput extends AbstractBufferedFileOutput {
 
     private final long segmentMaxSize;
     private final File dir;
-    private final int bufferCapacity;
     private final List<File> segments;
 
     private int segmentIndex;
     private RandomAccessFile currentSegment;
-    private long fileOffset;
 
     public ValueFileOutput(Config config, File dir) throws IOException {
         this(config, dir, Constants.BIG_BUF_SIZE);
@@ -62,16 +60,9 @@ public class ValueFileOutput extends UnsafeBytesOutput {
         E.checkArgument(dir.isDirectory(),
                         "The parameter dir must be a directory");
         this.dir = dir;
-        this.bufferCapacity = bufferCapacity;
         this.segments = ValueFile.scanSegment(dir);
         this.segmentIndex = -1;
         this.currentSegment = this.nextSegment();
-        this.fileOffset = 0L;
-    }
-
-    @Override
-    public void write(byte[] b) throws IOException {
-        this.write(b, 0, b.length);
     }
 
     @Override
@@ -81,7 +72,7 @@ public class ValueFileOutput extends UnsafeBytesOutput {
             return;
         }
 
-        this.flush();
+        this.flushBuffer();
         if (this.bufferCapacity >= len) {
             super.write(b, off, len);
             return;
@@ -116,45 +107,6 @@ public class ValueFileOutput extends UnsafeBytesOutput {
     }
 
     @Override
-    public void writeFixedInt(long position, int v) throws IOException {
-        if (this.fileOffset <= position &&
-            position <= this.position() - Constants.INT_LEN) {
-            super.writeFixedInt(position - this.fileOffset, v);
-            return;
-        }
-
-        long latestPosition = this.position();
-        this.seek(position);
-        super.writeInt(v);
-        this.seek(latestPosition);
-    }
-
-    @Override
-    protected void require(int size) throws IOException {
-        if (size <= this.bufferAvailable()) {
-            return;
-        }
-        this.flush();
-        /*
-         * The buffer capacity must be >= 8, write primitive data like int,
-         * long, float, double can be write to buffer after flush buffer.
-         * Only write bytes may exceed the limit, and write bytes using
-         * write(byte[] b) is overrode in this class. In conclusion, the
-         * required size can be supplied after flushBuffer.
-         */
-        if (size > this.bufferAvailable()) {
-            throw new IOException(String.format(
-                      "Write %s bytes to position %s overflows buffer %s",
-                      size, this.position(), this.bufferCapacity));
-        }
-    }
-
-    @Override
-    public long position() {
-        return this.fileOffset + super.position();
-    }
-
-    @Override
     public void seek(long position) throws IOException {
         E.checkArgument(position >= 0,
                         "Parameter position must >= 0, but get '%s'",
@@ -167,16 +119,16 @@ public class ValueFileOutput extends UnsafeBytesOutput {
         int segmentIndex = (int) (position / this.segmentMaxSize);
         if (segmentIndex >= this.segments.size()) {
             throw new EOFException(String.format(
-                                   "Can't seek to %s, reach the end of file",
-                                   position));
+                    "Can't seek to %s, reach the end of file",
+                    position));
         }
 
-        this.flush();
+        this.flushBuffer();
         if (segmentIndex != this.segmentIndex) {
             this.currentSegment.close();
             this.currentSegment = new RandomAccessFile(
-                                  this.segments.get(segmentIndex),
-                                  Constants.FILE_MODE_WRITE);
+                    this.segments.get(segmentIndex),
+                    Constants.FILE_MODE_WRITE);
             this.segmentIndex = segmentIndex;
         }
         long seekPosition = position - segmentIndex * this.segmentMaxSize;
@@ -185,21 +137,14 @@ public class ValueFileOutput extends UnsafeBytesOutput {
     }
 
     @Override
-    public long skip(long n) throws IOException {
-        long positionBeforeSkip = this.position();
-        this.seek(positionBeforeSkip + n);
-        return positionBeforeSkip;
-    }
-
-    @Override
     public void close() throws IOException {
-        this.flush();
+        this.flushBuffer();
         this.currentSegment.close();
     }
 
-    public void flush() throws IOException {
+    public void flushBuffer() throws IOException {
         int segmentRemain = this.currentSegmentRemain();
-        int bufferSize = (int) super.position();
+        int bufferSize = super.bufferSize();
 
         if (segmentRemain >= bufferSize) {
             this.currentSegment.write(super.buffer(), 0, bufferSize);
@@ -234,9 +179,5 @@ public class ValueFileOutput extends UnsafeBytesOutput {
         long remain = this.segmentMaxSize -
                       this.currentSegment.getFilePointer();
         return (int) remain;
-    }
-
-    private int bufferAvailable() {
-        return this.bufferCapacity - (int) super.position();
     }
 }
