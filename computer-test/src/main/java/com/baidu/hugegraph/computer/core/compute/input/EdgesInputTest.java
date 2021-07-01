@@ -258,7 +258,7 @@ public class EdgesInputTest extends UnitTestBase {
     private void checkEdgesInput(EdgesInput edgesInput, EdgeFrequency freq)
                                  throws IOException {
 
-        for (long i = 0L; i < 200L; i+= 2) {
+        for (long i = 0L; i < 200L; i += 2) {
             LongId id = new LongId(i);
             ReusablePointer idPointer = idToReusablePointer(id);
             Edges edges = edgesInput.edges(idPointer);

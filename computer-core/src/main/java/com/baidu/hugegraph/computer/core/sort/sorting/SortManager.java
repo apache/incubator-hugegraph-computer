@@ -117,7 +117,7 @@ public class SortManager implements Manager {
                 throw new ComputerException("Failed to sort buffers of %s " +
                                             "message", e, type.name());
             }
-            return ByteBuffer.wrap(output.buffer());
+            return ByteBuffer.wrap(output.toByteArray());
         }, this.sortExecutor);
     }
 

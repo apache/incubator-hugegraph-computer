@@ -69,9 +69,10 @@ public class NettyManagedBuffer implements ManagedBuffer {
 
     @Override
     public byte[] copyToByteArray() {
-        return ByteBufUtil.getBytes(this.buf,
-                                    this.buf.readerIndex(),
-                                    this.buf.readableBytes(),
+        ByteBuf buf = this.buf.duplicate();
+        return ByteBufUtil.getBytes(buf,
+                                    buf.readerIndex(),
+                                    buf.readableBytes(),
                                     true);
     }
 }
