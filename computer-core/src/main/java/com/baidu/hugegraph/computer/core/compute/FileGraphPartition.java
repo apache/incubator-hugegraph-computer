@@ -51,17 +51,17 @@ import com.baidu.hugegraph.util.E;
 
 public class FileGraphPartition<M extends Value<M>> {
 
-    private final ComputerContext context;
     private static final String VERTEX = "vertex";
     private static final String EDGE = "edge";
     private static final String STATUS = "status";
     private static final String VALUE = "value";
 
+    private final ComputerContext context;
     private final FileGenerator fileGenerator;
     private final int partition;
+    private final File vertexFile;
+    private final File edgeFile;
 
-    private File vertexFile;
-    private File edgeFile;
     private File preStatusFile;
     private File curStatusFile;
     private File preValueFile;
@@ -117,8 +117,7 @@ public class FileGraphPartition<M extends Value<M>> {
             vertexOut.close();
             edgeOut.close();
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new ComputerException("Init vertex input failed", e);
+            throw new ComputerException("File graph partition init failed", e);
         }
 
         return new PartitionStat(this.partition, this.vertexCount,
@@ -128,7 +127,7 @@ public class FileGraphPartition<M extends Value<M>> {
     // Package access
     PartitionStat compute0(ComputationContext context,
                            Computation<M> computation) {
-        long activeVertexCount = 0;
+        long activeVertexCount = 0L;
         this.beforeCompute(0);
 
         while (this.vertexInput.hasNext()) {
@@ -168,7 +167,7 @@ public class FileGraphPartition<M extends Value<M>> {
                     vertex.inactivate();
                 }
             } catch (IOException e) {
-                throw new ComputerException("Can't read status or result", e);
+                throw new ComputerException("Read status or result failed", e);
             }
 
             /*
@@ -211,7 +210,7 @@ public class FileGraphPartition<M extends Value<M>> {
                     vertex.inactivate();
                 }
             } catch (IOException e) {
-                throw new ComputerException("Can't read status or result", e);
+                throw new ComputerException("Read status or result failed", e);
             }
 
             Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
@@ -245,8 +244,7 @@ public class FileGraphPartition<M extends Value<M>> {
     }
 
     private void writeEdges(Pointer id, PeekableIterator<KvEntry> edges,
-                            BufferedFileOutput edgeOut)
-                            throws IOException {
+                            BufferedFileOutput edgeOut) throws IOException {
         while (edges.hasNext()) {
             KvEntry entry = edges.peek();
             Pointer key = entry.key();
@@ -281,8 +279,7 @@ public class FileGraphPartition<M extends Value<M>> {
     }
 
     private void beforeCompute(int superstep) {
-        this.vertexInput = new VertexInput(this.context,
-                                           this.vertexFile,
+        this.vertexInput = new VertexInput(this.context, this.vertexFile,
                                            this.vertexCount);
         this.edgesInput = new EdgesInput(this.context, this.edgeFile);
         // Inputs
@@ -310,7 +307,6 @@ public class FileGraphPartition<M extends Value<M>> {
 
             this.curStatusOut = new BufferedFileOutput(this.curStatusFile);
             this.curValueOut = new BufferedFileOutput(this.curValueFile);
-
         } catch (IOException e) {
             throw new ComputerException("Before compute call failed", e);
         }
@@ -359,8 +355,6 @@ public class FileGraphPartition<M extends Value<M>> {
             this.preValueIn.close();
             this.preStatusFile.delete();
             this.preValueFile.delete();
-            this.vertexInput.close();
-            this.edgesInput.close();
         } catch (IOException e) {
             throw new ComputerException("After output call failed", e);
         }

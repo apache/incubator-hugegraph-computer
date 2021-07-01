@@ -43,12 +43,12 @@ public class ComputeManager<M extends Value<M>> {
 
     private static final Logger LOG = Log.logger(ComputeManager.class);
 
-    private ComputerContext context;
+    private final ComputerContext context;
     private final Managers managers;
 
     private final Map<Integer, FileGraphPartition<M>> partitions;
     private final Computation<M> computation;
-    private final MessageRecvManager messageRecvManager;
+    private final MessageRecvManager recvManager;
     private final MessageSendManager sendManager;
 
     public ComputeManager(ComputerContext context, Managers managers,
@@ -57,19 +57,17 @@ public class ComputeManager<M extends Value<M>> {
         this.managers = managers;
         this.computation = computation;
         this.partitions = new HashMap<>();
-        this.messageRecvManager = this.managers.get(MessageRecvManager.NAME);
+        this.recvManager = this.managers.get(MessageRecvManager.NAME);
         this.sendManager = this.managers.get(MessageSendManager.NAME);
     }
 
     public WorkerStat input() {
         WorkerStat workerStat = new WorkerStat();
-        MessageRecvManager messageRecvManager = this.managers.get(
-                                                MessageRecvManager.NAME);
-        messageRecvManager.waitReceivedAllMessages();
+        this.recvManager.waitReceivedAllMessages();
         Map<Integer, PeekableIterator<KvEntry>> vertices;
-        vertices = messageRecvManager.vertexPartitions();
+        vertices = this.recvManager.vertexPartitions();
         Map<Integer, PeekableIterator<KvEntry>> edges;
-        edges = messageRecvManager.edgePartitions();
+        edges = this.recvManager.edgePartitions();
         // TODO: parallel input process
         for (Map.Entry<Integer, PeekableIterator<KvEntry>> entry :
              vertices.entrySet()) {
@@ -89,14 +87,10 @@ public class ComputeManager<M extends Value<M>> {
      * {@link MessageRecvManager#beforeSuperstep} is called.
      */
     public void takeComputeMessages() {
-        Map<Integer, PeekableIterator<KvEntry>> messages;
-        messages = this.messageRecvManager.messagePartitions();
+        Map<Integer, PeekableIterator<KvEntry>> messages =
+                     this.recvManager.messagePartitions();
         for (FileGraphPartition<M> partition : this.partitions.values()) {
-            PeekableIterator<KvEntry> m = messages.get(partition.partition());
-            if (m == null) {
-                m = PeekableIterator.emptyIterator();
-            }
-            partition.messages(m);
+            partition.messages(messages.get(partition.partition()));
         }
     }
 
@@ -123,9 +117,9 @@ public class ComputeManager<M extends Value<M>> {
         }
         this.sendManager.finishSend(MessageType.MSG);
         // After compute and send finish signal.
-        Map<Integer, RecvStat> recvStats = this.messageRecvManager.recvStats();
+        Map<Integer, RecvStat> recvStats = this.recvManager.recvStats();
         for (Map.Entry<Integer, PartitionStat> entry :
-                partitionStats.entrySet()) {
+                                               partitionStats.entrySet()) {
             PartitionStat partitionStat = entry.getValue();
             partitionStat.merge(recvStats.get(partitionStat.partitionId()));
             workerStat.add(partitionStat);

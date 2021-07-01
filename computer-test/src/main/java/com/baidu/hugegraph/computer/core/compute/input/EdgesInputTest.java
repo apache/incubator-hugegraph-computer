@@ -136,7 +136,6 @@ public class EdgesInputTest extends UnitTestBase {
         addEdgeBuffer((ManagedBuffer buffer) -> {
             receiveManager.handle(MessageType.EDGE, 0, buffer);
         }, freq);
-        //recvManagerConsumer.accept(addEdgeBuffer);
 
         receiveManager.onFinished(connectionId);
         partition.init(receiveManager.vertexPartitions().get(0),
@@ -150,7 +149,7 @@ public class EdgesInputTest extends UnitTestBase {
 
     private static void add200VertexBuffer(Consumer<ManagedBuffer> consumer)
                                            throws IOException {
-        for (long i = 0L; i < 200L; i += 1) {
+        for (long i = 0L; i < 200L; i += 2) {
             Vertex vertex = graphFactory().createVertex();
             vertex.id(new LongId(i));
             vertex.properties(graphFactory().createProperties());
@@ -259,9 +258,9 @@ public class EdgesInputTest extends UnitTestBase {
     private void checkEdgesInput(EdgesInput edgesInput, EdgeFrequency freq)
                                  throws IOException {
 
-        for (long i = 0L; i < 200L; i++) {
+        for (long i = 0L; i < 200L; i+= 2) {
             LongId id = new LongId(i);
-            ReusablePointer idPointer = idToResablePpointer(id);
+            ReusablePointer idPointer = idToReusablePointer(id);
             Edges edges = edgesInput.edges(idPointer);
             Iterator<Edge> edgesIt = edges.iterator();
             Assert.assertEquals(i, edges.size());
@@ -290,8 +289,8 @@ public class EdgesInputTest extends UnitTestBase {
         }
     }
 
-    public static ReusablePointer idToResablePpointer(Id id)
-                                                       throws IOException {
+    public static ReusablePointer idToReusablePointer(Id id)
+                                                      throws IOException {
         BytesOutput output = IOFactory.createBytesOutput(9);
         output.writeByte(id.type().code());
         id.write(output);

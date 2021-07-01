@@ -67,8 +67,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
             } finally {
-                workerService.close();
                 countDownLatch.countDown();
+                workerService.close();
             }
         });
 
@@ -92,8 +92,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start master", e);
                 exceptions[1] = e;
             } finally {
-                masterService.close();
                 countDownLatch.countDown();
+                masterService.close();
             }
         });
 
@@ -132,8 +132,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
             } finally {
-                workerService.close();
                 countDownLatch.countDown();
+                workerService.close();
             }
         });
 
@@ -159,8 +159,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start worker", e);
                 exceptions[1] = e;
             } finally {
-                workerService.close();
                 countDownLatch.countDown();
+                workerService.close();
             }
         });
 
@@ -185,8 +185,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start master", e);
                 exceptions[2] = e;
             } finally {
-                masterService.close();
                 countDownLatch.countDown();
+                masterService.close();
             }
         });
 

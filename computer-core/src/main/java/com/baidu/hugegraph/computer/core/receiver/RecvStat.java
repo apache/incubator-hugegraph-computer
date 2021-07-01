@@ -25,7 +25,6 @@ package com.baidu.hugegraph.computer.core.receiver;
 public class RecvStat {
 
     private final long messageCount;
-
     private final long messageBytes;
 
     public RecvStat(long messageCount, long messageBytes) {

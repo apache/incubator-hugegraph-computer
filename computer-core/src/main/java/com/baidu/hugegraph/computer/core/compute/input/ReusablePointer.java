@@ -50,7 +50,7 @@ public class ReusablePointer implements Pointer, Readable {
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        this.length = in.readInt();
+        this.length = in.readFixedInt();
         if (this.bytes.length < this.length) {
             this.bytes = new byte[this.length];
             this.input = IOFactory.createBytesInput(this.bytes);

@@ -123,13 +123,11 @@ public class MessageInputTest extends UnitTestBase {
     }
 
     private void checkMessages(Map<Id, List<IdValueList>> expectedMessages,
-                               MessageInput input)
-                               throws IOException {
-
+                               MessageInput input) throws IOException {
         for (long i = 0L; i < 200L; i++) {
             List<IdValueList> messages  = expectedMessages.get(new LongId(i));
             LongId id = new LongId(i);
-            ReusablePointer idPointer = EdgesInputTest.idToResablePpointer(id);
+            ReusablePointer idPointer = EdgesInputTest.idToReusablePointer(id);
             Iterator<IdValueList> mit = input.iterator(idPointer);
             if (messages == null) {
                 Assert.assertFalse(mit.hasNext());

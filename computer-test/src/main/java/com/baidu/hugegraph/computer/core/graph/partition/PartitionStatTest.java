@@ -62,19 +62,20 @@ public class PartitionStatTest {
         stat1.merge(null);
         Assert.assertEquals(1L, stat1.vertexCount());
         Assert.assertEquals(2L, stat1.edgeCount());
-        Assert.assertEquals(0L, stat1.messageBytes());
         Assert.assertEquals(0L, stat1.messageCount());
+        Assert.assertEquals(0L, stat1.messageBytes());
+
         RecvStat recvStat = new RecvStat(100L, 400L);
         stat1.merge(recvStat);
         Assert.assertEquals(1L, stat1.vertexCount());
         Assert.assertEquals(2L, stat1.edgeCount());
-        Assert.assertEquals(100L, stat1.messageBytes());
-        Assert.assertEquals(400L, stat1.messageCount());
+        Assert.assertEquals(100L, stat1.messageCount());
+        Assert.assertEquals(400L, stat1.messageBytes());
         stat1.merge(recvStat);
         Assert.assertEquals(1L, stat1.vertexCount());
         Assert.assertEquals(2L, stat1.edgeCount());
-        Assert.assertEquals(200L, stat1.messageBytes());
-        Assert.assertEquals(800L, stat1.messageCount());
+        Assert.assertEquals(200L, stat1.messageCount());
+        Assert.assertEquals(800L, stat1.messageBytes());
     }
 
     @Test
