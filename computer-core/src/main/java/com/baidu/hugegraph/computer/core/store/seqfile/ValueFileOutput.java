@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -66,9 +64,6 @@ public class ValueFileOutput extends UnsafeBytesOutput {
         this.dir = dir;
         this.bufferCapacity = bufferCapacity;
         this.segments = ValueFile.scanSegment(dir);
-        E.checkArgument(CollectionUtils.isNotEmpty(this.segments),
-                        "Can't find any segment in dir '%s'",
-                        dir.getAbsolutePath());
         this.segmentIndex = -1;
         this.currentSegment = this.nextSegment();
         this.fileOffset = 0L;

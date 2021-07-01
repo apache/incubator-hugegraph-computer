@@ -62,7 +62,7 @@ public class ValueFileTest {
             Assert.assertThrows(IllegalArgumentException.class, () -> {
                 new ValueFileOutput(CONFIG, dir, 1);
             }, e -> {
-                Assert.assertContains("The parameter bufferSize must be >= 8",
+                Assert.assertContains("bufferCapacity must be >= 8",
                                       e.getMessage());
             });
 
