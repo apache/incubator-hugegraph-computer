@@ -21,6 +21,9 @@ package com.baidu.hugegraph.computer.core.store;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -52,6 +55,31 @@ public class BitFileTest {
             try (BitsFileReader reader = new BitsFileReaderImpl(CONFIG, dir)) {
                 for (int i = 0; i < 1000000; i++) {
                     Assert.assertEquals(i % 2 == 0, reader.readBoolean());
+                }
+            }
+        } finally {
+            FileUtils.deleteQuietly(dir);
+        }
+    }
+
+    @Test
+    public void testRandomValue() throws IOException {
+        File dir = createTempDir();
+
+        List<Boolean> data = new ArrayList<>();
+        Random random = new Random();
+        try {
+            try (BitsFileWriter writer = new BitsFileWriterImpl(CONFIG, dir)) {
+                for (int i = 0; i < 1000000; i++) {
+                    boolean item = random.nextInt(2) == 0;
+                    writer.writeBoolean(item);
+                    data.add(item);
+                }
+            }
+
+            try (BitsFileReader reader = new BitsFileReaderImpl(CONFIG, dir)) {
+                for (int i = 0; i < data.size(); i++) {
+                    Assert.assertEquals(data.get(i), reader.readBoolean());
                 }
             }
         } finally {
