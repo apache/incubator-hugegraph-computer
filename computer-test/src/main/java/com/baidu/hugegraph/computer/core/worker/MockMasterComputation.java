@@ -178,11 +178,11 @@ public class MockMasterComputation extends DefaultMasterComputation {
     }
 
     protected void assertStat(MasterComputationContext context) {
-        Assert.assertEquals(100L, context.totalVertexCount());
-        Assert.assertEquals(200L, context.totalEdgeCount());
-        Assert.assertEquals(50L, context.finishedVertexCount());
-        Assert.assertEquals(60L, context.messageCount());
-        Assert.assertEquals(70L, context.messageBytes());
+        Assert.assertEquals(6L, context.totalVertexCount());
+        Assert.assertEquals(5L, context.totalEdgeCount());
+        Assert.assertEquals(0L, context.finishedVertexCount());
+        Assert.assertEquals(0L, context.messageCount());
+        Assert.assertEquals(0L, context.messageBytes());
     }
 
     protected void assertStep0Aggregators(MasterComputationContext context) {

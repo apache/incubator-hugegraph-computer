@@ -59,19 +59,21 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.WORKER_COMPUTATION_CLASS,
                 MockComputation.class.getName(),
                 ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                 DoubleValue.class.getName()
             );
             WorkerService workerService = new MockWorkerService();
             try {
-                Thread.sleep(2000);
+                Thread.sleep(2000L);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
                 LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
             } finally {
-                countDownLatch.countDown();
                 workerService.close();
+                countDownLatch.countDown();
             }
         });
 
@@ -87,6 +89,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.MASTER_COMPUTATION_CLASS,
                 MockMasterComputation.class.getName(),
                 ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                 DoubleValue.class.getName()
             );
             MasterService masterService = new MasterService();
@@ -97,8 +101,13 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start master", e);
                 exceptions[1] = e;
             } finally {
-                countDownLatch.countDown();
+                /**
+                 * It must close the service first. The pool will be shutdown
+                 * if count down is executed first, and the server thread in
+                 * master service will not be closed.
+                 */
                 masterService.close();
+                countDownLatch.countDown();
             }
         });
 
@@ -128,6 +137,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.WORKER_COMPUTATION_CLASS,
                 MockComputation2.class.getName(),
                 ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                 DoubleValue.class.getName()
             );
             WorkerService workerService = new MockWorkerService();
@@ -139,8 +150,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
             } finally {
-                countDownLatch.countDown();
                 workerService.close();
+                countDownLatch.countDown();
             }
         });
 
@@ -157,6 +168,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.WORKER_COMPUTATION_CLASS,
                 MockComputation2.class.getName(),
                 ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                 DoubleValue.class.getName()
             );
             WorkerService workerService = new MockWorkerService();
@@ -168,8 +181,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start worker", e);
                 exceptions[1] = e;
             } finally {
-                countDownLatch.countDown();
                 workerService.close();
+                countDownLatch.countDown();
             }
         });
 
@@ -186,6 +199,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.MASTER_COMPUTATION_CLASS,
                 MockMasterComputation2.class.getName(),
                 ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                 DoubleValue.class.getName()
             );
             MasterService masterService = new MasterService();
@@ -196,8 +211,8 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start master", e);
                 exceptions[2] = e;
             } finally {
-                countDownLatch.countDown();
                 masterService.close();
+                countDownLatch.countDown();
             }
         });
 
