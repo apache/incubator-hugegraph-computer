@@ -116,19 +116,24 @@ public class ManagedBufferTest {
         ByteBuffer byteBuffer2 = ByteBuffer.allocate(bytesSource.length);
         byteBuffer2 = byteBuffer2.put(bytesSource);
         byteBuffer2.flip();
+
+        int position = byteBuffer2.position();
         NioManagedBuffer nioManagedBuffer2 = new NioManagedBuffer(byteBuffer2);
         byte[] bytes2 = nioManagedBuffer2.copyToByteArray();
         Assert.assertArrayEquals(bytesSource, bytes2);
         Assert.assertNotSame(bytesSource, bytes2);
+        Assert.assertEquals(position, byteBuffer2.position());
 
         ByteBuf buf3 = Unpooled.directBuffer(bytesSource.length);
         try {
             buf3 = buf3.writeBytes(bytesSource);
+            int readerIndex = buf3.readerIndex();
             NettyManagedBuffer nettyManagedBuffer3 =
                                new NettyManagedBuffer(buf3);
             byte[] bytes3 = nettyManagedBuffer3.copyToByteArray();
             Assert.assertArrayEquals(bytesSource, bytes3);
             Assert.assertNotSame(bytesSource, bytes3);
+            Assert.assertEquals(readerIndex, buf3.readerIndex());
         } finally {
             buf3.release();
         }

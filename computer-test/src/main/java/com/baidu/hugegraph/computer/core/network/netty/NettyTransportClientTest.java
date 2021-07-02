@@ -36,16 +36,17 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
@@ -143,6 +144,25 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                         ByteBuffer.wrap(StringEncoding.encode("test3")));
             client.finishSession();
         }
+    }
+
+    @Test
+    public void testDataUniformity() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        byte[] sourceBytes = StringEncoding.encode("test data 123");
+
+        Mockito.doAnswer(invocationOnMock -> {
+            ManagedBuffer buffer = invocationOnMock.getArgument(2);
+            byte[] bytes = buffer.copyToByteArray();
+            Assert.assertArrayEquals(sourceBytes, bytes);
+            Assert.assertNotSame(sourceBytes, bytes);
+            return null;
+        }).when(serverHandler).handle(Mockito.eq(MessageType.MSG),
+                                      Mockito.eq(1),
+                                      Mockito.any());
+        client.startSession();
+        client.send(MessageType.MSG, 1, ByteBuffer.wrap(sourceBytes));
+        client.finishSession();
     }
 
     @Test

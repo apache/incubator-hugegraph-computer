@@ -31,7 +31,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mockito;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.ClientHandler;
@@ -45,6 +44,7 @@ import com.baidu.hugegraph.computer.core.network.TransportServer;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
@@ -92,6 +92,7 @@ public abstract class AbstractNetworkTest {
         Configurator.setAllLevels("com.baidu.hugegraph", Level.DEBUG);
         OPTIONS.put(ComputerOptions.TRANSPORT_SERVER_HOST, host);
         OPTIONS.put(ComputerOptions.TRANSPORT_IO_MODE, "AUTO");
+        OPTIONS.put(ComputerOptions.TRANSPORT_SERVER_PORT, "0");
         this.initOption();
         Object[] objects = new Object[OPTIONS.size() * 2];
         Set<Map.Entry<ConfigOption<?>, String>> kvs = OPTIONS.entrySet();
