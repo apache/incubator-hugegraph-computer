@@ -37,6 +37,7 @@ import com.baidu.hugegraph.computer.core.store.seqfile.ValueFileOutput;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
 
 public class ValueFileTest {
@@ -216,8 +217,9 @@ public class ValueFileTest {
 
             try (ValueFileInput input = new ValueFileInput(CONFIG, dir,
                                                            bufferSize)) {
-                long fileLength = input.fileLength();
-                Assert.assertEquals(200, fileLength);
+                Long fileLength = Whitebox.getInternalState(input,
+                                                            "fileLength");
+                Assert.assertEquals(200L, fileLength);
 
                 long position;
                 // Position in buffer

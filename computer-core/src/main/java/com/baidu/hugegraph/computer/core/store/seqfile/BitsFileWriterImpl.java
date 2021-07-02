@@ -25,11 +25,13 @@ import com.baidu.hugegraph.computer.core.config.Config;
 
 public class BitsFileWriterImpl implements BitsFileWriter {
 
+    private static final int BUFFER_BITS = Long.BYTES << 3;
+
     private final ValueFileOutput output;
     private boolean finished;
 
     private long byteBuffer;
-    private byte cursor;
+    private int cursor;
 
     public BitsFileWriterImpl(Config config, String dir) throws IOException {
         this(config, new File(dir));
@@ -50,7 +52,7 @@ public class BitsFileWriterImpl implements BitsFileWriter {
         }
         this.cursor++;
 
-        if (this.cursor >= Long.BYTES * 8) {
+        if (this.cursor >= BUFFER_BITS) {
             this.output.writeLong(this.byteBuffer);
             this.byteBuffer = 0L;
             this.cursor = 0;

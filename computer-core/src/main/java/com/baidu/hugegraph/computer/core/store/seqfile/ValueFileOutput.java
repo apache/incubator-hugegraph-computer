@@ -73,7 +73,7 @@ public class ValueFileOutput extends AbstractBufferedFileOutput {
         }
 
         this.flushBuffer();
-        if (this.bufferCapacity >= len) {
+        if (this.bufferCapacity() >= len) {
             super.write(b, off, len);
             return;
         }
@@ -142,6 +142,7 @@ public class ValueFileOutput extends AbstractBufferedFileOutput {
         this.currentSegment.close();
     }
 
+    @Override
     public void flushBuffer() throws IOException {
         int segmentRemain = this.currentSegmentRemain();
         int bufferSize = super.bufferSize();

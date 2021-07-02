@@ -26,7 +26,8 @@ import com.baidu.hugegraph.util.E;
 
 public abstract class AbstractBufferedFileOutput extends UnsafeBytesOutput {
 
-    protected final int bufferCapacity;
+    private final int bufferCapacity;
+
     protected long fileOffset;
 
     public AbstractBufferedFileOutput(int bufferCapacity) {
@@ -97,9 +98,13 @@ public abstract class AbstractBufferedFileOutput extends UnsafeBytesOutput {
         return (int) super.position();
     }
 
-    protected abstract void flushBuffer() throws IOException;
-
     protected int bufferAvailable() {
         return this.bufferCapacity - (int) super.position();
     }
+
+    protected int bufferCapacity() {
+        return this.bufferCapacity;
+    }
+
+    protected abstract void flushBuffer() throws IOException;
 }

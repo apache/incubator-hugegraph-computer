@@ -84,7 +84,7 @@ public class ValueFileInput extends AbstractBufferedFileInput {
 
         if (bufferRemain >= len) {
             super.readFully(b, off, len);
-        } else if (this.bufferCapacity >= len) {
+        } else if (this.bufferCapacity() >= len) {
             this.shiftAndFillBuffer();
             super.readFully(b, off, len);
         } else if ((bufferRemain + segmentRemain) >= len) {
@@ -126,18 +126,23 @@ public class ValueFileInput extends AbstractBufferedFileInput {
         if (position == this.position()) {
             return;
         }
-        if (position > this.fileLength) {
+        if (position > this.fileLength()) {
             throw new EOFException(String.format(
                                    "Can't seek to %s, reach the end of file",
                                    position));
         }
 
+        // Seek position in buffer
         long bufferStart = this.fileOffset - this.limit();
         if (bufferStart <= position && position <= this.fileOffset) {
             super.seek(position - bufferStart);
             return;
         }
 
+        /*
+         * Calculate the segment corresponding to position and
+         * seek to the corresponding position of the segment
+         */
         int segmentIndex = (int) (position / this.segmentMaxSize);
         if (segmentIndex != this.segmentIndex) {
             this.currentSegment.close();
@@ -149,9 +154,11 @@ public class ValueFileInput extends AbstractBufferedFileInput {
         long seekPosition = position - segmentIndex * this.segmentMaxSize;
         this.currentSegment.seek(seekPosition);
 
+        // Reset buffer after seek
         super.seek(0L);
         this.limit(0);
         this.fileOffset = position;
+
         this.fillBuffer();
     }
 
@@ -162,8 +169,8 @@ public class ValueFileInput extends AbstractBufferedFileInput {
 
     @Override
     protected void fillBuffer() throws IOException {
-        int readLen = Math.min(this.bufferCapacity - this.limit(),
-                               (int) (this.fileLength - this.fileOffset));
+        int readLen = Math.min(this.bufferCapacity() - this.limit(),
+                               (int) (this.fileLength() - this.fileOffset));
         int remain = this.currentSegmentRemain();
         if (readLen <= remain) {
             this.currentSegment.readFully(this.buffer(), this.limit(), readLen);
@@ -182,7 +189,7 @@ public class ValueFileInput extends AbstractBufferedFileInput {
     @Override
     public UnsafeBytesInput duplicate() throws IOException {
         ValueFileInput input = new ValueFileInput(this.config, this.dir,
-                                                  this.bufferCapacity);
+                                                  this.bufferCapacity());
         input.seek(this.position());
         return input;
     }
@@ -197,10 +204,6 @@ public class ValueFileInput extends AbstractBufferedFileInput {
         }
 
         return super.compare(offset, length, other, otherOffset, otherLength);
-    }
-
-    public long fileLength() {
-        return this.fileLength;
     }
 
     private int currentSegmentRemain() throws IOException {

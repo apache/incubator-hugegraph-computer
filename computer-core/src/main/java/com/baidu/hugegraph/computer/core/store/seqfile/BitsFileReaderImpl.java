@@ -25,11 +25,13 @@ import com.baidu.hugegraph.computer.core.config.Config;
 
 public class BitsFileReaderImpl implements BitsFileReader {
 
+    private static final int BUFFER_BITS = Long.BYTES << 3;
+
     private final ValueFileInput input;
     private boolean closed;
 
     private long byteBuffer;
-    private byte cursor;
+    private int cursor;
 
     public BitsFileReaderImpl(Config config, String path) throws IOException {
         this(config, new File(path));
@@ -45,7 +47,7 @@ public class BitsFileReaderImpl implements BitsFileReader {
 
     @Override
     public boolean readBoolean() throws IOException {
-        if (this.cursor >= Long.BYTES * 8) {
+        if (this.cursor >= BUFFER_BITS) {
             this.byteBuffer = this.input.readLong();
             this.cursor = 0;
         }

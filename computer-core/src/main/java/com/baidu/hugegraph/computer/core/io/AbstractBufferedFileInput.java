@@ -27,9 +27,10 @@ import com.baidu.hugegraph.util.E;
 
 public abstract class AbstractBufferedFileInput extends UnsafeBytesInput {
 
+    private final int bufferCapacity;
+    private final long fileLength;
+
     protected long fileOffset;
-    protected final int bufferCapacity;
-    protected final long fileLength;
 
     public AbstractBufferedFileInput(int bufferCapacity, long fileLength) {
         super(new byte[bufferCapacity], 0, 0);
@@ -156,5 +157,13 @@ public abstract class AbstractBufferedFileInput extends UnsafeBytesInput {
                                          otherBytes, 0, otherBytes.length);
             }
         }
+    }
+
+    protected int bufferCapacity() {
+        return this.bufferCapacity;
+    }
+
+    protected long fileLength() {
+        return this.fileLength;
     }
 }
