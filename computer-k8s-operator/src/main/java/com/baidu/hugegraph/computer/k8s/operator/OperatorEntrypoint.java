@@ -24,14 +24,18 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
@@ -52,15 +56,16 @@ import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
+import io.fabric8.kubernetes.client.utils.Utils;
 
 public class OperatorEntrypoint {
 
     private static final Logger LOG = Log.logger(OperatorEntrypoint.class);
 
     private HugeConfig config;
-    private KubernetesClient kubeClient;
+    private NamespacedKubernetesClient kubeClient;
     private SharedInformerFactory informerFactory;
     private List<AbstractController<?>> controllers;
     private ExecutorService controllerPool;
@@ -82,8 +87,7 @@ public class OperatorEntrypoint {
 
     public void start() {
         try {
-            this.config = new HugeConfig(new MapConfiguration(System.getenv()));
-
+            this.config = this.configFromSysPropsOrEnvVars();
             this.kubeClient = new DefaultKubernetesClient();
             this.controllers = new ArrayList<>();
             this.informerFactory = this.kubeClient.informers();
@@ -168,6 +172,19 @@ public class OperatorEntrypoint {
             this.httpServer.stop(0);
             this.httpServer = null;
         }
+    }
+
+    private HugeConfig configFromSysPropsOrEnvVars() {
+        Map<String, String> confMap = new HashMap<>();
+        Set<String> keys = OperatorOptions.instance().options().keySet();
+        for (String key : keys) {
+            String value = Utils.getSystemPropertyOrEnvVar(key);
+            if (StringUtils.isNotBlank(value)) {
+                confMap.put(key, value);
+            }
+        }
+        MapConfiguration configuration = new MapConfiguration(confMap);
+        return new HugeConfig(configuration);
     }
 
     private void registerControllers() {

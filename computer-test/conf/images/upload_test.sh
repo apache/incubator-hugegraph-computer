@@ -48,9 +48,12 @@ function abs_path() {
 
 BIN=`abs_path`
 
-echo $BIN
-echo $REGISTRY
-echo $USER_NAME
-echo $PASSWORD
-echo $JAR_FILE
-echo $IMG_URL
+cat >${BIN}/upload.txt<<EOF
+docker login -u${USER_NAME} -p${PASSWORD} ${REGISTRY}
+
+docker build --build-arg JAR_FILE=${JAR_FILE} -t ${IMG_URL} -f ${BIN}/Dockerfile
+
+docker push ${IMG_URL}
+
+docker logout ${REGISTRY}
+EOF

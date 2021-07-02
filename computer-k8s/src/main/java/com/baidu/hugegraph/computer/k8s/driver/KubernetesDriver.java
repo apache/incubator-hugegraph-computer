@@ -140,19 +140,29 @@ public class KubernetesDriver implements ComputerDriver {
                                    KubeDriverOptions.IMAGE_REPOSITORY_PASSWORD);
             String imageUrl = this.buildImageUrl(algorithmName);
 
-            String template = "sh %s -r %s -u %s -p %s -j %s -i %s";
-            String command = String.format(template, shell, registry,
-                                           username, password,
-                                           tempFile.getAbsolutePath(),
-                                           imageUrl);
+            StringBuilder builder = new StringBuilder();
+            builder.append("bash ").append(shell);
+            if (StringUtils.isNotBlank(registry)) {
+                builder.append(" -r ").append(registry);
+            }
+            builder.append(" -u ").append(username);
+            builder.append(" -p ").append(password);
+            builder.append(" -j ").append(tempFile.getAbsolutePath());
+            builder.append(" -i ").append(imageUrl);
 
+            String command = builder.toString();
+            LOG.info("command: {}", command);
             Process process = Runtime.getRuntime().exec(command);
             int code = process.waitFor();
             if (code != 0) {
                 InputStream errorStream = process.getErrorStream();
                 String errorInfo = IOHelpers.readFully(errorStream);
+                if (StringUtils.isBlank(errorInfo)) {
+                    InputStream stdoutStream = process.getInputStream();
+                    errorInfo = IOHelpers.readFully(stdoutStream);
+                }
                 throw new RuntimeException(
-                          "Failed to upload algorithm Jar: " + errorInfo);
+                          "Failed to upload algorithm Jar " + errorInfo);
             }
         } catch (Throwable exception) {
             throw new RuntimeException(exception);

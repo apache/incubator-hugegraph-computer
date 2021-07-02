@@ -34,7 +34,6 @@ import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
-import com.baidu.hugegraph.computer.k8s.crd.model.Protocol;
 import com.baidu.hugegraph.computer.k8s.crd.model.ResourceName;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.util.Log;
@@ -175,12 +174,12 @@ public class ComputerJobDeployer {
         ContainerPort transportContainerPort = new ContainerPortBuilder()
                 .withName("transport")
                 .withContainerPort(Integer.valueOf(transportPort))
-                .withProtocol(Protocol.TCP.value())
+                .withProtocol("TCP")
                 .build();
         ContainerPort rpcContainerPort = new ContainerPortBuilder()
                 .withName("rpc")
                 .withContainerPort(Integer.valueOf(rpcPort))
-                .withProtocol(Protocol.TCP.value())
+                .withProtocol("TCP")
                 .build();
 
         return Sets.newHashSet(transportContainerPort, rpcContainerPort);
@@ -262,20 +261,19 @@ public class ComputerJobDeployer {
                 .withVolumes(configVolume)
                 .build();
 
-        return new JobBuilder()
-                .withMetadata(meta)
-                .withNewSpec()
-                .withParallelism(instances)
-                .withCompletions(instances)
-                .withBackoffLimit(Constants.JOB_BACKOFF_LIMIT)
-                .withNewTemplate()
-                    .withNewMetadata()
-                        .withLabels(meta.getLabels())
-                    .endMetadata()
-                    .withSpec(podSpec)
-                .endTemplate()
-                .endSpec()
-                .build();
+        return new JobBuilder().withMetadata(meta)
+                               .withNewSpec()
+                               .withParallelism(instances)
+                               .withCompletions(instances)
+                               .withBackoffLimit(Constants.JOB_BACKOFF_LIMIT)
+                               .withNewTemplate()
+                                    .withNewMetadata()
+                                        .withLabels(meta.getLabels())
+                                    .endMetadata()
+                                    .withSpec(podSpec)
+                               .endTemplate()
+                               .endSpec()
+                               .build();
     }
 
     private Container getContainer(String name, ComputerJobSpec spec,
@@ -297,6 +295,7 @@ public class ComputerJobDeployer {
                 .endValueFrom()
                 .build();
         envVars.add(podIP);
+
         EnvVar podName = new EnvVarBuilder()
                 .withName(Constants.ENV_POD_NAME)
                 .withNewValueFrom()
@@ -306,6 +305,7 @@ public class ComputerJobDeployer {
                 .endValueFrom()
                 .build();
         envVars.add(podName);
+
         EnvVar podNamespace = new EnvVarBuilder()
                 .withName(Constants.ENV_POD_NAMESPACE)
                 .withNewValueFrom()
@@ -315,13 +315,10 @@ public class ComputerJobDeployer {
                 .endValueFrom()
                 .build();
         envVars.add(podNamespace);
+
         EnvVar confPath = new EnvVarBuilder()
                 .withName(Constants.ENV_CONFIG_PATH)
-                .withNewValueFrom()
-                .withNewFieldRef()
-                .withFieldPath(Constants.CONFIG_PATH)
-                .endFieldRef()
-                .endValueFrom()
+                .withValue(Constants.CONFIG_PATH)
                 .build();
         envVars.add(confPath);
 
@@ -376,11 +373,11 @@ public class ComputerJobDeployer {
                 .withBlockOwnerDeletion(true)
                 .build();
 
-        return new ObjectMetaBuilder()
-                .withNamespace(namespace)
-                .withName(component)
-                .addToLabels(KubeUtil.commonLabels(crName, component))
-                .withOwnerReferences(ownerReference)
-                .build();
+        Map<String, String> labels = KubeUtil.commonLabels(crName, component);
+        return new ObjectMetaBuilder().withNamespace(namespace)
+                                      .withName(component)
+                                      .addToLabels(labels)
+                                      .withOwnerReferences(ownerReference)
+                                      .build();
     }
 }

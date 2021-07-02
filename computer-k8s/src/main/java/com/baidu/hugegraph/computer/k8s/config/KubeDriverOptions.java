@@ -88,7 +88,7 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.image_repository_url",
                     "The value is url of image repository.",
                     disallowEmpty(),
-                    "hugegraph"
+                    "hugegraph/computer"
             );
 
     public static final ConfigOption<String> BUILD_IMAGE_BASH_PATH =

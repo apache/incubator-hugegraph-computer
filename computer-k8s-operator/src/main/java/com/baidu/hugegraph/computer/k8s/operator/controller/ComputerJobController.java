@@ -231,7 +231,6 @@ public class ComputerJobController
                                            MutableInt failedComponents,
                                            MutableInt succeededComponents,
                                            MutableInt runningComponents) {
-
         if (job != null) {
             ComponentState newState = new ComponentState();
             newState.setName(job.getMetadata().getName());
@@ -282,9 +281,9 @@ public class ComputerJobController
                                    new ComputerJobStatus() :
                                    computerJob.getStatus();
         status = new ComputerJobStatusBuilder(status)
-                .editOrNewComponentStates().endComponentStates()
-                .editOrNewJobState().endJobState()
-                .build();
+                     .editOrNewComponentStates().endComponentStates()
+                     .editOrNewJobState().endJobState()
+                     .build();
         computerJob.setStatus(status);
     }
 

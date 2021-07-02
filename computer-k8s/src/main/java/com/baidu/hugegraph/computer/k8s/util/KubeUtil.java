@@ -102,11 +102,11 @@ public class KubeUtil {
     }
 
     public static String imageName(String repository, String algorithmName,
-                                   String tag) {
-        if (StringUtils.isBlank(tag)) {
-            tag = "latest";
+                                   String version) {
+        if (StringUtils.isBlank(version)) {
+            version = "latest";
         }
-        return String.format("%s/%s:%s", repository, algorithmName, tag);
+        return String.format("%s:%s-%s", repository, algorithmName, version);
     }
 
     public static String masterJobName(String name) {
