@@ -189,4 +189,61 @@ public class MultiQueueTest {
             Assert.assertNull(e);
         }
     }
+
+    @Test
+    public void testTakeWithWait() throws InterruptedException {
+        MultiQueue queue = new MultiQueue(2);
+        Throwable[] exceptions = new Throwable[3];
+
+        Thread thread1 = new Thread(() -> {
+            try {
+                Thread.sleep(100);
+                queue.put(0, new QueuedMessage(1, MessageType.VERTEX, null));
+                Thread.sleep(200);
+                queue.put(0, new QueuedMessage(3, MessageType.VERTEX, null));
+                Thread.sleep(300);
+                queue.put(0, new QueuedMessage(5, MessageType.VERTEX, null));
+            } catch (Throwable e) {
+                exceptions[0] = e;
+            }
+        });
+
+        Thread thread2 = new Thread(() -> {
+            try {
+                Thread.sleep(100);
+                queue.put(1, new QueuedMessage(2, MessageType.VERTEX, null));
+                Thread.sleep(200);
+                queue.put(1, new QueuedMessage(4, MessageType.VERTEX, null));
+                Thread.sleep(300);
+                queue.put(1, new QueuedMessage(6, MessageType.VERTEX, null));
+            } catch (Throwable e) {
+                exceptions[1] = e;
+            }
+        });
+
+        Thread thread3 = new Thread(() -> {
+            try {
+                queue.take();
+                queue.take();
+                queue.take();
+                queue.take();
+                queue.take();
+                queue.take();
+            } catch (Throwable e) {
+                exceptions[2] = e;
+            }
+        });
+
+        thread1.start();
+        thread2.start();
+        thread3.start();
+
+        thread1.join();
+        thread2.join();
+        thread3.join();
+
+        for (Throwable e : exceptions) {
+            Assert.assertNull(e);
+        }
+    }
 }
