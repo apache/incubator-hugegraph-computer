@@ -32,15 +32,13 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.AbstractBufferedFileInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.util.E;
 
 public class ValueFileInput extends AbstractBufferedFileInput {
 
     private final Config config;
-    private final long segmentMaxSize;
+    private final long maxSegmentSize;
     private final File dir;
     private final List<File> segments;
 
@@ -56,12 +54,12 @@ public class ValueFileInput extends AbstractBufferedFileInput {
         super(bufferCapacity, ValueFile.fileLength(dir));
 
         this.config = config;
-        this.segmentMaxSize = config.get(
+        this.maxSegmentSize = config.get(
                               ComputerOptions.VALUE_FILE_MAX_SEGMENT_SIZE);
         E.checkArgument(bufferCapacity >= 8 &&
-                        bufferCapacity <= this.segmentMaxSize,
+                        bufferCapacity <= this.maxSegmentSize,
                         "The parameter bufferSize must be >= 8 " +
-                        "and <= %s", this.segmentMaxSize);
+                        "and <= %s", this.maxSegmentSize);
         E.checkArgument(dir.isDirectory(),
                         "The parameter dir must be a directory");
         this.dir = dir;
@@ -107,11 +105,11 @@ public class ValueFileInput extends AbstractBufferedFileInput {
             while (true) {
                 this.currentSegment.close();
                 this.currentSegment = this.nextSegment();
-                if (length > this.segmentMaxSize) {
+                if (length > this.maxSegmentSize) {
                     this.currentSegment.readFully(b, offset,
-                                                  (int) this.segmentMaxSize);
-                    offset += this.segmentMaxSize;
-                    length -= this.segmentMaxSize;
+                                                  (int) this.maxSegmentSize);
+                    offset += this.maxSegmentSize;
+                    length -= this.maxSegmentSize;
                 } else {
                     this.currentSegment.readFully(b, offset, length);
                     break;
@@ -143,7 +141,7 @@ public class ValueFileInput extends AbstractBufferedFileInput {
          * Calculate the segment corresponding to position and
          * seek to the corresponding position of the segment
          */
-        int segmentIndex = (int) (position / this.segmentMaxSize);
+        int segmentIndex = (int) (position / this.maxSegmentSize);
         if (segmentIndex != this.segmentIndex) {
             this.currentSegment.close();
             this.currentSegment = new RandomAccessFile(
@@ -151,7 +149,7 @@ public class ValueFileInput extends AbstractBufferedFileInput {
                                   Constants.FILE_MODE_READ);
             this.segmentIndex = segmentIndex;
         }
-        long seekPosition = position - segmentIndex * this.segmentMaxSize;
+        long seekPosition = position - segmentIndex * this.maxSegmentSize;
         this.currentSegment.seek(seekPosition);
 
         // Reset buffer after seek
@@ -194,20 +192,8 @@ public class ValueFileInput extends AbstractBufferedFileInput {
         return input;
     }
 
-    @Override
-    public int compare(long offset, long length, RandomAccessInput other,
-                       long otherOffset, long otherLength) throws IOException {
-        assert other != null;
-        if (other.getClass() != ValueFileInput.class) {
-            throw new NotSupportException("ValueFileInput must be compare " +
-                                          "with ValueFileInput");
-        }
-
-        return super.compare(offset, length, other, otherOffset, otherLength);
-    }
-
     private int currentSegmentRemain() throws IOException {
-        long remain = this.segmentMaxSize -
+        long remain = this.maxSegmentSize -
                       this.currentSegment.getFilePointer();
         return (int) remain;
     }

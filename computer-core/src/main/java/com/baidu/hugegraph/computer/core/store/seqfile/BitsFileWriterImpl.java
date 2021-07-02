@@ -29,7 +29,6 @@ public class BitsFileWriterImpl implements BitsFileWriter {
 
     private final ValueFileOutput output;
     private boolean finished;
-
     private long byteBuffer;
     private int cursor;
 

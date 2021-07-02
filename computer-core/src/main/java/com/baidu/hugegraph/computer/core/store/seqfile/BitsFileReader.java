@@ -25,8 +25,9 @@ import java.io.IOException;
 public interface BitsFileReader extends Closeable {
 
     /**
-     * Use 1 long store 64 booleans
-     * Read from low to high
+     * Read 1 boolean from file, file is a directory.
+     * Use 1 long store 64 booleans, read from low to high.
+     * @return boolean data
      */
     boolean readBoolean() throws IOException;
 

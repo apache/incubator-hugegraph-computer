@@ -38,7 +38,7 @@ public class ValueFile {
     private static final Pattern FILE_NUM_PATTERN = Pattern.compile("[0-9]+");
 
     private ValueFile() {
-
+        // pass
     }
 
     public static List<File> scanSegment(File dir) {

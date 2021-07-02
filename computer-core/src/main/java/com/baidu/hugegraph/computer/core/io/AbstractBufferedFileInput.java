@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
-import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.util.E;
 
 public abstract class AbstractBufferedFileInput extends UnsafeBytesInput {
@@ -55,7 +54,7 @@ public abstract class AbstractBufferedFileInput extends UnsafeBytesInput {
                         "The parameter bytesToSkip must be >= 0, but got %s",
                         bytesToSkip);
         E.checkArgument(this.available() >= bytesToSkip,
-                        "Fail to skip '%s' bytes, because don't have " +
+                        "Failed to skip '%s' bytes, because don't have " +
                         "enough data");
 
         long positionBeforeSkip = this.position();
@@ -80,8 +79,9 @@ public abstract class AbstractBufferedFileInput extends UnsafeBytesInput {
          */
         if (size > this.limit()) {
             throw new IOException(String.format(
-                    "Read %s bytes from position %s overflows buffer %s",
-                    size, this.position(), this.limit()));
+                      "Reading %s bytes from position %s overflows " +
+                      "buffer length %s",
+                      size, this.position(), this.limit()));
         }
     }
 
@@ -100,63 +100,57 @@ public abstract class AbstractBufferedFileInput extends UnsafeBytesInput {
     @Override
     public int compare(long offset, long length, RandomAccessInput other,
                        long otherOffset, long otherLength) throws IOException {
-        assert other != null;
-        if (!(other instanceof AbstractBufferedFileInput)) {
-            throw new NotSupportException("Parameter other must be instance " +
-                                          "of AbstractBufferedFileInput");
-        }
+        byte[] bytes1, bytes2;
+        int compareOffset1, compareOffset2;
 
-        AbstractBufferedFileInput oInput = (AbstractBufferedFileInput) other;
-
-        long bufferStart = this.fileOffset - this.limit();
-        if (bufferStart <= offset && offset <= this.fileOffset &&
-            super.limit() >= length) {
-            long oBufferStart = oInput.fileOffset - oInput.limit();
-            // Compare all in buffer
-            if (oBufferStart <= otherOffset &&
-                otherOffset <= oInput.fileOffset &&
-                oInput.limit() >= otherLength) {
-                return BytesUtil.compare(this.buffer(),
-                                         (int) (offset - bufferStart),
-                                         (int) length, oInput.buffer(),
-                                         (int) (otherOffset - oBufferStart),
-                                         (int) otherLength);
-            } else {
-                long oOldPosition = oInput.position();
-                oInput.seek(otherOffset);
-                byte[] otherBytes = oInput.readBytes((int) otherLength);
-                oInput.seek(oOldPosition);
-
-                return BytesUtil.compare(this.buffer(),
-                                         (int) (offset - bufferStart),
-                                         (int) length, otherBytes,
-                                         0, otherBytes.length);
-            }
+        /*
+         * Set the compare information of the current object.
+         * Ture: The compare range of the current object is within the buffer.
+         */
+        if (rangeInBuffer(this, offset, length)) {
+            bytes1 = this.buffer();
+            compareOffset1 = (int) (offset - bufferStartPosition(this));
         } else {
             long oldPosition = this.position();
             this.seek(offset);
-            byte[] bytes = this.readBytes((int) length);
+            bytes1 = this.readBytes((int) length);
+            compareOffset1 = 0;
             this.seek(oldPosition);
-
-            long oBufferStart = oInput.fileOffset - oInput.limit();
-            if (oBufferStart <= otherOffset &&
-                otherOffset <= oInput.fileOffset &&
-                oInput.limit() >= otherLength) {
-                return BytesUtil.compare(bytes,
-                                         0, bytes.length,
-                                         oInput.buffer(),
-                                         (int) (otherOffset - oBufferStart),
-                                         (int) otherLength);
-            } else {
-                long oOldPosition = oInput.position();
-                oInput.seek(otherOffset);
-                byte[] otherBytes = oInput.readBytes((int) otherLength);
-                oInput.seek(oOldPosition);
-
-                return BytesUtil.compare(bytes, 0, bytes.length,
-                                         otherBytes, 0, otherBytes.length);
-            }
         }
+
+        /*
+         * Set the compare information of the compared object.
+         * Ture: The compare range of the compared object is within the buffer
+         * and compared object instance of AbstractBufferedFileInput.
+         */
+        AbstractBufferedFileInput otherInput;
+        if (other instanceof AbstractBufferedFileInput &&
+            rangeInBuffer(otherInput = (AbstractBufferedFileInput) other,
+                          otherOffset, otherLength)) {
+            bytes2 = otherInput.buffer();
+            long otherBufferStart = bufferStartPosition(otherInput);
+            compareOffset2 = (int) (otherOffset - otherBufferStart);
+        } else {
+            long oldPosition = other.position();
+            other.seek(otherOffset);
+            bytes2 = other.readBytes((int) otherLength);
+            compareOffset2 = 0;
+            other.seek(oldPosition);
+        }
+
+        return BytesUtil.compare(bytes1, compareOffset1, (int) length,
+                                 bytes2, compareOffset2, (int) otherLength);
+    }
+
+    private static long bufferStartPosition(AbstractBufferedFileInput input) {
+        return input.fileOffset - input.limit();
+    }
+
+    private static boolean rangeInBuffer(AbstractBufferedFileInput input,
+                                         long offset, long length) {
+        long bufferStart = bufferStartPosition(input);
+        return bufferStart <= offset && offset <= input.fileOffset &&
+               input.limit() >= length;
     }
 
     protected int bufferCapacity() {

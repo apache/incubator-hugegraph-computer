@@ -33,7 +33,7 @@ import com.baidu.hugegraph.util.E;
 
 public class ValueFileOutput extends AbstractBufferedFileOutput {
 
-    private final long segmentMaxSize;
+    private final long maxSegmentSize;
     private final File dir;
     private final List<File> segments;
 
@@ -48,15 +48,15 @@ public class ValueFileOutput extends AbstractBufferedFileOutput {
                            throws IOException {
         super(bufferCapacity);
 
-        this.segmentMaxSize = config.get(
+        this.maxSegmentSize = config.get(
                               ComputerOptions.VALUE_FILE_MAX_SEGMENT_SIZE);
-        E.checkArgument(this.segmentMaxSize <= Integer.MAX_VALUE,
+        E.checkArgument(this.maxSegmentSize <= Integer.MAX_VALUE,
                         "Max size of segment must be smaller than '%s' " +
-                        "but get '%s'", Integer.MAX_VALUE, this.segmentMaxSize);
+                        "but get '%s'", Integer.MAX_VALUE, this.maxSegmentSize);
         E.checkArgument(bufferCapacity >= 8 &&
-                        bufferCapacity <= this.segmentMaxSize,
+                        bufferCapacity <= this.maxSegmentSize,
                         "The parameter bufferCapacity must be >= 8 " +
-                        "and <= %s", this.segmentMaxSize);
+                        "and <= %s", this.maxSegmentSize);
         E.checkArgument(dir.isDirectory(),
                         "The parameter dir must be a directory");
         this.dir = dir;
@@ -89,14 +89,18 @@ public class ValueFileOutput extends AbstractBufferedFileOutput {
             tempLen -= remain;
             offset += remain;
 
+            /*
+             * The read length maybe greater than the size of multiple segments.
+             * So need to write multiple segments.
+             */
             while (true) {
                 this.currentSegment.close();
                 this.currentSegment = this.nextSegment();
-                if (tempLen > this.segmentMaxSize) {
+                if (tempLen > this.maxSegmentSize) {
                     this.currentSegment.write(b, offset,
-                                              (int) this.segmentMaxSize);
-                    tempLen -= this.segmentMaxSize;
-                    offset += this.segmentMaxSize;
+                                              (int) this.maxSegmentSize);
+                    tempLen -= this.maxSegmentSize;
+                    offset += this.maxSegmentSize;
                 } else {
                     this.currentSegment.write(b, offset, tempLen);
                     break;
@@ -116,22 +120,22 @@ public class ValueFileOutput extends AbstractBufferedFileOutput {
             return;
         }
 
-        int segmentIndex = (int) (position / this.segmentMaxSize);
+        int segmentIndex = (int) (position / this.maxSegmentSize);
         if (segmentIndex >= this.segments.size()) {
             throw new EOFException(String.format(
-                    "Can't seek to %s, reach the end of file",
-                    position));
+                      "Can't seek to %s, reach the end of file",
+                      position));
         }
 
         this.flushBuffer();
         if (segmentIndex != this.segmentIndex) {
             this.currentSegment.close();
             this.currentSegment = new RandomAccessFile(
-                    this.segments.get(segmentIndex),
-                    Constants.FILE_MODE_WRITE);
+                                  this.segments.get(segmentIndex),
+                                  Constants.FILE_MODE_WRITE);
             this.segmentIndex = segmentIndex;
         }
-        long seekPosition = position - segmentIndex * this.segmentMaxSize;
+        long seekPosition = position - segmentIndex * this.maxSegmentSize;
         this.currentSegment.seek(seekPosition);
         this.fileOffset = position;
     }
@@ -171,13 +175,14 @@ public class ValueFileOutput extends AbstractBufferedFileOutput {
 
         if (!segment.exists()) {
             boolean result = segment.createNewFile();
-            E.checkState(result, "Fail to create segment");
+            E.checkState(result, "Failed to create segment '%s'",
+                         segment.getAbsolutePath());
         }
         return new RandomAccessFile(segment, Constants.FILE_MODE_WRITE);
     }
 
     private int currentSegmentRemain() throws IOException {
-        long remain = this.segmentMaxSize -
+        long remain = this.maxSegmentSize -
                       this.currentSegment.getFilePointer();
         return (int) remain;
     }

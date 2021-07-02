@@ -32,10 +32,10 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
+import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.seqfile.ValueFileInput;
 import com.baidu.hugegraph.computer.core.store.seqfile.ValueFileOutput;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
@@ -440,14 +440,16 @@ public class ValueFileTest {
                 result = input1.compare(23, 12, input2, 23, 5);
                 Assert.assertGt(0, result);
 
-                UnsafeBytesInput input = new UnsafeBytesInput(new byte[10]);
-                Assert.assertThrows(NotSupportException.class, () -> {
-                    input1.compare(0, 2, input, 0, 4);
-                }, e -> {
-                    Assert.assertContains("must be compare with " +
-                                          "ValueFileInput",
-                                          e.getMessage());
-                });
+                // Compare with different class
+                UnsafeBytesOutput output = new UnsafeBytesOutput(20);
+                output.writeBytes("banana");
+                UnsafeBytesInput input = new UnsafeBytesInput(output.buffer());
+
+                result = input1.compare(0, 2, input, 0, 4);
+                Assert.assertLt(0, result);
+
+                result = input1.compare(1, 5, input, 0, 4);
+                Assert.assertGt(0, result);
             }
         } finally {
             FileUtils.deleteQuietly(dir);

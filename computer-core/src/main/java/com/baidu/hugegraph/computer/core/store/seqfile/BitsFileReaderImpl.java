@@ -29,7 +29,6 @@ public class BitsFileReaderImpl implements BitsFileReader {
 
     private final ValueFileInput input;
     private boolean closed;
-
     private long byteBuffer;
     private int cursor;
 
@@ -52,11 +51,7 @@ public class BitsFileReaderImpl implements BitsFileReader {
             this.cursor = 0;
         }
 
-        boolean result = ((this.byteBuffer & 1) == 1);
-        this.byteBuffer >>= 1;
-        this.cursor++;
-
-        return result;
+        return (this.byteBuffer >> this.cursor++ & 1) == 1;
     }
 
     @Override

@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.E;
 
@@ -107,17 +106,5 @@ public class BufferedFileInput extends AbstractBufferedFileInput {
         BufferedFileInput input = new BufferedFileInput(new File(path));
         input.seek(this.position());
         return input;
-    }
-
-    @Override
-    public int compare(long offset, long length, RandomAccessInput other,
-                       long otherOffset, long otherLength) throws IOException {
-        assert other != null;
-        if (other.getClass() != BufferedFileInput.class) {
-            throw new NotSupportException("BufferedFileInput must be compare " +
-                                          "with BufferedFileInput");
-        }
-
-        return super.compare(offset, length, other, otherOffset, otherLength);
     }
 }

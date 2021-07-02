@@ -25,11 +25,19 @@ import java.io.IOException;
 public interface BitsFileWriter extends Closeable {
 
     /**
-     * Use 1 long store 64 booleans
-     * Write from low to high
+     * Write 1 boolean to file, file is a directory.
+     * Use 1 long store 64 booleans, write from low to high.
+     * @param value boolean data
+     * @throws IOException
      */
     void writeBoolean(boolean value) throws IOException;
 
+    /**
+     * Write 1 long to buffer when invoke writeBoolean 64 times.
+     * This method will write the buffer to the file, but the part of written
+     * not enough 64 times will not be written to the file.
+     * @throws IOException
+     */
     void flush() throws IOException;
 
     void close() throws IOException;

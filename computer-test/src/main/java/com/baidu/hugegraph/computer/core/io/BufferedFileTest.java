@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.exception.NotSupportException;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
@@ -668,10 +667,9 @@ public class BufferedFileTest {
             output.writeBytes("banana");
             RandomAccessInput input = EntriesUtil.inputFromOutput(output);
 
-            Assert.assertThrows(NotSupportException.class, () -> {
-                input1.compare(0, input1.available(), input, 0,
-                               input.available());
-            });
+            int result = input1.compare(0, input1.available(), input, 0,
+                                        input.available());
+            Assert.assertGt(0, result);
         } finally {
             FileUtils.deleteQuietly(file1);
         }
