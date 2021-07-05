@@ -165,8 +165,6 @@ public class MockMasterComputation extends DefaultMasterComputation {
 
     @Override
     public boolean compute(MasterComputationContext context) {
-        this.assertStat(context);
-
         if (context.superstep() == 0) {
             this.assertStep0Aggregators(context);
             this.updateStep0Aggregators(context);
