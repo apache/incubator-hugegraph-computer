@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.compute.input;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 
 import javax.annotation.Nonnull;
@@ -249,5 +250,33 @@ public class EdgesInput {
         } catch (IOException e) {
             throw new ComputerException("Read edges failed", e);
         }
+    }
+}
+
+class EmptyEdges implements Edges {
+
+    private static final EmptyEdges INSTANCE = new EmptyEdges();
+
+    private EmptyEdges() {
+        // pass
+    }
+
+    public static EmptyEdges instance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public void add(Edge edge) {
+        throw new ComputerException("Can't add edge '{}'", edge);
+    }
+
+    @Override
+    public Iterator<Edge> iterator() {
+        return Collections.emptyIterator();
     }
 }

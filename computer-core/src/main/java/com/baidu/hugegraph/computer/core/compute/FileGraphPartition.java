@@ -62,6 +62,8 @@ public class FileGraphPartition<M extends Value<M>> {
     private final File vertexFile;
     private final File edgeFile;
 
+    private final Value<?> result;
+
     private File preStatusFile;
     private File curStatusFile;
     private File preValueFile;
@@ -77,7 +79,6 @@ public class FileGraphPartition<M extends Value<M>> {
     private VertexInput vertexInput;
     private EdgesInput edgesInput;
     private MessageInput<M> messageInput;
-    private final Value<?> result;
 
     public FileGraphPartition(ComputerContext context, Managers managers,
                        int partition) {
@@ -124,8 +125,7 @@ public class FileGraphPartition<M extends Value<M>> {
                                  this.edgeCount);
     }
 
-    // Package access
-    PartitionStat compute0(ComputationContext context,
+    protected PartitionStat compute0(ComputationContext context,
                            Computation<M> computation) {
         long activeVertexCount = 0L;
         this.beforeCompute(0);
@@ -147,8 +147,7 @@ public class FileGraphPartition<M extends Value<M>> {
                                  this.vertexCount - activeVertexCount, 0L, 0L);
     }
 
-    // Package access
-    PartitionStat compute(ComputationContext context,
+    protected PartitionStat compute(ComputationContext context,
                           Computation<M> computation,
                           int superstep) {
         this.beforeCompute(superstep);
@@ -223,6 +222,11 @@ public class FileGraphPartition<M extends Value<M>> {
                                  this.edgeCount);
     }
 
+    /**
+     * Put the messages sent at previous superstep from MessageRecvManager to
+     * this partition. The messages is null if no messages sent to this
+     * partition at previous superstep.
+     */
     public void messages(PeekableIterator<KvEntry> messages) {
         this.messageInput = new MessageInput<>(this.context, messages);
     }

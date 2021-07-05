@@ -17,39 +17,26 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.compute.input;
+package com.baidu.hugegraph.computer.core.receiver;
 
-import java.util.Collections;
-import java.util.Iterator;
+/**
+ * Received message stat for a partition.
+ */
+public class RecvMessageStat {
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+    private final long messageCount;
+    private final long messageBytes;
 
-public class EmptyEdges implements Edges {
-
-    private static final EmptyEdges INSTANCE = new EmptyEdges();
-
-    private EmptyEdges() {
-        // pass
+    public RecvMessageStat(long messageCount, long messageBytes) {
+        this.messageCount = messageCount;
+        this.messageBytes = messageBytes;
     }
 
-    public static EmptyEdges instance() {
-        return INSTANCE;
+    public long messageCount() {
+        return this.messageCount;
     }
 
-    @Override
-    public int size() {
-        return 0;
-    }
-
-    @Override
-    public void add(Edge edge) {
-        throw new ComputerException("Can't add edge '{}'", edge);
-    }
-
-    @Override
-    public Iterator<Edge> iterator() {
-        return Collections.emptyIterator();
+    public long messageBytes() {
+        return this.messageBytes;
     }
 }

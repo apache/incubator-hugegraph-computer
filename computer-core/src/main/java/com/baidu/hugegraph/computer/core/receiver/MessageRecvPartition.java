@@ -115,8 +115,8 @@ public abstract class MessageRecvPartition {
         return this.totalBytes;
     }
 
-    public RecvStat recvStat() {
-        return new RecvStat(0L, this.totalBytes);
+    public RecvMessageStat recvStat() {
+        return new RecvMessageStat(0L, this.totalBytes);
     }
 
     protected abstract OuterSortFlusher outerSortFlusher();

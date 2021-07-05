@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
-import com.baidu.hugegraph.computer.core.receiver.RecvStat;
+import com.baidu.hugegraph.computer.core.receiver.RecvMessageStat;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -83,7 +83,8 @@ public class ComputeManager<M extends Value<M>> {
     }
 
     /**
-     * Get compute-messages from MessageRecvManager. Be called before
+     * Get compute-messages from MessageRecvManager, then put message to
+     * corresponding partition. Be called before
      * {@link MessageRecvManager#beforeSuperstep} is called.
      */
     public void takeComputeMessages() {
@@ -117,7 +118,7 @@ public class ComputeManager<M extends Value<M>> {
         }
         this.sendManager.finishSend(MessageType.MSG);
         // After compute and send finish signal.
-        Map<Integer, RecvStat> recvStats = this.recvManager.recvStats();
+        Map<Integer, RecvMessageStat> recvStats = this.recvManager.recvStats();
         for (Map.Entry<Integer, PartitionStat> entry :
                                                partitionStats.entrySet()) {
             PartitionStat partitionStat = entry.getValue();

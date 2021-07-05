@@ -218,7 +218,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         return partitions.iterators();
     }
 
-    public Map<Integer, RecvStat> recvStats() {
+    public Map<Integer, RecvMessageStat> recvStats() {
         this.waitReceivedAllMessages();
         E.checkState(this.messagePartitions != null,
                      "The messagePartitions can't be null");

@@ -40,12 +40,12 @@ public class MockComputation implements Computation<DoubleValue> {
 
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
-
+        vertex.value(new DoubleValue(0.5D));
     }
 
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<DoubleValue> messages) {
-
+        // pass
     }
 }

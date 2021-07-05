@@ -39,7 +39,7 @@ public class LogOutput implements ComputerOutput {
     @Override
     public void init(Config config, int partition) {
         this.partition = partition;
-        LOG.info("begin output partition {}", this.partition);
+        LOG.info("Start write back partition {}", this.partition);
     }
 
     @Override
@@ -51,6 +51,6 @@ public class LogOutput implements ComputerOutput {
 
     @Override
     public void close() {
-        LOG.info("close output partition {}", partition);
+        LOG.info("End write back partition {}", this.partition);
     }
 }

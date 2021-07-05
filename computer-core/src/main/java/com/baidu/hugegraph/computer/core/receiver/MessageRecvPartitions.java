@@ -83,8 +83,8 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         return entries;
     }
 
-    public Map<Integer, RecvStat> recvStats() {
-        Map<Integer, RecvStat> entries = new HashMap<>();
+    public Map<Integer, RecvMessageStat> recvStats() {
+        Map<Integer, RecvMessageStat> entries = new HashMap<>();
         for (Map.Entry<Integer, P> entry : this.partitions.entrySet()) {
             entries.put(entry.getKey(), entry.getValue().recvStat());
         }

@@ -51,11 +51,11 @@ public class MessageInput<T extends Value<T>> {
                      ComputerOptions.ALGORITHM_MESSAGE_CLASS);
     }
 
-    public  Iterator<T> iterator(ReusablePointer vid) {
+    public Iterator<T> iterator(ReusablePointer vidPointer) {
         while (this.messages.hasNext()) {
             KvEntry entry = this.messages.peek();
             Pointer key = entry.key();
-            int status = vid.compareTo(key);
+            int status = vidPointer.compareTo(key);
             if (status < 0) {
                 return Collections.emptyIterator();
             } else if (status == 0) {
@@ -65,48 +65,55 @@ public class MessageInput<T extends Value<T>> {
             }
         }
 
-        return new Iterator<T>() {
+        return new MessageIterator(vidPointer);
+    }
 
-            // It indicates whether the value can be returned to client.
-            boolean valueValid = false;
+    private class MessageIterator implements Iterator<T> {
 
-            @Override
-            public boolean hasNext() {
-                if (this.valueValid) {
-                    return true;
-                }
-                if (MessageInput.this.messages.hasNext()) {
-                    KvEntry entry = MessageInput.this.messages.peek();
-                    Pointer key = entry.key();
-                    int status = vid.compareTo(key);
-                    if (status == 0) {
-                        MessageInput.this.messages.next();
-                        this.valueValid = true;
-                        try {
-                            BytesInput in = IOFactory.createBytesInput(
-                                            entry.value().bytes());
-                            MessageInput.this.value.read(in);
-                        } catch (IOException e) {
-                            throw new ComputerException("Can't read value", e);
-                        }
-                        return true;
-                    } else {
-                        return false;
+        // It indicates whether the value can be returned to client.
+        boolean valueValid = false;
+        private ReusablePointer vidPointer;
+
+        private MessageIterator(ReusablePointer vidPointer) {
+            this.vidPointer = vidPointer;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (this.valueValid) {
+                return true;
+            }
+            if (MessageInput.this.messages.hasNext()) {
+                KvEntry entry = MessageInput.this.messages.peek();
+                Pointer key = entry.key();
+                int status = this.vidPointer.compareTo(key);
+                if (status == 0) {
+                    MessageInput.this.messages.next();
+                    this.valueValid = true;
+                    try {
+                        BytesInput in = IOFactory.createBytesInput(
+                                        entry.value().bytes());
+                        MessageInput.this.value.read(in);
+                    } catch (IOException e) {
+                        throw new ComputerException("Can't read value", e);
                     }
+                    return true;
                 } else {
                     return false;
                 }
+            } else {
+                return false;
             }
+        }
 
-            @Override
-            public T next() {
-                if (this.valueValid) {
-                    this.valueValid = false;
-                    return MessageInput.this.value;
-                } else {
-                    throw new NoSuchElementException();
-                }
+        @Override
+        public T next() {
+            if (this.valueValid) {
+                this.valueValid = false;
+                return MessageInput.this.value;
+            } else {
+                throw new NoSuchElementException();
             }
-        };
+        }
     }
 }

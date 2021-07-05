@@ -75,7 +75,8 @@ public class VertexInput {
             this.vertex.id(StreamGraphInput.readId(this.idPointer.input()));
             this.vertex.properties(this.properties);
         } catch (IOException e) {
-            throw new ComputerException("Can't read from input", e);
+            throw new ComputerException("Can't read vertex from input '%s'",
+                                        e, this.vertexFile.getAbsolutePath());
         }
         return this.vertex;
     }

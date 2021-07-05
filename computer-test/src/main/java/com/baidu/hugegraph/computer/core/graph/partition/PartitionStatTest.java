@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.receiver.RecvStat;
+import com.baidu.hugegraph.computer.core.receiver.RecvMessageStat;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -65,13 +65,13 @@ public class PartitionStatTest {
         Assert.assertEquals(0L, stat1.messageCount());
         Assert.assertEquals(0L, stat1.messageBytes());
 
-        RecvStat recvStat = new RecvStat(100L, 400L);
-        stat1.merge(recvStat);
+        RecvMessageStat recvMessageStat = new RecvMessageStat(100L, 400L);
+        stat1.merge(recvMessageStat);
         Assert.assertEquals(1L, stat1.vertexCount());
         Assert.assertEquals(2L, stat1.edgeCount());
         Assert.assertEquals(100L, stat1.messageCount());
         Assert.assertEquals(400L, stat1.messageBytes());
-        stat1.merge(recvStat);
+        stat1.merge(recvMessageStat);
         Assert.assertEquals(1L, stat1.vertexCount());
         Assert.assertEquals(2L, stat1.edgeCount());
         Assert.assertEquals(200L, stat1.messageCount());
