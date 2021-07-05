@@ -17,21 +17,19 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.seqfile;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.Closeable;
+import java.io.IOException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    EntryOutputTest.class,
-    PointerTest.class,
-    EntriesUtilTest.class,
-    FileManagerTest.class,
-    ValueFileTest.class,
-    BitFileTest.class
-})
-public class StoreTestSuite {
+public interface BitsFileReader extends Closeable {
+
+    /**
+     * Read 1 boolean from file, file is a directory.
+     * Use 1 long store 64 booleans, read from low to high.
+     * @return boolean data
+     */
+    boolean readBoolean() throws IOException;
+
+    void close() throws IOException;
 }

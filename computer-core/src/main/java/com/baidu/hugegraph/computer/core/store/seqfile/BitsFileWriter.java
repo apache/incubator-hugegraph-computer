@@ -17,21 +17,28 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store;
+package com.baidu.hugegraph.computer.core.store.seqfile;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import java.io.Closeable;
+import java.io.IOException;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    HgkvDirTest.class,
-    HgkvFileTest.class,
-    EntryOutputTest.class,
-    PointerTest.class,
-    EntriesUtilTest.class,
-    FileManagerTest.class,
-    ValueFileTest.class,
-    BitFileTest.class
-})
-public class StoreTestSuite {
+public interface BitsFileWriter extends Closeable {
+
+    /**
+     * Write 1 boolean to file, file is a directory.
+     * Use 1 long store 64 booleans, write from low to high.
+     * @param value boolean data
+     * @throws IOException
+     */
+    void writeBoolean(boolean value) throws IOException;
+
+    /**
+     * Write 1 long to buffer when invoke writeBoolean 64 times.
+     * This method will write the buffer to the file, but the part of written
+     * not enough 64 times will not be written to the file.
+     * @throws IOException
+     */
+    void flush() throws IOException;
+
+    void close() throws IOException;
 }

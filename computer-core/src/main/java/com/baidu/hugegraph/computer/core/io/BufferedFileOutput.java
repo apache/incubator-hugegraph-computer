@@ -32,11 +32,10 @@ import com.baidu.hugegraph.util.E;
  * buffer is full. The second is unsafe data output.
  * This class is not thread safe.
  */
-public class BufferedFileOutput extends UnsafeBytesOutput {
+public class BufferedFileOutput extends AbstractBufferedFileOutput {
 
     private final int bufferCapacity;
     private final RandomAccessFile file;
-    private long fileOffset;
 
     public BufferedFileOutput(File file) throws IOException {
         this(new RandomAccessFile(file, Constants.FILE_MODE_WRITE),
@@ -49,12 +48,6 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
                         "The parameter bufferSize must be >= 8");
         this.bufferCapacity = bufferCapacity;
         this.file = file;
-        this.fileOffset = 0L;
-    }
-
-    @Override
-    public void write(byte[] b) throws IOException {
-        this.write(b, 0, b.length);
     }
 
     @Override
@@ -74,11 +67,6 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
     }
 
     @Override
-    public long position() {
-        return this.fileOffset + super.position();
-    }
-
-    @Override
     public void seek(long position) throws IOException {
         if (this.fileOffset <= position && position <= this.position()) {
             super.seek(position - this.fileOffset);
@@ -90,70 +78,13 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
     }
 
     @Override
-    public long skip(long bytesToSkip) throws IOException {
-        E.checkArgument(bytesToSkip >= 0,
-                        "The parameter bytesToSkip must be >= 0, but got %s",
-                        bytesToSkip);
-        long positionBeforeSkip = this.fileOffset + super.position();
-        if (bytesToSkip <= this.bufferAvailable()) {
-            super.skip(bytesToSkip);
-            return positionBeforeSkip;
-        }
-
-        this.flushBuffer();
-        if (bytesToSkip <= this.bufferCapacity) {
-            super.skip(bytesToSkip);
-        } else {
-            this.fileOffset += bytesToSkip;
-            this.file.seek(this.fileOffset);
-        }
-        return positionBeforeSkip;
-    }
-
-    @Override
-    public void writeFixedInt(long position, int v) throws IOException {
-        // The write position is in the buffer
-        if (this.fileOffset <= position &&
-            position <= this.position() - Constants.INT_LEN) {
-            super.writeFixedInt(position - this.fileOffset, v);
+    protected void flushBuffer() throws IOException {
+        int bufferSize = super.bufferSize();
+        if (bufferSize == 0) {
             return;
         }
-        long oldPosition = this.position();
-        this.seek(position);
-        super.writeInt(v);
-        this.seek(oldPosition);
-    }
-
-    @Override
-    protected void require(int size) throws IOException {
-        E.checkArgument(size <= this.bufferCapacity,
-                        "The parameter size must be <= %s",
-                        this.bufferCapacity);
-        if (size <= this.bufferAvailable()) {
-            return;
-        }
-        this.flushBuffer();
-        /*
-         * The buffer capacity must be >= 8, write primitive data like int,
-         * long, float, double can be write to buffer after flush buffer.
-         * Only write bytes may exceed the limit, and write bytes using
-         * write(byte[] b) is overrode in this class. In conclusion, the
-         * required size can be supplied after flushBuffer.
-         */
-        if (size > this.bufferAvailable()) {
-            throw new IOException(String.format(
-                      "Write %s bytes to position %s overflows buffer %s",
-                      size, this.position(), this.bufferCapacity));
-        }
-    }
-
-    private void flushBuffer() throws IOException {
-        int bufferPosition = (int) super.position();
-        if (bufferPosition == 0) {
-            return;
-        }
-        this.file.write(this.buffer(), 0, bufferPosition);
-        this.fileOffset += bufferPosition;
+        this.file.write(this.buffer(), 0, bufferSize);
+        this.fileOffset += bufferSize;
         super.seek(0);
     }
 
@@ -161,9 +92,5 @@ public class BufferedFileOutput extends UnsafeBytesOutput {
     public void close() throws IOException {
         this.flushBuffer();
         this.file.close();
-    }
-
-    private final int bufferAvailable() {
-        return this.bufferCapacity - (int) super.position();
     }
 }
