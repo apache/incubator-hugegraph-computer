@@ -36,16 +36,17 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
+import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
@@ -143,6 +144,47 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                         ByteBuffer.wrap(StringEncoding.encode("test3")));
             client.finishSession();
         }
+    }
+
+    @Test
+    public void testDataUniformity() throws IOException {
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        byte[] sourceBytes1 = StringEncoding.encode("test data message");
+        byte[] sourceBytes2 = StringEncoding.encode("test data edge");
+        byte[] sourceBytes3 = StringEncoding.encode("test data vertex");
+
+        Mockito.doAnswer(invocationOnMock -> {
+            MessageType type = invocationOnMock.getArgument(0);
+            ManagedBuffer buffer = invocationOnMock.getArgument(2);
+            byte[] sourceBytes = null;
+            switch (type) {
+                case MSG:
+                    sourceBytes = sourceBytes1;
+                    break;
+                case EDGE:
+                    sourceBytes = sourceBytes2;
+                    break;
+                case VERTEX:
+                    sourceBytes = sourceBytes3;
+                    break;
+                default:
+            }
+            byte[] bytes = buffer.copyToByteArray();
+            Assert.assertArrayEquals(sourceBytes, bytes);
+            Assert.assertNotSame(sourceBytes, bytes);
+
+            byte[] bytes2 = buffer.copyToByteArray();
+            Assert.assertArrayEquals(sourceBytes, bytes2);
+            Assert.assertNotSame(sourceBytes, bytes2);
+            return null;
+        }).when(serverHandler).handle(Mockito.any(), Mockito.eq(1),
+                                      Mockito.any());
+
+        client.startSession();
+        client.send(MessageType.MSG, 1, ByteBuffer.wrap(sourceBytes1));
+        client.send(MessageType.EDGE, 1, ByteBuffer.wrap(sourceBytes2));
+        client.send(MessageType.VERTEX, 1, ByteBuffer.wrap(sourceBytes3));
+        client.finishSession();
     }
 
     @Test
