@@ -66,8 +66,8 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.WatcherException;
@@ -81,9 +81,9 @@ public class KubernetesDriver implements ComputerDriver {
 
     private final HugeConfig conf;
     private final String namespace;
-    private final KubernetesClient kubeClient;
-    private final MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
-            Resource<HugeGraphComputerJob>> operation;
+    private final NamespacedKubernetesClient kubeClient;
+    private final MixedOperation<HugeGraphComputerJob,
+            HugeGraphComputerJobList, Resource<HugeGraphComputerJob>> operation;
     private volatile Watch watch;
     private final MutableBoolean watchActive;
     private final Map<String, Pair<CompletableFuture<Void>, JobObserver>> waits;
@@ -94,10 +94,11 @@ public class KubernetesDriver implements ComputerDriver {
         this(conf, createKubeClient(conf));
     }
 
-    public KubernetesDriver(HugeConfig conf, KubernetesClient kubeClient) {
+    public KubernetesDriver(HugeConfig conf,
+                            NamespacedKubernetesClient kubeClient) {
         this.conf = conf;
         this.namespace = this.conf.get(KubeDriverOptions.NAMESPACE);
-        this.kubeClient = kubeClient;
+        this.kubeClient = kubeClient.inNamespace(this.namespace);
         this.operation = this.kubeClient.customResources(
                          HugeGraphComputerJob.class,
                          HugeGraphComputerJobList.class);
@@ -108,7 +109,8 @@ public class KubernetesDriver implements ComputerDriver {
         this.defaultConf = this.defaultComputerConf();
     }
 
-    private static KubernetesClient createKubeClient(HugeConfig conf) {
+    private static NamespacedKubernetesClient createKubeClient(
+                                              HugeConfig conf) {
         String kubeConfig = conf.get(KubeDriverOptions.KUBE_CONFIG);
         Config config;
         try {
@@ -149,9 +151,8 @@ public class KubernetesDriver implements ComputerDriver {
             builder.append(" -p ").append(password);
             builder.append(" -j ").append(tempFile.getAbsolutePath());
             builder.append(" -i ").append(imageUrl);
-
             String command = builder.toString();
-            LOG.info("command: {}", command);
+
             Process process = Runtime.getRuntime().exec(command);
             int code = process.waitFor();
             if (code != 0) {
@@ -194,14 +195,13 @@ public class KubernetesDriver implements ComputerDriver {
             .withComputerConf(computerConf);
         computerJob.setSpec(spec);
 
-        this.operation.inNamespace(this.namespace).createOrReplace(computerJob);
+        this.operation.createOrReplace(computerJob);
         return jobId;
     }
 
     @Override
     public void cancelJob(String jobId, Map<String, String> params) {
-        Boolean delete = this.operation.inNamespace(this.namespace)
-                                       .withName(KubeUtil.crName(jobId))
+        Boolean delete = this.operation.withName(KubeUtil.crName(jobId))
                                        .delete();
         E.checkState(delete, "Failed to cancel Job, jobId: ", jobId);
     }
@@ -240,14 +240,14 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     private Watch initWatch() {
-        return this.operation.inNamespace(this.namespace)
-                             .watch(new Watcher<HugeGraphComputerJob>() {
+        return this.operation.watch(new Watcher<HugeGraphComputerJob>() {
             @Override
             public void eventReceived(Action action,
                                       HugeGraphComputerJob computerJob) {
                 if (computerJob == null) {
                     return;
                 }
+
                 String jobId = computerJob.getSpec().getJobId();
                 if (StringUtils.isBlank(jobId)) {
                     return;
@@ -275,7 +275,7 @@ public class KubernetesDriver implements ComputerDriver {
 
             @Override
             public void onClose(WatcherException cause) {
-                if (cause.isShouldRetry()) {
+                if (cause.isHttpGone()) {
                     return;
                 }
 
@@ -309,10 +309,9 @@ public class KubernetesDriver implements ComputerDriver {
 
     @Override
     public JobState jobState(String jobId, Map<String, String> params) {
-        HugeGraphComputerJob computerJob = this.operation
-                .inNamespace(this.namespace)
-                .withName(KubeUtil.crName(jobId))
-                .get();
+        String crName = KubeUtil.crName(jobId);
+        HugeGraphComputerJob computerJob = this.operation.withName(crName)
+                                                         .get();
         if (computerJob == null) {
             return null;
         }
@@ -331,7 +330,6 @@ public class KubernetesDriver implements ComputerDriver {
         String crName = KubeUtil.crName(jobId);
         String eventName = KubeUtil.failedEventName(crName);
         Event event = this.kubeClient.v1().events()
-                                     .inNamespace(this.namespace)
                                      .withName(eventName)
                                      .get();
         if (event == null) {
@@ -396,6 +394,26 @@ public class KubernetesDriver implements ComputerDriver {
         return computerConf;
     }
 
+    private Map<String, String> defaultComputerConf() {
+        Map<String, String> defaultConf = new HashMap<>();
+
+        Collection<TypedOption<?, ?>> options = ComputerOptions.instance()
+                                                               .options()
+                                                               .values();
+        for (TypedOption<?, ?> typedOption : options) {
+            Object value = this.conf.get(typedOption);
+            String key = typedOption.name();
+            if (value != null) {
+                defaultConf.put(key, String.valueOf(value));
+            } else {
+                boolean required = ComputerOptions.REQUIRED_OPTIONS
+                        .contains(key);
+                E.checkArgument(!required, "The %s option can't be null", key);
+            }
+        }
+        return Collections.unmodifiableMap(defaultConf);
+    }
+
     private ComputerJobSpec computerJobSpec(Map<String, Object> defaultSpec,
                                             Map<String, String> params) {
         Map<String, Object> specMap = new HashMap<>(defaultSpec);
@@ -408,26 +426,6 @@ public class KubernetesDriver implements ComputerDriver {
             }
         });
         return HugeGraphComputerJob.mapToSpec(specMap);
-    }
-
-    private Map<String, String> defaultComputerConf() {
-        Map<String, String> defaultConf = new HashMap<>();
-
-        Collection<TypedOption<?, ?>> options = KubeDriverOptions.instance()
-                                                                 .options()
-                                                                 .values();
-        for (TypedOption<?, ?> typedOption : options) {
-            Object value = this.conf.get(typedOption);
-            String key = typedOption.name();
-            if (value != null) {
-                defaultConf.put(key, String.valueOf(value));
-            } else {
-                boolean required = ComputerOptions.REQUIRED_OPTIONS
-                                                  .contains(key);
-                E.checkArgument(!required, "The %s option can't be null", key);
-            }
-        }
-        return Collections.unmodifiableMap(defaultConf);
     }
 
     private Map<String, Object> defaultSpec() {

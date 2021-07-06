@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -48,6 +49,7 @@ import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -62,14 +64,32 @@ import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 
 public class ComputerJobDeployer {
 
     private static final Logger LOG = Log.logger(ComputerJobDeployer.class);
 
-    private final KubernetesClient kubeClient;
+    private final NamespacedKubernetesClient kubeClient;
 
-    public ComputerJobDeployer(KubernetesClient kubeClient) {
+    // NO BACKOFF
+    private static final int JOB_BACKOFF_LIMIT = 0;
+    private static final String JOB_RESTART_POLICY = "Never";
+
+    private static final String RANDOM_PORT = "0";
+    private static final String PROTOCOL = "TCP";
+    private static final String TRANSPORT_PORT_NAME = "transport-port";
+    private static final String RPC_PORT_NAME = "rpc-port";
+    private static final int DEFAULT_TRANSPORT_PORT = 8099;
+    private static final int DEFAULT_RPC_PORT = 8090;
+
+    private static final String CONFIG_MAP_VOLUME = "config-map-volume";
+
+    private static final String POD_IP_KEY = "status.podIP";
+    private static final String POD_NAMESPACE_KEY = "metadata.namespace";
+    private static final String POD_NAME_KEY = "metadata.name";
+
+    public ComputerJobDeployer(NamespacedKubernetesClient kubeClient) {
         this.kubeClient = kubeClient;
     }
 
@@ -92,51 +112,46 @@ public class ComputerJobDeployer {
                                     ComputerJobComponent observed) {
         ConfigMap desiredConfigMap = desired.configMap();
         ConfigMap observedConfigMap = observed.configMap();
+
+        final KubernetesClient client;
+        if (!Objects.equals(this.kubeClient.getNamespace(), namespace)) {
+            client = this.kubeClient.inNamespace(namespace);
+        } else {
+            client = this.kubeClient;
+        }
+
         if (desiredConfigMap == null && observedConfigMap != null) {
-            this.kubeClient.configMaps()
-                           .inNamespace(namespace)
-                           .delete(observedConfigMap);
+            client.configMaps().delete(observedConfigMap);
         } else if (desiredConfigMap != null && observedConfigMap == null) {
-            KubeUtil.ignoreExists(() -> {
-                return this.kubeClient.configMaps()
-                                      .inNamespace(namespace)
-                                      .create(desiredConfigMap);
-            });
+            KubeUtil.ignoreExists(() -> client.configMaps()
+                                              .create(desiredConfigMap));
         }
         if (desiredConfigMap != null && observedConfigMap != null) {
-            LOG.info("ConfigMap already exists, no action");
+            LOG.debug("ConfigMap already exists, no action");
         }
 
         Job desiredMasterJob = desired.masterJob();
         Job observedMasterJob = observed.masterJob();
         if (desiredMasterJob == null && observedMasterJob != null) {
-            this.kubeClient.batch().v1().jobs().inNamespace(namespace)
-                           .delete(observedMasterJob);
+            client.batch().v1().jobs().delete(observedMasterJob);
         } else if (desiredMasterJob != null && observedMasterJob == null) {
-            KubeUtil.ignoreExists(() -> {
-                return this.kubeClient.batch().v1().jobs()
-                                      .inNamespace(namespace)
-                                      .create(desiredMasterJob);
-            });
+            KubeUtil.ignoreExists(() -> client.batch().v1().jobs()
+                                              .create(desiredMasterJob));
         }
         if (desiredMasterJob != null && observedMasterJob != null) {
-            LOG.info("MasterJob already exists, no action");
+            LOG.debug("MasterJob already exists, no action");
         }
 
         Job desiredWorkerJob = desired.workerJob();
         Job observedWorkerJob = observed.workerJob();
         if (desiredWorkerJob == null && observedWorkerJob != null) {
-            this.kubeClient.batch().v1().jobs().inNamespace(namespace)
-                           .delete(observedWorkerJob);
+            client.batch().v1().jobs().delete(observedWorkerJob);
         } else if (desiredWorkerJob != null && observedWorkerJob == null) {
-            KubeUtil.ignoreExists(() -> {
-                return this.kubeClient.batch().v1().jobs()
-                                      .inNamespace(namespace)
-                                      .create(desiredWorkerJob);
-            });
+            KubeUtil.ignoreExists(() -> client.batch().v1().jobs()
+                                              .create(desiredWorkerJob));
         }
         if (desiredWorkerJob != null && observedWorkerJob != null) {
-            LOG.info("WorkerJob already exists, no action");
+            LOG.debug("WorkerJob already exists, no action");
         }
     }
 
@@ -153,33 +168,31 @@ public class ComputerJobDeployer {
         config.put(ComputerOptions.TRANSPORT_SERVER_HOST.name(), ip);
         config.put(ComputerOptions.RPC_SERVER_HOST.name(), ip);
 
-
-        String randomPort = "0";
         String transportPort = config.get(
                                ComputerOptions.TRANSPORT_SERVER_PORT.name());
         if (StringUtils.isBlank(transportPort) ||
-            randomPort.equals(transportPort)) {
-            transportPort = String.valueOf(Constants.DEFAULT_TRANSPORT_PORT);
+            RANDOM_PORT.equals(transportPort)) {
+            transportPort = String.valueOf(DEFAULT_TRANSPORT_PORT);
             config.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(),
                        transportPort);
         }
 
         String rpcPort = config.get(
                          ComputerOptions.RPC_SERVER_PORT.name());
-        if (StringUtils.isBlank(rpcPort) || randomPort.equals(rpcPort)) {
-            rpcPort = String.valueOf(Constants.DEFAULT_RPC_PORT);
+        if (StringUtils.isBlank(rpcPort) || RANDOM_PORT.equals(rpcPort)) {
+            rpcPort = String.valueOf(DEFAULT_RPC_PORT);
             config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
         }
 
         ContainerPort transportContainerPort = new ContainerPortBuilder()
-                .withName("transport")
+                .withName(TRANSPORT_PORT_NAME)
                 .withContainerPort(Integer.valueOf(transportPort))
-                .withProtocol("TCP")
+                .withProtocol(PROTOCOL)
                 .build();
         ContainerPort rpcContainerPort = new ContainerPortBuilder()
-                .withName("rpc")
+                .withName(RPC_PORT_NAME)
                 .withContainerPort(Integer.valueOf(rpcPort))
-                .withProtocol("TCP")
+                .withProtocol(PROTOCOL)
                 .build();
 
         return Sets.newHashSet(transportContainerPort, rpcContainerPort);
@@ -221,7 +234,7 @@ public class ComputerJobDeployer {
                                                 command, args);
         List<Container> containers = Lists.newArrayList(container);
 
-        int instances = Constants.MASTER_INSTANCES;
+        final int instances = Constants.MASTER_INSTANCES;
         return this.getJob(crName, metadata, spec, instances, containers);
     }
 
@@ -244,7 +257,7 @@ public class ComputerJobDeployer {
                                                 command, args);
         List<Container> containers = Lists.newArrayList(container);
 
-        int instances = spec.getWorkerInstances();
+        final int instances = spec.getWorkerInstances();
         return this.getJob(crName, metadata, spec, instances, containers);
     }
 
@@ -257,7 +270,7 @@ public class ComputerJobDeployer {
         PodSpec podSpec = new PodSpecBuilder()
                 .withContainers(containers)
                 .withImagePullSecrets(spec.getPullSecrets())
-                .withRestartPolicy(Constants.JOB_RESTART_POLICY)
+                .withRestartPolicy(JOB_RESTART_POLICY)
                 .withVolumes(configVolume)
                 .build();
 
@@ -265,7 +278,7 @@ public class ComputerJobDeployer {
                                .withNewSpec()
                                .withParallelism(instances)
                                .withCompletions(instances)
-                               .withBackoffLimit(Constants.JOB_BACKOFF_LIMIT)
+                               .withBackoffLimit(JOB_BACKOFF_LIMIT)
                                .withNewTemplate()
                                     .withNewMetadata()
                                         .withLabels(meta.getLabels())
@@ -277,7 +290,7 @@ public class ComputerJobDeployer {
     }
 
     private Container getContainer(String name, ComputerJobSpec spec,
-                                   Collection<ContainerPort> ports,
+                                   Set<ContainerPort> ports,
                                    Collection<String> command,
                                    Collection<String> args) {
         List<EnvVar> envVars = spec.getEnvVars();
@@ -290,7 +303,7 @@ public class ComputerJobDeployer {
                 .withName(Constants.ENV_POD_IP)
                 .withNewValueFrom()
                 .withNewFieldRef()
-                .withFieldPath(Constants.POD_IP_KEY)
+                .withFieldPath(POD_IP_KEY)
                 .endFieldRef()
                 .endValueFrom()
                 .build();
@@ -300,7 +313,7 @@ public class ComputerJobDeployer {
                 .withName(Constants.ENV_POD_NAME)
                 .withNewValueFrom()
                 .withNewFieldRef()
-                .withFieldPath(Constants.POD_NAME_KEY)
+                .withFieldPath(POD_NAME_KEY)
                 .endFieldRef()
                 .endValueFrom()
                 .build();
@@ -310,14 +323,14 @@ public class ComputerJobDeployer {
                 .withName(Constants.ENV_POD_NAMESPACE)
                 .withNewValueFrom()
                 .withNewFieldRef()
-                .withFieldPath(Constants.POD_NAMESPACE_KEY)
+                .withFieldPath(POD_NAMESPACE_KEY)
                 .endFieldRef()
                 .endValueFrom()
                 .build();
         envVars.add(podNamespace);
 
         EnvVar confPath = new EnvVarBuilder()
-                .withName(Constants.ENV_CONFIG_PATH)
+                .withName(Constants.ENV_CONFIG_DIR)
                 .withValue(Constants.CONFIG_PATH)
                 .build();
         envVars.add(confPath);
@@ -345,14 +358,14 @@ public class ComputerJobDeployer {
 
     private VolumeMount getConfigMount() {
         return new VolumeMountBuilder()
-                .withName(Constants.CONFIG_MAP_VOLUME)
+                .withName(CONFIG_MAP_VOLUME)
                 .withMountPath(Constants.CONFIG_PATH)
                 .build();
     }
 
     private Volume getConfigVolume(String configMapName) {
         return new VolumeBuilder()
-                .withName(Constants.CONFIG_MAP_VOLUME)
+                .withName(CONFIG_MAP_VOLUME)
                 .withNewConfigMap()
                     .withName(configMapName)
                 .endConfigMap()
@@ -373,7 +386,9 @@ public class ComputerJobDeployer {
                 .withBlockOwnerDeletion(true)
                 .build();
 
-        Map<String, String> labels = KubeUtil.commonLabels(crName, component);
+        String kind = HasMetadata.getKind(HugeGraphComputerJob.class);
+        Map<String, String> labels = KubeUtil.commonLabels(kind, crName,
+                                                           component);
         return new ObjectMetaBuilder().withNamespace(namespace)
                                       .withName(component)
                                       .addToLabels(labels)

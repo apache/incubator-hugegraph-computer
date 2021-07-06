@@ -17,38 +17,32 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.suite.integrate;
+package com.baidu.hugegraph.computer.k8s;
 
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.config.OptionSpace;
-import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    SenderIntegrateTest.class
+    KubernetesDriverTest.class,
+    OperatorTest.class,
+    MiniKubeTest.class
 })
-public class IntegrateTestSuite {
-
-    private static final Logger LOG = Log.logger(IntegrateTestSuite.class);
+public class K8sTestSuite {
 
     @BeforeClass
     public static void setup() {
-        LOG.info("Setup for IntegrateTestSuite of hugegraph-computer");
-
-        // Don't forget to register options
-        OptionSpace.register("computer",
-                             "com.baidu.hugegraph.computer.core.config." +
-                             "ComputerOptions");
-        OptionSpace.register("computer-rpc",
-                             "com.baidu.hugegraph.config.RpcOptions");
-
-        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                                  "defaultValue", "http://localhost:2579");
+        OptionSpace.register("computer-driver",
+                             "com.baidu.hugegraph.computer.driver.config" +
+                             ".ComputerOptions");
+        OptionSpace.register("computer-k8s-driver",
+                             "com.baidu.hugegraph.computer.k8s.config" +
+                             ".KubeDriverOptions");
+        OptionSpace.register("computer-k8s-spec",
+                             "com.baidu.hugegraph.computer.k8s.config" +
+                             ".KubeSpecOptions");
     }
 }

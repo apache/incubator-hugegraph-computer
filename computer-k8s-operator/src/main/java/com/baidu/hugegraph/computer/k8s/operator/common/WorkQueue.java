@@ -108,7 +108,7 @@ public class WorkQueue<T> {
         }
     }
 
-    public synchronized void shutDown() {
+    public synchronized void shutdown() {
         this.shutdown = true;
         this.notifyAll();
     }

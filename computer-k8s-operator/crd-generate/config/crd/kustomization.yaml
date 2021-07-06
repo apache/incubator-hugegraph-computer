@@ -3,6 +3,7 @@
 # It should be run by config/default
 resources:
 - bases/hugegraph.baidu.com_hugegraphcomputerjobs.yaml
+- bases/hugegraph.baidu.com_hugegraphcomputerjobs.v1beta1.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

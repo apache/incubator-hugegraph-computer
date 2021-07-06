@@ -79,7 +79,7 @@ public class Request {
     }
 
     public int retryIncrGet() {
-        return this.retryTimes.getAndIncrement();
+        return this.retryTimes.incrementAndGet();
     }
 
     @Override

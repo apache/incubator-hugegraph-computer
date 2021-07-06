@@ -6,6 +6,5 @@ ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
 
 WORKDIR /opt/app
 COPY target/hugegraph-computer-operator.jar operator.jar
-EXPOSE 8081
 
-CMD ["java", "-jar", "operator.jar"]
+ENTRYPOINT ["java", "-jar", "operator.jar"]

@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -109,16 +110,16 @@ public class KubeUtil {
         return String.format("%s:%s-%s", repository, algorithmName, version);
     }
 
-    public static String masterJobName(String name) {
-        return name + "-master";
+    public static String masterJobName(String crName) {
+        return crName + "-master";
     }
 
-    public static String workerJobName(String name) {
-        return name + "-worker";
+    public static String workerJobName(String crName) {
+        return crName + "-worker";
     }
 
-    public static String configMapName(String name) {
-        return name + "-configmap";
+    public static String configMapName(String crName) {
+        return crName + "-configmap";
     }
 
     public static String failedEventName(String crName) {
@@ -164,12 +165,25 @@ public class KubeUtil {
         return null;
     }
 
-    public static Map<String, String> commonLabels(String crName,
+    public static Map<String, String> commonLabels(String kind,
+                                                   String crName,
                                                    String component) {
         Map<String, String> labels = new HashMap<>();
-        labels.put("app", crName);
+        labels.put("app", kind);
+        labels.put("resourceName", crName);
         labels.put("component", component);
         return labels;
+    }
+
+    public static String matchKindAndGetCrName(Map<String, String> labels,
+                                               String kind) {
+        String app = labels.get("app");
+        String crName = labels.get("resourceName");
+        if (Objects.equals(kind, app) && StringUtils.isNotBlank(crName)) {
+            return crName;
+        }
+
+        return StringUtils.EMPTY;
     }
 
     public static Event buildEvent(HasMetadata eventRef,
@@ -204,9 +218,9 @@ public class KubeUtil {
      * Convert config key to spec key.
      * eg. "k8s.master_cpu" -> "masterCpu"
      */
-    public static String covertSpecKey(String key) {
-        key = key.substring(Constants.K8S_SPEC_PREFIX.length());
-        Matcher matcher = LINE_PATTERN.matcher(key);
+    public static String covertSpecKey(String configKey) {
+        configKey = configKey.substring(Constants.K8S_SPEC_PREFIX.length());
+        Matcher matcher = LINE_PATTERN.matcher(configKey);
         StringBuffer sb = new StringBuffer();
         while (matcher.find()) {
             matcher.appendReplacement(sb, matcher.group(1).toUpperCase());

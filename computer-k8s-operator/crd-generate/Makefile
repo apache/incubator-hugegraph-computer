@@ -1,6 +1,6 @@
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions=v1beta1"
+CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions={v1,v1beta1}"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -39,12 +39,14 @@ gen-all: gen-code manifests gen-jsonschema ## Generate code containing DeepCopy,
 
 manifests: controller-gen kustomize ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-	$(KUSTOMIZE) build config/crd > ../manifest/hugegraph-computer-crd.yaml
+	#$(KUSTOMIZE) build config/crd > ../manifest/hugegraph-computer-crd.yaml
+	cp config/crd/bases/hugegraph.baidu.com_hugegraphcomputerjobs.yaml ../manifest/hugegraph-computer-crd.v1.yaml
+	cp config/crd/bases/hugegraph.baidu.com_hugegraphcomputerjobs.v1beta1.yaml ../manifest/hugegraph-computer-crd.v1beta1.yaml
 	$(KUSTOMIZE) build config/default > ../manifest/hugegraph-computer-operator.yaml
 	rm -rf config/crd/bases
 
 gen-code: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+	$(CONTROLLER_GEN) object paths="./..."
 
 gen-jsonschema: ## Generate JsonSchema for java
 	go run cmd/generate.go

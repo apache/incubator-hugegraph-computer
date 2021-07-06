@@ -45,11 +45,6 @@ public class JsonUtil {
         }
     }
 
-    public static String toJsonWithClass(Object obj) {
-        E.checkArgumentNotNull(obj, "The obj can't be null");
-        return obj.getClass().getSimpleName() + toJson(obj);
-    }
-
     public static <T> T fromJson(String json, Class<T> clazz) {
         E.checkState(json != null,
                      "Json value can't be null for '%s'",

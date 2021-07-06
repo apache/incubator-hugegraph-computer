@@ -17,9 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.driver.k8s;
-
-import static io.fabric8.kubernetes.client.Config.KUBERNETES_KUBECONFIG_FILE;
+package com.baidu.hugegraph.computer.k8s;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,23 +27,25 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-import org.apache.commons.configuration.MapConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
+import com.baidu.hugegraph.computer.driver.DefaultJobState;
+import com.baidu.hugegraph.computer.driver.JobObserver;
+import com.baidu.hugegraph.computer.driver.JobState;
+import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
+import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
-import com.baidu.hugegraph.computer.k8s.operator.OperatorEntrypoint;
-import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
@@ -55,54 +55,26 @@ import io.fabric8.kubernetes.api.model.NamedClusterBuilder;
 import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.api.model.NamedContextBuilder;
 import io.fabric8.kubernetes.client.Config;
-import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 
-public class KubernetesDriverTest {
+public class KubernetesDriverTest extends AbstractK8sTest {
 
     @Rule
     public KubernetesServer server = new KubernetesServer(true, true);
 
-    private HashMap<String, String> options;
-    private HugeConfig config;
-    private KubernetesDriver driver;
-    private OperatorEntrypoint entrypoint;
-    private String namespace;
-
-    public void updateOptions(String key, Object value) {
-        this.config.clearProperty(key);
-        this.config.addProperty(key, String.valueOf(value));
-    }
-
     @Before
     public void setup() throws IOException {
-        this.namespace = "test";
-
-        this.options = new HashMap<>();
-        this.options.put(ComputerOptions.JOB_ID.name(),
-                         KubeUtil.genJobId("PageRank"));
-        this.options.put(ComputerOptions.JOB_WORKERS_COUNT.name(), "1");
-        this.options.put(ComputerOptions.ALGORITHM_RESULT_CLASS.name(),
-                         LongValue.class.getName());
-        this.options.put(ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
-                         "http://abc:8098");
-        this.options.put(ComputerOptions.HUGEGRAPH_URL.name(),
-                         "http://127.0.0.1:8080");
-        this.options.put(KubeDriverOptions.NAMESPACE.name(),
-                         this.namespace);
-
+        this.initConfig();
+        this.kubeClient = new DefaultKubernetesClient()
+                              .inNamespace(this.namespace);
         Config configuration = this.server.getClient().getConfiguration();
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
         try {
             String absolutePath = tempFile.getAbsolutePath();
-
-            this.options.put(KubeDriverOptions.KUBE_CONFIG.name(),
-                             absolutePath);
-
-            MapConfiguration mapConfig = new MapConfiguration(this.options);
-            this.config = new HugeConfig(mapConfig);
-
+            this.updateOptions(KubeDriverOptions.KUBE_CONFIG.name(),
+                               absolutePath);
             NamedCluster cluster = new NamedClusterBuilder()
                     .withName("kubernetes")
                     .withNewCluster()
@@ -123,32 +95,13 @@ public class KubernetesDriverTest {
                     .withCurrentContext(context.getName())
                     .build();
             KubeConfigUtils.persistKubeConfigIntoFile(config, absolutePath);
-            System.setProperty(KUBERNETES_KUBECONFIG_FILE, absolutePath);
+            System.setProperty(Config.KUBERNETES_KUBECONFIG_FILE, absolutePath);
 
-            this.driver = new KubernetesDriver(this.config);
-
-            new Thread(()-> {
-                System.setProperty(OperatorOptions.PROBE_PORT.name(), "9892");
-                System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
-                                   this.namespace);
-                this.entrypoint = new OperatorEntrypoint();
-                this.entrypoint.start();
-            }).start();
+            this.initKubernetesDriver();
+            this.initOperator();
         } finally {
             FileUtils.deleteQuietly(tempFile);
         }
-    }
-
-    @After
-    public void teardown() throws IOException {
-        if (this.driver != null) {
-            this.driver.close();
-            this.driver = null;
-        }
-
-        this.entrypoint.shutdown();
-
-        this.server.getMockServer().close();
     }
 
     @Test
@@ -213,15 +166,61 @@ public class KubernetesDriverTest {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
         String jobId = this.driver.submitJob("PageRank", params);
-        NamespacedKubernetesClient client = this.server.getClient();
+        HugeGraphComputerJob computerJob = this.operation
+                                               .withName(KubeUtil.crName(jobId))
+                                               .get();
+        Assert.assertNotNull(computerJob);
+        Assert.assertEquals(computerJob.getSpec().getAlgorithmName(),
+                            "PageRank");
+        Assert.assertEquals(computerJob.getSpec().getJobId(), jobId);
     }
 
     @Test
-    public void testCan() {
+    public void testCancelJob() {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
-        String jobId = this.driver.submitJob("PageRank", params);
+        String jobId = this.driver.submitJob("PageRank2", params);
+
+        String crName = KubeUtil.crName(jobId);
+        HugeGraphComputerJob computerJob = this.operation.withName(crName)
+                                                         .get();
+        Assert.assertNotNull(computerJob);
+
+        UnitTestBase.sleep(1000L);
 
         this.driver.cancelJob(jobId, params);
+        HugeGraphComputerJob canceledComputerJob = this.operation
+                                                       .withName(crName)
+                                                       .get();
+        Assert.assertNull(canceledComputerJob);
+    }
+
+    @Test
+    public void testWaitJob() {
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
+        String jobId = this.driver.submitJob("PageRank3", params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            this.driver.waitJob(jobId, params, jobObserver);
+        });
+
+        Mockito.verify(jobObserver, Mockito.timeout(5000L).atLeast(1))
+               .onJobStateChanged(Mockito.any(DefaultJobState.class));
+
+        future.getNow(null);
+    }
+
+    @Test
+    public void testJobState() {
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
+        String jobId = this.driver.submitJob("PageRank4", params);
+
+        JobState jobState = this.driver.jobState(jobId, params);
+        Assert.assertNotNull(jobState);
+        Assert.assertEquals(JobStatus.INITIALIZING, jobState.jobStatus());
     }
 }

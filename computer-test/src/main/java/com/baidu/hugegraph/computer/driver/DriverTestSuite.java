@@ -19,18 +19,18 @@
 
 package com.baidu.hugegraph.computer.driver;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
-import com.baidu.hugegraph.computer.driver.k8s.KubernetesDriverTest;
+import com.baidu.hugegraph.computer.driver.util.JsonUtil;
 import com.baidu.hugegraph.config.OptionSpace;
-
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     ComputerOptionsTest.class,
-    KubernetesDriverTest.class
 })
 public class DriverTestSuite {
 
@@ -39,11 +39,23 @@ public class DriverTestSuite {
         OptionSpace.register("computer-driver",
                              "com.baidu.hugegraph.computer.driver.config" +
                              ".ComputerOptions");
-        OptionSpace.register("computer-k8s-driver",
-                             "com.baidu.hugegraph.computer.k8s.config" +
-                             ".KubeDriverOptions");
-        OptionSpace.register("computer-k8s-spec",
-                             "com.baidu.hugegraph.computer.k8s.config" +
-                             ".KubeSpecOptions");
+    }
+
+    @Test
+    public void jsonTest() {
+        SuperstepStat superstepStat = new SuperstepStat();
+        String json = JsonUtil.toJson(superstepStat);
+        SuperstepStat superstepStat1 = JsonUtil.fromJson(json,
+                                                         SuperstepStat.class);
+        Assert.assertEquals(superstepStat, superstepStat1);
+    }
+
+    @Test
+    public void testJobStatus() {
+        Assert.assertFalse(JobStatus.finished(JobStatus.INITIALIZING));
+        Assert.assertFalse(JobStatus.finished(JobStatus.RUNNING));
+        Assert.assertTrue(JobStatus.finished(JobStatus.FAILED));
+        Assert.assertTrue(JobStatus.finished(JobStatus.SUCCEEDED));
+        Assert.assertTrue(JobStatus.finished(JobStatus.CANCELLED));
     }
 }

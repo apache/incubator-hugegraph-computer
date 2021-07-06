@@ -76,15 +76,23 @@ public class OperatorOptions extends OptionHolder {
                     "The minimum frequency at which watched resources are " +
                     "reconciled.",
                     positiveInt(),
-                    10 * 1000L
+                    10 * 60 * 1000L
             );
 
-    public static final ConfigOption<Integer> WORKER_COUNT =
+    public static final ConfigOption<Integer> RECONCILER_COUNT =
             new ConfigOption<>(
-                    "WORKER_COUNT",
+                    "RECONCILER_COUNT",
                     "The max number of reconciler thread.",
                     positiveInt(),
                     Runtime.getRuntime().availableProcessors()
+            );
+
+    public static final ConfigOption<Long> CLOSE_RECONCILER_TIMEOUT =
+            new ConfigOption<>(
+                    "CLOSE_RECONCILER_TIMEOUT",
+                    "The max timeout(in ms) to close reconciler.",
+                    positiveInt(),
+                    120L
             );
 
     public static final ConfigOption<Long> READY_CHECK_INTERNAL =

@@ -45,7 +45,9 @@ import com.baidu.hugegraph.computer.core.store.StoreTestSuite;
 import com.baidu.hugegraph.computer.core.util.UtilTestSuite;
 import com.baidu.hugegraph.computer.core.worker.WorkerTestSuite;
 import com.baidu.hugegraph.computer.driver.DriverTestSuite;
+import com.baidu.hugegraph.computer.k8s.K8sTestSuite;
 import com.baidu.hugegraph.config.OptionSpace;
+import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
@@ -66,9 +68,10 @@ import com.baidu.hugegraph.util.Log;
     SortingTestSuite.class,
     SenderTestSuite.class,
     ReceiverTestSuite.class,
-    ComputeTestSuite.class
+    ComputeTestSuite.class,
     ReceiverTestSuite.class,
-    DriverTestSuite.class
+    DriverTestSuite.class,
+    K8sTestSuite.class
 })
 public class UnitTestSuite {
 
@@ -84,6 +87,9 @@ public class UnitTestSuite {
                              "ComputerOptions");
         OptionSpace.register("computer-rpc",
                              "com.baidu.hugegraph.config.RpcOptions");
+
+        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
+                                  "defaultValue", "http://localhost:2579");
         UnitTestBase.updateOptions(
             ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()
         );

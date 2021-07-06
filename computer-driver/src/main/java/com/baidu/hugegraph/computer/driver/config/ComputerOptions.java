@@ -620,6 +620,14 @@ public class ComputerOptions extends OptionHolder {
                     String.class
             );
 
+    public static final NoDefaultConfigOption<Long>
+            VALUE_FILE_MAX_SEGMENT_SIZE =
+            new NoDefaultConfigOption<>(
+                    "valuefile.max_segment_size",
+                    positiveInt(),
+                    Long.class
+            );
+
     public static Set<String> PROHIBIT_USER_SETTINGS = ImmutableSet.of(
             HUGEGRAPH_URL.name(),
             BSP_ETCD_ENDPOINTS.name(),

@@ -30,8 +30,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 import io.etcd.jetcd.ByteSequence;
@@ -42,7 +42,7 @@ import io.etcd.jetcd.options.GetOption;
 
 public class EtcdClientTest {
 
-    private static String ENDPOINTS = "http://localhost:2379";
+    private static String ENDPOINTS = "http://localhost:2579";
     private static String NAMESPACE = "test_job_0001";
     private static String KEY_PREFIX = "/key";
     private static String KEY1 = "/key1";

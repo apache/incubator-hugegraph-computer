@@ -25,7 +25,7 @@ spec:
             value: &probe_port 8081
           - name: WATCH_NAMESPACE
             value: hugegraph-computer-system
-          - name: WORKER_COUNT
+          - name: RECONCILER_COUNT
             value: 6
         securityContext:
           allowPrivilegeEscalation: false

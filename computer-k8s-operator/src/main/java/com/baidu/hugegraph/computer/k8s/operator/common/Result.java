@@ -30,7 +30,6 @@ public class Result {
     public static final Result NO_REQUEUE = new Result(false);
     public static final Result REQUEUE = new Result(true);
 
-
     public Result(boolean requeue) {
         this.requeue = requeue;
         this.requeueAfter = Duration.ZERO;
@@ -45,10 +44,11 @@ public class Result {
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (!(o instanceof Result)) {
             return false;
         }
-        Result result = (Result) o;
+
+        final Result result = (Result) o;
         return this.requeue == result.requeue &&
                Objects.equals(this.requeueAfter, result.requeueAfter);
     }

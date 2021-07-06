@@ -22,7 +22,10 @@ package com.baidu.hugegraph.computer.k8s.operator.common;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -34,10 +37,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.k8s.crd.model.EventType;
-import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.config.HugeConfig;
@@ -47,30 +50,33 @@ import com.google.common.collect.Sets;
 
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.EventSource;
-import io.fabric8.kubernetes.api.model.EventSourceBuilder;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.informers.ResourceEventHandler;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformer;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
+import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
 import io.fabric8.kubernetes.client.utils.Serialization;
 
 public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private static final Logger LOG = Log.logger(AbstractController.class);
 
-    protected final HugeConfig config;
-    protected final String kind;
+    protected static final Pair<Boolean, String> FALSE_PAIR = Pair.of(false,
+                                                                      null);
+
     private final Class<T> crClass;
-    protected final KubernetesClient kubeClient;
+    private final String kind;
+    protected final HugeConfig config;
+    protected final NamespacedKubernetesClient kubeClient;
     private final int maxReconcileRetry;
     private final WorkQueue<Request> workQueue;
     private final ScheduledExecutorService executor;
@@ -78,16 +84,17 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     private Map<Class<? extends HasMetadata>,
             SharedIndexInformer<? extends HasMetadata>> informerMap;
 
-    public AbstractController(HugeConfig config, KubernetesClient kubeClient) {
+    public AbstractController(HugeConfig config,
+                              NamespacedKubernetesClient kubeClient) {
         this.config = config;
-        this.crClass = this.crClass();
-        this.kind = HasMetadata.getSingular(this.crClass);
+        this.crClass = this.getCRClass();
+        this.kind = HasMetadata.getKind(this.crClass).toLowerCase(Locale.ROOT);
         this.kubeClient = kubeClient;
         this.maxReconcileRetry = this.config.get(
                                       OperatorOptions.MAX_RECONCILE_RETRY);
         this.workQueue = new WorkQueue<>();
-        Integer workCount = this.config.get(OperatorOptions.WORKER_COUNT);
-        this.executor = ExecutorUtil.newScheduledThreadPool(workCount,
+        Integer reconcilers = this.config.get(OperatorOptions.RECONCILER_COUNT);
+        this.executor = ExecutorUtil.newScheduledThreadPool(reconcilers,
                                                             this.kind +
                                                             "-reconciler-%d");
     }
@@ -111,9 +118,9 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
             return;
         }
 
-        Integer workCount = this.config.get(OperatorOptions.WORKER_COUNT);
-        CountDownLatch latch = new CountDownLatch(workCount);
-        for (int i = 0; i < workCount; i++) {
+        Integer reconcilers = this.config.get(OperatorOptions.RECONCILER_COUNT);
+        CountDownLatch latch = new CountDownLatch(reconcilers);
+        for (int i = 0; i < reconcilers; i++) {
             this.executor.scheduleWithFixedDelay(() -> {
                         try {
                             this.worker();
@@ -140,8 +147,15 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     }
 
     public void shutdown() {
-        this.workQueue.shutDown();
+        this.workQueue.shutdown();
         this.executor.shutdown();
+        Long timeout = this.config
+                           .get(OperatorOptions.CLOSE_RECONCILER_TIMEOUT);
+        try {
+            this.executor.awaitTermination(timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     protected abstract Result reconcile(Request request);
@@ -150,7 +164,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         while (!this.executor.isShutdown() &&
                !this.workQueue.isShutdown() &&
                !Thread.currentThread().isInterrupted()) {
-            LOG.info("Trying to get item from work queue of {}-controller",
+            LOG.debug("Trying to get item from work queue of {}-controller",
                       this.kind);
             Request request = null;
             try {
@@ -198,8 +212,8 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
             }
 
             @Override
-            public void onUpdate(T oldCr, T newCr) {
-                Request request = Request.parseRequestByCR(newCr);
+            public void onUpdate(T oldCR, T newCR) {
+                Request request = Request.parseRequestByCR(newCR);
                 AbstractController.this.enqueueRequest(request);
             }
 
@@ -268,59 +282,107 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         return Serialization.clone(resource);
     }
 
+    @SuppressWarnings("unused")
     protected <R extends HasMetadata> List<R> getResourceList(String namespace,
                                                               Class<R> rClass) {
         @SuppressWarnings("unchecked")
         SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
                                           this.informerMap.get(rClass);
         List<R> rs = informer.getIndexer()
-                             .byIndex(namespace, Cache.NAMESPACE_INDEX);
+                             .byIndex(Cache.NAMESPACE_INDEX, namespace);
         if (CollectionUtils.isEmpty(rs)) {
             return rs;
         }
-        return Serialization.clone(rs);
+        for (int i = 0; i < rs.size(); i++) {
+            rs.set(i, Serialization.clone(rs.get(i)));
+        }
+        return rs;
+    }
+
+    protected <R extends HasMetadata> List<R> getResourceListWithLabels(
+                                              String namespace, Class<R> rClass,
+                                              Map<String, String> matchLabels) {
+        @SuppressWarnings("unchecked")
+        SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
+                                          this.informerMap.get(rClass);
+        List<R> rs = informer.getIndexer()
+                             .byIndex(Cache.NAMESPACE_INDEX, namespace);
+        if (CollectionUtils.isEmpty(rs)) {
+            return rs;
+        }
+
+        if (MapUtils.isEmpty(matchLabels)) {
+            return this.getResourceList(namespace, rClass);
+        }
+
+        List<R> matchRS = new ArrayList<>();
+
+        Set<Map.Entry<String, String>> matchLabelSet = matchLabels.entrySet();
+        for (R r : rs) {
+            Map<String, String> label = KubernetesResourceUtil
+                                        .getLabels(r.getMetadata());
+            if (MapUtils.isEmpty(label)) {
+                continue;
+            }
+            if (label.entrySet().containsAll(matchLabelSet)) {
+                matchRS.add(Serialization.clone(r));
+            }
+        }
+
+        return matchRS;
     }
 
     protected List<Pod> getPodsByJob(Job job) {
         String namespace = job.getMetadata().getNamespace();
         LabelSelector selector = job.getSpec().getSelector();
 
-        PodList list = this.kubeClient
-                .pods()
-                .inNamespace(namespace)
-                .withLabelSelector(selector)
-                .list();
-        return list.getItems();
+        if (selector != null) {
+            Map<String, String> matchLabels = selector.getMatchLabels();
+            if (MapUtils.isNotEmpty(matchLabels)) {
+                return this.getResourceListWithLabels(namespace, Pod.class,
+                                                      matchLabels);
+            }
+        }
+        return Collections.emptyList();
     }
 
     protected void recordEvent(HasMetadata eventRef,
                                EventType eventType, String eventName,
                                String reason, String message) {
         String component = HasMetadata.getKind(this.crClass) + "Operator";
-        EventSource eventSource = new EventSourceBuilder()
-                .withComponent(component)
-                .build();
+        EventSource eventSource = new EventSource();
+        eventSource.setComponent(component);
         Event event = KubeUtil.buildEvent(eventRef, eventSource,
                                           eventType, eventName,
                                           reason, message);
-        this.kubeClient.v1().events()
-                       .inNamespace(event.getMetadata().getNamespace())
-                       .createOrReplace(event);
-    }
-
-    private void handleOwnsResource(HasMetadata resource) {
-        OwnerReference owner = this.getControllerOf(resource);
-        if (owner == null || StringUtils.isBlank(owner.getName()) ||
-            StringUtils.equalsIgnoreCase(HugeGraphComputerJob.KIND,
-                                         owner.getKind())) {
-            return;
+        KubernetesClient client = this.kubeClient;
+        String namespace = event.getMetadata().getNamespace();
+        if (!Objects.equals(this.kubeClient.getNamespace(), namespace)) {
+            client = this.kubeClient.inNamespace(namespace);
         }
-        String namespace = resource.getMetadata().getNamespace();
-        Request request = new Request(namespace, owner.getName());
-        this.enqueueRequest(request);
+        client.v1().events().createOrReplace(event);
     }
 
-    private OwnerReference getControllerOf(HasMetadata resource) {
+    private void handleOwnsResource(HasMetadata ownsResource) {
+        Pair<Boolean, String> ownsPredicate = this.ownsPredicate(ownsResource);
+        if (ownsPredicate.getKey()) {
+            String namespace = ownsResource.getMetadata().getNamespace();
+            Request request = new Request(namespace, ownsPredicate.getValue());
+            this.enqueueRequest(request);
+        }
+    }
+
+    protected Pair<Boolean, String> ownsPredicate(HasMetadata ownsResource) {
+        OwnerReference owner = this.getControllerOf(ownsResource);
+        if (owner != null && owner.getController() &&
+            StringUtils.isNotBlank(owner.getName()) &&
+            StringUtils.equalsIgnoreCase(owner.getKind(), this.kind)) {
+            return Pair.of(true, owner.getName());
+        }
+        return FALSE_PAIR;
+    }
+
+    protected OwnerReference getControllerOf(HasMetadata resource) {
         List<OwnerReference> ownerReferences = resource.getMetadata()
                                                        .getOwnerReferences();
         for (OwnerReference ownerReference : ownerReferences) {
@@ -359,7 +421,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         return synced;
     }
 
-    private Class<T> crClass() {
+    private Class<T> getCRClass() {
         Type type = this.getClass().getGenericSuperclass();
         ParameterizedType parameterizedType = (ParameterizedType) type;
         Type[] types = parameterizedType.getActualTypeArguments();

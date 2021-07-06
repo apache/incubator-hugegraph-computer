@@ -53,7 +53,7 @@ import com.sun.net.httpserver.HttpServer;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
@@ -90,15 +90,14 @@ public class OperatorEntrypoint {
             this.config = this.configFromSysPropsOrEnvVars();
             this.kubeClient = new DefaultKubernetesClient();
             this.controllers = new ArrayList<>();
-            this.informerFactory = this.kubeClient.informers();
 
             String watchNamespace = this.config.get(
                                     OperatorOptions.WATCH_NAMESPACE);
             if (!Objects.equals(watchNamespace, Constants.ALL_NAMESPACE)) {
                 this.createNamespace(watchNamespace);
-                this.informerFactory = this.informerFactory.inNamespace(
-                                                            watchNamespace);
+                this.kubeClient = this.kubeClient.inNamespace(watchNamespace);
             }
+            this.informerFactory = this.kubeClient.informers();
             LOG.info("Watch namespace: " + watchNamespace);
 
             this.addHealthCheck();
@@ -191,7 +190,7 @@ public class OperatorEntrypoint {
         ComputerJobController jobController = new ComputerJobController(
                                                   this.config, this.kubeClient);
         this.registerController(jobController,
-                                Deployment.class, ConfigMap.class, Job.class);
+                                ConfigMap.class, Job.class, Pod.class);
     }
 
     @SafeVarargs
