@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -61,6 +60,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 
 public class EdgesInputTest extends UnitTestBase {
@@ -70,7 +70,9 @@ public class EdgesInputTest extends UnitTestBase {
 
     @After
     public void teardown() {
-        this.managers.closeAll(this.config);
+        if (this.managers != null) {
+            this.managers.closeAll(this.config);
+        }
     }
 
     @Test
@@ -86,6 +88,20 @@ public class EdgesInputTest extends UnitTestBase {
     @Test
     public void testMultiple() throws IOException {
         this.testEdgeFreq(EdgeFrequency.MULTIPLE);
+    }
+
+    @Test
+    public void testEmptyEdges() {
+        EdgesInput.EmptyEdges edges = EdgesInput.EmptyEdges.instance();
+        Iterator<Edge> it = edges.iterator();
+        Assert.assertFalse(it.hasNext());
+        Assert.assertEquals(0, edges.size());
+        Assert.assertThrows(ComputerException.class, () -> {
+            edges.add(graphFactory().createEdge());
+        }, e -> {
+            Assert.assertContains("Not support adding edges during computing",
+                                  e.getMessage());
+        });
     }
 
     private void testEdgeFreq(EdgeFrequency freq)

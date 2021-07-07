@@ -101,7 +101,7 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start master", e);
                 exceptions[1] = e;
             } finally {
-                /**
+                /*
                  * It must close the service first. The pool will be shutdown
                  * if count down is executed first, and the server thread in
                  * master service will not be closed.

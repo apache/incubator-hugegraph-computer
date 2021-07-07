@@ -118,7 +118,8 @@ public class ComputeManager<M extends Value<M>> {
         }
         this.sendManager.finishSend(MessageType.MSG);
         // After compute and send finish signal.
-        Map<Integer, RecvMessageStat> recvStats = this.recvManager.recvStats();
+        Map<Integer, RecvMessageStat> recvStats =
+                                      this.recvManager.recvMessageStats();
         for (Map.Entry<Integer, PartitionStat> entry :
                                                partitionStats.entrySet()) {
             PartitionStat partitionStat = entry.getValue();

@@ -115,7 +115,7 @@ public abstract class MessageRecvPartition {
         return this.totalBytes;
     }
 
-    public RecvMessageStat recvStat() {
+    public RecvMessageStat recvMessageStat() {
         return new RecvMessageStat(0L, this.totalBytes);
     }
 

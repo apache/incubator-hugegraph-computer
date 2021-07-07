@@ -99,24 +99,23 @@ public class EdgesInput {
             }
             return EmptyEdges.instance();
         } catch (IOException e) {
-            throw new ComputerException("Can't read from input", e);
+            throw new ComputerException("Can't read from edges input '%s'",
+                                        e, this.edgeFile.getAbsoluteFile());
         }
     }
 
     private class SuperEdges implements Edges {
 
-        private ReusablePointer vid;
+        private final ReusablePointer vid;
         private final long startPosition;
-        private Iterator<Edge> currentEdgeIt;
+        private Iterator<Edge> currentEdgesIter;
         private int size;
         private int iterationTime;
 
-        SuperEdges(ReusablePointer vid,
-                   Edges edges,
-                   long startPosition) {
+        SuperEdges(ReusablePointer vid, Edges edges, long startPosition) {
             this.vid = vid;
             this.startPosition = startPosition;
-            this.currentEdgeIt = edges.iterator();
+            this.currentEdgesIter = edges.iterator();
             this.size = 0;
             this.iterationTime = 0;
         }
@@ -153,7 +152,8 @@ public class EdgesInput {
 
         @Override
         public void add(Edge edge) {
-            throw new ComputerException("Can't add edge");
+            throw new ComputerException(
+                      "Not support adding edges during computing");
         }
 
         @Override
@@ -168,44 +168,48 @@ public class EdgesInput {
                 throw new ComputerException("Can't seek to %s",
                                             e, this.startPosition);
             }
-            return new Iterator<Edge>() {
+            return new EdgesIterator();
 
-                @Override
-                public boolean hasNext() {
-                    if (currentEdgeIt.hasNext()) {
-                        return true;
-                    } else {
-                        long currentPosition = input.position();
-                        try {
-                            if (input.available() > 0) {
-                                idPointer.read(input);
-                                if (idPointer.compareTo(vid) == 0) {
-                                    valuePointer.read(EdgesInput.this.input);
-                                    currentEdgeIt = readEdges(
-                                                    valuePointer.input())
+        }
+
+        private class EdgesIterator implements Iterator<Edge> {
+
+            @Override
+            public boolean hasNext() {
+                if (currentEdgesIter.hasNext()) {
+                    return true;
+                } else {
+                    long currentPosition = input.position();
+                    try {
+                        if (input.available() > 0) {
+                            idPointer.read(input);
+                            if (idPointer.compareTo(vid) == 0) {
+                                valuePointer.read(EdgesInput.this.input);
+                                currentEdgesIter = readEdges(
+                                                   valuePointer.input())
                                                    .iterator();
-                                } else {
-                                    input.seek(currentPosition);
-                                }
+                            } else {
+                                input.seek(currentPosition);
                             }
-                        } catch (IOException e) {
-                            throw new ComputerException(
-                                      "Read Edges from position %s failed",
-                                      currentPosition);
                         }
+                    } catch (IOException e) {
+                        throw new ComputerException(
+                                  "Error occurred when read edges from edges " +
+                                  "input '%s' at position %s", e,
+                                  edgeFile.getAbsoluteFile(), currentPosition);
                     }
-                    return currentEdgeIt.hasNext();
                 }
+                return currentEdgesIter.hasNext();
+            }
 
-                @Override
-                public Edge next() {
-                    return currentEdgeIt.next();
-                }
-            };
+            @Override
+            public Edge next() {
+                return currentEdgesIter.next();
+            }
         }
     }
 
-    // TODO: use one batch of edges to read batches for each vertex.
+    // TODO: use one reused Edges instance to read batches for each vertex.
     private Edges readEdges(RandomAccessInput in) {
         try {
             int count = in.readFixedInt();
@@ -248,35 +252,36 @@ public class EdgesInput {
             }
             return edges;
         } catch (IOException e) {
-            throw new ComputerException("Read edges failed", e);
+            throw new ComputerException("Failed to read edges from input '%s'",
+                                        e, this.edgeFile.getAbsoluteFile());
         }
     }
-}
+    public static class EmptyEdges implements Edges {
 
-class EmptyEdges implements Edges {
+        private static final EmptyEdges INSTANCE = new EmptyEdges();
 
-    private static final EmptyEdges INSTANCE = new EmptyEdges();
+        private EmptyEdges() {
+            // pass
+        }
 
-    private EmptyEdges() {
-        // pass
-    }
+        public static EmptyEdges instance() {
+            return INSTANCE;
+        }
 
-    public static EmptyEdges instance() {
-        return INSTANCE;
-    }
+        @Override
+        public int size() {
+            return 0;
+        }
 
-    @Override
-    public int size() {
-        return 0;
-    }
+        @Override
+        public void add(Edge edge) {
+            throw new ComputerException(
+                      "Not support adding edges during computing");
+        }
 
-    @Override
-    public void add(Edge edge) {
-        throw new ComputerException("Can't add edge '{}'", edge);
-    }
-
-    @Override
-    public Iterator<Edge> iterator() {
-        return Collections.emptyIterator();
+        @Override
+        public Iterator<Edge> iterator() {
+            return Collections.emptyIterator();
+        }
     }
 }

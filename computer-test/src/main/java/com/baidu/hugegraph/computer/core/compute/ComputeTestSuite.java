@@ -23,13 +23,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import com.baidu.hugegraph.computer.core.compute.input.EdgesInputTest;
-import com.baidu.hugegraph.computer.core.compute.input.EmptyEdgesTest;
 import com.baidu.hugegraph.computer.core.compute.input.MessageInputTest;
+import com.baidu.hugegraph.computer.core.compute.input.ResuablePointerTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     EdgesInputTest.class,
-    EmptyEdgesTest.class,
+    ResuablePointerTest.class,
     MessageInputTest.class,
     ComputeManagerTest.class
 })

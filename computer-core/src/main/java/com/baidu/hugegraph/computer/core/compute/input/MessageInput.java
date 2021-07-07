@@ -71,11 +71,12 @@ public class MessageInput<T extends Value<T>> {
     private class MessageIterator implements Iterator<T> {
 
         // It indicates whether the value can be returned to client.
-        boolean valueValid = false;
+        private boolean valueValid;
         private ReusablePointer vidPointer;
 
         private MessageIterator(ReusablePointer vidPointer) {
             this.vidPointer = vidPointer;
+            this.valueValid = false;
         }
 
         @Override

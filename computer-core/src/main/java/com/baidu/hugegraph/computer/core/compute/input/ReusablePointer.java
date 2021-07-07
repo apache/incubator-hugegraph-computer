@@ -63,11 +63,16 @@ public class ReusablePointer implements Pointer, Readable {
         try {
             this.input.seek(0L);
         } catch (IOException e) {
-            throw new ComputerException("Seek to position 0 failed", e);
+            throw new ComputerException(
+                      "ResuablePointer can't seek to position 0", e);
         }
         return this.input;
     }
 
+    /**
+     * Only [0 .. length) of the returned byte array is valid. The extra data
+     * [length .. bytes.length) is meaningless, may be left by previous pointer.
+     */
     @Override
     public byte[] bytes() {
         return this.bytes;
