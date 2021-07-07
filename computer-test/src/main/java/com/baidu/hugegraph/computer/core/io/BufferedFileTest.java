@@ -247,7 +247,7 @@ public class BufferedFileTest {
                 Assert.assertEquals(1, input.readInt());
                 input.skip(4);
                 Assert.assertThrows(EOFException.class, () -> {
-                    input.seek(12); // Out of range
+                    input.seek(13); // Out of range
                 }, e -> {
                     Assert.assertContains("reach the end of file",
                                           e.getMessage());

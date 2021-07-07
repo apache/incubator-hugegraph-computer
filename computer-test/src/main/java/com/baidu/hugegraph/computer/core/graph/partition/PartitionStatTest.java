@@ -23,6 +23,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.receiver.RecvMessageStat;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -53,6 +54,28 @@ public class PartitionStatTest {
         PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
         PartitionStat stat2ReadObj = new PartitionStat();
         UnitTestBase.assertEqualAfterWriteAndRead(stat2, stat2ReadObj);
+    }
+
+    @Test
+    public void testMerge() throws IOException {
+        PartitionStat stat1 = new PartitionStat(0, 1L, 2L);
+        stat1.merge(null);
+        Assert.assertEquals(1L, stat1.vertexCount());
+        Assert.assertEquals(2L, stat1.edgeCount());
+        Assert.assertEquals(0L, stat1.messageCount());
+        Assert.assertEquals(0L, stat1.messageBytes());
+
+        RecvMessageStat recvMessageStat = new RecvMessageStat(100L, 400L);
+        stat1.merge(recvMessageStat);
+        Assert.assertEquals(1L, stat1.vertexCount());
+        Assert.assertEquals(2L, stat1.edgeCount());
+        Assert.assertEquals(100L, stat1.messageCount());
+        Assert.assertEquals(400L, stat1.messageBytes());
+        stat1.merge(recvMessageStat);
+        Assert.assertEquals(1L, stat1.vertexCount());
+        Assert.assertEquals(2L, stat1.edgeCount());
+        Assert.assertEquals(200L, stat1.messageCount());
+        Assert.assertEquals(800L, stat1.messageBytes());
     }
 
     @Test

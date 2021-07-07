@@ -17,35 +17,40 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.suite.integrate;
+package com.baidu.hugegraph.computer.core.output;
 
-import java.util.Iterator;
+import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.worker.Computation;
-import com.baidu.hugegraph.computer.core.worker.ComputationContext;
+import com.baidu.hugegraph.util.Log;
 
-public class MockComputation implements Computation<DoubleValue> {
+/**
+ * LogOutput print the computation result to log file.
+ * It can't be used on production environment.
+ * Be used for test or development only.
+ */
+public class LogOutput implements ComputerOutput {
+
+    private static final Logger LOG = Log.logger(LogOutput.class);
+
+    private int partition;
 
     @Override
-    public String name() {
-        return "mock";
+    public void init(Config config, int partition) {
+        this.partition = partition;
+        LOG.info("Start write back partition {}", this.partition);
     }
 
     @Override
-    public String category() {
-        return "mock";
+    public void write(Vertex vertex) {
+        LOG.info("id='{}', result='{}'",
+                 vertex.id().toString(),
+                 vertex.value().toString());
     }
 
     @Override
-    public void compute0(ComputationContext context, Vertex vertex) {
-        vertex.value(new DoubleValue(0.5D));
-    }
-
-    @Override
-    public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<DoubleValue> messages) {
-        // pass
+    public void close() {
+        LOG.info("End write back partition {}", this.partition);
     }
 }

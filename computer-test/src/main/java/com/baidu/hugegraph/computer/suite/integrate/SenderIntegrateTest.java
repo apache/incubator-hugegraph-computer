@@ -31,6 +31,7 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.computer.core.network.DataClientManager;
@@ -63,8 +64,9 @@ public class SenderIntegrateTest {
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
-                                          .withValueName("rank")
-                                          .withValueType("DOUBLE")
+                                          .withResultName("rank")
+                                          .withResultClass(DoubleValue.class)
+                                          .withMessageClass(DoubleValue.class)
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
@@ -88,8 +90,9 @@ public class SenderIntegrateTest {
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
-                                          .withValueName("rank")
-                                          .withValueType("DOUBLE")
+                                          .withResultName("rank")
+                                          .withResultClass(DoubleValue.class)
+                                          .withMessageClass(DoubleValue.class)
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
@@ -123,8 +126,9 @@ public class SenderIntegrateTest {
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_003")
-                                          .withValueName("rank")
-                                          .withValueType("DOUBLE")
+                                          .withResultName("rank")
+                                          .withResultClass(DoubleValue.class)
+                                          .withMessageClass(DoubleValue.class)
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(2)
@@ -143,8 +147,9 @@ public class SenderIntegrateTest {
         Thread workerThread1 = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_003")
-                                          .withValueName("rank")
-                                          .withValueType("DOUBLE")
+                                          .withResultName("rank")
+                                          .withResultClass(DoubleValue.class)
+                                          .withMessageClass(DoubleValue.class)
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(2)
@@ -164,8 +169,9 @@ public class SenderIntegrateTest {
         Thread workerThread2 = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_003")
-                                          .withValueName("rank")
-                                          .withValueType("DOUBLE")
+                                          .withResultName("rank")
+                                          .withResultClass(DoubleValue.class)
+                                          .withMessageClass(DoubleValue.class)
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(2)
@@ -197,8 +203,9 @@ public class SenderIntegrateTest {
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
-                                          .withValueName("rank")
-                                          .withValueType("DOUBLE")
+                                          .withResultName("rank")
+                                          .withResultClass(DoubleValue.class)
+                                          .withMessageClass(DoubleValue.class)
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
@@ -222,8 +229,9 @@ public class SenderIntegrateTest {
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
-                                          .withValueName("rank")
-                                          .withValueType("DOUBLE")
+                                          .withResultName("rank")
+                                          .withResultClass(DoubleValue.class)
+                                          .withMessageClass(DoubleValue.class)
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
@@ -317,13 +325,21 @@ public class SenderIntegrateTest {
             return this;
         }
 
-        public OptionsBuilder withValueName(String name) {
-            this.options.add(name);
+        public OptionsBuilder withResultClass(Class clazz) {
+            this.options.add(ComputerOptions.ALGORITHM_RESULT_CLASS.name());
+            this.options.add(clazz.getName());
             return this;
         }
 
-        public OptionsBuilder withValueType(String type) {
-            this.options.add(type);
+        public OptionsBuilder withMessageClass(Class clazz) {
+            this.options.add(ComputerOptions.ALGORITHM_MESSAGE_CLASS.name());
+            this.options.add(clazz.getName());
+            return this;
+        }
+
+        public OptionsBuilder withResultName(String name) {
+            this.options.add(ComputerOptions.OUTPUT_RESULT_NAME.name());
+            this.options.add(name);
             return this;
         }
 

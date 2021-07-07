@@ -17,36 +17,62 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.store.hgkvfile.entry;
+package com.baidu.hugegraph.computer.core.compute.input;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.io.Readable;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 
-public class InlinePointer implements Pointer {
+public class ReusablePointer implements Pointer, Readable {
 
-    private final long length;
-    private final byte[] bytes;
+    private int length;
+    private byte[] bytes;
+    private RandomAccessInput input;
 
-    public InlinePointer(byte[] bytes) {
-        this.length = bytes.length;
-        this.bytes = bytes;
+    public ReusablePointer() {
+        this.bytes = Constants.EMPTY_BYTES;
+        this.length = 0;
+        this.input = IOFactory.createBytesInput(this.bytes);
     }
 
-    public InlinePointer(byte[] bytes, long length) {
-        this.length = length;
+    public ReusablePointer(byte[] bytes, int length) {
         this.bytes = bytes;
+        this.length = length;
+        this.input = IOFactory.createBytesInput(this.bytes);
+    }
+
+    @Override
+    public void read(RandomAccessInput in) throws IOException {
+        this.length = in.readFixedInt();
+        if (this.bytes.length < this.length) {
+            this.bytes = new byte[this.length];
+            this.input = IOFactory.createBytesInput(this.bytes);
+        }
+        in.readFully(this.bytes, 0, this.length);
     }
 
     @Override
     public RandomAccessInput input() {
-        return IOFactory.createBytesInput(this.bytes);
+        try {
+            this.input.seek(0L);
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "ResuablePointer can't seek to position 0", e);
+        }
+        return this.input;
     }
 
+    /**
+     * Only [0 .. length) of the returned byte array is valid. The extra data
+     * [length .. bytes.length) is meaningless, may be left by previous pointer.
+     */
     @Override
     public byte[] bytes() {
         return this.bytes;
@@ -54,8 +80,8 @@ public class InlinePointer implements Pointer {
 
     @Override
     public void write(RandomAccessOutput output) throws IOException {
-        output.writeFixedInt((int) this.length);
-        output.write(this.bytes(), 0, (int) this.length);
+        output.writeFixedInt(this.length);
+        output.write(this.bytes(), 0, this.length);
     }
 
     @Override
@@ -71,7 +97,7 @@ public class InlinePointer implements Pointer {
     @Override
     public int compareTo(Pointer other) {
         try {
-            return BytesUtil.compare(this.bytes(), (int) this.length,
+            return BytesUtil.compare(this.bytes(), this.length,
                                      other.bytes(), (int) other.length());
         } catch (IOException e) {
             throw new ComputerException(e.getMessage(), e);

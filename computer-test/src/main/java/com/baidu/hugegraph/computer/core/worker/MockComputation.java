@@ -56,8 +56,6 @@ public class MockComputation implements Computation<DoubleValue> {
         } else if (context.superstep() == 1) {
             this.assertStep1Aggregators(context);
         }
-
-        this.assertStat(context);
     }
 
     @Override
@@ -127,11 +125,6 @@ public class MockComputation implements Computation<DoubleValue> {
             Assert.assertContains("IntValue cannot be cast to", e.getMessage());
             Assert.assertContains("FloatValue", e.getMessage());
         });
-    }
-
-    protected void assertStat(WorkerContext context) {
-        Assert.assertEquals(100L, context.totalVertexCount());
-        Assert.assertEquals(200L, context.totalEdgeCount());
     }
 
     protected void createAndRunAggregators(WorkerContext context) {
@@ -403,7 +396,7 @@ public class MockComputation implements Computation<DoubleValue> {
 
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
-        // pass
+        vertex.value(new DoubleValue(0.5D));
     }
 
     @Override

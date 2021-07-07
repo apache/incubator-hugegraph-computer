@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.receiver.RecvMessageStat;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
 
 public class PartitionStat implements Readable, Writable {
@@ -100,6 +101,13 @@ public class PartitionStat implements Readable, Writable {
         out.writeLong(this.finishedVertexCount);
         out.writeLong(this.messageCount);
         out.writeLong(this.messageBytes);
+    }
+
+    public void merge(RecvMessageStat recvMessageStat) {
+        if (recvMessageStat != null) {
+            this.messageCount += recvMessageStat.messageCount();
+            this.messageBytes += recvMessageStat.messageBytes();
+        }
     }
 
     @Override

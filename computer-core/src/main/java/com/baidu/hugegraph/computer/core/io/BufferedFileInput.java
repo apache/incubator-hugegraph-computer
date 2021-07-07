@@ -73,7 +73,7 @@ public class BufferedFileInput extends AbstractBufferedFileInput {
             super.seek(position - bufferStart);
             return;
         }
-        if (position >= this.fileLength()) {
+        if (position > this.fileLength()) {
             throw new EOFException(String.format(
                                    "Can't seek to %s, reach the end of file",
                                    position));

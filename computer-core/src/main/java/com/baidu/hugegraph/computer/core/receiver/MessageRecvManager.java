@@ -31,7 +31,6 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
@@ -45,7 +44,6 @@ import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -115,7 +113,6 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     @Override
     public void afterSuperstep(Config config, int superstep) {
-        // pass
     }
 
     @Override
@@ -134,19 +131,6 @@ public class MessageRecvManager implements Manager, MessageHandler {
         // TODO: implement failover
         LOG.warn("Exception caught for connection:{}, root cause:{}",
                  connectionId, cause);
-    }
-
-    /**
-     * Merge vertices and edges in each partition parallel, and get the
-     * workerStat. Be called at the end of input superstep.
-     */
-    public WorkerStat mergeGraph() {
-        // TODO: Merge vertices and edges in each partition parallel
-        PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
-                                                50L, 60L, 70L);
-        WorkerStat workerStat = new WorkerStat();
-        workerStat.add(stat1);
-        return workerStat;
     }
 
     public void waitReceivedAllMessages() {
@@ -232,5 +216,12 @@ public class MessageRecvManager implements Manager, MessageHandler {
         ComputeMessageRecvPartitions partitions = this.messagePartitions;
         this.messagePartitions = null;
         return partitions.iterators();
+    }
+
+    public Map<Integer, RecvMessageStat> recvMessageStats() {
+        this.waitReceivedAllMessages();
+        E.checkState(this.messagePartitions != null,
+                     "The messagePartitions can't be null");
+        return this.messagePartitions.recvMessageStats();
     }
 }

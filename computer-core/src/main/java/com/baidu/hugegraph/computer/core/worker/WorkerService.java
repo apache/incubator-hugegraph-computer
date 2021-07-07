@@ -33,12 +33,12 @@ import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
+import com.baidu.hugegraph.computer.core.compute.ComputeManager;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.input.WorkerInputManager;
@@ -66,6 +66,7 @@ public class WorkerService {
     private boolean inited;
     private Config config;
     private Bsp4Worker bsp4Worker;
+    private ComputeManager computeManager;
     private ContainerInfo workerInfo;
 
     private Computation<?> computation;
@@ -127,6 +128,8 @@ public class WorkerService {
             dm.connect(worker.id(), worker.hostname(), worker.dataPort());
         }
 
+        this.computeManager = new ComputeManager(this.context, this.managers,
+                                                 this.computation);
         this.managers.initedAll(this.config);
         LOG.info("{} WorkerService initialized", this);
         this.inited = true;
@@ -184,7 +187,9 @@ public class WorkerService {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
-
+            if (superstep > 0) {
+                this.computeManager.takeComputeMessages();
+            }
             /*
              * Call beforeSuperstep() before all workers compute() called.
              *
@@ -200,14 +205,8 @@ public class WorkerService {
              */
             this.bsp4Worker.workerStepPrepareDone(superstep);
             this.bsp4Worker.waitMasterStepPrepareDone(superstep);
-
-            WorkerStat workerStat = this.compute();
-
-            /*
-             * Wait for all workers to do compute()
-             */
-            MessageRecvManager messageRecvManager =
-                               this.managers.get(MessageRecvManager.NAME);
+            WorkerStat workerStat = this.computeManager.compute(context,
+                                                                superstep);
 
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
@@ -314,10 +313,7 @@ public class WorkerService {
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();
 
-        MessageRecvManager recvManager =
-                           this.managers.get(MessageRecvManager.NAME);
-
-        WorkerStat workerStat = recvManager.mergeGraph();
+        WorkerStat workerStat = this.computeManager.input();
 
         this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
                                        workerStat);
@@ -333,26 +329,9 @@ public class WorkerService {
      * can exit successfully.
      */
     private void outputstep() {
-        /*
-         * Write results back parallel
-         */
-        // TODO: output the vertices in partitions parallel
+        this.computeManager.output();
         this.bsp4Worker.workerOutputDone();
         LOG.info("{} WorkerService outputstep finished", this);
-    }
-
-    /**
-     * Compute vertices of all partitions parallel in this worker.
-     * Be called one time for a superstep.
-     * @return WorkerStat
-     */
-    private WorkerStat compute() {
-        // TODO: compute partitions parallel and get workerStat
-        PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
-                                                50L, 60L, 70L);
-        WorkerStat workerStat = new WorkerStat();
-        workerStat.add(stat1);
-        return workerStat;
     }
 
     private class SuperstepContext implements WorkerContext {

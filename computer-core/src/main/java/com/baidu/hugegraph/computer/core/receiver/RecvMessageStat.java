@@ -17,40 +17,26 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.core.receiver;
 
-import java.io.IOException;
+/**
+ * Received message stat for a partition.
+ */
+public class RecvMessageStat {
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+    private final long messageCount;
+    private final long messageBytes;
 
-public class IdValueList extends ListValue<IdValue> {
-
-    public IdValueList() {
-        super(ValueType.ID_VALUE);
+    public RecvMessageStat(long messageCount, long messageBytes) {
+        this.messageCount = messageCount;
+        this.messageBytes = messageBytes;
     }
 
-    @Override
-    public ValueType type() {
-        return ValueType.ID_VALUE_LIST;
+    public long messageCount() {
+        return this.messageCount;
     }
 
-    @Override
-    public void read(RandomAccessInput in) throws IOException {
-        this.read(in, false);
-    }
-
-    @Override
-    public void write(RandomAccessOutput out) throws IOException {
-        this.write(out, false);
-    }
-
-    @Override
-    public IdValueList copy() {
-        IdValueList values = new IdValueList();
-        for (IdValue value : this.values()) {
-            values.add(value);
-        }
-        return values;
+    public long messageBytes() {
+        return this.messageBytes;
     }
 }

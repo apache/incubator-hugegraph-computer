@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.RpcOptions;
@@ -56,11 +57,15 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.BSP_LOG_INTERVAL, "30000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
                 ComputerOptions.WORKER_COMPUTATION_CLASS,
-                MockComputation.class.getName()
+                MockComputation.class.getName(),
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                DoubleValue.class.getName()
             );
             WorkerService workerService = new MockWorkerService();
             try {
-                Thread.sleep(2000);
+                Thread.sleep(2000L);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
@@ -82,7 +87,11 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.BSP_LOG_INTERVAL, "30000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
                 ComputerOptions.MASTER_COMPUTATION_CLASS,
-                MockMasterComputation.class.getName()
+                MockMasterComputation.class.getName(),
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                DoubleValue.class.getName()
             );
             MasterService masterService = new MasterService();
             try {
@@ -92,6 +101,11 @@ public class WorkerServiceTest extends UnitTestBase {
                 LOG.error("Failed to start master", e);
                 exceptions[1] = e;
             } finally {
+                /*
+                 * It must close the service first. The pool will be shutdown
+                 * if count down is executed first, and the server thread in
+                 * master service will not be closed.
+                 */
                 masterService.close();
                 countDownLatch.countDown();
             }
@@ -121,7 +135,11 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.BSP_LOG_INTERVAL, "10000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
                 ComputerOptions.WORKER_COMPUTATION_CLASS,
-                MockComputation2.class.getName()
+                MockComputation2.class.getName(),
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                DoubleValue.class.getName()
             );
             WorkerService workerService = new MockWorkerService();
             try {
@@ -148,7 +166,11 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.BSP_LOG_INTERVAL, "10000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
                 ComputerOptions.WORKER_COMPUTATION_CLASS,
-                MockComputation2.class.getName()
+                MockComputation2.class.getName(),
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                DoubleValue.class.getName()
             );
             WorkerService workerService = new MockWorkerService();
             try {
@@ -175,7 +197,11 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.BSP_LOG_INTERVAL, "10000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
                 ComputerOptions.MASTER_COMPUTATION_CLASS,
-                MockMasterComputation2.class.getName()
+                MockMasterComputation2.class.getName(),
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                DoubleValue.class.getName()
             );
             MasterService masterService = new MasterService();
             try {

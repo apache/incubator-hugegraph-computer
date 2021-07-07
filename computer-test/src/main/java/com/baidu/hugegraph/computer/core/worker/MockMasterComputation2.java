@@ -29,15 +29,6 @@ import com.baidu.hugegraph.testutil.Assert;
 public class MockMasterComputation2 extends MockMasterComputation {
 
     @Override
-    protected void assertStat(MasterComputationContext context) {
-        Assert.assertEquals(200L, context.totalVertexCount());
-        Assert.assertEquals(400L, context.totalEdgeCount());
-        Assert.assertEquals(100L, context.finishedVertexCount());
-        Assert.assertEquals(120L, context.messageCount());
-        Assert.assertEquals(140L, context.messageBytes());
-    }
-
-    @Override
     protected void assertStep0Aggregators(MasterComputationContext context) {
         Assert.assertEquals(new IntValue(10), context.aggregatedValue(
                             MockMasterComputation.AGGR_CUSTOM_INT));

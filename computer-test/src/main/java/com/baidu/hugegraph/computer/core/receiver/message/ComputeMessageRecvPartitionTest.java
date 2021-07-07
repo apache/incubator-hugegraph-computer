@@ -27,7 +27,6 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
-import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.Null;
@@ -35,9 +34,6 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.io.BytesOutput;
-import com.baidu.hugegraph.computer.core.io.IOFactory;
-import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
@@ -45,8 +41,6 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -128,7 +122,9 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             for (int j = 0; j < 2; j++) {
                 Id id = new LongId(i);
                 DoubleValue message = new DoubleValue(i);
-                ReceiverUtil.comsumeBuffer(writeMessage(id, message), consumer);
+                ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
+                                                                     message),
+                                           consumer);
             }
         }
     }
@@ -164,22 +160,11 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                 Id id = new LongId(i);
                 IdValueList message = new IdValueList();
                 message.add(id.idValue());
-                ReceiverUtil.comsumeBuffer(writeMessage(id, message), consumer);
+                ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
+                                                                     message),
+                                           consumer);
             }
         }
-    }
-
-    private static byte[] writeMessage(Id id, Writable message)
-                                       throws IOException {
-        BytesOutput bytesOutput = IOFactory.createBytesOutput(
-                                  Constants.SMALL_BUF_SIZE);
-        EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
-
-        entryOutput.writeEntry(out -> {
-            out.writeByte(id.type().code());
-            id.write(out);
-        }, message);
-        return bytesOutput.toByteArray();
     }
 
     private static void checkIdValueListMessages(PeekableIterator<KvEntry> it)

@@ -22,12 +22,18 @@ package com.baidu.hugegraph.computer.core.receiver;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
+import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 import io.netty.buffer.ByteBuf;
@@ -60,5 +66,18 @@ public class ReceiverUtil {
         input.seek(pointer.offset());
         value.read(input);
         input.seek(position);
+    }
+
+    public static byte[] writeMessage(Id id, Writable message)
+                                      throws IOException {
+        BytesOutput bytesOutput = IOFactory.createBytesOutput(
+                                  Constants.SMALL_BUF_SIZE);
+        EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
+
+        entryOutput.writeEntry(out -> {
+            out.writeByte(id.type().code());
+            id.write(out);
+        }, message);
+        return bytesOutput.toByteArray();
     }
 }

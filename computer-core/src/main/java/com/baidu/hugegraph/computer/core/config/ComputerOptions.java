@@ -33,6 +33,7 @@ import com.baidu.hugegraph.computer.core.input.DefaultInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportProvider;
+import com.baidu.hugegraph.computer.core.output.LogOutput;
 import com.baidu.hugegraph.config.ConfigConvOption;
 import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
@@ -163,6 +164,15 @@ public class ComputerOptions extends OptionHolder {
                     "The number of threads performing internal sorting.",
                     positiveInt(),
                     4
+            );
+
+    public static final ConfigOption<Class<?>> OUTPUT_CLASS =
+            new ConfigOption<>(
+                    "output.output_class",
+                    "The class to output the computation result of each " +
+                    "vertex. Be called after iteration computation.",
+                    disallowEmpty(),
+                    LogOutput.class
             );
 
     public static final ConfigOption<String> OUTPUT_RESULT_NAME =

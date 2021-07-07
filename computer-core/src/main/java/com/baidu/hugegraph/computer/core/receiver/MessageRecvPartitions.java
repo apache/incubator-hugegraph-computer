@@ -50,7 +50,7 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         this.partitions = new HashMap<>();
     }
 
-    public abstract P createPartition();
+    protected abstract P createPartition();
 
     public void addBuffer(int partitionId, ManagedBuffer buffer) {
         P partition = this.partition(partitionId);
@@ -79,6 +79,14 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         Map<Integer, PeekableIterator<KvEntry>> entries = new HashMap<>();
         for (Map.Entry<Integer, P> entry : this.partitions.entrySet()) {
             entries.put(entry.getKey(), entry.getValue().iterator());
+        }
+        return entries;
+    }
+
+    public Map<Integer, RecvMessageStat> recvMessageStats() {
+        Map<Integer, RecvMessageStat> entries = new HashMap<>();
+        for (Map.Entry<Integer, P> entry : this.partitions.entrySet()) {
+            entries.put(entry.getKey(), entry.getValue().recvMessageStat());
         }
         return entries;
     }
