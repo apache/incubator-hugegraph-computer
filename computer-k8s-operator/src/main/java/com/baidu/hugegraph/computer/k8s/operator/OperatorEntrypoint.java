@@ -159,10 +159,6 @@ public class OperatorEntrypoint {
             this.controllerPool.shutdown();
         }
 
-        if (this.informerFactory != null) {
-            this.informerFactory.stopAllRegisteredInformers();
-        }
-
         if (this.kubeClient != null) {
             this.kubeClient.close();
         }
