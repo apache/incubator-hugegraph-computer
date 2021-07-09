@@ -58,6 +58,7 @@
                     <generateBuilders>true</generateBuilders>
                     <outputDirectory>${project.build.directory}/generated-sources/src/gen/java</outputDirectory>
                     <includeAdditionalProperties>false</includeAdditionalProperties>
+                    <removeOldOutput>true</removeOldOutput>
                     <customAnnotator>io.fabric8.kubernetes.ModelAnnotator</customAnnotator>
                 </configuration>
                 <executions>
@@ -170,16 +171,6 @@
                                     <token>public[\s]class</token>
                                     <value>@SuppressWarnings({"unchecked", "deprecation"})&#x000A;public class</value>
                                 </replacement>
-<!--                                <replacement>-->
-<!--                                    <token>@JsonInclude\(JsonInclude\.Include\.NON_NULL\)</token>-->
-<!--                                    <value>@JsonInclude(JsonInclude.Include.NON_NULL)&#x000A;@JsonIgnoreProperties(ignoreUnknown = true)</value>-->
-<!--                                </replacement>-->
-<!--                                <replacement>-->
-<!--                                    <token>import\ com\.fasterxml\.jackson\.annotation\.JsonInclude;</token>-->
-<!--                                    <value>-->
-<!--                                        import com.fasterxml.jackson.annotation.JsonIgnoreProperties;&#x000A;import com.fasterxml.jackson.annotation.JsonInclude;-->
-<!--                                    </value>-->
-<!--                                </replacement>-->
                             </replacements>
                         </configuration>
                     </execution>

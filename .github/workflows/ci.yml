@@ -57,13 +57,12 @@ jobs:
           $TRAVIS_DIR/load-data-into-hugegraph.sh
 
       - name: Unit test
-        run: mvn -f computer-test/pom.xml test -P unit-test
-
-      - name: Integrate test
-        run: mvn -f computer-test/pom.xml test -P integrate-test
+        run: mvn clean test -P unit-test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
           file: target/site/jacoco/jacoco.xml
 
+      - name: Integrate test
+        run: mvn clean test -P integrate-test
