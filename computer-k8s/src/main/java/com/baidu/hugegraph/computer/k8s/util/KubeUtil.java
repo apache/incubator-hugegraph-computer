@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.k8s.util;
 import java.net.HttpURLConnection;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -46,7 +47,10 @@ import io.fabric8.kubernetes.api.model.EventSource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import io.fabric8.kubernetes.client.utils.Utils;
 
 public class KubeUtil {
@@ -227,5 +231,42 @@ public class KubeUtil {
         }
         matcher.appendTail(sb);
         return sb.toString();
+    }
+
+    public static Secret dockerRegistrySecret(String namespace,
+                                              String dockerServer,
+                                              String username,
+                                              String password) {
+        Map<String, Object> dockerConfig = createDockerConfig(dockerServer,
+                                                              username,
+                                                              password);
+        String dockerConfigAsStr = Serialization.asJson(dockerConfig);
+        String dataBase64 = Base64.getEncoder()
+                                  .encodeToString(dockerConfigAsStr.getBytes());
+        String name = "registry-secret-" + Utils.randomString(6);
+        return new SecretBuilder().withNewMetadata()
+                                  .withNamespace(namespace)
+                                  .withName(name)
+                                  .endMetadata()
+                                  .withType("kubernetes.io/dockerconfigjson")
+                                  .addToData(".dockerconfigjson", dataBase64)
+                                  .build();
+    }
+
+    private static Map<String, Object> createDockerConfig(String dockerServer,
+                                                          String username,
+                                                          String password) {
+        Map<String, Object> dockerConfigMap = new HashMap<>();
+        Map<String, Object> auths = new HashMap<>();
+        Map<String, Object> credentials = new HashMap<>();
+        credentials.put("username", username);
+        credentials.put("password", password);
+        String usernameAndPasswordAuth = username + ":" + password;
+        byte[] bytes = usernameAndPasswordAuth.getBytes();
+        credentials.put("auth", Base64.getEncoder().encodeToString(bytes));
+        auths.put(dockerServer, credentials);
+        dockerConfigMap.put("auths", auths);
+
+        return dockerConfigMap;
     }
 }

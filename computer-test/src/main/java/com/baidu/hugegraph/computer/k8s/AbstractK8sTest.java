@@ -45,8 +45,10 @@ import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.ExecutorUtil;
+import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -108,6 +110,22 @@ public abstract class AbstractK8sTest {
                     this.namespace);
         MapConfiguration mapConfig = new MapConfiguration(options);
         this.config = new HugeConfig(mapConfig);
+    }
+
+    protected void initPullSecret() {
+        String dockerServer = this.config.get(
+                              KubeDriverOptions.IMAGE_REPOSITORY_URL);
+        String username = this.config.get(
+                          KubeDriverOptions.IMAGE_REPOSITORY_USERNAME);
+        String password = this.config.get(
+                          KubeDriverOptions.IMAGE_REPOSITORY_PASSWORD);
+        Secret secret = KubeUtil.dockerRegistrySecret(this.namespace,
+                                                      dockerServer,
+                                                      username,
+                                                      password);
+        this.kubeClient.secrets().createOrReplace(secret);
+        this.updateOptions(KubeDriverOptions.PULL_SECRET_NAMES.name(),
+                           Lists.newArrayList(secret.getMetadata().getName()));
     }
 
     protected void initKubernetesDriver() {

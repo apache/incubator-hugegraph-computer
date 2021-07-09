@@ -37,6 +37,30 @@ public class SuperstepStat {
         this.active = true;
     }
 
+    public void vertexCount(long vertexCount) {
+        this.vertexCount = vertexCount;
+    }
+
+    public void edgeCount(long edgeCount) {
+        this.edgeCount = edgeCount;
+    }
+
+    public void finishedVertexCount(long finishedVertexCount) {
+        this.finishedVertexCount = finishedVertexCount;
+    }
+
+    public void messageCount(long messageCount) {
+        this.messageCount = messageCount;
+    }
+
+    public void messageBytes(long messageBytes) {
+        this.messageBytes = messageBytes;
+    }
+
+    public void active(boolean active) {
+        this.active = active;
+    }
+
     public long vertexCount() {
         return this.vertexCount;
     }

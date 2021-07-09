@@ -65,6 +65,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
+import io.fabric8.kubernetes.client.dsl.internal.core.v1.PodOperationsImpl;
 import io.fabric8.kubernetes.client.utils.PodStatusUtil;
 import io.fabric8.kubernetes.client.utils.Serialization;
 
@@ -438,17 +439,34 @@ public class ComputerJobController
                                    ComponentState masterJobState,
                                    ComponentState workerJobState) {
         StringBuilder builder = new StringBuilder();
-        builder.append("master error log: \n");
+
+        String masterFailedMsg = masterJobState.getMessage();
+        if (StringUtils.isNotBlank(masterFailedMsg)) {
+            builder.append("master failed message: \n");
+            builder.append(masterFailedMsg);
+        }
+
         String masterErrorLog = masterJobState.getErrorLog();
         if (StringUtils.isNotBlank(masterErrorLog)) {
+            builder.append("\n");
+            builder.append("master error log: \n");
             builder.append(masterErrorLog);
         }
-        builder.append("\n");
-        builder.append("worker error log: \n");
+
+        String workerFailedMsg = workerJobState.getMessage();
+        if (StringUtils.isNotBlank(workerFailedMsg)) {
+            builder.append("\n");
+            builder.append("worker failed message: \n");
+            builder.append(workerFailedMsg);
+        }
+
         String workerErrorLog = workerJobState.getErrorLog();
         if (StringUtils.isNotBlank(workerErrorLog)) {
+            builder.append("\n");
+            builder.append("worker error log: \n");
             builder.append(workerErrorLog);
         }
+
         String crName = computerJob.getMetadata().getName();
         this.recordEvent(computerJob, EventType.WARNING,
                          KubeUtil.failedEventName(crName), "ComputerJobFailed",
@@ -468,7 +486,10 @@ public class ComputerJobController
                     client = this.kubeClient.inNamespace(namespace);
                 }
 
-                String log = client.pods().withName(name).getLog(true);
+                PodOperationsImpl podPodResource = (PodOperationsImpl)
+                                                   client.pods().withName(name);
+                podPodResource.tailingLines(100);
+                String log = podPodResource.getLog(true);
                 if (StringUtils.isNotBlank(log)) {
                     return log;
                 }

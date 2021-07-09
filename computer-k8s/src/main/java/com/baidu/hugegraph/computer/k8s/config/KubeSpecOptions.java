@@ -131,7 +131,7 @@ public class KubeSpecOptions extends OptionHolder {
             new ConfigOption<>(
                     "k8s.worker_instances",
                     "The value is number of worker instances, it will " +
-                    "override job.workers_count option.",
+                    "override the 'job.workers_count' option.",
                     rangeInt(1, Integer.MAX_VALUE),
                     1
             );

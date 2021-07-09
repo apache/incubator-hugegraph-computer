@@ -29,6 +29,7 @@ import com.baidu.hugegraph.testutil.Assert;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.embedded.EmbeddedChannel;
 
 public class TransportUtilTest {
 
@@ -37,6 +38,11 @@ public class TransportUtilTest {
         Channel channel = null;
         String address = TransportUtil.remoteAddress(channel);
         Assert.assertNull(address);
+
+        Channel channel2 = new EmbeddedChannel();
+        channel2.close();
+        String address2 = TransportUtil.remoteAddress(channel2);
+        Assert.assertNull(address2);
     }
 
     @Test
@@ -44,6 +50,11 @@ public class TransportUtilTest {
         Channel channel = null;
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
         Assert.assertNull(connectionId);
+
+        Channel channel2 = new EmbeddedChannel();
+        channel2.close();
+        ConnectionId connectionId2 = TransportUtil.remoteConnectionId(channel2);
+        Assert.assertNull(connectionId2);
     }
 
     @Test

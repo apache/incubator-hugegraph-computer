@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.driver;
 
+import java.util.Objects;
+
 public class DefaultJobState implements JobState {
 
     private int superstep;
@@ -64,5 +66,27 @@ public class DefaultJobState implements JobState {
     @Override
     public JobStatus jobStatus() {
         return this.jobStatus;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DefaultJobState)) {
+            return false;
+        }
+        DefaultJobState jobState = (DefaultJobState) o;
+        return this.superstep == jobState.superstep &&
+               this.maxSuperstep == jobState.maxSuperstep &&
+               Objects.equals(this.lastSuperstepStat,
+                              jobState.lastSuperstepStat) &&
+               this.jobStatus == jobState.jobStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.superstep, this.maxSuperstep,
+                            this.lastSuperstepStat, this.jobStatus);
     }
 }

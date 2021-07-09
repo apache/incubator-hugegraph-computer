@@ -299,8 +299,8 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     private void cancelWait(String jobId) {
-        Pair<CompletableFuture<Void>, JobObserver> pair =
-                this.waits.remove(jobId);
+        Pair<CompletableFuture<Void>, JobObserver> pair = this.waits
+                                                              .remove(jobId);
         if (pair != null) {
             CompletableFuture<Void> future = pair.getLeft();
             future.cancel(true);
@@ -379,7 +379,7 @@ public class KubernetesDriver implements ComputerDriver {
                                                                    .options();
         params.forEach((k, v) -> {
             if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
-                if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
+                if (k.startsWith(Constants.K8S_SPEC_PREFIX) &&
                     !ComputerOptions.PROHIBIT_USER_SETTINGS.contains(k)) {
                     NoDefaultConfigOption<?> typedOption =
                                              (NoDefaultConfigOption<?>)

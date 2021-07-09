@@ -39,15 +39,23 @@ import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
+import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
+import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.testutil.Whitebox;
+import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.client.utils.Utils;
 
 public class MiniKubeTest extends AbstractK8sTest {
+
+    private static final String IMAGE_REPOSITORY_URL =
+                                "czcoder/hugegraph-computer-test";
+    private static final String ALGORITHM_NAME = "PageRank";
 
     @Before
     public void setup() throws IOException {
@@ -63,6 +71,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     @Test
     public void testProbe() throws IOException {
+        UnitTestBase.sleep(1000L);
+
         HttpClient client = HttpClientBuilder.create().build();
         String probePort = Utils.getSystemPropertyOrEnvVar(
                            OperatorOptions.PROBE_PORT.name());
@@ -82,13 +92,13 @@ public class MiniKubeTest extends AbstractK8sTest {
     }
 
     @Test
-    public void testWaitJob() {
+    public void testJobSucceed() {
         super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
-                            "czcoder/hugegraph-computer-test");
+                            IMAGE_REPOSITORY_URL);
 
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
-        String jobId = this.driver.submitJob("PageRank", params);
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
@@ -96,12 +106,92 @@ public class MiniKubeTest extends AbstractK8sTest {
             this.driver.waitJob(jobId, params, jobObserver);
         });
 
-        UnitTestBase.sleep(200L);
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.INITIALIZING);
+        Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+        DefaultJobState jobState2 = new DefaultJobState();
+        jobState2.jobStatus(JobStatus.SUCCEEDED);
+        Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState2));
+
+        future.getNow(null);
+    }
+
+    @Test
+    public void testJobFailed() {
+        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
+                            IMAGE_REPOSITORY_URL);
+        super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(),
+                            Lists.newArrayList("cat xxx"));
+        super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(),
+                            Lists.newArrayList("cat xxx"));
+        Object defaultSpec = Whitebox.invoke(KubernetesDriver.class,
+                                             "defaultSpec",
+                                             this.driver);
+        Whitebox.setInternalState(this.driver, "defaultSpec", defaultSpec);
+
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            this.driver.waitJob(jobId, params, jobObserver);
+        });
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.INITIALIZING);
+        Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+        DefaultJobState jobState2 = new DefaultJobState();
+        jobState2.jobStatus(JobStatus.FAILED);
+        Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState2));
+
+        String diagnostics = this.driver.diagnostics(jobId, params);
+        Assert.assertContains("No such file or directory", diagnostics);
+
+        future.getNow(null);
+    }
+
+    @Test
+    public void testJobCancelled() {
+        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
+                            IMAGE_REPOSITORY_URL);
+        super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(),
+                            Lists.newArrayList("pwd && sleep 60"));
+        super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(),
+                            Lists.newArrayList("pwd && sleep 60"));
+        Object defaultSpec = Whitebox.invoke(KubernetesDriver.class,
+                                             "defaultSpec",
+                                             this.driver);
+        Whitebox.setInternalState(this.driver, "defaultSpec", defaultSpec);
+
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            this.driver.waitJob(jobId, params, jobObserver);
+        });
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.INITIALIZING);
+        Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
 
         this.driver.cancelJob(jobId, params);
 
-        Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(3))
-               .onJobStateChanged(Mockito.any(DefaultJobState.class));
+        DefaultJobState jobState2 = new DefaultJobState();
+        jobState2.jobStatus(JobStatus.CANCELLED);
+        Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState2));
 
         future.getNow(null);
     }

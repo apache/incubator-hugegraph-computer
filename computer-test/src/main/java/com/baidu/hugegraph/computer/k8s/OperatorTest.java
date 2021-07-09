@@ -56,5 +56,4 @@ public class OperatorTest {
         Assert.assertEquals("namespace-test", request4.namespace());
         Assert.assertEquals("name-test", request4.name());
     }
-
 }

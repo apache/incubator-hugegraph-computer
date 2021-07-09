@@ -67,8 +67,6 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     @Before
     public void setup() throws IOException {
         this.initConfig();
-        this.kubeClient = new DefaultKubernetesClient()
-                              .inNamespace(this.namespace);
         Config configuration = this.server.getClient().getConfiguration();
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
         try {
@@ -97,6 +95,10 @@ public class KubernetesDriverTest extends AbstractK8sTest {
             KubeConfigUtils.persistKubeConfigIntoFile(config, absolutePath);
             System.setProperty(Config.KUBERNETES_KUBECONFIG_FILE, absolutePath);
 
+            this.kubeClient = new DefaultKubernetesClient()
+                                  .inNamespace(this.namespace);
+
+            this.initPullSecret();
             this.initKubernetesDriver();
             this.initOperator();
         } finally {
@@ -117,8 +119,6 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         Assert.assertNotNull(operation);
 
         final int workerInstances = 2;
-        this.updateOptions(KubeSpecOptions.WORKER_INSTANCES.name(),
-                           workerInstances);
         this.updateOptions(KubeSpecOptions.WORKER_INSTANCES.name(),
                            workerInstances);
         Map<String, Object> defaultSpec = Whitebox.invoke(
@@ -193,6 +193,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
                                                        .withName(crName)
                                                        .get();
         Assert.assertNull(canceledComputerJob);
+        Assert.assertNull(this.driver.jobState(jobId, params));
     }
 
     @Test

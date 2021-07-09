@@ -40,7 +40,7 @@ public class JsonUtil {
             return OBJECT_MAPPER.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
             String message = String.format("Can't write json: %s",
-                                          e.getMessage());
+                                           e.getMessage());
             throw new RuntimeException(message, e);
         }
     }
