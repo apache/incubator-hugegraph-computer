@@ -42,13 +42,17 @@ import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
+import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
+import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.google.common.collect.Lists;
 
+import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.client.utils.Utils;
 
 public class MiniKubeTest extends AbstractK8sTest {
@@ -56,6 +60,18 @@ public class MiniKubeTest extends AbstractK8sTest {
     private static final String IMAGE_REPOSITORY_URL =
                                 "czcoder/hugegraph-computer-test";
     private static final String ALGORITHM_NAME = "PageRank";
+
+    static {
+        OptionSpace.register("computer-driver",
+                             "com.baidu.hugegraph.computer.driver.config" +
+                             ".ComputerOptions");
+        OptionSpace.register("computer-k8s-driver",
+                             "com.baidu.hugegraph.computer.k8s.config" +
+                             ".KubeDriverOptions");
+        OptionSpace.register("computer-k8s-spec",
+                             "com.baidu.hugegraph.computer.k8s.config" +
+                             ".KubeSpecOptions");
+    }
 
     @Before
     public void setup() throws IOException {
@@ -192,6 +208,49 @@ public class MiniKubeTest extends AbstractK8sTest {
         jobState2.jobStatus(JobStatus.CANCELLED);
         Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
+
+        future.getNow(null);
+    }
+
+    @Test
+    public void testTwiceCreate() {
+        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
+                            IMAGE_REPOSITORY_URL);
+        super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(),
+                            Lists.newArrayList("pwd && sleep 60"));
+        super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(),
+                            Lists.newArrayList("pwd && sleep 60"));
+        Object defaultSpec = Whitebox.invoke(KubernetesDriver.class,
+                                             "defaultSpec",
+                                             this.driver);
+        Whitebox.setInternalState(this.driver, "defaultSpec", defaultSpec);
+
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
+        String jobId = this.driver.submitJob("PageRank", params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            this.driver.waitJob(jobId, params, jobObserver);
+        });
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.RUNNING);
+        Mockito.verify(jobObserver, Mockito.timeout(20000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+        HugeGraphComputerJob computerJob = this.operation
+                                               .withName(KubeUtil.crName(jobId))
+                                               .get();
+        computerJob.getSpec().setMasterCpu(Quantity.parse("2"));
+        this.operation.createOrReplace(computerJob);
+
+        UnitTestBase.sleep(1000L);
+
+        this.driver.cancelJob(jobId, params);
+
+        UnitTestBase.sleep(1000L);
 
         future.getNow(null);
     }

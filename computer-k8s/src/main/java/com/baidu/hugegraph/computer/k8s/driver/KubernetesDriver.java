@@ -178,10 +178,9 @@ public class KubernetesDriver implements ComputerDriver {
         String jobId = KubeUtil.genJobId(algorithmName);
         String crName = KubeUtil.crName(jobId);
 
-        ObjectMeta meta = new ObjectMetaBuilder()
-                .withNamespace(this.namespace)
-                .withName(crName)
-                .build();
+        ObjectMeta meta = new ObjectMetaBuilder().withNamespace(this.namespace)
+                                                 .withName(crName)
+                                                 .build();
         computerJob.setMetadata(meta);
 
         String imageUrl = this.buildImageUrl(algorithmName);
@@ -407,7 +406,7 @@ public class KubernetesDriver implements ComputerDriver {
                 defaultConf.put(key, String.valueOf(value));
             } else {
                 boolean required = ComputerOptions.REQUIRED_OPTIONS
-                        .contains(key);
+                                                  .contains(key);
                 E.checkArgument(!required, "The %s option can't be null", key);
             }
         }
