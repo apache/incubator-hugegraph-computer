@@ -31,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +43,7 @@ import com.baidu.hugegraph.computer.driver.JobState;
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
+import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
@@ -230,15 +232,25 @@ public class KubernetesDriverTest extends AbstractK8sTest {
 
     @Test
     public void testOnClose() {
+        Map<String, Pair<CompletableFuture<Void>, JobObserver>> waits =
+        Whitebox.getInternalState(this.driver, "waits");
+        waits.put("test-123", Pair.of(new CompletableFuture<>(),
+                                      Mockito.mock(JobObserver.class)));
+
         AbstractWatchManager<HugeGraphComputerJob> watch =
                                                    Whitebox.getInternalState(
                                                    this.driver, "watch");
         Watcher<HugeGraphComputerJob> watcher = Whitebox.getInternalState(
                                                 watch, "watcher");
+
+        watcher.eventReceived(Watcher.Action.ADDED, null);
+        watcher.eventReceived(Watcher.Action.ERROR, new HugeGraphComputerJob());
+        HugeGraphComputerJob computerJob = new HugeGraphComputerJob();
+        computerJob.setSpec(new ComputerJobSpec());
+        watcher.eventReceived(Watcher.Action.MODIFIED, computerJob);
+
         WatcherException testClose = new WatcherException("test close");
         watcher.onClose(testClose);
-
-        UnitTestBase.sleep(500L);
 
         MutableBoolean watchActive = Whitebox.getInternalState(this.driver,
                                                                "watchActive");

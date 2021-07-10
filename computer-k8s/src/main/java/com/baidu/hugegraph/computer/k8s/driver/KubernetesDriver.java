@@ -247,6 +247,10 @@ public class KubernetesDriver implements ComputerDriver {
                     return;
                 }
 
+                if (action == Action.ERROR) {
+                    return;
+                }
+
                 String jobId = computerJob.getSpec().getJobId();
                 if (StringUtils.isBlank(jobId)) {
                     return;
@@ -257,9 +261,7 @@ public class KubernetesDriver implements ComputerDriver {
                 if (pair != null) {
                     CompletableFuture<?> future = pair.getLeft();
                     JobObserver observer = pair.getRight();
-                    if (action == Action.ERROR) {
-                        return;
-                    }
+
                     KubernetesDriver driver = KubernetesDriver.this;
                     JobState jobState = driver.buildJobState(computerJob);
 

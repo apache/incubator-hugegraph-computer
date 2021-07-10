@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.driver;
 
+import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +31,8 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
+import com.baidu.hugegraph.computer.driver.config.NoDefaultConfigOption;
+import com.baidu.hugegraph.config.ConfigException;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.testutil.Assert;
@@ -47,6 +51,19 @@ public class ComputerOptionsTest {
                     "http://abc:8098");
         options.put(ComputerOptions.HUGEGRAPH_URL.name(),
                     "http://127.0.0.1:8080");
+    }
+
+    @Test
+    public void testNoDefaultConfigOption() {
+        NoDefaultConfigOption<String> option = new NoDefaultConfigOption<>(
+                                                   "test", "desc",
+                                                   disallowEmpty(), String.class);
+
+        Assert.assertThrows(ConfigException.class, () -> {
+            option.checkVal("");
+        });
+
+        Assert.assertNull(option.parseConvert(null));
     }
 
     @Test
