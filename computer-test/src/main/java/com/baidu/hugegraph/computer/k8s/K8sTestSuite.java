@@ -19,11 +19,8 @@
 
 package com.baidu.hugegraph.computer.k8s;
 
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-
-import com.baidu.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -32,17 +29,4 @@ import com.baidu.hugegraph.config.OptionSpace;
     MiniKubeTest.class
 })
 public class K8sTestSuite {
-
-    @BeforeClass
-    public static void setup() {
-        OptionSpace.register("computer-driver",
-                             "com.baidu.hugegraph.computer.driver.config" +
-                             ".ComputerOptions");
-        OptionSpace.register("computer-k8s-driver",
-                             "com.baidu.hugegraph.computer.k8s.config" +
-                             ".KubeDriverOptions");
-        OptionSpace.register("computer-k8s-spec",
-                             "com.baidu.hugegraph.computer.k8s.config" +
-                             ".KubeSpecOptions");
-    }
 }

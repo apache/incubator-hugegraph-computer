@@ -43,6 +43,7 @@ import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.HugeConfig;
+import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.google.common.collect.Lists;
@@ -66,6 +67,18 @@ public abstract class AbstractK8sTest {
     protected Future<?> operatorFuture;
     protected MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
               Resource<HugeGraphComputerJob>> operation;
+
+    static {
+        OptionSpace.register("computer-driver",
+                             "com.baidu.hugegraph.computer.driver.config" +
+                             ".ComputerOptions");
+        OptionSpace.register("computer-k8s-driver",
+                             "com.baidu.hugegraph.computer.k8s.config" +
+                             ".KubeDriverOptions");
+        OptionSpace.register("computer-k8s-spec",
+                             "com.baidu.hugegraph.computer.k8s.config" +
+                             ".KubeSpecOptions");
+    }
 
     protected void updateOptions(String key, Object value) {
         this.config.clearProperty(key);

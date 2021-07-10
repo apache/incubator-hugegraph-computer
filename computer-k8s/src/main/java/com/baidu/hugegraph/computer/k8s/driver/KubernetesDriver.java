@@ -274,10 +274,6 @@ public class KubernetesDriver implements ComputerDriver {
 
             @Override
             public void onClose(WatcherException cause) {
-                if (cause.isHttpGone()) {
-                    return;
-                }
-
                 for (Pair<CompletableFuture<Void>, JobObserver> pair :
                      KubernetesDriver.this.waits.values()) {
                     if (pair != null) {

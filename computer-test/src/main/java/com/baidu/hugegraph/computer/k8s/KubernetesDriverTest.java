@@ -56,6 +56,9 @@ import io.fabric8.kubernetes.api.model.NamedContext;
 import io.fabric8.kubernetes.api.model.NamedContextBuilder;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.Watcher;
+import io.fabric8.kubernetes.client.WatcherException;
+import io.fabric8.kubernetes.client.dsl.internal.AbstractWatchManager;
 import io.fabric8.kubernetes.client.internal.KubeConfigUtils;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 
@@ -223,5 +226,22 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         JobState jobState = this.driver.jobState(jobId, params);
         Assert.assertNotNull(jobState);
         Assert.assertEquals(JobStatus.INITIALIZING, jobState.jobStatus());
+    }
+
+    @Test
+    public void testOnClose() {
+        AbstractWatchManager<HugeGraphComputerJob> watch =
+                                                   Whitebox.getInternalState(
+                                                   this.driver, "watch");
+        Watcher<HugeGraphComputerJob> watcher = Whitebox.getInternalState(
+                                                watch, "watcher");
+        WatcherException testClose = new WatcherException("test close");
+        watcher.onClose(testClose);
+
+        UnitTestBase.sleep(500L);
+
+        MutableBoolean watchActive = Whitebox.getInternalState(this.driver,
+                                                               "watchActive");
+        Assert.assertFalse(watchActive.booleanValue());
     }
 }

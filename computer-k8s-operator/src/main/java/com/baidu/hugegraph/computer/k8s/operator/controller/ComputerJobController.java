@@ -402,7 +402,9 @@ public class ComputerJobController
                                    ConditionStatus.FALSE.value()) &&
                     Objects.equals(condition.getReason(),
                                    POD_REASON_UNSCHEDULABLE)) {
-                    return Pair.of(true, condition.getMessage());
+                    return Pair.of(true,
+                                   condition.getReason() + ", " +
+                                   condition.getMessage());
                 }
             }
         }
@@ -425,7 +427,8 @@ public class ComputerJobController
                         ContainerStateWaiting waiting = state.getWaiting();
                         if (waiting != null &&
                             IMAGE_PULL_BACKOFF.equals(waiting.getReason())) {
-                            return Pair.of(true, waiting.getMessage());
+                            return Pair.of(true, waiting.getReason() + ", " +
+                                           waiting.getMessage());
                         }
                     }
                 }

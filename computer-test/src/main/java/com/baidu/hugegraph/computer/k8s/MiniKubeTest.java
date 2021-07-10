@@ -40,6 +40,7 @@ import org.mockito.Mockito;
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobStatus;
+import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
@@ -47,7 +48,6 @@ import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.google.common.collect.Lists;
@@ -60,18 +60,6 @@ public class MiniKubeTest extends AbstractK8sTest {
     private static final String IMAGE_REPOSITORY_URL =
                                 "czcoder/hugegraph-computer-test";
     private static final String ALGORITHM_NAME = "PageRank";
-
-    static {
-        OptionSpace.register("computer-driver",
-                             "com.baidu.hugegraph.computer.driver.config" +
-                             ".ComputerOptions");
-        OptionSpace.register("computer-k8s-driver",
-                             "com.baidu.hugegraph.computer.k8s.config" +
-                             ".KubeDriverOptions");
-        OptionSpace.register("computer-k8s-spec",
-                             "com.baidu.hugegraph.computer.k8s.config" +
-                             ".KubeSpecOptions");
-    }
 
     @Before
     public void setup() throws IOException {
@@ -114,6 +102,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
+        params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(), "0");
+        params.put(ComputerOptions.RPC_SERVER_PORT.name(), "0");
         String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
@@ -170,6 +160,34 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         String diagnostics = this.driver.diagnostics(jobId, params);
         Assert.assertContains("No such file or directory", diagnostics);
+
+        future.getNow(null);
+    }
+
+    @Test
+    public void testUnSchedulable() {
+        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
+                            IMAGE_REPOSITORY_URL);
+
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
+        params.put(KubeSpecOptions.MASTER_CPU.name(), "10");
+        params.put(KubeSpecOptions.MASTER_MEMORY.name(), "10Gi");
+        String jobId = this.driver.submitJob("PageRank", params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            this.driver.waitJob(jobId, params, jobObserver);
+        });
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.FAILED);
+        Mockito.verify(jobObserver, Mockito.timeout(30000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+        String diagnostics = this.driver.diagnostics(jobId, params);
+        Assert.assertContains("Unschedulable", diagnostics);
 
         future.getNow(null);
     }
