@@ -347,6 +347,7 @@ public class KubernetesDriver implements ComputerDriver {
     public void close() {
         if (this.watch != null) {
             this.watch.close();
+            this.watchActive.setFalse();
         }
 
         if (this.kubeClient != null) {
@@ -377,7 +378,7 @@ public class KubernetesDriver implements ComputerDriver {
                                                                    .options();
         params.forEach((k, v) -> {
             if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
-                if (k.startsWith(Constants.K8S_SPEC_PREFIX) &&
+                if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
                     !ComputerOptions.PROHIBIT_USER_SETTINGS.contains(k)) {
                     NoDefaultConfigOption<?> typedOption =
                                              (NoDefaultConfigOption<?>)

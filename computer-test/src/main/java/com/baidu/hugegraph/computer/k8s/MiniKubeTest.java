@@ -158,6 +158,8 @@ public class MiniKubeTest extends AbstractK8sTest {
         Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
 
+        UnitTestBase.sleep(500L);
+
         String diagnostics = this.driver.diagnostics(jobId, params);
         Assert.assertContains("No such file or directory", diagnostics);
 

@@ -140,6 +140,8 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     public void testUploadAlgorithmJar() throws FileNotFoundException {
         this.updateOptions(KubeDriverOptions.BUILD_IMAGE_BASH_PATH.name(),
                            "conf/images/upload_test.sh");
+        this.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY.name(),
+                           "registry.hub.docker.com");
         InputStream inputStream = new FileInputStream(
                                       "conf/images/test.jar");
         this.driver.uploadAlgorithmJar("PageRank", inputStream);
@@ -202,7 +204,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     }
 
     @Test
-    public void testWaitJob() {
+    public void testWaitJobAndCancel() {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
         String jobId = this.driver.submitJob("PageRank3", params);
@@ -217,6 +219,14 @@ public class KubernetesDriverTest extends AbstractK8sTest {
                .onJobStateChanged(Mockito.any(DefaultJobState.class));
 
         future.getNow(null);
+
+        MutableBoolean watchActive = Whitebox.getInternalState(this.driver,
+                                                               "watchActive");
+        watchActive.setFalse();
+        this.driver.waitJob(jobId, params, jobObserver);
+
+        this.driver.cancelJob(jobId, params);
+        this.driver.waitJob(jobId, params, jobObserver);
     }
 
     @Test
