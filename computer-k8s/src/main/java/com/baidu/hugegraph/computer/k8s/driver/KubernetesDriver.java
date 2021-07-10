@@ -211,7 +211,7 @@ public class KubernetesDriver implements ComputerDriver {
         JobState jobState = this.jobState(jobId, params);
         if (jobState == null) {
             LOG.warn("Unable to fetch Job: {}, it may have been deleted",
-                     jobId);
+                     jobId);ComputerOptionsTest
             return;
         } else {
             observer.onJobStateChanged(jobState);
@@ -255,8 +255,9 @@ public class KubernetesDriver implements ComputerDriver {
                 if (StringUtils.isBlank(jobId)) {
                     return;
                 }
-                Pair<CompletableFuture<Void>, JobObserver> pair =
-                        KubernetesDriver.this.waits.get(jobId);
+
+                Pair<CompletableFuture<Void>,
+                     JobObserver> pair = KubernetesDriver.this.waits.get(jobId);
 
                 if (pair != null) {
                     CompletableFuture<?> future = pair.getLeft();

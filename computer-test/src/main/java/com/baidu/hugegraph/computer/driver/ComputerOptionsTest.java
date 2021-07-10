@@ -57,7 +57,8 @@ public class ComputerOptionsTest {
     public void testNoDefaultConfigOption() {
         NoDefaultConfigOption<String> option = new NoDefaultConfigOption<>(
                                                    "test", "desc",
-                                                   disallowEmpty(), String.class);
+                                                   disallowEmpty(),
+                                                   String.class);
 
         Assert.assertThrows(ConfigException.class, () -> {
             option.checkVal("");
