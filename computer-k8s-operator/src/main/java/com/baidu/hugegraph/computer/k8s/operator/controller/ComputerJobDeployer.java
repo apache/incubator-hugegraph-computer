@@ -340,7 +340,7 @@ public class ComputerJobDeployer {
         VolumeMount configMount = this.getConfigMount();
 
         return new ContainerBuilder()
-                .withName(name)
+                .withName(KubeUtil.containerName(name))
                 .withImage(spec.getImage())
                 .withImagePullPolicy(spec.getPullPolicy())
                 .withEnv(spec.getEnvVars())

@@ -282,7 +282,6 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         return Serialization.clone(resource);
     }
 
-    @SuppressWarnings("unused")
     protected <R extends HasMetadata> List<R> getResourceList(String namespace,
                                                               Class<R> rClass) {
         @SuppressWarnings("unchecked")

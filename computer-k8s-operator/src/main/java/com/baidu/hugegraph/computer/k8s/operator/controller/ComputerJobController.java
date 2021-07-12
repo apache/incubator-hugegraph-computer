@@ -65,7 +65,6 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
-import io.fabric8.kubernetes.client.dsl.internal.core.v1.PodOperationsImpl;
 import io.fabric8.kubernetes.client.utils.PodStatusUtil;
 import io.fabric8.kubernetes.client.utils.Serialization;
 
@@ -489,10 +488,9 @@ public class ComputerJobController
                     client = this.kubeClient.inNamespace(namespace);
                 }
 
-                PodOperationsImpl podPodResource = (PodOperationsImpl)
-                                                   client.pods().withName(name);
-                podPodResource.tailingLines(100);
-                String log = podPodResource.getLog(true);
+                String log = client.pods().withName(name)
+                                   .tailingLines(100)
+                                   .getLog(true);
                 if (StringUtils.isNotBlank(log)) {
                     return log;
                 }

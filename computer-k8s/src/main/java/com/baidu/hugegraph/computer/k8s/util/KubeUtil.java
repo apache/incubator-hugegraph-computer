@@ -126,6 +126,10 @@ public class KubeUtil {
         return crName + "-configmap";
     }
 
+    public static String containerName(String component) {
+        return component + "-container";
+    }
+
     public static String failedEventName(String crName) {
         return crName + "-failedEvent";
     }
