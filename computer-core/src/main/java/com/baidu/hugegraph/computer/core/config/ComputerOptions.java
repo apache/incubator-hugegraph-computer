@@ -452,7 +452,7 @@ public class ComputerOptions extends OptionHolder {
                     "The server port to listen on to transfer data. " +
                     "The system will assign a random port if it's set to 0.",
                     nonNegativeInt(),
-                    8099
+                    0
             );
 
     public static final ConfigOption<Integer> TRANSPORT_SERVER_THREADS =

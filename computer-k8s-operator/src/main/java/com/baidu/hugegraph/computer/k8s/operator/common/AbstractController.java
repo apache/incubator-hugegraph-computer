@@ -394,7 +394,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private void enqueueRequest(Request request) {
         if (request != null) {
-            LOG.info("Enqueue an request: {}", request);
+            LOG.debug("Enqueue an request: {}", request);
             this.workQueue.add(request);
         }
     }

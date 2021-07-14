@@ -19,20 +19,18 @@ spec:
         command: ["java", "-jar", "operator.jar"]
         args: []
         image: controller:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         env:
           - name: PROBE_PORT
-            value: &probe_port 8081
+            value: "8081"
           - name: WATCH_NAMESPACE
-            value: hugegraph-computer-system
+            value: "hugegraph-computer-system"
           - name: RECONCILER_COUNT
-            value: 6
-        securityContext:
-          allowPrivilegeEscalation: false
+            value: "6"
         livenessProbe:
           httpGet:
             path: /healthz
-            port: *probe_port
+            port: &probe_port 8081
           initialDelaySeconds: 15
           periodSeconds: 20
         readinessProbe:
@@ -48,5 +46,7 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "1000m"
+        securityContext:
+          allowPrivilegeEscalation: false
       serviceAccountName: controller-manager
       terminationGracePeriodSeconds: 10

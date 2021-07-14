@@ -93,10 +93,19 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - namespaces
+  verbs:
+  - create
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
   - pods
   verbs:
   - get
   - list
+  - log
   - watch
 - apiGroups:
   - ""
