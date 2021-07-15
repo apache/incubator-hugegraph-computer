@@ -39,11 +39,11 @@
     </appenders>
 
     <loggers>
-        <root level="INFO">
+        <root level="${env:LOG_LEVEL:-INFO}">
             <appender-ref ref="console"/>
             <appender-ref ref="file"/>
         </root>
-        <Logger name="com.baidu.hugegraph" level="INFO" additivity="false">
+        <Logger name="com.baidu.hugegraph" level="${env:LOG_LEVEL:-INFO}" additivity="false">
             <appender-ref ref="console"/>
             <appender-ref ref="file"/>
         </Logger>

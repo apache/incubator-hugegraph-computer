@@ -27,6 +27,8 @@ spec:
             value: "hugegraph-computer-system"
           - name: RECONCILER_COUNT
             value: "6"
+          - name: LOG_LEVEL
+            value: "INFO"
         livenessProbe:
           httpGet:
             path: /healthz
