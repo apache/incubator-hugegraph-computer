@@ -64,10 +64,10 @@ public class OperatorEntrypoint {
 
     private static final Logger LOG = Log.logger(OperatorEntrypoint.class);
 
-    private HugeConfig config;
+    private final HugeConfig config;
+    private final List<AbstractController<?>> controllers;
     private NamespacedKubernetesClient kubeClient;
     private SharedInformerFactory informerFactory;
-    private List<AbstractController<?>> controllers;
     private ExecutorService controllerPool;
     private HttpServer httpServer;
 
@@ -85,12 +85,14 @@ public class OperatorEntrypoint {
         );
     }
 
+    public OperatorEntrypoint() {
+        this.config = this.configFromSysPropsOrEnvVars();
+        this.controllers = new ArrayList<>();
+    }
+
     public void start() {
         try {
-            this.config = this.configFromSysPropsOrEnvVars();
             this.kubeClient = new DefaultKubernetesClient();
-            this.controllers = new ArrayList<>();
-
             String watchNamespace = this.config.get(
                                     OperatorOptions.WATCH_NAMESPACE);
             if (!Objects.equals(watchNamespace, Constants.ALL_NAMESPACE)) {
@@ -110,6 +112,7 @@ public class OperatorEntrypoint {
                 System.exit(1);
             });
 
+            // Start all controller
             this.controllerPool = ExecutorUtil.newFixedThreadPool(
                                   this.controllers.size(), "controllers-%d");
             CountDownLatch latch = new CountDownLatch(this.controllers.size());
@@ -120,6 +123,7 @@ public class OperatorEntrypoint {
                 }, this.controllerPool));
             }
 
+            // Block until controller startup is complete
             CompletableFuture.runAsync(() -> {
                 try {
                     latch.await();
@@ -143,16 +147,13 @@ public class OperatorEntrypoint {
     public synchronized void shutdown() {
         LOG.info("The Operator shutdown...");
 
-        if (this.controllers != null) {
-            Iterator<AbstractController<?>> iterator =
-                                            this.controllers.iterator();
-            while (iterator.hasNext()) {
-                AbstractController<?> controller = iterator.next();
-                if (controller != null) {
-                    controller.shutdown();
-                }
-                iterator.remove();
+        Iterator<AbstractController<?>> iterator = this.controllers.iterator();
+        while (iterator.hasNext()) {
+            AbstractController<?> controller = iterator.next();
+            if (controller != null) {
+                controller.shutdown();
             }
+            iterator.remove();
         }
 
         if (this.controllerPool != null) {
@@ -184,7 +185,7 @@ public class OperatorEntrypoint {
 
     private void registerControllers() {
         ComputerJobController jobController = new ComputerJobController(
-                                                  this.config, this.kubeClient);
+                                              this.config, this.kubeClient);
         this.registerController(jobController,
                                 ConfigMap.class, Job.class, Pod.class);
     }
@@ -223,13 +224,12 @@ public class OperatorEntrypoint {
     }
 
     private void createNamespace(String namespace) {
-        NamespaceBuilder namespaceBuilder = new NamespaceBuilder()
-                .withNewMetadata()
-                .withName(namespace)
-                .endMetadata();
+        NamespaceBuilder builder = new NamespaceBuilder().withNewMetadata()
+                                                         .withName(namespace)
+                                                         .endMetadata();
         KubeUtil.ignoreExists(() -> {
             return this.kubeClient.namespaces()
-                                  .create(namespaceBuilder.build());
+                                  .create(builder.build());
         });
     }
 }

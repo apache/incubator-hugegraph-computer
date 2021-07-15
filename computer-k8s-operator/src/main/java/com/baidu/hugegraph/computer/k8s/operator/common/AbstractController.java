@@ -77,7 +77,6 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     private final String kind;
     protected final HugeConfig config;
     protected final NamespacedKubernetesClient kubeClient;
-    private final int maxReconcileRetry;
     private final WorkQueue<Request> workQueue;
     private final ScheduledExecutorService executor;
     private Set<Class<? extends HasMetadata>> ownsClassSet;
@@ -90,8 +89,6 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         this.crClass = this.getCRClass();
         this.kind = HasMetadata.getKind(this.crClass).toLowerCase(Locale.ROOT);
         this.kubeClient = kubeClient;
-        this.maxReconcileRetry = this.config.get(
-                                      OperatorOptions.MAX_RECONCILE_RETRY);
         this.workQueue = new WorkQueue<>();
         Integer reconcilers = this.config.get(OperatorOptions.RECONCILER_COUNT);
         this.executor = ExecutorUtil.newScheduledThreadPool(reconcilers,
@@ -123,7 +120,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         for (int i = 0; i < reconcilers; i++) {
             this.executor.scheduleWithFixedDelay(() -> {
                         try {
-                            this.worker();
+                            this.startWorker();
                         } catch (Throwable e) {
                             LOG.error("Unexpected reconcile loop abortion", e);
                         } finally {
@@ -160,7 +157,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     protected abstract Result reconcile(Request request);
 
-    private void worker() {
+    private void startWorker() {
         while (!this.executor.isShutdown() &&
                !this.workQueue.isShutdown() &&
                !Thread.currentThread().isInterrupted()) {
@@ -182,7 +179,9 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                 result = this.reconcile(request);
             } catch (Exception e) {
                 LOG.error("Reconcile occur error, requeue request: ", e);
-                if (request.retryIncrGet() > this.maxReconcileRetry) {
+                int maxReconcileRetry = this.config.get(
+                                        OperatorOptions.MAX_RECONCILE_RETRY);
+                if (request.retryIncrGet() > maxReconcileRetry) {
                     result = Result.NO_REQUEUE;
                 } else {
                     result = Result.REQUEUE;

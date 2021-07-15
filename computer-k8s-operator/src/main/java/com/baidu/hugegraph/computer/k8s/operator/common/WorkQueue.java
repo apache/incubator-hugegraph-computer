@@ -24,7 +24,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
- * This class ensures the added work items are, not in dirty set or currently
+ * This class ensures the added work items are not in dirty set or currently
  * processing set, before append them to the list.
  *
  * This has been taken from official client:
