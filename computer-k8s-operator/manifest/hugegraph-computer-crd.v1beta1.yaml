@@ -169,6 +169,8 @@ spec:
               type: array
             image:
               type: string
+            jarFile:
+              type: string
             jobId:
               type: string
             log4jXml:
@@ -238,6 +240,7 @@ spec:
           - algorithmName
           - computerConf
           - image
+          - jarFile
           - jobId
           - masterArgs
           - workerArgs

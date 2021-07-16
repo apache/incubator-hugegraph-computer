@@ -74,6 +74,7 @@ import io.fabric8.kubernetes.client.WatcherException;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.utils.IOHelpers;
+import io.fabric8.kubernetes.client.utils.URLUtils;
 
 public class KubernetesDriver implements ComputerDriver {
 
@@ -133,6 +134,8 @@ public class KubernetesDriver implements ComputerDriver {
 
             String shell = this.conf.get(
                                 KubeDriverOptions.BUILD_IMAGE_BASH_PATH);
+            String jarFileDir = this.conf.get(
+                                     KubeDriverOptions.JAR_FILE_DIR);
             String registry = this.conf.get(
                                    KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY)
                                   .trim();
@@ -149,7 +152,9 @@ public class KubernetesDriver implements ComputerDriver {
             }
             builder.append(" -u ").append(username);
             builder.append(" -p ").append(password);
-            builder.append(" -j ").append(tempFile.getAbsolutePath());
+            builder.append(" -s ").append(tempFile.getAbsolutePath());
+            builder.append(" -j ").append(URLUtils.join(jarFileDir,
+                                                        algorithmName + ".jar"));
             builder.append(" -i ").append(imageUrl);
             String command = builder.toString();
 

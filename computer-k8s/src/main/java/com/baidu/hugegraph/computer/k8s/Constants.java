@@ -35,6 +35,7 @@ public class Constants {
     public static final String ENV_CONFIG_DIR = "CONFIG_DIR";
     public static final String ENV_COMPUTER_CONF_PATH = "COMPUTER_CONF_PATH";
     public static final String ENV_LOG4J_XML_PATH = "LOG4J_XML_PATH";
+    public static final String ENV_JAR_FILE_PATH = "JAR_FILE_PATH";
 
     public static final String CONFIG_DIR =  "/opt/hugegraph-computer/conf";
     public static final String COMPUTER_CONF_FILE = "computer.properties";

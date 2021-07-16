@@ -73,6 +73,10 @@
           "type": "string",
           "existingJavaType": "String"
         },
+        "jarFile": {
+          "type": "string",
+          "existingJavaType": "String"
+        },
         "jobId": {
           "type": "string",
           "existingJavaType": "String"

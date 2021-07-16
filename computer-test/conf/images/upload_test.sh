@@ -3,18 +3,20 @@
 REGISTRY=""
 USER_NAME=""
 PASSWORD=""
+SOURCE_JAR_FILE=""
 JAR_FILE=""
 IMG_URL=""
 
 function print_usage() {
-    echo "USAGE: $0 -r {REGISTRY} -u {USER_NAME} -p {PASSWORD} -j {JAR_FILE} -i {IMG_URL}"
+    echo "USAGE: $0 -r {REGISTRY} -u {USER_NAME} -p {PASSWORD} -s {SOURCE_JAR_FILE} -j {JAR_FILE} -i {IMG_URL}"
 }
 
-while getopts "r:u:p:j:i:" arg; do
+while getopts "r:u:p:s:j:i:" arg; do
     case ${arg} in
         r) REGISTRY="$OPTARG" ;;
         u) USER_NAME="$OPTARG" ;;
         p) PASSWORD="$OPTARG" ;;
+        s) SOURCE_JAR_FILE="$OPTARG" ;;
         j) JAR_FILE="$OPTARG" ;;
         i) IMG_URL="$OPTARG" ;;
         ?) print_usage && exit 1 ;;
@@ -27,6 +29,11 @@ if [ "$USER_NAME" = "" ]; then
 fi
 
 if [ "$PASSWORD" = "" ]; then
+    print_usage
+    exit 1
+fi
+
+if [ "$SOURCE_JAR_FILE" = "" ]; then
     print_usage
     exit 1
 fi
@@ -51,7 +58,7 @@ BIN=`abs_path`
 cat >${BIN}/upload.txt<<EOF
 docker login -u${USER_NAME} -p${PASSWORD} ${REGISTRY}
 
-docker build --build-arg JAR_FILE=${JAR_FILE} -t ${IMG_URL} -f ${BIN}/Dockerfile
+docker build --build-arg SOURCE_JAR_FILE=${SOURCE_JAR_FILE} JAR_FILE=${JAR_FILE} -t ${IMG_URL} -f ${BIN}/Dockerfile
 
 docker push ${IMG_URL}
 

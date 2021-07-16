@@ -116,4 +116,13 @@ public class KubeDriverOptions extends OptionHolder {
                     null,
                     ""
             );
+
+    public static final ConfigOption<String> JAR_FILE_DIR =
+            new ConfigOption<>(
+                    "k8s.jar_file_path",
+                    "The value is directory where the algorithm jar is " +
+                    "located.",
+                    disallowEmpty(),
+                    "/cache/jars/"
+            );
 }
