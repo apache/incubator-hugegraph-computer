@@ -121,6 +121,8 @@ public abstract class AbstractK8sTest {
                     "http://127.0.0.1:8080");
         options.put(KubeDriverOptions.NAMESPACE.name(),
                     this.namespace);
+        options.put(KubeDriverOptions.LOG4J_XML_PATH.name(),
+                    "conf/log4j2-test.xml");
         MapConfiguration mapConfig = new MapConfiguration(options);
         this.config = new HugeConfig(mapConfig);
     }

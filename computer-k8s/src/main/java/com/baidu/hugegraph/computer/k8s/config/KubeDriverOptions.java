@@ -21,6 +21,8 @@ package com.baidu.hugegraph.computer.k8s.config;
 
 import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
 
+import org.apache.commons.io.FileUtils;
+
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
@@ -56,7 +58,7 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.kube_config",
                     "The value is path of k8s config file.",
                     disallowEmpty(),
-                    System.getProperty("user.home") + "/.kube/config"
+                    FileUtils.getUserDirectoryPath() + "/.kube/config"
             );
 
     public static final ConfigOption<String> IMAGE_REPOSITORY_REGISTRY =
@@ -72,7 +74,7 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.image_repository_username",
                     "The value is username for login image repository.",
                     disallowEmpty(),
-                    "username"
+                    "abc"
             );
 
     public static final ConfigOption<String> IMAGE_REPOSITORY_PASSWORD =
@@ -80,7 +82,7 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.image_repository_password",
                     "The value is password for login image repository.",
                     disallowEmpty(),
-                    "password"
+                    "abc"
             );
 
     public static final ConfigOption<String> IMAGE_REPOSITORY_URL =
@@ -102,7 +104,15 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigListOption<String> PULL_SECRET_NAMES =
             new ConfigListOption<>(
                     "k8s.pull_secret_names",
-                    "The value is pullSecret name list of image",
+                    "The value is pullSecret name list of image.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> LOG4J_XML_PATH =
+            new ConfigOption<>(
+                    "k8s.log4j_xml_path",
+                    "The value is log4j.xml path of computer job.",
                     null,
                     ""
             );

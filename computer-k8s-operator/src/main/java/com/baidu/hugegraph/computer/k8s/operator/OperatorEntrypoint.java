@@ -193,7 +193,7 @@ public class OperatorEntrypoint {
     @SafeVarargs
     private final void registerController(
                        AbstractController<?> controller,
-                       Class<? extends HasMetadata>...ownsClass) {
+                       Class<? extends HasMetadata>... ownsClass) {
         controller.register(this.informerFactory, ownsClass);
         this.controllers.add(controller);
     }

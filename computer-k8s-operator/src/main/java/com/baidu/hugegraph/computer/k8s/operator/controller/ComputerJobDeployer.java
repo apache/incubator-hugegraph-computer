@@ -207,6 +207,11 @@ public class ComputerJobDeployer {
         data.put(Constants.COMPUTER_CONF_FILE,
                  KubeUtil.asProperties(computerConf));
 
+        String log4jXml = spec.getLog4jXml();
+        if (StringUtils.isNotBlank(log4jXml)) {
+            data.put(Constants.LOG_XML_FILE, log4jXml);
+        }
+
         String name = KubeUtil.configMapName(crName);
 
         return new ConfigMapBuilder()
@@ -329,11 +334,23 @@ public class ComputerJobDeployer {
                 .build();
         envVars.add(podNamespace);
 
-        EnvVar confPath = new EnvVarBuilder()
+        EnvVar confDir = new EnvVarBuilder()
                 .withName(Constants.ENV_CONFIG_DIR)
-                .withValue(Constants.CONFIG_PATH)
+                .withValue(Constants.CONFIG_DIR)
+                .build();
+        envVars.add(confDir);
+
+        EnvVar confPath = new EnvVarBuilder()
+                .withName(Constants.ENV_COMPUTER_CONF_PATH)
+                .withValue(Constants.COMPUTER_CONF_PATH)
                 .build();
         envVars.add(confPath);
+
+        EnvVar log4jXmlPath = new EnvVarBuilder()
+                .withName(Constants.ENV_LOG4J_XML_PATH)
+                .withValue(Constants.LOG_XML_PATH)
+                .build();
+        envVars.add(log4jXmlPath);
 
         Quantity masterCpu = spec.getMasterCpu();
         Quantity masterMemory = spec.getMasterMemory();
@@ -359,7 +376,7 @@ public class ComputerJobDeployer {
     private VolumeMount getConfigMount() {
         return new VolumeMountBuilder()
                 .withName(CONFIG_MAP_VOLUME)
-                .withMountPath(Constants.CONFIG_PATH)
+                .withMountPath(Constants.CONFIG_DIR)
                 .build();
     }
 

@@ -98,7 +98,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     @SafeVarargs
     public final void register(SharedInformerFactory informerFactory,
-                               Class<? extends HasMetadata>...ownsClass) {
+                               Class<? extends HasMetadata>... ownsClass) {
         Long resyncPeriod = this.config.get(OperatorOptions.RESYNC_PERIOD);
         this.ownsClassSet = Sets.newHashSet(ownsClass);
         this.informerMap = new ConcurrentHashMap<>();

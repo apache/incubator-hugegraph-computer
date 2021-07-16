@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.k8s;
 
+import io.fabric8.kubernetes.client.utils.URLUtils;
+
 public class Constants {
 
     public static final String ALL_NAMESPACE = "*";
@@ -31,9 +33,16 @@ public class Constants {
     public static final String ENV_POD_NAMESPACE = "POD_NAMESPACE";
     public static final String ENV_POD_NAME = "POD_NAME";
     public static final String ENV_CONFIG_DIR = "CONFIG_DIR";
+    public static final String ENV_COMPUTER_CONF_PATH = "COMPUTER_CONF_PATH";
+    public static final String ENV_LOG4J_XML_PATH = "LOG4J_XML_PATH";
 
-    public static final String CONFIG_PATH =  "/opt/hugegraph-computer/conf";
+    public static final String CONFIG_DIR =  "/opt/hugegraph-computer/conf";
     public static final String COMPUTER_CONF_FILE = "computer.properties";
+    public static final String LOG_XML_FILE = "log4j2.xml";
+    public static final String COMPUTER_CONF_PATH =
+           URLUtils.pathJoin(CONFIG_DIR, COMPUTER_CONF_FILE);
+    public static final String LOG_XML_PATH =
+           URLUtils.pathJoin(CONFIG_DIR, LOG_XML_FILE);
 
     public static final String K8S_SPEC_PREFIX  = "k8s.";
 }

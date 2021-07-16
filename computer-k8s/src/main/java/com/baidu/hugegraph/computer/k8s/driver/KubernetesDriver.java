@@ -458,6 +458,18 @@ public class KubernetesDriver implements ComputerDriver {
             }
         }
 
+        // Add log4j.xml
+        String log4jXmlPath = this.conf.get(KubeDriverOptions.LOG4J_XML_PATH);
+        if (StringUtils.isNotBlank(log4jXmlPath)) {
+            try {
+                File file = new File(log4jXmlPath);
+                String log4jXml = FileUtils.readFileToString(file);
+                spec.withLog4jXml(log4jXml);
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+
         Map<String, Object> specMap = HugeGraphComputerJob.specToMap(spec);
         return Collections.unmodifiableMap(specMap);
     }

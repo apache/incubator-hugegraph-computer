@@ -77,6 +77,10 @@
           "type": "string",
           "existingJavaType": "String"
         },
+        "log4jXml": {
+          "type": "string",
+          "existingJavaType": "String"
+        },
         "masterArgs": {
           "type": "array",
           "items": {

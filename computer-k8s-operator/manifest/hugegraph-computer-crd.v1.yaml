@@ -170,6 +170,8 @@ spec:
                 type: string
               jobId:
                 type: string
+              log4jXml:
+                type: string
               masterArgs:
                 items:
                   type: string
