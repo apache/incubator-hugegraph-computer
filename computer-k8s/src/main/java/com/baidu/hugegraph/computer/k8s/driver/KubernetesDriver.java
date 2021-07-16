@@ -153,8 +153,8 @@ public class KubernetesDriver implements ComputerDriver {
             builder.append(" -u ").append(username);
             builder.append(" -p ").append(password);
             builder.append(" -s ").append(tempFile.getAbsolutePath());
-            builder.append(" -j ").append(URLUtils.join(jarFileDir,
-                                                        algorithmName + ".jar"));
+            String jarFile = URLUtils.join(jarFileDir, algorithmName + ".jar");
+            builder.append(" -j ").append(jarFile);
             builder.append(" -i ").append(imageUrl);
             String command = builder.toString();
 
