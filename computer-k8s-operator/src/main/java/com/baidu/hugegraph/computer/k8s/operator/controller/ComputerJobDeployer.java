@@ -352,11 +352,14 @@ public class ComputerJobDeployer {
                 .build();
         envVars.add(log4jXmlPath);
 
-        EnvVar jarFilePath = new EnvVarBuilder()
-                .withName(Constants.ENV_JAR_FILE_PATH)
-                .withValue(spec.getJarFile())
-                .build();
-        envVars.add(jarFilePath);
+        String jarFile = spec.getJarFile();
+        if (StringUtils.isNotBlank(jarFile)) {
+            EnvVar jarFilePath = new EnvVarBuilder()
+                    .withName(Constants.ENV_JAR_FILE_PATH)
+                    .withValue(jarFile)
+                    .build();
+            envVars.add(jarFilePath);
+        }
 
         Quantity masterCpu = spec.getMasterCpu();
         Quantity masterMemory = spec.getMasterMemory();

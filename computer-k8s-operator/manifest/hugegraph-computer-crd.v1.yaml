@@ -239,7 +239,6 @@ spec:
             - algorithmName
             - computerConf
             - image
-            - jarFile
             - jobId
             - masterArgs
             - workerArgs

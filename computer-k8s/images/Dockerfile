@@ -1,4 +1,4 @@
-FROM czcoder/hugegraph-computer:latest
+FROM czcoder/hugegraph-computer-framework:latest
 
 LABEL maintainer="HugeGraph Docker Maintainers <hugegraph@googlegroups.com>"
 

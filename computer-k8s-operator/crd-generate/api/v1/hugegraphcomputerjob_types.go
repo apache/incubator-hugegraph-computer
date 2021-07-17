@@ -60,7 +60,7 @@ type ComputerJobSpec struct {
 
 	Log4jXml *string `json:"log4jXml,omitempty"`
 	
-	JarFile *string `json:"jarFile"`
+	JarFile *string `json:"jarFile,omitempty"`
 
 	// Environment variables shared by all Master and Worker.
 	EnvVars []corev1.EnvVar `json:"envVars,omitempty"`
