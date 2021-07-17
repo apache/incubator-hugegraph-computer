@@ -42,12 +42,12 @@ class MessageQueue {
     }
 
     public void put(QueuedMessage message) throws InterruptedException {
-        boolean isEmpty = this.queue.isEmpty();
         this.queue.put(message);
-        if (isEmpty) {
-            // It means that the queue is empty before put
-            this.notEmptyNotifier.run();
-        }
+        /*
+         * TODO: Try to optimize, don't signal every time when the queue
+         * is not empty
+         */
+        this.notEmptyNotifier.run();
     }
 
     public QueuedMessage peek() {
