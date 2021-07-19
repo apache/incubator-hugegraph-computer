@@ -125,7 +125,7 @@ public class MiniKubeTest extends AbstractK8sTest {
                                   true);
         Whitebox.setInternalState(this.driver, "internalAlgorithms",
                                   Lists.newArrayList("algorithm123"));
-        Whitebox.setInternalState(this.driver, "internalAlgorithms",
+        Whitebox.setInternalState(this.driver, "internalAlgorithmImageUrl",
                                   IMAGE_REPOSITORY_URL);
 
         Map<String, String> params = new HashMap<>();
