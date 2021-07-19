@@ -68,6 +68,9 @@ public abstract class AbstractK8sTest {
     protected MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
               Resource<HugeGraphComputerJob>> operation;
 
+    protected static final String IMAGE_REPOSITORY_URL =
+              "czcoder/hugegraph-computer-test";
+
     static {
         OptionSpace.register("computer-driver",
                              "com.baidu.hugegraph.computer.driver.config" +
@@ -123,6 +126,10 @@ public abstract class AbstractK8sTest {
                     this.namespace);
         options.put(KubeDriverOptions.LOG4J_XML_PATH.name(),
                     "conf/log4j2-test.xml");
+        options.put(KubeDriverOptions.ENABLE_INTERNAL_ALGORITHM.name(),
+                    "false");
+        options.put(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
+                    IMAGE_REPOSITORY_URL);
         MapConfiguration mapConfig = new MapConfiguration(options);
         this.config = new HugeConfig(mapConfig);
     }

@@ -91,6 +91,15 @@ public class KubernetesDriver implements ComputerDriver {
     private final Map<String, Object> defaultSpec;
     private final Map<String, String> defaultConf;
 
+    private final String bash;
+    private final String jarFileDir;
+    private final String registry;
+    private final String username;
+    private final String password;
+    private final Boolean enableInternalAlgorithm;
+    private final List<String> internalAlgorithms;
+    private final String internalAlgorithmImageUrl;
+
     public KubernetesDriver(HugeConfig conf) {
         this(conf, createKubeClient(conf));
     }
@@ -108,6 +117,23 @@ public class KubernetesDriver implements ComputerDriver {
         this.waits = new ConcurrentHashMap<>();
         this.defaultSpec = this.defaultSpec();
         this.defaultConf = this.defaultComputerConf();
+
+
+        this.bash = this.conf.get(KubeDriverOptions.BUILD_IMAGE_BASH_PATH);
+        this.jarFileDir = this.conf.get(KubeDriverOptions.JAR_FILE_DIR);
+        this.registry = this.conf.get(
+                             KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY)
+                                 .trim();
+        this.username = this.conf.get(
+                             KubeDriverOptions.IMAGE_REPOSITORY_USERNAME);
+        this.password = this.conf.get(
+                             KubeDriverOptions.IMAGE_REPOSITORY_PASSWORD);
+        this.enableInternalAlgorithm = this.conf.get(
+        KubeDriverOptions.ENABLE_INTERNAL_ALGORITHM);
+        this.internalAlgorithms = this.conf.get(
+        KubeDriverOptions.INTERNAL_ALGORITHMS);
+        this.internalAlgorithmImageUrl = this.conf.get(
+        KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL);
     }
 
     private static NamespacedKubernetesClient createKubeClient(
@@ -132,28 +158,18 @@ public class KubernetesDriver implements ComputerDriver {
                                            ".jar");
             FileUtils.copyInputStreamToFile(input, tempFile);
 
-            String shell = this.conf.get(
-                                KubeDriverOptions.BUILD_IMAGE_BASH_PATH);
-            String jarFileDir = this.conf.get(
-                                     KubeDriverOptions.JAR_FILE_DIR);
-            String registry = this.conf.get(
-                                   KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY)
-                                  .trim();
-            String username = this.conf.get(
-                                   KubeDriverOptions.IMAGE_REPOSITORY_USERNAME);
-            String password = this.conf.get(
-                                   KubeDriverOptions.IMAGE_REPOSITORY_PASSWORD);
+
             String imageUrl = this.buildImageUrl(algorithmName);
 
             StringBuilder builder = new StringBuilder();
-            builder.append("bash ").append(shell);
-            if (StringUtils.isNotBlank(registry)) {
-                builder.append(" -r ").append(registry);
+            builder.append("bash ").append(this.bash);
+            if (StringUtils.isNotBlank(this.registry)) {
+                builder.append(" -r ").append(this.registry);
             }
-            builder.append(" -u ").append(username);
-            builder.append(" -p ").append(password);
+            builder.append(" -u ").append(this.username);
+            builder.append(" -p ").append(this.password);
             builder.append(" -s ").append(tempFile.getAbsolutePath());
-            String jarFile = URLUtils.join(jarFileDir, algorithmName + ".jar");
+            String jarFile = this.buildJarFile(this.jarFileDir, algorithmName);
             builder.append(" -j ").append(jarFile);
             builder.append(" -i ").append(imageUrl);
             String command = builder.toString();
@@ -188,15 +204,28 @@ public class KubernetesDriver implements ComputerDriver {
                                                  .build();
         computerJob.setMetadata(meta);
 
-        String imageUrl = this.buildImageUrl(algorithmName);
         Map<String, String> computerConf = this.computerConf(this.defaultConf,
                                                              params);
 
         ComputerJobSpec spec = this.computerJobSpec(this.defaultSpec, params);
-        spec.withAlgorithmName(algorithmName)
-            .withJobId(jobId)
-            .withImage(imageUrl)
-            .withComputerConf(computerConf);
+
+        if (this.enableInternalAlgorithm &&
+            this.internalAlgorithms.contains(algorithmName)) {
+            spec.withAlgorithmName(algorithmName)
+                .withJobId(jobId)
+                .withImage(this.internalAlgorithmImageUrl)
+                .withComputerConf(computerConf);
+        } else {
+            String imageUrl = this.buildImageUrl(algorithmName);
+            String jarFileDir = this.conf.get(KubeDriverOptions.JAR_FILE_DIR);
+            String jarFile = this.buildJarFile(jarFileDir, algorithmName);
+            spec.withAlgorithmName(algorithmName)
+                .withJobId(jobId)
+                .withImage(imageUrl)
+                .withJarFile(jarFile)
+                .withComputerConf(computerConf);
+        }
+
         computerJob.setSpec(spec);
 
         this.operation.createOrReplace(computerJob);
@@ -373,7 +402,11 @@ public class KubernetesDriver implements ComputerDriver {
     private String buildImageUrl(String algorithmName) {
         String repository = this.conf.get(
                                  KubeDriverOptions.IMAGE_REPOSITORY_URL);
-        return KubeUtil.imageName(repository, algorithmName, null);
+        return KubeUtil.imageUrl(repository, algorithmName, null);
+    }
+
+    private String buildJarFile(String jarFileDir, String algorithmName) {
+        return URLUtils.join(jarFileDir, algorithmName + ".jar");
     }
 
     private Map<String, String> computerConf(Map<String, String> defaultConf,

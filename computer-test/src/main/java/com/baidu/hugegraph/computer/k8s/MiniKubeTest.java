@@ -41,7 +41,6 @@ import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
-import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
@@ -57,8 +56,6 @@ import io.fabric8.kubernetes.client.utils.Utils;
 
 public class MiniKubeTest extends AbstractK8sTest {
 
-    private static final String IMAGE_REPOSITORY_URL =
-                                "czcoder/hugegraph-computer-test";
     private static final String ALGORITHM_NAME = "PageRank";
 
     @Before
@@ -97,9 +94,6 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     @Test
     public void testJobSucceed() {
-        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
-                            IMAGE_REPOSITORY_URL);
-
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
         params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(), "0");
@@ -126,9 +120,41 @@ public class MiniKubeTest extends AbstractK8sTest {
     }
 
     @Test
+    public void testJobInternalSucceed() {
+        Whitebox.setInternalState(this.driver, "enableInternalAlgorithm",
+                                  true);
+        Whitebox.setInternalState(this.driver, "internalAlgorithms",
+                                  Lists.newArrayList("algorithm123"));
+        Whitebox.setInternalState(this.driver, "internalAlgorithms",
+                                  IMAGE_REPOSITORY_URL);
+
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
+        params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(), "0");
+        params.put(ComputerOptions.RPC_SERVER_PORT.name(), "0");
+        String jobId = this.driver.submitJob("algorithm123", params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            this.driver.waitJob(jobId, params, jobObserver);
+        });
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.INITIALIZING);
+        Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+        DefaultJobState jobState2 = new DefaultJobState();
+        jobState2.jobStatus(JobStatus.SUCCEEDED);
+        Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState2));
+
+        future.getNow(null);
+    }
+
+    @Test
     public void testJobFailed() {
-        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
-                            IMAGE_REPOSITORY_URL);
         super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(),
                             Lists.newArrayList("cat xxx"));
         super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(),
@@ -168,14 +194,11 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     @Test
     public void testUnSchedulable() {
-        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
-                            IMAGE_REPOSITORY_URL);
-
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
         params.put(KubeSpecOptions.MASTER_CPU.name(), "10");
         params.put(KubeSpecOptions.MASTER_MEMORY.name(), "10Gi");
-        String jobId = this.driver.submitJob("PageRank", params);
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
@@ -196,8 +219,6 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     @Test
     public void testJobCancelled() {
-        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
-                            IMAGE_REPOSITORY_URL);
         super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(),
                             Lists.newArrayList("pwd && sleep 60"));
         super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(),
@@ -234,8 +255,6 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     @Test
     public void testTwiceCreate() {
-        super.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
-                            IMAGE_REPOSITORY_URL);
         super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(),
                             Lists.newArrayList("pwd && sleep 60"));
         super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(),
@@ -247,7 +266,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
-        String jobId = this.driver.submitJob("PageRank", params);
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 

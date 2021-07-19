@@ -106,8 +106,8 @@ public class KubeUtil {
         return algorithmName + "-" + Utils.randomString(10);
     }
 
-    public static String imageName(String repository, String algorithmName,
-                                   String version) {
+    public static String imageUrl(String repository, String algorithmName,
+                                  String version) {
         if (StringUtils.isBlank(version)) {
             version = "latest";
         }

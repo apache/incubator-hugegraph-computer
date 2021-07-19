@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.k8s.config;
 
+import static com.baidu.hugegraph.config.OptionChecker.allowValues;
 import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
 
 import org.apache.commons.io.FileUtils;
@@ -90,7 +91,7 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.image_repository_url",
                     "The value is url of image repository.",
                     disallowEmpty(),
-                    "hugegraph/computer"
+                    "hugegraph/hugegraph-computer"
             );
 
     public static final ConfigOption<String> BUILD_IMAGE_BASH_PATH =
@@ -124,5 +125,29 @@ public class KubeDriverOptions extends OptionHolder {
                     "located.",
                     disallowEmpty(),
                     "/cache/jars/"
+            );
+
+    public static final ConfigOption<Boolean> ENABLE_INTERNAL_ALGORITHM =
+            new ConfigOption<>(
+                    "k8s.enable_internal_algorithm",
+                    "Whether enable internal algorithm.",
+                    allowValues(true, false),
+                    true
+            );
+
+    public static final ConfigListOption<String> INTERNAL_ALGORITHMS =
+            new ConfigListOption<>(
+                    "k8s.internal_algorithm",
+                    "The value is name list of all internal algorithm.",
+                    disallowEmpty(),
+                    "pageRank"
+            );
+
+    public static final ConfigOption<String> INTERNAL_ALGORITHM_IMAGE_URL =
+            new ConfigOption<>(
+                    "k8s.internal_algorithm_image_url",
+                    "The value is image url of internal algorithm.",
+                    disallowEmpty(),
+                    "czcoder/hugegraph-computer-based-algorithm:latest"
             );
 }

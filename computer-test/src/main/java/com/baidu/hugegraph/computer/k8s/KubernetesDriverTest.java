@@ -138,10 +138,11 @@ public class KubernetesDriverTest extends AbstractK8sTest {
 
     @Test
     public void testUploadAlgorithmJar() throws FileNotFoundException {
-        this.updateOptions(KubeDriverOptions.BUILD_IMAGE_BASH_PATH.name(),
-                           "conf/images/upload_test.sh");
-        this.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY.name(),
-                           "registry.hub.docker.com");
+        Whitebox.setInternalState(this.driver, "bash",
+                                  "conf/images/upload_test.sh");
+        Whitebox.setInternalState(this.driver, "registry",
+                                  "registry.hub.docker.com");
+
         InputStream inputStream = new FileInputStream(
                                       "conf/images/test.jar");
         this.driver.uploadAlgorithmJar("PageRank", inputStream);
@@ -156,8 +157,9 @@ public class KubernetesDriverTest extends AbstractK8sTest {
 
     @Test
     public void testUploadAlgorithmJarWithError() throws FileNotFoundException {
-        this.updateOptions(KubeDriverOptions.BUILD_IMAGE_BASH_PATH.name(),
-                           "conf/images/upload_test-x.sh");
+        Whitebox.setInternalState(this.driver, "bash",
+                                  "conf/images/upload_test-x.sh");
+
         InputStream inputStream = new FileInputStream(
                                       "conf/images/test.jar");
 
