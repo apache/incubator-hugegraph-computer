@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.k8s.crd.model.EventType;
@@ -69,9 +68,6 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private static final Logger LOG = Log.logger(AbstractController.class);
-
-    protected static final Pair<Boolean, String> FALSE_PAIR = Pair.of(false,
-                                                                      null);
 
     private final Class<T> crClass;
     private final String kind;
@@ -155,7 +151,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         }
     }
 
-    protected abstract Result reconcile(Request request);
+    protected abstract OperatorResult reconcile(Request request);
 
     private void startWorker() {
         while (!this.executor.isShutdown() &&
@@ -174,7 +170,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                 LOG.info("The {}-controller worker exiting...", this.kind);
                 break;
             }
-            Result result;
+            OperatorResult result;
             try {
                 result = this.reconcile(request);
             } catch (Exception e) {
@@ -182,9 +178,9 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                 int maxReconcileRetry = this.config.get(
                                         OperatorOptions.MAX_RECONCILE_RETRY);
                 if (request.retryIncrGet() > maxReconcileRetry) {
-                    result = Result.NO_REQUEUE;
+                    result = OperatorResult.NO_REQUEUE;
                 } else {
-                    result = Result.REQUEUE;
+                    result = OperatorResult.REQUEUE;
                 }
             }
 
@@ -362,22 +358,22 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     }
 
     private void handleOwnsResource(HasMetadata ownsResource) {
-        Pair<Boolean, String> ownsPredicate = this.ownsPredicate(ownsResource);
-        if (ownsPredicate.getKey()) {
+        MatchWithMsg ownsMatch = this.ownsPredicate(ownsResource);
+        if (ownsMatch.isMatch()) {
             String namespace = ownsResource.getMetadata().getNamespace();
-            Request request = new Request(namespace, ownsPredicate.getValue());
+            Request request = new Request(namespace, ownsMatch.msg());
             this.enqueueRequest(request);
         }
     }
 
-    protected Pair<Boolean, String> ownsPredicate(HasMetadata ownsResource) {
+    protected MatchWithMsg ownsPredicate(HasMetadata ownsResource) {
         OwnerReference owner = this.getControllerOf(ownsResource);
         if (owner != null && owner.getController() &&
             StringUtils.isNotBlank(owner.getName()) &&
             StringUtils.equalsIgnoreCase(owner.getKind(), this.kind)) {
-            return Pair.of(true, owner.getName());
+            return new MatchWithMsg(true, owner.getName());
         }
-        return FALSE_PAIR;
+        return MatchWithMsg.NO_MATCH;
     }
 
     protected OwnerReference getControllerOf(HasMetadata resource) {
@@ -393,7 +389,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     private void enqueueRequest(Request request) {
         if (request != null) {
-            LOG.debug("Enqueue an request: {}", request);
+            LOG.debug("Enqueue a resource request: {}", request);
             this.workQueue.add(request);
         }
     }

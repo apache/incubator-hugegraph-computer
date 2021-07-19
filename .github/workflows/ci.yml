@@ -45,7 +45,7 @@ jobs:
           fetch-depth: 2
 
       - name: Compile
-        run: mvn clean install -Dmaven.javadoc.skip=true -DskipTests | grep -v "Downloading\|Downloaded"
+        run: mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
 
       - name: Prepare env and service
         env:

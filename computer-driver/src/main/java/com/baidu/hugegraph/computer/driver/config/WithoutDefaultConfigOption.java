@@ -27,20 +27,21 @@ import com.google.common.base.Predicate;
 /**
  * The class is subclass of {@link ConfigOption} it without default value
  */
-public class NoDefaultConfigOption<T> extends ConfigOption<T> {
+public class WithoutDefaultConfigOption<T> extends ConfigOption<T> {
 
-    public NoDefaultConfigOption(String name, Predicate<T> pred,
-                                 Class<T> type) {
+    public WithoutDefaultConfigOption(String name, Predicate<T> pred,
+                                      Class<T> type) {
         this(name, StringUtils.EMPTY, pred, type);
     }
 
-    public NoDefaultConfigOption(String name, String desc, Predicate<T> pred,
-                                 Class<T> type) {
+    public WithoutDefaultConfigOption(String name, String desc,
+                                      Predicate<T> pred, Class<T> type) {
         this(name, false, desc, pred, type);
     }
 
-    public NoDefaultConfigOption(String name, boolean required, String desc,
-                                 Predicate<T> pred, Class<T> type) {
+    public WithoutDefaultConfigOption(String name, boolean required,
+                                      String desc, Predicate<T> pred,
+                                      Class<T> type) {
         super(name, required, desc, pred, type, null);
     }
 

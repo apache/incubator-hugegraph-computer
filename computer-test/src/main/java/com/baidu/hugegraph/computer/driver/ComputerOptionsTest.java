@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
-import com.baidu.hugegraph.computer.driver.config.NoDefaultConfigOption;
+import com.baidu.hugegraph.computer.driver.config.WithoutDefaultConfigOption;
 import com.baidu.hugegraph.config.ConfigException;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
@@ -55,7 +55,8 @@ public class ComputerOptionsTest {
 
     @Test
     public void testNoDefaultConfigOption() {
-        NoDefaultConfigOption<String> option = new NoDefaultConfigOption<>(
+        WithoutDefaultConfigOption<String>
+                option = new WithoutDefaultConfigOption<>(
                                                    "test", "desc",
                                                    disallowEmpty(),
                                                    String.class);

@@ -25,7 +25,7 @@ import static com.baidu.hugegraph.config.OptionChecker.rangeInt;
 
 import java.util.Map;
 
-import com.baidu.hugegraph.computer.driver.config.NoDefaultConfigOption;
+import com.baidu.hugegraph.computer.driver.config.WithoutDefaultConfigOption;
 import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
@@ -59,18 +59,20 @@ public class KubeSpecOptions extends OptionHolder {
         }
     }
 
-    public static final NoDefaultConfigOption<String> MASTER_CPU =
-            new NoDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<String> MASTER_CPU =
+            new WithoutDefaultConfigOption<>(
                     "k8s.master_cpu",
-                    "The value is cpu limit of master.",
+                    "The value is cpu limit of master, it's units should " +
+                    "meet the constraints of k8s for cpu units.",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
 
-    public static final NoDefaultConfigOption<String> MASTER_MEMORY =
-            new NoDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<String> MASTER_MEMORY =
+            new WithoutDefaultConfigOption<>(
                     "k8s.master_memory",
-                    "The value is memory limit of master.",
+                    "The value is memory limit of master, it's units should " +
+                    "meet the constraints of k8s for memory units.",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
@@ -93,18 +95,20 @@ public class KubeSpecOptions extends OptionHolder {
                     "echo master"
             );
 
-    public static final NoDefaultConfigOption<String> WORKER_CPU =
-            new NoDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<String> WORKER_CPU =
+            new WithoutDefaultConfigOption<>(
                     "k8s.worker_cpu",
-                    "The value is cpu limit of worker.",
+                    "The value is cpu limit of worker, it's units should " +
+                    "meet the constraints of k8s for cpu units.",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
 
-    public static final NoDefaultConfigOption<String> WORKER_MEMORY =
-            new NoDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<String> WORKER_MEMORY =
+            new WithoutDefaultConfigOption<>(
                     "k8s.worker_memory",
-                    "The value is memory limit of worker.",
+                    "The value is memory limit of worker, it's units should " +
+                    "meet the constraints of k8s for memory units.",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
@@ -139,7 +143,7 @@ public class KubeSpecOptions extends OptionHolder {
     public static final ConfigOption<String> PULL_POLICY =
             new ConfigOption<>(
                     "k8s.pull_policy",
-                    "The value is pull policy of image.",
+                    "The value is pull-policy of image.",
                     allowValues("Always", "Never", "IfNotPresent"),
                     "Always"
             );

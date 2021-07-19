@@ -19,42 +19,23 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.common;
 
-import java.time.Duration;
-import java.util.Objects;
+public class MatchWithMsg {
 
-public class Result {
+    private final boolean match;
+    private final String msg;
 
-    private final boolean requeue;
-    private final Duration requeueAfter;
+    public static final MatchWithMsg NO_MATCH = new MatchWithMsg(false, null);
 
-    public static final Result NO_REQUEUE = new Result(false);
-    public static final Result REQUEUE = new Result(true);
-
-    public Result(boolean requeue) {
-        this.requeue = requeue;
-        this.requeueAfter = Duration.ZERO;
+    public MatchWithMsg(boolean match, String msg) {
+        this.match = match;
+        this.msg = msg;
     }
 
-    public boolean requeue() {
-        return this.requeue;
+    public String msg() {
+        return this.msg;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Result)) {
-            return false;
-        }
-
-        final Result result = (Result) o;
-        return this.requeue == result.requeue &&
-               Objects.equals(this.requeueAfter, result.requeueAfter);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.requeue, this.requeueAfter);
+    public boolean isMatch() {
+        return this.match;
     }
 }

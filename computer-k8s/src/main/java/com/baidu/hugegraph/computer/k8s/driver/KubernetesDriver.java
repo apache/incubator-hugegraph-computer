@@ -46,7 +46,7 @@ import com.baidu.hugegraph.computer.driver.JobState;
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.driver.SuperstepStat;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
-import com.baidu.hugegraph.computer.driver.config.NoDefaultConfigOption;
+import com.baidu.hugegraph.computer.driver.config.WithoutDefaultConfigOption;
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
@@ -385,8 +385,8 @@ public class KubernetesDriver implements ComputerDriver {
             if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
                 if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
                     !ComputerOptions.PROHIBIT_USER_SETTINGS.contains(k)) {
-                    NoDefaultConfigOption<?> typedOption =
-                                             (NoDefaultConfigOption<?>)
+                    WithoutDefaultConfigOption<?> typedOption =
+                                             (WithoutDefaultConfigOption<?>)
                                              allOptions.get(k);
                     if (typedOption != null) {
                         typedOption.checkVal(v);

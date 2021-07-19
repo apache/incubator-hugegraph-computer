@@ -22,19 +22,19 @@ package com.baidu.hugegraph.computer.k8s;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.k8s.operator.common.OperatorResult;
 import com.baidu.hugegraph.computer.k8s.operator.common.Request;
-import com.baidu.hugegraph.computer.k8s.operator.common.Result;
 
 public class OperatorTest {
 
     @Test
     public void testResult() {
-        Result result = new Result(true);
-        Result result2 = new Result(false);
+        OperatorResult result = new OperatorResult(true);
+        OperatorResult result2 = new OperatorResult(false);
         Assert.assertNotEquals(result, result2);
         Assert.assertNotEquals(null, result);
 
-        Result result3 = new Result(true);
+        OperatorResult result3 = new OperatorResult(true);
         Assert.assertEquals(result, result3);
         Assert.assertEquals(result.hashCode(), result3.hashCode());
     }
