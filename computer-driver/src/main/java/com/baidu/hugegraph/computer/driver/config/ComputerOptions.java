@@ -99,8 +99,8 @@ public class ComputerOptions extends OptionHolder {
                     String.class
             );
 
-    public static final WithoutDefaultConfigOption<String> INPUT_EDGE_DIRECTION =
-            new WithoutDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<String>
+            INPUT_EDGE_DIRECTION = new WithoutDefaultConfigOption<>(
                     "input.edge_direction",
                     allowValues("OUT", "IN", "BOTH"),
                     String.class
@@ -185,8 +185,8 @@ public class ComputerOptions extends OptionHolder {
                     Integer.class
             );
 
-    public static final WithoutDefaultConfigOption<Integer> JOB_PARTITIONS_COUNT =
-            new WithoutDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<Integer>
+            JOB_PARTITIONS_COUNT = new WithoutDefaultConfigOption<>(
                     "job.partitions_count",
                     positiveInt(),
                     Integer.class
@@ -221,8 +221,8 @@ public class ComputerOptions extends OptionHolder {
                     Long.class
             );
 
-    public static final WithoutDefaultConfigOption<Long> BSP_WAIT_MASTER_TIMEOUT =
-            new WithoutDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<Long>
+            BSP_WAIT_MASTER_TIMEOUT = new WithoutDefaultConfigOption<>(
                     "bsp.wait_master_timeout",
                     positiveInt(),
                     Long.class
@@ -250,8 +250,8 @@ public class ComputerOptions extends OptionHolder {
                     String.class
             );
 
-    public static final WithoutDefaultConfigOption<String> WORKER_COMBINER_CLASS =
-            new WithoutDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<String>
+            WORKER_COMBINER_CLASS = new WithoutDefaultConfigOption<>(
                     "worker.combiner_class",
                     disallowEmpty(),
                     String.class
@@ -274,7 +274,8 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static final WithoutDefaultConfigOption<Long>
-            WORKER_RECEIVED_BUFFERS_BYTES_LIMIT = new WithoutDefaultConfigOption<>(
+            WORKER_RECEIVED_BUFFERS_BYTES_LIMIT =
+            new WithoutDefaultConfigOption<>(
                     "worker.received_buffers_bytes_limit",
                     positiveInt(),
                     Long.class
@@ -289,7 +290,8 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static final WithoutDefaultConfigOption<Long>
-            WORKER_WAIT_FINISH_MESSAGES_TIMEOUT = new WithoutDefaultConfigOption<>(
+            WORKER_WAIT_FINISH_MESSAGES_TIMEOUT =
+            new WithoutDefaultConfigOption<>(
                     "worker.wait_finish_messages_timeout",
                     positiveInt(),
                     Long.class
@@ -310,7 +312,8 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static final WithoutDefaultConfigOption<Integer>
-            WORKER_WRITE_BUFFER_INIT_CAPACITY = new WithoutDefaultConfigOption<>(
+            WORKER_WRITE_BUFFER_INIT_CAPACITY =
+            new WithoutDefaultConfigOption<>(
                     "worker.write_buffer_capacity",
                     positiveInt(),
                     Integer.class
@@ -331,15 +334,15 @@ public class ComputerOptions extends OptionHolder {
                     String.class
             );
 
-    public static final WithoutDefaultConfigOption<String> HUGEGRAPH_GRAPH_NAME =
-            new WithoutDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<String>
+            HUGEGRAPH_GRAPH_NAME = new WithoutDefaultConfigOption<>(
                     "hugegraph.name",
                     disallowEmpty(),
                     String.class
             );
 
-    public static final WithoutDefaultConfigOption<String> TRANSPORT_SERVER_HOST =
-            new WithoutDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<String>
+            TRANSPORT_SERVER_HOST = new WithoutDefaultConfigOption<>(
                     "transport.server_host",
                     disallowEmpty(),
                     String.class
@@ -424,8 +427,8 @@ public class ComputerOptions extends OptionHolder {
                     Long.class
             );
 
-    public static final WithoutDefaultConfigOption<Long> TRANSPORT_CLOSE_TIMEOUT =
-            new WithoutDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<Long>
+            TRANSPORT_CLOSE_TIMEOUT = new WithoutDefaultConfigOption<>(
                     "transport.close_timeout",
                     positiveInt(),
                     Long.class
@@ -531,8 +534,8 @@ public class ComputerOptions extends OptionHolder {
                     Long.class
             );
 
-    public static final WithoutDefaultConfigOption<Integer> HGKV_MERGE_FILES_NUM =
-            new WithoutDefaultConfigOption<>(
+    public static final WithoutDefaultConfigOption<Integer>
+            HGKV_MERGE_FILES_NUM = new WithoutDefaultConfigOption<>(
                     "hgkv.max_merge_files",
                     positiveInt(),
                     Integer.class
