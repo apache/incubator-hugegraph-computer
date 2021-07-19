@@ -39,7 +39,7 @@ public interface Combiner<T> {
     T combine(T v1, T v2);
 
 
-    public static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
+    static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
         if (!values.hasNext()) {
             return null;
         }

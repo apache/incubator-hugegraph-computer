@@ -37,11 +37,12 @@ public class ComputerContextUtil {
         initContext(convertToMap(params));
     }
 
-    public static void initContext(Map<String, String> params) {
+    public static Config initContext(Map<String, String> params) {
         Config config = new DefaultConfig(params);
         GraphFactory graphFactory = new BuiltinGraphFactory(config);
         Allocator allocator = new DefaultAllocator(config, graphFactory);
         ComputerContext.initContext(config, graphFactory, allocator);
+        return config;
     }
 
     public static Map<String, String> convertToMap(String... options) {
