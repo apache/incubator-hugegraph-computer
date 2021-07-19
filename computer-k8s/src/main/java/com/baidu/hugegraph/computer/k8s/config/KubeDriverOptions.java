@@ -74,7 +74,7 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.image_repository_username",
                     "The value is username for login image repository.",
                     disallowEmpty(),
-                    "abc"
+                    "hugegraph"
             );
 
     public static final ConfigOption<String> IMAGE_REPOSITORY_PASSWORD =
@@ -82,7 +82,7 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.image_repository_password",
                     "The value is password for login image repository.",
                     disallowEmpty(),
-                    "abc"
+                    "hugegraph"
             );
 
     public static final ConfigOption<String> IMAGE_REPOSITORY_URL =

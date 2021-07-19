@@ -393,7 +393,7 @@ public class ComputerJobDeployer {
         return new VolumeBuilder()
                 .withName(CONFIG_MAP_VOLUME)
                 .withNewConfigMap()
-                    .withName(configMapName)
+                .withName(configMapName)
                 .endConfigMap()
                 .build();
     }
