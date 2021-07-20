@@ -45,7 +45,7 @@ public class MessageQueueTest {
         QueuedMessage message2 = new QueuedMessage(2, MessageType.EDGE,
                                                    ByteBuffer.allocate(4));
         queue.put(message2);
-        Assert.assertEquals(1, notifyCounter.get());
+        Assert.assertEquals(2, notifyCounter.get());
 
         BlockingQueue<?> blockQueue = Whitebox.getInternalState(queue, "queue");
         Assert.assertEquals(2, blockQueue.size());
@@ -61,6 +61,6 @@ public class MessageQueueTest {
 
         // Trigger notifier called
         queue.put(message1);
-        Assert.assertEquals(2, notifyCounter.get());
+        Assert.assertEquals(3, notifyCounter.get());
     }
 }
