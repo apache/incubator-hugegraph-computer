@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,7 +47,7 @@ import com.baidu.hugegraph.computer.driver.JobState;
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.driver.SuperstepStat;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
-import com.baidu.hugegraph.computer.driver.config.WithoutDefaultConfigOption;
+import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
@@ -184,7 +185,7 @@ public class KubernetesDriver implements ComputerDriver {
                     errorInfo = IOHelpers.readFully(stdoutStream);
                 }
                 throw new RuntimeException(
-                          "Failed to upload algorithm Jar " + errorInfo);
+                          "Failed to upload algorithm Jar, " + errorInfo);
             }
         } catch (Throwable exception) {
             throw new RuntimeException(exception);
@@ -204,10 +205,11 @@ public class KubernetesDriver implements ComputerDriver {
                                                  .build();
         computerJob.setMetadata(meta);
 
+        ComputerJobSpec spec = this.computerJobSpec(this.defaultSpec, params);
+
         Map<String, String> computerConf = this.computerConf(this.defaultConf,
                                                              params);
-
-        ComputerJobSpec spec = this.computerJobSpec(this.defaultSpec, params);
+        this.checkComputerConf(computerConf, spec);
 
         if (this.enableInternalAlgorithm &&
             this.internalAlgorithms.contains(algorithmName)) {
@@ -230,6 +232,25 @@ public class KubernetesDriver implements ComputerDriver {
 
         this.operation.createOrReplace(computerJob);
         return jobId;
+    }
+
+    private void checkComputerConf(Map<String, String> computerConf,
+                                   ComputerJobSpec spec) {
+        Set<String> requiredOptions = ComputerOptions.K8S_REQUIRED_USER_OPTIONS;
+        @SuppressWarnings("unchecked")
+        Collection<String> unSetOptions = CollectionUtils.removeAll(
+                requiredOptions,
+                computerConf.keySet());
+        E.checkArgument(unSetOptions.isEmpty(),
+                        "The %s options can't be null", unSetOptions);
+
+        int partitionsCount = Integer.parseInt(computerConf.getOrDefault(
+                              ComputerOptions.JOB_PARTITIONS_COUNT.name(),
+                              "1"));
+        int workerInstances = spec.getWorkerInstances();
+        E.checkArgument(partitionsCount >= workerInstances,
+                        "The partitions count must be >= workers instances, " +
+                        "but got %s < %s", partitionsCount, workerInstances);
     }
 
     @Override
@@ -417,10 +438,9 @@ public class KubernetesDriver implements ComputerDriver {
         params.forEach((k, v) -> {
             if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
                 if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
-                    !ComputerOptions.PROHIBIT_USER_SETTINGS.contains(k)) {
-                    WithoutDefaultConfigOption<?> typedOption =
-                                             (WithoutDefaultConfigOption<?>)
-                                             allOptions.get(k);
+                    !ComputerOptions.K8S_PROHIBIT_USER_SETTINGS.contains(k)) {
+                    DriverConfigOption<?> typedOption = (DriverConfigOption<?>)
+                                                        allOptions.get(k);
                     if (typedOption != null) {
                         typedOption.checkVal(v);
                     }
@@ -443,7 +463,7 @@ public class KubernetesDriver implements ComputerDriver {
             if (value != null) {
                 defaultConf.put(key, String.valueOf(value));
             } else {
-                boolean required = ComputerOptions.REQUIRED_OPTIONS
+                boolean required = ComputerOptions.REQUIRED_INIT_OPTIONS
                                                   .contains(key);
                 E.checkArgument(!required, "The %s option can't be null", key);
             }

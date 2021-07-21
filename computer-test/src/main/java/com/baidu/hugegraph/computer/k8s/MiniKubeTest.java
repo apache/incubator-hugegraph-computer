@@ -52,7 +52,6 @@ import com.baidu.hugegraph.testutil.Whitebox;
 import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.Quantity;
-import io.fabric8.kubernetes.client.utils.Utils;
 
 public class MiniKubeTest extends AbstractK8sTest {
 
@@ -75,17 +74,13 @@ public class MiniKubeTest extends AbstractK8sTest {
         UnitTestBase.sleep(1000L);
 
         HttpClient client = HttpClientBuilder.create().build();
-        String probePort = Utils.getSystemPropertyOrEnvVar(
-                           OperatorOptions.PROBE_PORT.name());
-        URI health = URI.create(String.format("http://localhost:%s/healthz",
-                                              probePort));
+        URI health = URI.create("http://localhost:9892/health");
         HttpGet request = new HttpGet(health);
         HttpResponse response = client.execute(request);
         Assert.assertEquals(HttpStatus.SC_OK,
                             response.getStatusLine().getStatusCode());
 
-        URI ready = URI.create(String.format("http://localhost:%s/readyz",
-                                              probePort));
+        URI ready = URI.create("http://localhost:9892/ready");
         HttpGet requestReady = new HttpGet(ready);
         HttpResponse responseReady = client.execute(requestReady);
         Assert.assertEquals(HttpStatus.SC_OK,

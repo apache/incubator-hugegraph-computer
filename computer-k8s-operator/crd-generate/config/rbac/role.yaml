@@ -105,12 +105,25 @@ rules:
   verbs:
   - get
   - list
-  - log
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/log
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - ""
   resources:
   - pods/status
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - secrets
   verbs:
   - get
 - apiGroups:

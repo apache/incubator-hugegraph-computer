@@ -44,9 +44,9 @@ public class WorkQueue<T> {
     private final LinkedList<T> queue;
 
     /**
-     * dirty defines all of the items that need to be processed.
+     * incoming defines all of the items that need to be processed.
      */
-    private final Set<T> dirty;
+    private final Set<T> incoming;
 
     /**
      * Things that are currently being processed are in the processing set.
@@ -56,11 +56,11 @@ public class WorkQueue<T> {
      */
     private final Set<T> processing;
 
-    private boolean shutdown = false;
+    private boolean shutdown;
 
     public WorkQueue() {
         this.queue = new LinkedList<>();
-        this.dirty = new HashSet<>();
+        this.incoming = new HashSet<>();
         this.processing = new HashSet<>();
     }
 
@@ -69,11 +69,11 @@ public class WorkQueue<T> {
             return;
         }
 
-        if (this.dirty.contains(item)) {
+        if (this.incoming.contains(item)) {
             return;
         }
 
-        this.dirty.add(item);
+        this.incoming.add(item);
         if (this.processing.contains(item)) {
             return;
         }
@@ -87,22 +87,23 @@ public class WorkQueue<T> {
     }
 
     public synchronized T get() throws InterruptedException {
-        while (this.queue.size() == 0 && !this.shutdown) {
-            this.wait();
-        }
-        if (this.queue.size() == 0) {
-            // We must be shutting down
-            return null;
+        while (this.queue.size() == 0) {
+            if (this.shutdown) {
+                // We must be shutting down
+                return null;
+            } else {
+                this.wait();
+            }
         }
         T obj = this.queue.poll();
         this.processing.add(obj);
-        this.dirty.remove(obj);
+        this.incoming.remove(obj);
         return obj;
     }
 
     public synchronized void done(T item) {
         this.processing.remove(item);
-        if (this.dirty.contains(item)) {
+        if (this.incoming.contains(item)) {
             this.queue.add(item);
             this.notify();
         }

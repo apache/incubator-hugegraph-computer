@@ -22,22 +22,24 @@ spec:
         imagePullPolicy: Always
         env:
           - name: PROBE_PORT
-            value: "8081"
+            value: "9892"
           - name: WATCH_NAMESPACE
             value: "hugegraph-computer-system"
           - name: RECONCILER_COUNT
             value: "6"
+          - name: INTERNAL_ETCD_URL
+            value: "http://hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2379"
           - name: LOG_LEVEL
             value: "INFO"
         livenessProbe:
           httpGet:
-            path: /healthz
-            port: &probe_port 8081
+            path: /health
+            port: &probe_port 9892
           initialDelaySeconds: 15
           periodSeconds: 20
         readinessProbe:
           httpGet:
-            path: /readyz
+            path: /ready
             port: *probe_port
           initialDelaySeconds: 5
           periodSeconds: 10

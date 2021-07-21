@@ -120,7 +120,8 @@ public class ComputerJobController
             return OperatorResult.NO_REQUEUE;
         }
 
-        ComputerJobDeployer deployer = new ComputerJobDeployer(this.kubeClient);
+        ComputerJobDeployer deployer = new ComputerJobDeployer(this.kubeClient,
+                                                               this.config);
         deployer.deploy(observed);
 
         return OperatorResult.NO_REQUEUE;

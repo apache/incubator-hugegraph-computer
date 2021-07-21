@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -108,8 +109,9 @@ public class OperatorEntrypoint {
 
             this.informerFactory.startAllRegisteredInformers();
             this.informerFactory.addSharedInformerEventListener(exception -> {
-                LOG.error("Informer Exception occurred, but caught", exception);
-                System.exit(1);
+                LOG.error("Informer event listener exception occurred, ",
+                          exception);
+                OperatorEntrypoint.this.shutdown();
             });
 
             // Start all controller
@@ -131,7 +133,7 @@ public class OperatorEntrypoint {
                     LOG.info("The Operator has been ready");
                 } catch (Throwable e) {
                     LOG.error("Failed to set up ready check");
-                    System.exit(1);
+                    OperatorEntrypoint.this.shutdown();
                 }
             });
 
@@ -158,10 +160,12 @@ public class OperatorEntrypoint {
 
         if (this.controllerPool != null) {
             this.controllerPool.shutdown();
+            this.controllerPool = null;
         }
 
         if (this.kubeClient != null) {
             this.kubeClient.close();
+            this.kubeClient = null;
         }
 
         if (this.httpServer != null) {
@@ -174,7 +178,9 @@ public class OperatorEntrypoint {
         Map<String, String> confMap = new HashMap<>();
         Set<String> keys = OperatorOptions.instance().options().keySet();
         for (String key : keys) {
-            String value = Utils.getSystemPropertyOrEnvVar(key);
+            String envKey = key.substring(Constants.K8S_SPEC_PREFIX.length())
+                               .toUpperCase(Locale.ROOT);
+            String value = Utils.getSystemPropertyOrEnvVar(envKey);
             if (StringUtils.isNotBlank(value)) {
                 confMap.put(key, value);
             }
@@ -203,7 +209,7 @@ public class OperatorEntrypoint {
         InetSocketAddress address = new InetSocketAddress(probePort);
         Integer probeBacklog = this.config.get(OperatorOptions.PROBE_BACKLOG);
         this.httpServer = HttpServer.create(address, probeBacklog);
-        this.httpServer.createContext("/healthz", httpExchange -> {
+        this.httpServer.createContext("/health", httpExchange -> {
             byte[] bytes = "ALL GOOD!".getBytes(StandardCharsets.UTF_8);
             httpExchange.sendResponseHeaders(HttpStatus.SC_OK, bytes.length);
             OutputStream responseBody = httpExchange.getResponseBody();
@@ -214,7 +220,7 @@ public class OperatorEntrypoint {
     }
 
     private void addReadyCheck() {
-        this.httpServer.createContext("/readyz", httpExchange -> {
+        this.httpServer.createContext("/ready", httpExchange -> {
             byte[] bytes = "ALL Ready!".getBytes(StandardCharsets.UTF_8);
             httpExchange.sendResponseHeaders(HttpStatus.SC_OK, bytes.length);
             OutputStream responseBody = httpExchange.getResponseBody();

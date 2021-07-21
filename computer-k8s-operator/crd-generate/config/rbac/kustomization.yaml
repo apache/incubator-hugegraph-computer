@@ -16,6 +16,8 @@ resources:
 #- auth_proxy_role.yaml
 #- auth_proxy_role_binding.yaml
 #- auth_proxy_client_clusterrole.yaml
+- etcd_operator_role.yaml
+- etcd_operator_role_binding.yaml
 
 commonLabels:
   app.kubernetes.io/name: hugegraph-computer-operator

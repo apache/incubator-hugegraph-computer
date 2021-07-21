@@ -25,7 +25,7 @@ import static com.baidu.hugegraph.config.OptionChecker.rangeInt;
 
 import java.util.Map;
 
-import com.baidu.hugegraph.computer.driver.config.WithoutDefaultConfigOption;
+import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
 import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
@@ -59,19 +59,19 @@ public class KubeSpecOptions extends OptionHolder {
         }
     }
 
-    public static final WithoutDefaultConfigOption<String> MASTER_CPU =
-            new WithoutDefaultConfigOption<>(
+    public static final DriverConfigOption<String> MASTER_CPU =
+            new DriverConfigOption<>(
                     "k8s.master_cpu",
-                    "The value is cpu limit of master, it's units should " +
+                    "The cpu limit of master, it's units should " +
                     "meet the constraints of k8s for cpu units.",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
 
-    public static final WithoutDefaultConfigOption<String> MASTER_MEMORY =
-            new WithoutDefaultConfigOption<>(
+    public static final DriverConfigOption<String> MASTER_MEMORY =
+            new DriverConfigOption<>(
                     "k8s.master_memory",
-                    "The value is memory limit of master, it's units should " +
+                    "The memory limit of master, it's units should " +
                     "meet the constraints of k8s for memory units.",
                     KubeSpecOptions::checkQuantity,
                     String.class
@@ -80,7 +80,7 @@ public class KubeSpecOptions extends OptionHolder {
     public static final ConfigListOption<String> MASTER_COMMAND =
             new ConfigListOption<>(
                     "k8s.master_command",
-                    "The value is run command of master, equivalent to " +
+                    "The run command of master, equivalent to " +
                     "'Entrypoint' field of Docker.",
                     disallowEmpty(),
                     "/bin/sh", "-c"
@@ -89,25 +89,25 @@ public class KubeSpecOptions extends OptionHolder {
     public static final ConfigListOption<String> MASTER_ARGS =
             new ConfigListOption<>(
                     "k8s.master_args",
-                    "The value is run args of master, equivalent to 'Cmd' " +
+                    "The run args of master, equivalent to 'Cmd' " +
                     "field of Docker.",
                     disallowEmpty(),
                     "echo master"
             );
 
-    public static final WithoutDefaultConfigOption<String> WORKER_CPU =
-            new WithoutDefaultConfigOption<>(
+    public static final DriverConfigOption<String> WORKER_CPU =
+            new DriverConfigOption<>(
                     "k8s.worker_cpu",
-                    "The value is cpu limit of worker, it's units should " +
+                    "The cpu limit of worker, it's units should " +
                     "meet the constraints of k8s for cpu units.",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
 
-    public static final WithoutDefaultConfigOption<String> WORKER_MEMORY =
-            new WithoutDefaultConfigOption<>(
+    public static final DriverConfigOption<String> WORKER_MEMORY =
+            new DriverConfigOption<>(
                     "k8s.worker_memory",
-                    "The value is memory limit of worker, it's units should " +
+                    "The memory limit of worker, it's units should " +
                     "meet the constraints of k8s for memory units.",
                     KubeSpecOptions::checkQuantity,
                     String.class
@@ -116,7 +116,7 @@ public class KubeSpecOptions extends OptionHolder {
     public static final ConfigListOption<String> WORKER_COMMAND =
             new ConfigListOption<>(
                     "k8s.worker_command",
-                    "The value is run command of worker, equivalent to " +
+                    "The run command of worker, equivalent to " +
                     "'Entrypoint' field of Docker.",
                     disallowEmpty(),
                     "/bin/sh", "-c"
@@ -125,7 +125,7 @@ public class KubeSpecOptions extends OptionHolder {
     public static final ConfigListOption<String> WORKER_ARGS =
             new ConfigListOption<>(
                     "k8s.worker_args",
-                    "The value is run args of worker, equivalent to 'Cmd' " +
+                    "The run args of worker, equivalent to 'Cmd' " +
                     "field of Docker.",
                     disallowEmpty(),
                     "echo worker"
@@ -134,8 +134,8 @@ public class KubeSpecOptions extends OptionHolder {
     public static final ConfigOption<Integer> WORKER_INSTANCES =
             new ConfigOption<>(
                     "k8s.worker_instances",
-                    "The value is number of worker instances, it will " +
-                    "override the 'job.workers_count' option.",
+                    "The number of worker instances, it will " +
+                    "instead the 'job.workers_count' option.",
                     rangeInt(1, Integer.MAX_VALUE),
                     1
             );
@@ -143,12 +143,12 @@ public class KubeSpecOptions extends OptionHolder {
     public static final ConfigOption<String> PULL_POLICY =
             new ConfigOption<>(
                     "k8s.pull_policy",
-                    "The value is pull-policy of image.",
+                    "The pull-policy of image.",
                     allowValues("Always", "Never", "IfNotPresent"),
                     "Always"
             );
 
-    public static Map<String, ConfigOption<?>> ALLOW_USER_SETTINGS =
+    public static final Map<String, ConfigOption<?>> ALLOW_USER_SETTINGS =
             new ImmutableMap.Builder<String, ConfigOption<?>>()
                     .put(MASTER_CPU.name(), MASTER_CPU)
                     .put(WORKER_CPU.name(), WORKER_CPU)

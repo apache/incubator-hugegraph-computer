@@ -49,7 +49,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> NAMESPACE =
             new ConfigOption<>(
                     "k8s.namespace",
-                    "The value is namespace of hugegraph-computer system.",
+                    "The namespace of hugegraph-computer system.",
                     disallowEmpty(),
                     Constants.DEFAULT_NAMESPACE
             );
@@ -57,7 +57,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> KUBE_CONFIG =
             new ConfigOption<>(
                     "k8s.kube_config",
-                    "The value is path of k8s config file.",
+                    "The path of k8s config file.",
                     disallowEmpty(),
                     FileUtils.getUserDirectoryPath() + "/.kube/config"
             );
@@ -65,7 +65,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> IMAGE_REPOSITORY_REGISTRY =
             new ConfigOption<>(
                     "k8s.image_repository_registry",
-                    "The value is address for login image repository.",
+                    "The address for login image repository.",
                     null,
                     ""
             );
@@ -73,7 +73,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> IMAGE_REPOSITORY_USERNAME =
             new ConfigOption<>(
                     "k8s.image_repository_username",
-                    "The value is username for login image repository.",
+                    "The username for login image repository.",
                     disallowEmpty(),
                     "hugegraph"
             );
@@ -81,7 +81,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> IMAGE_REPOSITORY_PASSWORD =
             new ConfigOption<>(
                     "k8s.image_repository_password",
-                    "The value is password for login image repository.",
+                    "The password for login image repository.",
                     disallowEmpty(),
                     "hugegraph"
             );
@@ -89,7 +89,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> IMAGE_REPOSITORY_URL =
             new ConfigOption<>(
                     "k8s.image_repository_url",
-                    "The value is url of image repository.",
+                    "The url of image repository.",
                     disallowEmpty(),
                     "hugegraph/hugegraph-computer"
             );
@@ -97,7 +97,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> BUILD_IMAGE_BASH_PATH =
             new ConfigOption<>(
                     "k8s.build_image_shell_path",
-                    "The value is bash path to build image.",
+                    "The bash path to build image.",
                     disallowEmpty(),
                     "conf/images/upload.sh"
             );
@@ -105,7 +105,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigListOption<String> PULL_SECRET_NAMES =
             new ConfigListOption<>(
                     "k8s.pull_secret_names",
-                    "The value is pullSecret name list of image.",
+                    "The pullSecret name list of image.",
                     null,
                     ""
             );
@@ -113,7 +113,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> LOG4J_XML_PATH =
             new ConfigOption<>(
                     "k8s.log4j_xml_path",
-                    "The value is log4j.xml path of computer job.",
+                    "The log4j.xml path of computer job.",
                     null,
                     ""
             );
@@ -121,7 +121,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> JAR_FILE_DIR =
             new ConfigOption<>(
                     "k8s.jar_file_path",
-                    "The value is directory where the algorithm jar is " +
+                    "The directory where the algorithm jar is " +
                     "located.",
                     disallowEmpty(),
                     "/cache/jars/"
@@ -138,7 +138,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigListOption<String> INTERNAL_ALGORITHMS =
             new ConfigListOption<>(
                     "k8s.internal_algorithm",
-                    "The value is name list of all internal algorithm.",
+                    "The name list of all internal algorithm.",
                     disallowEmpty(),
                     "pageRank"
             );
@@ -146,8 +146,8 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> INTERNAL_ALGORITHM_IMAGE_URL =
             new ConfigOption<>(
                     "k8s.internal_algorithm_image_url",
-                    "The value is image url of internal algorithm.",
+                    "The image url of internal algorithm.",
                     disallowEmpty(),
-                    "czcoder/hugegraph-computer-based-algorithm:latest"
+                    "hugegraph/hugegraph-computer-based-algorithm:latest"
             );
 }

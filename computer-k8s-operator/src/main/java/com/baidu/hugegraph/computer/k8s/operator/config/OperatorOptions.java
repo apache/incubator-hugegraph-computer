@@ -45,7 +45,7 @@ public class OperatorOptions extends OptionHolder {
 
     public static final ConfigOption<String> WATCH_NAMESPACE =
             new ConfigOption<>(
-                    "WATCH_NAMESPACE",
+                    "k8s.watch_namespace",
                     "The value is watch custom resources in the namespace, " +
                     "ignore other namespaces, the '*' means is all namespaces" +
                     " will be watched.",
@@ -55,16 +55,16 @@ public class OperatorOptions extends OptionHolder {
 
     public static final ConfigOption<Integer> PROBE_PORT =
             new ConfigOption<>(
-                    "PROBE_PORT",
+                    "k8s.probe_port",
                     "The value is the port that the controller bind to for " +
                     "serving health probes.",
                     positiveInt(),
-                    8081
+                    9892
             );
 
     public static final ConfigOption<Integer> PROBE_BACKLOG =
             new ConfigOption<>(
-                    "PROBE_BACKLOG",
+                    "k8s.probe_backlog",
                     "The maximum backlog for serving health probes.",
                     positiveInt(),
                     50
@@ -72,7 +72,7 @@ public class OperatorOptions extends OptionHolder {
 
     public static final ConfigOption<Long> RESYNC_PERIOD =
             new ConfigOption<>(
-                    "RESYNC_PERIOD",
+                    "k8s.resync_period",
                     "The minimum frequency at which watched resources are " +
                     "reconciled.",
                     positiveInt(),
@@ -81,7 +81,7 @@ public class OperatorOptions extends OptionHolder {
 
     public static final ConfigOption<Integer> RECONCILER_COUNT =
             new ConfigOption<>(
-                    "RECONCILER_COUNT",
+                    "k8s.reconciler_count",
                     "The max number of reconciler thread.",
                     positiveInt(),
                     Runtime.getRuntime().availableProcessors()
@@ -89,7 +89,7 @@ public class OperatorOptions extends OptionHolder {
 
     public static final ConfigOption<Long> CLOSE_RECONCILER_TIMEOUT =
             new ConfigOption<>(
-                    "CLOSE_RECONCILER_TIMEOUT",
+                    "k8s.close_reconciler_timeout",
                     "The max timeout(in ms) to close reconciler.",
                     positiveInt(),
                     120L
@@ -97,7 +97,7 @@ public class OperatorOptions extends OptionHolder {
 
     public static final ConfigOption<Long> READY_CHECK_INTERNAL =
             new ConfigOption<>(
-                    "READY_CHECK_INTERNAL",
+                    "k8s.ready_check_internal",
                     "The time interval(ms) of check ready.",
                     positiveInt(),
                     1000L
@@ -105,7 +105,7 @@ public class OperatorOptions extends OptionHolder {
 
     public static final ConfigOption<Long> READY_TIMEOUT =
             new ConfigOption<>(
-                    "READY_TIMEOUT",
+                    "k8s.ready_timeout",
                     "The max timeout(in ms) of check ready.",
                     positiveInt(),
                     30 * 1000L
@@ -113,9 +113,18 @@ public class OperatorOptions extends OptionHolder {
 
     public static final ConfigOption<Integer> MAX_RECONCILE_RETRY =
             new ConfigOption<>(
-                    "MAX_RECONCILE_RETRY",
+                    "k8s.max_reconcile_retry",
                     "The max retry times of reconcile.",
                     positiveInt(),
                     3
+            );
+
+    public static final ConfigOption<String> INTERNAL_ETCD_URL =
+            new ConfigOption<>(
+                    "k8s.internal_etcd_url",
+                    "The internal etcd url for operator system.",
+                    disallowEmpty(),
+                    "http://hugegraph-computer-operator-etcd" +
+                    ".hugegraph-computer-operator-system:2379"
             );
 }

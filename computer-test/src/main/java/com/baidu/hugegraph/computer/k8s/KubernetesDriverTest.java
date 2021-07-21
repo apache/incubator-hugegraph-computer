@@ -41,6 +41,7 @@ import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobState;
 import com.baidu.hugegraph.computer.driver.JobStatus;
+import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
@@ -267,5 +268,36 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         MutableBoolean watchActive = Whitebox.getInternalState(this.driver,
                                                                "watchActive");
         Assert.assertFalse(watchActive.booleanValue());
+    }
+
+    @Test
+    public void testCheckComputerConf() {
+        Map<String, String> params = new HashMap<>();
+        params.put(ComputerOptions.JOB_PARTITIONS_COUNT.name(), "9");
+        params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            this.driver.submitJob("PageRank3", params);
+        }, e -> {
+            Assert.assertContains(
+                    "The partitions count must be >= workers instances",
+                    e.getMessage()
+            );
+        });
+
+        Map<String, String> defaultConf = Whitebox.getInternalState(
+                                          this.driver, "defaultConf");
+        defaultConf = new HashMap<>(defaultConf);
+        defaultConf.remove(ComputerOptions.ALGORITHM_PARAMS_CLASS.name());
+        Whitebox.setInternalState(this.driver, "defaultConf", defaultConf);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            this.driver.submitJob("PageRank3", params);
+        }, e -> {
+            Assert.assertContains(
+                    "The [algorithm.params_class] options can't be null",
+                    e.getMessage()
+            );
+        });
     }
 }

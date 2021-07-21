@@ -118,6 +118,10 @@ public abstract class AbstractK8sTest {
         options.put(ComputerOptions.JOB_WORKERS_COUNT.name(), "1");
         options.put(ComputerOptions.ALGORITHM_RESULT_CLASS.name(),
                     LongValue.class.getName());
+        options.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
+                    "com.baidu.hugegraph.computer.core.config.Null");
+        options.put(ComputerOptions.JOB_PARTITIONS_COUNT.name(),
+                    "1000");
         options.put(ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
                     "http://abc:8098");
         options.put(ComputerOptions.HUGEGRAPH_URL.name(),
@@ -130,6 +134,8 @@ public abstract class AbstractK8sTest {
                     "false");
         options.put(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
                     IMAGE_REPOSITORY_URL);
+        options.put(KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL.name(),
+                    "czcoder/hugegraph-computer-test:PageRank-latest");
         MapConfiguration mapConfig = new MapConfiguration(options);
         this.config = new HugeConfig(mapConfig);
     }
@@ -159,12 +165,10 @@ public abstract class AbstractK8sTest {
     protected void initOperator() {
         ExecutorService pool = ExecutorUtil.newFixedThreadPool("operator-test");
         this.operatorFuture = pool.submit(() -> {
-            System.setProperty(OperatorOptions.PROBE_PORT.name(), "9892");
             String watchNameSpace = Utils.getSystemPropertyOrEnvVar(
-                    OperatorOptions.WATCH_NAMESPACE.name());
+                                    "WATCH_NAMESPACE");
             if (!Objects.equals(watchNameSpace, Constants.ALL_NAMESPACE)) {
-                System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
-                                   this.namespace);
+                System.setProperty("WATCH_NAMESPACE", this.namespace);
             } else {
                 NamespaceBuilder namespaceBuilder = new NamespaceBuilder()
                         .withNewMetadata()
