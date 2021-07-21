@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -47,6 +48,7 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
+import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
@@ -108,6 +110,11 @@ public class UnitTestBase {
             E.checkArgument(value instanceof String,
                             "The option value must be String class");
             map.put(((TypedOption<?, ?>) key).name(), (String) value);
+        }
+        if (!map.keySet().contains(
+                          ComputerOptions.ALGORITHM_PARAMS_CLASS.name())) {
+            map.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
+                    MockComputationParams.class.getName());
         }
         ComputerContextUtil.initContext(map);
     }

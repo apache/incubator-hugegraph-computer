@@ -29,8 +29,6 @@ import java.util.concurrent.Executors;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.master.MasterService;
@@ -64,19 +62,6 @@ public class PageRankTest extends UnitTestBase {
             params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
                        PageRankParams.class.getName());
 
-            String algorithmParamsName = params.get(
-                   ComputerOptions.ALGORITHM_PARAMS_CLASS.name());
-            AlgorithmParams algorithmParams;
-            try {
-                algorithmParams = (AlgorithmParams) Class.forName(
-                                  algorithmParamsName).newInstance();
-            } catch (Exception e) {
-                throw new ComputerException("Can't create algorithmParams, " +
-                                            "algorithmParamsName = {}",
-                                            algorithmParamsName);
-            }
-
-            algorithmParams.setAlgorithmParameters(params);
             Config config = ComputerContextUtil.initContext(params);
 
             WorkerService workerService = new MockWorkerService();
@@ -105,19 +90,6 @@ public class PageRankTest extends UnitTestBase {
             params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
                        PageRankParams.class.getName());
 
-            String algorithmParamsName = params.get(
-                   ComputerOptions.ALGORITHM_PARAMS_CLASS.name());
-            AlgorithmParams algorithmParams;
-            try {
-                algorithmParams = (AlgorithmParams) Class.forName(
-                                  algorithmParamsName).newInstance();
-            } catch (Exception e) {
-                throw new ComputerException("Can't create algorithmParams, " +
-                                            "algorithmParamsName = {}",
-                                            algorithmParamsName);
-            }
-
-            algorithmParams.setAlgorithmParameters(params);
             Config config = ComputerContextUtil.initContext(params);
 
             MasterService masterService = new MasterService();
