@@ -168,7 +168,9 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         Assert.assertThrows(ComputerDriverException.class, () -> {
             this.driver.uploadAlgorithmJar("PageRank", inputStream);
         }, e -> {
-            Assert.assertContains("No such file", e.getMessage());
+            ComputerDriverException exception = (ComputerDriverException) e;
+            Assert.assertContains("No such file",
+                                  exception.rootCause().getMessage());
         });
     }
 
