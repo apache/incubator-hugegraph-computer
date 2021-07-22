@@ -28,16 +28,6 @@
       "enum" : ["Pending", "Running", "Succeeded", "Failed", "Unknown"],
       "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.PodPhase"
     },
-    "ConditionStatus" : {
-      "type" : "string",
-      "enum" : ["True", "False", "Unknown"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.ConditionStatus"
-    },
-    "Protocol" : {
-      "type" : "string",
-      "enum" : ["TCP", "UDP", "SCTP"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.Protocol"
-    },
     "EventType" : {
       "type" : "string",
       "enum" : ["Normal", "Warning"],
@@ -69,12 +59,6 @@
     },
     "PodPhase" : {
       "$ref": "#/definitions/PodPhase"
-    },
-    "ConditionStatus" : {
-      "$ref": "#/definitions/ConditionStatus"
-    },
-    "Protocol" : {
-      "$ref": "#/definitions/Protocol"
     },
     "EventType" : {
       "$ref": "#/definitions/EventType"

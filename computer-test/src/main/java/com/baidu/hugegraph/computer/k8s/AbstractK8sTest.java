@@ -35,6 +35,7 @@ import org.junit.Before;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
+import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
@@ -136,6 +137,7 @@ public abstract class AbstractK8sTest {
                     IMAGE_REPOSITORY_URL);
         options.put(KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL.name(),
                     "czcoder/hugegraph-computer-test:PageRank-latest");
+        options.put(KubeSpecOptions.PULL_POLICY.name(), "IfNotPresent");
         MapConfiguration mapConfig = new MapConfiguration(options);
         this.config = new HugeConfig(mapConfig);
     }

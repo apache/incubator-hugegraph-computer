@@ -36,7 +36,6 @@ import com.baidu.hugegraph.computer.k8s.crd.model.ComponentStateBuilder;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatusBuilder;
-import com.baidu.hugegraph.computer.k8s.crd.model.ConditionStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.EventType;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
@@ -79,8 +78,10 @@ public class ComputerJobController
     private static final int TOTAL_COMPONENTS = 2;
     private static final int ALLOW_FAILED_JOBS = 0;
     private static final int ALLOW_FAILED_COMPONENTS = 0;
+    private static final int ERROR_LOG_TAILING_LINES = 500;
     private static final String POD_REASON_UNSCHEDULABLE = "Unschedulable";
     private static final String IMAGE_PULL_BACKOFF = "ImagePullBackOff";
+    private static final String CONDITION_STATUS_FALSE = "False";
     private static final String FINALIZER_NAME = CustomResource.getCRDName(
             HugeGraphComputerJob.class) + "/finalizers";
 
@@ -399,7 +400,7 @@ public class ComputerJobController
                                                .getConditions();
             for (PodCondition condition : conditions) {
                 if (Objects.equals(condition.getStatus(),
-                                   ConditionStatus.FALSE.value()) &&
+                                   CONDITION_STATUS_FALSE) &&
                     Objects.equals(condition.getReason(),
                                    POD_REASON_UNSCHEDULABLE)) {
                     return new MatchWithMsg(true,
@@ -491,7 +492,7 @@ public class ComputerJobController
                 }
 
                 String log = client.pods().withName(name)
-                                   .tailingLines(100)
+                                   .tailingLines(ERROR_LOG_TAILING_LINES)
                                    .getLog(true);
                 if (StringUtils.isNotBlank(log)) {
                     return log;

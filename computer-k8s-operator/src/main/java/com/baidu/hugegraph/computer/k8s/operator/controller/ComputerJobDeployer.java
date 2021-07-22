@@ -354,11 +354,14 @@ public class ComputerJobDeployer {
                 .build();
         envVars.add(confPath);
 
-        EnvVar log4jXmlPath = new EnvVarBuilder()
-                .withName(Constants.ENV_LOG4J_XML_PATH)
-                .withValue(Constants.LOG_XML_PATH)
-                .build();
-        envVars.add(log4jXmlPath);
+        String log4jXml = spec.getLog4jXml();
+        if (StringUtils.isNotBlank(log4jXml)) {
+            EnvVar log4jXmlPath = new EnvVarBuilder()
+                    .withName(Constants.ENV_LOG4J_XML_PATH)
+                    .withValue(Constants.LOG_XML_PATH)
+                    .build();
+            envVars.add(log4jXmlPath);
+        }
 
         String jarFile = spec.getJarFile();
         if (StringUtils.isNotBlank(jarFile)) {

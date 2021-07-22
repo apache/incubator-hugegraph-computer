@@ -124,7 +124,6 @@ public class OperatorOptions extends OptionHolder {
                     "k8s.internal_etcd_url",
                     "The internal etcd url for operator system.",
                     disallowEmpty(),
-                    "http://hugegraph-computer-operator-etcd" +
-                    ".hugegraph-computer-operator-system:2379"
+                    "http://127.0.0.1:2379"
             );
 }
