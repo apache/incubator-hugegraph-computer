@@ -20,7 +20,7 @@ usage() {
   algorithm_jar_path> [-l|--log4 log4_conf_path] <-d|--drive drive_type
   (local|k8s|yarn)>"
 }
-if [ $# -lt 6 ];
+if [ $# -lt 4 ];
   then usage
 fi
 
@@ -134,7 +134,7 @@ if [ "${ROLE}" = "" ]; then
   exit 1;
 fi
 
-CP=$(find "${LIB_DIR}" "*.jar" | tr "\n" ":")
+CP=$(find "${LIB_DIR}" -name "*.jar" | tr "\n" ":")
 
 CP="$JAR_FILE_PATH":${CP}
 
@@ -156,12 +156,13 @@ fi
 
 NEW_COMPUTER_CONF_PATH="${COPY_CONF_DIR}/$(basename "${COMPUTER_CONF_PATH}")"
 chmod 777 "${NEW_COMPUTER_CONF_PATH}"
-envsubst <${COMPUTER_CONF_PATH} >${NEW_COMPUTER_CONF_PATH}
+envsubst <"${COMPUTER_CONF_PATH}" >"${NEW_COMPUTER_CONF_PATH}"
+chmod 777 "${NEW_COMPUTER_CONF_PATH}"
 
 JVM_OPTIONS=${JVM_OPTIONS}
 if [ "${LOG4J_XML_PATH}" != "" ];then
   JVM_OPTIONS="${JVM_OPTIONS} -Dlog4j.configurationFile="${LOG4J_XML_PATH}""
 fi
-${JAVA} -Dname="hugegraph-computer" ${JVM_OPTIONS} -cp "${CP}"\
+${JAVA} -Dname="hugegraph-computer" ${JVM_OPTIONS} -cp "${CP}" \
 com.baidu.hugegraph.computer.cmd.Cmd "${NEW_COMPUTER_CONF_PATH}" ${ROLE} \
 ${DRIVE}
