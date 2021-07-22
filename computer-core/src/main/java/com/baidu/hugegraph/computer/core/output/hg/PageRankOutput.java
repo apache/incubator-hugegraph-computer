@@ -44,8 +44,9 @@ public class PageRankOutput extends HugeOutput {
                                                       Vertex vertex) {
         com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
                 new com.baidu.hugegraph.structure.graph.Vertex(null);
-        hugeVertex.id(vertex.id());
-        hugeVertex.property(this.name(), ((DoubleValue) vertex.value()).value());
+        hugeVertex.id(vertex.id().asObject());
+        hugeVertex.property(this.name(),
+                            ((DoubleValue) vertex.value()).value());
         return hugeVertex;
     }
 }

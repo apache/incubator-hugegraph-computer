@@ -28,38 +28,34 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.ComputerOutput;
+import com.baidu.hugegraph.computer.core.output.hg.task.TaskManager;
 import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.HugeClientBuilder;
 import com.baidu.hugegraph.util.Log;
 
 public abstract class HugeOutput implements ComputerOutput {
 
     private static final Logger LOG = Log.logger(PageRankOutput.class);
 
-    private static final int BATCH_SIZE = 500;
-
     private int partition;
-    private String url;
-    private String graph;
-    private HugeClient client;
+    private TaskManager taskManager;
     private List<com.baidu.hugegraph.structure.graph.Vertex> vertexBatch;
+    private int batchSize;
 
     @Override
     public void init(Config config, int partition) {
         LOG.info("Start write back partition {}", this.partition);
 
         this.partition = partition;
-        this.url = config.get(ComputerOptions.HUGEGRAPH_URL);
-        this.graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
-        this.client = new HugeClientBuilder(this.url, this.graph).build();
-        this.vertexBatch = new ArrayList<>();
 
-        // Prepare schema
+        this.taskManager = new TaskManager(config);
+        this.vertexBatch = new ArrayList<>();
+        this.batchSize = config.get(ComputerOptions.OUTPUT_BATCH_SIZE);
+
         this.prepareSchema();
     }
 
-    protected HugeClient client() {
-        return this.client;
+    public HugeClient client() {
+        return this.taskManager.client();
     }
 
     public abstract String name();
@@ -69,7 +65,7 @@ public abstract class HugeOutput implements ComputerOutput {
     @Override
     public void write(Vertex vertex) {
         this.vertexBatch.add(this.constructHugeVertex(vertex));
-        if (this.vertexBatch.size() >= BATCH_SIZE) {
+        if (this.vertexBatch.size() >= this.batchSize) {
             this.commit();
         }
     }
@@ -82,15 +78,15 @@ public abstract class HugeOutput implements ComputerOutput {
         if (!this.vertexBatch.isEmpty()) {
             this.commit();
         }
-        this.client.close();
+        this.taskManager.waitFinished();
+        this.taskManager.shutdown();
         LOG.info("End write back partition {}", this.partition);
     }
 
     private void commit() {
-        this.client.graph().addVertices(this.vertexBatch);
-        this.vertexBatch.clear();
-        LOG.debug("Write back vertices {} of partition {} " +
-                  "to graph: {} in url {} ",
-                  this.vertexBatch, this.partition, this.url, this.graph);
+        this.taskManager.submitBatch(this.vertexBatch);
+        LOG.info("Write back {} vertices", this.vertexBatch.size());
+
+        this.vertexBatch = new ArrayList<>();
     }
 }
