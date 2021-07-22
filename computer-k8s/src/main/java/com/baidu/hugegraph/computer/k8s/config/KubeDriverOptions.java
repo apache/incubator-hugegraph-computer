@@ -96,10 +96,10 @@ public class KubeDriverOptions extends OptionHolder {
 
     public static final ConfigOption<String> BUILD_IMAGE_BASH_PATH =
             new ConfigOption<>(
-                    "k8s.build_image_shell_path",
+                    "k8s.build_image_bash_path",
                     "The bash path to build image.",
                     disallowEmpty(),
-                    "conf/images/upload.sh"
+                    "conf/images/docker_push.sh"
             );
 
     public static final ConfigListOption<String> PULL_SECRET_NAMES =
