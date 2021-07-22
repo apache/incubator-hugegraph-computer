@@ -26,16 +26,21 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.Log;
 
 public class Cmd {
-    static final String ROLE_MASTER = "master";
-    static final String ROLE_WORKER = "worker";
+
+    private static final Logger LOG = Log.logger(MasterService.class);
+
+    private static final String ROLE_MASTER = "master";
+    private static final String ROLE_WORKER = "worker";
 
     public static void main(String[] args) throws IOException {
         E.checkArgument(ArrayUtils.getLength(args) == 3,
@@ -55,7 +60,8 @@ public class Cmd {
             case ROLE_WORKER:
                 executeWorkerService(context);
             default:
-                throw new RuntimeException("Unreachable code");
+                throw new IllegalArgumentException(
+                          String.format("Unexpected role '%s'", role));
         }
     }
 
@@ -65,8 +71,13 @@ public class Cmd {
             workerService = new WorkerService();
             workerService.init(context.config());
             workerService.execute();
+        } catch (Throwable e) {
+            LOG.error("execute worker service failed: {}", e.getMessage(), e);
+            throw e;
         } finally {
-            workerService.close();
+            if (workerService != null) {
+                workerService.close();
+            }
         }
     }
 
@@ -76,15 +87,21 @@ public class Cmd {
             masterService = new MasterService();
             masterService.init(context.config());
             masterService.execute();
+        } catch (Throwable e) {
+            LOG.error("execute master service failed: {}", e.getMessage(), e);
+            throw e;
         } finally {
-            masterService.close();
+            if (masterService != null) {
+                masterService.close();
+            }
         }
     }
 
-    private static ComputerContext parseContext(String arg) throws IOException {
+    private static ComputerContext parseContext(String conf)
+                                   throws IOException {
         Properties properties = new Properties();
         BufferedReader bufferedReader = new BufferedReader(
-                                            new FileReader(arg));
+                                            new FileReader(conf));
         properties.load(bufferedReader);
         ComputerContextUtil.initContext(
                             Collections.unmodifiableMap((Map) properties));

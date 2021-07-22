@@ -1,4 +1,5 @@
 #!/bin/env bash
+set -e
 BIN_DIR=$(cd "$(dirname "$0")" && pwd -P)
 BASE_DIR=$(cd "${BIN_DIR}/.." && pwd -P)
 LIB_DIR=${BASE_DIR}/lib
@@ -152,10 +153,10 @@ fi
 COPY_CONF_DIR="${CONF_DIR}/copy"
 if [ ! -a "${COPY_CONF_DIR}" ]; then
   mkdir -p "${COPY_CONF_DIR}"
+  chmod 777 "${COPY_CONF_DIR}"
 fi
 
 NEW_COMPUTER_CONF_PATH="${COPY_CONF_DIR}/$(basename "${COMPUTER_CONF_PATH}")"
-chmod 777 "${NEW_COMPUTER_CONF_PATH}"
 envsubst <"${COMPUTER_CONF_PATH}" >"${NEW_COMPUTER_CONF_PATH}"
 chmod 777 "${NEW_COMPUTER_CONF_PATH}"
 
