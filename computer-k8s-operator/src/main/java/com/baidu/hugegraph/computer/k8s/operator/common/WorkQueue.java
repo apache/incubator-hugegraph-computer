@@ -118,4 +118,3 @@ public class WorkQueue<T> {
         return this.shutdown;
     }
 }
-

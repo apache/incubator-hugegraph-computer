@@ -62,8 +62,10 @@ public class KubeSpecOptions extends OptionHolder {
     public static final DriverConfigOption<String> MASTER_CPU =
             new DriverConfigOption<>(
                     "k8s.master_cpu",
-                    "The cpu limit of master, it's units should " +
-                    "meet the constraints of k8s for cpu units.",
+                    "The cpu limit of master, the unit can be 'm' or without " +
+                    "unit detail please refer to：https://kubernetes " +
+                    ".io/zh/docs/concepts/configuration/" +
+                    "manage-resources-containers/#meaning-of-cpu",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
@@ -71,8 +73,11 @@ public class KubeSpecOptions extends OptionHolder {
     public static final DriverConfigOption<String> MASTER_MEMORY =
             new DriverConfigOption<>(
                     "k8s.master_memory",
-                    "The memory limit of master, it's units should " +
-                    "meet the constraints of k8s for memory units.",
+                    "The memory limit of master, the unit can be " +
+                    "one of Ei、Pi、Ti、Gi、Mi、Ki " +
+                    "detail please refer to：https://kubernetes " +
+                    ".io/zh/docs/concepts/configuration/" +
+                    "manage-resources-containers/#meaning-of-memory",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
@@ -98,8 +103,10 @@ public class KubeSpecOptions extends OptionHolder {
     public static final DriverConfigOption<String> WORKER_CPU =
             new DriverConfigOption<>(
                     "k8s.worker_cpu",
-                    "The cpu limit of worker, it's units should " +
-                    "meet the constraints of k8s for cpu units.",
+                    "The cpu limit of worker, the unit can be 'm' or without " +
+                    "unit detail please refer to：https://kubernetes " +
+                    ".io/zh/docs/concepts/configuration/" +
+                    "manage-resources-containers/#meaning-of-cpu",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );
@@ -107,8 +114,11 @@ public class KubeSpecOptions extends OptionHolder {
     public static final DriverConfigOption<String> WORKER_MEMORY =
             new DriverConfigOption<>(
                     "k8s.worker_memory",
-                    "The memory limit of worker, it's units should " +
-                    "meet the constraints of k8s for memory units.",
+                    "The memory limit of worker, the unit can be " +
+                    "one of Ei、Pi、Ti、Gi、Mi、Ki " +
+                    "detail please refer to：https://kubernetes " +
+                    ".io/zh/docs/concepts/configuration/" +
+                    "manage-resources-containers/#meaning-of-memory",
                     KubeSpecOptions::checkQuantity,
                     String.class
             );

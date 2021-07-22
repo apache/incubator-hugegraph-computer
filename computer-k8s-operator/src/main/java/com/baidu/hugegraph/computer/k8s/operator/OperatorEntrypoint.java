@@ -109,7 +109,7 @@ public class OperatorEntrypoint {
 
             this.informerFactory.startAllRegisteredInformers();
             this.informerFactory.addSharedInformerEventListener(exception -> {
-                LOG.error("Informer event listener exception occurred, ",
+                LOG.error("Informer event listener exception occurred ",
                           exception);
                 OperatorEntrypoint.this.shutdown();
             });

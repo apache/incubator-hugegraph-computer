@@ -54,7 +54,7 @@ public class ComputerOptionsTest {
     }
 
     @Test
-    public void testNoDefaultConfigOption() {
+    public void testDriverConfigOption() {
         DriverConfigOption<String> option = new DriverConfigOption<>(
                                                 "test", "desc",
                                                 disallowEmpty(),

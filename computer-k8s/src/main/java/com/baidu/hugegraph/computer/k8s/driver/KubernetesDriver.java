@@ -41,6 +41,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.driver.ComputerDriver;
+import com.baidu.hugegraph.computer.driver.ComputerDriverException;
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobState;
@@ -146,7 +147,9 @@ public class KubernetesDriver implements ComputerDriver {
             String kubeConfigContents = FileUtils.readFileToString(file);
             config = Config.fromKubeconfig(kubeConfigContents);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ComputerDriverException("Failed to read KubeConfig " +
+                                              "file, file path:%s",
+                                              e, kubeConfig);
         }
         return new DefaultKubernetesClient(config);
     }
@@ -184,11 +187,11 @@ public class KubernetesDriver implements ComputerDriver {
                     InputStream stdoutStream = process.getInputStream();
                     errorInfo = IOHelpers.readFully(stdoutStream);
                 }
-                throw new RuntimeException(
-                          "Failed to upload algorithm Jar, " + errorInfo);
+                throw new ComputerDriverException(errorInfo);
             }
         } catch (Throwable exception) {
-            throw new RuntimeException(exception);
+            throw new ComputerDriverException("Failed to upload algorithm Jar",
+                                              exception);
         } finally {
             FileUtils.deleteQuietly(tempFile);
         }
@@ -265,8 +268,8 @@ public class KubernetesDriver implements ComputerDriver {
                         JobObserver observer) {
         JobState jobState = this.jobState(jobId, params);
         if (jobState == null) {
-            LOG.warn("Unable to fetch Job: {}, it may have been deleted",
-                     jobId);
+            LOG.warn("Unable to fetch state of job '{}', it may have been " +
+                     "deleted", jobId);
             return;
         } else {
             observer.onJobStateChanged(jobState);
@@ -524,7 +527,9 @@ public class KubernetesDriver implements ComputerDriver {
                 String log4jXml = FileUtils.readFileToString(file);
                 spec.withLog4jXml(log4jXml);
             } catch (IOException exception) {
-                throw new RuntimeException(exception);
+                throw new ComputerDriverException(
+                          "Failed to read log4j file for computer job",
+                          exception);
             }
         }
 

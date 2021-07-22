@@ -97,7 +97,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> BUILD_IMAGE_BASH_PATH =
             new ConfigOption<>(
                     "k8s.build_image_bash_path",
-                    "The bash path to build image.",
+                    "The path of command used to build image.",
                     disallowEmpty(),
                     "conf/images/docker_push.sh"
             );
@@ -105,7 +105,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigListOption<String> PULL_SECRET_NAMES =
             new ConfigListOption<>(
                     "k8s.pull_secret_names",
-                    "The pullSecret name list of image.",
+                    "The names of pull-secret for pulling image.",
                     null,
                     ""
             );
@@ -113,7 +113,7 @@ public class KubeDriverOptions extends OptionHolder {
     public static final ConfigOption<String> LOG4J_XML_PATH =
             new ConfigOption<>(
                     "k8s.log4j_xml_path",
-                    "The log4j.xml path of computer job.",
+                    "The log4j.xml path for computer job.",
                     null,
                     ""
             );

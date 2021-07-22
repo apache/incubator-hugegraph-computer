@@ -20,9 +20,9 @@ under the License.
 package v1
 
 import (
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    corev1 "k8s.io/api/core/v1"
+    "k8s.io/apimachinery/pkg/api/resource"
+    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -31,99 +31,99 @@ import (
 
 // ComputerJobSpec defines the desired state of HugeGraphComputerJob
 type ComputerJobSpec struct {
-	AlgorithmName *string `json:"algorithmName"`
+    AlgorithmName *string `json:"algorithmName"`
 
-	JobId *string `json:"jobId"`
+    JobId *string `json:"jobId"`
 
-	Image *string `json:"image"`
+    Image *string `json:"image"`
 
-	// Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always
-	// if :latest tag is specified, or IfNotPresent otherwise.
-	// +kubebuilder:validation:Enum=Always;Never;IfNotPresent
-	PullPolicy corev1.PullPolicy `json:"pullPolicy,omitempty"`
+    // Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always
+    // if :latest tag is specified, or IfNotPresent otherwise.
+    // +kubebuilder:validation:Enum=Always;Never;IfNotPresent
+    PullPolicy corev1.PullPolicy `json:"pullPolicy,omitempty"`
 
-	// Secrets for image pull.
-	PullSecrets []corev1.LocalObjectReference `json:"pullSecrets,omitempty"`
+    // Secrets for image pull.
+    PullSecrets []corev1.LocalObjectReference `json:"pullSecrets,omitempty"`
 
-	//+kubebuilder:validation:Minimum=1
-	WorkerInstances int32 `json:"workerInstances"`
+    //+kubebuilder:validation:Minimum=1
+    WorkerInstances int32 `json:"workerInstances"`
 
-	MasterCpu resource.Quantity `json:"masterCpu,omitempty"`
+    MasterCpu resource.Quantity `json:"masterCpu,omitempty"`
 
-	WorkerCpu resource.Quantity `json:"workerCpu,omitempty"`
+    WorkerCpu resource.Quantity `json:"workerCpu,omitempty"`
 
-	MasterMemory resource.Quantity `json:"masterMemory,omitempty"`
+    MasterMemory resource.Quantity `json:"masterMemory,omitempty"`
 
-	WorkerMemory resource.Quantity `json:"workerMemory,omitempty"`
+    WorkerMemory resource.Quantity `json:"workerMemory,omitempty"`
 
-	ComputerConf map[string]string `json:"computerConf"`
+    ComputerConf map[string]string `json:"computerConf"`
 
-	Log4jXml *string `json:"log4jXml,omitempty"`
-	
-	JarFile *string `json:"jarFile,omitempty"`
+    Log4jXml *string `json:"log4jXml,omitempty"`
+    
+    JarFile *string `json:"jarFile,omitempty"`
 
-	// Environment variables shared by all Master and Worker.
-	EnvVars []corev1.EnvVar `json:"envVars,omitempty"`
+    // Environment variables shared by all Master and Worker.
+    EnvVars []corev1.EnvVar `json:"envVars,omitempty"`
 
-	// Environment variables injected from a source, shared by all Master and Worker.
-	EnvFrom []corev1.EnvFromSource `json:"envFrom,omitempty"`
+    // Environment variables injected from a source, shared by all Master and Worker.
+    EnvFrom []corev1.EnvFromSource `json:"envFrom,omitempty"`
 
-	MasterCommand []string `json:"masterCommand,omitempty"`
+    MasterCommand []string `json:"masterCommand,omitempty"`
 
-	MasterArgs []string `json:"masterArgs"`
+    MasterArgs []string `json:"masterArgs"`
 
-	WorkerCommand []string `json:"workerCommand,omitempty"`
+    WorkerCommand []string `json:"workerCommand,omitempty"`
 
-	WorkerArgs []string `json:"workerArgs"`
+    WorkerArgs []string `json:"workerArgs"`
 }
 
 type ComputerJobState struct {
-	//+optional
-	Superstep int32 `json:"superstep"`
+    //+optional
+    Superstep int32 `json:"superstep"`
 
-	//+optional
-	MaxSuperstep int32 `json:"maxSuperstep"`
+    //+optional
+    MaxSuperstep int32 `json:"maxSuperstep"`
 
-	//+optional
-	LastSuperstepStat *string `json:"lastSuperstepStat"`
+    //+optional
+    LastSuperstepStat *string `json:"lastSuperstepStat"`
 }
 
 // ComputerJobStatus defines the observed state of HugeGraphComputerJob
 type ComputerJobStatus struct {
-	JobStatus *string `json:"jobStatus"`
+    JobStatus *string `json:"jobStatus"`
 
-	//+optional
-	JobState ComputerJobState `json:"jobState"`
+    //+optional
+    JobState ComputerJobState `json:"jobState"`
 
-	//+optional
-	Components ComponentsStatus `json:"componentStates"`
+    //+optional
+    Components ComponentsStatus `json:"componentStates"`
 
-	LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
+    LastUpdateTime metav1.Time `json:"lastUpdateTime,omitempty"`
 }
 
 type ComponentState struct {
-	// The resource name of the component.
-	Name string `json:"name"`
+    // The resource name of the component.
+    Name string `json:"name"`
 
-	// The state of the component.
-	State string `json:"state"`
+    // The state of the component.
+    State string `json:"state"`
 
-	//+optional
-	Message string `json:"message"`
+    //+optional
+    Message string `json:"message"`
 
-	//+optional
-	ErrorLog string `json:"errorLog"`
+    //+optional
+    ErrorLog string `json:"errorLog"`
 }
 
 type ComponentsStatus struct {
-	// +optional
-	ConfigMap ComponentState `json:"configMap"`
+    // +optional
+    ConfigMap ComponentState `json:"configMap"`
 
-	// +optional
-	MasterJob ComponentState `json:"masterJob"`
+    // +optional
+    MasterJob ComponentState `json:"masterJob"`
 
-	// +optional
-	WorkerJob ComponentState `json:"workerJob"`
+    // +optional
+    WorkerJob ComponentState `json:"workerJob"`
 }
 
 // +kubebuilder:object:root=true
@@ -137,23 +137,23 @@ type ComponentsStatus struct {
 
 // HugeGraphComputerJob is the Schema for the hugegraphcomputerjobs API
 type HugeGraphComputerJob struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+    metav1.TypeMeta   `json:",inline"`
+    metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ComputerJobSpec   `json:"spec,omitempty"`
-	Status ComputerJobStatus `json:"status,omitempty"`
+    Spec   ComputerJobSpec   `json:"spec,omitempty"`
+    Status ComputerJobStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
 // HugeGraphComputerJobList contains a list of HugeGraphComputerJob
 type HugeGraphComputerJobList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
+    metav1.TypeMeta `json:",inline"`
+    metav1.ListMeta `json:"metadata,omitempty"`
 
-	Items []HugeGraphComputerJob `json:"items"`
+    Items []HugeGraphComputerJob `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&HugeGraphComputerJob{}, &HugeGraphComputerJobList{})
+    SchemeBuilder.Register(&HugeGraphComputerJob{}, &HugeGraphComputerJobList{})
 }

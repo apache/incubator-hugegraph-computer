@@ -166,11 +166,11 @@ public class KubeUtil {
             if (exception.getCode() == HttpURLConnection.HTTP_CONFLICT) {
                 LOG.warn("Resource already exists, message: {}",
                          exception.getMessage());
+                return null;
             } else {
                 throw exception;
             }
         }
-        return null;
     }
 
     public static Map<String, String> commonLabels(String kind,

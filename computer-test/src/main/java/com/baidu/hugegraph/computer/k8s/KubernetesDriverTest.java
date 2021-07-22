@@ -37,6 +37,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.baidu.hugegraph.computer.driver.ComputerDriverException;
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobState;
@@ -164,7 +165,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         InputStream inputStream = new FileInputStream(
                                       "conf/images/test.jar");
 
-        Assert.assertThrows(RuntimeException.class, () -> {
+        Assert.assertThrows(ComputerDriverException.class, () -> {
             this.driver.uploadAlgorithmJar("PageRank", inputStream);
         }, e -> {
             Assert.assertContains("No such file", e.getMessage());
