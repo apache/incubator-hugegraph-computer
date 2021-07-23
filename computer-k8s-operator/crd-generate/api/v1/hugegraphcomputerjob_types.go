@@ -75,6 +75,14 @@ type ComputerJobSpec struct {
     WorkerCommand []string `json:"workerCommand,omitempty"`
 
     WorkerArgs []string `json:"workerArgs"`
+
+    // Volumes in the Job pod.
+    // More info: https://kubernetes.io/docs/concepts/storage/volumes/
+    Volumes []corev1.Volume `json:"volumes,omitempty"`
+
+    // Volume mounts in the Job container.
+    // More info: https://kubernetes.io/docs/concepts/storage/volumes/
+    VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
 }
 
 type ComputerJobState struct {

@@ -278,13 +278,19 @@ public class ComputerJobDeployer {
                        int instances, List<Container> containers) {
 
         String configMapName = KubeUtil.configMapName(crName);
+
+        List<Volume> volumes = spec.getVolumes();
+        if (volumes == null) {
+            volumes = new ArrayList<>();
+        }
         Volume configVolume = this.getConfigVolume(configMapName);
+        volumes.add(configVolume);
 
         PodSpec podSpec = new PodSpecBuilder()
                 .withContainers(containers)
                 .withImagePullSecrets(spec.getPullSecrets())
                 .withRestartPolicy(JOB_RESTART_POLICY)
-                .withVolumes(configVolume)
+                .withVolumes(volumes)
                 .build();
 
         return new JobBuilder().withMetadata(meta)
@@ -374,7 +380,13 @@ public class ComputerJobDeployer {
 
         Quantity masterCpu = spec.getMasterCpu();
         Quantity masterMemory = spec.getMasterMemory();
+
+        List<VolumeMount> volumeMounts = spec.getVolumeMounts();
+        if (volumeMounts == null) {
+            volumeMounts = new ArrayList<>();
+        }
         VolumeMount configMount = this.getConfigMount();
+        volumeMounts.add(configMount);
 
         return new ContainerBuilder()
                 .withName(KubeUtil.containerName(name))
@@ -382,7 +394,7 @@ public class ComputerJobDeployer {
                 .withImagePullPolicy(spec.getPullPolicy())
                 .withEnv(spec.getEnvVars())
                 .withEnvFrom(spec.getEnvFrom())
-                .addToVolumeMounts(configMount)
+                .withVolumeMounts(volumeMounts)
                 .addAllToCommand(command)
                 .addAllToArgs(args)
                 .addAllToPorts(ports)

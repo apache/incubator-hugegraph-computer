@@ -114,6 +114,20 @@
             "existingJavaType": "io.fabric8.kubernetes.api.model.LocalObjectReference"
           }
         },
+        "volumeMounts": {
+          "type": "array",
+          "javaOmitEmpty": true,
+          "items": {
+            "existingJavaType": "io.fabric8.kubernetes.api.model.VolumeMount"
+          }
+        },
+        "volumes": {
+          "type": "array",
+          "javaOmitEmpty": true,
+          "items": {
+            "existingJavaType": "io.fabric8.kubernetes.api.model.Volume"
+          }
+        },
         "workerArgs": {
           "type": "array",
           "items": {
