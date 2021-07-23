@@ -16,13 +16,11 @@
  * limitations under the License.
  */
 
-package com.baidu.hugegraph.computer.cmd;
+package com.baidu.hugegraph.computer.dist;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.lang.ArrayUtils;
@@ -35,9 +33,9 @@ import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
-public class Cmd {
+public class HugeGraphComputer {
 
-    private static final Logger LOG = Log.logger(MasterService.class);
+    private static final Logger LOG = Log.logger(HugeGraphComputer.class);
 
     private static final String ROLE_MASTER = "master";
     private static final String ROLE_WORKER = "worker";
@@ -72,7 +70,8 @@ public class Cmd {
             workerService.init(context.config());
             workerService.execute();
         } catch (Throwable e) {
-            LOG.error("execute worker service failed: {}", e.getMessage(), e);
+            LOG.error("Failed to execute worker service: {}",
+                      e.getMessage(), e);
             throw e;
         } finally {
             if (workerService != null) {
@@ -88,7 +87,8 @@ public class Cmd {
             masterService.init(context.config());
             masterService.execute();
         } catch (Throwable e) {
-            LOG.error("execute master service failed: {}", e.getMessage(), e);
+            LOG.error("Failed to execute master service: {}",
+                      e.getMessage(), e);
             throw e;
         } finally {
             if (masterService != null) {
@@ -103,8 +103,7 @@ public class Cmd {
         BufferedReader bufferedReader = new BufferedReader(
                                             new FileReader(conf));
         properties.load(bufferedReader);
-        ComputerContextUtil.initContext(
-                            Collections.unmodifiableMap((Map) properties));
+        ComputerContextUtil.initContext(properties);
         ComputerContext context = ComputerContext.instance();
         return context;
     }
