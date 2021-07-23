@@ -31,26 +31,27 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.client.informers.cache.Cache;
 
-public class Request {
+public class OperatorRequest {
 
     private String namespace;
     private String name;
     private final AtomicInteger retryTimes;
 
-    public static Request parseRequestByCR(CustomResource<?, ?> resource) {
+    public static OperatorRequest parseRequestByCR(
+                                  CustomResource<?, ?> resource) {
         E.checkNotNull(resource, "resource");
         ObjectMeta metadata = resource.getMetadata();
         E.checkNotNull(resource, "metadata");
         String name = metadata.getName();
         E.checkArgument(StringUtils.isNotBlank(name), "resourceName");
-        return new Request(metadata.getNamespace(), name);
+        return new OperatorRequest(metadata.getNamespace(), name);
     }
 
-    public Request(String name) {
+    public OperatorRequest(String name) {
         this(null, name);
     }
 
-    public Request(String namespace, String name) {
+    public OperatorRequest(String namespace, String name) {
         this.namespace = namespace;
         this.name = name;
         this.retryTimes = new AtomicInteger(0);
@@ -60,7 +61,7 @@ public class Request {
         return this.name;
     }
 
-    public Request name(String name) {
+    public OperatorRequest name(String name) {
         this.name = name;
         return this;
     }
@@ -69,7 +70,7 @@ public class Request {
         return this.namespace;
     }
 
-    public Request namespace(String namespace) {
+    public OperatorRequest namespace(String namespace) {
         this.namespace = namespace;
         return this;
     }
@@ -88,11 +89,11 @@ public class Request {
             return true;
         }
 
-        if (!(obj instanceof Request)) {
+        if (!(obj instanceof OperatorRequest)) {
             return false;
         }
 
-        final Request other = (Request) obj;
+        final OperatorRequest other = (OperatorRequest) obj;
         return Objects.equals(other.namespace, this.namespace) &&
                Objects.equals(other.name, this.name);
     }

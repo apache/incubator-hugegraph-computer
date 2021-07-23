@@ -282,6 +282,8 @@ public class ComputerJobDeployer {
         List<Volume> volumes = spec.getVolumes();
         if (volumes == null) {
             volumes = new ArrayList<>();
+        } else {
+            volumes = Lists.newArrayList();
         }
         Volume configVolume = this.getConfigVolume(configMapName);
         volumes.add(configVolume);
@@ -384,6 +386,8 @@ public class ComputerJobDeployer {
         List<VolumeMount> volumeMounts = spec.getVolumeMounts();
         if (volumeMounts == null) {
             volumeMounts = new ArrayList<>();
+        } else {
+            volumeMounts = Lists.newArrayList(volumeMounts);
         }
         VolumeMount configMount = this.getConfigMount();
         volumeMounts.add(configMount);

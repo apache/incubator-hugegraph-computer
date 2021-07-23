@@ -147,8 +147,7 @@ public class KubernetesDriver implements ComputerDriver {
             String kubeConfigContents = FileUtils.readFileToString(file);
             config = Config.fromKubeconfig(kubeConfigContents);
         } catch (IOException e) {
-            throw new ComputerDriverException("Failed to read KubeConfig " +
-                                              "file, file path:%s",
+            throw new ComputerDriverException("Failed to read KubeConfig: %s",
                                               e, kubeConfig);
         }
         return new DefaultKubernetesClient(config);

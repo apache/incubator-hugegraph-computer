@@ -22,8 +22,8 @@ package com.baidu.hugegraph.computer.k8s;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.k8s.operator.common.OperatorRequest;
 import com.baidu.hugegraph.computer.k8s.operator.common.OperatorResult;
-import com.baidu.hugegraph.computer.k8s.operator.common.Request;
 
 public class OperatorTest {
 
@@ -41,18 +41,18 @@ public class OperatorTest {
 
     @Test
     public void testRequest() {
-        Request request = new Request("testA");
-        Request request2 = new Request("testB");
+        OperatorRequest request = new OperatorRequest("testA");
+        OperatorRequest request2 = new OperatorRequest("testB");
         Assert.assertNotEquals(request, request2);
         Assert.assertNotEquals(null, request);
 
-        Request request3 = new Request("testA");
+        OperatorRequest request3 = new OperatorRequest("testA");
         Assert.assertEquals(request, request3);
         Assert.assertEquals(request.hashCode(), request3.hashCode());
 
         Assert.assertEquals(1, request.retryIncrGet());
-        Request request4 = request.namespace("namespace-test")
-                                  .name("name-test");
+        OperatorRequest request4 = request.namespace("namespace-test")
+                                          .name("name-test");
         Assert.assertEquals("namespace-test", request4.namespace());
         Assert.assertEquals("name-test", request4.name());
     }

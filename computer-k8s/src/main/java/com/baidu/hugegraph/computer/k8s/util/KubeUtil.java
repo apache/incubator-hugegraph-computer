@@ -164,7 +164,7 @@ public class KubeUtil {
             return supplier.get();
         } catch (KubernetesClientException exception) {
             if (exception.getCode() == HttpURLConnection.HTTP_CONFLICT) {
-                LOG.warn("Resource already exists, message: {}",
+                LOG.warn("K8s resource already exists: {}",
                          exception.getMessage());
                 return null;
             } else {

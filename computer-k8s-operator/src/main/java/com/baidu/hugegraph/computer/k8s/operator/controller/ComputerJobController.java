@@ -43,8 +43,8 @@ import com.baidu.hugegraph.computer.k8s.crd.model.JobComponentState;
 import com.baidu.hugegraph.computer.k8s.crd.model.PodPhase;
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.common.MatchWithMsg;
+import com.baidu.hugegraph.computer.k8s.operator.common.OperatorRequest;
 import com.baidu.hugegraph.computer.k8s.operator.common.OperatorResult;
-import com.baidu.hugegraph.computer.k8s.operator.common.Request;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.Log;
@@ -94,7 +94,7 @@ public class ComputerJobController
     }
 
     @Override
-    protected OperatorResult reconcile(Request request) {
+    protected OperatorResult reconcile(OperatorRequest request) {
         HugeGraphComputerJob computerJob = this.getCR(request);
         if (computerJob == null) {
             LOG.info("Unable to fetch HugeGraphComputerJob, " +

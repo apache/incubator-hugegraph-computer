@@ -73,7 +73,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
     private final String kind;
     protected final HugeConfig config;
     protected final NamespacedKubernetesClient kubeClient;
-    private final WorkQueue<Request> workQueue;
+    private final WorkQueue<OperatorRequest> workQueue;
     private final ScheduledExecutorService executor;
     private Set<Class<? extends HasMetadata>> ownsClassSet;
     private Map<Class<? extends HasMetadata>,
@@ -151,7 +151,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         }
     }
 
-    protected abstract OperatorResult reconcile(Request request);
+    protected abstract OperatorResult reconcile(OperatorRequest request);
 
     private void startWorker() {
         while (!this.executor.isShutdown() &&
@@ -159,7 +159,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                !Thread.currentThread().isInterrupted()) {
             LOG.debug("Trying to get item from work queue of {}-controller",
                       this.kind);
-            Request request = null;
+            OperatorRequest request = null;
             try {
                 request = this.workQueue.get();
             } catch (InterruptedException e) {
@@ -202,19 +202,19 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         crInformer.addEventHandler(new ResourceEventHandler<T>() {
             @Override
             public void onAdd(T cr) {
-                Request request = Request.parseRequestByCR(cr);
+                OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
 
             @Override
             public void onUpdate(T oldCR, T newCR) {
-                Request request = Request.parseRequestByCR(newCR);
+                OperatorRequest request = OperatorRequest.parseRequestByCR(newCR);
                 AbstractController.this.enqueueRequest(request);
             }
 
             @Override
             public void onDelete(T cr, boolean deletedStateUnknown) {
-                Request request = Request.parseRequestByCR(cr);
+                OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
         });
@@ -258,7 +258,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         });
     }
 
-    protected T getCR(Request request) {
+    protected T getCR(OperatorRequest request) {
         return this.getResourceByName(request.namespace(), request.name(),
                                       this.crClass);
     }
@@ -269,7 +269,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         @SuppressWarnings("unchecked")
         SharedIndexInformer<R> informer = (SharedIndexInformer<R>)
                                           this.informerMap.get(rClass);
-        String key = new Request(namespace, name).key();
+        String key = new OperatorRequest(namespace, name).key();
         R resource = informer.getIndexer().getByKey(key);
         if (resource == null) {
             return null;
@@ -361,7 +361,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         MatchWithMsg ownsMatch = this.ownsPredicate(ownsResource);
         if (ownsMatch.isMatch()) {
             String namespace = ownsResource.getMetadata().getNamespace();
-            Request request = new Request(namespace, ownsMatch.msg());
+            OperatorRequest request = new OperatorRequest(namespace, ownsMatch.msg());
             this.enqueueRequest(request);
         }
     }
@@ -387,7 +387,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         return null;
     }
 
-    private void enqueueRequest(Request request) {
+    private void enqueueRequest(OperatorRequest request) {
         if (request != null) {
             LOG.debug("Enqueue a resource request: {}", request);
             this.workQueue.add(request);
