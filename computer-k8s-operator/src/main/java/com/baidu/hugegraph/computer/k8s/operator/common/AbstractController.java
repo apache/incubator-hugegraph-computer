@@ -207,8 +207,8 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
             }
 
             @Override
-            public void onUpdate(T oldCR, T newCR) {
-                OperatorRequest request = OperatorRequest.parseRequestByCR(newCR);
+            public void onUpdate(T oldCR, T cr) {
+                OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
 
@@ -361,7 +361,8 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         MatchWithMsg ownsMatch = this.ownsPredicate(ownsResource);
         if (ownsMatch.isMatch()) {
             String namespace = ownsResource.getMetadata().getNamespace();
-            OperatorRequest request = new OperatorRequest(namespace, ownsMatch.msg());
+            OperatorRequest request = new OperatorRequest(namespace,
+                                                          ownsMatch.msg());
             this.enqueueRequest(request);
         }
     }
