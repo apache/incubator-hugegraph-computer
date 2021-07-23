@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 
-public class PageRankComputation implements Computation<DoubleValue> {
+public class PageRank implements Computation<DoubleValue> {
 
     public static final String CONF_ALPHA_KEY = "pagerank.alpha";
 
@@ -41,13 +41,14 @@ public class PageRankComputation implements Computation<DoubleValue> {
     private double initialRankInSuperstep;
     private double cumulativeValue;
 
-    private Aggregator l1Diff;
-    private Aggregator cumulative;
-    private Aggregator danglingVertexNum;
-    private Aggregator danglingCumulative;
+    private Aggregator l1DiffAggr;
+    private Aggregator cumulativeRankAggr;
+    private Aggregator danglingVertexNumAggr;
+    private Aggregator danglingCumulativeAggr;
 
     // Initial value in superstep 0.
     private DoubleValue initialValue;
+    private DoubleValue contribValue;
 
     @Override
     public String name() {
@@ -62,15 +63,15 @@ public class PageRankComputation implements Computation<DoubleValue> {
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
         vertex.value(this.initialValue);
-        this.cumulative.aggregateValue(this.initialValue.value());
+        this.cumulativeRankAggr.aggregateValue(this.initialValue.value());
         int edgeCount = vertex.numEdges();
         if (edgeCount == 0) {
-            this.danglingVertexNum.aggregateValue(1L);
-            this.danglingCumulative.aggregateValue(this.initialValue.value());
+            this.danglingVertexNumAggr.aggregateValue(1L);
+            this.danglingCumulativeAggr.aggregateValue(
+                                        this.initialValue.value());
         } else {
-            DoubleValue contribValue = new DoubleValue(
-                        this.initialValue.value() / edgeCount);
-            context.sendMessageToAllEdges(vertex, contribValue);
+            this.contribValue.value(this.initialValue.value() / edgeCount);
+            context.sendMessageToAllEdges(vertex, this.contribValue);
         }
     }
 
@@ -87,12 +88,12 @@ public class PageRankComputation implements Computation<DoubleValue> {
         rank /= this.cumulativeValue;
         DoubleValue oldRank = vertex.value();
         vertex.value(new DoubleValue(rank));
-        this.l1Diff.aggregateValue(Math.abs(oldRank.value() - rank));
-        this.cumulative.aggregateValue(rank);
+        this.l1DiffAggr.aggregateValue(Math.abs(oldRank.value() - rank));
+        this.cumulativeRankAggr.aggregateValue(rank);
         int edgeCount = vertex.numEdges();
         if (edgeCount == 0) {
-            this.danglingVertexNum.aggregateValue(1L);
-            this.danglingCumulative.aggregateValue(rank);
+            this.danglingVertexNumAggr.aggregateValue(1L);
+            this.danglingCumulativeAggr.aggregateValue(rank);
         } else {
             DoubleValue contribValue = new DoubleValue(rank / edgeCount);
             context.sendMessageToAllEdges(vertex, contribValue);
@@ -102,6 +103,7 @@ public class PageRankComputation implements Computation<DoubleValue> {
     @Override
     public void init(Config config) {
         this.alpha = config.getDouble(CONF_ALPHA_KEY, CONF_ALPHA_DEFAULT);
+        this.contribValue = new DoubleValue();
     }
 
     @Override
@@ -113,40 +115,40 @@ public class PageRankComputation implements Computation<DoubleValue> {
     public void beforeSuperstep(WorkerContext context) {
         // Get aggregator values for computation
         DoubleValue danglingContribution = context.aggregatedValue(
-        PageRankMasterComputation.AGGR_COMULATIVE_DANGLING_PROBABILITY);
+                    PageRank4Master.AGGR_COMULATIVE_DANGLING_PROBABILITY);
 
         this.rankFromDangling = danglingContribution.value() /
                                 context.totalVertexCount();
         this.initialRankInSuperstep = this.alpha / context.totalVertexCount();
         DoubleValue cumulativeProbability = context.aggregatedValue(
-                    PageRankMasterComputation.AGGR_COMULATIVE_PROBABILITY);
+                    PageRank4Master.AGGR_COMULATIVE_PROBABILITY);
         this.cumulativeValue = cumulativeProbability.value();
         this.initialValue = new DoubleValue(1.0D / context.totalVertexCount());
 
         // Create aggregators
-        this.l1Diff = context.createAggregator(
-                      PageRankMasterComputation.AGGR_L1_NORM_DIFFERENCE_KEY);
-        this.cumulative = context.createAggregator(
-             PageRankMasterComputation.AGGR_COMULATIVE_PROBABILITY);
-        this.danglingVertexNum = context.createAggregator(
-             PageRankMasterComputation.AGGR_DANGLING_VERTICES_NUM);
-        this.danglingCumulative = context.createAggregator(
-             PageRankMasterComputation.AGGR_COMULATIVE_DANGLING_PROBABILITY);
+        this.l1DiffAggr = context.createAggregator(
+                          PageRank4Master.AGGR_L1_NORM_DIFFERENCE_KEY);
+        this.cumulativeRankAggr = context.createAggregator(
+                                  PageRank4Master.AGGR_COMULATIVE_PROBABILITY);
+        this.danglingVertexNumAggr = context.createAggregator(
+             PageRank4Master.AGGR_DANGLING_VERTICES_NUM);
+        this.danglingCumulativeAggr = context.createAggregator(
+             PageRank4Master.AGGR_COMULATIVE_DANGLING_PROBABILITY);
     }
 
     @Override
     public void afterSuperstep(WorkerContext context) {
         context.aggregateValue(
-                PageRankMasterComputation.AGGR_COMULATIVE_PROBABILITY,
-                this.cumulative.aggregatedValue());
+                PageRank4Master.AGGR_COMULATIVE_PROBABILITY,
+                this.cumulativeRankAggr.aggregatedValue());
         context.aggregateValue(
-                PageRankMasterComputation.AGGR_L1_NORM_DIFFERENCE_KEY,
-                this.l1Diff.aggregatedValue());
+                PageRank4Master.AGGR_L1_NORM_DIFFERENCE_KEY,
+                this.l1DiffAggr.aggregatedValue());
         context.aggregateValue(
-                PageRankMasterComputation.AGGR_DANGLING_VERTICES_NUM,
-                this.danglingVertexNum.aggregatedValue());
+                PageRank4Master.AGGR_DANGLING_VERTICES_NUM,
+                this.danglingVertexNumAggr.aggregatedValue());
         context.aggregateValue(
-                PageRankMasterComputation.AGGR_COMULATIVE_DANGLING_PROBABILITY,
-                this.danglingCumulative.aggregatedValue());
+                PageRank4Master.AGGR_COMULATIVE_DANGLING_PROBABILITY,
+                this.danglingCumulativeAggr.aggregatedValue());
     }
 }

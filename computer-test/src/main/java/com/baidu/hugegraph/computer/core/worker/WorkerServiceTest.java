@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.master.MasterService;
-import com.baidu.hugegraph.computer.core.output.LimitLogOutput;
+import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
@@ -64,7 +64,7 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                 DoubleValue.class.getName(),
                 ComputerOptions.OUTPUT_CLASS,
-                LimitLogOutput.class.getName()
+                LimitedLogOutput.class.getName()
             );
             WorkerService workerService = new MockWorkerService();
             try {

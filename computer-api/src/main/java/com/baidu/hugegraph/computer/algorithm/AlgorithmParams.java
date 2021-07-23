@@ -36,17 +36,17 @@ public interface AlgorithmParams {
      */
     void setAlgorithmParameters(Map<String, String> params);
 
-    default void setIfNotFound(Map<String, String> params, String key,
-                               String value) {
+    default void setIfAbsent(Map<String, String> params, String key,
+                             String value) {
         if (!params.keySet().contains(key)) {
             LOG.debug("Put parameters key={}, value={}", key, value);
             params.put(key, value);
         }
     }
 
-    default void setIfNotFound(Map<String, String> params,
-                               ConfigOption<?> keyOption,
-                               String value) {
-        this.setIfNotFound(params, keyOption.name(), value);
+    default void setIfAbsent(Map<String, String> params,
+                             ConfigOption<?> keyOption,
+                             String value) {
+        this.setIfAbsent(params, keyOption.name(), value);
     }
 }

@@ -25,23 +25,23 @@ import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.output.LimitLogOutput;
+import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
 public class PageRankParams implements AlgorithmParams {
 
     @Override
     public void setAlgorithmParameters(Map<String, String> params) {
-        this.setIfNotFound(params, ComputerOptions.MASTER_COMPUTATION_CLASS,
-                           PageRankMasterComputation.class.getName());
-        this.setIfNotFound(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
-                           PageRankComputation.class.getName());
-        this.setIfNotFound(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                           DoubleValue.class.getName());
-        this.setIfNotFound(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                           DoubleValue.class.getName());
-        this.setIfNotFound(params, ComputerOptions.WORKER_COMBINER_CLASS,
-                           DoubleValueSumCombiner.class.getName());
-        this.setIfNotFound(params, ComputerOptions.OUTPUT_CLASS,
-                           LimitLogOutput.class.getName());
+        this.setIfAbsent(params, ComputerOptions.MASTER_COMPUTATION_CLASS,
+                         PageRank4Master.class.getName());
+        this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
+                         PageRank.class.getName());
+        this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
+                         DoubleValue.class.getName());
+        this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                         DoubleValue.class.getName());
+        this.setIfAbsent(params, ComputerOptions.WORKER_COMBINER_CLASS,
+                         DoubleValueSumCombiner.class.getName());
+        this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
+                         LimitedLogOutput.class.getName());
     }
 }

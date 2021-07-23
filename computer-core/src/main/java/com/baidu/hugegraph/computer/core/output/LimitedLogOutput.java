@@ -25,31 +25,31 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.util.Log;
 
-public class LimitLogOutput implements ComputerOutput {
+public class LimitedLogOutput implements ComputerOutput {
 
-    private static final Logger LOG = Log.logger(LimitLogOutput.class);
+    private static final Logger LOG = Log.logger(LimitedLogOutput.class);
     private static final String CONF_LIMIT_OUTPUT_PER_PARTITION_KEY =
                                 "output.limit_logt_output";
     private static final int CONF_LIMIT_OUTPUT_PER_PARTITION_DEFAULT = 10;
 
     private int partition;
     private int limit;
-    private int index;
+    private int logged;
 
     @Override
     public void init(Config config, int partition) {
         this.partition = partition;
         this.limit = config.getInt(CONF_LIMIT_OUTPUT_PER_PARTITION_KEY,
                                    CONF_LIMIT_OUTPUT_PER_PARTITION_DEFAULT);
-        this.index = 0;
+        this.logged = 0;
         LOG.info("Start write back partition {}", this.partition);
     }
 
     @Override
     public void write(Vertex vertex) {
-        if (this.index < this.limit) {
+        if (this.logged < this.limit) {
             LOG.info("id='{}', result='{}'", vertex.id(), vertex.value());
-            this.index++;
+            this.logged++;
         }
     }
 

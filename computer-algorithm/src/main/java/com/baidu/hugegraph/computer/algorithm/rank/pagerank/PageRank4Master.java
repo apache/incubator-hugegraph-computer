@@ -31,10 +31,9 @@ import com.baidu.hugegraph.computer.core.master.MasterComputationContext;
 import com.baidu.hugegraph.computer.core.master.MasterContext;
 import com.baidu.hugegraph.util.Log;
 
-public class PageRankMasterComputation implements MasterComputation {
+public class PageRank4Master implements MasterComputation {
 
-    private static final Logger LOG = Log.logger(
-                                      PageRankMasterComputation.class);
+    private static final Logger LOG = Log.logger(PageRank4Master.class);
 
     public static final String CONF_L1_NORM_DIFFERENCE_THRESHOLD_KEY =
                                "pagerank.l1DiffThreshold";
@@ -94,8 +93,8 @@ public class PageRankMasterComputation implements MasterComputation {
           .append(danglingProbability.value())
           .append(", cumulative probability = ").append(cumulativeProbability)
           .append(", l1 norm difference = ").append(l1NormDifference.value());
-        LOG.info(sb.toString());
 
+        LOG.info("PageRank running status: {}", sb);
         double l1Diff = l1NormDifference.value();
         if (context.superstep() > 1 && l1Diff <= this.l1DiffThreshold) {
             return false;
