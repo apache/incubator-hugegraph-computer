@@ -23,16 +23,6 @@ while getopts "r:u:p:s:j:i:" arg; do
     esac
 done
 
-if [ "$USER_NAME" = "" ]; then
-    print_usage
-    exit 1
-fi
-
-if [ "$PASSWORD" = "" ]; then
-    print_usage
-    exit 1
-fi
-
 if [ "$SOURCE_JAR_FILE" = "" ]; then
     print_usage
     exit 1
@@ -55,10 +45,14 @@ function abs_path() {
 
 BIN=`abs_path`
 
-docker login -u ${USER_NAME} -p ${PASSWORD} ${REGISTRY}
+if [ "$USER_NAME" != "" ]; then
+    docker login -u ${USER_NAME} -p ${PASSWORD} ${REGISTRY}
+fi
 
 docker build --build-arg SOURCE_JAR_FILE=${SOURCE_JAR_FILE} JAR_FILE=${JAR_FILE} -t ${IMG_URL} -f ${BIN}/Dockerfile
 
 docker push ${IMG_URL}
 
-docker logout ${REGISTRY}
+if [ "$USER_NAME" != "" ]; then
+    docker logout ${REGISTRY}
+fi

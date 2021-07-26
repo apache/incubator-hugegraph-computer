@@ -23,16 +23,6 @@ while getopts "r:u:p:s:j:i:" arg; do
     esac
 done
 
-if [ "$USER_NAME" = "" ]; then
-    print_usage
-    exit 1
-fi
-
-if [ "$PASSWORD" = "" ]; then
-    print_usage
-    exit 1
-fi
-
 if [ "$SOURCE_JAR_FILE" = "" ]; then
     print_usage
     exit 1
