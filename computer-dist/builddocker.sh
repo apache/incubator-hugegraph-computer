@@ -14,5 +14,5 @@ projectVersion=$(mvn -f "${PROJECT_POM_PATH}" -q -N \
     org.codehaus.mojo:exec-maven-plugin:1.3.1:exec \
     -Dexec.executable='echo' -Dexec.args='${project.version}')
 
-docker build -t "hugegraph-computer-framework:${projectVersion}" "${contextPath}" \
-    -f "${BASE_DIR}"/Dockerfile
+docker build -t "hugegraph/hugegraph-computer-framework:${projectVersion}" \
+    "${contextPath}" -f "${BASE_DIR}"/Dockerfile

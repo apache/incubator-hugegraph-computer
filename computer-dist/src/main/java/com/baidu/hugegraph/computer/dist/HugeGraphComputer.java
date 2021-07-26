@@ -30,6 +30,7 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
+import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -51,6 +52,7 @@ public class HugeGraphComputer {
                         ROLE_WORKER.equals(role),
                         "The role must be either " +
                         "%s or %s", ROLE_MASTER, ROLE_WORKER);
+        register();
         ComputerContext context = parseContext(args[0]);
         switch (role) {
             case ROLE_MASTER:
@@ -106,5 +108,13 @@ public class HugeGraphComputer {
         ComputerContextUtil.initContext(properties);
         ComputerContext context = ComputerContext.instance();
         return context;
+    }
+
+    private static void register() {
+        OptionSpace.register("computer",
+                             "com.baidu.hugegraph.computer.core.config." +
+                             "ComputerOptions");
+        OptionSpace.register("computer-rpc",
+                             "com.baidu.hugegraph.config.RpcOptions");
     }
 }
