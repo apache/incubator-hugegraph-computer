@@ -4,7 +4,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
 - name: controller
-  newName: czcoder/hugegraph-computer-operator
+  newName: hugegraph/hugegraph-computer-operator
   newTag: latest
 commonLabels:
   app.kubernetes.io/name: hugegraph-computer-operator
