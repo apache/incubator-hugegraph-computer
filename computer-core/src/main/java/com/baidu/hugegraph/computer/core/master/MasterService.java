@@ -40,6 +40,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.input.MasterInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
+import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.rpc.MasterRpcManager;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.E;
@@ -84,7 +85,7 @@ public class MasterService {
         InetSocketAddress rpcAddress = this.initManagers();
 
         this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
-                                            rpcAddress.getHostName(),
+                                            TransportUtil.host(rpcAddress),
                                             rpcAddress.getPort());
         /*
          * Connect to BSP server and clean the old data may be left by the
