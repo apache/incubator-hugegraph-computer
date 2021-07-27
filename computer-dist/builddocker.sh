@@ -5,14 +5,14 @@ PROJECT_PATH="$(cd "${BASE_DIR}/.." && pwd -P)"
 PROJECT_POM_PATH="${PROJECT_PATH}/pom.xml"
 mvn -f "${PROJECT_POM_PATH}" clean package -DskipTests
 
-contextPath=$(mvn -f "${PROJECT_POM_PATH}" -q -N \
+CONTEXT_PATH=$(mvn -f "${PROJECT_POM_PATH}" -q -N \
     org.codehaus.mojo:exec-maven-plugin:1.3.1:exec \
     -Dexec.executable='echo' -Dexec.args='${final.name}')
-    contextPath="${PROJECT_PATH}/${contextPath}"
+    CONTEXT_PATH="${PROJECT_PATH}/${CONTEXT_PATH}"
 
-projectVersion=$(mvn -f "${PROJECT_POM_PATH}" -q -N \
+PROJECT_VERSION=$(mvn -f "${PROJECT_POM_PATH}" -q -N \
     org.codehaus.mojo:exec-maven-plugin:1.3.1:exec \
     -Dexec.executable='echo' -Dexec.args='${project.version}')
 
-docker build -t "hugegraph/hugegraph-computer-framework:${projectVersion}" \
-    "${contextPath}" -f "${BASE_DIR}"/Dockerfile
+docker build -t "hugegraph/hugegraph-computer-framework:${PROJECT_VERSION}" \
+    "${CONTEXT_PATH}" -f "${BASE_DIR}"/Dockerfile
