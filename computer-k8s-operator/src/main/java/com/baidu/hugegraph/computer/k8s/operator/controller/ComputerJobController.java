@@ -160,13 +160,12 @@ public class ComputerJobController
             if (!JobStatus.finished(status.getJobStatus())) {
                 status.setJobStatus(JobStatus.CANCELLED.name());
                 this.updateStatus(computerJob);
-                return true;
             } else {
                 if (computerJob.removeFinalizer(FINALIZER_NAME)) {
                     this.replaceCR(computerJob);
-                    return true;
                 }
             }
+            return true;
         } else {
             if (JobStatus.finished(status.getJobStatus())) {
                 this.deleteCR(computerJob);
