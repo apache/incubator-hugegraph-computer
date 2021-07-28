@@ -90,6 +90,14 @@ public class TransportUtil {
         return resolvedAddress;
     }
 
+    public static String host(InetSocketAddress socketAddress) {
+        InetAddress address = socketAddress.getAddress();
+        if (address != null) {
+            return address.getHostAddress();
+        }
+        return socketAddress.getHostName();
+    }
+
     public static List<String> getLocalIPAddress() {
         List<String> ips = new ArrayList<>();
         try {
