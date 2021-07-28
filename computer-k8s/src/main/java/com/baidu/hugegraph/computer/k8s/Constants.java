@@ -62,7 +62,7 @@ public class Constants {
     public static final List<String> MASTER_ARGS =
            Lists.newArrayList("-r master", "-d k8s");
     public static final List<String> WORKER_ARGS =
-           Lists.newArrayList( "-r worker", "-d k8s");
+           Lists.newArrayList("-r worker", "-d k8s");
 
     public static final String K8S_SPEC_PREFIX  = "k8s.";
 }
