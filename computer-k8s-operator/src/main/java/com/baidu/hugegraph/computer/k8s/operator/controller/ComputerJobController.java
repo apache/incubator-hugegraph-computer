@@ -246,7 +246,7 @@ public class ComputerJobController
             status.setJobStatus(JobStatus.SUCCEEDED.name());
             String crName = computerJob.getMetadata().getName();
             this.recordEvent(computerJob, EventType.NORMAL,
-                             KubeUtil.succeededEventName(crName),
+                             KubeUtil.succeedEventName(crName),
                              "ComputerJobSucceed",
                              String.format("Job %s run success", crName));
             return status;

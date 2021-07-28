@@ -134,8 +134,8 @@ public class KubeUtil {
         return crName + "-failedEvent";
     }
 
-    public static String succeededEventName(String crName) {
-        return crName + "-succeededEvent";
+    public static String succeedEventName(String crName) {
+        return crName + "-succeedEvent";
     }
 
     public static String now() {
