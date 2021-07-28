@@ -412,7 +412,7 @@ public class ComputerJobDeployer {
                          .append(this.timezone);
         EnvVar jvmOptionsEnv = new EnvVarBuilder()
                 .withName(Constants.ENV_JVM_OPTIONS)
-                .withValue(jvmOptionsBuilder.toString())
+                .withValue(jvmOptionsBuilder.toString().trim())
                 .build();
         envVars.add(jvmOptionsEnv);
 
