@@ -75,11 +75,11 @@ type ComputerJobSpec struct {
 
     MasterCommand []string `json:"masterCommand,omitempty"`
 
-    MasterArgs []string `json:"masterArgs"`
+    MasterArgs []string `json:"masterArgs,omitempty"`
 
     WorkerCommand []string `json:"workerCommand,omitempty"`
 
-    WorkerArgs []string `json:"workerArgs"`
+    WorkerArgs []string `json:"workerArgs,omitempty"`
 
     // Volumes in the Job pod.
     // More info: https://kubernetes.io/docs/concepts/storage/volumes/

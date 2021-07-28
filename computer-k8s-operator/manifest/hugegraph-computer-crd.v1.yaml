@@ -1176,8 +1176,6 @@ spec:
             - computerConf
             - image
             - jobId
-            - masterArgs
-            - workerArgs
             - workerInstances
             type: object
           status:

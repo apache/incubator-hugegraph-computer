@@ -91,6 +91,7 @@
         },
         "masterArgs": {
           "type": "array",
+          "javaOmitEmpty": true,
           "items": {
             "type": "string"
           }
@@ -138,6 +139,7 @@
         },
         "workerArgs": {
           "type": "array",
+          "javaOmitEmpty": true,
           "items": {
             "type": "string"
           }
