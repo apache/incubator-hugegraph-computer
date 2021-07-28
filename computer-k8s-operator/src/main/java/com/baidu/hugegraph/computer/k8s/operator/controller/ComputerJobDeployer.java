@@ -92,11 +92,13 @@ public class ComputerJobDeployer {
     private static final String POD_NAME_KEY = "metadata.name";
 
     private final String internalEtcdUrl;
+    private final String timezone;
 
     public ComputerJobDeployer(NamespacedKubernetesClient kubeClient,
                                HugeConfig config) {
         this.kubeClient = kubeClient;
         this.internalEtcdUrl = config.get(OperatorOptions.INTERNAL_ETCD_URL);
+        this.timezone = config.get(OperatorOptions.TIMEZONE);
     }
 
     public void deploy(ComputerJobComponent observed) {
@@ -406,7 +408,8 @@ public class ComputerJobDeployer {
         StringBuilder jvmOptionsBuilder = jvmOptions == null ?
                                           new StringBuilder() :
                                           new StringBuilder(jvmOptions.trim());
-        jvmOptionsBuilder.append(" ").append("-Duser.timezone=Asia/Shanghai");
+        jvmOptionsBuilder.append(" ").append("-Duser.timezone=")
+                         .append(this.timezone);
         EnvVar jvmOptionsEnv = new EnvVarBuilder()
                 .withName(Constants.ENV_JVM_OPTIONS)
                 .withValue(jvmOptionsBuilder.toString())

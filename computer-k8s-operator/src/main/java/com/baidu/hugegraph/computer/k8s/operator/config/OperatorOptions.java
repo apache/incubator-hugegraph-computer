@@ -53,6 +53,14 @@ public class OperatorOptions extends OptionHolder {
                     Constants.DEFAULT_NAMESPACE
             );
 
+    public static final ConfigOption<String> TIMEZONE =
+            new ConfigOption<>(
+                    "k8s.timezone",
+                    "The timezone of computer job and operator.",
+                    disallowEmpty(),
+                    "Asia/Shanghai"
+            );
+
     public static final ConfigOption<Integer> PROBE_PORT =
             new ConfigOption<>(
                     "k8s.probe_port",

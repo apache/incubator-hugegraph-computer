@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -89,6 +90,10 @@ public class OperatorEntrypoint {
     public OperatorEntrypoint() {
         this.config = this.configFromSysPropsOrEnvVars();
         this.controllers = new ArrayList<>();
+
+        // Set time zone from config
+        String timezone = this.config.get(OperatorOptions.TIMEZONE);
+        TimeZone.setDefault(TimeZone.getTimeZone(timezone));
     }
 
     public void start() {

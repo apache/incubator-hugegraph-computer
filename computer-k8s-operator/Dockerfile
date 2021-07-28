@@ -1,6 +1,5 @@
 FROM openjdk:8-jre-alpine
 LABEL maintainer="HugeGraph Docker Maintainers <hugegraph@googlegroups.com>"
-RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2 -XshowSettings:vm"
 WORKDIR /opt/app
