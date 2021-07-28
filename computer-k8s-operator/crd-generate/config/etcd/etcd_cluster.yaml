@@ -11,4 +11,4 @@ metadata:
 spec:
   repository: quay.io/coreos/etcd
   size: 3
-  version: "3.2.13"
+  version: "3.5.0"
