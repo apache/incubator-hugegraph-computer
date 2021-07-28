@@ -26,6 +26,7 @@ import static com.baidu.hugegraph.config.OptionChecker.rangeInt;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
+import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
@@ -97,7 +98,7 @@ public class KubeSpecOptions extends OptionHolder {
                     "The run args of master, equivalent to 'Cmd' " +
                     "field of Docker.",
                     disallowEmpty(),
-                    "echo master"
+                    Constants.MASTER_CMD.toArray(new String[0])
             );
 
     public static final DriverConfigOption<String> WORKER_CPU =
@@ -138,7 +139,7 @@ public class KubeSpecOptions extends OptionHolder {
                     "The run args of worker, equivalent to 'Cmd' " +
                     "field of Docker.",
                     disallowEmpty(),
-                    "echo worker"
+                    Constants.WORKER_CMD.toArray(new String[0])
             );
 
     public static final ConfigOption<Integer> WORKER_INSTANCES =
@@ -158,6 +159,14 @@ public class KubeSpecOptions extends OptionHolder {
                     "Always"
             );
 
+    public static final DriverConfigOption<String> JVM_OPTIONS =
+            new DriverConfigOption<>(
+                    "k8s.jvm_options",
+                    "The java startup parameters of computer job.",
+                    disallowEmpty(),
+                    String.class
+            );
+
     public static final Map<String, ConfigOption<?>> ALLOW_USER_SETTINGS =
             new ImmutableMap.Builder<String, ConfigOption<?>>()
                     .put(MASTER_CPU.name(), MASTER_CPU)
@@ -165,5 +174,6 @@ public class KubeSpecOptions extends OptionHolder {
                     .put(MASTER_MEMORY.name(), MASTER_MEMORY)
                     .put(WORKER_MEMORY.name(), WORKER_MEMORY)
                     .put(WORKER_INSTANCES.name(), WORKER_INSTANCES)
+                    .put(JVM_OPTIONS.name(), JVM_OPTIONS)
                     .build();
 }

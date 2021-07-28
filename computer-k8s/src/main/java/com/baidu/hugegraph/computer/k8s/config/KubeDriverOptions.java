@@ -110,10 +110,10 @@ public class KubeDriverOptions extends OptionHolder {
                     ""
             );
 
-    public static final ConfigOption<String> LOG4J_XML_PATH =
+    public static final ConfigOption<String> LOG4J_CONF_PATH =
             new ConfigOption<>(
-                    "k8s.log4j_xml_path",
-                    "The log4j.xml path for computer job.",
+                    "k8s.log4j_conf_path",
+                    "The log4j.xml or log4j.properties path for computer job.",
                     null,
                     ""
             );

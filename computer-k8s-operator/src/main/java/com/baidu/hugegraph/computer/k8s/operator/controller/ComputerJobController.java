@@ -244,6 +244,11 @@ public class ComputerJobController
             return status;
         } else if (succeededComponents.intValue() == TOTAL_COMPONENTS) {
             status.setJobStatus(JobStatus.SUCCEEDED.name());
+            String crName = computerJob.getMetadata().getName();
+            this.recordEvent(computerJob, EventType.NORMAL,
+                             KubeUtil.succeededEventName(crName),
+                             "ComputerJobSucceed",
+                             String.format("Job %s run success", crName));
             return status;
         }
 
@@ -494,7 +499,7 @@ public class ComputerJobController
                                    .tailingLines(ERROR_LOG_TAILING_LINES)
                                    .getLog(true);
                 if (StringUtils.isNotBlank(log)) {
-                    return log;
+                    return log + "\n podName:" + pod.getMetadata().getName();
                 }
             }
         }

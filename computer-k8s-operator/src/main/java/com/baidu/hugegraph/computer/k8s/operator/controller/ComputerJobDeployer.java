@@ -215,9 +215,13 @@ public class ComputerJobDeployer {
         data.put(Constants.COMPUTER_CONF_FILE,
                  KubeUtil.asProperties(computerConf));
 
-        String log4jXml = spec.getLog4jXml();
-        if (StringUtils.isNotBlank(log4jXml)) {
-            data.put(Constants.LOG_XML_FILE, log4jXml);
+        String log4jConf = spec.getLog4jConf();
+        if (StringUtils.isNotBlank(log4jConf)) {
+            if (log4jConf.trim().charAt(0) == '<') {
+                data.put(Constants.LOG_XML_FILE, log4jConf);
+            } else {
+                data.put(Constants.LOG_PROP_FILE, log4jConf);
+            }
         }
 
         String name = KubeUtil.configMapName(crName);
@@ -238,6 +242,9 @@ public class ComputerJobDeployer {
             command = Lists.newArrayList("/bin/sh", "-c");
         }
         List<String> args = spec.getMasterArgs();
+        if (CollectionUtils.isEmpty(args)) {
+            args = Constants.MASTER_CMD;
+        }
 
         String name = KubeUtil.masterJobName(crName);
 
@@ -261,6 +268,9 @@ public class ComputerJobDeployer {
             command = Lists.newArrayList("/bin/sh", "-c");
         }
         List<String> args = spec.getWorkerArgs();
+        if (CollectionUtils.isEmpty(args)) {
+            args = Constants.WORKER_CMD;
+        }
 
         String name = KubeUtil.workerJobName(crName);
 
@@ -283,7 +293,7 @@ public class ComputerJobDeployer {
         if (volumes == null) {
             volumes = new ArrayList<>();
         } else {
-            volumes = Lists.newArrayList();
+            volumes = Lists.newArrayList(volumes);
         }
         Volume configVolume = this.getConfigVolume(configMapName);
         volumes.add(configVolume);
@@ -319,7 +329,7 @@ public class ComputerJobDeployer {
             envVars = new ArrayList<>();
         }
 
-        // Add Pod info to env
+        // Add env
         EnvVar podIP = new EnvVarBuilder()
                 .withName(Constants.ENV_POD_IP)
                 .withNewValueFrom()
@@ -362,13 +372,16 @@ public class ComputerJobDeployer {
                 .build();
         envVars.add(confPath);
 
-        String log4jXml = spec.getLog4jXml();
-        if (StringUtils.isNotBlank(log4jXml)) {
-            EnvVar log4jXmlPath = new EnvVarBuilder()
-                    .withName(Constants.ENV_LOG4J_XML_PATH)
-                    .withValue(Constants.LOG_XML_PATH)
-                    .build();
-            envVars.add(log4jXmlPath);
+        String log4jConf = spec.getLog4jConf();
+        if (StringUtils.isNotBlank(log4jConf)) {
+            EnvVarBuilder logConfEnvBuilder = new EnvVarBuilder();
+            logConfEnvBuilder.withName(Constants.ENV_LOG4J_CONF_PATH);
+            if (log4jConf.trim().charAt(0) == '<') {
+                logConfEnvBuilder.withValue(Constants.LOG_XML_PATH);
+            } else {
+                logConfEnvBuilder.withValue(Constants.LOG_PROP_PATH);
+            }
+            envVars.add(logConfEnvBuilder.build());
         }
 
         String jarFile = spec.getJarFile();
@@ -379,6 +392,26 @@ public class ComputerJobDeployer {
                     .build();
             envVars.add(jarFilePath);
         }
+
+        String remoteJarUri = spec.getRemoteJarUri();
+        if (StringUtils.isNotBlank(remoteJarUri)) {
+            EnvVar jobJarURI = new EnvVarBuilder()
+                    .withName(Constants.ENV_JOB_JAR_URI)
+                    .withValue(remoteJarUri)
+                    .build();
+            envVars.add(jobJarURI);
+        }
+
+        String jvmOptions = spec.getJvmOptions();
+        StringBuilder jvmOptionsBuilder = jvmOptions == null ?
+                                          new StringBuilder() :
+                                          new StringBuilder(jvmOptions.trim());
+        jvmOptionsBuilder.append(" ").append("-Duser.timezone=Asia/Shanghai");
+        EnvVar jvmOptionsEnv = new EnvVarBuilder()
+                .withName(Constants.ENV_JVM_OPTIONS)
+                .withValue(jvmOptionsBuilder.toString())
+                .build();
+        envVars.add(jvmOptionsEnv);
 
         Quantity masterCpu = spec.getMasterCpu();
         Quantity masterMemory = spec.getMasterMemory();

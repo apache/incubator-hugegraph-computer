@@ -129,15 +129,18 @@ public abstract class AbstractK8sTest {
                     "http://127.0.0.1:8080");
         options.put(KubeDriverOptions.NAMESPACE.name(),
                     this.namespace);
-        options.put(KubeDriverOptions.LOG4J_XML_PATH.name(),
+        options.put(KubeDriverOptions.LOG4J_CONF_PATH.name(),
                     "conf/log4j2-test.xml");
         options.put(KubeDriverOptions.ENABLE_INTERNAL_ALGORITHM.name(),
                     "false");
         options.put(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
                     IMAGE_REPOSITORY_URL);
         options.put(KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL.name(),
-                    "czcoder/hugegraph-computer-test:PageRank-latest");
+                    IMAGE_REPOSITORY_URL + ":PageRank-latest");
         options.put(KubeSpecOptions.PULL_POLICY.name(), "IfNotPresent");
+        options.put(KubeSpecOptions.JVM_OPTIONS.name(), "-Dlog4j2.debug=true");
+        options.put(KubeSpecOptions.MASTER_ARGS.name(), "[echo master]");
+        options.put(KubeSpecOptions.WORKER_ARGS.name(), "[echo worker]");
         MapConfiguration mapConfig = new MapConfiguration(options);
         this.config = new HugeConfig(mapConfig);
     }
@@ -190,7 +193,8 @@ public abstract class AbstractK8sTest {
     private void createCRD(KubernetesClient client) {
         client.apiextensions().v1beta1()
               .customResourceDefinitions()
-              .load(new File("conf/hugegraph-computer-crd-test.v1beta1.yaml"))
+              .load(new File("../computer-k8s-operator/manifest" +
+                             "/hugegraph-computer-crd.v1beta1.yaml"))
               .createOrReplace();
     }
 }

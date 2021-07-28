@@ -172,7 +172,9 @@ spec:
                 type: string
               jobId:
                 type: string
-              log4jXml:
+              jvmOptions:
+                type: string
+              log4jConf:
                 type: string
               masterArgs:
                 items:
@@ -211,6 +213,9 @@ spec:
                       type: string
                   type: object
                 type: array
+              remoteJarUri:
+                pattern: ^(http|https):\/\/([\w.]+\/?)\S*$
+                type: string
               volumeMounts:
                 description: 'Volume mounts in the Job container. More info: https://kubernetes.io/docs/concepts/storage/volumes/'
                 items:

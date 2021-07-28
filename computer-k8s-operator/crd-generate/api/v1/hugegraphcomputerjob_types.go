@@ -58,9 +58,14 @@ type ComputerJobSpec struct {
 
     ComputerConf map[string]string `json:"computerConf"`
 
-    Log4jXml *string `json:"log4jXml,omitempty"`
+    Log4jConf *string `json:"log4jConf,omitempty"`
     
     JarFile *string `json:"jarFile,omitempty"`
+
+    //+kubebuilder:validation:Pattern=`^(http|https):\/\/([\w.]+\/?)\S*$`
+    RemoteJarUri *string  `json:"remoteJarUri,omitempty"`
+
+    JvmOptions *string `json:"jvmOptions,omitempty"`
 
     // Environment variables shared by all Master and Worker.
     EnvVars []corev1.EnvVar `json:"envVars,omitempty"`

@@ -134,6 +134,10 @@ public class KubeUtil {
         return crName + "-failedEvent";
     }
 
+    public static String succeededEventName(String crName) {
+        return crName + "-succeededEvent";
+    }
+
     public static String now() {
         return OffsetDateTime.now().toString();
     }

@@ -120,7 +120,6 @@ public class KubernetesDriver implements ComputerDriver {
         this.defaultSpec = this.defaultSpec();
         this.defaultConf = this.defaultComputerConf();
 
-
         this.bash = this.conf.get(KubeDriverOptions.BUILD_IMAGE_BASH_PATH);
         this.jarFileDir = this.conf.get(KubeDriverOptions.JAR_FILE_DIR);
         this.registry = this.conf.get(
@@ -241,8 +240,8 @@ public class KubernetesDriver implements ComputerDriver {
         Set<String> requiredOptions = ComputerOptions.K8S_REQUIRED_USER_OPTIONS;
         @SuppressWarnings("unchecked")
         Collection<String> unSetOptions = CollectionUtils.removeAll(
-                requiredOptions,
-                computerConf.keySet());
+                                          requiredOptions,
+                                          computerConf.keySet());
         E.checkArgument(unSetOptions.isEmpty(),
                         "The %s options can't be null", unSetOptions);
 
@@ -518,13 +517,13 @@ public class KubernetesDriver implements ComputerDriver {
             }
         }
 
-        // Add log4j.xml
-        String log4jXmlPath = this.conf.get(KubeDriverOptions.LOG4J_XML_PATH);
-        if (StringUtils.isNotBlank(log4jXmlPath)) {
+        // Add log4j config
+        String log4jConfPath = this.conf.get(KubeDriverOptions.LOG4J_CONF_PATH);
+        if (StringUtils.isNotBlank(log4jConfPath)) {
             try {
-                File file = new File(log4jXmlPath);
-                String log4jXml = FileUtils.readFileToString(file);
-                spec.withLog4jXml(log4jXml);
+                File file = new File(log4jConfPath);
+                String log4jConf = FileUtils.readFileToString(file);
+                spec.withLog4jConf(log4jConf);
             } catch (IOException exception) {
                 throw new ComputerDriverException(
                           "Failed to read log4j file for computer job",

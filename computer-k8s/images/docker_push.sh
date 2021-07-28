@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ev
+
 REGISTRY=""
 USER_NAME=""
 PASSWORD=""
