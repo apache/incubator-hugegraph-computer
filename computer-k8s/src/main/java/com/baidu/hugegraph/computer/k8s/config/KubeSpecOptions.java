@@ -89,7 +89,7 @@ public class KubeSpecOptions extends OptionHolder {
                     "The run command of master, equivalent to " +
                     "'Entrypoint' field of Docker.",
                     disallowEmpty(),
-                    "/bin/sh", "-c"
+                    Constants.COMMAND.toArray(new String[0])
             );
 
     public static final ConfigListOption<String> MASTER_ARGS =
@@ -98,7 +98,7 @@ public class KubeSpecOptions extends OptionHolder {
                     "The run args of master, equivalent to 'Cmd' " +
                     "field of Docker.",
                     disallowEmpty(),
-                    Constants.MASTER_CMD.toArray(new String[0])
+                    Constants.MASTER_ARGS.toArray(new String[0])
             );
 
     public static final DriverConfigOption<String> WORKER_CPU =
@@ -130,7 +130,7 @@ public class KubeSpecOptions extends OptionHolder {
                     "The run command of worker, equivalent to " +
                     "'Entrypoint' field of Docker.",
                     disallowEmpty(),
-                    "/bin/sh", "-c"
+                    Constants.COMMAND.toArray(new String[0])
             );
 
     public static final ConfigListOption<String> WORKER_ARGS =
@@ -139,7 +139,7 @@ public class KubeSpecOptions extends OptionHolder {
                     "The run args of worker, equivalent to 'Cmd' " +
                     "field of Docker.",
                     disallowEmpty(),
-                    Constants.WORKER_CMD.toArray(new String[0])
+                    Constants.WORKER_ARGS.toArray(new String[0])
             );
 
     public static final ConfigOption<Integer> WORKER_INSTANCES =

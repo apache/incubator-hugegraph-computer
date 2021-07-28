@@ -139,6 +139,8 @@ public abstract class AbstractK8sTest {
                     IMAGE_REPOSITORY_URL + ":PageRank-latest");
         options.put(KubeSpecOptions.PULL_POLICY.name(), "IfNotPresent");
         options.put(KubeSpecOptions.JVM_OPTIONS.name(), "-Dlog4j2.debug=true");
+        options.put(KubeSpecOptions.MASTER_COMMAND.name(), "[/bin/sh, -c]");
+        options.put(KubeSpecOptions.WORKER_COMMAND.name(), "[/bin/sh, -c]");
         options.put(KubeSpecOptions.MASTER_ARGS.name(), "[echo master]");
         options.put(KubeSpecOptions.WORKER_ARGS.name(), "[echo worker]");
         MapConfiguration mapConfig = new MapConfiguration(options);

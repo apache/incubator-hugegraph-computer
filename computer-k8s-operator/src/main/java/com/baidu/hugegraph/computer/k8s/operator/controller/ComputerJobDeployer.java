@@ -239,11 +239,11 @@ public class ComputerJobDeployer {
 
         List<String> command = spec.getMasterCommand();
         if (CollectionUtils.isEmpty(command)) {
-            command = Lists.newArrayList("/bin/sh", "-c");
+            command = Constants.COMMAND;
         }
         List<String> args = spec.getMasterArgs();
         if (CollectionUtils.isEmpty(args)) {
-            args = Constants.MASTER_CMD;
+            args = Constants.MASTER_ARGS;
         }
 
         String name = KubeUtil.masterJobName(crName);
@@ -265,11 +265,11 @@ public class ComputerJobDeployer {
 
         List<String> command = spec.getWorkerCommand();
         if (CollectionUtils.isEmpty(command)) {
-            command = Lists.newArrayList("/bin/sh", "-c");
+            command = Constants.COMMAND;
         }
         List<String> args = spec.getWorkerArgs();
         if (CollectionUtils.isEmpty(args)) {
-            args = Constants.WORKER_CMD;
+            args = Constants.WORKER_ARGS;
         }
 
         String name = KubeUtil.workerJobName(crName);

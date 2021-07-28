@@ -57,10 +57,12 @@ public class Constants {
     public static final String DEFAULT_LOG_PATH =
             "/opt/hugegraph-computer/logs/hugegraph-computer.log";
 
-    public static final List<String> MASTER_CMD =
-           Lists.newArrayList("bin/start-computer.sh", "-r master", "-d k8s");
-    public static final List<String> WORKER_CMD =
-           Lists.newArrayList("bin/start-computer.sh", "-r worker", "-d k8s");
+    public static final List<String> COMMAND =
+           Lists.newArrayList("bin/start-computer.sh");
+    public static final List<String> MASTER_ARGS =
+           Lists.newArrayList("-r master", "-d k8s");
+    public static final List<String> WORKER_ARGS =
+           Lists.newArrayList( "-r worker", "-d k8s");
 
     public static final String K8S_SPEC_PREFIX  = "k8s.";
 }
