@@ -174,7 +174,7 @@ spec:
                 type: string
               jvmOptions:
                 type: string
-              log4jConf:
+              log4jXml:
                 type: string
               masterArgs:
                 items:

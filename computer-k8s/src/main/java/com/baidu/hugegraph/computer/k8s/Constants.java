@@ -46,13 +46,10 @@ public class Constants {
     public static final String CONFIG_DIR =  "/opt/hugegraph-computer/conf";
     public static final String COMPUTER_CONF_FILE = "computer.properties";
     public static final String LOG_XML_FILE = "log4j2.xml";
-    public static final String LOG_PROP_FILE = "log4j2.properties";
     public static final String COMPUTER_CONF_PATH =
            URLUtils.pathJoin(CONFIG_DIR, COMPUTER_CONF_FILE);
     public static final String LOG_XML_PATH =
            URLUtils.pathJoin(CONFIG_DIR, LOG_XML_FILE);
-    public static final String LOG_PROP_PATH =
-           URLUtils.pathJoin(CONFIG_DIR, LOG_PROP_FILE);
 
     public static final String DEFAULT_LOG_PATH =
             "/opt/hugegraph-computer/logs/hugegraph-computer.log";

@@ -85,7 +85,7 @@
           "type": "string",
           "existingJavaType": "String"
         },
-        "log4jConf": {
+        "log4jXml": {
           "type": "string",
           "existingJavaType": "String"
         },

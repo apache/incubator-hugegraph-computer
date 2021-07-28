@@ -217,13 +217,9 @@ public class ComputerJobDeployer {
         data.put(Constants.COMPUTER_CONF_FILE,
                  KubeUtil.asProperties(computerConf));
 
-        String log4jConf = spec.getLog4jConf();
-        if (StringUtils.isNotBlank(log4jConf)) {
-            if (log4jConf.trim().charAt(0) == '<') {
-                data.put(Constants.LOG_XML_FILE, log4jConf);
-            } else {
-                data.put(Constants.LOG_PROP_FILE, log4jConf);
-            }
+        String log4jXml = spec.getLog4jXml();
+        if (StringUtils.isNotBlank(log4jXml)) {
+            data.put(Constants.LOG_XML_FILE, log4jXml);
         }
 
         String name = KubeUtil.configMapName(crName);
@@ -374,16 +370,13 @@ public class ComputerJobDeployer {
                 .build();
         envVars.add(confPath);
 
-        String log4jConf = spec.getLog4jConf();
-        if (StringUtils.isNotBlank(log4jConf)) {
-            EnvVarBuilder logConfEnvBuilder = new EnvVarBuilder();
-            logConfEnvBuilder.withName(Constants.ENV_LOG4J_CONF_PATH);
-            if (log4jConf.trim().charAt(0) == '<') {
-                logConfEnvBuilder.withValue(Constants.LOG_XML_PATH);
-            } else {
-                logConfEnvBuilder.withValue(Constants.LOG_PROP_PATH);
-            }
-            envVars.add(logConfEnvBuilder.build());
+        String log4jXml = spec.getLog4jXml();
+        if (StringUtils.isNotBlank(log4jXml)) {
+            EnvVar logConfEnv = new EnvVarBuilder()
+                    .withName(Constants.ENV_LOG4J_CONF_PATH)
+                    .withValue(Constants.LOG_XML_PATH)
+                    .build();
+            envVars.add(logConfEnv);
         }
 
         String jarFile = spec.getJarFile();

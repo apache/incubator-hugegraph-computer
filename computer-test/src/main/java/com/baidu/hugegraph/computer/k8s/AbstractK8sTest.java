@@ -129,7 +129,7 @@ public abstract class AbstractK8sTest {
                     "http://127.0.0.1:8080");
         options.put(KubeDriverOptions.NAMESPACE.name(),
                     this.namespace);
-        options.put(KubeDriverOptions.LOG4J_CONF_PATH.name(),
+        options.put(KubeDriverOptions.LOG4J_XML_PATH.name(),
                     "conf/log4j2-test.xml");
         options.put(KubeDriverOptions.ENABLE_INTERNAL_ALGORITHM.name(),
                     "false");

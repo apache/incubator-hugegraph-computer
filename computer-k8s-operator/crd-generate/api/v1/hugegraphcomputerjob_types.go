@@ -58,7 +58,7 @@ type ComputerJobSpec struct {
 
     ComputerConf map[string]string `json:"computerConf"`
 
-    Log4jConf *string `json:"log4jConf,omitempty"`
+    Log4jXml *string `json:"log4jXml,omitempty"`
     
     JarFile *string `json:"jarFile,omitempty"`
 

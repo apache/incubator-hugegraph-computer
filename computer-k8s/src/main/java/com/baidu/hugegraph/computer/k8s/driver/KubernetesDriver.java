@@ -85,8 +85,8 @@ public class KubernetesDriver implements ComputerDriver {
     private final HugeConfig conf;
     private final String namespace;
     private final NamespacedKubernetesClient kubeClient;
-    private final MixedOperation<HugeGraphComputerJob,
-            HugeGraphComputerJobList, Resource<HugeGraphComputerJob>> operation;
+    private final MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
+                                 Resource<HugeGraphComputerJob>> operation;
     private volatile Watch watch;
     private final MutableBoolean watchActive;
     private final Map<String, Pair<CompletableFuture<Void>, JobObserver>> waits;
@@ -123,18 +123,17 @@ public class KubernetesDriver implements ComputerDriver {
         this.bash = this.conf.get(KubeDriverOptions.BUILD_IMAGE_BASH_PATH);
         this.jarFileDir = this.conf.get(KubeDriverOptions.JAR_FILE_DIR);
         this.registry = this.conf.get(
-                             KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY)
-                                 .trim();
+                KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY).trim();
         this.username = this.conf.get(
-                             KubeDriverOptions.IMAGE_REPOSITORY_USERNAME);
+                KubeDriverOptions.IMAGE_REPOSITORY_USERNAME);
         this.password = this.conf.get(
-                             KubeDriverOptions.IMAGE_REPOSITORY_PASSWORD);
+                KubeDriverOptions.IMAGE_REPOSITORY_PASSWORD);
         this.enableInternalAlgorithm = this.conf.get(
-        KubeDriverOptions.ENABLE_INTERNAL_ALGORITHM);
+                KubeDriverOptions.ENABLE_INTERNAL_ALGORITHM);
         this.internalAlgorithms = this.conf.get(
-        KubeDriverOptions.INTERNAL_ALGORITHMS);
+                KubeDriverOptions.INTERNAL_ALGORITHMS);
         this.internalAlgorithmImageUrl = this.conf.get(
-        KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL);
+                KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL);
     }
 
     private static NamespacedKubernetesClient createKubeClient(
@@ -517,13 +516,13 @@ public class KubernetesDriver implements ComputerDriver {
             }
         }
 
-        // Add log4j config
-        String log4jConfPath = this.conf.get(KubeDriverOptions.LOG4J_CONF_PATH);
-        if (StringUtils.isNotBlank(log4jConfPath)) {
+        // Add log4j.xml
+        String log4jXmlPath = this.conf.get(KubeDriverOptions.LOG4J_XML_PATH);
+        if (StringUtils.isNotBlank(log4jXmlPath)) {
             try {
-                File file = new File(log4jConfPath);
-                String log4jConf = FileUtils.readFileToString(file);
-                spec.withLog4jConf(log4jConf);
+                File file = new File(log4jXmlPath);
+                String log4jXml = FileUtils.readFileToString(file);
+                spec.withLog4jXml(log4jXml);
             } catch (IOException exception) {
                 throw new ComputerDriverException(
                           "Failed to read log4j file for computer job",
