@@ -35,6 +35,11 @@
              so must explicitly import each submodule -->
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>computer-dist</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-common</artifactId>
         </dependency>
         <dependency>

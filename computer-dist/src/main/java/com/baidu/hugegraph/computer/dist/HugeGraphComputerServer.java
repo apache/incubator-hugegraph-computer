@@ -24,10 +24,10 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.master.MasterService;
@@ -38,43 +38,36 @@ import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
-public class HugeGraphComputer {
+public class HugeGraphComputerServer {
 
-    private static final Logger LOG = Log.logger(HugeGraphComputer.class);
+    private static final Logger LOG = Log.logger(HugeGraphComputerServer.class);
 
     private static final String ROLE_MASTER = "master";
     private static final String ROLE_WORKER = "worker";
 
-    static {
-        loadClass();
-    }
-
     /**
      *  Some class must be load first, in order to invoke static method to init;
      */
-    private static void loadClass() {
-        try {
-            Class.forName(IdType.class.getCanonicalName());
-            Class.forName(MessageType.class.getCanonicalName());
-            Class.forName(ValueType.class.getCanonicalName());
-        } catch (ClassNotFoundException e) {
-            LOG.error("Failed to init class: {}", e.getMessage(), e);
-            throw new ComputerException("Failed to init class: %s",
-                                        e.getMessage(), e);
-        }
+    private static void loadClass() throws ClassNotFoundException {
+        Class.forName(IdType.class.getCanonicalName());
+        Class.forName(MessageType.class.getCanonicalName());
+        Class.forName(ValueType.class.getCanonicalName());
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException,
+                                                  ClassNotFoundException {
         E.checkArgument(ArrayUtils.getLength(args) == 3,
                         "Argument count must be three, " +
                         "the first is conf path;" +
                         "the second is role type;" +
                         "the third is drive type.");
         String role = args[1];
-        E.checkArgument(ROLE_MASTER.equals(role) ||
-                        ROLE_WORKER.equals(role),
-                        "The role must be either " +
-                        "%s or %s", ROLE_MASTER, ROLE_WORKER);
+        E.checkArgument(!StringUtils.isEmpty(role),
+                        "The role can't be null or emtpy, " +
+                        "it must be either '%s' or '%s'",
+                        ROLE_MASTER, ROLE_WORKER);
+        setUncaughtExceptionHandler();
+        loadClass();
         registerOptions();
         ComputerContext context = parseContext(args[0]);
         switch (role) {
@@ -90,16 +83,37 @@ public class HugeGraphComputer {
         }
     }
 
+    protected static void setUncaughtExceptionHandler() {
+        Thread.UncaughtExceptionHandler handler =
+               Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler(
+               new PrintExceptionHandler(handler)
+        );
+    }
+
+    private static class PrintExceptionHandler implements
+                                               Thread.UncaughtExceptionHandler {
+        private final Thread.UncaughtExceptionHandler handler;
+        PrintExceptionHandler(Thread.UncaughtExceptionHandler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public void uncaughtException(Thread t, Throwable e) {
+            HugeGraphComputerServer.LOG.error("Failed to run service on {}, {}",
+                                              t, e.getMessage(), e);
+            if (handler != null) {
+                handler.uncaughtException(t, e);
+            }
+        }
+    }
+
     private static void executeWorkerService(ComputerContext context) {
         WorkerService workerService = null;
         try {
             workerService = new WorkerService();
             workerService.init(context.config());
             workerService.execute();
-        } catch (Throwable e) {
-            LOG.error("Failed to execute worker service: {}",
-                      e.getMessage(), e);
-            throw e;
         } finally {
             if (workerService != null) {
                 workerService.close();
@@ -113,10 +127,6 @@ public class HugeGraphComputer {
             masterService = new MasterService();
             masterService.init(context.config());
             masterService.execute();
-        } catch (Throwable e) {
-            LOG.error("Failed to execute master service: {}",
-                      e.getMessage(), e);
-            throw e;
         } finally {
             if (masterService != null) {
                 masterService.close();

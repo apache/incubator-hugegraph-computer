@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -xe
+set -e
 BIN_DIR=$(cd "$(dirname "$0")" && pwd -P)
 BASE_DIR=$(cd "${BIN_DIR}/.." && pwd -P)
 LIB_DIR=${BASE_DIR}/lib
@@ -17,13 +17,15 @@ ROLE_MASTER="master"
 ROLE_WORKER="worker"
 
 usage() {
-    echo "start-computer.sh <-c|--conf conf_file_path>"
-    echo "<-a|--algorithm algorithm_jar_path> [-l|--log4 log4_conf_path]"
-    echo "<-d|--drive drive_type(local|k8s|yarn)>"
+    echo "Usage:"
+    echo "    start-computer.sh <-c|--conf conf_file_path>"
+    echo "        <-a|--algorithm algorithm_jar_path>"
+    echo "        [-l|--log4 log4_conf_path]"
+    echo "        <-d|--drive drive_type(local|k8s|yarn)>"
 }
 
-if [ $# -lt 4 ];
-    then usage
+if [ $# -lt 4 ]; then
+    usage
 fi
 
 check_empty() {
@@ -34,16 +36,16 @@ check_empty() {
 }
 
 check_file_readable() {
-    if [ ! -r "$2" ];then
+    if [ ! -r "$2" ]; then
         echo $1
         exit 1
     fi
 }
 
 check_file_executable() {
-    if [ ! -x "$1" ];then
-      echo $2
-      exit 1
+    if [ ! -x "$1" ]; then
+        echo $2
+        exit 1
     fi
 }
 
@@ -180,12 +182,12 @@ if [ "${LOG4J_CONF_PATH}" != "" ];then
     LOG4j_CONF=-Dlog4j.configurationFile="${LOG4J_CONF_PATH}"
 fi
 
+MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputerServer
+
 if [ "${LOG4j_CONF}" != "" ]; then
     ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${JVM_OPTIONS} -cp \
-        "${CP}" com.baidu.hugegraph.computer.dist.HugeGraphComputer \
-        "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
+        "${CP}" ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
 else
     ${JAVA} -Dname="hugegraph-computer" ${JVM_OPTIONS} -cp "${CP}" \
-        com.baidu.hugegraph.computer.dist.HugeGraphComputer \
-        "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
+        ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
 fi
