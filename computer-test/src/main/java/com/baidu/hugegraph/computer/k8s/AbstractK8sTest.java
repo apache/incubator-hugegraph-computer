@@ -135,6 +135,10 @@ public abstract class AbstractK8sTest {
                     "false");
         options.put(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
                     IMAGE_REPOSITORY_URL);
+        options.put(KubeDriverOptions.IMAGE_REPOSITORY_USERNAME.name(),
+                    "hugegraph");
+        options.put(KubeDriverOptions.IMAGE_REPOSITORY_PASSWORD.name(),
+                    "hugegraph");
         options.put(KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL.name(),
                     IMAGE_REPOSITORY_URL + ":PageRank-latest");
         options.put(KubeSpecOptions.PULL_POLICY.name(), "IfNotPresent");

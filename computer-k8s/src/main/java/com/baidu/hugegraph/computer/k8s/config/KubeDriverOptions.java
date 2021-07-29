@@ -62,6 +62,22 @@ public class KubeDriverOptions extends OptionHolder {
                     FileUtils.getUserDirectoryPath() + "/.kube/config"
             );
 
+    public static final ConfigOption<String> FRAMEWORK_IMAGE_URL =
+            new ConfigOption<>(
+                    "k8s.framework_image_url",
+                    "The image url of computer framework.",
+                    disallowEmpty(),
+                    "hugegraph/hugegraph-computer-framework:latest"
+            );
+
+    public static final ConfigOption<String> BUILD_IMAGE_BASH_PATH =
+            new ConfigOption<>(
+                    "k8s.build_image_bash_path",
+                    "The path of command used to build image.",
+                    null,
+                    ""
+            );
+
     public static final ConfigOption<String> IMAGE_REPOSITORY_REGISTRY =
             new ConfigOption<>(
                     "k8s.image_repository_registry",
@@ -94,12 +110,12 @@ public class KubeDriverOptions extends OptionHolder {
                     "hugegraph/hugegraph-computer"
             );
 
-    public static final ConfigOption<String> BUILD_IMAGE_BASH_PATH =
+    public static final ConfigOption<String> JAR_FILE_DIR =
             new ConfigOption<>(
-                    "k8s.build_image_bash_path",
-                    "The path of command used to build image.",
+                    "k8s.jar_file_dir",
+                    "The directory where the algorithm jar to upload location.",
                     disallowEmpty(),
-                    "conf/images/docker_push.sh"
+                    "/cache/jars/"
             );
 
     public static final ConfigListOption<String> PULL_SECRET_NAMES =
@@ -116,15 +132,6 @@ public class KubeDriverOptions extends OptionHolder {
                     "The log4j.xml path for computer job.",
                     null,
                     ""
-            );
-
-    public static final ConfigOption<String> JAR_FILE_DIR =
-            new ConfigOption<>(
-                    "k8s.jar_file_path",
-                    "The directory where the algorithm jar is " +
-                    "located.",
-                    disallowEmpty(),
-                    "/cache/jars/"
             );
 
     public static final ConfigOption<Boolean> ENABLE_INTERNAL_ALGORITHM =

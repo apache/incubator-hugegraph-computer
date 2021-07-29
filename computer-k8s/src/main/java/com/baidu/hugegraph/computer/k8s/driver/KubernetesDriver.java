@@ -20,8 +20,12 @@
 package com.baidu.hugegraph.computer.k8s.driver;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,7 +97,7 @@ public class KubernetesDriver implements ComputerDriver {
     private final Map<String, Object> defaultSpec;
     private final Map<String, String> defaultConf;
 
-    private final String bash;
+    private final String bashPath;
     private final String jarFileDir;
     private final String registry;
     private final String username;
@@ -101,6 +105,11 @@ public class KubernetesDriver implements ComputerDriver {
     private final Boolean enableInternalAlgorithm;
     private final List<String> internalAlgorithms;
     private final String internalAlgorithmImageUrl;
+    private final String frameworkImageUrl;
+
+    private static final String DEFAULT_PUSH_BASH_PATH = "/docker_push.sh";
+    private static final String BUILD_IMAGE_FUNC = "build_image";
+    private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
 
     public KubernetesDriver(HugeConfig conf) {
         this(conf, createKubeClient(conf));
@@ -120,7 +129,7 @@ public class KubernetesDriver implements ComputerDriver {
         this.defaultSpec = this.defaultSpec();
         this.defaultConf = this.defaultComputerConf();
 
-        this.bash = this.conf.get(KubeDriverOptions.BUILD_IMAGE_BASH_PATH);
+        this.bashPath = this.conf.get(KubeDriverOptions.BUILD_IMAGE_BASH_PATH);
         this.jarFileDir = this.conf.get(KubeDriverOptions.JAR_FILE_DIR);
         this.registry = this.conf.get(
                 KubeDriverOptions.IMAGE_REPOSITORY_REGISTRY).trim();
@@ -134,6 +143,8 @@ public class KubernetesDriver implements ComputerDriver {
                 KubeDriverOptions.INTERNAL_ALGORITHMS);
         this.internalAlgorithmImageUrl = this.conf.get(
                 KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL);
+        this.frameworkImageUrl = this.conf.get(
+                KubeDriverOptions.FRAMEWORK_IMAGE_URL);
     }
 
     private static NamespacedKubernetesClient createKubeClient(
@@ -155,25 +166,40 @@ public class KubernetesDriver implements ComputerDriver {
     public void uploadAlgorithmJar(String algorithmName, InputStream input) {
         File tempFile = null;
         try {
-            tempFile = File.createTempFile(UUID.randomUUID().toString(),
-                                           ".jar");
+            Path path = Files.createDirectories(
+                        Paths.get(TMP_DIR, UUID.randomUUID().toString()));
+            tempFile = File.createTempFile("userAlgorithm", ".jar",
+                                           path.toFile());
             FileUtils.copyInputStreamToFile(input, tempFile);
 
-
-            String imageUrl = this.buildImageUrl(algorithmName);
+            InputStream bashStream;
+            if (StringUtils.isBlank(this.bashPath)) {
+                bashStream = this.getClass()
+                                 .getResourceAsStream(DEFAULT_PUSH_BASH_PATH);
+            } else {
+                bashStream = new FileInputStream(this.bashPath);
+            }
+            String bashAsStr = IOHelpers.readFully(bashStream);
 
             StringBuilder builder = new StringBuilder();
-            builder.append("bash ").append(this.bash);
+            builder.append(BUILD_IMAGE_FUNC);
             if (StringUtils.isNotBlank(this.registry)) {
                 builder.append(" -r ").append(this.registry);
             }
-            builder.append(" -u ").append(this.username);
-            builder.append(" -p ").append(this.password);
+            if (StringUtils.isNotBlank(this.username)) {
+                builder.append(" -u ").append(this.username);
+            }
+            if (StringUtils.isNotBlank(this.password)) {
+                builder.append(" -p ").append(this.password);
+            }
             builder.append(" -s ").append(tempFile.getAbsolutePath());
             String jarFile = this.buildJarFile(this.jarFileDir, algorithmName);
             builder.append(" -j ").append(jarFile);
+            String imageUrl = this.buildImageUrl(algorithmName);
             builder.append(" -i ").append(imageUrl);
-            String command = builder.toString();
+            builder.append(" -f ").append(this.frameworkImageUrl);
+            String args = builder.toString();
+            String[] command = {"bash", "-c", bashAsStr + "\n" + args};
 
             Process process = Runtime.getRuntime().exec(command);
             int code = process.waitFor();
@@ -211,21 +237,21 @@ public class KubernetesDriver implements ComputerDriver {
                                                              params);
         this.checkComputerConf(computerConf, spec);
 
+        spec.withAlgorithmName(algorithmName)
+            .withJobId(jobId)
+            .withComputerConf(computerConf);
+
         if (this.enableInternalAlgorithm &&
             this.internalAlgorithms.contains(algorithmName)) {
-            spec.withAlgorithmName(algorithmName)
-                .withJobId(jobId)
-                .withImage(this.internalAlgorithmImageUrl)
-                .withComputerConf(computerConf);
+            spec.withImage(this.internalAlgorithmImageUrl);
+        } else if (StringUtils.isNotBlank(spec.getRemoteJarUri())) {
+            spec.withImage(this.frameworkImageUrl);
         } else {
             String imageUrl = this.buildImageUrl(algorithmName);
             String jarFileDir = this.conf.get(KubeDriverOptions.JAR_FILE_DIR);
             String jarFile = this.buildJarFile(jarFileDir, algorithmName);
-            spec.withAlgorithmName(algorithmName)
-                .withJobId(jobId)
-                .withImage(imageUrl)
-                .withJarFile(jarFile)
-                .withComputerConf(computerConf);
+            spec.withImage(imageUrl)
+                .withJarFile(jarFile);
         }
 
         computerJob.setSpec(spec);

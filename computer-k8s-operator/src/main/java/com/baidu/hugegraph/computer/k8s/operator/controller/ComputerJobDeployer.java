@@ -91,6 +91,8 @@ public class ComputerJobDeployer {
     private static final String POD_NAMESPACE_KEY = "metadata.namespace";
     private static final String POD_NAME_KEY = "metadata.name";
 
+    private static final Long TERMINATION_GRACE_PERIOD = 180L;
+
     private final String internalEtcdUrl;
     private final String timezone;
 
@@ -300,6 +302,7 @@ public class ComputerJobDeployer {
                 .withContainers(containers)
                 .withImagePullSecrets(spec.getPullSecrets())
                 .withRestartPolicy(JOB_RESTART_POLICY)
+                .withTerminationGracePeriodSeconds(TERMINATION_GRACE_PERIOD)
                 .withVolumes(volumes)
                 .build();
 

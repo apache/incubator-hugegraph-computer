@@ -167,6 +167,15 @@ public class KubeSpecOptions extends OptionHolder {
                     String.class
             );
 
+    public static final DriverConfigOption<String> REMOTE_JAR_URI =
+            new DriverConfigOption<>(
+                    "k8s.remote_jar_uri",
+                    "The remote jar uri of computer job, it will overlay " +
+                    "algorithm image.",
+                    disallowEmpty(),
+                    String.class
+            );
+
     public static final Map<String, ConfigOption<?>> ALLOW_USER_SETTINGS =
             new ImmutableMap.Builder<String, ConfigOption<?>>()
                     .put(MASTER_CPU.name(), MASTER_CPU)
@@ -175,5 +184,6 @@ public class KubeSpecOptions extends OptionHolder {
                     .put(WORKER_MEMORY.name(), WORKER_MEMORY)
                     .put(WORKER_INSTANCES.name(), WORKER_INSTANCES)
                     .put(JVM_OPTIONS.name(), JVM_OPTIONS)
+                    .put(REMOTE_JAR_URI.name(), REMOTE_JAR_URI)
                     .build();
 }

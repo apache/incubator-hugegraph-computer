@@ -49,26 +49,24 @@ function build_image() {
         exit 1
     fi
 
-    cat >/tmp/upload.txt<<EOF
-        # Build image
-        SOURCE_JAR_FILE_NAME=${SOURCE_JAR_FILE##*/}
-        DOCKER_CONTEXT=${SOURCE_JAR_FILE%/*}
-        echo "FROM ${FRAMEWORK_IMG_URL}
-              LABEL maintainer='${MAINTAINER}'
-              COPY ${SOURCE_JAR_FILE_NAME} ${JAR_FILE}" | \
-        docker build -t ${IMG_URL} -f - ${DOCKER_CONTEXT}
+    # Build image
+    SOURCE_JAR_FILE_NAME=${SOURCE_JAR_FILE##*/}
+    DOCKER_CONTEXT=${SOURCE_JAR_FILE%/*}
+    echo "FROM ${FRAMEWORK_IMG_URL}
+          LABEL maintainer='${MAINTAINER}'
+          COPY ${source_jar_file_name} ${JAR_FILE}" | \
+    docker build -t ${IMG_URL} -f - ${docker_context}
 
-        # Login repository
-        if [ "$REGISTRY" != "" ]; then
-            docker login -u ${USER_NAME} -p ${PASSWORD} ${REGISTRY}
-        fi
+    # Login repository
+    if [ "$USER_NAME" != "" ]; then
+        docker login -u ${USER_NAME} -p ${PASSWORD} ${REGISTRY}
+    fi
 
-        # Push image to repository
-        docker push ${IMG_URL}
+    # Push image to repository
+    docker push ${IMG_URL}
 
-        # Logout repository
-        if [ "$REGISTRY" != "" ]; then
-            docker logout ${REGISTRY}
-        fi
-EOF
+    # Logout repository
+    if [ "$USER_NAME" != "" ]; then
+        docker logout ${REGISTRY}
+    fi
 }

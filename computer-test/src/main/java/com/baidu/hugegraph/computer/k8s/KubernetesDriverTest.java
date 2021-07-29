@@ -140,7 +140,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
 
     @Test
     public void testUploadAlgorithmJar() throws FileNotFoundException {
-        Whitebox.setInternalState(this.driver, "bash",
+        Whitebox.setInternalState(this.driver, "bashPath",
                                   "conf/images/upload_test.sh");
         Whitebox.setInternalState(this.driver, "registry",
                                   "registry.hub.docker.com");
@@ -149,7 +149,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
                                       "conf/images/test.jar");
         this.driver.uploadAlgorithmJar("PageRank", inputStream);
 
-        File file = new File("conf/images/upload.txt");
+        File file = new File("/tmp/upload.txt");
         try {
             Assert.assertTrue(file.exists());
         } finally {
@@ -159,7 +159,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
 
     @Test
     public void testUploadAlgorithmJarWithError() throws FileNotFoundException {
-        Whitebox.setInternalState(this.driver, "bash",
+        Whitebox.setInternalState(this.driver, "bashPath",
                                   "conf/images/upload_test-x.sh");
 
         InputStream inputStream = new FileInputStream(
