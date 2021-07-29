@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    HugeGraphComputerServerTest.class
+    HugeGraphComputerTest.class
 })
 public class ComputerDistTestSuite {
 }

@@ -59,6 +59,7 @@ public class MasterService {
     private final Managers managers;
 
     private boolean inited;
+    private boolean closed;
     private Config config;
     private Bsp4Master bsp4Master;
     private ContainerInfo masterInfo;
@@ -69,12 +70,13 @@ public class MasterService {
     public MasterService() {
         this.context = ComputerContext.instance();
         this.managers = new Managers();
+        this.closed = false;
     }
 
     /**
      * Init master service, create the managers used by master.
      */
-    public void init(Config config) {
+    public synchronized void init(Config config) {
         E.checkArgument(!this.inited, "The %s has been initialized", this);
         LOG.info("{} Start to initialize master", this);
 
@@ -114,8 +116,12 @@ public class MasterService {
      * Stop the the master service. Stop the managers created in
      * {@link #init(Config)}.
      */
-    public void close() {
+    public synchronized void close() {
         this.checkInited();
+        if (this.closed) {
+            LOG.info("{} MasterService had closed before", this);
+            return;
+        }
 
         this.masterComputation.close(new DefaultMasterContext());
 
@@ -125,6 +131,8 @@ public class MasterService {
 
         this.bsp4Master.clean();
         this.bsp4Master.close();
+
+        this.closed = true;
         LOG.info("{} MasterService closed", this);
     }
 
@@ -133,7 +141,7 @@ public class MasterService {
      * then execute the superstep iteration.
      * After the superstep iteration, output the result.
      */
-    public void execute() {
+    public synchronized void execute() {
         this.checkInited();
 
         LOG.info("{} MasterService execute", this);

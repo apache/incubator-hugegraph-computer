@@ -12,25 +12,24 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
-public class HugeGraphComputerServerTest {
+public class HugeGraphComputerTest {
 
-    private static final Logger LOG =
-                                Log.logger(HugeGraphComputerServerTest.class);
+    private static final Logger LOG = Log.logger(HugeGraphComputerTest.class);
 
     @Test
     public void testServiceWith1Worker() throws InterruptedException {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch countDownLatch = new CountDownLatch(2);
         Throwable[] exceptions = new Throwable[2];
-        String masterConfPath = HugeGraphComputerServerTest.class.getResource(
-                "/computer-master.properties").getPath();
-        String work1ConfPath = HugeGraphComputerServerTest.class.getResource(
-                "/computer-worker1.properties").getPath();
+        String masterConfPath = HugeGraphComputerTest.class.getResource(
+                                "/computer-master.properties").getPath();
+        String work1ConfPath = HugeGraphComputerTest.class.getResource(
+                               "/computer-worker1.properties").getPath();
         pool.submit(() -> {
             try {
                 Thread.sleep(2000L);
                 String[] args = {work1ConfPath, "worker", "local"};
-                HugeGraphComputerServer.main(args);
+                HugeGraphComputer.main(args);
             } catch (Throwable e) {
                 LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
@@ -42,7 +41,7 @@ public class HugeGraphComputerServerTest {
         pool.submit(() -> {
             try {
                 String[] args = {masterConfPath, "master", "local"};
-                HugeGraphComputerServer.main(args);
+                HugeGraphComputer.main(args);
             } catch (Throwable e) {
                 LOG.error("Failed to start master", e);
                 exceptions[1] = e;
@@ -60,13 +59,13 @@ public class HugeGraphComputerServerTest {
 
     @Test
     public void testServiceWithError() {
-        String work1ConfPath = HugeGraphComputerServerTest.class.getResource(
-                "/computer-worker1.properties").getPath();
+        String work1ConfPath = HugeGraphComputerTest.class.getResource(
+                               "/computer-worker1.properties").getPath();
         Assert.assertThrows(IllegalArgumentException.class,
                             () -> {
                                 String[] args1 = {work1ConfPath, "worker111",
                                                   "local"};
-                                HugeGraphComputerServer.main(args1);
+                                HugeGraphComputer.main(args1);
                             });
     }
 
@@ -77,13 +76,34 @@ public class HugeGraphComputerServerTest {
             isRun.compareAndSet(false, true);
         };
         Thread.setDefaultUncaughtExceptionHandler(handler);
-        HugeGraphComputerServer.setUncaughtExceptionHandler();
+        HugeGraphComputer.setUncaughtExceptionHandler();
         Thread t = new Thread(() -> {
             throw new RuntimeException();
         });
         t.start();
         t.join();
         Assert.assertTrue(isRun.get());
+    }
+
+    @Test
+    public void testShutdownHook() {
+        try {
+            HugeGraphComputer.ShutdownHook.add(null);
+            HugeGraphComputer.ShutdownHook.remove(null);
+        } catch (Throwable e) {
+            Assert.fail(e.getMessage());
+        }
+
+        HugeGraphComputer.ShutdownHook hook =
+                          HugeGraphComputer.ShutdownHook.add(() -> {
+                          });
+        Assert.assertNotNull(hook);
+
+        Assert.assertTrue(Runtime.getRuntime().removeShutdownHook(hook));
+
+        Assert.assertFalse(Runtime.getRuntime().removeShutdownHook(hook));
+        Runtime.getRuntime().addShutdownHook(hook);
+        Assert.assertTrue(Runtime.getRuntime().removeShutdownHook(hook));
     }
 
     private boolean existError(Throwable[] exceptions) {

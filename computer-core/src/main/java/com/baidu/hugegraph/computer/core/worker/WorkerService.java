@@ -64,6 +64,7 @@ public class WorkerService {
     private final Map<Integer, ContainerInfo> workers;
 
     private boolean inited;
+    private boolean closed;
     private Config config;
     private Bsp4Worker bsp4Worker;
     private ComputeManager computeManager;
@@ -79,12 +80,13 @@ public class WorkerService {
         this.managers = new Managers();
         this.workers = new HashMap<>();
         this.inited = false;
+        this.closed = false;
     }
 
     /**
      * Init worker service, create the managers used by worker service.
      */
-    public void init(Config config) {
+    public synchronized void init(Config config) {
         E.checkArgument(!this.inited, "The %s has been initialized", this);
 
         this.config = config;
@@ -139,8 +141,12 @@ public class WorkerService {
      * Stop the worker service. Stop the managers created in
      * {@link #init(Config)}.
      */
-    public void close() {
+    public synchronized void close() {
         this.checkInited();
+        if (this.closed) {
+            LOG.info("{} WorkerService had closed before", this);
+            return;
+        }
 
         this.computation.close(this.config);
 
@@ -154,6 +160,8 @@ public class WorkerService {
 
         this.bsp4Worker.workerCloseDone();
         this.bsp4Worker.close();
+
+        this.closed = true;
         LOG.info("{} WorkerService closed", this);
     }
 
@@ -162,7 +170,7 @@ public class WorkerService {
      * to start from. And then do the superstep iteration until master's
      * superstepStat is inactive.
      */
-    public void execute() {
+    public synchronized void execute() {
         this.checkInited();
 
         LOG.info("{} WorkerService execute", this);

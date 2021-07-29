@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 BASE_DIR=$(cd "$(dirname "$0")" && pwd -P)
 PROJECT_PATH="$(cd "${BASE_DIR}/.." && pwd -P)"

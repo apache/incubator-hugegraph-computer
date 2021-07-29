@@ -182,7 +182,7 @@ if [ "${LOG4J_CONF_PATH}" != "" ];then
     LOG4j_CONF=-Dlog4j.configurationFile="${LOG4J_CONF_PATH}"
 fi
 
-MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputerServer
+MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputer
 
 if [ "${LOG4j_CONF}" != "" ]; then
     ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${JVM_OPTIONS} -cp \
