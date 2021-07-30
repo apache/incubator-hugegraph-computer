@@ -49,6 +49,9 @@ public class HugeConverterTest extends UnitTestBase {
     public void testConvertId() {
         Assert.assertThrows(IllegalArgumentException.class,
                             () -> HugeConverter.convertId(null));
+        Assert.assertEquals(new LongId(1), HugeConverter.convertId((byte) 1));
+        Assert.assertEquals(new LongId(1), HugeConverter.convertId((short) 1));
+        Assert.assertEquals(new LongId(1), HugeConverter.convertId(1));
         Assert.assertEquals(new LongId(1L), HugeConverter.convertId(1L));
         Assert.assertEquals(new Utf8Id("abc"), HugeConverter.convertId("abc"));
         UUID uuid = UUID.randomUUID();
