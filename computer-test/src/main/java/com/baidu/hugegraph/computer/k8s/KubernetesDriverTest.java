@@ -141,7 +141,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     @Test
     public void testUploadAlgorithmJar() throws FileNotFoundException {
         Whitebox.setInternalState(this.driver, "bashPath",
-                                  "conf/images/upload_test.sh");
+                                  "conf/images/docker_push_test.sh");
         Whitebox.setInternalState(this.driver, "registry",
                                   "registry.hub.docker.com");
 
