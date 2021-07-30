@@ -87,23 +87,15 @@ public class HugeGraphComputerTest {
 
     @Test
     public void testShutdownHook() {
-        try {
-            HugeGraphComputer.ShutdownHook.add(null);
-            HugeGraphComputer.ShutdownHook.remove(null);
-        } catch (Throwable e) {
-            Assert.fail(e.getMessage());
-        }
-
         HugeGraphComputer.ShutdownHook hook =
-                          HugeGraphComputer.ShutdownHook.add(() -> {
-                          });
-        Assert.assertNotNull(hook);
+                          new HugeGraphComputer.ShutdownHook();
+        Assert.assertFalse(hook.hook(null));
+        Assert.assertFalse(hook.unHook());
 
-        Assert.assertTrue(Runtime.getRuntime().removeShutdownHook(hook));
-
-        Assert.assertFalse(Runtime.getRuntime().removeShutdownHook(hook));
-        Runtime.getRuntime().addShutdownHook(hook);
-        Assert.assertTrue(Runtime.getRuntime().removeShutdownHook(hook));
+        Assert.assertTrue(hook.hook(() -> {
+        }));
+        Assert.assertTrue(hook.unHook());
+        Assert.assertFalse(hook.unHook());
     }
 
     private boolean existError(Throwable[] exceptions) {

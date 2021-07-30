@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.master;
 
+import java.io.Closeable;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -51,7 +52,7 @@ import com.baidu.hugegraph.util.Log;
  * the job. Master service assembles the managers used by master. For example,
  * aggregator manager, input manager and so on.
  */
-public class MasterService {
+public class MasterService implements Closeable {
 
     private static final Logger LOG = Log.logger(MasterService.class);
 

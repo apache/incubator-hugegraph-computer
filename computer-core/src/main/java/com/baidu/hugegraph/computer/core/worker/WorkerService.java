@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
+import java.io.Closeable;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +56,7 @@ import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
-public class WorkerService {
+public class WorkerService implements Closeable {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 

@@ -19,6 +19,7 @@
 package com.baidu.hugegraph.computer.dist;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
@@ -109,40 +110,24 @@ public class HugeGraphComputer {
     }
 
     private static void executeWorkerService(ComputerContext context) {
-        WorkerService workerService = null;
-        ShutdownHook hook = null;
-        try {
-            workerService = new WorkerService();
-            final WorkerService closeable = workerService;
-            hook = ShutdownHook.add(() -> {
-                closeable.close();
-            });
+        ShutdownHook hook = new ShutdownHook();
+        try (WorkerService workerService = new WorkerService()) {
+            hook.hook(workerService);
             workerService.init(context.config());
             workerService.execute();
         } finally {
-            if (workerService != null) {
-                workerService.close();
-                ShutdownHook.remove(hook);
-            }
+            hook.unHook();
         }
     }
 
     private static void executeMasterService(ComputerContext context) {
-        MasterService masterService = null;
-        ShutdownHook shutdownHook = null;
-        try {
-            masterService = new MasterService();
-            final MasterService closeable = masterService;
-            shutdownHook = ShutdownHook.add(() -> {
-                closeable.close();
-            });
+        ShutdownHook shutdownHook = new ShutdownHook();
+        try (MasterService masterService = new MasterService()) {
+            shutdownHook.hook(masterService);
             masterService.init(context.config());
             masterService.execute();
         } finally {
-            if (masterService != null) {
-                masterService.close();
-                ShutdownHook.remove(shutdownHook);
-            }
+            shutdownHook.unHook();
         }
     }
 
@@ -165,28 +150,35 @@ public class HugeGraphComputer {
                              "com.baidu.hugegraph.config.RpcOptions");
     }
 
-    protected static class ShutdownHook extends Thread {
+    protected static class ShutdownHook {
 
-        private ShutdownHook(Runnable hook) {
-            super(hook);
-        }
+        private static final Logger LOG = Log.logger(ShutdownHook.class);
 
-        public static ShutdownHook add(Runnable hook) {
+        private Thread hook;
+
+        public boolean hook(Closeable hook) {
             if (hook == null) {
-                return null;
+                return false;
             }
 
-            ShutdownHook shutdownHook = new ShutdownHook(hook);
-            Runtime.getRuntime().addShutdownHook(shutdownHook);
-            return shutdownHook;
+            this.hook = new Thread(() -> {
+                try {
+                    hook.close();
+                } catch (IOException e) {
+                    LOG.error("Failed to execute Shutdown hook: {}",
+                              e.getMessage(), e);
+                }
+            });
+            Runtime.getRuntime().addShutdownHook(this.hook);
+            return true;
         }
 
-        public static void remove(ShutdownHook hook) {
-            if (hook == null) {
-                return;
+        public boolean unHook() {
+            if (this.hook == null) {
+                return false;
             }
 
-            Runtime.getRuntime().removeShutdownHook(hook);
+            return Runtime.getRuntime().removeShutdownHook(this.hook);
         }
     }
 }
