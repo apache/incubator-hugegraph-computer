@@ -48,8 +48,8 @@ public final class HugeConverter {
 
     public static Id convertId(Object rawId) {
         E.checkArgumentNotNull(rawId, "The rawId can't be null");
-        if (rawId instanceof Long) {
-            return new LongId((long) rawId);
+        if (rawId instanceof Number) {
+            return new LongId(((Number) rawId).longValue());
         } else if (rawId instanceof String) {
             return new Utf8Id((String) rawId);
         } else if (rawId instanceof UUID) {
