@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
@@ -43,10 +43,10 @@ public class DefaultEdgeTest extends UnitTestBase {
                             edge.properties());
 
         edge = new DefaultEdge(graphFactory(), "knows", "2021-06-01",
-                               new LongId(1L));
+                               BytesId.of(1L));
         Assert.assertEquals("knows", edge.label());
         Assert.assertEquals("2021-06-01", edge.name());
-        Assert.assertEquals(new LongId(1L), edge.targetId());
+        Assert.assertEquals(BytesId.of(1L), edge.targetId());
         Assert.assertEquals(new DefaultProperties(graphFactory()),
                             edge.properties());
     }
@@ -56,7 +56,7 @@ public class DefaultEdgeTest extends UnitTestBase {
         DefaultEdge edge = new DefaultEdge(graphFactory());
         edge.label("knows");
         edge.name("2021-06-01");
-        edge.targetId(new LongId(1L));
+        edge.targetId(BytesId.of(1L));
         Properties properties = new DefaultProperties(graphFactory());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
@@ -64,7 +64,7 @@ public class DefaultEdgeTest extends UnitTestBase {
 
         Assert.assertEquals("knows", edge.label());
         Assert.assertEquals("2021-06-01", edge.name());
-        Assert.assertEquals(new LongId(1L), edge.targetId());
+        Assert.assertEquals(BytesId.of(1L), edge.targetId());
         Assert.assertEquals(properties, edge.properties());
     }
 
@@ -73,33 +73,19 @@ public class DefaultEdgeTest extends UnitTestBase {
         DefaultEdge edge1 = new DefaultEdge(graphFactory());
         edge1.label("knows");
         edge1.name("2021-06-01");
-        edge1.targetId(new LongId(1L));
+        edge1.targetId(BytesId.of(1L));
         Properties properties = new DefaultProperties(graphFactory());
         properties.put("p1", new LongValue(1L));
         properties.put("p2", new DoubleValue(2.0D));
         edge1.properties(properties);
 
         DefaultEdge edge2 = new DefaultEdge(graphFactory(), "knows",
-                                            "2021-06-01", new LongId(1L));
+                                            "2021-06-01", BytesId.of(1L));
         edge2.properties().put("p1", new LongValue(1L));
         edge2.properties().put("p2", new DoubleValue(2.0D));
 
         Assert.assertEquals(edge1, edge2);
 
         Assert.assertNotEquals(edge1, properties);
-    }
-
-    @Test
-    public void testHashCode() {
-        DefaultEdge edge = new DefaultEdge(graphFactory());
-        edge.label("knows");
-        edge.name("2021-06-01");
-        edge.targetId(new LongId(1L));
-        Properties properties = new DefaultProperties(graphFactory());
-        properties.put("p1", new LongValue(1L));
-        properties.put("p2", new DoubleValue(2.0D));
-        edge.properties(properties);
-
-        Assert.assertEquals(968888145, edge.hashCode());
     }
 }

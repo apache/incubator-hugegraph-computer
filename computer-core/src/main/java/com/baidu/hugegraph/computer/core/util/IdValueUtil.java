@@ -23,8 +23,8 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
@@ -42,8 +42,7 @@ public class IdValueUtil {
          * write bytes in big-end-aligned way
          */
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
-            byte type = bai.readByte();
-            Id id = IdFactory.createId(type);
+            Id id = BytesId.of();
             id.read(bai);
             return id;
         } catch (IOException e) {
@@ -54,7 +53,6 @@ public class IdValueUtil {
 
     public static IdValue toIdValue(Id id, int len) {
         try (BytesOutput bao = IOFactory.createBytesOutput(len)) {
-            bao.writeByte(id.type().code());
             id.write(bao);
             return new IdValue(bao.buffer(), (int) bao.position());
         } catch (IOException e) {

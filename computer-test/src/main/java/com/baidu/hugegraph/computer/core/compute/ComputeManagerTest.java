@@ -34,8 +34,8 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.Null;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
@@ -163,7 +163,7 @@ public class ComputeManagerTest extends UnitTestBase {
                                            throws IOException {
         for (long i = 0L; i < 200L; i += 2) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             vertex.properties(graphFactory().createProperties());
             ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
         }
@@ -175,7 +175,6 @@ public class ComputeManagerTest extends UnitTestBase {
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
 
         entryOutput.writeEntry(out -> {
-            out.writeByte(vertex.id().type().code());
             vertex.id().write(out);
         }, out -> {
             vertex.properties().write(out);
@@ -188,7 +187,7 @@ public class ComputeManagerTest extends UnitTestBase {
                         Consumer<ManagedBuffer> consumer) throws IOException {
         for (long i = 0L; i < 200L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             int count = RANDOM.nextInt(20);
             if (count == 0) {
                 continue;
@@ -197,7 +196,7 @@ public class ComputeManagerTest extends UnitTestBase {
 
             for (long j = 0; j < count; j++) {
                 Edge edge = graphFactory().createEdge();
-                edge.targetId(new LongId(RANDOM.nextInt(200)));
+                edge.targetId(BytesId.of(RANDOM.nextInt(200)));
                 Properties properties = graphFactory().createProperties();
                 properties.put("p1", new LongValue(i));
                 edge.properties(properties);
@@ -215,13 +214,11 @@ public class ComputeManagerTest extends UnitTestBase {
 
         Id id = vertex.id();
         KvEntryWriter subKvWriter = entryOutput.writeEntry(out -> {
-            out.writeByte(id.type().code());
             id.write(out);
         });
         for (Edge edge : vertex.edges()) {
             Id targetId = edge.targetId();
             subKvWriter.writeSubKv(out -> {
-                out.writeByte(targetId.type().code());
                 targetId.write(out);
             }, out -> {
                 edge.properties().write(out);
@@ -236,7 +233,7 @@ public class ComputeManagerTest extends UnitTestBase {
         for (long i = 0L; i < 200L; i++) {
             int count = RANDOM.nextInt(5);
             for (int j = 0; j < count; j++) {
-                Id id = new LongId(i);
+                Id id = BytesId.of(i);
                 IdValueList message = new IdValueList();
                 message.add(id.idValue());
                 ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,

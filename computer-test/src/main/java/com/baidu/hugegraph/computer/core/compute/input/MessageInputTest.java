@@ -37,8 +37,8 @@ import com.baidu.hugegraph.computer.core.compute.MockComputation;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.Null;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
 import com.baidu.hugegraph.computer.core.manager.Managers;
@@ -125,8 +125,8 @@ public class MessageInputTest extends UnitTestBase {
     private void checkMessages(Map<Id, List<IdValueList>> expectedMessages,
                                MessageInput input) throws IOException {
         for (long i = 0L; i < 200L; i++) {
-            List<IdValueList> messages  = expectedMessages.get(new LongId(i));
-            LongId id = new LongId(i);
+            List<IdValueList> messages  = expectedMessages.get(BytesId.of(i));
+            Id id = BytesId.of(i);
             ReusablePointer idPointer = EdgesInputTest.idToReusablePointer(id);
             Iterator<IdValueList> mit = input.iterator(idPointer);
             if (messages == null) {
@@ -146,7 +146,7 @@ public class MessageInputTest extends UnitTestBase {
         for (long i = 0L; i < 200L; i++) {
             int count = random.nextInt(5);
             for (int j = 0; j < count; j++) {
-                Id id = new LongId(random.nextInt(200));
+                Id id = BytesId.of(random.nextInt(200));
                 IdValueList message = new IdValueList();
                 message.add(id.idValue());
                 ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
@@ -162,7 +162,7 @@ public class MessageInputTest extends UnitTestBase {
         for (long i = 0L; i < 200L; i++) {
             int count = random.nextInt(5);
             for (int j = 0; j < count; j++) {
-                Id id = new LongId(random.nextInt(200));
+                Id id = BytesId.of(random.nextInt(200));
                 IdValueList message = new IdValueList();
                 message.add(id.idValue());
                 List<IdValueList> messages = globalMessages.computeIfAbsent(

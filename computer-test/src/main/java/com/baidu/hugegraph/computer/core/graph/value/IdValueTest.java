@@ -20,13 +20,12 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.id.UuidId;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -114,16 +113,17 @@ public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testReadWrite() throws IOException {
-        assertValueEqualAfterWriteAndRead(new Utf8Id("text").idValue());
-        assertValueEqualAfterWriteAndRead(new Utf8Id("text2").idValue());
-        assertValueEqualAfterWriteAndRead(new LongId(123456L).idValue());
-        assertValueEqualAfterWriteAndRead(new UuidId().idValue());
+        assertValueEqualAfterWriteAndRead(BytesId.of("text").idValue());
+        assertValueEqualAfterWriteAndRead(BytesId.of("text2").idValue());
+        assertValueEqualAfterWriteAndRead(BytesId.of(123456L).idValue());
+        assertValueEqualAfterWriteAndRead(BytesId.of(new UUID(0L, 0L))
+                                                 .idValue());
     }
 
     @Test
     public void testReadWriteUtf8IdValue() throws IOException {
-        IdValue value1 = new Utf8Id("long id").idValue();
-        IdValue value2 = new Utf8Id("short").idValue();
+        IdValue value1 = BytesId.of("long id").idValue();
+        IdValue value2 = BytesId.of("short").idValue();
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
                                Constants.SMALL_BUF_SIZE)) {
@@ -131,7 +131,7 @@ public class IdValueTest extends UnitTestBase {
             value2.write(bao);
             bytes = bao.toByteArray();
         }
-        IdValue value3 = new Utf8Id().idValue();
+        IdValue value3 = BytesId.of(Constants.EMPTY_STR).idValue();
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             value3.read(bai);
             Assert.assertEquals(value1, value3);
@@ -142,18 +142,18 @@ public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testCompare() {
-        IdValue value1 = new LongId(123L).idValue();
-        IdValue value2 = new LongId(123L).idValue();
-        IdValue value3 = new LongId(321L).idValue();
-        IdValue value4 = new LongId(322L).idValue();
+        IdValue value1 = BytesId.of(123L).idValue();
+        IdValue value2 = BytesId.of(123L).idValue();
+        IdValue value3 = BytesId.of(321L).idValue();
+        IdValue value4 = BytesId.of(322L).idValue();
 
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value2.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
         Assert.assertLt(0, value3.compareTo(value4));
 
-        IdValue value5 = new Utf8Id("123").idValue();
-        IdValue value6 = new Utf8Id("456").idValue();
+        IdValue value5 = BytesId.of("123").idValue();
+        IdValue value6 = BytesId.of("456").idValue();
 
         Assert.assertLt(0, value5.compareTo(value6));
         Assert.assertGt(0, value6.compareTo(value5));

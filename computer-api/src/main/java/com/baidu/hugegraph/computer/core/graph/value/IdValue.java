@@ -91,6 +91,20 @@ public class IdValue implements Value<IdValue> {
     @Override
     public int compareTo(IdValue other) {
         E.checkArgumentNotNull(other, "The compare argument can't be null");
+        if (this.bytes == EMPTY_BYTES && other.bytes == EMPTY_BYTES) {
+            return 0;
+        }
+        if (this.bytes == EMPTY_BYTES) {
+            return -1;
+        }
+        if (other.bytes == EMPTY_BYTES) {
+            return 1;
+        }
+        // The first byte is IdType code
+        int cmp = this.bytes[0] - other.bytes[0];
+        if (cmp != 0) {
+            return cmp;
+        }
         return BytesUtil.compare(this.bytes, this.length,
                                  other.bytes, other.length);
     }

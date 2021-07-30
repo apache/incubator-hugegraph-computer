@@ -19,6 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.graph.id;
 
+import java.util.UUID;
+
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 
@@ -33,11 +36,11 @@ public final class IdFactory {
     public static Id createId(IdType type) {
         switch (type) {
             case LONG:
-                return new LongId();
+                return BytesId.of(0L);
             case UTF8:
-                return new Utf8Id();
+                return BytesId.of(Constants.EMPTY_STR);
             case UUID:
-                return new UuidId();
+                return BytesId.of(new UUID(0L, 0L));
             default:
                 throw new ComputerException("Can't create Id for %s",
                                             type.name());

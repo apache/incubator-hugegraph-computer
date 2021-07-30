@@ -30,8 +30,8 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -44,7 +44,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
 
     @Test
     public void testWriteReadVertex() throws Exception {
-        LongId longId = new LongId(100L);
+        Id longId = BytesId.of(100L);
         LongValue longValue = new LongValue(999L);
         Vertex vertex = graphFactory().createVertex(longId, longValue);
         Properties properties = graphFactory().createProperties();
@@ -72,16 +72,16 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         ComputerContext context = ComputerContext.instance();
         GraphFactory graphFactory = context.graphFactory();
 
-        LongId longId = new LongId(100L);
+        Id longId = BytesId.of(100L);
         LongValue longValue = new LongValue(999L);
         Vertex vertex = graphFactory().createVertex(longId, longValue);
-        vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
-        vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
-        vertex.addEdge(graphFactory.createEdge("watch", new LongId(3L)));
+        vertex.addEdge(graphFactory.createEdge(BytesId.of(2L)));
+        vertex.addEdge(graphFactory.createEdge("knows", BytesId.of(3L)));
+        vertex.addEdge(graphFactory.createEdge("watch", BytesId.of(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
         vertex.addEdge(graphFactory.createEdge("watch", "2222",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
 
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
@@ -107,16 +107,16 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         ComputerContext context = ComputerContext.instance();
         GraphFactory graphFactory = context.graphFactory();
 
-        LongId longId = new LongId(100L);
+        Id longId = BytesId.of(100L);
         LongValue longValue = new LongValue(999L);
         Vertex vertex = graphFactory().createVertex(longId, longValue);
-        vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
-        vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
-        vertex.addEdge(graphFactory.createEdge("watch", new LongId(3L)));
+        vertex.addEdge(graphFactory.createEdge(BytesId.of(2L)));
+        vertex.addEdge(graphFactory.createEdge("knows", BytesId.of(3L)));
+        vertex.addEdge(graphFactory.createEdge("watch", BytesId.of(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
         vertex.addEdge(graphFactory.createEdge("watch", "2222",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
 
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
@@ -142,16 +142,16 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         ComputerContext context = ComputerContext.instance();
         GraphFactory graphFactory = context.graphFactory();
 
-        LongId longId = new LongId(100L);
+        Id longId = BytesId.of(100L);
         LongValue longValue = new LongValue(999L);
         Vertex vertex = graphFactory().createVertex(longId, longValue);
-        vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
-        vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
-        vertex.addEdge(graphFactory.createEdge("watch", new LongId(3L)));
+        vertex.addEdge(graphFactory.createEdge(BytesId.of(2L)));
+        vertex.addEdge(graphFactory.createEdge("knows", BytesId.of(3L)));
+        vertex.addEdge(graphFactory.createEdge("watch", BytesId.of(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
         vertex.addEdge(graphFactory.createEdge("watch", "2222",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
 
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
@@ -174,7 +174,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
             ComputerOptions.ALGORITHM_MESSAGE_CLASS, DoubleValue.class.getName()
         );
 
-        Id id = new LongId(999L);
+        Id id = BytesId.of(999L);
         Value<?> value = new DoubleValue(0.85D);
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(

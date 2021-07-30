@@ -28,7 +28,8 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
@@ -53,8 +54,8 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();
 
-        LongId longId = new LongId(100L);
-        IdValue idValue = new LongId(999L).idValue();
+        Id longId = BytesId.of(100L);
+        IdValue idValue = BytesId.of(999L).idValue();
         Vertex vertex = factory.createVertex(longId, idValue);
 
         String fileName = "output.csv";
@@ -84,13 +85,13 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();
 
-        LongId longId = new LongId(100L);
+        Id longId = BytesId.of(100L);
         IdValueList idValueList = new IdValueList();
-        idValueList.add(new LongId(998L).idValue());
-        idValueList.add(new LongId(999L).idValue());
+        idValueList.add(BytesId.of(998L).idValue());
+        idValueList.add(BytesId.of(999L).idValue());
         Vertex vertex = factory.createVertex(longId, idValueList);
-        vertex.addEdge(factory.createEdge("knows", new LongId(200)));
-        vertex.addEdge(factory.createEdge("watch", "1111", new LongId(300)));
+        vertex.addEdge(factory.createEdge("knows", BytesId.of(200)));
+        vertex.addEdge(factory.createEdge("watch", "1111", BytesId.of(300)));
 
         String fileName = "output2.csv";
         File file = new File(fileName);
@@ -121,13 +122,13 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         ComputerContext context = context();
         GraphFactory factory = context.graphFactory();
 
-        LongId longId = new LongId(100L);
+        Id longId = BytesId.of(100L);
         IdValueListList idValueListList = new IdValueListList();
         IdValueList idValueList1 = new IdValueList();
-        idValueList1.add(new LongId(66L).idValue());
+        idValueList1.add(BytesId.of(66L).idValue());
         IdValueList idValueList2 = new IdValueList();
-        idValueList2.add(new LongId(998L).idValue());
-        idValueList2.add(new LongId(999L).idValue());
+        idValueList2.add(BytesId.of(998L).idValue());
+        idValueList2.add(BytesId.of(999L).idValue());
         idValueListList.add(idValueList1);
         idValueListList.add(idValueList2);
 

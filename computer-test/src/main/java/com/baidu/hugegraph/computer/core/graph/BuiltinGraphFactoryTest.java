@@ -23,11 +23,9 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.id.UuidId;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -40,7 +38,7 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         GraphFactory graphFactory = graphFactory();
         Id id = graphFactory.createId(value);
         Assert.assertEquals(IdType.LONG, id.type());
-        Assert.assertEquals(new LongId(value), id);
+        Assert.assertEquals(BytesId.of(value), id);
     }
 
     @Test
@@ -49,7 +47,7 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         GraphFactory graphFactory = graphFactory();
         Id id = graphFactory.createId(value);
         Assert.assertEquals(IdType.UTF8, id.type());
-        Assert.assertEquals(new Utf8Id(value), id);
+        Assert.assertEquals(BytesId.of(value), id);
     }
 
     @Test
@@ -58,7 +56,7 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         GraphFactory graphFactory = graphFactory();
         Id id = graphFactory.createId(uuid);
         Assert.assertEquals(IdType.UUID, id.type());
-        Assert.assertEquals(new UuidId(uuid), id);
+        Assert.assertEquals(BytesId.of(uuid), id);
     }
 
     @Test

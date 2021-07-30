@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -45,64 +45,51 @@ public class EntriesUtilTest {
                              Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(output);
 
-        KvEntryWriter subKvWriter = entryOutput.writeEntry(new LongId(100));
-        subKvWriter.writeSubKv(new LongId(20), new LongId(1));
-        subKvWriter.writeSubKv(new LongId(10), new LongId(1));
-        subKvWriter.writeSubKv(new LongId(50), new LongId(1));
-        subKvWriter.writeSubKv(new LongId(40), new LongId(1));
-        subKvWriter.writeSubKv(new LongId(10), new LongId(1));
+        KvEntryWriter subKvWriter = entryOutput.writeEntry(BytesId.of(100));
+        subKvWriter.writeSubKv(BytesId.of(20), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(10), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(50), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(40), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(10), BytesId.of(1));
         subKvWriter.writeFinish();
 
         BytesInput input = EntriesUtil.inputFromOutput(output);
 
         // Test inlinePointer kvEntry
         KvEntry entry = EntriesUtil.kvEntryFromInput(input, true, true);
-        Assert.assertEquals(100,
-                            StoreTestUtil.dataFromPointer(entry.key())
-                                         .intValue());
+        Assert.assertEquals(BytesId.of(100),
+                            StoreTestUtil.idFromPointer(entry.key()));
         try (EntryIterator iter = new SubKvEntriesInput(entry, true)) {
-            Assert.assertEquals(10,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertEquals(10,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertEquals(20,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertEquals(40,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertEquals(50,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
+            Assert.assertEquals(BytesId.of(10),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertEquals(BytesId.of(10),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertEquals(BytesId.of(20),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertEquals(BytesId.of(40),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertEquals(BytesId.of(50),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
         }
 
         input.seek(0);
 
         // Test cachedPointer kvEntry
         entry = EntriesUtil.kvEntryFromInput(input, false, true);
-        Assert.assertEquals(100,
-                            StoreTestUtil.dataFromPointer(entry.key())
-                                         .intValue());
+        Assert.assertEquals(BytesId.of(100),
+                            StoreTestUtil.idFromPointer(entry.key()));
         try (EntryIterator iter = new SubKvEntriesInput(entry, false)) {
-            Assert.assertEquals(10,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertEquals(10,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertEquals(20,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertEquals(40,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertEquals(50,
-                                StoreTestUtil.dataFromPointer(iter.next().key())
-                                             .intValue());
-            Assert.assertThrows(NoSuchElementException.class,
-                                iter::next);
+            Assert.assertEquals(BytesId.of(10),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertEquals(BytesId.of(10),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertEquals(BytesId.of(20),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertEquals(BytesId.of(40),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertEquals(BytesId.of(50),
+                                StoreTestUtil.idFromPointer(iter.next().key()));
+            Assert.assertThrows(NoSuchElementException.class, iter::next);
         }
     }
 }

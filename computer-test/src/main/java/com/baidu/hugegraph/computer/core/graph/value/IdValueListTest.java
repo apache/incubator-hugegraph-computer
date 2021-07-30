@@ -24,8 +24,9 @@ import java.io.IOException;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.Lists;
 
@@ -33,8 +34,8 @@ public class IdValueListTest extends UnitTestBase {
 
     @Test
     public void test() {
-        LongId longId1 = new LongId(100L);
-        LongId longId2 = new LongId(200L);
+        Id longId1 = BytesId.of(100L);
+        Id longId2 = BytesId.of(200L);
         IdValueList listValue1 = new IdValueList();
         IdValueList listValue2 = new IdValueList();
 
@@ -61,8 +62,8 @@ public class IdValueListTest extends UnitTestBase {
 
     @Test
     public void testReadWrite() throws IOException {
-        LongId longId1 = new LongId(100L);
-        LongId longId2 = new LongId(200L);
+        Id longId1 = BytesId.of(100L);
+        Id longId2 = BytesId.of(200L);
         IdValueList oldValue = new IdValueList();
         oldValue.add(longId1.idValue());
         oldValue.add(longId2.idValue());
@@ -71,8 +72,8 @@ public class IdValueListTest extends UnitTestBase {
 
     @Test
     public void testCompare() {
-        LongId longId1 = new LongId(100L);
-        LongId longId2 = new LongId(200L);
+        Id longId1 = BytesId.of(100L);
+        Id longId2 = BytesId.of(200L);
         IdValueList value1 = new IdValueList();
         value1.add(longId1.idValue());
         IdValueList value2 = new IdValueList();

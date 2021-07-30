@@ -56,7 +56,6 @@ public class JsonStructGraphOutput extends StructGraphOutput {
         this.writeId(vertex.id());
         this.writeSplitter();
 
-
         this.writeKey(this.valueName);
         this.writeJoiner();
         this.writeValue(vertex.value());

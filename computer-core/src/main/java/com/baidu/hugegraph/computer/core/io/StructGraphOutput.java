@@ -64,7 +64,12 @@ public abstract class StructGraphOutput implements GraphWritebackOutput {
     }
 
     public void writeId(Id id) throws IOException {
-        id.write(this.out);
+        Object rawId = id.asObject();
+        if (rawId instanceof Number) {
+            this.out.writeNumber((Number) rawId);
+        } else {
+            this.out.writeString(rawId.toString());
+        }
     }
 
     public void writeValue(Value<?> value) throws IOException {

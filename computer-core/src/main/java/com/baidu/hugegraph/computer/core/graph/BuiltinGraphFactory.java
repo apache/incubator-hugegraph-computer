@@ -34,10 +34,8 @@ import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.id.UuidId;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
@@ -65,17 +63,17 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Id createId(long id) {
-        return new LongId(id);
+        return BytesId.of(id);
     }
 
     @Override
     public Id createId(String id) {
-        return new Utf8Id(id);
+        return BytesId.of(id);
     }
 
     @Override
     public Id createId(UUID id) {
-        return new UuidId(id);
+        return BytesId.of(id);
     }
 
     @Override

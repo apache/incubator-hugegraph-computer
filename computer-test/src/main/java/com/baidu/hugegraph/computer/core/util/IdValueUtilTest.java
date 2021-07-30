@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.util;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -30,8 +30,8 @@ public class IdValueUtilTest {
 
     @Test
     public void testConvertIdAndIdValue() {
-        Id id1 = new LongId(1L);
-        Id id2 = new LongId(2L);
+        Id id1 = BytesId.of(1L);
+        Id id2 = BytesId.of(2L);
         IdValue value1 = IdValueUtil.toIdValue(id1, 11);
         IdValue value2 = IdValueUtil.toIdValue(id2, 11);
         Assert.assertEquals(id1, IdValueUtil.toId(value1));

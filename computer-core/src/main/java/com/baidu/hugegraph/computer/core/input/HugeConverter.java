@@ -26,10 +26,8 @@ import java.util.UUID;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.id.UuidId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
@@ -49,11 +47,11 @@ public final class HugeConverter {
     public static Id convertId(Object rawId) {
         E.checkArgumentNotNull(rawId, "The rawId can't be null");
         if (rawId instanceof Number) {
-            return new LongId(((Number) rawId).longValue());
+            return BytesId.of(((Number) rawId).longValue());
         } else if (rawId instanceof String) {
-            return new Utf8Id((String) rawId);
+            return BytesId.of((String) rawId);
         } else if (rawId instanceof UUID) {
-            return new UuidId((UUID) rawId);
+            return BytesId.of((UUID) rawId);
         } else {
             throw new ComputerException("Can't convert to Id from '%s'(%s)",
                                         rawId, rawId.getClass());

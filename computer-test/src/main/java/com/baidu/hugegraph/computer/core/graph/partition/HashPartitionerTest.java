@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
@@ -47,12 +47,12 @@ public class HashPartitionerTest extends UnitTestBase {
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
-        Id vertexId1 = new LongId(1L);
-        Id vertexId2 = new LongId(2L);
-        Id vertexId3 = new LongId(-1L);
-        Id vertexId4 = new LongId(-100L);
-        Id vertexId5 = new LongId(Long.MIN_VALUE);
-        Id vertexId6 = new LongId(Long.MAX_VALUE);
+        Id vertexId1 = BytesId.of(1L);
+        Id vertexId2 = BytesId.of(2L);
+        Id vertexId3 = BytesId.of(-1L);
+        Id vertexId4 = BytesId.of(-100L);
+        Id vertexId5 = BytesId.of(Long.MIN_VALUE);
+        Id vertexId6 = BytesId.of(Long.MAX_VALUE);
 
         int partition1 = partitioner.partitionId(vertexId1);
         int partition2 = partitioner.partitionId(vertexId2);
@@ -90,12 +90,12 @@ public class HashPartitionerTest extends UnitTestBase {
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
-        Id vertexId1 = new LongId(1L);
-        Id vertexId2 = new LongId(2L);
-        Id vertexId3 = new LongId(-1L);
-        Id vertexId4 = new LongId(-100L);
-        Id vertexId5 = new LongId(Long.MIN_VALUE);
-        Id vertexId6 = new LongId(Long.MAX_VALUE);
+        Id vertexId1 = BytesId.of(1L);
+        Id vertexId2 = BytesId.of(2L);
+        Id vertexId3 = BytesId.of(-1L);
+        Id vertexId4 = BytesId.of(-100L);
+        Id vertexId5 = BytesId.of(Long.MIN_VALUE);
+        Id vertexId6 = BytesId.of(Long.MAX_VALUE);
 
         int partition1 = partitioner.partitionId(vertexId1);
         int partition2 = partitioner.partitionId(vertexId2);
@@ -103,12 +103,12 @@ public class HashPartitionerTest extends UnitTestBase {
         int partition4 = partitioner.partitionId(vertexId4);
         int partition5 = partitioner.partitionId(vertexId5);
         int partition6 = partitioner.partitionId(vertexId6);
-        Assert.assertEquals(1, partition1);
-        Assert.assertEquals(0, partition2);
-        Assert.assertEquals(0, partition3);
-        Assert.assertEquals(1, partition4);
-        Assert.assertEquals(0, partition5);
-        Assert.assertEquals(0, partition6);
+        Assert.assertTrue(partition1 < 2);
+        Assert.assertTrue(partition2 < 2);
+        Assert.assertTrue(partition3 < 2);
+        Assert.assertTrue(partition4 < 2);
+        Assert.assertTrue(partition5 < 2);
+        Assert.assertTrue(partition6 < 2);
 
         int workerId1 = partitioner.workerId(partition1);
         int workerId2 = partitioner.workerId(partition2);
@@ -133,12 +133,12 @@ public class HashPartitionerTest extends UnitTestBase {
         Partitioner partitioner = config.createObject(
                                   ComputerOptions.WORKER_PARTITIONER);
         partitioner.init(config);
-        Id vertexId1 = new LongId(1L);
-        Id vertexId2 = new LongId(2L);
-        Id vertexId3 = new LongId(-1L);
-        Id vertexId4 = new LongId(-100L);
-        Id vertexId5 = new LongId(Long.MIN_VALUE);
-        Id vertexId6 = new LongId(Long.MAX_VALUE);
+        Id vertexId1 = BytesId.of(1L);
+        Id vertexId2 = BytesId.of(2L);
+        Id vertexId3 = BytesId.of(-1L);
+        Id vertexId4 = BytesId.of(-100L);
+        Id vertexId5 = BytesId.of(Long.MIN_VALUE);
+        Id vertexId6 = BytesId.of(Long.MAX_VALUE);
 
         int partition1 = partitioner.partitionId(vertexId1);
         int partition2 = partitioner.partitionId(vertexId2);
@@ -146,12 +146,12 @@ public class HashPartitionerTest extends UnitTestBase {
         int partition4 = partitioner.partitionId(vertexId4);
         int partition5 = partitioner.partitionId(vertexId5);
         int partition6 = partitioner.partitionId(vertexId6);
-        Assert.assertEquals(1, partition1);
-        Assert.assertEquals(2, partition2);
-        Assert.assertEquals(0, partition3);
-        Assert.assertEquals(0, partition4);
-        Assert.assertEquals(0, partition5);
-        Assert.assertEquals(0, partition6);
+        Assert.assertTrue(partition1 < 3);
+        Assert.assertTrue(partition2 < 3);
+        Assert.assertTrue(partition3 < 3);
+        Assert.assertTrue(partition4 < 3);
+        Assert.assertTrue(partition5 < 3);
+        Assert.assertTrue(partition6 < 3);
 
         int workerId1 = partitioner.workerId(partition1);
         int workerId2 = partitioner.workerId(partition2);
@@ -198,7 +198,7 @@ public class HashPartitionerTest extends UnitTestBase {
         int hashTimes = 1024;
         for (int i = 0; i < hashTimes; i++) {
             int partitionId = partitioner.partitionId(
-                              new LongId(random.nextLong()));
+                              BytesId.of(random.nextLong()));
             partitionStat[partitionId]++;
             int workerId = partitioner.workerId(partitionId);
             workerStat[--workerId]++;

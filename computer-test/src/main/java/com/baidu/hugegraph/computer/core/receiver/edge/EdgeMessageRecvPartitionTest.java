@@ -35,8 +35,8 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -151,11 +151,11 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             Edges edges = graphFactory().createEdges(2);
             for (long j = i + 1; j < i + 3; j++) {
                 Edge edge = graphFactory().createEdge();
-                edge.targetId(new LongId(j));
+                edge.targetId(BytesId.of(j));
                 Properties properties = graphFactory().createProperties();
                 properties.put("p1", new LongValue(i));
                 edge.properties(properties);
@@ -171,11 +171,11 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             Edges edges = graphFactory().createEdges(2);
             for (long j = i + 1; j < i + 3; j++) {
                 Edge edge = graphFactory().createEdge();
-                edge.targetId(new LongId(j));
+                edge.targetId(BytesId.of(j));
                 Properties properties = graphFactory().createProperties();
                 properties.put("p1", new LongValue(i));
                 edge.properties(properties);
@@ -187,11 +187,11 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
 
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             Edges edges = graphFactory().createEdges(2);
             for (long j = i + 1; j < i + 3; j++) {
                 Edge edge = graphFactory().createEdge();
-                edge.targetId(new LongId(j));
+                edge.targetId(BytesId.of(j));
                 Properties properties = graphFactory().createProperties();
                 properties.put("p2", new LongValue(2L * i));
                 edge.properties(properties);
@@ -209,14 +209,14 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
             Id id = ReceiverUtil.readId(entry.key());
-            Assert.assertEquals(new LongId(i), id);
+            Assert.assertEquals(BytesId.of(i), id);
 
             EntryIterator subKvIt = EntriesUtil.subKvIterFromEntry(entry);
             for (long j = i + 1; j < i + 3; j++) {
                 Assert.assertTrue(subKvIt.hasNext());
                 KvEntry subKv = subKvIt.next();
                 Id targetId = ReceiverUtil.readId(subKv.key());
-                Assert.assertEquals(new LongId(j), targetId);
+                Assert.assertEquals(BytesId.of(j), targetId);
 
                 Properties properties = graphFactory().createProperties();
                 ReceiverUtil.readValue(subKv.value(), properties);
@@ -235,13 +235,13 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
             Id id = ReceiverUtil.readId(entry.key());
-            Assert.assertEquals(new LongId(i), id);
+            Assert.assertEquals(BytesId.of(i), id);
             EntryIterator subKvIt = EntriesUtil.subKvIterFromEntry(entry);
             for (long j = i + 1; j < i + 3; j++) {
                 Assert.assertTrue(subKvIt.hasNext());
                 KvEntry subKv = subKvIt.next();
                 Id targetId = ReceiverUtil.readId(subKv.key());
-                Assert.assertEquals(new LongId(j), targetId);
+                Assert.assertEquals(BytesId.of(j), targetId);
                 Properties properties = graphFactory().createProperties();
 
                 ReceiverUtil.readValue(subKv.value(), properties);
@@ -262,13 +262,11 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
 
         Id id = vertex.id();
         KvEntryWriter subKvWriter = entryOutput.writeEntry(out -> {
-            out.writeByte(id.type().code());
             id.write(out);
         });
         for (Edge edge : vertex.edges()) {
             Id targetId = edge.targetId();
             subKvWriter.writeSubKv(out -> {
-                out.writeByte(targetId.type().code());
                 targetId.write(out);
             }, out -> {
                 edge.properties().write(out);
