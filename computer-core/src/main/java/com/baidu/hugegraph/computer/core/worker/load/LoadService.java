@@ -98,7 +98,7 @@ public class LoadService {
         @Override
         public boolean hasNext() {
             VertexFetcher vertexFetcher = fetcher.vertexFetcher();
-            if (this.currentSplit == null || !vertexFetcher.hasNext()) {
+            while (this.currentSplit == null || !vertexFetcher.hasNext()) {
                 /*
                  * The first time or the current split is complete,
                  * need to fetch next input split meta
@@ -109,9 +109,7 @@ public class LoadService {
                 }
                 vertexFetcher.prepareLoadInputSplit(this.currentSplit);
             }
-            assert this.currentSplit != null &&
-                   !this.currentSplit.equals(InputSplit.END_SPLIT);
-            return vertexFetcher.hasNext();
+            return true;
         }
 
         @Override
@@ -160,7 +158,7 @@ public class LoadService {
         @Override
         public boolean hasNext() {
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
-            if (this.currentSplit == null || !edgeFetcher.hasNext()) {
+            while (this.currentSplit == null || !edgeFetcher.hasNext()) {
                 /*
                  * The first time or the current split is complete,
                  * need to fetch next input split meta
@@ -171,9 +169,7 @@ public class LoadService {
                 }
                 edgeFetcher.prepareLoadInputSplit(this.currentSplit);
             }
-            assert this.currentSplit != null &&
-                   !this.currentSplit.equals(InputSplit.END_SPLIT);
-            return edgeFetcher.hasNext();
+            return true;
         }
 
         @Override

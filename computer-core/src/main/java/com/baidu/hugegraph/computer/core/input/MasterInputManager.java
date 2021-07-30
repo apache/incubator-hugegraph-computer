@@ -19,11 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.Log;
 
 public class MasterInputManager implements Manager {
+
+    private static final Logger LOG = Log.logger(MasterInputManager.class);
 
     public static final String NAME = "master_input";
 
@@ -39,8 +44,10 @@ public class MasterInputManager implements Manager {
     public void init(Config config) {
         this.fetcher = InputSourceFactory.createInputSplitFetcher(config);
         this.handler = new MasterInputHandler(this.fetcher);
-        this.handler.createVertexInputSplits();
-        this.handler.createEdgeInputSplits();
+        int vertexSplitSize = this.handler.createVertexInputSplits();
+        int edgeSplitSize = this.handler.createEdgeInputSplits();
+        LOG.info("Master create {} vertex splits, {} edge splits",
+                 vertexSplitSize, edgeSplitSize);
     }
 
     @Override

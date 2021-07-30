@@ -295,7 +295,8 @@ public class MasterService {
         SuperstepStat superstepStat = SuperstepStat.from(workerStats);
         this.bsp4Master.masterStepDone(Constants.INPUT_SUPERSTEP,
                                        superstepStat);
-        LOG.info("{} MasterService inputstep finished", this);
+        LOG.info("{} MasterService inputstep finished with superstat {}",
+                 this, superstepStat);
         return superstepStat;
     }
 
