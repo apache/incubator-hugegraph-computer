@@ -53,6 +53,7 @@ import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
+import com.baidu.hugegraph.computer.core.util.ShutdownHook;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -64,10 +65,10 @@ public class WorkerService implements Closeable {
     private final Managers managers;
     private final Map<Integer, ContainerInfo> workers;
 
-    private boolean inited;
-    private boolean closed;
+    private volatile boolean inited;
+    private volatile boolean closed;
     private Config config;
-    private Bsp4Worker bsp4Worker;
+    private volatile Bsp4Worker bsp4Worker;
     private ComputeManager computeManager;
     private ContainerInfo workerInfo;
 
@@ -76,19 +77,26 @@ public class WorkerService implements Closeable {
 
     private ContainerInfo masterInfo;
 
+    private volatile ShutdownHook shutdownHook;
+    private volatile Thread serviceThread;
+
     public WorkerService() {
         this.context = ComputerContext.instance();
         this.managers = new Managers();
         this.workers = new HashMap<>();
         this.inited = false;
         this.closed = false;
+        this.shutdownHook = new ShutdownHook();
     }
 
     /**
      * Init worker service, create the managers used by worker service.
      */
-    public synchronized void init(Config config) {
+    public void init(Config config) {
         E.checkArgument(!this.inited, "The %s has been initialized", this);
+
+        this.serviceThread = Thread.currentThread();
+        this.registerShutdownHook();
 
         this.config = config;
 
@@ -138,11 +146,18 @@ public class WorkerService implements Closeable {
         this.inited = true;
     }
 
+    private void registerShutdownHook() {
+        shutdownHook.hook(() -> {
+            this.stopServiceThread();
+            this.cleanBsp4();
+        });
+    }
+
     /**
      * Stop the worker service. Stop the managers created in
      * {@link #init(Config)}.
      */
-    public synchronized void close() {
+    public void close() {
         this.checkInited();
         if (this.closed) {
             LOG.info("{} WorkerService had closed before", this);
@@ -160,10 +175,31 @@ public class WorkerService implements Closeable {
         this.managers.closeAll(this.config);
 
         this.bsp4Worker.workerCloseDone();
-        this.bsp4Worker.close();
+        this.cleanBsp4();
+        this.shutdownHook.unHook();
 
         this.closed = true;
         LOG.info("{} WorkerService closed", this);
+    }
+
+    private void stopServiceThread() {
+        if (this.serviceThread == null) {
+            return;
+        }
+
+        try {
+            this.serviceThread.interrupt();
+        } catch (Throwable ignore) {
+        }
+    }
+
+    private void cleanBsp4() {
+        if (this.bsp4Worker == null) {
+            return;
+        }
+
+        this.bsp4Worker.clean();
+        this.bsp4Worker.close();
     }
 
     /**
@@ -171,7 +207,7 @@ public class WorkerService implements Closeable {
      * to start from. And then do the superstep iteration until master's
      * superstepStat is inactive.
      */
-    public synchronized void execute() {
+    public void execute() {
         this.checkInited();
 
         LOG.info("{} WorkerService execute", this);

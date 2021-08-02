@@ -85,19 +85,6 @@ public class HugeGraphComputerTest {
         Assert.assertTrue(isRun.get());
     }
 
-    @Test
-    public void testShutdownHook() {
-        HugeGraphComputer.ShutdownHook hook =
-                          new HugeGraphComputer.ShutdownHook();
-        Assert.assertFalse(hook.hook(null));
-        Assert.assertFalse(hook.unHook());
-
-        Assert.assertTrue(hook.hook(() -> {
-        }));
-        Assert.assertTrue(hook.unHook());
-        Assert.assertFalse(hook.unHook());
-    }
-
     private boolean existError(Throwable[] exceptions) {
         boolean error = false;
         for (Throwable e : exceptions) {
