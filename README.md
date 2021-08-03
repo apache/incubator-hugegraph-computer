@@ -1,7 +1,7 @@
 # hugegraph-computer
 
 [![License](https://img.shields.io/badge/license-Apache%202-0E78BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![Build Status](https://travis-ci.org/hugegraph/hugegraph-computer.svg?branch=master)](https://travis-ci.org/hugegraph/hugegraph-computer)
+[![Build Status](https://github.com/hugegraph/hugegraph-computer/actions/workflows/ci.yml/badge.svg)](https://github.com/hugegraph/hugegraph-computer/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/hugegraph/hugegraph-computer/branch/master/graph/badge.svg)](https://codecov.io/gh/hugegraph/hugegraph-computer)
 
 hugegraph-computer is a distributed graph processing system for hugegraph. It is an implementaion of [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf). It runs on Kubernetes or YARN framework.

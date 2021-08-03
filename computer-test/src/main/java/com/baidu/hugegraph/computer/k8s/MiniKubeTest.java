@@ -291,7 +291,8 @@ public class MiniKubeTest extends AbstractK8sTest {
     @Test
     public void testPullImageError() {
         Map<String, String> params = new HashMap<>();
-        this.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(), "xxx");
+        this.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
+                           "xxx");
         String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
