@@ -133,9 +133,9 @@ public class MasterService implements Closeable {
     }
 
     private void registerShutdownHook() {
-        shutdownHook.hook(() -> {
+        this.shutdownHook.hook(() -> {
             this.stopServiceThread();
-            this.cleanBsp4();
+            this.cleanAndCloseBsp4();
         });
     }
 
@@ -156,14 +156,14 @@ public class MasterService implements Closeable {
 
         this.managers.closeAll(this.config);
 
-        this.cleanBsp4();
+        this.cleanAndCloseBsp4();
         this.shutdownHook.unHook();
 
         this.closed = true;
         LOG.info("{} MasterService closed", this);
     }
 
-    private void cleanBsp4() {
+    private void cleanAndCloseBsp4() {
         if (this.bsp4Master == null) {
             return;
         }

@@ -11,7 +11,7 @@ public class ShutdownHook {
 
     private static final Logger LOG = Log.logger(ShutdownHook.class);
 
-    private Thread threadShutdownHook;
+    private volatile Thread threadShutdownHook;
 
     public boolean hook(Closeable hook) {
         if (hook == null) {

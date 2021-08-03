@@ -147,9 +147,9 @@ public class WorkerService implements Closeable {
     }
 
     private void registerShutdownHook() {
-        shutdownHook.hook(() -> {
+        this.shutdownHook.hook(() -> {
             this.stopServiceThread();
-            this.cleanBsp4();
+            this.cleanAndCloseBsp4();
         });
     }
 
@@ -175,7 +175,7 @@ public class WorkerService implements Closeable {
         this.managers.closeAll(this.config);
 
         this.bsp4Worker.workerCloseDone();
-        this.cleanBsp4();
+        this.cleanAndCloseBsp4();
         this.shutdownHook.unHook();
 
         this.closed = true;
@@ -193,7 +193,7 @@ public class WorkerService implements Closeable {
         }
     }
 
-    private void cleanBsp4() {
+    private void cleanAndCloseBsp4() {
         if (this.bsp4Worker == null) {
             return;
         }
