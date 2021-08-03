@@ -25,6 +25,7 @@ import org.junit.runners.Suite;
 
 import com.baidu.hugegraph.computer.algorithm.rank.pagerank.PageRankTest;
 import com.baidu.hugegraph.computer.algorithm.wcc.WccTest;
+import com.baidu.hugegraph.computer.algorithm.rank.pagerank.PageRankTest;
 import com.baidu.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
