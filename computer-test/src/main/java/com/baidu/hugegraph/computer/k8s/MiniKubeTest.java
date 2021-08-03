@@ -41,6 +41,7 @@ import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
+import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
@@ -283,6 +284,29 @@ public class MiniKubeTest extends AbstractK8sTest {
         this.driver.cancelJob(jobId, params);
 
         UnitTestBase.sleep(1000L);
+
+        future.getNow(null);
+    }
+
+    @Test
+    public void testPullImageError() {
+        Map<String, String> params = new HashMap<>();
+        this.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(), "xxx");
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            this.driver.waitJob(jobId, params, jobObserver);
+        });
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.FAILED);
+        Mockito.verify(jobObserver, Mockito.timeout(30000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+        String diagnostics = this.driver.diagnostics(jobId, params);
+        Assert.assertContains("ImagePullBackOff", diagnostics);
 
         future.getNow(null);
     }
