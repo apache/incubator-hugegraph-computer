@@ -17,7 +17,9 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.driver;
+package com.baidu.hugegraph.computer.driver;
+
+import java.util.Objects;
 
 public enum JobStatus {
 
@@ -29,5 +31,11 @@ public enum JobStatus {
 
     public static boolean finished(JobStatus status) {
         return status == CANCELLED || status == FAILED || status == SUCCEEDED;
+    }
+
+    public static boolean finished(String status) {
+        return Objects.equals(status, CANCELLED.name()) ||
+               Objects.equals(status, FAILED.name()) ||
+               Objects.equals(status, SUCCEEDED.name());
     }
 }

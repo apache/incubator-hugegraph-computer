@@ -19,7 +19,7 @@ cd ../
 rm -rf hugegraph
 tar -zxf hugegraph-*.tar.gz
 
-cd hugegraph-*
+cd "$(find hugegraph-* | head -1)"
 bin/init-store.sh || exit 1
 bin/start-hugegraph.sh || exit 1
 cd ../

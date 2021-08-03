@@ -1,0 +1,12 @@
+resources:
+  - etcd_operator.yaml
+  - etcd_cluster.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+  - name: etcd-operator
+    newName: quay.io/coreos/etcd-operator
+    newTag: v0.9.4
+commonLabels:
+  app.kubernetes.io/name: hugegraph-computer-operator-etcd
+  app.kubernetes.io/version: v1

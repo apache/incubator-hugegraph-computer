@@ -17,9 +17,8 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.driver;
+package com.baidu.hugegraph.computer.driver;
 
-import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 
 public interface JobState {
 

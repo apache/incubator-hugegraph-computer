@@ -17,24 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.driver;
+package com.baidu.hugegraph.computer.driver;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
-
-public interface ComputerDriver {
+public interface ComputerDriver extends Closeable {
 
     /**
      * This method is called when create algorithm, the user will upload a jar.
-     * @param input The input from which to create a jar.
      * @param algorithmName The algorithm name is unique. If the jar
      *                      correspond to the algorithm name is exist, it
      *                      will overwrite the previous jar.
+     * @param input The input stream from which to create a jar.
      */
-    void uploadAlgorithmJar(InputStream input, String algorithmName);
+    void uploadAlgorithmJar(String algorithmName, InputStream input);
 
     /**
      * Submit the algorithm to the cluster, the parameters are in config.
@@ -58,8 +57,7 @@ public interface ComputerDriver {
      * @param params reserved for other parameters in addition to jobId used
      *               to wait job.
      */
-    void waitJob(String jobId,
-                 Map<String, String> params,
+    void waitJob(String jobId, Map<String, String> params,
                  JobObserver observer);
 
     /**

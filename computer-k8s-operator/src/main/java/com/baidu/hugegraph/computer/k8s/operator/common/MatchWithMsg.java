@@ -17,12 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.driver;
+package com.baidu.hugegraph.computer.k8s.operator.common;
 
-public interface JobObserver {
+public class MatchWithMsg {
 
-    /**
-     * This observer will notified by every superstep.
-     */
-    public void onJobStateChanged(JobState state);
+    private final boolean match;
+    private final String msg;
+
+    public static final MatchWithMsg NO_MATCH = new MatchWithMsg(false, null);
+
+    public MatchWithMsg(boolean match, String msg) {
+        this.match = match;
+        this.msg = msg;
+    }
+
+    public String msg() {
+        return this.msg;
+    }
+
+    public boolean isMatch() {
+        return this.match;
+    }
 }

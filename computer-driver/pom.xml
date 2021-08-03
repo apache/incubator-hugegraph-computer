@@ -12,6 +12,9 @@
     <artifactId>computer-driver</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>hugegraph-common</artifactId>
+        </dependency>
     </dependencies>
 </project>

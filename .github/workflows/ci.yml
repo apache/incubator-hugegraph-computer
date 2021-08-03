@@ -16,13 +16,21 @@ on:
 
 jobs:
   computer-ci:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Install JDK 8
         uses: actions/setup-java@v2
         with:
           java-version: '8'
           distribution: 'adopt'
+
+      - name: Setup Minikube-Kubernetes
+        uses: manusa/actions-setup-minikube@v2.4.2
+        with:
+          minikube version: v1.21.0
+          kubernetes version: v1.20.1
+      - name: Interact with the cluster
+        run: kubectl get nodes
 
       - name: Cache Maven packages
         uses: actions/cache@v2
@@ -37,7 +45,7 @@ jobs:
           fetch-depth: 2
 
       - name: Compile
-        run: mvn compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
+        run: mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
 
       - name: Prepare env and service
         env:
@@ -58,4 +66,3 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           file: target/site/jacoco/jacoco.xml
-
