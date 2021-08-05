@@ -140,7 +140,10 @@ public class DefaultConfigTest extends UnitTestBase {
 
     @Test
     public void testCreateObject() {
-        Config config = context().config();
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.MASTER_COMPUTATION_CLASS,
+                DefaultMasterComputation.class.getName()
+        );
         MasterComputation masterComputation = config.createObject(
                           ComputerOptions.MASTER_COMPUTATION_CLASS);
         Assert.assertEquals(DefaultMasterComputation.class,
@@ -165,7 +168,10 @@ public class DefaultConfigTest extends UnitTestBase {
 
     @Test
     public void testNullClass() {
-        Config config = context().config();
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.WORKER_COMBINER_CLASS,
+                Null.class.getName()
+        );
         Object combiner = config.createObject(
                           ComputerOptions.WORKER_COMBINER_CLASS, false);
         Assert.assertNull(combiner);

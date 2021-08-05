@@ -17,22 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.combiner;
+package com.baidu.hugegraph.computer.algorithm.rank.pagerank;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.util.E;
+import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-public class ValueMinCombiner<T extends Value<T>> implements Combiner<T> {
+import com.baidu.hugegraph.config.OptionSpace;
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public T combine(T v1, T v2) {
-        E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
-        E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
-        if (v1.compareTo(v2) <= 0) {
-            return v1;
-        } else {
-            return v2;
-        }
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    PageRankTest.class,
+})
+public class AlgorithmTestSuite {
+    @BeforeClass
+    public static void setup() throws ClassNotFoundException {
+        // Don't forget to register options
+        OptionSpace.register("computer",
+                             "com.baidu.hugegraph.computer.core.config." +
+                             "ComputerOptions");
     }
 }

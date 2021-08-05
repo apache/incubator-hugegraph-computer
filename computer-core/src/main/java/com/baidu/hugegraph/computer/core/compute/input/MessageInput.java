@@ -27,6 +27,7 @@ import java.util.NoSuchElementException;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -36,8 +37,9 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class MessageInput<T extends Value<T>> {
 
+    private final Config config;
     private final PeekableIterator<KvEntry> messages;
-    private final T value;
+    private T value;
 
     public MessageInput(ComputerContext context,
                         PeekableIterator<KvEntry> messages) {
@@ -46,8 +48,9 @@ public class MessageInput<T extends Value<T>> {
         } else {
             this.messages = messages;
         }
+        this.config = context.config();
 
-        this.value = context.config().createObject(
+        this.value = this.config.createObject(
                      ComputerOptions.ALGORITHM_MESSAGE_CLASS);
     }
 
@@ -94,6 +97,8 @@ public class MessageInput<T extends Value<T>> {
                     try {
                         BytesInput in = IOFactory.createBytesInput(
                                         entry.value().bytes());
+                        MessageInput.this.value = config.createObject(
+                                     ComputerOptions.ALGORITHM_MESSAGE_CLASS);
                         MessageInput.this.value.read(in);
                     } catch (IOException e) {
                         throw new ComputerException("Can't read value", e);

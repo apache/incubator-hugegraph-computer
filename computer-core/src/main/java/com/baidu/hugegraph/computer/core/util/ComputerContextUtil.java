@@ -22,10 +22,12 @@ package com.baidu.hugegraph.computer.core.util;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.allocator.Allocator;
 import com.baidu.hugegraph.computer.core.allocator.DefaultAllocator;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.DefaultConfig;
 import com.baidu.hugegraph.computer.core.graph.BuiltinGraphFactory;
@@ -37,11 +39,26 @@ public class ComputerContextUtil {
         initContext(convertToMap(params));
     }
 
-    public static void initContext(Map<String, String> params) {
+    public static Config initContext(Map<String, String> params) {
+        // Set algorithm's parameters
+        String algorithmParamsName = params.get(
+               ComputerOptions.ALGORITHM_PARAMS_CLASS.name());
+        AlgorithmParams algorithmParams;
+        try {
+            algorithmParams = (AlgorithmParams) Class.forName(
+                              algorithmParamsName).newInstance();
+        } catch (Exception e) {
+            throw new ComputerException("Can't create algorithmParams, " +
+                                        "algorithmParamsName = {}",
+                                        algorithmParamsName);
+        }
+        algorithmParams.setAlgorithmParameters(params);
+
         Config config = new DefaultConfig(params);
         GraphFactory graphFactory = new BuiltinGraphFactory(config);
         Allocator allocator = new DefaultAllocator(config, graphFactory);
         ComputerContext.initContext(config, graphFactory, allocator);
+        return config;
     }
 
     public static Map<String, String> convertToMap(String... options) {

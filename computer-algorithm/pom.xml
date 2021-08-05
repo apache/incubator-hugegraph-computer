@@ -12,6 +12,15 @@
     <artifactId>computer-algorithm</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>computer-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>computer-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

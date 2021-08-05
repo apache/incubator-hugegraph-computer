@@ -32,6 +32,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.master.MasterService;
+import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
@@ -61,7 +62,9 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.ALGORITHM_RESULT_CLASS,
                 DoubleValue.class.getName(),
                 ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                DoubleValue.class.getName()
+                DoubleValue.class.getName(),
+                ComputerOptions.OUTPUT_CLASS,
+                LimitedLogOutput.class.getName()
             );
             WorkerService workerService = new MockWorkerService();
             try {
@@ -115,7 +118,7 @@ public class WorkerServiceTest extends UnitTestBase {
         pool.shutdownNow();
 
         Assert.assertFalse(Arrays.asList(exceptions).toString(),
-                           this.existError(exceptions));
+                           existError(exceptions));
     }
 
     @Test
@@ -220,19 +223,7 @@ public class WorkerServiceTest extends UnitTestBase {
         pool.shutdownNow();
 
         Assert.assertFalse(Arrays.asList(exceptions).toString(),
-                           this.existError(exceptions));
-    }
-
-    private boolean existError(Throwable[] exceptions) {
-        boolean error = false;
-        for (Throwable e : exceptions) {
-            if (e != null) {
-                error = true;
-                LOG.warn("There exist error:", e);
-                break;
-            }
-        }
-        return error;
+                           existError(exceptions));
     }
 
     @Test

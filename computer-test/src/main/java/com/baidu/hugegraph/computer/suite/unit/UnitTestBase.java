@@ -24,9 +24,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -45,11 +48,15 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
+import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.Log;
 
 public class UnitTestBase {
+
+    private static final Logger LOG = Log.logger(UnitTestBase.class);
 
     private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
                                         "0123456789" +
@@ -103,6 +110,11 @@ public class UnitTestBase {
             E.checkArgument(value instanceof String,
                             "The option value must be String class");
             map.put(((TypedOption<?, ?>) key).name(), (String) value);
+        }
+        if (!map.keySet().contains(
+                          ComputerOptions.ALGORITHM_PARAMS_CLASS.name())) {
+            map.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
+                    MockComputationParams.class.getName());
         }
         ComputerContextUtil.initContext(map);
     }
@@ -182,5 +194,17 @@ public class UnitTestBase {
         return (StreamGraphOutput) IOFactory.createGraphOutput(context(),
                                                                OutputFormat.BIN,
                                                                output);
+    }
+
+    public static boolean existError(Throwable[] exceptions) {
+        boolean error = false;
+        for (Throwable e : exceptions) {
+            if (e != null) {
+                error = true;
+                LOG.warn("There exist error:", e);
+                break;
+            }
+        }
+        return error;
     }
 }
