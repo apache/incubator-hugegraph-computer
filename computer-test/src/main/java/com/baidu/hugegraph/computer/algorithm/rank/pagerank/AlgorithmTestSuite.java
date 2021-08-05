@@ -19,12 +19,22 @@
 
 package com.baidu.hugegraph.computer.algorithm.rank.pagerank;
 
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+
+import com.baidu.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     PageRankTest.class,
 })
 public class AlgorithmTestSuite {
+    @BeforeClass
+    public static void setup() throws ClassNotFoundException {
+        // Don't forget to register options
+        OptionSpace.register("computer",
+                             "com.baidu.hugegraph.computer.core.config." +
+                             "ComputerOptions");
+    }
 }
