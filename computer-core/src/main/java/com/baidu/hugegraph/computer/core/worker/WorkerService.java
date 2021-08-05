@@ -175,7 +175,7 @@ public class WorkerService implements Closeable {
         this.managers.closeAll(this.config);
 
         this.bsp4Worker.workerCloseDone();
-        this.cleanAndCloseBsp4();
+        this.bsp4Worker.close();
         this.shutdownHook.unHook();
 
         this.closed = true;
