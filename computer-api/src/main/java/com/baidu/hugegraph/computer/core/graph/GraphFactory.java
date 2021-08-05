@@ -43,6 +43,8 @@ public interface GraphFactory {
 
     <V extends Value<?>> Vertex createVertex(Id id, V value);
 
+    <V extends Value<?>> Vertex createVertex(String label, Id id, V value);
+
     Edges createEdges();
 
     Edges createEdges(int capacity);

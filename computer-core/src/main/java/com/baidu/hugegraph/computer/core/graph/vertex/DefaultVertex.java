@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.graph.vertex;
 
 import java.util.Objects;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
@@ -30,6 +31,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultVertex implements Vertex {
 
+    private String label;
     private Id id;
     private Value<?> value;
     private Edges edges;
@@ -41,11 +43,27 @@ public class DefaultVertex implements Vertex {
     }
 
     public DefaultVertex(GraphFactory graphFactory, Id id, Value<?> value) {
+        this(graphFactory, Constants.EMPTY_STR, id, value);
+    }
+
+    public DefaultVertex(GraphFactory graphFactory, String label, Id id,
+                         Value<?> value) {
+        this.label = label;
         this.id = id;
         this.value = value;
         this.edges = graphFactory.createEdges();
         this.properties = graphFactory.createProperties();
         this.active = true;
+    }
+
+    @Override
+    public String label() {
+        return this.label;
+    }
+
+    @Override
+    public void label(String label) {
+        this.label = label;
     }
 
     @Override

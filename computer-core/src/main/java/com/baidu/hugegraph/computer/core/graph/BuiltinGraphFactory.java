@@ -86,6 +86,12 @@ public final class BuiltinGraphFactory implements GraphFactory {
     }
 
     @Override
+    public <V extends Value<?>> Vertex createVertex(String label, Id id,
+                                                    V value) {
+        return new DefaultVertex(this, label, id, value);
+    }
+
+    @Override
     public Edges createEdges() {
         int averageDegree = this.config.get(
                             ComputerOptions.VERTEX_AVERAGE_DEGREE);
