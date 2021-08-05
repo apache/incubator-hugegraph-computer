@@ -65,6 +65,7 @@ public class EtcdBspTest extends UnitTestBase {
 
     @After
     public void teardown() {
+        this.bsp4Worker.clean();
         this.bsp4Worker.close();
         this.bsp4Master.clean();
         this.bsp4Master.close();
