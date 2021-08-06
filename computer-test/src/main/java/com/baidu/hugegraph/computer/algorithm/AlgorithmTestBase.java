@@ -41,9 +41,9 @@ import com.baidu.hugegraph.util.Log;
 
 public class AlgorithmTestBase extends UnitTestBase {
 
-    public static void assertServiceWithWorker1(String algorithm) throws
-                                                                 InterruptedException {
-        final Logger log = Log.logger(algorithm);
+    public static void assertServiceWithWorker1(String algorithmParams)
+                       throws InterruptedException {
+        final Logger log = Log.logger(algorithmParams);
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch countDownLatch = new CountDownLatch(2);
         Throwable[] exceptions = new Throwable[2];
@@ -57,7 +57,8 @@ public class AlgorithmTestBase extends UnitTestBase {
             params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(), "100000");
             params.put(ComputerOptions.BSP_LOG_INTERVAL.name(), "30000");
             params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), "10");
-            params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(), algorithm);
+            params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
+                       algorithmParams);
 
             Config config = ComputerContextUtil.initContext(params);
 
@@ -84,7 +85,8 @@ public class AlgorithmTestBase extends UnitTestBase {
             params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(), "100000");
             params.put(ComputerOptions.BSP_LOG_INTERVAL.name(), "30000");
             params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), "10");
-            params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(), algorithm);
+            params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
+                       algorithmParams);
 
             Config config = ComputerContextUtil.initContext(params);
 

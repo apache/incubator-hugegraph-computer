@@ -26,9 +26,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
@@ -64,9 +62,11 @@ public class DegreeCentrality implements Computation<NullValue> {
             while (edges.hasNext()) {
                 edge = edges.next();
                 DoubleValue value = edge.properties().get(this.weight);
-                E.checkArgumentNotNull(value, "The vertex's '%s' weight " +
-                                              "property '%s' can't be null");
-                totalWeight.add(BigDecimal.valueOf(value.value()));
+                E.checkArgumentNotNull(value, "The edge's '%s' weight " +
+                                              "property '%s' can't be null",
+                                       edge.name(), this.weight);
+                totalWeight = totalWeight.add(
+                              BigDecimal.valueOf(value.value()));
             }
             vertex.value(new DoubleValue(totalWeight.doubleValue()));
         }
