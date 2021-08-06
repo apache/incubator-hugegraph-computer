@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableMap;
 
@@ -56,8 +57,13 @@ public class ComputerContextUtilTest {
 
         Properties properties = new Properties();
         properties.setProperty("key1", "newValue1");
+        properties.setProperty("algorithm.params_class",
+                               MockComputationParams.class.getName());
         result = ComputerContextUtil.convertToMap(properties);
-        Assert.assertEquals(ImmutableMap.of("key1", "newValue1"), result);
+        Assert.assertEquals(ImmutableMap.of(
+                            "key1", "newValue1",
+                            "algorithm.params_class",
+                            MockComputationParams.class.getName()), result);
 
         ComputerContextUtil.initContext(properties);
         Assert.assertEquals("newValue1",
