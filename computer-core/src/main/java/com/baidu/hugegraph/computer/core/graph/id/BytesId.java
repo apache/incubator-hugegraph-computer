@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.graph.id;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -89,14 +88,6 @@ public class BytesId implements Id {
         return new BytesId(IdType.UUID, output.buffer(), output.position());
     }
 
-    private byte[] truncate() {
-        if (this.bytes.length == this.length) {
-            return this.bytes;
-        } else {
-            return Arrays.copyOfRange(this.bytes, 0, this.length);
-        }
-    }
-
     @Override
     public IdType type() {
         return this.type;
@@ -115,10 +106,10 @@ public class BytesId implements Id {
 
     @Override
     public Object asObject() {
-        byte[] bytes = this.truncate();
         switch (this.type) {
             case LONG:
-                BytesInput input = IOFactory.createBytesInput(bytes);
+                BytesInput input = IOFactory.createBytesInput(this.bytes, 0,
+                                                              this.length);
                 try {
                     return input.readLong();
                 } catch (IOException e) {
@@ -126,9 +117,9 @@ public class BytesId implements Id {
                                                 "Long object");
                 }
             case UTF8:
-                return CoderUtil.decode(bytes);
+                return CoderUtil.decode(this.bytes, 0, this.length);
             case UUID:
-                input = IOFactory.createBytesInput(bytes);
+                input = IOFactory.createBytesInput(this.bytes, 0, this.length);
                 try {
                     long high = input.readLong();
                     long low = input.readLong();
