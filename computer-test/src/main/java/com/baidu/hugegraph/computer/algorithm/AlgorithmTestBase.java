@@ -114,5 +114,4 @@ public class AlgorithmTestBase extends UnitTestBase {
         Assert.assertFalse(Arrays.asList(exceptions).toString(),
                            existError(exceptions));
     }
-
 }

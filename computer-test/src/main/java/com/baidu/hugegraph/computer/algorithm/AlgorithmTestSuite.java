@@ -36,6 +36,7 @@ import com.baidu.hugegraph.config.OptionSpace;
     WccTest.class
 })
 public class AlgorithmTestSuite {
+
     @BeforeClass
     public static void setup() throws ClassNotFoundException {
         // Don't forget to register options

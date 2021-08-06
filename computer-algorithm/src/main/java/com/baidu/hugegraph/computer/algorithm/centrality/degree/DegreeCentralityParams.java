@@ -29,6 +29,7 @@ import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
 public class DegreeCentralityParams implements AlgorithmParams {
+
     @Override
     public void setAlgorithmParameters(Map<String, String> params) {
         this.setIfAbsent(params, ComputerOptions.MASTER_COMPUTATION_CLASS,

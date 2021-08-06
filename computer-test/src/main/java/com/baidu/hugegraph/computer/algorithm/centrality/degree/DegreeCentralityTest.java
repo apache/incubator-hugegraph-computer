@@ -24,6 +24,7 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
+
     @Test
     public void testServiceWith1Worker() throws InterruptedException {
         assertServiceWithWorker1(DegreeCentralityParams.class.getName());
