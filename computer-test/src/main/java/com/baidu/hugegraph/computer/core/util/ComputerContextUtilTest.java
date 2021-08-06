@@ -20,10 +20,13 @@
 package com.baidu.hugegraph.computer.core.util;
 
 import java.util.Map;
+import java.util.Properties;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableMap;
 
@@ -32,7 +35,11 @@ public class ComputerContextUtilTest {
     @Test
     public void testConvertToMap() {
         Assert.assertThrows(ComputerException.class, () -> {
-            ComputerContextUtil.convertToMap(null);
+            ComputerContextUtil.convertToMap((String) null);
+        });
+
+        Assert.assertThrows(ComputerException.class, () -> {
+            ComputerContextUtil.convertToMap((Properties) null);
         });
 
         Assert.assertThrows(ComputerException.class, () -> {
@@ -47,5 +54,21 @@ public class ComputerContextUtilTest {
                                      "key1", "value1", "key2", "value2");
         Assert.assertEquals(ImmutableMap.of("key1", "value1", "key2", "value2"),
                             result);
+
+        Properties properties = new Properties();
+        properties.setProperty("key1", "newValue1");
+        properties.setProperty("algorithm.params_class",
+                               MockComputationParams.class.getName());
+        result = ComputerContextUtil.convertToMap(properties);
+        Assert.assertEquals(ImmutableMap.of(
+                            "key1", "newValue1",
+                            "algorithm.params_class",
+                            MockComputationParams.class.getName()), result);
+
+        ComputerContextUtil.initContext(properties);
+        Assert.assertEquals("newValue1",
+                            ComputerContext.instance()
+                                           .config()
+                                           .getString("key1", ""));
     }
 }

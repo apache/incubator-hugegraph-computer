@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.worker;
 
+import java.io.Closeable;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
@@ -52,10 +53,11 @@ import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
+import com.baidu.hugegraph.computer.core.util.ShutdownHook;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
-public class WorkerService {
+public class WorkerService implements Closeable {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 
@@ -63,9 +65,10 @@ public class WorkerService {
     private final Managers managers;
     private final Map<Integer, ContainerInfo> workers;
 
-    private boolean inited;
+    private volatile boolean inited;
+    private volatile boolean closed;
     private Config config;
-    private Bsp4Worker bsp4Worker;
+    private volatile Bsp4Worker bsp4Worker;
     private ComputeManager computeManager;
     private ContainerInfo workerInfo;
 
@@ -74,11 +77,16 @@ public class WorkerService {
 
     private ContainerInfo masterInfo;
 
+    private volatile ShutdownHook shutdownHook;
+    private volatile Thread serviceThread;
+
     public WorkerService() {
         this.context = ComputerContext.instance();
         this.managers = new Managers();
         this.workers = new HashMap<>();
         this.inited = false;
+        this.closed = false;
+        this.shutdownHook = new ShutdownHook();
     }
 
     /**
@@ -86,6 +94,9 @@ public class WorkerService {
      */
     public void init(Config config) {
         E.checkArgument(!this.inited, "The %s has been initialized", this);
+
+        this.serviceThread = Thread.currentThread();
+        this.registerShutdownHook();
 
         this.config = config;
 
@@ -135,12 +146,23 @@ public class WorkerService {
         this.inited = true;
     }
 
+    private void registerShutdownHook() {
+        this.shutdownHook.hook(() -> {
+            this.stopServiceThread();
+            this.cleanAndCloseBsp();
+        });
+    }
+
     /**
      * Stop the worker service. Stop the managers created in
      * {@link #init(Config)}.
      */
     public void close() {
         this.checkInited();
+        if (this.closed) {
+            LOG.info("{} WorkerService had closed before", this);
+            return;
+        }
 
         this.computation.close(this.config);
 
@@ -154,7 +176,30 @@ public class WorkerService {
 
         this.bsp4Worker.workerCloseDone();
         this.bsp4Worker.close();
+        this.shutdownHook.unHook();
+
+        this.closed = true;
         LOG.info("{} WorkerService closed", this);
+    }
+
+    private void stopServiceThread() {
+        if (this.serviceThread == null) {
+            return;
+        }
+
+        try {
+            this.serviceThread.interrupt();
+        } catch (Throwable ignore) {
+        }
+    }
+
+    private void cleanAndCloseBsp() {
+        if (this.bsp4Worker == null) {
+            return;
+        }
+
+        this.bsp4Worker.clean();
+        this.bsp4Worker.close();
     }
 
     /**

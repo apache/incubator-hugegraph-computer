@@ -76,6 +76,11 @@ public class WorkerServiceTest extends UnitTestBase {
                 exceptions[0] = e;
             } finally {
                 workerService.close();
+                try {
+                    workerService.close();
+                } catch (Throwable e) {
+                    Assert.fail(e.getMessage());
+                }
                 countDownLatch.countDown();
             }
         });
@@ -110,6 +115,11 @@ public class WorkerServiceTest extends UnitTestBase {
                  * master service will not be closed.
                  */
                 masterService.close();
+                try {
+                    masterService.close();
+                } catch (Throwable e) {
+                    Assert.fail(e.getMessage());
+                }
                 countDownLatch.countDown();
             }
         });
