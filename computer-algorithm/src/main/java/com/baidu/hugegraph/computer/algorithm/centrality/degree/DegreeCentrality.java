@@ -19,17 +19,29 @@
 
 package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 import com.baidu.hugegraph.computer.core.worker.WorkerContext;
+import com.baidu.hugegraph.util.E;
 
 public class DegreeCentrality implements Computation<NullValue> {
+
+    public static final String CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY =
+                               "degree.centrality.weight.property";
+    private boolean calculateByWeight;
+    private String weight;
 
     @Override
     public String name() {
@@ -43,13 +55,21 @@ public class DegreeCentrality implements Computation<NullValue> {
 
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
-        long normalization = context.totalVertexCount() - 1;
-        if (normalization <= 0) {
-            vertex.value(new DoubleValue(1.0));
+        if (!this.calculateByWeight) {
+            vertex.value(new DoubleValue(vertex.numEdges()));
         } else {
-            vertex.value(new DoubleValue(vertex.numEdges() / normalization));
+            Edge edge = null;
+            BigDecimal totalWeight = BigDecimal.valueOf(0.0);
+            Iterator<Edge> edges = vertex.edges().iterator();
+            while (edges.hasNext()) {
+                edge = edges.next();
+                DoubleValue value = edge.properties().get(this.weight);
+                E.checkArgumentNotNull(value, "The vertex's '%s' weight " +
+                                              "property '%s' can't be null");
+                totalWeight.add(BigDecimal.valueOf(value.value()));
+            }
+            vertex.value(new DoubleValue(totalWeight.doubleValue()));
         }
-
         vertex.inactivate();
     }
 
@@ -61,7 +81,9 @@ public class DegreeCentrality implements Computation<NullValue> {
 
     @Override
     public void init(Config config) {
-        // pass
+        this.weight = config.getString(CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY,
+                                       "");
+        this.calculateByWeight = StringUtils.isNotEmpty(this.weight);
     }
 
     @Override

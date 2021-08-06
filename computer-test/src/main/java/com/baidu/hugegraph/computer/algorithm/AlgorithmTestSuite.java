@@ -23,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.algorithm.centrality.degree.DegreeCentralityTest;
 import com.baidu.hugegraph.computer.algorithm.rank.pagerank.PageRankTest;
 import com.baidu.hugegraph.computer.algorithm.wcc.WccTest;
 import com.baidu.hugegraph.computer.algorithm.rank.pagerank.PageRankTest;
@@ -31,6 +32,7 @@ import com.baidu.hugegraph.config.OptionSpace;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     PageRankTest.class,
+    DegreeCentralityTest.class,
     WccTest.class
 })
 public class AlgorithmTestSuite {
