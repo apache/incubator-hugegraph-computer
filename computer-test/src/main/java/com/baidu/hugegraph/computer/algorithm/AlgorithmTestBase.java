@@ -41,7 +41,7 @@ import com.baidu.hugegraph.util.Log;
 
 public class AlgorithmTestBase extends UnitTestBase {
 
-    public static void assertServiceWithWorker1(String algorithmParams)
+    public static void runAlgorithm(String algorithmParams, String ... options)
                        throws InterruptedException {
         final Logger log = Log.logger(algorithmParams);
         ExecutorService pool = Executors.newFixedThreadPool(2);
@@ -59,9 +59,12 @@ public class AlgorithmTestBase extends UnitTestBase {
             params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), "10");
             params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
                        algorithmParams);
-
             Config config = ComputerContextUtil.initContext(params);
-
+            if (options != null) {
+                for (int i = 0; i < options.length; i += 2) {
+                    params.put(options[i], options[i + 1]);
+                }
+            }
             WorkerService workerService = new MockWorkerService();
             try {
                 Thread.sleep(2000L);
@@ -87,6 +90,11 @@ public class AlgorithmTestBase extends UnitTestBase {
             params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), "10");
             params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
                        algorithmParams);
+            if (options != null) {
+                for (int i = 0; i < options.length; i += 2) {
+                    params.put(options[i], options[i + 1]);
+                }
+            }
 
             Config config = ComputerContextUtil.initContext(params);
 

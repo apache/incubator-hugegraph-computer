@@ -27,6 +27,11 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
 
     @Test
     public void testServiceWith1Worker() throws InterruptedException {
-        assertServiceWithWorker1(DegreeCentralityParams.class.getName());
+        runAlgorithm(DegreeCentralityParams.class.getName(),
+                     DegreeCentrality.CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY,
+                     "rate");
+        DegreeCentralityTestOutput.assertResult();
+        runAlgorithm(DegreeCentralityParams.class.getName());
+        DegreeCentralityTestOutput.assertResult();
     }
 }

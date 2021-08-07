@@ -27,6 +27,6 @@ public class PageRankTest extends AlgorithmTestBase {
 
     @Test
     public void testServiceWith1Worker() throws InterruptedException {
-       assertServiceWithWorker1(PageRankParams.class.getName());
+       runAlgorithm(PageRankParams.class.getName());
     }
 }

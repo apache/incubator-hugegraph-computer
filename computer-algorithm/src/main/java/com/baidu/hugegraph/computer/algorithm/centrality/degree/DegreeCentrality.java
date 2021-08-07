@@ -24,15 +24,20 @@ import java.util.Iterator;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 import com.baidu.hugegraph.computer.core.worker.WorkerContext;
-import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.NumericUtil;
 
 public class DegreeCentrality implements Computation<NullValue> {
 
@@ -61,16 +66,38 @@ public class DegreeCentrality implements Computation<NullValue> {
             Iterator<Edge> edges = vertex.edges().iterator();
             while (edges.hasNext()) {
                 edge = edges.next();
-                DoubleValue value = edge.properties().get(this.weight);
-                E.checkArgumentNotNull(value, "The edge's '%s' weight " +
-                                              "property '%s' can't be null",
-                                       edge.name(), this.weight);
+                Value value = edge.properties().get(this.weight);
                 totalWeight = totalWeight.add(
-                              BigDecimal.valueOf(value.value()));
+                              BigDecimal.valueOf(getWeightValue(value)));
             }
             vertex.value(new DoubleValue(totalWeight.doubleValue()));
         }
         vertex.inactivate();
+    }
+
+    private double getWeightValue(Value value) {
+        if (value == null) {
+            return 1.0;
+        }
+
+        switch (value.type()) {
+            case LONG:
+                return NumericUtil.convertToNumber(
+                       (LongValue) value).doubleValue();
+            case INT:
+                return NumericUtil.convertToNumber(
+                       (IntValue) value).doubleValue();
+            case DOUBLE:
+                return NumericUtil.convertToNumber(
+                       (DoubleValue) value).doubleValue();
+            case FLOAT:
+                return NumericUtil.convertToNumber(
+                       (FloatValue) value).doubleValue();
+            default:
+                throw new ComputerException("The weight property can only be " +
+                                            "either Long or Int or Double or " +
+                                            "Float, but got %s", value.type());
+        }
     }
 
     @Override
