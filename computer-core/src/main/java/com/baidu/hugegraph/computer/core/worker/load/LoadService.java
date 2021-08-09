@@ -157,6 +157,9 @@ public class LoadService {
 
         @Override
         public boolean hasNext() {
+            if (InputSplit.END_SPLIT.equals(this.currentSplit)) {
+                return this.currentVertex != null;
+            }
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
             while (this.currentSplit == null || !edgeFetcher.hasNext()) {
                 /*
@@ -165,7 +168,7 @@ public class LoadService {
                  */
                 this.currentSplit = fetcher.nextEdgeInputSplit();
                 if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
-                    return false;
+                    return this.currentVertex != null;
                 }
                 edgeFetcher.prepareLoadInputSplit(this.currentSplit);
             }
@@ -177,9 +180,11 @@ public class LoadService {
             if (!this.hasNext()) {
                 throw new NoSuchElementException();
             }
+
             com.baidu.hugegraph.structure.graph.Edge hugeEdge;
-            while (this.hasNext()) {
-                hugeEdge = fetcher.edgeFetcher().next();
+            EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
+            while (edgeFetcher.hasNext()) {
+                hugeEdge = edgeFetcher.next();
                 Edge edge = this.convert(hugeEdge);
                 Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
                 if (this.currentVertex == null) {
