@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -52,6 +53,7 @@ import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
+import com.baidu.hugegraph.util.ExecutorUtil;
 import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.Pod;
@@ -60,6 +62,8 @@ import io.fabric8.kubernetes.api.model.Quantity;
 public class MiniKubeTest extends AbstractK8sTest {
 
     private static final String ALGORITHM_NAME = "PageRank";
+    private static final ExecutorService POOL =
+            ExecutorUtil.newFixedThreadPool(1, "minikube-test-pool");
 
     @Before
     public void setup() throws IOException {
@@ -135,7 +139,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             this.driver.waitJob(jobId, params, jobObserver);
-        });
+        }, POOL);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -169,7 +173,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             this.driver.waitJob(jobId, params, jobObserver);
-        });
+        }, POOL);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -201,7 +205,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             this.driver.waitJob(jobId, params, jobObserver);
-        });
+        }, POOL);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.FAILED);
@@ -233,7 +237,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             this.driver.waitJob(jobId, params, jobObserver);
-        });
+        }, POOL);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -269,7 +273,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             this.driver.waitJob(jobId, params, jobObserver);
-        });
+        }, POOL);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.RUNNING);
@@ -302,7 +306,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             this.driver.waitJob(jobId, params, jobObserver);
-        });
+        }, POOL);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.FAILED);
@@ -327,7 +331,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             this.driver.waitJob(jobId, params, jobObserver);
-        });
+        }, POOL);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
