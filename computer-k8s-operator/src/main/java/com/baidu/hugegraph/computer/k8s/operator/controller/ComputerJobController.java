@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.controller;
 
+import java.net.HttpURLConnection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -61,6 +62,7 @@ import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobCondition;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -97,8 +99,8 @@ public class ComputerJobController
     protected OperatorResult reconcile(OperatorRequest request) {
         HugeGraphComputerJob computerJob = this.getCR(request);
         if (computerJob == null) {
-            LOG.info("Unable to fetch HugeGraphComputerJob, " +
-                     "it may have been deleted");
+            LOG.debug("Unable to fetch HugeGraphComputerJob, " +
+                      "it may have been deleted");
             return OperatorResult.NO_REQUEUE;
         }
 
@@ -137,7 +139,7 @@ public class ComputerJobController
 
         if (ownsResource instanceof Pod) {
             ObjectMeta metadata = ownsResource.getMetadata();
-            if (metadata != null) {
+            if (metadata != null && metadata.getLabels() != null) {
                 Map<String, String> labels = metadata.getLabels();
                 String kind = HasMetadata.getKind(HugeGraphComputerJob.class);
                 String crName = KubeUtil.matchKindAndGetCrName(labels, kind);
@@ -495,10 +497,21 @@ public class ComputerJobController
                     client = this.kubeClient.inNamespace(namespace);
                 }
 
-                String log = client.pods().withName(name)
-                                   .tailingLines(ERROR_LOG_TAILING_LINES)
-                                   .getLog(true);
-                if (StringUtils.isNotBlank(log)) {
+                String log;
+                // Fix the pod deleted when job failed
+                try {
+                    log = client.pods().withName(name)
+                                       .tailingLines(ERROR_LOG_TAILING_LINES)
+                                       .getLog(true);
+                } catch (KubernetesClientException e) {
+                    if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                       continue;
+                    } else {
+                        throw e;
+                    }
+                }
+                if (StringUtils.isNotBlank(log) &&
+                    !log.contains("Unable to retrieve container logs")) {
                     return log + "\n podName:" + pod.getMetadata().getName();
                 }
             }

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.http.HttpResponse;
@@ -35,6 +36,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -62,8 +64,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 public class MiniKubeTest extends AbstractK8sTest {
 
     private static final String ALGORITHM_NAME = "PageRank";
-    private static final ExecutorService POOL =
-            ExecutorUtil.newFixedThreadPool(1, "minikube-test-pool");
+    private static ExecutorService POOL;
 
     @Before
     public void setup() throws IOException {
@@ -74,7 +75,18 @@ public class MiniKubeTest extends AbstractK8sTest {
         this.namespace = "minikube";
         System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
                            Constants.ALL_NAMESPACE);
+
+        POOL = ExecutorUtil.newFixedThreadPool(1, "minikube-test-pool");
+
         super.setup();
+    }
+
+    @After
+    public void teardown() throws InterruptedException,
+                                  ExecutionException,
+                                  IOException {
+        POOL.shutdown();
+        super.teardown();
     }
 
     @Test
