@@ -50,7 +50,7 @@ public class IdList extends ListValue<Id> {
     public IdList copy() {
         IdList values = new IdList();
         for (Id value : this.values()) {
-            values.add(value);
+            values.add((Id) value.copy());
         }
         return values;
     }

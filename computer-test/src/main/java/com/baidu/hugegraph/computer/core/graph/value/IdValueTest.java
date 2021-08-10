@@ -166,9 +166,9 @@ public class IdValueTest extends UnitTestBase {
         Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
         Value<Id> value3 = new BytesId(IdType.LONG, new byte[]{'1', '2', '3'});
 
-        Assert.assertEquals(-2015121099, value1.hashCode());
-        Assert.assertEquals(-2015090313, value2.hashCode());
-        Assert.assertEquals(-2015042649, value3.hashCode());
+        Assert.assertNotEquals(value1.hashCode(), value2.hashCode());
+        Assert.assertNotEquals(value1.hashCode(), value3.hashCode());
+        Assert.assertNotEquals(value2.hashCode(), value3.hashCode());
     }
 
     @Test
