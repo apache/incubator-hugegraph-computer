@@ -19,7 +19,8 @@
 
 package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 
-import java.math.BigDecimal;
+import static jdk.nashorn.internal.objects.Global.Infinity;
+
 import java.util.Iterator;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,7 +38,7 @@ import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 import com.baidu.hugegraph.util.NumericUtil;
 
 public class DegreeCentrality implements Computation<NullValue> {
-
+    
     public static final String CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY =
                                "degree.centrality.weight.property";
     private boolean calculateByWeightProperty;
@@ -59,15 +60,27 @@ public class DegreeCentrality implements Computation<NullValue> {
             vertex.value(new DoubleValue(vertex.numEdges()));
         } else {
             Edge edge = null;
-            BigDecimal totalWeight = BigDecimal.valueOf(0.0);
+            /**
+             *  TODO: Here we use doubleValue type now, we will use BigDecimal
+             *  and output "BigDecimalValue" to resolve double type overflow
+             *  int the future;
+             */
+            double totalWeight = 0.0;
+            double weight = 0.0;
             Iterator<Edge> edges = vertex.edges().iterator();
             while (edges.hasNext()) {
                 edge = edges.next();
-                Value weight = edge.properties().get(this.weightProperty);
-                totalWeight = totalWeight.add(
-                              BigDecimal.valueOf(getWeightValue(weight)));
+                weight = getWeightValue(
+                         (Value) edge.properties()
+                                     .get(this.weightProperty));
+                if ((totalWeight + weight) == Infinity) {
+                    throw new ComputerException("Calculate weight overflow," +
+                                                "current is %s, edge '%s' is ",
+                                                totalWeight, edge, weight);
+                }
+                totalWeight += weight;
             }
-            vertex.value(new DoubleValue(totalWeight.doubleValue()));
+            vertex.value(new DoubleValue(totalWeight));
         }
         vertex.inactivate();
     }
