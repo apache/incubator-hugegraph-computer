@@ -37,8 +37,8 @@ import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
@@ -77,9 +77,9 @@ public class ComputeManagerTest extends UnitTestBase {
             ComputerOptions.WORKER_COMBINER_CLASS,
             Null.class.getName(), // Can't combine
             ComputerOptions.ALGORITHM_RESULT_CLASS,
-            IdValueListList.class.getName(),
+            IdListList.class.getName(),
             ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-            IdValueList.class.getName(),
+            IdList.class.getName(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
             ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
@@ -234,8 +234,8 @@ public class ComputeManagerTest extends UnitTestBase {
             int count = RANDOM.nextInt(5);
             for (int j = 0; j < count; j++) {
                 Id id = BytesId.of(i);
-                IdValueList message = new IdValueList();
-                message.add(id.idValue());
+                IdList message = new IdList();
+                message.add(id);
                 ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);

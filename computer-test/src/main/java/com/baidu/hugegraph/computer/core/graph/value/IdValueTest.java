@@ -26,6 +26,8 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -36,94 +38,75 @@ public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testType() {
-        IdValue value1 = new IdValue();
-        IdValue value2 = new IdValue(new byte[]{1, 2, 3});
+        Value<Id> value1 = BytesId.of();
+        Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
 
         Assert.assertEquals(ValueType.ID_VALUE, value1.type());
         Assert.assertEquals(ValueType.ID_VALUE, value2.type());
     }
 
     @Test
-    public void testValue() {
-        IdValue value1 = new IdValue();
-        IdValue value2 = new IdValue(new byte[]{1, 2, 3});
-        IdValue value3 = new IdValue(new byte[]{'1', '2', '3'});
-        IdValue value4 = new IdValue(new byte[]{1, 2, 3}, 2);
-
-        Assert.assertArrayEquals(new byte[]{}, value1.bytes());
-        Assert.assertArrayEquals(new byte[]{1, 2, 3}, value2.bytes());
-        Assert.assertArrayEquals(new byte[]{'1', '2', '3'}, value3.bytes());
-        Assert.assertArrayEquals(new byte[]{1, 2}, value4.bytes());
-    }
-
-    @Test
     public void testAssign() {
-        IdValue value1 = new IdValue();
-        IdValue value2 = new IdValue(new byte[]{1, 2, 3});
-        IdValue value3 = new IdValue(new byte[]{'1', '2', '3'});
+        Value<Id> value1 = BytesId.of();
+        Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
+        Value<Id> value3 = new BytesId(IdType.LONG, new byte[]{'1', '2', '3'});
 
-        Assert.assertArrayEquals(new byte[]{}, value1.bytes());
         value1.assign(value2);
-        Assert.assertArrayEquals(new byte[]{1, 2, 3}, value1.bytes());
-        Assert.assertArrayEquals(new byte[]{1, 2, 3}, value2.bytes());
+        Assert.assertEquals(value2, value1);
 
         value2.assign(value3);
-        Assert.assertArrayEquals(new byte[]{1, 2, 3}, value1.bytes());
-        Assert.assertArrayEquals(new byte[]{'1', '2', '3'}, value2.bytes());
+        Assert.assertEquals(value3, value2);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<IdValue> v = (Value) new FloatValue();
+            Value<Id> v = (Value) new FloatValue();
             value2.assign(v);
         }, e -> {
-            Assert.assertContains("Can't assign '0.0'(FloatValue) to IdValue",
+            Assert.assertContains("Can't assign '0.0'(FloatValue) to BytesId",
                                   e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<IdValue> v = (Value) new LongValue();
+            Value<Id> v = (Value) new LongValue();
             value2.assign(v);
         }, e -> {
-            Assert.assertContains("Can't assign '0'(LongValue) to IdValue",
+            Assert.assertContains("Can't assign '0'(LongValue) to BytesId",
                                   e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             value2.assign(null);
         }, e -> {
-            Assert.assertContains("Can't assign null to IdValue",
+            Assert.assertContains("Can't assign null to BytesId",
                                   e.getMessage());
         });
     }
 
     @Test
     public void testCopy() {
-        IdValue value1 = new IdValue(new byte[]{1, 2, 3});
-        IdValue value2 = new IdValue(new byte[]{'1', '2', '3'});
+        Value<Id> value1 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
+        Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{'1', '2', '3'});
 
-        IdValue copy = value1.copy();
-        Assert.assertArrayEquals(new byte[]{1, 2, 3}, value1.bytes());
-        Assert.assertArrayEquals(new byte[]{1, 2, 3}, copy.bytes());
+        Value<Id> copy = value1.copy();
+        Assert.assertEquals(value1, copy);
 
         copy.assign(value2);
-        Assert.assertArrayEquals(new byte[]{'1', '2', '3'}, copy.bytes());
-        Assert.assertArrayEquals(new byte[]{1, 2, 3}, value1.bytes());
+        Assert.assertEquals(value2, copy);
     }
 
     @Test
     public void testReadWrite() throws IOException {
-        assertValueEqualAfterWriteAndRead(BytesId.of("text").idValue());
-        assertValueEqualAfterWriteAndRead(BytesId.of("text2").idValue());
-        assertValueEqualAfterWriteAndRead(BytesId.of(123456L).idValue());
-        assertValueEqualAfterWriteAndRead(BytesId.of(new UUID(0L, 0L))
-                                                 .idValue());
+        assertValueEqualAfterWriteAndRead(BytesId.of("text"));
+        assertValueEqualAfterWriteAndRead(BytesId.of("text2"));
+        assertValueEqualAfterWriteAndRead(BytesId.of(123456L));
+        assertValueEqualAfterWriteAndRead(BytesId.of(new UUID(0L, 0L)));
     }
 
     @Test
     public void testReadWriteUtf8IdValue() throws IOException {
-        IdValue value1 = BytesId.of("long id").idValue();
-        IdValue value2 = BytesId.of("short").idValue();
+        Value<Id> value1 = BytesId.of("long id");
+        Value<Id> value2 = BytesId.of("short");
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
                                Constants.SMALL_BUF_SIZE)) {
@@ -131,7 +114,7 @@ public class IdValueTest extends UnitTestBase {
             value2.write(bao);
             bytes = bao.toByteArray();
         }
-        IdValue value3 = BytesId.of(Constants.EMPTY_STR).idValue();
+        Value<Id> value3 = BytesId.of(Constants.EMPTY_STR);
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             value3.read(bai);
             Assert.assertEquals(value1, value3);
@@ -142,59 +125,60 @@ public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testCompare() {
-        IdValue value1 = BytesId.of(123L).idValue();
-        IdValue value2 = BytesId.of(123L).idValue();
-        IdValue value3 = BytesId.of(321L).idValue();
-        IdValue value4 = BytesId.of(322L).idValue();
+        Value<Id> value1 = BytesId.of(123L);
+        Value<Id> value2 = BytesId.of(123L);
+        Value<Id> value3 = BytesId.of(321L);
+        Value<Id> value4 = BytesId.of(322L);
 
-        Assert.assertEquals(0, value1.compareTo(value2));
-        Assert.assertLt(0, value2.compareTo(value3));
-        Assert.assertGt(0, value3.compareTo(value1));
-        Assert.assertLt(0, value3.compareTo(value4));
+        Assert.assertEquals(0, value1.compareTo((Id) value2));
+        Assert.assertLt(0, value2.compareTo((Id) value3));
+        Assert.assertGt(0, value3.compareTo((Id) value1));
+        Assert.assertLt(0, value3.compareTo((Id) value4));
 
-        IdValue value5 = BytesId.of("123").idValue();
-        IdValue value6 = BytesId.of("456").idValue();
+        Value<Id> value5 = BytesId.of("123");
+        Value<Id> value6 = BytesId.of("456");
 
-        Assert.assertLt(0, value5.compareTo(value6));
-        Assert.assertGt(0, value6.compareTo(value5));
+        Assert.assertLt(0, value5.compareTo((Id) value6));
+        Assert.assertGt(0, value6.compareTo((Id) value5));
 
-        Assert.assertGt(0, value5.compareTo(value1));
-        Assert.assertGt(0, value6.compareTo(value1));
+        Assert.assertGt(0, value5.compareTo((Id) value1));
+        Assert.assertGt(0, value6.compareTo((Id) value1));
 
-        Assert.assertLt(0, value1.compareTo(value5));
-        Assert.assertLt(0, value1.compareTo(value6));
+        Assert.assertLt(0, value1.compareTo((Id) value5));
+        Assert.assertLt(0, value1.compareTo((Id) value6));
     }
 
     @Test
     public void testEquals() {
-        IdValue value1 = new IdValue();
-        Assert.assertTrue(value1.equals(value1));
-        Assert.assertTrue(value1.equals(new IdValue(new byte[]{})));
-        Assert.assertFalse(value1.equals(new IdValue(new byte[]{1})));
+        Value<Id> value1 = BytesId.of();
+        Assert.assertEquals(value1, value1);
+        Assert.assertEquals(value1, BytesId.of());
+        Assert.assertNotEquals(value1,
+                               new BytesId(IdType.LONG, new byte[] {1}));
 
-        Assert.assertFalse(value1.equals(new IntValue(1)));
-        Assert.assertFalse(value1.equals(null));
+        Assert.assertNotEquals(value1, new IntValue(1));
+        Assert.assertNotEquals(null, value1);
     }
 
     @Test
     public void testHashCode() {
-        IdValue value1 = new IdValue();
-        IdValue value2 = new IdValue(new byte[]{1, 2, 3});
-        IdValue value3 = new IdValue(new byte[]{'1', '2', '3'});
+        Value<Id> value1 = BytesId.of();
+        Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
+        Value<Id> value3 = new BytesId(IdType.LONG, new byte[]{'1', '2', '3'});
 
-        Assert.assertEquals(1, value1.hashCode());
-        Assert.assertEquals(30817, value2.hashCode());
-        Assert.assertEquals(78481, value3.hashCode());
+        Assert.assertEquals(-2015121099, value1.hashCode());
+        Assert.assertEquals(-2015090313, value2.hashCode());
+        Assert.assertEquals(-2015042649, value3.hashCode());
     }
 
     @Test
     public void testToString() {
-        IdValue value1 = new IdValue();
-        IdValue value2 = new IdValue(new byte[]{1, 2, 3});
-        IdValue value3 = new IdValue(new byte[]{'1', '2', '3'});
+        Value<Id> value1 = BytesId.of();
+        Value<Id> value2 = BytesId.of(123);
+        Value<Id> value3 = BytesId.of("123");
 
-        Assert.assertEquals("", value1.toString());
-        Assert.assertEquals("010203", value2.toString());
-        Assert.assertEquals("313233", value3.toString());
+        Assert.assertEquals("0", value1.toString());
+        Assert.assertEquals("123", value2.toString());
+        Assert.assertEquals("123", value3.toString());
     }
 }

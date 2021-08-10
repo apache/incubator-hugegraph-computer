@@ -26,9 +26,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -48,10 +46,8 @@ public class BytesIdTest extends UnitTestBase {
         Id longId8 = BytesId.of();
         Id longId9 = BytesId.of();
 
-        Assert.assertEquals(IdType.LONG, longId1.type());
-        IdValue idValue = longId1.idValue();
-        Assert.assertEquals(ValueType.ID_VALUE, idValue.type());
-        Assert.assertEquals(longId1, IdValueUtil.toId(idValue));
+        Assert.assertEquals(IdType.LONG, longId1.idType());
+        Assert.assertEquals(ValueType.ID_VALUE, longId1.type());
 
         Assert.assertEquals(new Long(123L), longId1.asObject());
         Assert.assertEquals(123L, longId1.asObject());
@@ -61,14 +57,14 @@ public class BytesIdTest extends UnitTestBase {
 
         Assert.assertTrue(longId1.compareTo(longId2) < 0);
         Assert.assertTrue(longId2.compareTo(longId1) > 0);
-        Assert.assertTrue(longId1.compareTo(longId3) == 0);
+        Assert.assertEquals(0, longId1.compareTo(longId3));
         Assert.assertTrue(longId2.compareTo(longId4) < 0);
 
         Assert.assertTrue(longId5.compareTo(longId6) > 0);
         Assert.assertTrue(longId6.compareTo(longId5) < 0);
-        Assert.assertTrue(longId5.compareTo(longId7) == 0);
+        Assert.assertEquals(0, longId5.compareTo(longId7));
 
-        Assert.assertTrue(longId8.compareTo(longId9) == 0);
+        Assert.assertEquals(0, longId8.compareTo(longId9));
         Assert.assertTrue(longId8.compareTo(longId1) < 0);
         Assert.assertTrue(longId1.compareTo(longId9) > 0);
 
@@ -88,20 +84,18 @@ public class BytesIdTest extends UnitTestBase {
         Id utf8Id5 = BytesId.of("abc");
         Id utf8Id6 = BytesId.of("100");
 
-        Assert.assertEquals(IdType.UTF8, utf8Id1.type());
+        Assert.assertEquals(IdType.UTF8, utf8Id1.idType());
         Assert.assertEquals(3, utf8Id2.length());
 
-        Assert.assertEquals(IdType.UTF8, utf8Id2.type());
-        IdValue idValue = utf8Id2.idValue();
-        Assert.assertEquals(ValueType.ID_VALUE, idValue.type());
-        Assert.assertEquals(utf8Id2, IdValueUtil.toId(idValue));
+        Assert.assertEquals(IdType.UTF8, utf8Id2.idType());
+        Assert.assertEquals(ValueType.ID_VALUE, utf8Id2.type());
 
         Assert.assertEquals("abc", utf8Id2.asObject());
 
         Assert.assertEquals("100", utf8Id6.asObject());
         Assert.assertTrue(utf8Id3.compareTo(utf8Id2) > 0);
         Assert.assertTrue(utf8Id2.compareTo(utf8Id3) < 0);
-        Assert.assertTrue(utf8Id2.compareTo(utf8Id2) == 0);
+        Assert.assertEquals(0, utf8Id2.compareTo(utf8Id2));
         Assert.assertTrue(utf8Id2.compareTo(utf8Id4) < 0);
         Assert.assertTrue(utf8Id4.compareTo(utf8Id2) > 0);
 
@@ -120,10 +114,8 @@ public class BytesIdTest extends UnitTestBase {
         Id uuidId2 = BytesId.of(uuid2);
         Id uuidId3 = BytesId.of(uuid1);
 
-        Assert.assertEquals(IdType.UUID, uuidId1.type());
-        IdValue idValue = uuidId1.idValue();
-        Assert.assertEquals(ValueType.ID_VALUE, idValue.type());
-        Assert.assertEquals(uuidId1, IdValueUtil.toId(idValue));
+        Assert.assertEquals(IdType.UUID, uuidId1.idType());
+        Assert.assertEquals(ValueType.ID_VALUE, uuidId1.type());
 
         Assert.assertEquals(uuid1, uuidId1.asObject());
         ByteBuffer buffer = ByteBuffer.allocate(16);
@@ -132,7 +124,7 @@ public class BytesIdTest extends UnitTestBase {
 
         Assert.assertTrue(uuidId1.compareTo(uuidId2) < 0);
         Assert.assertTrue(uuidId2.compareTo(uuidId1) > 0);
-        Assert.assertTrue(uuidId1.compareTo(uuidId3) == 0);
+        Assert.assertEquals(0, uuidId1.compareTo(uuidId3));
 
         Assert.assertEquals(uuidId1, uuidId3);
         Assert.assertNotEquals(uuidId1, uuidId2);

@@ -24,15 +24,15 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class IdValueList extends ListValue<IdValue> {
+public class IdListList extends ListValue<IdList> {
 
-    public IdValueList() {
-        super(ValueType.ID_VALUE);
+    public IdListList() {
+        super(ValueType.ID_VALUE_LIST);
     }
 
     @Override
     public ValueType type() {
-        return ValueType.ID_VALUE_LIST;
+        return ValueType.ID_VALUE_LIST_LIST;
     }
 
     @Override
@@ -43,14 +43,5 @@ public class IdValueList extends ListValue<IdValue> {
     @Override
     public void write(RandomAccessOutput out) throws IOException {
         this.write(out, false);
-    }
-
-    @Override
-    public IdValueList copy() {
-        IdValueList values = new IdValueList();
-        for (IdValue value : this.values()) {
-            values.add(value);
-        }
-        return values;
     }
 }

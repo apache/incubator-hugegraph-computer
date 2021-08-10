@@ -37,7 +37,7 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         long value = 1L;
         GraphFactory graphFactory = graphFactory();
         Id id = graphFactory.createId(value);
-        Assert.assertEquals(IdType.LONG, id.type());
+        Assert.assertEquals(IdType.LONG, id.idType());
         Assert.assertEquals(BytesId.of(value), id);
     }
 
@@ -46,7 +46,7 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         String value = "John";
         GraphFactory graphFactory = graphFactory();
         Id id = graphFactory.createId(value);
-        Assert.assertEquals(IdType.UTF8, id.type());
+        Assert.assertEquals(IdType.UTF8, id.idType());
         Assert.assertEquals(BytesId.of(value), id);
     }
 
@@ -55,7 +55,7 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         UUID uuid = UUID.randomUUID();
         GraphFactory graphFactory = graphFactory();
         Id id = graphFactory.createId(uuid);
-        Assert.assertEquals(IdType.UUID, id.type());
+        Assert.assertEquals(IdType.UUID, id.idType());
         Assert.assertEquals(BytesId.of(uuid), id);
     }
 

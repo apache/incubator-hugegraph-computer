@@ -32,21 +32,21 @@ public class IdFactoryTest {
     @Test
     public void testCreateIdFromCode() {
         Assert.assertEquals(IdType.LONG,
-                            IdFactory.createId(IdType.LONG.code()).type());
+                            IdFactory.createId(IdType.LONG.code()).idType());
         Assert.assertEquals(IdType.UTF8,
-                            IdFactory.createId(IdType.UTF8.code()).type());
+                            IdFactory.createId(IdType.UTF8.code()).idType());
         Assert.assertEquals(IdType.UUID,
-                            IdFactory.createId(IdType.UUID.code()).type());
+                            IdFactory.createId(IdType.UUID.code()).idType());
     }
 
     @Test
     public void testCreateIdFromType() {
         Assert.assertEquals(IdType.LONG,
-                            IdFactory.createId(IdType.LONG).type());
+                            IdFactory.createId(IdType.LONG).idType());
         Assert.assertEquals(IdType.UTF8,
-                            IdFactory.createId(IdType.UTF8).type());
+                            IdFactory.createId(IdType.UTF8).idType());
         Assert.assertEquals(IdType.UUID,
-                            IdFactory.createId(IdType.UUID).type());
+                            IdFactory.createId(IdType.UUID).idType());
 
         Assert.assertEquals(BytesId.of(0L), IdFactory.createId(IdType.LONG));
         Assert.assertEquals(BytesId.of(Constants.EMPTY_STR),

@@ -36,27 +36,26 @@ public class IdValueListTest extends UnitTestBase {
     public void test() {
         Id longId1 = BytesId.of(100L);
         Id longId2 = BytesId.of(200L);
-        IdValueList listValue1 = new IdValueList();
-        IdValueList listValue2 = new IdValueList();
+        IdList listValue1 = new IdList();
+        IdList listValue2 = new IdList();
 
-        listValue1.add(longId1.idValue());
-        listValue2.add(longId1.idValue());
+        listValue1.add(longId1);
+        listValue2.add(longId1);
 
         Assert.assertEquals(ValueType.ID_VALUE_LIST, listValue1.type());
         Assert.assertEquals(ValueType.ID_VALUE, listValue1.elemType());
         Assert.assertTrue(ListUtils.isEqualList(
-                          Lists.newArrayList(longId1.idValue()),
+                          Lists.newArrayList(longId1),
                           listValue1.values()));
         Assert.assertEquals(listValue1, listValue2);
 
-        listValue2.add(longId2.idValue());
+        listValue2.add(longId2);
         Assert.assertTrue(ListUtils.isEqualList(
-                          Lists.newArrayList(longId1.idValue(),
-                                             longId2.idValue()),
+                          Lists.newArrayList(longId1, longId2),
                           listValue2.values()));
         Assert.assertNotEquals(listValue1, listValue2);
         Assert.assertEquals(ListUtils.hashCodeForList(
-                            Lists.newArrayList(longId1.idValue())),
+                            Lists.newArrayList(longId1)),
                             listValue1.hashCode());
     }
 
@@ -64,9 +63,9 @@ public class IdValueListTest extends UnitTestBase {
     public void testReadWrite() throws IOException {
         Id longId1 = BytesId.of(100L);
         Id longId2 = BytesId.of(200L);
-        IdValueList oldValue = new IdValueList();
-        oldValue.add(longId1.idValue());
-        oldValue.add(longId2.idValue());
+        IdList oldValue = new IdList();
+        oldValue.add(longId1);
+        oldValue.add(longId2);
         assertValueEqualAfterWriteAndRead(oldValue);
     }
 
@@ -74,13 +73,13 @@ public class IdValueListTest extends UnitTestBase {
     public void testCompare() {
         Id longId1 = BytesId.of(100L);
         Id longId2 = BytesId.of(200L);
-        IdValueList value1 = new IdValueList();
-        value1.add(longId1.idValue());
-        IdValueList value2 = new IdValueList();
-        value2.add(longId1.idValue());
-        IdValueList value3 = new IdValueList();
-        value3.add(longId1.idValue());
-        value3.add(longId2.idValue());
+        IdList value1 = new IdList();
+        value1.add(longId1);
+        IdList value2 = new IdList();
+        value2.add(longId1);
+        IdList value3 = new IdList();
+        value3.add(longId1);
+        value3.add(longId2);
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));

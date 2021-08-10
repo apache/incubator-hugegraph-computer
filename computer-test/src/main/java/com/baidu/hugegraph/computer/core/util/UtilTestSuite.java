@@ -25,7 +25,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     ComputerContextUtilTest.class,
-    IdValueUtilTest.class,
     JsonUtilTest.class,
     SerializeUtilTest.class
 })

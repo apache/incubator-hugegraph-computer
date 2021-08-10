@@ -85,11 +85,11 @@ public class OverwriteCombinerTest extends UnitTestBase {
     @Test
     public void testCombineProperties() {
         Properties properties1 = graphFactory().createProperties();
-        properties1.put("name", BytesId.of("marko").idValue());
-        properties1.put("city", BytesId.of("Beijing").idValue());
+        properties1.put("name", BytesId.of("marko"));
+        properties1.put("city", BytesId.of("Beijing"));
 
         Properties properties2 = graphFactory().createProperties();
-        properties1.put("name", BytesId.of("josh").idValue());
+        properties1.put("name", BytesId.of("josh"));
 
         OverwriteCombiner<Properties> combiner = new OverwriteCombiner<>();
         Properties properties = combiner.combine(properties1, properties2);

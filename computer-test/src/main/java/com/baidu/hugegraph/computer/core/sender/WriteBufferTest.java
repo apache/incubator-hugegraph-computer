@@ -116,11 +116,11 @@ public class WriteBufferTest extends UnitTestBase {
         vertex = graphFactory.createVertex(BytesId.of(1L),
                                            new DoubleValue(0.5d));
         Properties properties = graphFactory.createProperties();
-        properties.put("name", BytesId.of("marko").idValue());
+        properties.put("name", BytesId.of("marko"));
         properties.put("age", new IntValue(18));
         properties.put("city", new ListValue<>(ValueType.ID_VALUE,
-                               ImmutableList.of(BytesId.of("wuhan").idValue(),
-                                                BytesId.of("xian").idValue())));
+                               ImmutableList.of(BytesId.of("wuhan"),
+                                                BytesId.of("xian"))));
         vertex.properties(properties);
         buffer.writeVertex(vertex);
         long position2 = buffer.output().position();

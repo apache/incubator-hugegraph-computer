@@ -39,8 +39,8 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.Null;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
@@ -70,9 +70,9 @@ public class MessageInputTest extends UnitTestBase {
             ComputerOptions.WORKER_COMBINER_CLASS,
             Null.class.getName(), // Can't combine
             ComputerOptions.ALGORITHM_RESULT_CLASS,
-            IdValueListList.class.getName(),
+            IdListList.class.getName(),
             ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-            IdValueList.class.getName(),
+            IdList.class.getName(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
             ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
@@ -118,17 +118,17 @@ public class MessageInputTest extends UnitTestBase {
         PeekableIterator<KvEntry> it = receiveManager.messagePartitions()
                                                      .get(0);
         MessageInput<?> input = new MessageInput<>(context(), it);
-        Map<Id, List<IdValueList>> expectedMessages = expectedMessages();
+        Map<Id, List<IdList>> expectedMessages = expectedMessages();
         checkMessages(expectedMessages, input);
     }
 
-    private void checkMessages(Map<Id, List<IdValueList>> expectedMessages,
+    private void checkMessages(Map<Id, List<IdList>> expectedMessages,
                                MessageInput input) throws IOException {
         for (long i = 0L; i < 200L; i++) {
-            List<IdValueList> messages  = expectedMessages.get(BytesId.of(i));
+            List<IdList> messages  = expectedMessages.get(BytesId.of(i));
             Id id = BytesId.of(i);
             ReusablePointer idPointer = EdgesInputTest.idToReusablePointer(id);
-            Iterator<IdValueList> mit = input.iterator(idPointer);
+            Iterator<IdList> mit = input.iterator(idPointer);
             if (messages == null) {
                 Assert.assertFalse(mit.hasNext());
             } else {
@@ -147,8 +147,8 @@ public class MessageInputTest extends UnitTestBase {
             int count = random.nextInt(5);
             for (int j = 0; j < count; j++) {
                 Id id = BytesId.of(random.nextInt(200));
-                IdValueList message = new IdValueList();
-                message.add(id.idValue());
+                IdList message = new IdList();
+                message.add(id);
                 ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);
@@ -156,16 +156,16 @@ public class MessageInputTest extends UnitTestBase {
         }
     }
 
-    private static Map<Id, List<IdValueList>> expectedMessages() {
+    private static Map<Id, List<IdList>> expectedMessages() {
         Random random = new Random(1);
-        Map<Id, List<IdValueList>> globalMessages = new HashMap<>();
+        Map<Id, List<IdList>> globalMessages = new HashMap<>();
         for (long i = 0L; i < 200L; i++) {
             int count = random.nextInt(5);
             for (int j = 0; j < count; j++) {
                 Id id = BytesId.of(random.nextInt(200));
-                IdValueList message = new IdValueList();
-                message.add(id.idValue());
-                List<IdValueList> messages = globalMessages.computeIfAbsent(
+                IdList message = new IdList();
+                message.add(id);
+                List<IdList> messages = globalMessages.computeIfAbsent(
                                              id, nid -> new ArrayList<>());
                 messages.add(message);
             }

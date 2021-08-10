@@ -33,7 +33,7 @@ import com.baidu.hugegraph.computer.core.config.Null;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
@@ -92,7 +92,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             Null.class.getName(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10",
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS, IdValueList.class.getName()
+            ComputerOptions.ALGORITHM_MESSAGE_CLASS, IdList.class.getName()
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -158,8 +158,8 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         for (long i = 0L; i < 10L; i++) {
             for (int j = 0; j < 2; j++) {
                 Id id = BytesId.of(i);
-                IdValueList message = new IdValueList();
-                message.add(id.idValue());
+                IdList message = new IdList();
+                message.add(id);
                 ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);
@@ -176,9 +176,9 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                 Id currentId = ReceiverUtil.readId(currentEntry.key());
                 Id expectId = BytesId.of(i);
                 Assert.assertEquals(expectId, currentId);
-                IdValueList expectMessage = new IdValueList();
-                expectMessage.add(expectId.idValue());
-                IdValueList currentValue = new IdValueList();
+                IdList expectMessage = new IdList();
+                expectMessage.add(expectId);
+                IdList currentValue = new IdList();
                 ReceiverUtil.readValue(currentEntry.value(), currentValue);
                 Assert.assertEquals(expectMessage, currentValue);
             }

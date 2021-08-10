@@ -30,17 +30,17 @@ public class MergeNewPropertiesCombinerTest extends UnitTestBase {
     @Test
     public void testCombine() {
         Properties properties1 = graphFactory().createProperties();
-        properties1.put("name", BytesId.of("marko").idValue());
-        properties1.put("city", BytesId.of("Beijing").idValue());
+        properties1.put("name", BytesId.of("marko"));
+        properties1.put("city", BytesId.of("Beijing"));
 
         Properties properties2 = graphFactory().createProperties();
-        properties2.put("name", BytesId.of("josh").idValue());
-        properties2.put("age", BytesId.of("18").idValue());
+        properties2.put("name", BytesId.of("josh"));
+        properties2.put("age", BytesId.of("18"));
 
         Properties expect = graphFactory().createProperties();
-        expect.put("name", BytesId.of("marko").idValue());
-        expect.put("age", BytesId.of("18").idValue());
-        expect.put("city", BytesId.of("Beijing").idValue());
+        expect.put("name", BytesId.of("marko"));
+        expect.put("age", BytesId.of("18"));
+        expect.put("city", BytesId.of("Beijing"));
 
         PropertiesCombiner combiner = new MergeNewPropertiesCombiner();
         Properties properties = combiner.combine(properties1, properties2);
@@ -50,12 +50,12 @@ public class MergeNewPropertiesCombinerTest extends UnitTestBase {
     @Test
     public void testCombineNull() {
         Properties properties1 = graphFactory().createProperties();
-        properties1.put("name", BytesId.of("marko").idValue());
-        properties1.put("city", BytesId.of("Beijing").idValue());
+        properties1.put("name", BytesId.of("marko"));
+        properties1.put("city", BytesId.of("Beijing"));
 
         Properties properties2 = graphFactory().createProperties();
-        properties2.put("name", BytesId.of("josh").idValue());
-        properties2.put("age", BytesId.of("18").idValue());
+        properties2.put("name", BytesId.of("josh"));
+        properties2.put("age", BytesId.of("18"));
 
 
         PropertiesCombiner combiner = new MergeNewPropertiesCombiner();

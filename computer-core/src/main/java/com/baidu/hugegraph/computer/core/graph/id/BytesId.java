@@ -25,7 +25,8 @@ import java.util.UUID;
 
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -33,7 +34,6 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
-import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 import com.baidu.hugegraph.util.E;
 
 public class BytesId implements Id {
@@ -89,19 +89,31 @@ public class BytesId implements Id {
     }
 
     @Override
-    public IdType type() {
+    public IdType idType() {
         return this.type;
+    }
+
+    @Override
+    public ValueType type() {
+        return ValueType.ID_VALUE;
+    }
+
+    @Override
+    public void assign(Value<Id> other) {
+        this.checkAssign(other);
+        this.type = ((BytesId) other).type;
+        this.bytes = ((BytesId) other).bytes;
+        this.length = ((BytesId) other).length;
+    }
+
+    @Override
+    public Id copy() {
+        return new BytesId(this.type, this.bytes, this.length);
     }
 
     @Override
     public int length() {
         return this.length;
-    }
-
-    @Override
-    public IdValue idValue() {
-        int len = Byte.BYTES + Integer.BYTES + this.length;
-        return IdValueUtil.toIdValue(this, len);
     }
 
     @Override

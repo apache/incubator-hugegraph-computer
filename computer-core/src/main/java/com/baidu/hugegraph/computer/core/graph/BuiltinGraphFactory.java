@@ -41,9 +41,8 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -162,11 +161,11 @@ public final class BuiltinGraphFactory implements GraphFactory {
             case DOUBLE:
                 return new DoubleValue();
             case ID_VALUE:
-                return new IdValue();
+                return BytesId.of();
             case ID_VALUE_LIST:
-                return new IdValueList();
+                return new IdList();
             case ID_VALUE_LIST_LIST:
-                return new IdValueListList();
+                return new IdListList();
             case LIST_VALUE:
                 return new ListValue<>();
             default:

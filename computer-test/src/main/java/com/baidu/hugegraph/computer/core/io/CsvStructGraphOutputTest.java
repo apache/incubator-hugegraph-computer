@@ -33,11 +33,11 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -55,8 +55,8 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         GraphFactory factory = context.graphFactory();
 
         Id longId = BytesId.of(100L);
-        IdValue idValue = BytesId.of(999L).idValue();
-        Vertex vertex = factory.createVertex(longId, idValue);
+        Value<Id> value = BytesId.of(999L);
+        Vertex vertex = factory.createVertex(longId, value);
 
         String fileName = "output.csv";
         File file = new File(fileName);
@@ -86,10 +86,10 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         GraphFactory factory = context.graphFactory();
 
         Id longId = BytesId.of(100L);
-        IdValueList idValueList = new IdValueList();
-        idValueList.add(BytesId.of(998L).idValue());
-        idValueList.add(BytesId.of(999L).idValue());
-        Vertex vertex = factory.createVertex(longId, idValueList);
+        IdList idList = new IdList();
+        idList.add(BytesId.of(998L));
+        idList.add(BytesId.of(999L));
+        Vertex vertex = factory.createVertex(longId, idList);
         vertex.addEdge(factory.createEdge("knows", BytesId.of(200)));
         vertex.addEdge(factory.createEdge("watch", "1111", BytesId.of(300)));
 
@@ -123,16 +123,16 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         GraphFactory factory = context.graphFactory();
 
         Id longId = BytesId.of(100L);
-        IdValueListList idValueListList = new IdValueListList();
-        IdValueList idValueList1 = new IdValueList();
-        idValueList1.add(BytesId.of(66L).idValue());
-        IdValueList idValueList2 = new IdValueList();
-        idValueList2.add(BytesId.of(998L).idValue());
-        idValueList2.add(BytesId.of(999L).idValue());
-        idValueListList.add(idValueList1);
-        idValueListList.add(idValueList2);
+        IdListList idListList = new IdListList();
+        IdList idList1 = new IdList();
+        idList1.add(BytesId.of(66L));
+        IdList idList2 = new IdList();
+        idList2.add(BytesId.of(998L));
+        idList2.add(BytesId.of(999L));
+        idListList.add(idList1);
+        idListList.add(idList2);
 
-        Vertex vertex = factory.createVertex(longId, idValueListList);
+        Vertex vertex = factory.createVertex(longId, idListList);
         vertex.properties().put("boolean", new BooleanValue(true));
         vertex.properties().put("byte", new IntValue(127));
         vertex.properties().put("short", new IntValue(16383));
@@ -140,7 +140,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         vertex.properties().put("long", new LongValue(10000000000L));
         vertex.properties().put("float", new FloatValue(0.1F));
         vertex.properties().put("double", new DoubleValue(-0.01D));
-        vertex.properties().put("idvalue", longId.idValue());
+        vertex.properties().put("idvalue", longId);
 
         String fileName = "output3.csv";
         File file = new File(fileName);
