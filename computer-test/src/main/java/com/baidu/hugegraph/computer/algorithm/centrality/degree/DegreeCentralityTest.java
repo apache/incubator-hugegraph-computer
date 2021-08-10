@@ -19,12 +19,21 @@
 
 package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 
+import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
+import com.google.common.collect.Streams;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
 
@@ -39,13 +48,60 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
     }
 
     private static class DegreeCentralityTestParams
-                         extends DegreeCentralityParams {
+                   extends DegreeCentralityParams {
 
         @Override
         public void setAlgorithmParameters(Map<String, String> params) {
             params.put(ComputerOptions.OUTPUT_CLASS.name(),
                        DegreeCentralityTestOutput.class.getName());
             super.setAlgorithmParameters(params);
+        }
+    }
+
+    private static class DegreeCentralityTestOutput extends LimitedLogOutput {
+
+        private String weight;
+
+        public static boolean isRun;
+
+        public DegreeCentralityTestOutput() {
+            isRun = false;
+        }
+
+        @Override
+        public void init(Config config, int partition) {
+            super.init(config, partition);
+            this.weight = config.getString(
+            DegreeCentrality.CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY, "");
+            isRun = false;
+        }
+
+        @Override
+        public void write(Vertex vertex) {
+            super.write(vertex);
+            isRun = true;
+            DoubleValue value = vertex.value();
+            if (StringUtils.isEmpty(this.weight)) {
+                Assert.assertEquals(vertex.numEdges(),
+                                    value.value(), 0.000001);
+            } else {
+                Iterator<Edge> edges = vertex.edges().iterator();
+                double totalValue = Streams.stream(edges).map(
+                                    (edge) -> ((DoubleValue) edge.properties()
+                                                             .get(this.weight))
+                                                             .value())
+                                    .reduce((v1, v2) -> v1 + v2).get();
+                Assert.assertEquals(totalValue, value.value(), 0.000001);
+            }
+        }
+
+        @Override
+        public void close() {
+            super.close();
+        }
+
+        public static void assertResult() {
+            Assert.assertTrue(isRun);
         }
     }
 }
