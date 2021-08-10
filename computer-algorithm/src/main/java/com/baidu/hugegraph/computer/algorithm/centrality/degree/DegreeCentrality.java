@@ -28,9 +28,6 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
-import com.baidu.hugegraph.computer.core.graph.value.IntValue;
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -43,8 +40,8 @@ public class DegreeCentrality implements Computation<NullValue> {
 
     public static final String CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY =
                                "degree.centrality.weight.property";
-    private boolean calculateByWeight;
-    private String weight;
+    private boolean calculateByWeightProperty;
+    private String weightProperty;
 
     @Override
     public String name() {
@@ -58,7 +55,7 @@ public class DegreeCentrality implements Computation<NullValue> {
 
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
-        if (!this.calculateByWeight) {
+        if (!this.calculateByWeightProperty) {
             vertex.value(new DoubleValue(vertex.numEdges()));
         } else {
             Edge edge = null;
@@ -66,9 +63,9 @@ public class DegreeCentrality implements Computation<NullValue> {
             Iterator<Edge> edges = vertex.edges().iterator();
             while (edges.hasNext()) {
                 edge = edges.next();
-                Value value = edge.properties().get(this.weight);
+                Value weight = edge.properties().get(this.weightProperty);
                 totalWeight = totalWeight.add(
-                              BigDecimal.valueOf(getWeightValue(value)));
+                              BigDecimal.valueOf(getWeightValue(weight)));
             }
             vertex.value(new DoubleValue(totalWeight.doubleValue()));
         }
@@ -82,17 +79,10 @@ public class DegreeCentrality implements Computation<NullValue> {
 
         switch (value.type()) {
             case LONG:
-                return NumericUtil.convertToNumber(
-                       (LongValue) value).doubleValue();
             case INT:
-                return NumericUtil.convertToNumber(
-                       (IntValue) value).doubleValue();
             case DOUBLE:
-                return NumericUtil.convertToNumber(
-                       (DoubleValue) value).doubleValue();
             case FLOAT:
-                return NumericUtil.convertToNumber(
-                       (FloatValue) value).doubleValue();
+                return NumericUtil.convertToNumber(value).doubleValue();
             default:
                 throw new ComputerException("The weight property can only be " +
                                             "either Long or Int or Double or " +
@@ -108,9 +98,10 @@ public class DegreeCentrality implements Computation<NullValue> {
 
     @Override
     public void init(Config config) {
-        this.weight = config.getString(CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY,
-                                       "");
-        this.calculateByWeight = StringUtils.isNotEmpty(this.weight);
+        this.weightProperty = config.getString(
+                              CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY, "");
+        this.calculateByWeightProperty = StringUtils.isNotEmpty(
+                                         this.weightProperty);
     }
 
     @Override

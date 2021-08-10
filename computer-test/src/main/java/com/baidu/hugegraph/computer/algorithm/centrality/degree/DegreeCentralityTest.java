@@ -19,19 +19,33 @@
 
 package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 
+import java.util.Map;
+
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
 
     @Test
     public void testServiceWith1Worker() throws InterruptedException {
-        runAlgorithm(DegreeCentralityParams.class.getName(),
+        runAlgorithm(DegreeCentralityTestParams.class.getName(),
                      DegreeCentrality.CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY,
                      "rate");
         DegreeCentralityTestOutput.assertResult();
-        runAlgorithm(DegreeCentralityParams.class.getName());
+        runAlgorithm(DegreeCentralityTestParams.class.getName());
         DegreeCentralityTestOutput.assertResult();
+    }
+
+    private static class DegreeCentralityTestParams
+                         extends DegreeCentralityParams {
+
+        @Override
+        public void setAlgorithmParameters(Map<String, String> params) {
+            params.put(ComputerOptions.OUTPUT_CLASS.name(),
+                       DegreeCentralityTestOutput.class.getName());
+            super.setAlgorithmParameters(params);
+        }
     }
 }
