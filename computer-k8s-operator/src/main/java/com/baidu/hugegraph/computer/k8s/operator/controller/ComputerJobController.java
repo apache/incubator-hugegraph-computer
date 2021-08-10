@@ -99,8 +99,8 @@ public class ComputerJobController
     protected OperatorResult reconcile(OperatorRequest request) {
         HugeGraphComputerJob computerJob = this.getCR(request);
         if (computerJob == null) {
-            LOG.debug("Unable to fetch HugeGraphComputerJob, " +
-                      "it may have been deleted");
+            LOG.debug("Unable to fetch HugeGraphComputerJob {}, " +
+                      "it may have been deleted", request.name());
             return OperatorResult.NO_REQUEUE;
         }
 
