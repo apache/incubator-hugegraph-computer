@@ -115,9 +115,12 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ListValue<T> copy() {
         List<T> values = GRAPH_FACTORY.createList();
-        values.addAll(this.values);
+        for (T value : this.values) {
+            values.add((T) value.copy());
+        }
         return new ListValue<>(this.elemType, values);
     }
 

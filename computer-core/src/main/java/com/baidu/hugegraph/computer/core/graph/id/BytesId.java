@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.graph.id;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -108,7 +109,8 @@ public class BytesId implements Id {
 
     @Override
     public Id copy() {
-        return new BytesId(this.type, this.bytes, this.length);
+        byte[] bytes = Arrays.copyOf(this.bytes, this.length);
+        return new BytesId(this.type, bytes, this.length);
     }
 
     @Override
