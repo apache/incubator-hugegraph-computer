@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.k8s.operator.controller;
 
 import java.net.HttpURLConnection;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -247,10 +248,12 @@ public class ComputerJobController
         } else if (succeededComponents.intValue() == TOTAL_COMPONENTS) {
             status.setJobStatus(JobStatus.SUCCEEDED.name());
             String crName = computerJob.getMetadata().getName();
+            long cost = this.calculateJobCost(computerJob);
             this.recordEvent(computerJob, EventType.NORMAL,
                              KubeUtil.succeedEventName(crName),
                              "ComputerJobSucceed",
-                             String.format("Job %s run success", crName));
+                             String.format("Job %s run success, run cost %ss",
+                                           crName, cost));
             return status;
         }
 
@@ -263,6 +266,15 @@ public class ComputerJobController
         }
 
         return status;
+    }
+
+    private long calculateJobCost(HugeGraphComputerJob computerJob) {
+        String creationTimestamp = computerJob.getMetadata()
+                                              .getCreationTimestamp();
+        long createTime = OffsetDateTime.parse(creationTimestamp)
+                                        .toEpochSecond();
+        long now = OffsetDateTime.now().toEpochSecond();
+        return now - createTime;
     }
 
     private ComponentState deriveJobStatus(Job job,
