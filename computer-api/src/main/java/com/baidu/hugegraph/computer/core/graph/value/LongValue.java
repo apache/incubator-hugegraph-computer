@@ -25,12 +25,32 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class LongValue implements Value<LongValue> {
+public class LongValue extends Number implements Value<LongValue> {
 
     private long value;
 
     public LongValue() {
         this.value = 0L;
+    }
+
+    @Override
+    public int intValue() {
+        return (int) this.value;
+    }
+
+    @Override
+    public long longValue() {
+        return this.value;
+    }
+
+    @Override
+    public float floatValue() {
+        return (float) this.value;
+    }
+
+    @Override
+    public double doubleValue() {
+        return (double) this.value;
     }
 
     public LongValue(long value) {
