@@ -316,8 +316,9 @@ public class ComputerJobController
                 newState.setMessage(failedPullImage.msg());
                 failedComponents.increment();
             } else {
-                int active = KubeUtil.intVal(job.getStatus().getActive());
-                active = active + succeeded;
+                int running = pods.stream().filter(PodStatusUtil::isRunning)
+                                  .mapToInt(x -> 1).sum();
+                int active = running + succeeded;
                 if (active >= instances) {
                     newState.setState(JobComponentState.RUNNING.value());
                     runningComponents.increment();
