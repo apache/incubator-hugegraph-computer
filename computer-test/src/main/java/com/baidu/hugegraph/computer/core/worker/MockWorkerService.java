@@ -26,7 +26,6 @@ import com.baidu.hugegraph.computer.core.config.Config;
  */
 public class MockWorkerService extends WorkerService {
 
-
     @Override
     public void init(Config config) {
         super.init(config);

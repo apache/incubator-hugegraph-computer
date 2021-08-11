@@ -43,13 +43,12 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
                      DegreeCentrality.CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY,
                      "rate");
         DegreeCentralityTestOutput.assertResult();
-        runAlgorithm(DegreeCentralityTestParams.class.getName(),
-                     ComputerOptions.JOB_ID.name(), "local_degreeCentrality");
+        runAlgorithm(DegreeCentralityTestParams.class.getName());
         DegreeCentralityTestOutput.assertResult();
     }
 
-    private static class DegreeCentralityTestParams
-                   extends DegreeCentralityParams {
+    public static class DegreeCentralityTestParams
+                  extends DegreeCentralityParams {
 
         @Override
         public void setAlgorithmParameters(Map<String, String> params) {
@@ -59,7 +58,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
         }
     }
 
-    private static class DegreeCentralityTestOutput extends LimitedLogOutput {
+    public static class DegreeCentralityTestOutput extends LimitedLogOutput {
 
         private String weight;
 

@@ -49,24 +49,33 @@ public class AlgorithmTestBase extends UnitTestBase {
         Throwable[] exceptions = new Throwable[2];
 
         pool.submit(() -> {
-            Map<String, String> params = new HashMap<>();
-            params.put(RpcOptions.RPC_REMOTE_URL.name(), "127.0.0.1:8090");
-            params.put(ComputerOptions.JOB_ID.name(), "local_002");
-            params.put(ComputerOptions.JOB_WORKERS_COUNT.name(), "1");
-            params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(), "8086");
-            params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(), "100000");
-            params.put(ComputerOptions.BSP_LOG_INTERVAL.name(), "30000");
-            params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), "10");
-            params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
-                       algorithmParams);
-            Config config = ComputerContextUtil.initContext(params);
-            if (options != null) {
-                for (int i = 0; i < options.length; i += 2) {
-                    params.put(options[i], options[i + 1]);
-                }
-            }
-            WorkerService workerService = new MockWorkerService();
+            WorkerService workerService = null;
             try {
+                Map<String, String> params = new HashMap<>();
+                params.put(RpcOptions.RPC_REMOTE_URL.name(),
+                           "127.0.0.1:8090");
+                params.put(ComputerOptions.JOB_ID.name(),
+                           "local_002");
+                params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
+                           "1");
+                params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(),
+                           "8086");
+                params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(),
+                           "100000");
+                params.put(ComputerOptions.BSP_LOG_INTERVAL.name(),
+                           "30000");
+                params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(),
+                           "10");
+                params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
+                           algorithmParams);
+                Config config = ComputerContextUtil.initContext(params);
+                if (options != null) {
+                    for (int i = 0; i < options.length; i += 2) {
+                        params.put(options[i], options[i + 1]);
+                    }
+                }
+                workerService = new MockWorkerService();
+
                 Thread.sleep(2000L);
                 workerService.init(config);
                 workerService.execute();
@@ -74,32 +83,43 @@ public class AlgorithmTestBase extends UnitTestBase {
                 log.error("Failed to start worker", e);
                 exceptions[0] = e;
             } finally {
-                workerService.close();
+                if (workerService != null) {
+                    workerService.close();
+                }
                 countDownLatch.countDown();
             }
         });
 
         pool.submit(() -> {
-            Map<String, String> params = new HashMap<>();
-            params.put(RpcOptions.RPC_SERVER_HOST.name(), "localhost");
-            params.put(RpcOptions.RPC_SERVER_PORT.name(), "8090");
-            params.put(ComputerOptions.JOB_ID.name(), "local_002");
-            params.put(ComputerOptions.JOB_WORKERS_COUNT.name(), "1");
-            params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(), "100000");
-            params.put(ComputerOptions.BSP_LOG_INTERVAL.name(), "30000");
-            params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(), "10");
-            params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
-                       algorithmParams);
-            if (options != null) {
-                for (int i = 0; i < options.length; i += 2) {
-                    params.put(options[i], options[i + 1]);
-                }
-            }
-
-            Config config = ComputerContextUtil.initContext(params);
-
-            MasterService masterService = new MasterService();
+            MasterService masterService = null;
             try {
+                Map<String, String> params = new HashMap<>();
+                params.put(RpcOptions.RPC_SERVER_HOST.name(),
+                           "localhost");
+                params.put(RpcOptions.RPC_SERVER_PORT.name(),
+                           "8090");
+                params.put(ComputerOptions.JOB_ID.name(),
+                           "local_002");
+                params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
+                           "1");
+                params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(),
+                           "100000");
+                params.put(ComputerOptions.BSP_LOG_INTERVAL.name(),
+                           "30000");
+                params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(),
+                           "10");
+                params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
+                           algorithmParams);
+                if (options != null) {
+                    for (int i = 0; i < options.length; i += 2) {
+                        params.put(options[i], options[i + 1]);
+                    }
+                }
+
+                Config config = ComputerContextUtil.initContext(params);
+
+                masterService = new MasterService();
+
                 masterService.init(config);
                 masterService.execute();
             } catch (Throwable e) {
@@ -111,7 +131,9 @@ public class AlgorithmTestBase extends UnitTestBase {
                  * if count down is executed first, and the server thread in
                  * master service will not be closed.
                  */
-                masterService.close();
+                if (masterService != null) {
+                    masterService.close();
+                }
                 countDownLatch.countDown();
             }
         });
