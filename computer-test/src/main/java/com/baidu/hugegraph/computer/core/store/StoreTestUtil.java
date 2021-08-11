@@ -31,6 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -131,6 +133,13 @@ public class StoreTestUtil {
             throw e;
         }
         return file;
+    }
+
+    public static Id idFromPointer(Pointer pointer) throws IOException {
+        BytesInput input = IOFactory.createBytesInput(pointer.bytes());
+        Id id = BytesId.of();
+        id.read(input);
+        return id;
     }
 
     public static Integer dataFromPointer(Pointer pointer) throws IOException {

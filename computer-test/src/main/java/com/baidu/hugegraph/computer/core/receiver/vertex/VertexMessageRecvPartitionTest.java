@@ -33,8 +33,8 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -181,7 +181,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
                                           throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             vertex.properties(graphFactory().createProperties());
             ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
         }
@@ -192,7 +192,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             Properties properties = graphFactory().createProperties();
             properties.put("p1", new LongValue(i));
             vertex.properties(properties);
@@ -202,7 +202,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
 
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             Properties properties = graphFactory().createProperties();
             properties.put("p2", new LongValue(2L * i));
             vertex.properties(properties);
@@ -223,7 +223,6 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
 
         entryOutput.writeEntry(out -> {
-            out.writeByte(vertex.id().type().code());
             vertex.id().write(out);
         }, out -> {
             vertex.properties().write(out);
@@ -239,7 +238,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
             Id id = ReceiverUtil.readId(entry.key());
-            Assert.assertEquals(new LongId(i), id);
+            Assert.assertEquals(BytesId.of(i), id);
             Properties properties = graphFactory().createProperties();
 
             ReceiverUtil.readValue(entry.value(), properties);
@@ -257,7 +256,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
             Id id = ReceiverUtil.readId(entry.key());
-            Assert.assertEquals(new LongId(i), id);
+            Assert.assertEquals(BytesId.of(i), id);
         }
     }
 }

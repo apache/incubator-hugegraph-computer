@@ -26,8 +26,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
@@ -75,7 +74,7 @@ public class WriteBuffersTest extends UnitTestBase {
         Assert.assertFalse(buffers.reachThreshold());
 
         Vertex vertex = context().graphFactory().createVertex(
-                        new LongId(1L), new DoubleValue(0.5d));
+                        BytesId.of(1L), new DoubleValue(0.5d));
         // After write, the position is 11
         buffers.writeVertex(vertex);
         Assert.assertFalse(buffers.reachThreshold());
@@ -95,7 +94,7 @@ public class WriteBuffersTest extends UnitTestBase {
         Assert.assertTrue(buffers.isEmpty());
 
         Vertex vertex = context().graphFactory().createVertex(
-                        new LongId(1L), new DoubleValue(0.5d));
+                        BytesId.of(1L), new DoubleValue(0.5d));
         buffers.writeVertex(vertex);
         Assert.assertFalse(buffers.isEmpty());
     }
@@ -106,7 +105,7 @@ public class WriteBuffersTest extends UnitTestBase {
 
         // NOTE: need ensure the buffer size can hold follow writed bytes
         WriteBuffers buffers = new WriteBuffers(context(), 100, 110);
-        Vertex vertex = graphFactory.createVertex(new LongId(1L),
+        Vertex vertex = graphFactory.createVertex(BytesId.of(1L),
                                                   new DoubleValue(0.5d));
         buffers.writeVertex(vertex);
         WriteBuffer buffer = Whitebox.getInternalState(buffers,
@@ -114,26 +113,26 @@ public class WriteBuffersTest extends UnitTestBase {
         long position1 = buffer.output().position();
         Assert.assertGt(0L, position1);
 
-        vertex = graphFactory.createVertex(new LongId(1L),
+        vertex = graphFactory.createVertex(BytesId.of(1L),
                                            new DoubleValue(0.5d));
         Properties properties = graphFactory.createProperties();
-        properties.put("name", new Utf8Id("marko").idValue());
+        properties.put("name", BytesId.of("marko"));
         properties.put("age", new IntValue(18));
         properties.put("city", new ListValue<>(ValueType.ID_VALUE,
-                               ImmutableList.of(new Utf8Id("wuhan").idValue(),
-                                                new Utf8Id("xian").idValue())));
+                               ImmutableList.of(BytesId.of("wuhan"),
+                                                BytesId.of("xian"))));
         vertex.properties(properties);
         buffers.writeVertex(vertex);
         buffer = Whitebox.getInternalState(buffers, "writingBuffer");
         long position2 = buffer.output().position();
         Assert.assertGt(position1, position2);
 
-        vertex = graphFactory.createVertex(new LongId(1L),
+        vertex = graphFactory.createVertex(BytesId.of(1L),
                                            new DoubleValue(0.5d));
-        vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
-        vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
+        vertex.addEdge(graphFactory.createEdge(BytesId.of(2L)));
+        vertex.addEdge(graphFactory.createEdge("knows", BytesId.of(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
         buffers.writeEdges(vertex);
         buffer = Whitebox.getInternalState(buffers, "writingBuffer");
         long position3 = buffer.output().position();
@@ -146,11 +145,11 @@ public class WriteBuffersTest extends UnitTestBase {
         WriteBuffer buffer = Whitebox.getInternalState(buffers,
                                                        "writingBuffer");
 
-        buffers.writeMessage(new LongId(1L), new DoubleValue(0.85D));
+        buffers.writeMessage(BytesId.of(1L), new DoubleValue(0.85D));
         long position1 = buffer.output().position();
         Assert.assertGt(0L, position1);
 
-        buffers.writeMessage(new LongId(2L), new DoubleValue(0.15D));
+        buffers.writeMessage(BytesId.of(2L), new DoubleValue(0.15D));
         long position2 = buffer.output().position();
         Assert.assertGt(position1, position2);
     }
@@ -160,12 +159,12 @@ public class WriteBuffersTest extends UnitTestBase {
         GraphFactory graphFactory = context().graphFactory();
 
         WriteBuffers buffers = new WriteBuffers(context(), 50, 100);
-        Vertex vertex = graphFactory.createVertex(new LongId(1L),
+        Vertex vertex = graphFactory.createVertex(BytesId.of(1L),
                                                   new DoubleValue(0.5d));
-        vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
-        vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
+        vertex.addEdge(graphFactory.createEdge(BytesId.of(2L)));
+        vertex.addEdge(graphFactory.createEdge("knows", BytesId.of(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
         buffers.writeEdges(vertex);
         // Reached threshold, the position is 76
         Assert.assertTrue(buffers.reachThreshold());
@@ -194,12 +193,12 @@ public class WriteBuffersTest extends UnitTestBase {
         GraphFactory graphFactory = context().graphFactory();
 
         WriteBuffers buffers = new WriteBuffers(context(), 50, 100);
-        Vertex vertex = graphFactory.createVertex(new LongId(1L),
+        Vertex vertex = graphFactory.createVertex(BytesId.of(1L),
                                                   new DoubleValue(0.5d));
-        vertex.addEdge(graphFactory.createEdge(new LongId(2L)));
-        vertex.addEdge(graphFactory.createEdge("knows", new LongId(3L)));
+        vertex.addEdge(graphFactory.createEdge(BytesId.of(2L)));
+        vertex.addEdge(graphFactory.createEdge("knows", BytesId.of(3L)));
         vertex.addEdge(graphFactory.createEdge("watch", "1111",
-                                               new LongId(4L)));
+                                               BytesId.of(4L)));
         buffers.writeEdges(vertex);
         // Reached threshold, the position is 76
         Assert.assertTrue(buffers.reachThreshold());
@@ -247,7 +246,7 @@ public class WriteBuffersTest extends UnitTestBase {
         GraphFactory graphFactory = context().graphFactory();
 
         WriteBuffers buffers = new WriteBuffers(context(), 10, 20);
-        Vertex vertex = graphFactory.createVertex(new LongId(1L),
+        Vertex vertex = graphFactory.createVertex(BytesId.of(1L),
                                                   new DoubleValue(0.5d));
         buffers.writeVertex(vertex);
         buffers.prepareSorting();

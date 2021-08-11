@@ -110,7 +110,6 @@ public class StreamGraphOutput implements GraphComputeOutput {
 
     @Override
     public void writeId(RandomAccessOutput out, Id id) throws IOException {
-        out.writeByte(id.type().code());
         id.write(out);
     }
 

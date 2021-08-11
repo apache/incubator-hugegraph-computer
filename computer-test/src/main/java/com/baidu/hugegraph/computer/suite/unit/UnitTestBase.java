@@ -71,7 +71,7 @@ public class UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        Id newId = IdFactory.createId(oldId.type());
+        Id newId = IdFactory.createId(oldId.idType());
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newId.read(bai);
             Assert.assertEquals(oldId, newId);

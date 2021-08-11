@@ -24,7 +24,7 @@ import java.util.Map;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.combiner.ValueMinCombiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
 public class WccParams implements AlgorithmParams {
@@ -34,9 +34,9 @@ public class WccParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
                          Wcc.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                         IdValue.class.getName());
+                         BytesId.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                         IdValue.class.getName());
+                         BytesId.class.getName());
         this.setIfAbsent(params, ComputerOptions.WORKER_COMBINER_CLASS,
                          ValueMinCombiner.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,

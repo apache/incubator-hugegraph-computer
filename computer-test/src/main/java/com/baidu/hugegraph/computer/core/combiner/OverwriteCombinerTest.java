@@ -21,15 +21,15 @@ package com.baidu.hugegraph.computer.core.combiner;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class OverwriteCombinerTest extends UnitTestBase {
@@ -66,16 +66,16 @@ public class OverwriteCombinerTest extends UnitTestBase {
     @Test
     public void testCombineVertex() {
         GraphFactory factory = graphFactory();
-        LongId longId1 = new LongId(1L);
+        Id longId1 = BytesId.of(1L);
         DoubleValue value1 = new DoubleValue(0.1D);
         Vertex vertex1 = factory.createVertex(longId1, value1);
-        vertex1.addEdge(factory.createEdge(new LongId(2L)));
-        vertex1.addEdge(factory.createEdge(new LongId(3L)));
+        vertex1.addEdge(factory.createEdge(BytesId.of(2L)));
+        vertex1.addEdge(factory.createEdge(BytesId.of(3L)));
 
-        LongId longId2 = new LongId(1L);
+        Id longId2 = BytesId.of(1L);
         DoubleValue value2 = new DoubleValue(0.2D);
         Vertex vertex2 = factory.createVertex(longId2, value2);
-        vertex2.addEdge(factory.createEdge(new LongId(1L)));
+        vertex2.addEdge(factory.createEdge(BytesId.of(1L)));
 
         OverwriteCombiner<Vertex> combiner = new OverwriteCombiner<>();
         Vertex vertex = combiner.combine(vertex1, vertex2);
@@ -85,11 +85,11 @@ public class OverwriteCombinerTest extends UnitTestBase {
     @Test
     public void testCombineProperties() {
         Properties properties1 = graphFactory().createProperties();
-        properties1.put("name", new Utf8Id("marko").idValue());
-        properties1.put("city", new Utf8Id("Beijing").idValue());
+        properties1.put("name", BytesId.of("marko"));
+        properties1.put("city", BytesId.of("Beijing"));
 
         Properties properties2 = graphFactory().createProperties();
-        properties1.put("name", new Utf8Id("josh").idValue());
+        properties1.put("name", BytesId.of("josh"));
 
         OverwriteCombiner<Properties> combiner = new OverwriteCombiner<>();
         Properties properties = combiner.combine(properties1, properties2);

@@ -30,10 +30,10 @@ import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.Null;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
@@ -92,7 +92,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             Null.class.getName(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10",
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS, IdValueList.class.getName()
+            ComputerOptions.ALGORITHM_MESSAGE_CLASS, IdList.class.getName()
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -120,7 +120,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                        throws IOException {
         for (long i = 0L; i < 10L; i++) {
             for (int j = 0; j < 2; j++) {
-                Id id = new LongId(i);
+                Id id = BytesId.of(i);
                 DoubleValue message = new DoubleValue(i);
                 ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
@@ -144,11 +144,11 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             if (lastId.equals(currentId)) {
                 lastSumValue.value(lastSumValue.value() + currentValue.value());
             } else {
-                Assert.assertEquals(lastId.asLong() * 2.0D,
+                Assert.assertEquals((Long) lastId.asObject() * 2.0D,
                                     lastSumValue.value(), 0.0D);
             }
         }
-        Assert.assertEquals(lastId.asLong() * 2.0D,
+        Assert.assertEquals((Long) lastId.asObject() * 2.0D,
                             lastSumValue.value(), 0.0D);
     }
 
@@ -157,9 +157,9 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             for (int j = 0; j < 2; j++) {
-                Id id = new LongId(i);
-                IdValueList message = new IdValueList();
-                message.add(id.idValue());
+                Id id = BytesId.of(i);
+                IdList message = new IdList();
+                message.add(id);
                 ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);
@@ -174,11 +174,11 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                 Assert.assertTrue(it.hasNext());
                 KvEntry currentEntry = it.next();
                 Id currentId = ReceiverUtil.readId(currentEntry.key());
-                Id expectId = new LongId(i);
+                Id expectId = BytesId.of(i);
                 Assert.assertEquals(expectId, currentId);
-                IdValueList expectMessage = new IdValueList();
-                expectMessage.add(expectId.idValue());
-                IdValueList currentValue = new IdValueList();
+                IdList expectMessage = new IdList();
+                expectMessage.add(expectId);
+                IdList currentValue = new IdList();
                 ReceiverUtil.readValue(currentEntry.value(), currentValue);
                 Assert.assertEquals(expectMessage, currentValue);
             }

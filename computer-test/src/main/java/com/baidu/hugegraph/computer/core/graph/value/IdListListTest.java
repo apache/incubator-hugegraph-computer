@@ -24,25 +24,26 @@ import java.io.IOException;
 import org.apache.commons.collections.ListUtils;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.Lists;
 
-public class IdValueListListTest extends UnitTestBase {
+public class IdListListTest extends UnitTestBase {
 
     @Test
     public void test() {
-        LongId longId1 = new LongId(100L);
-        LongId longId2 = new LongId(200L);
+        Id longId1 = BytesId.of(100L);
+        Id longId2 = BytesId.of(200L);
 
-        IdValueList listValue1 = new IdValueList();
-        IdValueList listValue2 = new IdValueList();
-        IdValueListList listListValue1 = new IdValueListList();
-        IdValueListList listListValue2 = new IdValueListList();
+        IdList listValue1 = new IdList();
+        IdList listValue2 = new IdList();
+        IdListList listListValue1 = new IdListList();
+        IdListList listListValue2 = new IdListList();
 
-        listValue1.add(longId1.idValue());
-        listValue2.add(longId2.idValue());
+        listValue1.add(longId1);
+        listValue2.add(longId2);
         listListValue1.add(listValue1);
         listListValue2.add(listValue1);
 
@@ -55,7 +56,7 @@ public class IdValueListListTest extends UnitTestBase {
                           listListValue1.values()));
         Assert.assertEquals(listListValue1, listListValue2);
 
-        listValue2.add(longId2.idValue());
+        listValue2.add(longId2);
         listListValue2.add(listValue2);
         Assert.assertTrue(ListUtils.isEqualList(
                           Lists.newArrayList(listValue1, listValue2),
@@ -68,30 +69,30 @@ public class IdValueListListTest extends UnitTestBase {
 
     @Test
     public void testReadWrite() throws IOException {
-        LongId longId1 = new LongId(100L);
-        LongId longId2 = new LongId(200L);
-        IdValueList listValue = new IdValueList();
-        listValue.add(longId1.idValue());
-        listValue.add(longId2.idValue());
+        Id longId1 = BytesId.of(100L);
+        Id longId2 = BytesId.of(200L);
+        IdList listValue = new IdList();
+        listValue.add(longId1);
+        listValue.add(longId2);
 
-        IdValueListList oldValue = new IdValueListList();
+        IdListList oldValue = new IdListList();
         oldValue.add(listValue);
         assertValueEqualAfterWriteAndRead(oldValue);
     }
 
     @Test
     public void testCompare() {
-        LongId longId1 = new LongId(100L);
-        LongId longId2 = new LongId(200L);
-        IdValueList listValue = new IdValueList();
-        listValue.add(longId1.idValue());
-        listValue.add(longId2.idValue());
+        Id longId1 = BytesId.of(100L);
+        Id longId2 = BytesId.of(200L);
+        IdList listValue = new IdList();
+        listValue.add(longId1);
+        listValue.add(longId2);
 
-        IdValueListList value1 = new IdValueListList();
+        IdListList value1 = new IdListList();
         value1.add(listValue);
-        IdValueListList value2 = new IdValueListList();
+        IdListList value2 = new IdListList();
         value2.add(listValue);
-        IdValueListList value3 = new IdValueListList();
+        IdListList value3 = new IdListList();
         value3.add(listValue);
         value3.add(listValue);
 

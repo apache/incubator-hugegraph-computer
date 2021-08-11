@@ -20,8 +20,11 @@
 
 package com.baidu.hugegraph.computer.core.graph.id;
 
+import java.util.UUID;
+
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class IdFactoryTest {
@@ -29,24 +32,26 @@ public class IdFactoryTest {
     @Test
     public void testCreateIdFromCode() {
         Assert.assertEquals(IdType.LONG,
-                            IdFactory.createId(IdType.LONG.code()).type());
+                            IdFactory.createId(IdType.LONG.code()).idType());
         Assert.assertEquals(IdType.UTF8,
-                            IdFactory.createId(IdType.UTF8.code()).type());
+                            IdFactory.createId(IdType.UTF8.code()).idType());
         Assert.assertEquals(IdType.UUID,
-                            IdFactory.createId(IdType.UUID.code()).type());
+                            IdFactory.createId(IdType.UUID.code()).idType());
     }
 
     @Test
     public void testCreateIdFromType() {
         Assert.assertEquals(IdType.LONG,
-                            IdFactory.createId(IdType.LONG).type());
+                            IdFactory.createId(IdType.LONG).idType());
         Assert.assertEquals(IdType.UTF8,
-                            IdFactory.createId(IdType.UTF8).type());
+                            IdFactory.createId(IdType.UTF8).idType());
         Assert.assertEquals(IdType.UUID,
-                            IdFactory.createId(IdType.UUID).type());
+                            IdFactory.createId(IdType.UUID).idType());
 
-        Assert.assertEquals(new LongId(), IdFactory.createId(IdType.LONG));
-        Assert.assertEquals(new Utf8Id(), IdFactory.createId(IdType.UTF8));
-        Assert.assertEquals(new UuidId(), IdFactory.createId(IdType.UUID));
+        Assert.assertEquals(BytesId.of(0L), IdFactory.createId(IdType.LONG));
+        Assert.assertEquals(BytesId.of(Constants.EMPTY_STR),
+                            IdFactory.createId(IdType.UTF8));
+        Assert.assertEquals(BytesId.of(new UUID(0L, 0L)),
+                            IdFactory.createId(IdType.UUID));
     }
 }

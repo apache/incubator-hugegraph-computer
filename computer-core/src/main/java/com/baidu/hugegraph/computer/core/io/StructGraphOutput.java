@@ -25,10 +25,8 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.util.IdValueUtil;
 
 public abstract class StructGraphOutput implements GraphWritebackOutput {
 
@@ -64,13 +62,18 @@ public abstract class StructGraphOutput implements GraphWritebackOutput {
     }
 
     public void writeId(Id id) throws IOException {
-        id.write(this.out);
+        Object rawId = id.asObject();
+        if (rawId instanceof Number) {
+            this.out.writeNumber((Number) rawId);
+        } else {
+            this.out.writeString(rawId.toString());
+        }
     }
 
     public void writeValue(Value<?> value) throws IOException {
         switch (value.type()) {
             case ID_VALUE:
-                this.writeIdValue((IdValue) value);
+                this.writeIdValue((Id) value);
                 break;
             case ID_VALUE_LIST:
             case ID_VALUE_LIST_LIST:
@@ -91,12 +94,12 @@ public abstract class StructGraphOutput implements GraphWritebackOutput {
         }
     }
 
-    private void writeIdValue(IdValue idValue) throws IOException {
+    private void writeIdValue(Id idValue) throws IOException {
         /*
          * The idValue is shown as bytes in computation,
          * but it's as id when output
          */
-        this.writeId(IdValueUtil.toId(idValue));
+        this.writeId(idValue);
     }
 
     private void writeListValue(ListValue<?> listValue) throws IOException {

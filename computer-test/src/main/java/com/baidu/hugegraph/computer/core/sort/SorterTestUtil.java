@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -120,12 +121,20 @@ public class SorterTestUtil {
         }
     }
 
+    public static void assertKvEntry(KvEntry entry, Id expectKey,
+                                     Id expectValue) throws IOException {
+        Assert.assertEquals(expectKey,
+                            StoreTestUtil.idFromPointer(entry.key()));
+        Assert.assertEquals(expectValue,
+                            StoreTestUtil.idFromPointer(entry.value()));
+    }
+
     public static void assertKvEntry(KvEntry entry, Integer expectKey,
-                                     Integer expectValues)
+                                     Integer expectValue)
                                      throws IOException {
         Assert.assertEquals(expectKey,
                             StoreTestUtil.dataFromPointer(entry.key()));
-        Assert.assertEquals(expectValues,
+        Assert.assertEquals(expectValue,
                             StoreTestUtil.dataFromPointer(entry.value()));
     }
 

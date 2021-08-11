@@ -26,13 +26,13 @@ import org.junit.Assert;
 
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
-public class MockComputation implements Computation<IdValueList> {
+public class MockComputation implements Computation<IdList> {
 
     private static final String NAME = "MockComputation";
     private static final String CATEGORY = "Mock";
@@ -50,7 +50,7 @@ public class MockComputation implements Computation<IdValueList> {
 
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
-        IdValueListList value = new IdValueListList();
+        IdListList value = new IdListList();
         vertex.value(value);
         Edges edges =  vertex.edges();
         checkEdges(edges);
@@ -62,8 +62,8 @@ public class MockComputation implements Computation<IdValueList> {
 
     @Override
     public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<IdValueList> messages) {
-        IdValueListList value = vertex.value();
+                        Iterator<IdList> messages) {
+        IdListList value = vertex.value();
         while (messages.hasNext()) {
             Assert.assertTrue(messages.hasNext());
             value.add(messages.next().copy());

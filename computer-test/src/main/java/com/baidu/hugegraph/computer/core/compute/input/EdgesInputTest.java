@@ -38,11 +38,11 @@ import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.config.Null;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
@@ -113,9 +113,9 @@ public class EdgesInputTest extends UnitTestBase {
             ComputerOptions.WORKER_COMBINER_CLASS,
             Null.class.getName(), // Can't combine
             ComputerOptions.ALGORITHM_RESULT_CLASS,
-            IdValueListList.class.getName(),
+            IdListList.class.getName(),
             ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-            IdValueList.class.getName(),
+            IdList.class.getName(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
             ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
@@ -167,7 +167,7 @@ public class EdgesInputTest extends UnitTestBase {
                                            throws IOException {
         for (long i = 0L; i < 200L; i += 2) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             vertex.properties(graphFactory().createProperties());
             ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
         }
@@ -179,7 +179,6 @@ public class EdgesInputTest extends UnitTestBase {
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
 
         entryOutput.writeEntry(out -> {
-            out.writeByte(vertex.id().type().code());
             vertex.id().write(out);
         }, out -> {
             vertex.properties().write(out);
@@ -192,7 +191,7 @@ public class EdgesInputTest extends UnitTestBase {
                                       EdgeFrequency freq) throws IOException {
         for (long i = 0L; i < 200L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             int count = (int) i;
             if (count == 0) {
                 continue;
@@ -203,16 +202,16 @@ public class EdgesInputTest extends UnitTestBase {
                 Edge edge = graphFactory().createEdge();
                 switch (freq) {
                     case SINGLE:
-                        edge.targetId(new LongId(j));
+                        edge.targetId(BytesId.of(j));
                         break;
                     case SINGLE_PER_LABEL:
                         edge.label(String.valueOf(j));
-                        edge.targetId(new LongId(j));
+                        edge.targetId(BytesId.of(j));
                         break;
                     case MULTIPLE:
                         edge.name(String.valueOf(j));
                         edge.label(String.valueOf(j));
-                        edge.targetId(new LongId(j));
+                        edge.targetId(BytesId.of(j));
                         break;
                     default:
                         throw new ComputerException(
@@ -237,7 +236,6 @@ public class EdgesInputTest extends UnitTestBase {
 
         Id id = vertex.id();
         KvEntryWriter subKvWriter = entryOutput.writeEntry(out -> {
-            out.writeByte(id.type().code());
             id.write(out);
         });
         for (Edge edge : vertex.edges()) {
@@ -245,18 +243,15 @@ public class EdgesInputTest extends UnitTestBase {
             subKvWriter.writeSubKv(out -> {
                 switch (freq) {
                     case SINGLE:
-                        out.writeByte(targetId.type().code());
                         targetId.write(out);
                         break;
                     case SINGLE_PER_LABEL:
                         out.writeUTF(edge.label());
-                        out.writeByte(targetId.type().code());
                         targetId.write(out);
                         break;
                     case MULTIPLE:
                         out.writeUTF(edge.label());
                         out.writeUTF(edge.name());
-                        out.writeByte(targetId.type().code());
                         targetId.write(out);
                         break;
                     default:
@@ -275,7 +270,7 @@ public class EdgesInputTest extends UnitTestBase {
                                  throws IOException {
 
         for (long i = 0L; i < 200L; i += 2) {
-            LongId id = new LongId(i);
+            Id id = BytesId.of(i);
             ReusablePointer idPointer = idToReusablePointer(id);
             Edges edges = edgesInput.edges(idPointer);
             Iterator<Edge> edgesIt = edges.iterator();
@@ -285,14 +280,14 @@ public class EdgesInputTest extends UnitTestBase {
                 Edge edge = edgesIt.next();
                 switch (freq) {
                     case SINGLE:
-                        Assert.assertEquals(new LongId(j), edge.targetId());
+                        Assert.assertEquals(BytesId.of(j), edge.targetId());
                         break;
                     case SINGLE_PER_LABEL:
-                        Assert.assertEquals(new LongId(j), edge.targetId());
+                        Assert.assertEquals(BytesId.of(j), edge.targetId());
                         Assert.assertEquals(String.valueOf(j), edge.label());
                         break;
                     case MULTIPLE:
-                        Assert.assertEquals(new LongId(j), edge.targetId());
+                        Assert.assertEquals(BytesId.of(j), edge.targetId());
                         Assert.assertEquals(String.valueOf(j), edge.label());
                         Assert.assertEquals(String.valueOf(j), edge.name());
                         break;
@@ -308,7 +303,6 @@ public class EdgesInputTest extends UnitTestBase {
     public static ReusablePointer idToReusablePointer(Id id)
                                                       throws IOException {
         BytesOutput output = IOFactory.createBytesOutput(9);
-        output.writeByte(id.type().code());
         id.write(output);
         return new ReusablePointer(output.buffer(), (int) output.position());
     }

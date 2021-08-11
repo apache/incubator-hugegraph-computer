@@ -21,12 +21,13 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class IdValueList extends ListValue<IdValue> {
+public class IdList extends ListValue<Id> {
 
-    public IdValueList() {
+    public IdList() {
         super(ValueType.ID_VALUE);
     }
 
@@ -46,10 +47,10 @@ public class IdValueList extends ListValue<IdValue> {
     }
 
     @Override
-    public IdValueList copy() {
-        IdValueList values = new IdValueList();
-        for (IdValue value : this.values()) {
-            values.add(value);
+    public IdList copy() {
+        IdList values = new IdList();
+        for (Id value : this.values()) {
+            values.add((Id) value.copy());
         }
         return values;
     }

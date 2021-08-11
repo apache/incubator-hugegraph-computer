@@ -34,18 +34,15 @@ import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.id.UuidId;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -65,17 +62,17 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Id createId(long id) {
-        return new LongId(id);
+        return BytesId.of(id);
     }
 
     @Override
     public Id createId(String id) {
-        return new Utf8Id(id);
+        return BytesId.of(id);
     }
 
     @Override
     public Id createId(UUID id) {
-        return new UuidId(id);
+        return BytesId.of(id);
     }
 
     @Override
@@ -164,11 +161,11 @@ public final class BuiltinGraphFactory implements GraphFactory {
             case DOUBLE:
                 return new DoubleValue();
             case ID_VALUE:
-                return new IdValue();
+                return BytesId.of();
             case ID_VALUE_LIST:
-                return new IdValueList();
+                return new IdList();
             case ID_VALUE_LIST_LIST:
-                return new IdValueListList();
+                return new IdListList();
             case LIST_VALUE:
                 return new ListValue<>();
             default:

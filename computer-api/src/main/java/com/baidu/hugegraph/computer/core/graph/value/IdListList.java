@@ -24,9 +24,9 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class IdValueListList extends ListValue<IdValueList> {
+public class IdListList extends ListValue<IdList> {
 
-    public IdValueListList() {
+    public IdListList() {
         super(ValueType.ID_VALUE_LIST);
     }
 

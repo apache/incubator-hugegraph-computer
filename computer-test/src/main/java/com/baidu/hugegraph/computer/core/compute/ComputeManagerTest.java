@@ -34,11 +34,11 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.Null;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
@@ -77,9 +77,9 @@ public class ComputeManagerTest extends UnitTestBase {
             ComputerOptions.WORKER_COMBINER_CLASS,
             Null.class.getName(), // Can't combine
             ComputerOptions.ALGORITHM_RESULT_CLASS,
-            IdValueListList.class.getName(),
+            IdListList.class.getName(),
             ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-            IdValueList.class.getName(),
+            IdList.class.getName(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
             ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
@@ -163,7 +163,7 @@ public class ComputeManagerTest extends UnitTestBase {
                                            throws IOException {
         for (long i = 0L; i < 200L; i += 2) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             vertex.properties(graphFactory().createProperties());
             ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
         }
@@ -175,7 +175,6 @@ public class ComputeManagerTest extends UnitTestBase {
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
 
         entryOutput.writeEntry(out -> {
-            out.writeByte(vertex.id().type().code());
             vertex.id().write(out);
         }, out -> {
             vertex.properties().write(out);
@@ -188,7 +187,7 @@ public class ComputeManagerTest extends UnitTestBase {
                         Consumer<ManagedBuffer> consumer) throws IOException {
         for (long i = 0L; i < 200L; i++) {
             Vertex vertex = graphFactory().createVertex();
-            vertex.id(new LongId(i));
+            vertex.id(BytesId.of(i));
             int count = RANDOM.nextInt(20);
             if (count == 0) {
                 continue;
@@ -197,7 +196,7 @@ public class ComputeManagerTest extends UnitTestBase {
 
             for (long j = 0; j < count; j++) {
                 Edge edge = graphFactory().createEdge();
-                edge.targetId(new LongId(RANDOM.nextInt(200)));
+                edge.targetId(BytesId.of(RANDOM.nextInt(200)));
                 Properties properties = graphFactory().createProperties();
                 properties.put("p1", new LongValue(i));
                 edge.properties(properties);
@@ -215,13 +214,11 @@ public class ComputeManagerTest extends UnitTestBase {
 
         Id id = vertex.id();
         KvEntryWriter subKvWriter = entryOutput.writeEntry(out -> {
-            out.writeByte(id.type().code());
             id.write(out);
         });
         for (Edge edge : vertex.edges()) {
             Id targetId = edge.targetId();
             subKvWriter.writeSubKv(out -> {
-                out.writeByte(targetId.type().code());
                 targetId.write(out);
             }, out -> {
                 edge.properties().write(out);
@@ -236,9 +233,9 @@ public class ComputeManagerTest extends UnitTestBase {
         for (long i = 0L; i < 200L; i++) {
             int count = RANDOM.nextInt(5);
             for (int j = 0; j < count; j++) {
-                Id id = new LongId(i);
-                IdValueList message = new IdValueList();
-                message.add(id.idValue());
+                Id id = BytesId.of(i);
+                IdList message = new IdList();
+                message.add(id);
                 ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);

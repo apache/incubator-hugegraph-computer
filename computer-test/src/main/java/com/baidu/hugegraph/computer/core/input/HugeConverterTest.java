@@ -26,11 +26,8 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
-import com.baidu.hugegraph.computer.core.graph.id.UuidId;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
@@ -40,6 +37,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
@@ -49,13 +47,13 @@ public class HugeConverterTest extends UnitTestBase {
     public void testConvertId() {
         Assert.assertThrows(IllegalArgumentException.class,
                             () -> HugeConverter.convertId(null));
-        Assert.assertEquals(new LongId(1), HugeConverter.convertId((byte) 1));
-        Assert.assertEquals(new LongId(1), HugeConverter.convertId((short) 1));
-        Assert.assertEquals(new LongId(1), HugeConverter.convertId(1));
-        Assert.assertEquals(new LongId(1L), HugeConverter.convertId(1L));
-        Assert.assertEquals(new Utf8Id("abc"), HugeConverter.convertId("abc"));
+        Assert.assertEquals(BytesId.of(1), HugeConverter.convertId((byte) 1));
+        Assert.assertEquals(BytesId.of(1), HugeConverter.convertId((short) 1));
+        Assert.assertEquals(BytesId.of(1), HugeConverter.convertId(1));
+        Assert.assertEquals(BytesId.of(1L), HugeConverter.convertId(1L));
+        Assert.assertEquals(BytesId.of("abc"), HugeConverter.convertId("abc"));
         UUID uuid = UUID.randomUUID();
-        Assert.assertEquals(new UuidId(uuid), HugeConverter.convertId(uuid));
+        Assert.assertEquals(BytesId.of(uuid), HugeConverter.convertId(uuid));
 
         Assert.assertThrows(ComputerException.class,
                             () -> HugeConverter.convertId(true));

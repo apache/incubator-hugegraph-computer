@@ -24,7 +24,6 @@ import java.util.Iterator;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
@@ -32,7 +31,7 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 /**
  * Wcc stands for Weak Connected Component.
  */
-public class Wcc implements Computation<IdValue> {
+public class Wcc implements Computation<Id> {
 
     @Override
     public String name() {
@@ -41,7 +40,7 @@ public class Wcc implements Computation<IdValue> {
 
     @Override
     public String category() {
-        return "wcc";
+        return "community";
     }
 
     @Override
@@ -52,20 +51,19 @@ public class Wcc implements Computation<IdValue> {
                 min = edge.targetId();
             }
         }
-        IdValue value = min.idValue();
+        Id value = min;
         vertex.value(value);
         vertex.inactivate();
         context.sendMessageToAllEdgesIf(vertex, value, (result, target) -> {
-            return result.compareTo(target.idValue()) < 0;
+            return result.compareTo(target) < 0;
         });
     }
 
     @Override
     public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<IdValue> messages) {
-        IdValue message = Combiner.combineAll(context.combiner(),
-                                              messages);
-        IdValue value = vertex.value();
+                        Iterator<Id> messages) {
+        Id message = Combiner.combineAll(context.combiner(), messages);
+        Id value = vertex.value();
         if (value.compareTo(message) > 0) {
             vertex.value(message);
             context.sendMessageToAllEdges(vertex, message);

@@ -30,14 +30,13 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryReader;
-
 
 public class StreamGraphInput implements GraphComputeInput {
 
@@ -143,8 +142,7 @@ public class StreamGraphInput implements GraphComputeInput {
     }
 
     public static Id readId(RandomAccessInput in) throws IOException {
-        byte code = in.readByte();
-        Id id = IdFactory.createId(code);
+        Id id = BytesId.of();
         id.read(in);
         return id;
     }

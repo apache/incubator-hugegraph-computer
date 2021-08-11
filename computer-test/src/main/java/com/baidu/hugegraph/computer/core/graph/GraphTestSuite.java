@@ -24,17 +24,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import com.baidu.hugegraph.computer.core.common.ContainerInfoTest;
+import com.baidu.hugegraph.computer.core.graph.id.BytesIdTest;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactoryTest;
 import com.baidu.hugegraph.computer.core.graph.id.IdTypeTest;
-import com.baidu.hugegraph.computer.core.graph.id.LongIdTest;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8IdTest;
-import com.baidu.hugegraph.computer.core.graph.id.UuidIdTest;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitionerTest;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStatTest;
 import com.baidu.hugegraph.computer.core.graph.value.BooleanValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValueTest;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListListTest;
+import com.baidu.hugegraph.computer.core.graph.value.IdListListTest;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueListTest;
 import com.baidu.hugegraph.computer.core.graph.value.IdValueTest;
 import com.baidu.hugegraph.computer.core.graph.value.IntValueTest;
@@ -45,9 +43,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    LongIdTest.class,
-    Utf8IdTest.class,
-    UuidIdTest.class,
+    BytesIdTest.class,
     IdTypeTest.class,
     IdFactoryTest.class,
     NullValueTest.class,
@@ -58,7 +54,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueTypeTest;
     FloatValueTest.class,
     DoubleValueTest.class,
     IdValueListTest.class,
-    IdValueListListTest.class,
+    IdListListTest.class,
     ListValueTest.class,
     ValueTypeTest.class,
     BuiltinGraphFactoryTest.class,

@@ -54,7 +54,7 @@ public class ReceiverUtil {
     }
 
     public static Id readId(Pointer pointer) throws IOException {
-        RandomAccessInput input  = pointer.input();
+        RandomAccessInput input = pointer.input();
         input.seek(pointer.offset());
         return StreamGraphInput.readId(input);
     }
@@ -75,7 +75,6 @@ public class ReceiverUtil {
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
 
         entryOutput.writeEntry(out -> {
-            out.writeByte(id.type().code());
             id.write(out);
         }, message);
         return bytesOutput.toByteArray();

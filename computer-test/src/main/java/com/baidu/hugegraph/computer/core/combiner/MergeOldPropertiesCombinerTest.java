@@ -21,9 +21,9 @@ package com.baidu.hugegraph.computer.core.combiner;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.computer.core.graph.id.Utf8Id;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class MergeOldPropertiesCombinerTest extends UnitTestBase {
@@ -31,17 +31,17 @@ public class MergeOldPropertiesCombinerTest extends UnitTestBase {
     @Test
     public void testCombine() {
         Properties properties1 = graphFactory().createProperties();
-        properties1.put("name", new Utf8Id("marko").idValue());
-        properties1.put("city", new Utf8Id("Beijing").idValue());
+        properties1.put("name", BytesId.of("marko"));
+        properties1.put("city", BytesId.of("Beijing"));
 
         Properties properties2 = graphFactory().createProperties();
-        properties2.put("name", new Utf8Id("josh").idValue());
-        properties2.put("age", new Utf8Id("18").idValue());
+        properties2.put("name", BytesId.of("josh"));
+        properties2.put("age", BytesId.of("18"));
 
         Properties expect = graphFactory().createProperties();
-        expect.put("name", new Utf8Id("josh").idValue());
-        expect.put("age", new Utf8Id("18").idValue());
-        expect.put("city", new Utf8Id("Beijing").idValue());
+        expect.put("name", BytesId.of("josh"));
+        expect.put("age", BytesId.of("18"));
+        expect.put("city", BytesId.of("Beijing"));
 
         PropertiesCombiner combiner = new MergeOldPropertiesCombiner();
         Properties properties = combiner.combine(properties1, properties2);
@@ -51,12 +51,12 @@ public class MergeOldPropertiesCombinerTest extends UnitTestBase {
     @Test
     public void testCombineNullValue() {
         Properties properties1 = graphFactory().createProperties();
-        properties1.put("name", new Utf8Id("marko").idValue());
-        properties1.put("city", new Utf8Id("Beijing").idValue());
+        properties1.put("name", BytesId.of("marko"));
+        properties1.put("city", BytesId.of("Beijing"));
 
         Properties properties2 = graphFactory().createProperties();
-        properties2.put("name", new Utf8Id("josh").idValue());
-        properties2.put("age", new Utf8Id("18").idValue());
+        properties2.put("name", BytesId.of("josh"));
+        properties2.put("age", BytesId.of("18"));
 
         PropertiesCombiner combiner = new MergeOldPropertiesCombiner();
 

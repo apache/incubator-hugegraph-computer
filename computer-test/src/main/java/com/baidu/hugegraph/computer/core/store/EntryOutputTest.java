@@ -27,7 +27,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.graph.id.LongId;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -50,14 +51,14 @@ public class EntryOutputTest {
                                                  6, 6,
                                                  2, 1,
                                                  4, 8);
-        List<LongId> data = intListToLongIds(entries);
+        List<Id> data = intListToLongIds(entries);
 
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(output);
 
         for (int i = 0; i < data.size(); ) {
-            LongId id = data.get(i++);
+            Id id = data.get(i++);
             Writable value = data.get(i++);
             entryOutput.writeEntry(id, value);
         }
@@ -65,10 +66,10 @@ public class EntryOutputTest {
         // Assert result
         BytesInput input = EntriesUtil.inputFromOutput(output);
         EntryIterator iter = new KvEntriesInput(input);
-        SorterTestUtil.assertKvEntry(iter.next(), 1, 5);
-        SorterTestUtil.assertKvEntry(iter.next(), 6, 6);
-        SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
-        SorterTestUtil.assertKvEntry(iter.next(), 4, 8);
+        SorterTestUtil.assertKvEntry(iter.next(), BytesId.of(1), BytesId.of(5));
+        SorterTestUtil.assertKvEntry(iter.next(), BytesId.of(6), BytesId.of(6));
+        SorterTestUtil.assertKvEntry(iter.next(), BytesId.of(2), BytesId.of(1));
+        SorterTestUtil.assertKvEntry(iter.next(), BytesId.of(4), BytesId.of(8));
     }
 
     @Test
@@ -86,21 +87,25 @@ public class EntryOutputTest {
         // Assert entry1
         KvEntry kvEntry1 = iter.next();
         Assert.assertEquals(3, kvEntry1.numSubEntries());
-        int key1 = StoreTestUtil.dataFromPointer(kvEntry1.key());
-        Assert.assertEquals(5, key1);
+        Id key1 = StoreTestUtil.idFromPointer(kvEntry1.key());
+        Assert.assertEquals(BytesId.of(5), key1);
         EntryIterator kvEntry1SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry1);
         KvEntry subKv1 = kvEntry1SubKvs.next();
         Assert.assertEquals(0, subKv1.numSubEntries());
-        SorterTestUtil.assertKvEntry(subKv1, 6, 6);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 2, 1);
-        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(), 4, 8);
+        SorterTestUtil.assertKvEntry(subKv1, BytesId.of(6), BytesId.of(6));
+        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(),
+                                     BytesId.of(2), BytesId.of(1));
+        SorterTestUtil.assertKvEntry(kvEntry1SubKvs.next(),
+                                     BytesId.of(4), BytesId.of(8));
         // Assert entry2
         KvEntry kvEntry2 = iter.next();
-        int key2 = StoreTestUtil.dataFromPointer(kvEntry2.key());
-        Assert.assertEquals(1, key2);
+        Id key2 = StoreTestUtil.idFromPointer(kvEntry2.key());
+        Assert.assertEquals(BytesId.of(1), key2);
         EntryIterator kvEntry2SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry2);
-        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 2, 2);
-        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 6, 1);
+        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(),
+                                     BytesId.of(2), BytesId.of(2));
+        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(),
+                                     BytesId.of(6), BytesId.of(1));
     }
 
     @Test
@@ -117,33 +122,39 @@ public class EntryOutputTest {
 
         // Assert entry1
         KvEntry kvEntry1 = iter.next();
-        int key1 = StoreTestUtil.dataFromPointer(kvEntry1.key());
-        Assert.assertEquals(5, key1);
+        Id key1 = StoreTestUtil.idFromPointer(kvEntry1.key());
+        Assert.assertEquals(BytesId.of(5), key1);
 
         EntryIterator kvEntry1SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry1);
         KvEntry subKv1 = kvEntry1SubKvs.next();
         Assert.assertEquals(0, subKv1.numSubEntries());
-        SorterTestUtil.assertKvEntry(subKv1, 2, 1);
+        SorterTestUtil.assertKvEntry(subKv1, BytesId.of(2), BytesId.of(1));
         KvEntry subKv2 = kvEntry1SubKvs.next();
         Assert.assertEquals(0, subKv2.numSubEntries());
-        SorterTestUtil.assertKvEntry(subKv2, 4, 8);
+        SorterTestUtil.assertKvEntry(subKv2, BytesId.of(4), BytesId.of(8));
         KvEntry subKv3 = kvEntry1SubKvs.next();
         Assert.assertEquals(0, subKv3.numSubEntries());
-        SorterTestUtil.assertKvEntry(subKv3, 6, 6);
+        SorterTestUtil.assertKvEntry(subKv3, BytesId.of(6), BytesId.of(6));
         // Assert entry2
         KvEntry kvEntry2 = iter.next();
-        int key2 = StoreTestUtil.dataFromPointer(kvEntry2.key());
-        Assert.assertEquals(1, key2);
+        Id key2 = StoreTestUtil.idFromPointer(kvEntry2.key());
+        Assert.assertEquals(BytesId.of(1), key2);
 
         EntryIterator kvEntry2SubKvs = EntriesUtil.subKvIterFromEntry(kvEntry2);
-        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 2, 2);
-        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(), 6, 1);
+        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(),
+                                     BytesId.of(2), BytesId.of(2));
+        SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(),
+                                     BytesId.of(6), BytesId.of(1));
     }
 
     private static BytesInput inputFromEntries(List<Integer> entries,
                                                boolean needSort)
                                                throws IOException {
-        List<LongId> data = intListToLongIds(entries);
+        /*
+         * All integer data will convert to Id type, so upper layer also
+         * needs to use the Id type to make a judgment
+         */
+        List<Id> data = intListToLongIds(entries);
 
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
@@ -162,9 +173,9 @@ public class EntryOutputTest {
         return EntriesUtil.inputFromOutput(output);
     }
 
-    private static List<LongId> intListToLongIds(List<Integer> list) {
+    private static List<Id> intListToLongIds(List<Integer> list) {
         return list.stream()
-                   .map(LongId::new)
+                   .map(BytesId::of)
                    .collect(Collectors.toList());
     }
 }

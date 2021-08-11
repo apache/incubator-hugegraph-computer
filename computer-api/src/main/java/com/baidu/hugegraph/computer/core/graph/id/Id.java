@@ -19,19 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.graph.id;
 
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.io.Writable;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public interface Id extends Readable, Writable, Comparable<Id> {
+public interface Id extends Value<Id> {
 
-    IdType type();
+    IdType idType();
 
-    IdValue idValue();
+    int length();
 
     Object asObject();
-
-    long asLong();
-
-    byte[] asBytes();
 }
