@@ -43,7 +43,8 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
                      DegreeCentrality.CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY,
                      "rate");
         DegreeCentralityTestOutput.assertResult();
-        runAlgorithm(DegreeCentralityTestParams.class.getName());
+        runAlgorithm(DegreeCentralityTestParams.class.getName(),
+                     ComputerOptions.JOB_ID.name(), "local_degreeCentrality");
         DegreeCentralityTestOutput.assertResult();
     }
 
