@@ -29,11 +29,16 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -61,27 +66,18 @@ public class SortManager implements Manager {
     private static final String NAME = "sort";
     private static final String PREFIX = "sort-executor-%s";
 
+    private final ComputerContext context;
     private final ExecutorService sortExecutor;
     private final Sorter sorter;
-    private final Combiner<Pointer> messageCombiner;
-    private final Combiner<Pointer> vertexCombiner;
-    private final Combiner<Pointer> edgeCombiner;
     private final int capacity;
     private final int flushThreshold;
 
     public SortManager(ComputerContext context) {
+        this.context = context;
         Config config = context.config();
         int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
         this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, PREFIX);
         this.sorter = new SorterImpl(config);
-        this.vertexCombiner =
-             config.createObject(
-             ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS, false);
-        this.edgeCombiner =
-             config.createObject(
-             ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS, false);
-        this.messageCombiner = config.createObject(
-                               ComputerOptions.WORKER_COMBINER_CLASS, false);
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
         this.flushThreshold = config.get(
@@ -180,15 +176,15 @@ public class SortManager implements Manager {
 
         switch (type) {
             case VERTEX:
-                combiner = this.vertexCombiner;
+                combiner = this.createVertexCombiner();
                 needSortSubKv = false;
                 break;
             case EDGE:
-                combiner = this.edgeCombiner;
+                combiner = this.createEdgeCombiner();
                 needSortSubKv = true;
                 break;
             case MSG:
-                combiner = this.messageCombiner;
+                combiner = this.createMessageCombiner();
                 needSortSubKv = false;
                 break;
             default:
@@ -209,5 +205,64 @@ public class SortManager implements Manager {
         }
 
         return flusher;
+    }
+
+    private Combiner<Pointer> createVertexCombiner() {
+        Config config = this.context.config();
+        Combiner<Properties> propCombiner = config.createObject(
+                ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
+
+        if (propCombiner == null) {
+            return null;
+        }
+
+        return this.createPropertiesCombiner(propCombiner);
+    }
+
+    private Combiner<Pointer> createEdgeCombiner() {
+        Config config = this.context.config();
+        Combiner<Properties> propCombiner = config.createObject(
+                ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
+
+        if (propCombiner == null) {
+            return null;
+        }
+
+        return this.createPropertiesCombiner(propCombiner);
+    }
+
+    private Combiner<Pointer> createMessageCombiner() {
+        Config config = this.context.config();
+        Combiner<?> valueCombiner = config.createObject(
+                    ComputerOptions.WORKER_COMBINER_CLASS, false);
+
+        if (valueCombiner == null) {
+            return null;
+        }
+
+        Value<?> v1 = config.createObject(
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+        Value<?> v2 = v1.copy();
+        return new PointerCombiner(v1, v2, valueCombiner);
+    }
+
+    private Combiner<Pointer> createPropertiesCombiner(
+                              Combiner<Properties> propCombiner) {
+        /*
+         * If propertiesCombiner is OverwriteCombiner, just remain the
+         * second, no need to deserialize the properties and then serialize
+         * the second properties.
+         */
+        Combiner<Pointer> combiner;
+        if (propCombiner instanceof OverwriteCombiner) {
+            combiner = new OverwriteCombiner<>();
+        } else {
+            GraphFactory graphFactory = this.context.graphFactory();
+            Properties v1 = graphFactory.createProperties();
+            Properties v2 = graphFactory.createProperties();
+
+            combiner = new PointerCombiner<>(v1, v2, propCombiner);
+        }
+        return combiner;
     }
 }
