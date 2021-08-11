@@ -67,12 +67,12 @@ public class MiniKubeTest extends AbstractK8sTest {
     private static ExecutorService POOL;
 
     @BeforeClass
-    public static void setupClass() {
+    public static void init() {
         POOL = ExecutorUtil.newFixedThreadPool(1, "minikube-test-pool");
     }
 
     @AfterClass
-    public static void teardownClass() {
+    public static void clear() {
         POOL.shutdown();
     }
 
