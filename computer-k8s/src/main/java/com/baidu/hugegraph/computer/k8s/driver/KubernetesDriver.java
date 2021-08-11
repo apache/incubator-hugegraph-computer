@@ -314,6 +314,7 @@ public class KubernetesDriver implements ComputerDriver {
                 future.get();
             }
         } catch (Throwable e) {
+            LOG.error("waitJob error:", e);
             this.cancelWait(jobId);
             throw KubernetesClientException.launderThrowable(e);
         }
@@ -358,6 +359,7 @@ public class KubernetesDriver implements ComputerDriver {
 
             @Override
             public void onClose(WatcherException cause) {
+                LOG.error("ONCLOSE error:", cause);
                 for (Pair<CompletableFuture<Void>, JobObserver> pair :
                      KubernetesDriver.this.waits.values()) {
                     if (pair != null) {
