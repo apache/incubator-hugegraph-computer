@@ -119,7 +119,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
             this.driver.waitJob(jobId, params, jobObserver);
-        });
+        }, POOL);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);

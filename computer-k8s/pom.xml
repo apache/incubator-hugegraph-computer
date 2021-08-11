@@ -12,7 +12,7 @@
     <artifactId>computer-k8s</artifactId>
 
     <properties>
-        <fabric8.version>5.5.0</fabric8.version>
+        <fabric8.version>5.6.0</fabric8.version>
         <lombok.version>1.18.0</lombok.version>
         <sundrio.version>0.40.1</sundrio.version>
         <maven.jsonschema2pojo.plugin.version>1.1.0</maven.jsonschema2pojo.plugin.version>

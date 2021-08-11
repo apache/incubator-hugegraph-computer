@@ -174,6 +174,7 @@ public abstract class AbstractK8sTest {
     }
 
     protected void initOperator() {
+        this.operation.delete(this.operation.list().getItems());
         ExecutorService pool = ExecutorUtil.newFixedThreadPool("operator-test");
         this.operatorFuture = pool.submit(() -> {
             String watchNameSpace = Utils.getSystemPropertyOrEnvVar(
