@@ -17,17 +17,20 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.rank.pagerank;
+package com.baidu.hugegraph.computer.algorithm;
 
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.algorithm.rank.pagerank.PageRankTest;
+import com.baidu.hugegraph.computer.algorithm.wcc.WccTest;
 import com.baidu.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     PageRankTest.class,
+    WccTest.class
 })
 public class AlgorithmTestSuite {
     @BeforeClass
