@@ -241,7 +241,7 @@ public class SortManager implements Manager {
         }
 
         Value<?> v1 = config.createObject(
-                ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+                      ComputerOptions.ALGORITHM_MESSAGE_CLASS);
         Value<?> v2 = v1.copy();
         return new PointerCombiner(v1, v2, valueCombiner);
     }
