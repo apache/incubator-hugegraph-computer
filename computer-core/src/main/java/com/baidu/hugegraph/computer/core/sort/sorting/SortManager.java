@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -47,6 +46,7 @@ import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
+import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -63,7 +63,9 @@ public class SortManager implements Manager {
 
     private final ExecutorService sortExecutor;
     private final Sorter sorter;
-    private final Combiner<Pointer> combiner;
+    private final Combiner<Pointer> messageCombiner;
+    private final Combiner<Pointer> vertexCombiner;
+    private final Combiner<Pointer> edgeCombiner;
     private final int capacity;
     private final int flushThreshold;
 
@@ -72,8 +74,14 @@ public class SortManager implements Manager {
         int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
         this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, PREFIX);
         this.sorter = new SorterImpl(config);
-        // TODO: sort different type of message use different combiner
-        this.combiner = new OverwriteCombiner<>();
+        this.vertexCombiner =
+             config.createObject(
+             ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS, false);
+        this.edgeCombiner =
+             config.createObject(
+             ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS, false);
+        this.messageCombiner = config.createObject(
+                               ComputerOptions.WORKER_COMBINER_CLASS, false);
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
         this.flushThreshold = config.get(
@@ -167,12 +175,39 @@ public class SortManager implements Manager {
     private InnerSortFlusher createSortFlusher(MessageType type,
                                                RandomAccessOutput output,
                                                int flushThreshold) {
-        if (type == MessageType.VERTEX || type == MessageType.MSG) {
-            return new CombineKvInnerSortFlusher(output, this.combiner);
-        } else {
-            assert type == MessageType.EDGE;
-            return new CombineSubKvInnerSortFlusher(output, this.combiner,
-                                                    flushThreshold);
+        Combiner<Pointer> combiner;
+        boolean needSortSubKv;
+
+        switch (type) {
+            case VERTEX:
+                combiner = this.vertexCombiner;
+                needSortSubKv = false;
+                break;
+            case EDGE:
+                combiner = this.edgeCombiner;
+                needSortSubKv = true;
+                break;
+            case MSG:
+                combiner = this.messageCombiner;
+                needSortSubKv = false;
+                break;
+            default:
+                throw new ComputerException("Unsupported combine message " +
+                                            "type for %s", type);
         }
+
+        InnerSortFlusher flusher;
+        if (combiner == null) {
+            flusher = new KvInnerSortFlusher(output);
+        } else {
+            if (needSortSubKv) {
+                flusher = new CombineSubKvInnerSortFlusher(output, combiner,
+                                                           flushThreshold);
+            } else {
+                flusher = new CombineKvInnerSortFlusher(output, combiner);
+            }
+        }
+
+        return flusher;
     }
 }
