@@ -43,6 +43,13 @@ public class BytesId implements Id {
     private byte[] bytes;
     private int length;
 
+    public BytesId() {
+        BytesId id = BytesId.of();
+        this.type = id.type;
+        this.bytes = id.bytes;
+        this.length = id.length;
+    }
+
     public BytesId(IdType type, byte[] bytes) {
         this(type, bytes, bytes.length);
     }
