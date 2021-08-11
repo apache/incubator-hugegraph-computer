@@ -111,9 +111,9 @@ public class ComputerJobController
         }
 
         ComputerJobComponent observed = this.observeComponent(computerJob);
-        if (this.updateStatus(observed)) {
-            LOG.info("Wait status to be stable before taking further actions");
-            return OperatorResult.REQUEUE;
+        if (!this.updateStatus(observed)) {
+            LOG.debug("Wait status to be stable before taking further actions");
+            return OperatorResult.NO_REQUEUE;
         }
 
         if (Objects.equals(computerJob.getStatus().getJobStatus(),
@@ -305,9 +305,8 @@ public class ComputerJobController
                 failedComponents.increment();
             } else {
                 int active = KubeUtil.intVal(job.getStatus().getActive());
-                boolean allPodRunning = pods.stream()
-                                            .allMatch(PodStatusUtil::isRunning);
-                if (active >= instances && allPodRunning) {
+                active = active + succeeded;
+                if (active >= instances) {
                     newState.setState(JobComponentState.RUNNING.value());
                     runningComponents.increment();
                 } else {
@@ -512,7 +511,8 @@ public class ComputerJobController
                 }
                 if (StringUtils.isNotBlank(log) &&
                     !log.contains("Unable to retrieve container logs")) {
-                    return log + "\n podName:" + pod.getMetadata().getName();
+                    return log + "\n podName:" + pod.getMetadata().getName() +
+                                 "\n nodeIp:" + pod.getStatus().getHostIP();
                 }
             }
         }

@@ -143,7 +143,7 @@ public class KubeUtil {
     }
 
     public static int intVal(Integer integer) {
-        return integer != null ? integer : -1;
+        return integer != null ? integer : 0;
     }
 
     public static String asProperties(Map<String, String> map) {
