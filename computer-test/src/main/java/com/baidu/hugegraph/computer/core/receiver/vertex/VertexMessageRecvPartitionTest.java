@@ -108,8 +108,8 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.JOB_PARTITIONS_COUNT, "1",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
-            ComputerOptions.HGKV_MERGE_FILES_NUM, "2"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
+            ComputerOptions.HGKV_MERGE_FILES_NUM, "5"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -121,7 +121,6 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         this.partition = new VertexMessageRecvPartition(context(),
                                                         fileGenerator,
                                                         this.sortManager);
-        addTenVertexBuffer(this.partition::addBuffer);
         addTenVertexBuffer(this.partition::addBuffer);
         addTenVertexBuffer(this.partition::addBuffer);
 

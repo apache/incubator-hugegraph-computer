@@ -212,10 +212,6 @@ public class SortManager implements Manager {
         Combiner<Properties> propCombiner = config.createObject(
                 ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
 
-        if (propCombiner == null) {
-            return null;
-        }
-
         return this.createPropertiesCombiner(propCombiner);
     }
 
@@ -223,10 +219,6 @@ public class SortManager implements Manager {
         Config config = this.context.config();
         Combiner<Properties> propCombiner = config.createObject(
                 ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
-
-        if (propCombiner == null) {
-            return null;
-        }
 
         return this.createPropertiesCombiner(propCombiner);
     }
