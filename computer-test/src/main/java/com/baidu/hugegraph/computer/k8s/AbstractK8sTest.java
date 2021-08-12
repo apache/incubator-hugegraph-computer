@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
@@ -47,6 +48,7 @@ import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.ExecutorUtil;
+import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
@@ -68,6 +70,8 @@ public abstract class AbstractK8sTest {
     protected Future<?> operatorFuture;
     protected MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
               Resource<HugeGraphComputerJob>> operation;
+
+    private static final Logger LOG = Log.logger(AbstractK8sTest.class);
 
     protected static final String IMAGE_REPOSITORY_URL =
               "czcoder/hugegraph-computer-test";
@@ -102,14 +106,19 @@ public abstract class AbstractK8sTest {
     @After
     public void teardown() throws IOException, ExecutionException,
                                   InterruptedException {
-        this.driver.close();
-        this.entrypoint.shutdown();
-        this.operatorFuture.get();
-        Set<String> keySet = OperatorOptions.instance().options().keySet();
-        for (String key : keySet) {
-            System.clearProperty(key);
+        try {
+            this.driver.close();
+            this.entrypoint.shutdown();
+            this.operatorFuture.get();
+            Set<String> keySet = OperatorOptions.instance().options().keySet();
+            for (String key : keySet) {
+                System.clearProperty(key);
+            }
+            System.clearProperty(Config.KUBERNETES_KUBECONFIG_FILE);
+        } catch (Throwable t) {
+            LOG.error("teardown error:", t);
+            throw t;
         }
-        System.clearProperty(Config.KUBERNETES_KUBECONFIG_FILE);
     }
 
     protected void initConfig() {

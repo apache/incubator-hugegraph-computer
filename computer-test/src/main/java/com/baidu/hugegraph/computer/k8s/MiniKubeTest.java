@@ -50,7 +50,6 @@ import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
-import com.baidu.hugegraph.computer.k8s.operator.OperatorEntrypoint;
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
@@ -67,7 +66,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 public class MiniKubeTest extends AbstractK8sTest {
 
     private static final String ALGORITHM_NAME = "PageRank";
-    private static final Logger LOG = Log.logger(OperatorEntrypoint.class);
+    private static final Logger LOG = Log.logger(AbstractK8sTest.class);
     private static ExecutorService POOL;
 
     @BeforeClass
