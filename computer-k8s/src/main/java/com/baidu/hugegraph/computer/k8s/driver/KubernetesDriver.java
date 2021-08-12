@@ -292,8 +292,8 @@ public class KubernetesDriver implements ComputerDriver {
         try {
             JobState jobState = this.jobState(jobId, params);
             if (jobState == null) {
-                LOG.warn("Unable to fetch state of job '{}', it may have been " +
-                         "deleted", jobId);
+                LOG.warn("Unable to fetch state of job '{}', " +
+                         "it may have been deleted", jobId);
                 return;
             } else {
                 observer.onJobStateChanged(jobState);
