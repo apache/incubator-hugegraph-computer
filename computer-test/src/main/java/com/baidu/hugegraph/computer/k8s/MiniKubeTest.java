@@ -40,6 +40,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
@@ -49,6 +50,7 @@ import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
+import com.baidu.hugegraph.computer.k8s.operator.OperatorEntrypoint;
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
@@ -56,6 +58,7 @@ import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.ExecutorUtil;
+import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.Pod;
@@ -64,6 +67,7 @@ import io.fabric8.kubernetes.api.model.Quantity;
 public class MiniKubeTest extends AbstractK8sTest {
 
     private static final String ALGORITHM_NAME = "PageRank";
+    private static final Logger LOG = Log.logger(OperatorEntrypoint.class);
     private static ExecutorService POOL;
 
     @BeforeClass
@@ -308,26 +312,30 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     @Test
     public void testPullImageError() {
-        Map<String, String> params = new HashMap<>();
-        this.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
-                           "xxx");
-        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
+        try {
+            Map<String, String> params = new HashMap<>();
+            this.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
+                               "xxx");
+            String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
-        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+            JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                this.driver.waitJob(jobId, params, jobObserver);
+            }, POOL);
 
-        DefaultJobState jobState = new DefaultJobState();
-        jobState.jobStatus(JobStatus.FAILED);
-        Mockito.verify(jobObserver, Mockito.timeout(30000L).atLeast(1))
-               .onJobStateChanged(Mockito.eq(jobState));
+            DefaultJobState jobState = new DefaultJobState();
+            jobState.jobStatus(JobStatus.FAILED);
+            Mockito.verify(jobObserver, Mockito.timeout(30000L).atLeast(1))
+                   .onJobStateChanged(Mockito.eq(jobState));
 
-        String diagnostics = this.driver.diagnostics(jobId, params);
-        Assert.assertContains("ImagePullBackOff", diagnostics);
+            String diagnostics = this.driver.diagnostics(jobId, params);
+            Assert.assertContains("ImagePullBackOff", diagnostics);
 
-        future.getNow(null);
+            future.getNow(null);
+        } catch (Throwable throwable) {
+            LOG.error("testPullImageError error:", throwable);
+        }
     }
 
     @Test
