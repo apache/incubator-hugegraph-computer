@@ -497,7 +497,8 @@ public class KubernetesDriver implements ComputerDriver {
             } else {
                 boolean required = ComputerOptions.REQUIRED_INIT_OPTIONS
                                                   .contains(key);
-                E.checkArgument(!required, "The %s option can't be null", key);
+                E.checkArgument(!required,
+                                "The %s option can't be null", key);
             }
         }
         return Collections.unmodifiableMap(defaultConf);
