@@ -20,7 +20,7 @@
     </dependencies>
 
     <build>
-        <finalName>hugegraph-computer-operator</finalName>
+        <finalName>hugegraph-computer-operator-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
