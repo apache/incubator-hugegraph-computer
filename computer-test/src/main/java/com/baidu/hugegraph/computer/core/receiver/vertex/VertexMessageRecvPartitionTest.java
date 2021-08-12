@@ -108,8 +108,8 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.JOB_PARTITIONS_COUNT, "1",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
-            ComputerOptions.HGKV_MERGE_FILES_NUM, "5"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
+            ComputerOptions.HGKV_MERGE_FILES_NUM, "2"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -121,6 +121,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         this.partition = new VertexMessageRecvPartition(context(),
                                                         fileGenerator,
                                                         this.sortManager);
+        addTenVertexBuffer(this.partition::addBuffer);
         addTenVertexBuffer(this.partition::addBuffer);
         addTenVertexBuffer(this.partition::addBuffer);
 
@@ -183,7 +184,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             Vertex vertex = graphFactory().createVertex();
             vertex.id(BytesId.of(i));
             vertex.properties(graphFactory().createProperties());
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeVertex(vertex), consumer);
         }
     }
 
@@ -197,7 +198,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             properties.put("p1", new LongValue(i));
             vertex.properties(properties);
 
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeVertex(vertex), consumer);
         }
 
         for (long i = 0L; i < 10L; i++) {
@@ -207,13 +208,13 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             properties.put("p2", new LongValue(2L * i));
             vertex.properties(properties);
 
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeVertex(vertex), consumer);
         }
     }
 
     private static void addTwoEmptyBuffer(Consumer<ManagedBuffer> consumer) {
         for (int i = 0; i < 2; i++) {
-            ReceiverUtil.comsumeBuffer(new byte[2], consumer);
+            ReceiverUtil.consumeBuffer(new byte[2], consumer);
         }
     }
 

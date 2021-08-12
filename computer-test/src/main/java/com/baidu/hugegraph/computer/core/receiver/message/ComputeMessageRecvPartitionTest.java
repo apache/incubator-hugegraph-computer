@@ -122,7 +122,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             for (int j = 0; j < 2; j++) {
                 Id id = BytesId.of(i);
                 DoubleValue message = new DoubleValue(i);
-                ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
+                ReceiverUtil.consumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);
             }
@@ -160,7 +160,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
                 Id id = BytesId.of(i);
                 IdList message = new IdList();
                 message.add(id);
-                ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
+                ReceiverUtil.consumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);
             }

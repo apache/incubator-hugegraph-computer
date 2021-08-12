@@ -162,7 +162,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.comsumeBuffer(writeEdges(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex), consumer);
         }
     }
 
@@ -182,7 +182,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.comsumeBuffer(writeEdges(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex), consumer);
         }
 
         for (long i = 0L; i < 10L; i++) {
@@ -198,7 +198,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.comsumeBuffer(writeEdges(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex), consumer);
         }
     }
 

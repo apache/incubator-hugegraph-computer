@@ -169,7 +169,7 @@ public class EdgesInputTest extends UnitTestBase {
             Vertex vertex = graphFactory().createVertex();
             vertex.id(BytesId.of(i));
             vertex.properties(graphFactory().createProperties());
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeVertex(vertex), consumer);
         }
     }
 
@@ -224,7 +224,7 @@ public class EdgesInputTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.comsumeBuffer(writeEdges(vertex, freq), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex, freq), consumer);
         }
     }
 

@@ -149,7 +149,7 @@ public class MessageInputTest extends UnitTestBase {
                 Id id = BytesId.of(random.nextInt(200));
                 IdList message = new IdList();
                 message.add(id);
-                ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
+                ReceiverUtil.consumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);
             }

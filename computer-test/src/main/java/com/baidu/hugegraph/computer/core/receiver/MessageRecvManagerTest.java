@@ -139,7 +139,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
     @Test
     public void testOtherMessageType() {
         Assert.assertThrows(ComputerException.class, () -> {
-            ReceiverUtil.comsumeBuffer(new byte[100],
+            ReceiverUtil.consumeBuffer(new byte[100],
                                        (ManagedBuffer buffer) -> {
                 this.receiveManager.handle(MessageType.ACK, 0, buffer);
             });

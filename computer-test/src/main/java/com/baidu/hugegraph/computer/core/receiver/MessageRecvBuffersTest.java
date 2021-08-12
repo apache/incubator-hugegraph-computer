@@ -151,7 +151,7 @@ public class MessageRecvBuffersTest {
 
     public static void addMockBufferToBuffers(MessageRecvBuffers buffers,
                                               int mockBufferLength) {
-        ReceiverUtil.comsumeBuffer(new byte[mockBufferLength],
+        ReceiverUtil.consumeBuffer(new byte[mockBufferLength],
                                    (ManagedBuffer buffer) -> {
             buffers.addBuffer(buffer);
         });
