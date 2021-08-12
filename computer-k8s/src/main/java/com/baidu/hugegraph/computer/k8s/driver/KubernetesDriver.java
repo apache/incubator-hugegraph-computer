@@ -289,34 +289,38 @@ public class KubernetesDriver implements ComputerDriver {
     @Override
     public void waitJob(String jobId, Map<String, String> params,
                         JobObserver observer) {
-        JobState jobState = this.jobState(jobId, params);
-        if (jobState == null) {
-            LOG.warn("Unable to fetch state of job '{}', it may have been " +
-                     "deleted", jobId);
-            return;
-        } else {
-            observer.onJobStateChanged(jobState);
-        }
-
-        CompletableFuture<Void> future = null;
-        synchronized (this.watchActive) {
-            if (!this.watchActive.getValue()) {
-                this.watch = this.initWatch();
-                this.watchActive.setTrue();
-            } else {
-                future = new CompletableFuture<>();
-                this.waits.put(jobId, Pair.of(future, observer));
-            }
-        }
-
         try {
-            if (future != null) {
-                future.get();
+            JobState jobState = this.jobState(jobId, params);
+            if (jobState == null) {
+                LOG.warn("Unable to fetch state of job '{}', it may have been " +
+                         "deleted", jobId);
+                return;
+            } else {
+                observer.onJobStateChanged(jobState);
             }
-        } catch (Throwable e) {
-            LOG.error("waitJob error:", e);
-            this.cancelWait(jobId);
-            throw KubernetesClientException.launderThrowable(e);
+
+            CompletableFuture<Void> future = null;
+            synchronized (this.watchActive) {
+                if (!this.watchActive.getValue()) {
+                    this.watch = this.initWatch();
+                    this.watchActive.setTrue();
+                } else {
+                    future = new CompletableFuture<>();
+                    this.waits.put(jobId, Pair.of(future, observer));
+                }
+            }
+
+            try {
+                if (future != null) {
+                    future.get();
+                }
+            } catch (Throwable e) {
+                this.cancelWait(jobId);
+                throw KubernetesClientException.launderThrowable(e);
+            }
+        } catch (Throwable t) {
+            LOG.error("waitJob error:", t);
+            throw t;
         }
     }
 
