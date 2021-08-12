@@ -23,8 +23,8 @@ import java.util.Map;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
 public class RingsDetectionParams implements AlgorithmParams {
@@ -34,9 +34,9 @@ public class RingsDetectionParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
                          RingsDetection.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                         IdValueListList.class.getName());
+                         IdListList.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                         IdValueList.class.getName());
+                         IdList.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          LimitedLogOutput.class.getName());
     }

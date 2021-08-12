@@ -23,14 +23,13 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.IdValue;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueList;
-import com.baidu.hugegraph.computer.core.graph.value.IdValueListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
-public class RingsDetection implements Computation<IdValueList> {
+public class RingsDetection implements Computation<IdList> {
 
     @Override
     public String name() {
@@ -47,21 +46,19 @@ public class RingsDetection implements Computation<IdValueList> {
         if (vertex.edges().size() == 0) {
             return;
         }
-        vertex.value(new IdValueListList());
+        vertex.value(new IdListList());
 
-        // Init path
-        Id id = vertex.id();
-        IdValueList path = new IdValueList();
-        path.add(id.idValue());
+        Id vertexId = vertex.id();
+
+        IdList path = new IdList();
+        path.add(vertexId);
 
         for (Edge edge : vertex.edges()) {
             /*
              * Only send path to vertex whose id is larger than
              * or equals current vertex id
              */
-            if (id.compareTo(edge.targetId()) <= 0) {
-                String v = vertex.id().toString();
-                String t = edge.targetId().toString();
+            if (vertexId.compareTo(edge.targetId()) <= 0) {
                 context.sendMessage(edge.targetId(), path);
             }
         }
@@ -69,45 +66,43 @@ public class RingsDetection implements Computation<IdValueList> {
 
     @Override
     public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<IdValueList> messages) {
-        IdValue idValue = vertex.id().idValue();
-        String s = new String(idValue.bytes());
+                        Iterator<IdList> messages) {
+        Id vertexId = vertex.id();
         boolean halt = true;
         while (messages.hasNext()) {
             halt = false;
-            IdValueList sequence = messages.next();
-            if (idValue.equals(sequence.get(0))) {
+            IdList sequence = messages.next();
+            if (vertexId.equals(sequence.get(0))) {
                 // Use the smallest vertex record ring
                 boolean isMin = true;
                 for (int i = 0; i < sequence.size(); i++) {
-                    IdValue pathVertexValue = sequence.get(i);
-                    if (idValue.compareTo(pathVertexValue) > 0) {
+                    Id pathVertexValue = sequence.get(i);
+                    if (vertexId.compareTo(pathVertexValue) > 0) {
                         isMin = false;
                         break;
                     }
                 }
                 if (isMin) {
-                    sequence.add(idValue);
-                    IdValueListList value = vertex.value();
+                    sequence.add(vertexId);
+                    IdListList value = vertex.value();
                     value.add(sequence.copy());
                 }
             } else {
                 boolean contains = false;
                 // Drop sequence if path contains this vertex
                 for (int i = 0; i < sequence.size(); i++) {
-                    IdValue pathVertexValue = sequence.get(i);
-                    if (pathVertexValue.equals(vertex.id().idValue())) {
+                    Id pathVertexValue = sequence.get(i);
+                    if (pathVertexValue.equals(vertex.id())) {
                         contains = true;
                         break;
                     }
                 }
                 // Field ringId is smallest vertex id in path
-                IdValue ringId = sequence.get(0);
+                Id ringId = sequence.get(0);
                 if (!contains) {
-                    sequence.add(vertex.id().idValue());
+                    sequence.add(vertex.id());
                     for (Edge edge : vertex.edges()) {
-                        if (ringId.compareTo(edge.targetId().idValue()) <= 0) {
-                            String s1 = new String(edge.targetId().idValue().bytes());
+                        if (ringId.compareTo(edge.targetId()) <= 0) {
                             context.sendMessage(edge.targetId(), sequence);
                         }
                     }
