@@ -38,11 +38,6 @@ public abstract class AbstractBufferedFileOutput extends UnsafeBytesOutput {
     }
 
     @Override
-    public void write(byte[] b) throws IOException {
-        this.write(b, 0, b.length);
-    }
-
-    @Override
     public void writeFixedInt(long position, int v) throws IOException {
         if (this.fileOffset <= position &&
             position <= this.position() - Constants.INT_LEN) {
