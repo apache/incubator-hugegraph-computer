@@ -64,20 +64,22 @@ public class ComputeManager<M extends Value<M>> {
     public WorkerStat input() {
         WorkerStat workerStat = new WorkerStat();
         this.recvManager.waitReceivedAllMessages();
-        Map<Integer, PeekableIterator<KvEntry>> vertices;
-        vertices = this.recvManager.vertexPartitions();
-        Map<Integer, PeekableIterator<KvEntry>> edges;
-        edges = this.recvManager.edgePartitions();
+
+        Map<Integer, PeekableIterator<KvEntry>> vertices =
+                     this.recvManager.vertexPartitions();
+        Map<Integer, PeekableIterator<KvEntry>> edges =
+                     this.recvManager.edgePartitions();
         // TODO: parallel input process
         for (Map.Entry<Integer, PeekableIterator<KvEntry>> entry :
              vertices.entrySet()) {
-            FileGraphPartition<M> partition = new FileGraphPartition<>(
-                                              this.context, this.managers,
-                                              entry.getKey());
-            PartitionStat partitionStat = partition.init(entry.getValue(),
-                                          edges.get(entry.getKey()));
+            int partition = entry.getKey();
+            FileGraphPartition<M> part = new FileGraphPartition<>(this.context,
+                                                                  this.managers,
+                                                                  partition);
+            PartitionStat partitionStat = part.input(entry.getValue(),
+                                                     edges.get(partition));
             workerStat.add(partitionStat);
-            this.partitions.put(entry.getKey(), partition);
+            this.partitions.put(partition, part);
         }
         return workerStat;
     }
@@ -87,7 +89,7 @@ public class ComputeManager<M extends Value<M>> {
      * corresponding partition. Be called before
      * {@link MessageRecvManager#beforeSuperstep} is called.
      */
-    public void takeComputeMessages() {
+    public void takeRecvedMessages() {
         Map<Integer, PeekableIterator<KvEntry>> messages =
                      this.recvManager.messagePartitions();
         for (FileGraphPartition<M> partition : this.partitions.values()) {

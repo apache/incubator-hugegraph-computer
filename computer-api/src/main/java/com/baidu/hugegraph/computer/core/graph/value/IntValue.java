@@ -27,6 +27,8 @@ import com.baidu.hugegraph.util.E;
 
 public class IntValue extends Number implements Value<IntValue> {
 
+    private static final long serialVersionUID = -2014388310992178979L;
+
     private int value;
 
     public IntValue() {
@@ -45,7 +47,7 @@ public class IntValue extends Number implements Value<IntValue> {
 
     @Override
     public float floatValue() {
-        return (float) this.value;
+        return this.value;
     }
 
     @Override

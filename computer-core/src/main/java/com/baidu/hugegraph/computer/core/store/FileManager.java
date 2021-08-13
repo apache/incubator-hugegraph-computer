@@ -73,7 +73,7 @@ public class FileManager implements FileGenerator, Manager {
         for (String path : paths) {
             File dir = new File(path);
             File jobDir = new File(dir, jobId);
-            this.mkdirs(jobDir);
+            mkdirs(jobDir);
             LOG.debug("Initialized directory '{}' to directory list", jobDir);
             this.dirs.add(jobDir.toString());
         }

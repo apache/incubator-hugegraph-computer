@@ -27,6 +27,8 @@ import com.baidu.hugegraph.util.E;
 
 public class DoubleValue extends Number implements Value<DoubleValue> {
 
+    private static final long serialVersionUID = -524902178200973565L;
+
     private double value;
 
     public DoubleValue() {

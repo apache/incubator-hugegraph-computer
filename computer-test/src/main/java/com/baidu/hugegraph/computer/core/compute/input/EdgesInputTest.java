@@ -140,9 +140,8 @@ public class EdgesInputTest extends UnitTestBase {
         ConnectionId connectionId = new ConnectionId(new InetSocketAddress(
                                                      "localhost", 8081),
                                                      0);
-        FileGraphPartition<?> partition = new FileGraphPartition(context(),
-                                                                 this.managers,
-                                                                 0);
+        FileGraphPartition<?> partition = new FileGraphPartition<>(
+                                          context(), this.managers, 0);
         receiveManager.onStarted(connectionId);
         add200VertexBuffer((ManagedBuffer buffer) -> {
             receiveManager.handle(MessageType.VERTEX, 0, buffer);
@@ -154,8 +153,8 @@ public class EdgesInputTest extends UnitTestBase {
         }, freq);
 
         receiveManager.onFinished(connectionId);
-        partition.init(receiveManager.vertexPartitions().get(0),
-                       receiveManager.edgePartitions().get(0));
+        partition.input(receiveManager.vertexPartitions().get(0),
+                        receiveManager.edgePartitions().get(0));
         File edgeFile = Whitebox.getInternalState(partition, "edgeFile");
         EdgesInput edgesInput = new EdgesInput(context(), edgeFile);
         edgesInput.init();

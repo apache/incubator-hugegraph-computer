@@ -148,7 +148,7 @@ public class ComputeManagerTest extends UnitTestBase {
         receiveManager.afterSuperstep(this.config, 0);
 
         // Superstep 1
-        this.computeManager.takeComputeMessages();
+        this.computeManager.takeRecvedMessages();
         receiveManager.beforeSuperstep(this.config, 1);
         receiveManager.onStarted(this.connectionId);
         receiveManager.onFinished(this.connectionId);
