@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
-public class MessageInput<T extends Value<T>> {
+public class MessageInput<T extends Value<?>> {
 
     private final Config config;
     private final PeekableIterator<KvEntry> messages;
@@ -97,8 +97,6 @@ public class MessageInput<T extends Value<T>> {
                     try {
                         BytesInput in = IOFactory.createBytesInput(
                                         entry.value().bytes());
-                        MessageInput.this.value = config.createObject(
-                                     ComputerOptions.ALGORITHM_MESSAGE_CLASS);
                         MessageInput.this.value.read(in);
                     } catch (IOException e) {
                         throw new ComputerException("Can't read value", e);

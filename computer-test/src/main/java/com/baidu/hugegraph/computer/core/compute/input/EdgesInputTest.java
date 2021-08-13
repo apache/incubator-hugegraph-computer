@@ -54,6 +54,7 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
+import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
@@ -153,7 +154,10 @@ public class EdgesInputTest extends UnitTestBase {
         }, freq);
 
         receiveManager.onFinished(connectionId);
-        partition.input(receiveManager.vertexPartitions().get(0),
+        Whitebox.invoke(partition.getClass(), new Class<?>[] {
+                        PeekableIterator.class, PeekableIterator.class},
+                        "input", partition,
+                        receiveManager.vertexPartitions().get(0),
                         receiveManager.edgePartitions().get(0));
         File edgeFile = Whitebox.getInternalState(partition, "edgeFile");
         EdgesInput edgesInput = new EdgesInput(context(), edgeFile);
