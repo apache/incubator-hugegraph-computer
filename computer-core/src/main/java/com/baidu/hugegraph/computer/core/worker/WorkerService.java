@@ -68,7 +68,7 @@ public class WorkerService implements Closeable {
     private volatile boolean inited;
     private volatile boolean closed;
     private Config config;
-    private volatile Bsp4Worker bsp4Worker;
+    private Bsp4Worker bsp4Worker;
     private ComputeManager<?> computeManager;
     private ContainerInfo workerInfo;
 
@@ -181,7 +181,7 @@ public class WorkerService implements Closeable {
 
         this.bsp4Worker.workerCloseDone();
         this.bsp4Worker.close();
-        this.shutdownHook.unHook();
+        this.shutdownHook.unhook();
 
         this.closed = true;
         LOG.info("{} WorkerService closed", this);

@@ -203,11 +203,6 @@ public class Bsp4Master extends BspBase {
         LOG.info("Master waited workers close-done");
     }
 
-    public void clean() {
-        this.bspClient().clean();
-        LOG.info("Cleaned up the BSP data");
-    }
-
     private List<byte[]> waitOnWorkersEvent(String prefix, long timeout) {
         return this.bspClient().getChildren(prefix, this.workerCount(),
                                             timeout, this.logInterval());

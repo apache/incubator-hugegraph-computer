@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.bsp;
 
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.util.Log;
@@ -75,6 +76,19 @@ public abstract class BspBase {
         this.bspClient.close();
         LOG.info("Closed {} BSP connection '{}' for job '{}'",
                  this.bspClient.type(), this.bspClient.endpoint(), this.jobId);
+    }
+
+    /**
+     * Cleaned up the BSP data
+     */
+    public void clean() {
+        try {
+            this.bspClient().clean();
+        } catch (Exception e) {
+            throw new ComputerException("Failed to clean up the BSP data: %s",
+                                        e, this.bspClient().endpoint());
+        }
+        LOG.info("Cleaned up the BSP data: %s", this.bspClient().endpoint());
     }
 
     private BspClient createBspClient() {

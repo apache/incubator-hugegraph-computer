@@ -1,7 +1,6 @@
 package com.baidu.hugegraph.computer.core.util;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 import org.slf4j.Logger;
 
@@ -21,8 +20,8 @@ public class ShutdownHook {
         this.threadShutdownHook = new Thread(() -> {
             try {
                 hook.close();
-            } catch (IOException e) {
-                LOG.warn("Failed to execute Shutdown hook: {}",
+            } catch (Throwable e) {
+                LOG.warn("Failed to execute shutdown hook: {}",
                           e.getMessage(), e);
             }
         });
@@ -30,7 +29,7 @@ public class ShutdownHook {
         return true;
     }
 
-    public boolean unHook() {
+    public boolean unhook() {
         if (this.threadShutdownHook == null) {
             return false;
         }
