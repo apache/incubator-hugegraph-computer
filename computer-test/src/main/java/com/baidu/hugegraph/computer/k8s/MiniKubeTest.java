@@ -334,6 +334,7 @@ public class MiniKubeTest extends AbstractK8sTest {
             future.getNow(null);
         } catch (Throwable throwable) {
             LOG.error("testPullImageError error:", throwable);
+            throw throwable;
         }
     }
 
