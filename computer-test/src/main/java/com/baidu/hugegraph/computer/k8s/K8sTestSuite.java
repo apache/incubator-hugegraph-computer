@@ -24,8 +24,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    KubernetesDriverTest.class,
-    OperatorTest.class,
+    //KubernetesDriverTest.class,
+    //OperatorTest.class,
     MiniKubeTest.class
 })
 public class K8sTestSuite {
