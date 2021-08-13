@@ -116,6 +116,7 @@ public abstract class AbstractK8sTest {
             }
             System.clearProperty(Config.KUBERNETES_KUBECONFIG_FILE);
         } catch (Throwable t) {
+
             LOG.error("teardown error:", t);
             throw t;
         }
