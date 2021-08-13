@@ -81,14 +81,19 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     @Before
     public void setup() throws IOException {
-        String kubeconfigFilename = getKubeconfigFilename();
-        File file = new File(kubeconfigFilename);
-        Assert.assertTrue(file.exists());
+        try {
+            String kubeconfigFilename = getKubeconfigFilename();
+            File file = new File(kubeconfigFilename);
+            Assert.assertTrue(file.exists());
 
-        this.namespace = "minikube";
-        System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
-                           Constants.ALL_NAMESPACE);
-        super.setup();
+            this.namespace = "minikube";
+            System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
+                               Constants.ALL_NAMESPACE);
+            super.setup();
+        } catch (Throwable e) {
+            LOG.error("setup error:", e);
+            throw e;
+        }
     }
 
     @Test
@@ -295,8 +300,8 @@ public class MiniKubeTest extends AbstractK8sTest {
                .onJobStateChanged(Mockito.eq(jobState));
 
         HugeGraphComputerJob computerJob = this.operation
-                                               .withName(KubeUtil.crName(jobId))
-                                               .get();
+                .withName(KubeUtil.crName(jobId))
+                .get();
         computerJob.getSpec().setMasterCpu(Quantity.parse("2"));
         this.operation.createOrReplace(computerJob);
 
@@ -313,15 +318,17 @@ public class MiniKubeTest extends AbstractK8sTest {
     public void testPullImageError() {
         try {
             Map<String, String> params = new HashMap<>();
-            this.updateOptions(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
-                               "xxx");
+            this.updateOptions(
+                    KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
+                    "xxx");
             String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
             JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                this.driver.waitJob(jobId, params, jobObserver);
-            }, POOL);
+            CompletableFuture<Void> future =
+                    CompletableFuture.runAsync(() -> {
+                        this.driver.waitJob(jobId, params, jobObserver);
+                    }, POOL);
 
             DefaultJobState jobState = new DefaultJobState();
             jobState.jobStatus(JobStatus.FAILED);
@@ -358,8 +365,8 @@ public class MiniKubeTest extends AbstractK8sTest {
                .onJobStateChanged(Mockito.eq(jobState));
 
         List<AbstractController<?>> controllers = Whitebox.getInternalState(
-                                                  this.entrypoint,
-                                                  "controllers");
+                this.entrypoint,
+                "controllers");
         AbstractController<?> abstractController = controllers.get(0);
         List<Pod> pods = Whitebox.invoke(AbstractController.class,
                                          new Class[]{String.class, Class.class,
