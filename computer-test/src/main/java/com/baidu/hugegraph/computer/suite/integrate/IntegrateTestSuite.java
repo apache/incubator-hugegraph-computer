@@ -31,7 +31,7 @@ import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    SenderIntegrateTest.class
+    //SenderIntegrateTest.class
 })
 public class IntegrateTestSuite {
 
