@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.slf4j.Logger;
 
@@ -216,6 +217,7 @@ public abstract class AbstractK8sTest {
                 .load(new File("../computer-k8s-operator/manifest" +
                                "/hugegraph-computer-crd.v1beta1.yaml"));
         cr.createOrReplace();
-        cr.waitUntilCondition(Objects::nonNull, 5, TimeUnit.SECONDS);
+        Assert.assertNotNull(cr.waitUntilCondition(Objects::nonNull,
+                                                   5, TimeUnit.SECONDS));
     }
 }
