@@ -444,6 +444,7 @@ public class ValueFileTest {
                 UnsafeBytesOutput output = new UnsafeBytesOutput(20);
                 output.writeBytes("banana");
                 UnsafeBytesInput input = new UnsafeBytesInput(output.buffer());
+                output.close();
 
                 result = input1.compare(0, 2, input, 0, 4);
                 Assert.assertLt(0, result);

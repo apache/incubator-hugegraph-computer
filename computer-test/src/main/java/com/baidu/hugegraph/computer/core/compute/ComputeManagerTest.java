@@ -65,9 +65,10 @@ public class ComputeManagerTest extends UnitTestBase {
     private Config config;
     private Managers managers;
     private ConnectionId connectionId;
-    private ComputeManager computeManager;
+    private ComputeManager<?> computeManager;
 
     @Before
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void setup() {
         this.config = UnitTestBase.updateWithRequiredOptions(
             ComputerOptions.JOB_ID, "local_001",
@@ -106,8 +107,8 @@ public class ComputeManagerTest extends UnitTestBase {
         this.connectionId = new ConnectionId(new InetSocketAddress("localhost",
                                                                    8081),
                                              0);
-        Computation computation = this.config.createObject(
-                                  ComputerOptions.WORKER_COMPUTATION_CLASS);
+        Computation<?> computation = this.config.createObject(
+                                     ComputerOptions.WORKER_COMPUTATION_CLASS);
         this.computeManager = new ComputeManager(context(), this.managers,
                                                  computation);
     }

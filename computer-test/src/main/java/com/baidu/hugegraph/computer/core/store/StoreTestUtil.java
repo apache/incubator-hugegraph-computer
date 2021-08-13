@@ -77,11 +77,12 @@ public class StoreTestUtil {
 
         BytesInput input = IOFactory.createBytesInput(data.buffer(),
                                                       (int) data.position());
-        Iterator<KvEntry> entriesIter = new KvEntriesInput(input);
+        KvEntriesInput iter = new KvEntriesInput(input);
         List<KvEntry> entries = new ArrayList<>();
-        while (entriesIter.hasNext()) {
-            entries.add(entriesIter.next());
+        while (iter.hasNext()) {
+            entries.add(iter.next());
         }
+        iter.close();
 
         return entries;
     }
@@ -105,12 +106,13 @@ public class StoreTestUtil {
                                            List<List<Integer>> map,
                                            String path) throws IOException {
         BytesInput input = SorterTestUtil.inputFromSubKvMap(map);
-        Iterator<KvEntry> iter = new KvEntriesInput(input, true);
+        KvEntriesInput iter = new KvEntriesInput(input, true);
         try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config, path)) {
             while (iter.hasNext()) {
                 builder.write(iter.next());
             }
         }
+        iter.close();
     }
 
     public static File mapToHgkvFile(Config config, List<Integer> map,

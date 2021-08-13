@@ -73,6 +73,7 @@ public class FlusherTest {
         SorterTestUtil.assertKvEntry(iter.next(), 2, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 3, 1);
         SorterTestUtil.assertKvEntry(iter.next(), 4, 1);
+        iter.close();
     }
 
     @Test
@@ -138,8 +139,9 @@ public class FlusherTest {
 
         BytesInput result = EntriesUtil.inputFromOutput(output);
         // Assert result
-        Iterator<KvEntry> kvIter = new KvEntriesInput(result);
-        SorterTestUtil.assertKvEntry(kvIter.next(), 1, 1);
-        SorterTestUtil.assertKvEntry(kvIter.next(), 3, 4);
+        KvEntriesInput iter = new KvEntriesInput(result);
+        SorterTestUtil.assertKvEntry(iter.next(), 1, 1);
+        SorterTestUtil.assertKvEntry(iter.next(), 3, 4);
+        iter.close();
     }
 }

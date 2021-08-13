@@ -46,7 +46,7 @@ import com.google.common.collect.ImmutableList;
 public class EntryOutputTest {
 
     @Test
-    public void testWriteKvEntry() throws IOException {
+    public void testWriteKvEntry() throws Exception {
         List<Integer> entries = ImmutableList.of(1, 5,
                                                  6, 6,
                                                  2, 1,
@@ -70,10 +70,11 @@ public class EntryOutputTest {
         SorterTestUtil.assertKvEntry(iter.next(), BytesId.of(6), BytesId.of(6));
         SorterTestUtil.assertKvEntry(iter.next(), BytesId.of(2), BytesId.of(1));
         SorterTestUtil.assertKvEntry(iter.next(), BytesId.of(4), BytesId.of(8));
+        iter.close();
     }
 
     @Test
-    public void testSubKvNotNeedSort() throws IOException {
+    public void testSubKvNotNeedSort() throws Exception {
         List<Integer> entries = ImmutableList.of(5,
                                                  6, 6,
                                                  2, 1,
@@ -106,10 +107,12 @@ public class EntryOutputTest {
                                      BytesId.of(2), BytesId.of(2));
         SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(),
                                      BytesId.of(6), BytesId.of(1));
+
+        iter.close();
     }
 
     @Test
-    public void testSubKvNeedSort() throws IOException {
+    public void testSubKvNeedSort() throws Exception {
         List<Integer> entries = ImmutableList.of(5,
                                                  6, 6,
                                                  2, 1,
@@ -145,6 +148,8 @@ public class EntryOutputTest {
                                      BytesId.of(2), BytesId.of(2));
         SorterTestUtil.assertKvEntry(kvEntry2SubKvs.next(),
                                      BytesId.of(6), BytesId.of(1));
+
+        iter.close();
     }
 
     private static BytesInput inputFromEntries(List<Integer> entries,

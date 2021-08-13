@@ -27,9 +27,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -37,15 +35,12 @@ import com.baidu.hugegraph.computer.core.network.IOMode;
 import com.baidu.hugegraph.computer.core.network.MockMessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.epoll.Epoll;
 
 public class NettyTransportServerTest extends UnitTestBase {
-
-    private static final Logger LOG =
-            Log.logger(NettyTransportServerTest.class);
 
     private static Config config;
     private static MockMessageHandler messageHandler;

@@ -325,13 +325,13 @@ public class SenderIntegrateTest {
             return this;
         }
 
-        public OptionsBuilder withResultClass(Class clazz) {
+        public OptionsBuilder withResultClass(Class<?> clazz) {
             this.options.add(ComputerOptions.ALGORITHM_RESULT_CLASS.name());
             this.options.add(clazz.getName());
             return this;
         }
 
-        public OptionsBuilder withMessageClass(Class clazz) {
+        public OptionsBuilder withMessageClass(Class<?> clazz) {
             this.options.add(ComputerOptions.ALGORITHM_MESSAGE_CLASS.name());
             this.options.add(clazz.getName());
             return this;

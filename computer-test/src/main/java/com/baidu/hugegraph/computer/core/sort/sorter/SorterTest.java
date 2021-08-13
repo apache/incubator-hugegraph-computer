@@ -109,11 +109,12 @@ public class SorterTest {
                           false);
 
         BytesInput resultInput = EntriesUtil.inputFromOutput(output);
-        Iterator<KvEntry> iter = new KvEntriesInput(resultInput);
+        KvEntriesInput iter = new KvEntriesInput(resultInput);
         SorterTestUtil.assertKvEntry(iter.next(), 1, 43);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 5);
         SorterTestUtil.assertKvEntry(iter.next(), 5, 9);
         SorterTestUtil.assertKvEntry(iter.next(), 6, 3);
+        iter.close();
     }
 
     @Test
@@ -284,12 +285,13 @@ public class SorterTest {
          * key 3 subKv 4 1
          */
         BytesInput input = this.sortedSubKvBuffer(config);
-        EntryIterator kvIter = new KvEntriesInput(input, true);
-        SorterTestUtil.assertSubKvByKv(kvIter.next(), 1, 3, 1, 5, 1);
-        SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 5, 1, 8, 2);
-        SorterTestUtil.assertSubKvByKv(kvIter.next(), 2, 9, 1);
-        SorterTestUtil.assertSubKvByKv(kvIter.next(), 3, 2, 2, 3, 1);
-        SorterTestUtil.assertSubKvByKv(kvIter.next(), 3, 4, 1);
+        EntryIterator iter = new KvEntriesInput(input, true);
+        SorterTestUtil.assertSubKvByKv(iter.next(), 1, 3, 1, 5, 1);
+        SorterTestUtil.assertSubKvByKv(iter.next(), 2, 5, 1, 8, 2);
+        SorterTestUtil.assertSubKvByKv(iter.next(), 2, 9, 1);
+        SorterTestUtil.assertSubKvByKv(iter.next(), 3, 2, 2, 3, 1);
+        SorterTestUtil.assertSubKvByKv(iter.next(), 3, 4, 1);
+        iter.close();
     }
 
     @Test
