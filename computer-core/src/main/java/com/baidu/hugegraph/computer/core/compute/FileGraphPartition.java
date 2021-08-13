@@ -387,10 +387,9 @@ public class FileGraphPartition<M extends Value<M>> {
     }
 
     private static void createFile(File file) throws IOException {
+        File canonicalFile = file.getParentFile().getCanonicalFile();
         boolean mkdirs = file.getParentFile().mkdirs();
-        assert mkdirs;
 
         boolean newFile = file.createNewFile();
-        assert newFile;
     }
 }
