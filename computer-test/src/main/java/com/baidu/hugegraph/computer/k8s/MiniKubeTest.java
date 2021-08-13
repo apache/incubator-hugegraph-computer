@@ -40,6 +40,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
@@ -56,12 +57,15 @@ import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.ExecutorUtil;
+import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Quantity;
 
 public class MiniKubeTest extends AbstractK8sTest {
+
+    private static final Logger LOG = Log.logger(MiniKubeTest.class);
 
     private static final String ALGORITHM_NAME = "PageRank";
     private static ExecutorService POOL;
@@ -78,14 +82,19 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     @Before
     public void setup() throws IOException {
-        String kubeconfigFilename = getKubeconfigFilename();
-        File file = new File(kubeconfigFilename);
-        Assert.assertTrue(file.exists());
+        try {
+            String kubeconfigFilename = getKubeconfigFilename();
+            File file = new File(kubeconfigFilename);
+            Assert.assertTrue(file.exists());
 
-        this.namespace = "minikube";
-        System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
-                           Constants.ALL_NAMESPACE);
-        super.setup();
+            this.namespace = "minikube";
+            System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
+                               Constants.ALL_NAMESPACE);
+            super.setup();
+        } catch (Throwable throwable) {
+            LOG.error("Failed to setup MiniKubeTest ", throwable);
+            throw throwable;
+        }
     }
 
     @Test
