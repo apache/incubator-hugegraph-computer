@@ -46,6 +46,7 @@ import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.OptionSpace;
+import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.google.common.collect.Lists;
@@ -200,13 +201,14 @@ public abstract class AbstractK8sTest {
     }
 
     private void createCRD(KubernetesClient client) {
-        Resource<CustomResourceDefinition> cr = client
+        Resource<CustomResourceDefinition> crd = client
                 .apiextensions()
                 .v1beta1()
                 .customResourceDefinitions()
                 .load(new File("../computer-k8s-operator/manifest" +
                                "/hugegraph-computer-crd.v1beta1.yaml"));
-        cr.createOrReplace();
-        cr.waitUntilCondition(Objects::nonNull, 5, TimeUnit.SECONDS);
+        crd.createOrReplace();
+        crd.waitUntilReady(10, TimeUnit.SECONDS);
+        Assert.assertNotNull(crd.get());
     }
 }
