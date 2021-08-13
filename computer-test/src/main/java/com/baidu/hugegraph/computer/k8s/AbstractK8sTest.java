@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.After;
 import org.junit.Before;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
@@ -48,6 +49,7 @@ import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.ExecutorUtil;
+import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
@@ -71,6 +73,8 @@ public abstract class AbstractK8sTest {
     protected MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
               Resource<HugeGraphComputerJob>> operation;
 
+    private static final Logger LOG = Log.logger(AbstractK8sTest.class);
+
     protected static final String IMAGE_REPOSITORY_URL =
               "czcoder/hugegraph-computer-test";
 
@@ -93,12 +97,17 @@ public abstract class AbstractK8sTest {
 
     @Before
     public void setup() throws IOException {
-        this.initConfig();
-        this.kubeClient = new DefaultKubernetesClient()
-                              .inNamespace(this.namespace);
-        this.createCRD(this.kubeClient);
-        this.initKubernetesDriver();
-        this.initOperator();
+        try {
+            this.initConfig();
+            this.kubeClient = new DefaultKubernetesClient()
+                    .inNamespace(this.namespace);
+            this.createCRD(this.kubeClient);
+            this.initKubernetesDriver();
+            this.initOperator();
+        } catch (Throwable t) {
+            LOG.error("setup error:", t);
+            throw t;
+        }
     }
 
     @After
