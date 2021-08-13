@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.configuration.MapConfiguration;
 import org.junit.After;
@@ -51,6 +52,7 @@ import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.apiextensions.v1beta1.CustomResourceDefinition;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
@@ -198,10 +200,13 @@ public abstract class AbstractK8sTest {
     }
 
     private void createCRD(KubernetesClient client) {
-        client.apiextensions().v1beta1()
-              .customResourceDefinitions()
-              .load(new File("../computer-k8s-operator/manifest" +
-                             "/hugegraph-computer-crd.v1beta1.yaml"))
-              .createOrReplace();
+        Resource<CustomResourceDefinition> cr = client
+                .apiextensions()
+                .v1beta1()
+                .customResourceDefinitions()
+                .load(new File("../computer-k8s-operator/manifest" +
+                               "/hugegraph-computer-crd.v1beta1.yaml"));
+        cr.createOrReplace();
+        cr.waitUntilCondition(Objects::nonNull, 5, TimeUnit.SECONDS);
     }
 }

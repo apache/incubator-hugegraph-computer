@@ -257,7 +257,7 @@ public class ComputerJobController
             this.recordEvent(computerJob, EventType.NORMAL,
                              KubeUtil.succeedEventName(crName),
                              "ComputerJobSucceed",
-                             String.format("Job %s run success, run cost %ss",
+                             String.format("Job %s run successfully, took %ss",
                                            crName, cost));
             return status;
         }
