@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.config;
 
+import static com.baidu.hugegraph.config.OptionChecker.allowValues;
 import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
 import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 
@@ -133,5 +134,14 @@ public class OperatorOptions extends OptionHolder {
                     "The internal etcd url for operator system.",
                     disallowEmpty(),
                     "http://127.0.0.1:2379"
+            );
+
+    public static final ConfigOption<Boolean> AUTO_DESTROY_POD =
+            new ConfigOption<>(
+                    "k8s.auto_destroy_pod",
+                    "Whether to automatically destroy all pods when the job " +
+                    "is completed or failed.",
+                    allowValues(true, false),
+                    true
             );
 }

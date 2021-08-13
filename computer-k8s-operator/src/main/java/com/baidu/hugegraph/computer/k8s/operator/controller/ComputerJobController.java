@@ -47,6 +47,7 @@ import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.common.MatchWithMsg;
 import com.baidu.hugegraph.computer.k8s.operator.common.OperatorRequest;
 import com.baidu.hugegraph.computer.k8s.operator.common.OperatorResult;
+import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.Log;
@@ -77,6 +78,7 @@ public class ComputerJobController
 
     private final MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
             Resource<HugeGraphComputerJob>> operation;
+    private final Boolean autoDestroyPod;
 
     private static final int TOTAL_COMPONENTS = 2;
     private static final int ALLOW_FAILED_JOBS = 0;
@@ -94,6 +96,7 @@ public class ComputerJobController
         this.operation = this.kubeClient.customResources(
                                          HugeGraphComputerJob.class,
                                          HugeGraphComputerJobList.class);
+        this.autoDestroyPod = this.config.get(OperatorOptions.AUTO_DESTROY_POD);
     }
 
     @Override
@@ -171,7 +174,9 @@ public class ComputerJobController
             return true;
         } else {
             if (JobStatus.finished(status.getJobStatus())) {
-                this.deleteCR(computerJob);
+                if (this.autoDestroyPod) {
+                    this.deleteCR(computerJob);
+                }
                 return true;
             }
         }

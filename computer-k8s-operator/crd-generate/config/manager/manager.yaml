@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: manager
-        command: ["java", "-jar", "operator.jar"]
+        command: ["java", "-jar", "hugegraph-computer-operator.jar"]
         args: []
         image: controller:latest
         imagePullPolicy: Always
@@ -31,6 +31,8 @@ spec:
             value: "http://hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2379"
           - name: LOG_LEVEL
             value: "INFO"
+          - name: AUTO_DESTROY_POD
+            value: "true"
         livenessProbe:
           httpGet:
             path: /health
