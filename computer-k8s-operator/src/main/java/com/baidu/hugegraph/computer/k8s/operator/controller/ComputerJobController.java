@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.controller;
 
+import java.net.HttpURLConnection;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,6 +47,7 @@ import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.common.MatchWithMsg;
 import com.baidu.hugegraph.computer.k8s.operator.common.OperatorRequest;
 import com.baidu.hugegraph.computer.k8s.operator.common.OperatorResult;
+import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.Log;
@@ -61,6 +64,7 @@ import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobCondition;
 import io.fabric8.kubernetes.client.CustomResource;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
@@ -74,6 +78,7 @@ public class ComputerJobController
 
     private final MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
             Resource<HugeGraphComputerJob>> operation;
+    private final Boolean autoDestroyPod;
 
     private static final int TOTAL_COMPONENTS = 2;
     private static final int ALLOW_FAILED_JOBS = 0;
@@ -91,14 +96,15 @@ public class ComputerJobController
         this.operation = this.kubeClient.customResources(
                                          HugeGraphComputerJob.class,
                                          HugeGraphComputerJobList.class);
+        this.autoDestroyPod = this.config.get(OperatorOptions.AUTO_DESTROY_POD);
     }
 
     @Override
     protected OperatorResult reconcile(OperatorRequest request) {
         HugeGraphComputerJob computerJob = this.getCR(request);
         if (computerJob == null) {
-            LOG.info("Unable to fetch HugeGraphComputerJob, " +
-                     "it may have been deleted");
+            LOG.debug("Unable to fetch HugeGraphComputerJob {}, " +
+                      "it may have been deleted", request.name());
             return OperatorResult.NO_REQUEUE;
         }
 
@@ -109,9 +115,9 @@ public class ComputerJobController
         }
 
         ComputerJobComponent observed = this.observeComponent(computerJob);
-        if (this.updateStatus(observed)) {
-            LOG.info("Wait status to be stable before taking further actions");
-            return OperatorResult.REQUEUE;
+        if (!this.updateStatus(observed)) {
+            LOG.debug("Wait status to be stable before taking further actions");
+            return OperatorResult.NO_REQUEUE;
         }
 
         if (Objects.equals(computerJob.getStatus().getJobStatus(),
@@ -137,7 +143,7 @@ public class ComputerJobController
 
         if (ownsResource instanceof Pod) {
             ObjectMeta metadata = ownsResource.getMetadata();
-            if (metadata != null) {
+            if (metadata != null && metadata.getLabels() != null) {
                 Map<String, String> labels = metadata.getLabels();
                 String kind = HasMetadata.getKind(HugeGraphComputerJob.class);
                 String crName = KubeUtil.matchKindAndGetCrName(labels, kind);
@@ -168,7 +174,9 @@ public class ComputerJobController
             return true;
         } else {
             if (JobStatus.finished(status.getJobStatus())) {
-                this.deleteCR(computerJob);
+                if (this.autoDestroyPod) {
+                    this.deleteCR(computerJob);
+                }
                 return true;
             }
         }
@@ -245,10 +253,12 @@ public class ComputerJobController
         } else if (succeededComponents.intValue() == TOTAL_COMPONENTS) {
             status.setJobStatus(JobStatus.SUCCEEDED.name());
             String crName = computerJob.getMetadata().getName();
+            long cost = this.calculateJobCost(computerJob);
             this.recordEvent(computerJob, EventType.NORMAL,
                              KubeUtil.succeedEventName(crName),
                              "ComputerJobSucceed",
-                             String.format("Job %s run success", crName));
+                             String.format("Job %s run successfully, took %ss",
+                                           crName, cost));
             return status;
         }
 
@@ -261,6 +271,15 @@ public class ComputerJobController
         }
 
         return status;
+    }
+
+    private long calculateJobCost(HugeGraphComputerJob computerJob) {
+        String creationTimestamp = computerJob.getMetadata()
+                                              .getCreationTimestamp();
+        long createTime = OffsetDateTime.parse(creationTimestamp)
+                                        .toEpochSecond();
+        long now = OffsetDateTime.now().toEpochSecond();
+        return now - createTime;
     }
 
     private ComponentState deriveJobStatus(Job job,
@@ -302,10 +321,10 @@ public class ComputerJobController
                 newState.setMessage(failedPullImage.msg());
                 failedComponents.increment();
             } else {
-                int active = KubeUtil.intVal(job.getStatus().getActive());
-                boolean allPodRunning = pods.stream()
-                                            .allMatch(PodStatusUtil::isRunning);
-                if (active >= instances && allPodRunning) {
+                int running = pods.stream().filter(PodStatusUtil::isRunning)
+                                  .mapToInt(x -> 1).sum();
+                int active = running + succeeded;
+                if (active >= instances) {
                     newState.setState(JobComponentState.RUNNING.value());
                     runningComponents.increment();
                 } else {
@@ -495,11 +514,23 @@ public class ComputerJobController
                     client = this.kubeClient.inNamespace(namespace);
                 }
 
-                String log = client.pods().withName(name)
-                                   .tailingLines(ERROR_LOG_TAILING_LINES)
-                                   .getLog(true);
-                if (StringUtils.isNotBlank(log)) {
-                    return log + "\n podName:" + pod.getMetadata().getName();
+                String log;
+                // Fix the pod deleted when job failed
+                try {
+                    log = client.pods().withName(name)
+                                       .tailingLines(ERROR_LOG_TAILING_LINES)
+                                       .getLog(true);
+                } catch (KubernetesClientException e) {
+                    if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                       continue;
+                    } else {
+                        throw e;
+                    }
+                }
+                if (StringUtils.isNotBlank(log) &&
+                    !log.contains("Unable to retrieve container logs")) {
+                    return log + "\n podName:" + pod.getMetadata().getName() +
+                                 "\n nodeIp:" + pod.getStatus().getHostIP();
                 }
             }
         }

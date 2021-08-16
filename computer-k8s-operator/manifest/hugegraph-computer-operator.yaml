@@ -376,7 +376,7 @@ spec:
         command:
         - java
         - -jar
-        - operator.jar
+        - hugegraph-computer-operator.jar
         env:
         - name: PROBE_PORT
           value: "9892"
@@ -388,6 +388,8 @@ spec:
           value: http://hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2379
         - name: LOG_LEVEL
           value: INFO
+        - name: AUTO_DESTROY_POD
+          value: "true"
         image: hugegraph/hugegraph-computer-operator:latest
         imagePullPolicy: Always
         livenessProbe:

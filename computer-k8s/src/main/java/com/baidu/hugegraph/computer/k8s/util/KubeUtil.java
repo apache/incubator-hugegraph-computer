@@ -142,8 +142,8 @@ public class KubeUtil {
         return OffsetDateTime.now().toString();
     }
 
-    public static int intVal(Integer integer) {
-        return integer != null ? integer : -1;
+    public static int intVal(Integer value) {
+        return value != null ? value : 0;
     }
 
     public static String asProperties(Map<String, String> map) {

@@ -168,6 +168,11 @@ public class OperatorEntrypoint {
             this.controllerPool = null;
         }
 
+        if (this.informerFactory != null) {
+            this.informerFactory.stopAllRegisteredInformers();
+            this.informerFactory = null;
+        }
+
         if (this.kubeClient != null) {
             this.kubeClient.close();
             this.kubeClient = null;
