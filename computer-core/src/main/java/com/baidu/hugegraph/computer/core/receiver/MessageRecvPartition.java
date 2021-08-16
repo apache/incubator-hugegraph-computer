@@ -165,17 +165,15 @@ public abstract class MessageRecvPartition {
      * Merge outputFiles if needed, like merge 10000 files into 100 files.
      */
     private void mergeOutputFilesIfNeeded() {
-        int actualSize = this.outputFiles.size();
-        if (actualSize <= this.mergeFileNum) {
+        if (this.outputFiles.size() <= 1) {
             return;
         }
-        int targetSize = this.mergeFileNum;
-        // If mergeFileNum = 200 and actual = 400, target = 20.
-        if (actualSize < this.mergeFileNum * this.mergeFileNum) {
-            targetSize = (int) Math.sqrt(actualSize);
-        }
 
-        List<String> newOutputs = this.genOutputFileNames(targetSize);
+        /*
+         * TODO Restore genOutputFileNames(sqrt(outputFiles.size()))
+         *  after add Sorter#iterator() of subkv
+         */
+        List<String> newOutputs = this.genOutputFileNames(1);
         this.sortManager.mergeInputs(this.outputFiles, newOutputs,
                                      this.withSubKv, this.outerSortFlusher());
         this.outputFiles = newOutputs;

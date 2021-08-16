@@ -41,7 +41,7 @@ import io.netty.buffer.Unpooled;
 
 public class ReceiverUtil {
 
-    public static void comsumeBuffer(byte[] bytes,
+    public static void consumeBuffer(byte[] bytes,
                                      Consumer<ManagedBuffer> consumer) {
         ByteBuf buf = Unpooled.directBuffer(bytes.length);
         try {

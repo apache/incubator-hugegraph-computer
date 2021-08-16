@@ -183,7 +183,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             Vertex vertex = graphFactory().createVertex();
             vertex.id(BytesId.of(i));
             vertex.properties(graphFactory().createProperties());
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeVertex(vertex), consumer);
         }
     }
 
@@ -197,7 +197,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             properties.put("p1", new LongValue(i));
             vertex.properties(properties);
 
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeVertex(vertex), consumer);
         }
 
         for (long i = 0L; i < 10L; i++) {
@@ -207,13 +207,13 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
             properties.put("p2", new LongValue(2L * i));
             vertex.properties(properties);
 
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeVertex(vertex), consumer);
         }
     }
 
     private static void addTwoEmptyBuffer(Consumer<ManagedBuffer> consumer) {
         for (int i = 0; i < 2; i++) {
-            ReceiverUtil.comsumeBuffer(new byte[2], consumer);
+            ReceiverUtil.consumeBuffer(new byte[2], consumer);
         }
     }
 

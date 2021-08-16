@@ -165,7 +165,7 @@ public class ComputeManagerTest extends UnitTestBase {
             Vertex vertex = graphFactory().createVertex();
             vertex.id(BytesId.of(i));
             vertex.properties(graphFactory().createProperties());
-            ReceiverUtil.comsumeBuffer(writeVertex(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeVertex(vertex), consumer);
         }
     }
 
@@ -203,7 +203,7 @@ public class ComputeManagerTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.comsumeBuffer(writeEdges(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex), consumer);
         }
     }
 
@@ -236,7 +236,7 @@ public class ComputeManagerTest extends UnitTestBase {
                 Id id = BytesId.of(i);
                 IdList message = new IdList();
                 message.add(id);
-                ReceiverUtil.comsumeBuffer(ReceiverUtil.writeMessage(id,
+                ReceiverUtil.consumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
                                            consumer);
             }

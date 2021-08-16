@@ -72,8 +72,8 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.JOB_PARTITIONS_COUNT, "1",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
-            ComputerOptions.HGKV_MERGE_FILES_NUM, "5"
+            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
+            ComputerOptions.HGKV_MERGE_FILES_NUM, "2"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -162,7 +162,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.comsumeBuffer(writeEdges(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex), consumer);
         }
     }
 
@@ -182,7 +182,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.comsumeBuffer(writeEdges(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex), consumer);
         }
 
         for (long i = 0L; i < 10L; i++) {
@@ -198,7 +198,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.comsumeBuffer(writeEdges(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex), consumer);
         }
     }
 
