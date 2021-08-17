@@ -33,8 +33,8 @@ public class IntValueTest extends UnitTestBase {
         IntValue intValue1 = new IntValue();
         IntValue intValue2 = new IntValue(Integer.MIN_VALUE);
 
-        Assert.assertEquals(ValueType.INT, intValue1.type());
-        Assert.assertEquals(ValueType.INT, intValue2.type());
+        Assert.assertEquals(ValueType.INT, intValue1.valueType());
+        Assert.assertEquals(ValueType.INT, intValue2.valueType());
     }
 
     @Test

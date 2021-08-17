@@ -49,7 +49,7 @@ public class SerializeUtilTest {
         list1.add(id2);
 
         byte[] bytes = SerializeUtil.toBytes(list1);
-        List<Id> list2 = SerializeUtil.fromBytes(bytes, () -> BytesId.of());
+        List<Id> list2 = SerializeUtil.fromBytes(bytes, () -> new BytesId());
 
         Assert.assertEquals(list1, list2);
     }

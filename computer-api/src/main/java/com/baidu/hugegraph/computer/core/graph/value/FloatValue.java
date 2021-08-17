@@ -72,7 +72,7 @@ public class FloatValue extends Number implements Value<FloatValue> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.FLOAT;
     }
 

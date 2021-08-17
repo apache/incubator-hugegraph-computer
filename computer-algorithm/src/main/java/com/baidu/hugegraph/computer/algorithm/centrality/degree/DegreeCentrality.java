@@ -38,7 +38,7 @@ import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 import com.baidu.hugegraph.util.NumericUtil;
 
 public class DegreeCentrality implements Computation<NullValue> {
-    
+
     public static final String CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY =
                                "degree.centrality.weight.property";
     private boolean calculateByWeightProperty;
@@ -90,7 +90,7 @@ public class DegreeCentrality implements Computation<NullValue> {
             return 1.0;
         }
 
-        switch (value.type()) {
+        switch (value.valueType()) {
             case LONG:
             case INT:
             case DOUBLE:
@@ -99,7 +99,8 @@ public class DegreeCentrality implements Computation<NullValue> {
             default:
                 throw new ComputerException("The weight property can only be " +
                                             "either Long or Int or Double or " +
-                                            "Float, but got %s", value.type());
+                                            "Float, but got %s",
+                                            value.valueType());
         }
     }
 

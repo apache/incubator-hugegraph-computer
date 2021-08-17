@@ -71,7 +71,7 @@ public abstract class StructGraphOutput implements GraphWritebackOutput {
     }
 
     public void writeValue(Value<?> value) throws IOException {
-        switch (value.type()) {
+        switch (value.valueType()) {
             case ID_VALUE:
                 this.writeIdValue((Id) value);
                 break;
@@ -90,7 +90,7 @@ public abstract class StructGraphOutput implements GraphWritebackOutput {
                 break;
             default:
                 throw new ComputerException("Unexpected value type %s",
-                                            value.type());
+                                            value.valueType());
         }
     }
 

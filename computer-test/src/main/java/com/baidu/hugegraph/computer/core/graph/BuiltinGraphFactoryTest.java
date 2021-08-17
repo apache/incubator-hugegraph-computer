@@ -63,37 +63,40 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
     public void testCreateValue() {
         GraphFactory factory = context().graphFactory();
         Assert.assertEquals(ValueType.NULL,
-                            factory.createValue(ValueType.NULL.code()).type());
+                            factory.createValue(ValueType.NULL.code())
+                                   .valueType());
         Assert.assertEquals(ValueType.LONG,
-                            factory.createValue(ValueType.LONG.code()).type());
+                            factory.createValue(ValueType.LONG.code())
+                                   .valueType());
         Assert.assertEquals(ValueType.DOUBLE,
                             factory.createValue(ValueType.DOUBLE.code())
-                                   .type());
+                                   .valueType());
         Assert.assertEquals(ValueType.ID_VALUE,
                             factory.createValue(ValueType.ID_VALUE.code())
-                                   .type());
+                                   .valueType());
         Assert.assertEquals(ValueType.ID_VALUE_LIST,
                             factory.createValue(ValueType.ID_VALUE_LIST.code())
-                                   .type());
+                                   .valueType());
         Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
                             factory.createValue(
                                     ValueType.ID_VALUE_LIST_LIST.code())
-                                   .type());
+                                   .valueType());
 
         Assert.assertEquals(ValueType.NULL,
-                            factory.createValue(ValueType.NULL).type());
+                            factory.createValue(ValueType.NULL).valueType());
         Assert.assertEquals(ValueType.LONG,
-                            factory.createValue(ValueType.LONG).type());
+                            factory.createValue(ValueType.LONG).valueType());
         Assert.assertEquals(ValueType.DOUBLE,
-                            factory.createValue(ValueType.DOUBLE).type());
+                            factory.createValue(ValueType.DOUBLE).valueType());
         Assert.assertEquals(ValueType.ID_VALUE,
-                            factory.createValue(ValueType.ID_VALUE).type());
+                            factory.createValue(ValueType.ID_VALUE)
+                                   .valueType());
         Assert.assertEquals(ValueType.ID_VALUE_LIST,
                             factory.createValue(ValueType.ID_VALUE_LIST)
-                                   .type());
+                                   .valueType());
         Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
                             factory.createValue(ValueType.ID_VALUE_LIST_LIST)
-                                   .type());
+                                   .valueType());
 
         Assert.assertThrows(NullPointerException.class, () -> {
             factory.createValue(null);

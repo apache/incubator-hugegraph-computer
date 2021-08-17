@@ -116,7 +116,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
     @Override
     public void writeValue(RandomAccessOutput out, Value<?> value)
                            throws IOException {
-        out.writeByte(value.type().code());
+        out.writeByte(value.valueType().code());
         value.write(out);
     }
 

@@ -142,7 +142,7 @@ public class StreamGraphInput implements GraphComputeInput {
     }
 
     public static Id readId(RandomAccessInput in) throws IOException {
-        Id id = BytesId.of();
+        Id id = new BytesId();
         id.read(in);
         return id;
     }

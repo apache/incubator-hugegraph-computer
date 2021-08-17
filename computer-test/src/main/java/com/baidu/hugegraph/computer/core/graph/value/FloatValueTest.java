@@ -33,8 +33,8 @@ public class FloatValueTest extends UnitTestBase {
         FloatValue value1 = new FloatValue();
         FloatValue value2 = new FloatValue(Float.MIN_VALUE);
 
-        Assert.assertEquals(ValueType.FLOAT, value1.type());
-        Assert.assertEquals(ValueType.FLOAT, value2.type());
+        Assert.assertEquals(ValueType.FLOAT, value1.valueType());
+        Assert.assertEquals(ValueType.FLOAT, value2.valueType());
     }
 
     @Test

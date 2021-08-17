@@ -28,7 +28,7 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
     /**
      * @return the value type of this instance
      */
-    ValueType type();
+    ValueType valueType();
 
     /**
      * Assign a new value to this object

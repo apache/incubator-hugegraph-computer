@@ -40,7 +40,7 @@ public class NullValue implements Value<NullValue> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.NULL;
     }
 

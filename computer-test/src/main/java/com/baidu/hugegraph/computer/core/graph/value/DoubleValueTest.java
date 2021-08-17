@@ -33,8 +33,8 @@ public class DoubleValueTest extends UnitTestBase {
         DoubleValue value1 = new DoubleValue();
         DoubleValue value2 = new DoubleValue(Double.MIN_VALUE);
 
-        Assert.assertEquals(ValueType.DOUBLE, value1.type());
-        Assert.assertEquals(ValueType.DOUBLE, value2.type());
+        Assert.assertEquals(ValueType.DOUBLE, value1.valueType());
+        Assert.assertEquals(ValueType.DOUBLE, value2.valueType());
     }
 
     @Test

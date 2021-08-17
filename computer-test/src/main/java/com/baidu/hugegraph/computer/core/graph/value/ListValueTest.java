@@ -35,8 +35,8 @@ public class ListValueTest extends UnitTestBase {
         ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
         ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
 
-        Assert.assertEquals(ValueType.LIST_VALUE, value1.type());
-        Assert.assertEquals(ValueType.LIST_VALUE, value2.type());
+        Assert.assertEquals(ValueType.LIST_VALUE, value1.valueType());
+        Assert.assertEquals(ValueType.LIST_VALUE, value2.valueType());
     }
 
     @Test

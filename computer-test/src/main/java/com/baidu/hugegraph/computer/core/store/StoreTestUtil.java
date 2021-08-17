@@ -139,7 +139,7 @@ public class StoreTestUtil {
 
     public static Id idFromPointer(Pointer pointer) throws IOException {
         BytesInput input = IOFactory.createBytesInput(pointer.bytes());
-        Id id = BytesId.of();
+        Id id = new BytesId();
         id.read(input);
         return id;
     }

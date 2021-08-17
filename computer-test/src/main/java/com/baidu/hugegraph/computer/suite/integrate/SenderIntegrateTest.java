@@ -28,6 +28,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.algorithm.rank.pagerank.PageRankParams;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -64,6 +65,7 @@ public class SenderIntegrateTest {
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
+                                          .withAlgorithm(PageRankParams.class)
                                           .withResultName("rank")
                                           .withResultClass(DoubleValue.class)
                                           .withMessageClass(DoubleValue.class)
@@ -90,6 +92,7 @@ public class SenderIntegrateTest {
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
+                                          .withAlgorithm(PageRankParams.class)
                                           .withResultName("rank")
                                           .withResultClass(DoubleValue.class)
                                           .withMessageClass(DoubleValue.class)
@@ -122,17 +125,20 @@ public class SenderIntegrateTest {
     }
 
     @Test
-    public void testTwoWorkers() throws InterruptedException {
+    public void testMultiWorkers() throws InterruptedException {
+        int workerCount = 5;
+        int partitionCount = 5;
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_003")
+                                          .withAlgorithm(PageRankParams.class)
                                           .withResultName("rank")
                                           .withResultClass(DoubleValue.class)
                                           .withMessageClass(DoubleValue.class)
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
-                                          .withWorkerCount(2)
-                                          .withPartitionCount(2)
+                                          .withWorkerCount(workerCount)
+                                          .withPartitionCount(partitionCount)
                                           .withRpcServerHost("127.0.0.1")
                                           .withRpcServerPort(8090)
                                           .build();
@@ -144,57 +150,43 @@ public class SenderIntegrateTest {
                 Assert.fail(e.getMessage());
             }
         });
-        Thread workerThread1 = new Thread(() -> {
-            String[] args = OptionsBuilder.newInstance()
-                                          .withJobId("local_003")
-                                          .withResultName("rank")
-                                          .withResultClass(DoubleValue.class)
-                                          .withMessageClass(DoubleValue.class)
-                                          .withMaxSuperStep(3)
-                                          .withComputationClass(COMPUTATION)
-                                          .withWorkerCount(2)
-                                          .withPartitionCount(2)
-                                          .withTransoprtServerPort(8091)
-                                          .withRpcServerRemote("127.0.0.1:8090")
-                                          .build();
-            try {
-                Thread.sleep(2000);
-                WorkerService service = initWorker(args);
-                service.execute();
-                service.close();
-            } catch (InterruptedException e) {
-                Assert.fail(e.getMessage());
-            }
-        });
-        Thread workerThread2 = new Thread(() -> {
-            String[] args = OptionsBuilder.newInstance()
-                                          .withJobId("local_003")
-                                          .withResultName("rank")
-                                          .withResultClass(DoubleValue.class)
-                                          .withMessageClass(DoubleValue.class)
-                                          .withMaxSuperStep(3)
-                                          .withComputationClass(COMPUTATION)
-                                          .withWorkerCount(2)
-                                          .withPartitionCount(2)
-                                          .withTransoprtServerPort(8092)
-                                          .withRpcServerRemote("127.0.0.1:8090")
-                                          .build();
-            try {
-                Thread.sleep(2000);
-                WorkerService service = initWorker(args);
-                service.execute();
-                service.close();
-            } catch (InterruptedException e) {
-                Assert.fail(e.getMessage());
-            }
-        });
+
+        List<Thread> workers = new ArrayList<>(workerCount);
+        for (int i = 1; i <= workerCount; i++) {
+            int port = 8090 + i;
+            workers.add(new Thread(() -> {
+                String[] args;
+                args = OptionsBuilder.newInstance()
+                                     .withJobId("local_003")
+                                     .withAlgorithm(PageRankParams.class)
+                                     .withResultName("rank")
+                                     .withResultClass(DoubleValue.class)
+                                     .withMessageClass(DoubleValue.class)
+                                     .withMaxSuperStep(3)
+                                     .withComputationClass(COMPUTATION)
+                                     .withWorkerCount(workerCount)
+                                     .withPartitionCount(partitionCount)
+                                     .withTransoprtServerPort(port)
+                                     .withRpcServerRemote("127.0.0.1:8090")
+                                     .build();
+                try {
+                    Thread.sleep(2000);
+                    WorkerService service = initWorker(args);
+                    service.execute();
+                    service.close();
+                } catch (InterruptedException e) {
+                    Assert.fail(e.getMessage());
+                }
+            }));
+        }
 
         masterThread.start();
-        workerThread1.start();
-        workerThread2.start();
-
-        workerThread1.join();
-        workerThread2.join();
+        for (Thread worker : workers) {
+            worker.start();
+        }
+        for (Thread worker : workers) {
+            worker.join();
+        }
         masterThread.join();
     }
 
@@ -203,6 +195,7 @@ public class SenderIntegrateTest {
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
+                                          .withAlgorithm(PageRankParams.class)
                                           .withResultName("rank")
                                           .withResultClass(DoubleValue.class)
                                           .withMessageClass(DoubleValue.class)
@@ -229,6 +222,7 @@ public class SenderIntegrateTest {
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
+                                          .withAlgorithm(PageRankParams.class)
                                           .withResultName("rank")
                                           .withResultClass(DoubleValue.class)
                                           .withMessageClass(DoubleValue.class)
@@ -322,6 +316,12 @@ public class SenderIntegrateTest {
         public OptionsBuilder withJobId(String jobId) {
             this.options.add(ComputerOptions.JOB_ID.name());
             this.options.add(jobId);
+            return this;
+        }
+
+        public OptionsBuilder withAlgorithm(Class<?> clazz) {
+            this.options.add(ComputerOptions.ALGORITHM_PARAMS_CLASS.name());
+            this.options.add(clazz.getName());
             return this;
         }
 

@@ -126,9 +126,9 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
 
     private void checkValue(V value) {
         E.checkNotNull(value, "aggregator", "value");
-        E.checkArgument(value.type() == this.type,
+        E.checkArgument(value.valueType() == this.type,
                         "Can't set %s value '%s' to %s aggregator",
-                        value.type().string(), value, this.type.string());
+                        value.valueType().string(), value, this.type.string());
     }
 
     @Override

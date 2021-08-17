@@ -57,15 +57,15 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
     public void add(T value) {
         E.checkArgument(value != null,
-                        "Can't add null to %s", this.type().string());
+                        "Can't add null to %s", this.valueType().string());
         if (this.elemType != ValueType.UNKNOWN) {
-            E.checkArgument(this.elemType == value.type(),
+            E.checkArgument(this.elemType == value.valueType(),
                             "Invalid value '%s' with type %s, " +
                             "expect element with type %s",
-                            value, value.type().string(),
+                            value, value.valueType().string(),
                             this.elemType.string());
         } else {
-            this.elemType = value.type();
+            this.elemType = value.valueType();
         }
         this.values.add(value);
     }
@@ -95,7 +95,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.LIST_VALUE;
     }
 
@@ -109,8 +109,8 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
         ValueType elemType = ((ListValue<T>) other).elemType();
         E.checkArgument(elemType == this.elemType(),
                         "Can't assign %s<%s> to %s<%s>",
-                        other.type().string(), elemType.string(),
-                        this.type().string(), this.elemType().string());
+                        other.valueType().string(), elemType.string(),
+                        this.valueType().string(), this.elemType().string());
         this.values = ((ListValue<T>) other).values();
     }
 

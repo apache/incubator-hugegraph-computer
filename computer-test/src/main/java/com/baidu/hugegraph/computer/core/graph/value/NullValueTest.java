@@ -33,8 +33,8 @@ public class NullValueTest extends UnitTestBase {
         NullValue value1 = NullValue.get();
         NullValue value2 = NullValue.get();
 
-        Assert.assertEquals(ValueType.NULL, value1.type());
-        Assert.assertEquals(ValueType.NULL, value2.type());
+        Assert.assertEquals(ValueType.NULL, value1.valueType());
+        Assert.assertEquals(ValueType.NULL, value2.valueType());
     }
 
     @Test
