@@ -68,11 +68,11 @@ public class WorkerService implements Closeable {
     private volatile boolean inited;
     private volatile boolean closed;
     private Config config;
-    private volatile Bsp4Worker bsp4Worker;
-    private ComputeManager computeManager;
+    private Bsp4Worker bsp4Worker;
+    private ComputeManager<?> computeManager;
     private ContainerInfo workerInfo;
 
-    private Computation<?> computation;
+    private Computation<Value<?>> computation;
     private Combiner<Value<?>> combiner;
 
     private ContainerInfo masterInfo;
@@ -139,8 +139,12 @@ public class WorkerService implements Closeable {
             dm.connect(worker.id(), worker.hostname(), worker.dataPort());
         }
 
-        this.computeManager = new ComputeManager(this.context, this.managers,
-                                                 this.computation);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        ComputeManager<?> computeManager = new ComputeManager(this.context,
+                                                              this.managers,
+                                                              this.computation);
+        this.computeManager = computeManager;
+
         this.managers.initedAll(this.config);
         LOG.info("{} WorkerService initialized", this);
         this.inited = true;
@@ -157,6 +161,7 @@ public class WorkerService implements Closeable {
      * Stop the worker service. Stop the managers created in
      * {@link #init(Config)}.
      */
+    @Override
     public void close() {
         this.checkInited();
         if (this.closed) {
@@ -176,7 +181,7 @@ public class WorkerService implements Closeable {
 
         this.bsp4Worker.workerCloseDone();
         this.bsp4Worker.close();
-        this.shutdownHook.unHook();
+        this.shutdownHook.unhook();
 
         this.closed = true;
         LOG.info("{} WorkerService closed", this);
@@ -233,7 +238,7 @@ public class WorkerService implements Closeable {
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
             if (superstep > 0) {
-                this.computeManager.takeComputeMessages();
+                this.computeManager.takeRecvedMessages();
             }
             /*
              * Call beforeSuperstep() before all workers compute() called.

@@ -97,11 +97,6 @@ public class Bsp4Worker extends BspBase {
         return containers;
     }
 
-    public void clean() {
-        this.bspClient().clean();
-        LOG.info("Cleaned up the BSP data");
-    }
-
     /**
      * The master set this signal to let workers knows the first superstep to
      * start with.

@@ -68,7 +68,6 @@ public class WorkerServiceTest extends UnitTestBase {
             );
             WorkerService workerService = new MockWorkerService();
             try {
-                Thread.sleep(2000L);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
@@ -144,6 +143,7 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.JOB_WORKERS_COUNT, "2",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
+                ComputerOptions.WORKER_DATA_DIRS, "[job_8086]",
                 ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
                 ComputerOptions.BSP_LOG_INTERVAL, "10000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
@@ -156,7 +156,6 @@ public class WorkerServiceTest extends UnitTestBase {
             );
             WorkerService workerService = new MockWorkerService();
             try {
-                Thread.sleep(2000);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
@@ -175,6 +174,7 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.JOB_WORKERS_COUNT, "2",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "8087",
+                ComputerOptions.WORKER_DATA_DIRS, "[job_8087]",
                 ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
                 ComputerOptions.BSP_LOG_INTERVAL, "10000",
                 ComputerOptions.BSP_MAX_SUPER_STEP, "2",
@@ -187,7 +187,6 @@ public class WorkerServiceTest extends UnitTestBase {
             );
             WorkerService workerService = new MockWorkerService();
             try {
-                Thread.sleep(2000);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {

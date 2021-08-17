@@ -53,8 +53,8 @@ public class MockComputation implements Computation<IdList> {
         IdListList value = new IdListList();
         vertex.value(value);
         Edges edges =  vertex.edges();
-        checkEdges(edges);
-        checkEdges(edges);
+        checkEdgesSize(edges);
+        checkEdgesSize(edges);
         if (RANDOM.nextInt() % 10 == 0) {
             vertex.inactivate();
         }
@@ -74,12 +74,12 @@ public class MockComputation implements Computation<IdList> {
         }
     }
 
-    private static void checkEdges(Edges edges) {
+    private static void checkEdgesSize(Edges edges) {
         int edgeSize = edges.size();
-        int edgeIndex = 0;
-        for (Edge edge : edges) {
-            edgeIndex++;
+        int edgeIterSize = 0;
+        for (@SuppressWarnings("unused") Edge edge : edges) {
+            edgeIterSize++;
         }
-        Assert.assertEquals(edgeSize, edgeIndex);
+        Assert.assertEquals(edgeSize, edgeIterSize);
     }
 }

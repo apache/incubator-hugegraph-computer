@@ -44,17 +44,17 @@ public class ComputeMessageRecvPartition extends MessageRecvPartition {
                                        SortManager sortManager) {
         super(context.config(), fileGenerator, sortManager, false);
         Config config = context.config();
-        Combiner<?> valueCombiner = config.createObject(
-                                    ComputerOptions.WORKER_COMBINER_CLASS,
-                                    false);
-        if (valueCombiner == null) {
+        Combiner<Value<?>> combiner = config.createObject(
+                                      ComputerOptions.WORKER_COMBINER_CLASS,
+                                      false);
+        if (combiner == null) {
             this.flusher = new KvOuterSortFlusher();
         } else {
             Value<?> v1 = config.createObject(
                           ComputerOptions.ALGORITHM_MESSAGE_CLASS);
             Value<?> v2 = v1.copy();
-            PointerCombiner<Value<?>> pointerCombiner = new PointerCombiner(
-                                                        v1, v2, valueCombiner);
+            PointerCombiner<Value<?>> pointerCombiner = new PointerCombiner<>(
+                                                        v1, v2, combiner);
             this.flusher = new CombineKvOuterSortFlusher(pointerCombiner);
         }
     }

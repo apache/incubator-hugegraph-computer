@@ -66,6 +66,11 @@ public class ValueFileOutput extends AbstractBufferedFileOutput {
     }
 
     @Override
+    public void write(byte[] b) throws IOException {
+        this.write(b, 0, b.length);
+    }
+
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
         if (this.bufferAvailable() >= len) {
             super.write(b, off, len);

@@ -117,13 +117,13 @@ public class MessageInputTest extends UnitTestBase {
         receiveManager.onFinished(this.connectionId);
         PeekableIterator<KvEntry> it = receiveManager.messagePartitions()
                                                      .get(0);
-        MessageInput<?> input = new MessageInput<>(context(), it);
+        MessageInput<IdList> input = new MessageInput<>(context(), it);
         Map<Id, List<IdList>> expectedMessages = expectedMessages();
         checkMessages(expectedMessages, input);
     }
 
     private void checkMessages(Map<Id, List<IdList>> expectedMessages,
-                               MessageInput input) throws IOException {
+                               MessageInput<IdList> input) throws IOException {
         for (long i = 0L; i < 200L; i++) {
             List<IdList> messages  = expectedMessages.get(BytesId.of(i));
             Id id = BytesId.of(i);

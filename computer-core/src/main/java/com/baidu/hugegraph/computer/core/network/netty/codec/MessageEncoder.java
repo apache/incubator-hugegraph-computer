@@ -19,13 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
-import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
@@ -42,8 +39,6 @@ import io.netty.util.concurrent.PromiseCombiner;
  */
 @ChannelHandler.Sharable
 public class MessageEncoder extends ChannelOutboundHandlerAdapter {
-
-    private static final Logger LOG = Log.logger(MessageEncoder.class);
 
     public static final MessageEncoder INSTANCE = new MessageEncoder();
 

@@ -157,7 +157,7 @@ public class MasterService implements Closeable {
         this.managers.closeAll(this.config);
 
         this.cleanAndCloseBsp();
-        this.shutdownHook.unHook();
+        this.shutdownHook.unhook();
 
         this.closed = true;
         LOG.info("{} MasterService closed", this);

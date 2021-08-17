@@ -199,6 +199,8 @@ public class IntValueTest extends UnitTestBase {
 
     private static class SubIntValue extends IntValue {
 
+        private static final long serialVersionUID = 279936857611008457L;
+
         public SubIntValue(int value) {
             super(value);
         }

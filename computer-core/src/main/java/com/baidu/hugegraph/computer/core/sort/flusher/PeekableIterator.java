@@ -25,6 +25,7 @@ import com.baidu.hugegraph.iterator.CIter;
 
 public interface PeekableIterator<T> extends CIter<T> {
 
+    @SuppressWarnings("unchecked")
     static <V> PeekableIterator<V> emptyIterator() {
         return (PeekableIterator<V>) EmptyIterator.EMPTY_ITERATOR;
     }

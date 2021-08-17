@@ -27,6 +27,8 @@ import com.baidu.hugegraph.util.E;
 
 public class FloatValue extends Number implements Value<FloatValue> {
 
+    private static final long serialVersionUID = 6098857579782490901L;
+
     private float value;
 
     public FloatValue() {

@@ -27,6 +27,8 @@ import com.baidu.hugegraph.util.E;
 
 public class LongValue extends Number implements Value<LongValue> {
 
+    private static final long serialVersionUID = 8332327679205404212L;
+
     private long value;
 
     public LongValue() {
@@ -45,12 +47,12 @@ public class LongValue extends Number implements Value<LongValue> {
 
     @Override
     public float floatValue() {
-        return (float) this.value;
+        return this.value;
     }
 
     @Override
     public double doubleValue() {
-        return (double) this.value;
+        return this.value;
     }
 
     public LongValue(long value) {

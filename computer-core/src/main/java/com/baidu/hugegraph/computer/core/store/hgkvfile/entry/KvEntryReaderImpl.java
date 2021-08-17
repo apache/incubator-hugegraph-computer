@@ -33,6 +33,7 @@ public class KvEntryReaderImpl implements KvEntryReader {
     public KvEntryReaderImpl(RandomAccessInput input) {
         this.input = input;
         try {
+            @SuppressWarnings("unused")
             int totalLength = input.readFixedInt();
             this.remaining = input.readFixedInt();
         } catch (IOException e) {

@@ -59,10 +59,9 @@ public class FileGraphPartition<M extends Value<M>> {
     private final ComputerContext context;
     private final FileGenerator fileGenerator;
     private final int partition;
+
     private final File vertexFile;
     private final File edgeFile;
-
-    private final Value<?> result;
 
     private File preStatusFile;
     private File curStatusFile;
@@ -72,10 +71,12 @@ public class FileGraphPartition<M extends Value<M>> {
     private long vertexCount;
     private long edgeCount;
 
-    private BufferedFileOutput curStatusOut;
-    private BufferedFileOutput curValueOut;
-    private BufferedFileInput preStatusIn;
-    private BufferedFileInput preValueIn;
+    private BufferedFileOutput curStatusOutput;
+    private BufferedFileOutput curValueOutput;
+
+    private BufferedFileInput preStatusInput;
+    private BufferedFileInput preValueInput;
+
     private VertexInput vertexInput;
     private EdgesInput edgesInput;
     private MessageInput<M> messageInput;
@@ -88,14 +89,12 @@ public class FileGraphPartition<M extends Value<M>> {
         this.partition = partition;
         this.vertexFile = new File(this.fileGenerator.randomDirectory(VERTEX));
         this.edgeFile = new File(this.fileGenerator.randomDirectory(EDGE));
-        this.result = this.context.config().createObject(
-                      ComputerOptions.ALGORITHM_RESULT_CLASS);
         this.vertexCount = 0L;
         this.edgeCount = 0L;
     }
 
-    public PartitionStat init(PeekableIterator<KvEntry> vertices,
-                              PeekableIterator<KvEntry> edges) {
+    protected PartitionStat input(PeekableIterator<KvEntry> vertices,
+                                  PeekableIterator<KvEntry> edges) {
         if (edges == null) {
             edges = PeekableIterator.emptyIterator();
         }
@@ -104,17 +103,14 @@ public class FileGraphPartition<M extends Value<M>> {
             createFile(this.edgeFile);
             BufferedFileOutput vertexOut = new BufferedFileOutput(
                                            this.vertexFile);
-            BufferedFileOutput edgeOut = new BufferedFileOutput(this.edgeFile);
+            BufferedFileOutput edgeOut = new BufferedFileOutput(
+                                         this.edgeFile);
             while (vertices.hasNext()) {
                 KvEntry entry = vertices.next();
                 Pointer key = entry.key();
-                vertexOut.writeFixedInt(key.bytes().length);
-                vertexOut.write(key.bytes());
                 Pointer value = entry.value();
-                vertexOut.writeFixedInt(value.bytes().length);
-                vertexOut.write(value.bytes());
+                this.writeVertex(key, value, vertexOut);
                 this.writeEdges(key, edges, edgeOut);
-                this.vertexCount++;
             }
             vertexOut.close();
             edgeOut.close();
@@ -149,7 +145,7 @@ public class FileGraphPartition<M extends Value<M>> {
                 this.saveVertex(vertex);
             } catch (IOException e) {
                 throw new ComputerException(
-                          "Error occurred when saveVertex", e);
+                          "Error occurred when saveVertex: %s", e, vertex);
             }
         }
         try {
@@ -172,22 +168,17 @@ public class FileGraphPartition<M extends Value<M>> {
                       "Error occurred when beforeCompute at superstep %s",
                       e, superstep);
         }
+        Value<?> result = this.context.config().createObject(
+                          ComputerOptions.ALGORITHM_RESULT_CLASS);
         long activeVertexCount = 0L;
         while (this.vertexInput.hasNext()) {
             Vertex vertex = this.vertexInput.next();
-            Iterator<M> messageIt = this.messageInput.iterator(
-                                    this.vertexInput.idPointer());
-            try {
-                boolean status = this.preStatusIn.readBoolean();
-                this.result.read(this.preValueIn);
-                vertex.value(this.result);
-                if (status || messageIt.hasNext()) {
-                    vertex.reactivate();
-                } else {
-                    vertex.inactivate();
-                }
-            } catch (IOException e) {
-                throw new ComputerException("Read status or result failed", e);
+            this.readVertexStatusAndValue(vertex, result);
+
+            Iterator<M> messageIter = this.messageInput.iterator(
+                                      this.vertexInput.idPointer());
+            if (messageIter.hasNext()) {
+                vertex.reactivate();
             }
 
             /*
@@ -198,13 +189,14 @@ public class FileGraphPartition<M extends Value<M>> {
                 Edges edges = this.edgesInput.edges(
                               this.vertexInput.idPointer());
                 vertex.edges(edges);
-                computation.compute(context, vertex, messageIt);
+                computation.compute(context, vertex, messageIter);
             }
 
-            // Computation may change vertex status.
+            // The vertex status may be changed after computation
             if (vertex.active()) {
                 activeVertexCount++;
             }
+
             try {
                 this.saveVertex(vertex);
             } catch (IOException e) {
@@ -224,7 +216,7 @@ public class FileGraphPartition<M extends Value<M>> {
                                  this.vertexCount - activeVertexCount, 0L, 0L);
     }
 
-    public PartitionStat output() {
+    protected PartitionStat output() {
         ComputerOutput output = this.context.config().createObject(
                                 ComputerOptions.OUTPUT_CLASS);
         output.init(this.context.config(), this.partition);
@@ -234,20 +226,11 @@ public class FileGraphPartition<M extends Value<M>> {
             throw new ComputerException("Error occurred when beforeOutput", e);
         }
 
+        Value<?> result = this.context.config().createObject(
+                          ComputerOptions.ALGORITHM_RESULT_CLASS);
         while (this.vertexInput.hasNext()) {
             Vertex vertex = this.vertexInput.next();
-            try {
-                boolean status = this.preStatusIn.readBoolean();
-                this.result.read(this.preValueIn);
-                vertex.value(this.result);
-                if (status) {
-                    vertex.reactivate();
-                } else {
-                    vertex.inactivate();
-                }
-            } catch (IOException e) {
-                throw new ComputerException("Read status or result failed", e);
-            }
+            this.readVertexStatusAndValue(vertex, result);
 
             Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
             vertex.edges(edges);
@@ -269,53 +252,92 @@ public class FileGraphPartition<M extends Value<M>> {
      * this partition. The messages is null if no messages sent to this
      * partition at previous superstep.
      */
-    public void messages(PeekableIterator<KvEntry> messages) {
+    protected void messages(PeekableIterator<KvEntry> messages) {
         this.messageInput = new MessageInput<>(this.context, messages);
     }
 
-    public int partition() {
+    protected int partition() {
         return this.partition;
     }
 
-    private void saveVertex(Vertex vertex) throws IOException {
-        this.curStatusOut.writeBoolean(vertex.active());
-        Value<?> value = vertex.value();
-        E.checkNotNull(value, "Vertex's value can't be null");
-        vertex.value().write(this.curValueOut);
+    private void readVertexStatusAndValue(Vertex vertex, Value<?> result) {
+        try {
+            boolean activate = this.preStatusInput.readBoolean();
+            if (activate) {
+                vertex.reactivate();
+            } else {
+                vertex.inactivate();
+            }
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Failed to read status of vertex %s", e, vertex);
+        }
+
+        try {
+            result.read(this.preValueInput);
+            vertex.value(result);
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Failed to read status of vertex %s", e, vertex);
+        }
     }
 
-    private void writeEdges(Pointer id, PeekableIterator<KvEntry> edges,
+    private void saveVertex(Vertex vertex) throws IOException {
+        this.curStatusOutput.writeBoolean(vertex.active());
+        Value<?> value = vertex.value();
+        E.checkNotNull(value, "Vertex's value can't be null");
+        value.write(this.curValueOutput);
+    }
+
+    private void writeVertex(Pointer key, Pointer value,
+                             BufferedFileOutput vertexOut) throws IOException {
+        byte[] keyBytes = key.bytes();
+        vertexOut.writeFixedInt(keyBytes.length);
+        vertexOut.write(keyBytes);
+
+        byte[] valueBytes = value.bytes();
+        vertexOut.writeFixedInt(valueBytes.length);
+        vertexOut.write(valueBytes);
+
+        this.vertexCount++;
+    }
+
+    private void writeEdges(Pointer vid, PeekableIterator<KvEntry> edges,
                             BufferedFileOutput edgeOut) throws IOException {
+        byte[] vidBytes = vid.bytes();
         while (edges.hasNext()) {
             KvEntry entry = edges.peek();
             Pointer key = entry.key();
-            int status = id.compareTo(key);
-            if (status < 0) {
+            int matched = vid.compareTo(key);
+            if (matched < 0) {
                 return;
-            } else if (status == 0) {
-                edges.next();
-                edgeOut.writeFixedInt(id.bytes().length);
-                edgeOut.write(id.bytes());
-
-                long valuePosition = edgeOut.position();
-                edgeOut.writeFixedInt(0);
-
-                this.edgeCount += entry.numSubEntries();
-                edgeOut.writeFixedInt((int) entry.numSubEntries());
-                EntryIterator subKvIt = EntriesUtil.subKvIterFromEntry(entry);
-                while (subKvIt.hasNext()) {
-                    KvEntry subEntry = subKvIt.next();
-                    // Not write sub-key length
-                    edgeOut.write(subEntry.key().bytes());
-                    // Not write sub-value length
-                    edgeOut.write(subEntry.value().bytes());
-                }
-                long valueLength = edgeOut.position() - valuePosition -
-                                   Constants.INT_LEN;
-                edgeOut.writeFixedInt(valuePosition, (int) valueLength);
-            } else  { // status > 0
-                edges.next();
             }
+
+            edges.next();
+            if (matched > 0) {
+                // Skip stale edges
+                continue;
+            }
+            assert matched == 0;
+            edgeOut.writeFixedInt(vidBytes.length);
+            edgeOut.write(vidBytes);
+
+            long valuePosition = edgeOut.position();
+            edgeOut.writeFixedInt(0);
+
+            this.edgeCount += entry.numSubEntries();
+            edgeOut.writeFixedInt((int) entry.numSubEntries());
+            EntryIterator subKvIt = EntriesUtil.subKvIterFromEntry(entry);
+            while (subKvIt.hasNext()) {
+                KvEntry subEntry = subKvIt.next();
+                // Not write sub-key length
+                edgeOut.write(subEntry.key().bytes());
+                // Not write sub-value length
+                edgeOut.write(subEntry.value().bytes());
+            }
+            long valueLength = edgeOut.position() - valuePosition -
+                               Constants.INT_LEN;
+            edgeOut.writeFixedInt(valuePosition, (int) valueLength);
         }
     }
 
@@ -329,8 +351,8 @@ public class FileGraphPartition<M extends Value<M>> {
         if (superstep != 0) {
             this.preStatusFile = this.curStatusFile;
             this.preValueFile = this.curValueFile;
-            this.preStatusIn = new BufferedFileInput(this.preStatusFile);
-            this.preValueIn = new BufferedFileInput(this.preValueFile);
+            this.preStatusInput = new BufferedFileInput(this.preStatusFile);
+            this.preValueInput = new BufferedFileInput(this.preValueFile);
         }
 
         // Outputs of vertex's status and vertex's value.
@@ -345,26 +367,25 @@ public class FileGraphPartition<M extends Value<M>> {
         createFile(this.curStatusFile);
         createFile(this.curValueFile);
 
-        this.curStatusOut = new BufferedFileOutput(this.curStatusFile);
-        this.curValueOut = new BufferedFileOutput(this.curValueFile);
+        this.curStatusOutput = new BufferedFileOutput(this.curStatusFile);
+        this.curValueOutput = new BufferedFileOutput(this.curValueFile);
     }
 
     private void afterCompute(int superstep) throws IOException {
         this.vertexInput.close();
         this.edgesInput.close();
         if (superstep != 0) {
-            this.preStatusIn.close();
-            this.preValueIn.close();
+            this.preStatusInput.close();
+            this.preValueInput.close();
             this.preStatusFile.delete();
             this.preValueFile.delete();
         }
-        this.curStatusOut.close();
-        this.curValueOut.close();
+        this.curStatusOutput.close();
+        this.curValueOutput.close();
     }
 
     private void beforeOutput() throws IOException {
-        this.vertexInput = new VertexInput(this.context,
-                                           this.vertexFile,
+        this.vertexInput = new VertexInput(this.context, this.vertexFile,
                                            this.vertexCount);
         this.edgesInput = new EdgesInput(this.context, this.edgeFile);
 
@@ -373,21 +394,28 @@ public class FileGraphPartition<M extends Value<M>> {
 
         this.preStatusFile = this.curStatusFile;
         this.preValueFile = this.curValueFile;
-        this.preStatusIn = new BufferedFileInput(this.preStatusFile);
-        this.preValueIn = new BufferedFileInput(this.preValueFile);
+        this.preStatusInput = new BufferedFileInput(this.preStatusFile);
+        this.preValueInput = new BufferedFileInput(this.preValueFile);
     }
 
     private void afterOutput() throws IOException {
         this.vertexInput.close();
         this.edgesInput.close();
-        this.preStatusIn.close();
-        this.preValueIn.close();
+
+        this.preStatusInput.close();
+        this.preValueInput.close();
+
+        assert this.preStatusFile == this.curStatusFile;
+        assert this.preValueFile == this.curValueFile;
         this.preStatusFile.delete();
         this.preValueFile.delete();
+
+        this.vertexFile.delete();
+        this.edgeFile.delete();
     }
 
     private static void createFile(File file) throws IOException {
         file.getParentFile().mkdirs();
-        file.createNewFile();
+        E.checkArgument(file.createNewFile(), "Already exists file: %s", file);
     }
 }
