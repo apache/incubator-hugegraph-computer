@@ -77,16 +77,10 @@ public class SenderIntegrateTest {
                                           .withRpcServerHost("127.0.0.1")
                                           .withRpcServerPort(8090)
                                           .build();
-            MasterService service = null;
-            try {
-                service = initMaster(args);
+            try (MasterService service = initMaster(args)) {
                 service.execute();
             } catch (Exception e) {
                 Assert.fail(e.getMessage());
-            } finally {
-                if (service != null) {
-                    service.close();
-                }
             }
         });
         Thread workerThread = new Thread(() -> {
@@ -104,17 +98,10 @@ public class SenderIntegrateTest {
                                           .withTransoprtServerPort(8091)
                                           .withRpcServerRemote("127.0.0.1:8090")
                                           .build();
-            WorkerService service = null;
-            try {
-                Thread.sleep(2000);
-                service = initWorker(args);
+            try (WorkerService service = initWorker(args)) {
                 service.execute();
             } catch (Exception e) {
                 Assert.fail(e.getMessage());
-            } finally {
-                if (service != null) {
-                    service.close();
-                }
             }
         });
         masterThread.start();
@@ -170,11 +157,10 @@ public class SenderIntegrateTest {
                                      .withRpcServerRemote("127.0.0.1:8090")
                                      .build();
                 try {
-                    Thread.sleep(2000);
                     WorkerService service = initWorker(args);
                     service.execute();
                     service.close();
-                } catch (InterruptedException e) {
+                } catch (Exception e) {
                     Assert.fail(e.getMessage());
                 }
             }));
@@ -207,16 +193,10 @@ public class SenderIntegrateTest {
                                           .withRpcServerHost("127.0.0.1")
                                           .withRpcServerPort(8090)
                                           .build();
-            MasterService service = null;
-            try {
-                service = initMaster(args);
+            try (MasterService service = initMaster(args)) {
                 service.execute();
             } catch (Exception e) {
                 Assert.fail(e.getMessage());
-            } finally {
-                if (service != null) {
-                    service.close();
-                }
             }
         });
         Thread workerThread = new Thread(() -> {
@@ -234,19 +214,12 @@ public class SenderIntegrateTest {
                                           .withWriteBufferLowMark(10)
                                           .withRpcServerRemote("127.0.0.1:8090")
                                           .build();
-            WorkerService service = null;
-            try {
-                Thread.sleep(2000);
-                service = initWorker(args);
+            try (WorkerService service = initWorker(args)) {
                 // Let send rate slowly
                 this.slowSendFunc(service);
                 service.execute();
             } catch (Exception e) {
                 Assert.fail(e.getMessage());
-            } finally {
-                if (service != null) {
-                    service.close();
-                }
             }
         });
         masterThread.start();
