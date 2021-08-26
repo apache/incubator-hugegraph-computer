@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultEdge implements Edge {
 
@@ -83,6 +84,11 @@ public class DefaultEdge implements Edge {
     @Override
     public void properties(Properties properties) {
         this.properties = properties;
+    }
+
+    @Override
+    public <T extends Value<T>> T property(String key) {
+        return this.properties.get(key);
     }
 
     @Override

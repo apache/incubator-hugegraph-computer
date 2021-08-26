@@ -100,6 +100,11 @@ public class DefaultVertex implements Vertex {
     }
 
     @Override
+    public <T extends Value<T>> T property(String key) {
+        return this.properties.get(key);
+    }
+
+    @Override
     public boolean active() {
         return this.active;
     }

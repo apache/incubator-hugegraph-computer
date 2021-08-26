@@ -48,6 +48,8 @@ public interface Vertex extends Recyclable {
 
     void properties(Properties properties);
 
+    <T extends Value<T>> T property(String key);
+
     boolean active();
 
     void inactivate();
