@@ -217,6 +217,55 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
+    public static final ConfigOption<Integer> OUTPUT_BATCH_SIZE =
+            new ConfigOption<>(
+                    "output.batch_size",
+                    "The batch size of output",
+                    positiveInt(),
+                    500
+            );
+
+    public static final ConfigOption<Integer> OUTPUT_BATCH_THREADS =
+            new ConfigOption<>(
+                    "output.batch_threads",
+                    "The threads number used to batch output",
+                    positiveInt(),
+                    1
+            );
+
+    public static final ConfigOption<Integer> OUTPUT_SINGLE_THREADS =
+            new ConfigOption<>(
+                    "output.single_threads",
+                    "The threads number used to single output",
+                    positiveInt(),
+                    1
+            );
+
+    public static final ConfigOption<Integer>
+            OUTPUT_THREAD_POOL_SHUTDOWN_TIMEOUT =
+            new ConfigOption<>(
+                    "output.thread_pool_shutdown_timeout",
+                    "The timeout seconds of output threads pool shutdown",
+                    positiveInt(),
+                    60
+            );
+
+    public static final ConfigOption<Integer> OUTPUT_RETRY_TIMES =
+            new ConfigOption<>(
+                    "output.retry_times",
+                    "The retry times when output failed",
+                    positiveInt(),
+                    3
+            );
+
+    public static final ConfigOption<Integer> OUTPUT_RETRY_INTERVAL =
+            new ConfigOption<>(
+                    "output.retry_interval",
+                    "The retry interval when output failed",
+                    positiveInt(),
+                    10
+            );
+
     public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
             new ConfigOption<>(
                     "computer.vertex_average_degree",

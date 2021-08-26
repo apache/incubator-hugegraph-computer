@@ -156,6 +156,48 @@ public class ComputerOptions extends OptionHolder {
                     Boolean.class
             );
 
+    public static final DriverConfigOption<Integer> OUTPUT_BATCH_SIZE =
+            new DriverConfigOption<>(
+                    "output.batch_size",
+                    positiveInt(),
+                    Integer.class
+            );
+
+    public static final DriverConfigOption<Integer> OUTPUT_BATCH_THREADS =
+            new DriverConfigOption<>(
+                    "output.batch_threads",
+                    positiveInt(),
+                    Integer.class
+            );
+
+    public static final DriverConfigOption<Integer> OUTPUT_SINGLE_THREADS =
+            new DriverConfigOption<>(
+                    "output.single_threads",
+                    positiveInt(),
+                    Integer.class
+            );
+
+    public static final DriverConfigOption<Integer>
+            OUTPUT_THREAD_POOL_SHUTDOWN_TIMEOUT = new DriverConfigOption<>(
+                    "output.thread_pool_shutdown_timeout",
+                    positiveInt(),
+                    Integer.class
+            );
+
+    public static final DriverConfigOption<Integer> OUTPUT_RETRY_TIMES =
+            new DriverConfigOption<>(
+                    "output.retry_times",
+                    positiveInt(),
+                    Integer.class
+            );
+
+    public static final DriverConfigOption<Integer> OUTPUT_RETRY_INTERVAL =
+            new DriverConfigOption<>(
+                    "output.retry_interval",
+                    positiveInt(),
+                    Integer.class
+            );
+
     public static final DriverConfigOption<Integer>
             VERTEX_AVERAGE_DEGREE =
             new DriverConfigOption<>(
