@@ -58,6 +58,7 @@ public class StreamGraphInput implements GraphComputeInput {
         this.in.readEntry(in -> {
             vertex.id(readId(in));
         }, in -> {
+            vertex.label(this.readLabel(in));
             vertex.properties(this.readProperties(in));
         });
         return vertex;
@@ -156,5 +157,9 @@ public class StreamGraphInput implements GraphComputeInput {
             properties.put(key, value);
         }
         return properties;
+    }
+
+    public static String readLabel(RandomAccessInput in) throws IOException {
+        return in.readUTF();
     }
 }

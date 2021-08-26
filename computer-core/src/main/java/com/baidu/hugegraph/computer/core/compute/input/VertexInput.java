@@ -71,7 +71,9 @@ public class VertexInput {
         try {
             this.idPointer.read(this.input);
             this.valuePointer.read(this.input);
-            this.properties.read(this.valuePointer.input());
+            RandomAccessInput valueInput = this.valuePointer.input();
+            this.vertex.label(StreamGraphInput.readLabel(valueInput));
+            this.properties.read(valueInput);
             this.vertex.id(StreamGraphInput.readId(this.idPointer.input()));
             this.vertex.properties(this.properties);
         } catch (IOException e) {

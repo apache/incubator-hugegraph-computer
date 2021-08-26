@@ -219,8 +219,10 @@ public class EdgesInput {
                     Edge edge = this.graphFactory.createEdge();
                     // Only use targetId as subKey, use props as subValue
                     edge.targetId(StreamGraphInput.readId(in));
+                    edge.label(StreamGraphInput.readLabel(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
+                    edge.properties(props);
                     edges.add(edge);
                 }
             } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
@@ -229,6 +231,7 @@ public class EdgesInput {
                     // Use label + targetId as subKey, use props as subValue
                     edge.label(in.readUTF());
                     edge.targetId(StreamGraphInput.readId(in));
+                    edge.label(StreamGraphInput.readLabel(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
@@ -245,8 +248,10 @@ public class EdgesInput {
                     edge.label(in.readUTF());
                     edge.name(in.readUTF());
                     edge.targetId(StreamGraphInput.readId(in));
+                    edge.label(StreamGraphInput.readLabel(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
+                    edge.properties(props);
                     edges.add(edge);
                 }
             }
