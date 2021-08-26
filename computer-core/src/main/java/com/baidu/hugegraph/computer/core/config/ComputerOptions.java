@@ -762,4 +762,12 @@ public class ComputerOptions extends OptionHolder {
                     positiveInt(),
                     Bytes.GB
             );
+
+    public static final ConfigOption<String> RINGS_DETECTION_FILTER =
+            new ConfigOption<>(
+                    "rings.filter_config",
+                    "The filter of rings-detection.",
+                    disallowEmpty(),
+                    "{}"
+            );
 }

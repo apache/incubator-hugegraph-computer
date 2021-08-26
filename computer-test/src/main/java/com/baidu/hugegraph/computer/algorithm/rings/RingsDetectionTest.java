@@ -19,10 +19,10 @@
 
 package com.baidu.hugegraph.computer.algorithm.rings;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -38,18 +38,16 @@ import com.baidu.hugegraph.driver.SchemaManager;
 import com.baidu.hugegraph.structure.constant.T;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 public class RingsDetectionTest extends AlgorithmTestBase {
 
-    private static final Map<String, List<List<String>>> EXPECT_RESULT =
+    private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
-                      "1", ImmutableList.of(
-                              ImmutableList.of("1", "5", "2", "4", "3", "1")),
-                      "2", ImmutableList.of(
-                               ImmutableList.of("2", "4", "3", "2"),
-                               ImmutableList.of("2", "4", "3", "5", "2"))
+                    "A", ImmutableSet.of("ACA", "ADCA", "ABCA"),
+                    "B", ImmutableSet.of("BCB"),
+                    "C", ImmutableSet.of("CDC")
             );
 
     @BeforeClass
@@ -59,42 +57,41 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         HugeClient client = client();
         SchemaManager schema = client.schema();
 
-        schema.propertyKey("id")
-              .asText()
+        schema.propertyKey("data")
+              .asInt()
               .ifNotExist()
               .create();
-        schema.propertyKey("name")
-              .asText()
-              .ifNotExist()
-              .create();
-
         schema.vertexLabel("user")
-              .properties("name")
+              .properties("data")
               .useCustomizeStringId()
               .ifNotExist()
               .create();
         schema.edgeLabel("know")
               .sourceLabel("user")
               .targetLabel("user")
+              .properties("data")
               .ifNotExist()
               .create();
 
         GraphManager graph = client.graph();
-        Vertex v1 = graph.addVertex(T.label, "user", "id", "1", "name", "v1");
-        Vertex v2 = graph.addVertex(T.label, "user", "id", "2", "name", "v2");
-        Vertex v3 = graph.addVertex(T.label, "user", "id", "3", "name", "v3");
-        Vertex v4 = graph.addVertex(T.label, "user", "id", "4", "name", "v4");
-        Vertex v5 = graph.addVertex(T.label, "user", "id", "5", "name", "v5");
-        Vertex v6 = graph.addVertex(T.label, "user", "id", "6", "name", "v6");
+        Vertex vA = graph.addVertex(T.label, "user", T.id, "A", "data", 1);
+        Vertex vB = graph.addVertex(T.label, "user", T.id, "B", "data", 1);
+        Vertex vC = graph.addVertex(T.label, "user", T.id, "C", "data", 1);
+        Vertex vD = graph.addVertex(T.label, "user", T.id, "D", "data", 1);
+        Vertex vE = graph.addVertex(T.label, "user", T.id, "E", "data", 3);
 
-        v1.addEdge("know", v5);
-        v2.addEdge("know", v4);
-        v4.addEdge("know", v3);
-        v3.addEdge("know", v5);
-        v5.addEdge("know", v2);
-        v3.addEdge("know", v1);
-        v6.addEdge("know", v1);
-        v3.addEdge("know", v2);
+        vA.addEdge("know", vB, "data", 1);
+        vA.addEdge("know", vC, "data", 1);
+        vA.addEdge("know", vD, "data", 1);
+        vB.addEdge("know", vA, "data", 2);
+        vB.addEdge("know", vC, "data", 1);
+        vB.addEdge("know", vE, "data", 1);
+        vC.addEdge("know", vA, "data", 1);
+        vC.addEdge("know", vB, "data", 1);
+        vC.addEdge("know", vD, "data", 1);
+        vD.addEdge("know", vC, "data", 1);
+        vD.addEdge("know", vE, "data", 1);
+        vE.addEdge("know", vC, "data", 1);
     }
 
     @AfterClass
@@ -113,6 +110,23 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         public void setAlgorithmParameters(Map<String, String> params) {
             this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                              RingsDetectionsTestOutput.class.getName());
+            String filter = "{" +
+                            "    \"vertex_filter\": [" +
+                            "        {" +
+                            "            \"label_name\": \"user\"," +
+                            "            \"property_filter\": \"C.data==1\"" +
+                            "        }" +
+                            "    ]," +
+                            "    \"edge_filter\": [" +
+                            "        {" +
+                            "            \"label_name\": \"know\"," +
+                            "            \"property_filter\": \"D.data==C" +
+                            ".data\"" +
+                            "        }" +
+                            "    ]" +
+                            "}";
+            this.setIfAbsent(params, ComputerOptions.RINGS_DETECTION_FILTER,
+                             filter);
             super.setAlgorithmParameters(params);
         }
     }
@@ -123,27 +137,24 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         public void write(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             super.write(vertex);
-
-            IdListList rings = vertex.value();
-            List<List<String>> expect = EXPECT_RESULT.get(
-                                                      vertex.id().toString());
-
-            this.assertResult(rings, expect);
+            this.assertResult(vertex);
         }
 
-        private void assertResult(IdListList rings,
-                                  List<List<String>> expectRings) {
-            if (CollectionUtils.isEmpty(expectRings)) {
-                Assert.assertEquals(0, rings.size());
-            }
+        private void assertResult(
+                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+            IdListList rings = vertex.value();
+            Set<String> expect =
+                        EXPECT_RINGS.getOrDefault(vertex.id().toString(),
+                                                  new HashSet<>());
 
+            Assert.assertEquals(expect.size(), rings.size());
             for (int i = 0; i < rings.size(); i++) {
                 IdList ring = rings.get(0);
-                List<String> expectRing = expectRings.get(0);
+                StringBuilder ringValue = new StringBuilder();
                 for (int j = 0; j < ring.size(); j++) {
-                    Assert.assertEquals(expectRing.get(j),
-                                        ring.get(j).toString());
+                    ringValue.append(ring.get(j).toString());
                 }
+                Assert.assertTrue(expect.contains(ringValue.toString()));
             }
         }
     }
