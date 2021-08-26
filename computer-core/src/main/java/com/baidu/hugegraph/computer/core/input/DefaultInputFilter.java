@@ -26,13 +26,11 @@ public class DefaultInputFilter implements InputFilter {
 
     @Override
     public Vertex filter(Vertex vertex) {
-        vertex.properties().clear();
         return vertex;
     }
 
     @Override
     public Edge filter(Edge edge) {
-        edge.properties().clear();
         return edge;
     }
 }
