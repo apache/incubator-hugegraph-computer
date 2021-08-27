@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.rings;
+package com.baidu.hugegraph.computer.algorithm.path.rings;
 
 import java.util.Iterator;
 
@@ -41,7 +41,7 @@ public class RingsDetection implements Computation<RingsDetectionValue> {
 
     @Override
     public String category() {
-        return "detection";
+        return "path";
     }
 
     @Override

@@ -120,4 +120,9 @@ public class IntValue extends Number implements Value<IntValue> {
     public String toString() {
         return String.valueOf(this.value);
     }
+
+    @Override
+    public Object object() {
+        return this.value;
+    }
 }

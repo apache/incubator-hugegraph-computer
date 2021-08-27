@@ -84,4 +84,9 @@ public class NullValue implements Value<NullValue> {
     public String toString() {
         return "<null>";
     }
+
+    @Override
+    public Object object() {
+        return null;
+    }
 }

@@ -199,4 +199,9 @@ public class BytesId implements Id {
     public String toString() {
         return this.asObject().toString();
     }
+
+    @Override
+    public Object object() {
+        return this.bytes;
+    }
 }

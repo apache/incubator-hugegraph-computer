@@ -120,4 +120,9 @@ public class LongValue extends Number implements Value<LongValue> {
     public String toString() {
         return String.valueOf(this.value);
     }
+
+    @Override
+    public Object object() {
+        return this.value;
+    }
 }

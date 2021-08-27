@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.rings;
+package com.baidu.hugegraph.computer.algorithm.path.rings;
 
 import java.io.IOException;
 
@@ -40,11 +40,11 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
                                                                .graphFactory();
 
     private final IdList path;
-    private Properties degreeEdgeProp;
+    private Properties inEdgeProp;
 
     public RingsDetectionValue() {
         this.path = new IdList();
-        this.degreeEdgeProp = new DefaultProperties(FACTORY);
+        this.inEdgeProp = new DefaultProperties(FACTORY);
     }
 
     @Override
@@ -65,13 +65,13 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     @Override
     public void read(RandomAccessInput in) throws IOException {
         this.path.read(in);
-        this.degreeEdgeProp.read(in);
+        this.inEdgeProp.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
         this.path.write(out);
-        this.degreeEdgeProp.write(out);
+        this.inEdgeProp.write(out);
     }
 
     @Override
@@ -88,10 +88,15 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     }
 
     public Properties degreeEdgeProp() {
-        return this.degreeEdgeProp;
+        return this.inEdgeProp;
     }
 
     public void degreeEdgeProp(Properties properties) {
-        this.degreeEdgeProp = properties;
+        this.inEdgeProp = properties;
+    }
+
+    @Override
+    public Object object() {
+        throw new NotSupportedException();
     }
 }

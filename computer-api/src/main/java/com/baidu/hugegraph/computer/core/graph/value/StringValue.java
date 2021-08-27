@@ -28,7 +28,8 @@ public class StringValue implements Value<StringValue> {
 
     private String value;
 
-    public StringValue() {}
+    public StringValue() {
+    }
 
     public StringValue(String value) {
         this.value = value;
@@ -71,5 +72,10 @@ public class StringValue implements Value<StringValue> {
 
     public void value(String value) {
         this.value = value;
+    }
+
+    @Override
+    public Object object() {
+        return this.value;
     }
 }

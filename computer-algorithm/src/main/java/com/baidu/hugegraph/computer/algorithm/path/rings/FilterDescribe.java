@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.rings;
+package com.baidu.hugegraph.computer.algorithm.path.rings;
 
 import java.util.List;
 

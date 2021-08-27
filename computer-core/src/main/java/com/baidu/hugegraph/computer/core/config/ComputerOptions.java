@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
-import com.baidu.hugegraph.computer.core.input.DefaultInputFilter;
+import com.baidu.hugegraph.computer.core.input.filter.DefaultInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportProvider;
@@ -765,8 +765,10 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<String> RINGS_DETECTION_FILTER =
             new ConfigOption<>(
-                    "rings.filter_config",
-                    "The filter of rings-detection.",
+                    "rings.property_filter",
+                    "The property filter of rings-detection, used to " +
+                    "calculate vertex or edge properties and determine " +
+                    "whether continue detection.",
                     disallowEmpty(),
                     "{}"
             );

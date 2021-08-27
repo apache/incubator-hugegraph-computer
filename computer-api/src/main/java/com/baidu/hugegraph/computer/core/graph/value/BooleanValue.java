@@ -98,4 +98,9 @@ public class BooleanValue implements Value<BooleanValue> {
     public String toString() {
         return String.valueOf(this.value);
     }
+
+    @Override
+    public Object object() {
+        return this.value;
+    }
 }

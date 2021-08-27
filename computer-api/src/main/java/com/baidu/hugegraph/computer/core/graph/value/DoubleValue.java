@@ -120,4 +120,9 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
     public String toString() {
         return String.valueOf(this.value);
     }
+
+    @Override
+    public Object object() {
+        return this.value;
+    }
 }

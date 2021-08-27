@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.rings;
+package com.baidu.hugegraph.computer.algorithm.path.rings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,19 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
-import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
-import com.baidu.hugegraph.computer.core.graph.value.IntValue;
-import com.baidu.hugegraph.computer.core.graph.value.ListValue;
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
@@ -47,7 +40,7 @@ public class SpreadFilter {
     private static final String ALL = "*";
     private static final String DEGREE = "D";
     private static final String CURRENT = "C";
-    private static final List<Expression> PASS = new ArrayList<>();
+    private static final List<Expression> PASS = ImmutableList.of();
 
     private final Map<String, Expression> vertexFilter;
     private final Map<String, Expression> edgeFilter;
@@ -123,7 +116,7 @@ public class SpreadFilter {
 
     private static boolean filter(Map<String, Map<String, Value<?>>> params,
                                   List<Expression> expressions) {
-        Map<String, Object> map = convert(params);
+        Map<String, Object> map = convertParamsValueToObject(params);
         return expressions.stream()
                           .allMatch(expression -> {
                               return (Boolean) expression.execute(map);
@@ -147,7 +140,7 @@ public class SpreadFilter {
         return expressions;
     }
 
-    private static Map<String, Object> convert(
+    private static Map<String, Object> convertParamsValueToObject(
                    Map<String, Map<String, Value<?>>> params) {
         Map<String, Object> result = new HashMap<>();
         for (Map.Entry<String, Map<String, Value<?>>> entry :
@@ -155,32 +148,10 @@ public class SpreadFilter {
             Map<String, Object> subKv = new HashMap<>();
             Map<String, Value<?>> param = entry.getValue();
             for (Map.Entry<String, Value<?>> paramItem : param.entrySet()) {
-                subKv.put(paramItem.getKey(), getValue(paramItem.getValue()));
+                subKv.put(paramItem.getKey(), paramItem.getValue().object());
             }
             result.put(entry.getKey(), subKv);
         }
         return result;
-    }
-
-    private static Object getValue(Value<?> value) {
-        ValueType type = value.type();
-        switch (type) {
-            case BOOLEAN:
-                return  ((BooleanValue) value).value();
-            case INT:
-                return ((IntValue)value).value();
-            case LONG:
-                return ((LongValue)value).value();
-            case FLOAT:
-                return ((FloatValue)value).value();
-            case DOUBLE:
-                return ((DoubleValue)value).value();
-            case LIST_VALUE:
-                return ((ListValue<?>)value).values();
-            default:
-                throw new ComputerException("Can't convert property " +
-                                            "value from valueType: %s",
-                                            type.name());
-        }
     }
 }
