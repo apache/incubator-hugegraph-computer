@@ -88,7 +88,7 @@ public abstract class BspBase {
             throw new ComputerException("Failed to clean up the BSP data: %s",
                                         e, this.bspClient().endpoint());
         }
-        LOG.info("Cleaned up the BSP data: %s", this.bspClient().endpoint());
+        LOG.info("Cleaned up the BSP data: {}", this.bspClient().endpoint());
     }
 
     private BspClient createBspClient() {

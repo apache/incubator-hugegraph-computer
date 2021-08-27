@@ -48,7 +48,7 @@ public class IdListListTest extends UnitTestBase {
         listListValue2.add(listValue1);
 
         Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
-                            listListValue1.type());
+                            listListValue1.valueType());
         Assert.assertEquals(ValueType.ID_VALUE_LIST,
                             listListValue1.elemType());
         Assert.assertTrue(ListUtils.isEqualList(

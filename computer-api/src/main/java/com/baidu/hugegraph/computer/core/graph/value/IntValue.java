@@ -72,7 +72,7 @@ public class IntValue extends Number implements Value<IntValue> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.INT;
     }
 

@@ -72,7 +72,7 @@ public class LongValue extends Number implements Value<LongValue> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.LONG;
     }
 

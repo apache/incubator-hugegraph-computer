@@ -34,9 +34,9 @@ public class BooleanValueTest extends UnitTestBase {
         BooleanValue value2 = new BooleanValue(true);
         BooleanValue value3 = new BooleanValue(false);
 
-        Assert.assertEquals(ValueType.BOOLEAN, value1.type());
-        Assert.assertEquals(ValueType.BOOLEAN, value2.type());
-        Assert.assertEquals(ValueType.BOOLEAN, value3.type());
+        Assert.assertEquals(ValueType.BOOLEAN, value1.valueType());
+        Assert.assertEquals(ValueType.BOOLEAN, value2.valueType());
+        Assert.assertEquals(ValueType.BOOLEAN, value3.valueType());
     }
 
     @Test

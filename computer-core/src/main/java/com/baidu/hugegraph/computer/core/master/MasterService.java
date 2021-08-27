@@ -394,7 +394,7 @@ public class MasterService implements Closeable {
                             " or call another register method if necessary: " +
                             "registerAggregator(String name,ValueType type," +
                             "Class<C> combiner)", name);
-            this.registerAggregator(name, defaultValue.type(),
+            this.registerAggregator(name, defaultValue.valueType(),
                                     combinerClass, defaultValue);
         }
 

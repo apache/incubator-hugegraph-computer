@@ -33,8 +33,8 @@ public class LongValueTest extends UnitTestBase {
         LongValue value1 = new LongValue();
         LongValue value2 = new LongValue(Long.MIN_VALUE);
 
-        Assert.assertEquals(ValueType.LONG, value1.type());
-        Assert.assertEquals(ValueType.LONG, value2.type());
+        Assert.assertEquals(ValueType.LONG, value1.valueType());
+        Assert.assertEquals(ValueType.LONG, value2.valueType());
     }
 
     @Test

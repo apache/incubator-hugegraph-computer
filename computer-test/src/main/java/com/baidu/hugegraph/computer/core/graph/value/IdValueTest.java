@@ -38,16 +38,16 @@ public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testType() {
-        Value<Id> value1 = BytesId.of();
+        Value<Id> value1 = new BytesId();
         Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
 
-        Assert.assertEquals(ValueType.ID_VALUE, value1.type());
-        Assert.assertEquals(ValueType.ID_VALUE, value2.type());
+        Assert.assertEquals(ValueType.ID_VALUE, value1.valueType());
+        Assert.assertEquals(ValueType.ID_VALUE, value2.valueType());
     }
 
     @Test
     public void testAssign() {
-        Value<Id> value1 = BytesId.of();
+        Value<Id> value1 = new BytesId();
         Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
         Value<Id> value3 = new BytesId(IdType.LONG, new byte[]{'1', '2', '3'});
 
@@ -150,9 +150,9 @@ public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testEquals() {
-        Value<Id> value1 = BytesId.of();
+        Value<Id> value1 = new BytesId();
         Assert.assertEquals(value1, value1);
-        Assert.assertEquals(value1, BytesId.of());
+        Assert.assertEquals(value1, new BytesId());
         Assert.assertNotEquals(value1,
                                new BytesId(IdType.LONG, new byte[] {1}));
 
@@ -162,7 +162,7 @@ public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testHashCode() {
-        Value<Id> value1 = BytesId.of();
+        Value<Id> value1 = new BytesId();
         Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
         Value<Id> value3 = new BytesId(IdType.LONG, new byte[]{'1', '2', '3'});
 
@@ -173,7 +173,7 @@ public class IdValueTest extends UnitTestBase {
 
     @Test
     public void testToString() {
-        Value<Id> value1 = BytesId.of();
+        Value<Id> value1 = new BytesId();
         Value<Id> value2 = BytesId.of(123);
         Value<Id> value3 = BytesId.of("123");
 

@@ -50,7 +50,7 @@ public class BooleanValue implements Value<BooleanValue> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.BOOLEAN;
     }
 

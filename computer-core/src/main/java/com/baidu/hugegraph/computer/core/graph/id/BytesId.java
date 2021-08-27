@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.graph.id;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.UUID;
 
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
@@ -39,30 +38,26 @@ import com.baidu.hugegraph.util.E;
 
 public class BytesId implements Id {
 
-    private IdType type;
+    private IdType idType;
     private byte[] bytes;
     private int length;
 
     public BytesId() {
-        BytesId id = BytesId.of();
-        this.type = id.type;
+        BytesId id = BytesId.of(0L);
+        this.idType = id.idType;
         this.bytes = id.bytes;
         this.length = id.length;
     }
 
-    public BytesId(IdType type, byte[] bytes) {
-        this(type, bytes, bytes.length);
+    public BytesId(IdType idType, byte[] bytes) {
+        this(idType, bytes, bytes.length);
     }
 
-    public BytesId(IdType type, byte[] bytes, long length) {
+    public BytesId(IdType idType, byte[] bytes, long length) {
         E.checkArgument(bytes != null, "The bytes can't be null");
-        this.type = type;
+        this.idType = idType;
         this.bytes = bytes;
         this.length = (int) length;
-    }
-
-    public static BytesId of() {
-        return BytesId.of(0L);
     }
 
     public static BytesId of(long value) {
@@ -98,18 +93,18 @@ public class BytesId implements Id {
 
     @Override
     public IdType idType() {
-        return this.type;
+        return this.idType;
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.ID_VALUE;
     }
 
     @Override
     public void assign(Value<Id> other) {
         this.checkAssign(other);
-        this.type = ((BytesId) other).type;
+        this.idType = ((BytesId) other).idType;
         this.bytes = ((BytesId) other).bytes;
         this.length = ((BytesId) other).length;
     }
@@ -117,7 +112,7 @@ public class BytesId implements Id {
     @Override
     public Id copy() {
         byte[] bytes = Arrays.copyOf(this.bytes, this.length);
-        return new BytesId(this.type, bytes, this.length);
+        return new BytesId(this.idType, bytes, this.length);
     }
 
     @Override
@@ -127,7 +122,7 @@ public class BytesId implements Id {
 
     @Override
     public Object asObject() {
-        switch (this.type) {
+        switch (this.idType) {
             case LONG:
                 BytesInput input = IOFactory.createBytesInput(this.bytes, 0,
                                                               this.length);
@@ -150,13 +145,14 @@ public class BytesId implements Id {
                                                 "UUID object");
                 }
             default:
-                throw new ComputerException("Unexpected IdType %s", this.type);
+                throw new ComputerException("Unexpected IdType %s",
+                                            this.idType);
         }
     }
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        this.type = SerialEnum.fromCode(IdType.class, in.readByte());
+        this.idType = SerialEnum.fromCode(IdType.class, in.readByte());
         int len = in.readInt();
         this.bytes = BytesUtil.ensureCapacityWithoutCopy(this.bytes, len);
         in.readFully(this.bytes, 0, len);
@@ -165,14 +161,14 @@ public class BytesId implements Id {
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
-        out.writeByte(this.type.code());
+        out.writeByte(this.idType.code());
         out.writeInt(this.length);
         out.write(this.bytes, 0, this.length);
     }
 
     @Override
     public int compareTo(Id obj) {
-        int cmp = this.type().code() - obj.type().code();
+        int cmp = this.idType().code() - obj.idType().code();
         if (cmp != 0) {
             return cmp;
         }
@@ -187,7 +183,7 @@ public class BytesId implements Id {
             return false;
         }
         BytesId other = (BytesId) obj;
-        if (this.type != other.type) {
+        if (this.idType != other.idType) {
             return false;
         }
         return BytesUtil.compare(this.bytes, this.length,
@@ -196,9 +192,7 @@ public class BytesId implements Id {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(this.type);
-        result = 31 * result + BytesUtil.hashBytes(this.bytes, this.length);
-        return result;
+        return BytesUtil.hashBytes(this.bytes, this.length);
     }
 
     @Override

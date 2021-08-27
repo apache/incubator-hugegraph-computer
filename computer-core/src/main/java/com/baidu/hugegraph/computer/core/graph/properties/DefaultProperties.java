@@ -91,7 +91,7 @@ public class DefaultProperties implements Properties {
         for (Map.Entry<String, Value<?>> entry : this.keyValues.entrySet()) {
             out.writeUTF(entry.getKey());
             Value<?> value = entry.getValue();
-            out.writeByte(value.type().code());
+            out.writeByte(value.valueType().code());
             value.write(out);
         }
     }

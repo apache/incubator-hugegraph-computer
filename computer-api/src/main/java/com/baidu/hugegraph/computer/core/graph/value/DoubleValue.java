@@ -72,7 +72,7 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.DOUBLE;
     }
 

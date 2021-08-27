@@ -161,7 +161,7 @@ public final class BuiltinGraphFactory implements GraphFactory {
             case DOUBLE:
                 return new DoubleValue();
             case ID_VALUE:
-                return BytesId.of();
+                return new BytesId();
             case ID_VALUE_LIST:
                 return new IdList();
             case ID_VALUE_LIST_LIST:

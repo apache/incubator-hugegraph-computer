@@ -32,7 +32,7 @@ public class IdList extends ListValue<Id> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.ID_VALUE_LIST;
     }
 
