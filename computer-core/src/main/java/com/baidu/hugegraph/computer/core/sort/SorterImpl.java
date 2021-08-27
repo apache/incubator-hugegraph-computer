@@ -71,23 +71,15 @@ public class SorterImpl implements Sorter {
     public void mergeBuffers(List<RandomAccessInput> inputs,
                              OuterSortFlusher flusher, String output,
                              boolean withSubKv) throws Exception {
-        List<EntryIterator> entries = null;
-        try {
-            if (withSubKv) {
-                entries = inputs.stream()
-                                .map(KvEntriesWithFirstSubKvInput::new)
-                                .collect(Collectors.toList());
-            } else {
-                entries = inputs.stream()
-                                .map(KvEntriesInput::new)
-                                .collect(Collectors.toList());
-            }
-        } finally {
-            if (entries != null) {
-                for (EntryIterator iterator : entries) {
-                    iterator.close();
-                }
-            }
+        List<EntryIterator> entries;
+        if (withSubKv) {
+            entries = inputs.stream()
+                            .map(KvEntriesWithFirstSubKvInput::new)
+                            .collect(Collectors.toList());
+        } else {
+            entries = inputs.stream()
+                            .map(KvEntriesInput::new)
+                            .collect(Collectors.toList());
         }
 
         this.sortBuffers(entries, flusher, output);
