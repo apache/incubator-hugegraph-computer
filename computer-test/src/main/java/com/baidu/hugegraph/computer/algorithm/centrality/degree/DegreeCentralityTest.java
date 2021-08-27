@@ -40,7 +40,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
     @Test
     public void testServiceWith1Worker() throws InterruptedException {
         runAlgorithm(DegreeCentralityTestParams.class.getName(),
-                     DegreeCentrality.CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY,
+                     DegreeCentrality.OPTION_WEIGHT_PROPERTY,
                      "rate");
         DegreeCentralityTestOutput.assertResult();
         runAlgorithm(DegreeCentralityTestParams.class.getName());
@@ -72,7 +72,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
         public void init(Config config, int partition) {
             super.init(config, partition);
             this.weight = config.getString(
-            DegreeCentrality.CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY, "");
+            DegreeCentrality.OPTION_WEIGHT_PROPERTY, "");
             isRun = false;
         }
 

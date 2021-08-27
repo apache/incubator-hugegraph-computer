@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.rank.pagerank;
+package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
 
 import org.slf4j.Logger;
 
@@ -76,9 +76,8 @@ public class PageRank4Master implements MasterComputation {
 
     @Override
     public boolean compute(MasterComputationContext context) {
-
         LongValue danglingVerticesNum = context.aggregatedValue(
-                                         AGGR_DANGLING_VERTICES_NUM);
+                                        AGGR_DANGLING_VERTICES_NUM);
         DoubleValue danglingProbability = context.aggregatedValue(
                                           AGGR_COMULATIVE_DANGLING_PROBABILITY);
         DoubleValue cumulativeProbability = context.aggregatedValue(

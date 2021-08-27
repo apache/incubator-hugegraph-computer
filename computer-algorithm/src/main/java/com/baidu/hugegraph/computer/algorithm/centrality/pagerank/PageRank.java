@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.rank.pagerank;
+package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
 
 import java.util.Iterator;
 
@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
@@ -32,19 +33,19 @@ import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 
 public class PageRank implements Computation<DoubleValue> {
 
-    public static final String CONF_ALPHA_KEY = "pagerank.alpha";
+    public static final String OPTION_ALPHA = "page_rank.alpha";
 
-    public static final double CONF_ALPHA_DEFAULT = 0.15D;
+    public static final double ALPHA_DEFAULT_VALUE = 0.15;
 
     private double alpha;
-    private double rankFromDangling;
+    private double danglingRank;
     private double initialRankInSuperstep;
-    private double cumulativeValue;
+    private double cumulativeRank;
 
-    private Aggregator l1DiffAggr;
-    private Aggregator cumulativeRankAggr;
-    private Aggregator danglingVertexNumAggr;
-    private Aggregator danglingCumulativeAggr;
+    private Aggregator<DoubleValue> l1DiffAggr;
+    private Aggregator<DoubleValue> cumulativeRankAggr;
+    private Aggregator<LongValue> danglingVertexNumAggr;
+    private Aggregator<DoubleValue> danglingCumulativeAggr;
 
     // Initial value in superstep 0.
     private DoubleValue initialValue;
@@ -52,12 +53,12 @@ public class PageRank implements Computation<DoubleValue> {
 
     @Override
     public String name() {
-        return "pageRank";
+        return "page_rank";
     }
 
     @Override
     public String category() {
-        return "rank";
+        return "centrality";
     }
 
     @Override
@@ -79,13 +80,13 @@ public class PageRank implements Computation<DoubleValue> {
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<DoubleValue> messages) {
         DoubleValue message = Combiner.combineAll(context.combiner(), messages);
-        double rankFromNeighbors = 0.0D;
+        double rankFromNeighbors = 0.0;
         if (message != null) {
             rankFromNeighbors = message.value();
         }
-        double rank = (this.rankFromDangling + rankFromNeighbors) *
-                      (1.0D - this.alpha) + this.initialRankInSuperstep;
-        rank /= this.cumulativeValue;
+        double rank = (this.danglingRank + rankFromNeighbors) *
+                      (1.0 - this.alpha) + this.initialRankInSuperstep;
+        rank /= this.cumulativeRank;
         DoubleValue oldRank = vertex.value();
         vertex.value(new DoubleValue(rank));
         this.l1DiffAggr.aggregateValue(Math.abs(oldRank.value() - rank));
@@ -102,7 +103,7 @@ public class PageRank implements Computation<DoubleValue> {
 
     @Override
     public void init(Config config) {
-        this.alpha = config.getDouble(CONF_ALPHA_KEY, CONF_ALPHA_DEFAULT);
+        this.alpha = config.getDouble(OPTION_ALPHA, ALPHA_DEFAULT_VALUE);
         this.contribValue = new DoubleValue();
     }
 
@@ -114,16 +115,16 @@ public class PageRank implements Computation<DoubleValue> {
     @Override
     public void beforeSuperstep(WorkerContext context) {
         // Get aggregator values for computation
-        DoubleValue danglingContribution = context.aggregatedValue(
+        DoubleValue danglingTotalRank = context.aggregatedValue(
                     PageRank4Master.AGGR_COMULATIVE_DANGLING_PROBABILITY);
-
-        this.rankFromDangling = danglingContribution.value() /
-                                context.totalVertexCount();
-        this.initialRankInSuperstep = this.alpha / context.totalVertexCount();
-        DoubleValue cumulativeProbability = context.aggregatedValue(
+        DoubleValue cumulativeRank = context.aggregatedValue(
                     PageRank4Master.AGGR_COMULATIVE_PROBABILITY);
-        this.cumulativeValue = cumulativeProbability.value();
-        this.initialValue = new DoubleValue(1.0D / context.totalVertexCount());
+        long totalVertex = context.totalVertexCount();
+
+        this.danglingRank = danglingTotalRank.value() / totalVertex;
+        this.initialRankInSuperstep = this.alpha / totalVertex;
+        this.cumulativeRank = cumulativeRank.value();
+        this.initialValue = new DoubleValue(1.0 / totalVertex);
 
         // Create aggregators
         this.l1DiffAggr = context.createAggregator(
