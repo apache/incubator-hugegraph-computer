@@ -43,7 +43,7 @@ public class AlgorithmTestBase extends UnitTestBase {
 
     public static void runAlgorithm(String algorithmParams, String ... options)
                        throws InterruptedException {
-        final Logger log = Log.logger(algorithmParams);
+        final Logger log = Log.logger(AlgorithmTestBase.class);
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch countDownLatch = new CountDownLatch(2);
         Throwable[] exceptions = new Throwable[2];
