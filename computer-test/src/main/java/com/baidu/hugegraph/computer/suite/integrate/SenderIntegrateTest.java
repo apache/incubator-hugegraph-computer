@@ -28,7 +28,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.algorithm.rank.pagerank.PageRankParams;
+import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;

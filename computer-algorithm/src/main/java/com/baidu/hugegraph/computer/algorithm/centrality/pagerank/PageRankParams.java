@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.rank.pagerank;
+package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
 
 import java.util.Map;
 

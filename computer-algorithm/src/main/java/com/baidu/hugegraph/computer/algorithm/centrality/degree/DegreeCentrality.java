@@ -19,8 +19,6 @@
 
 package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 
-import static jdk.nashorn.internal.objects.Global.Infinity;
-
 import java.util.Iterator;
 
 import org.apache.commons.lang.StringUtils;
@@ -39,14 +37,15 @@ import com.baidu.hugegraph.util.NumericUtil;
 
 public class DegreeCentrality implements Computation<NullValue> {
 
-    public static final String CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY =
-                               "degree.centrality.weight.property";
+    public static final String OPTION_WEIGHT_PROPERTY =
+                               "degree_centrality.weight_property";
+
     private boolean calculateByWeightProperty;
     private String weightProperty;
 
     @Override
     public String name() {
-        return "degreeCentrality";
+        return "degree_centrality";
     }
 
     @Override
@@ -66,26 +65,23 @@ public class DegreeCentrality implements Computation<NullValue> {
              *  int the future;
              */
             double totalWeight = 0.0;
-            double weight = 0.0;
             Iterator<Edge> edges = vertex.edges().iterator();
             while (edges.hasNext()) {
                 edge = edges.next();
-                weight = getWeightValue(
-                         (Value) edge.properties()
-                                     .get(this.weightProperty));
-                if ((totalWeight + weight) == Infinity) {
+                double weight = weightValue(edge.property(this.weightProperty));
+                totalWeight += weight;
+                if (totalWeight == Double.POSITIVE_INFINITY) {
                     throw new ComputerException("Calculate weight overflow," +
                                                 "current is %s, edge '%s' is ",
                                                 totalWeight, edge, weight);
                 }
-                totalWeight += weight;
             }
             vertex.value(new DoubleValue(totalWeight));
         }
         vertex.inactivate();
     }
 
-    private double getWeightValue(Value value) {
+    private static double weightValue(Value<?> value) {
         if (value == null) {
             return 1.0;
         }
@@ -113,7 +109,7 @@ public class DegreeCentrality implements Computation<NullValue> {
     @Override
     public void init(Config config) {
         this.weightProperty = config.getString(
-                              CONF_DEGREE_CENTRALITY_WEIGHT_PROPERTY, "");
+                              OPTION_WEIGHT_PROPERTY, "");
         this.calculateByWeightProperty = StringUtils.isNotEmpty(
                                          this.weightProperty);
     }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.wcc;
+package com.baidu.hugegraph.computer.algorithm.community.wcc;
 
 import java.util.Map;
 
