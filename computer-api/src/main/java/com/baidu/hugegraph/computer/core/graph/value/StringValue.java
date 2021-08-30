@@ -36,7 +36,7 @@ public class StringValue implements Value<StringValue> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.STRING;
     }
 

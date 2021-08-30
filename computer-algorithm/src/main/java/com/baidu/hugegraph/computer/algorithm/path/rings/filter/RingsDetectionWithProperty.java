@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.path.rings;
+package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
 import java.util.Iterator;
 
@@ -30,13 +30,14 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
-public class RingsDetection implements Computation<RingsDetectionValue> {
+public class RingsDetectionWithProperty implements
+                                        Computation<RingsDetectionValue> {
 
     private SpreadFilter filter;
 
     @Override
     public String name() {
-        return "ringsDetection";
+        return "ringsDetectionWithProperty";
     }
 
     @Override

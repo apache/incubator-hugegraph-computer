@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.path.rings;
+package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
 import java.util.Map;
 
@@ -27,12 +27,12 @@ import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
 import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
-public class RingsDetectionParams implements AlgorithmParams {
+public class RingsDetectionWithPropertyParams implements AlgorithmParams {
 
     @Override
     public void setAlgorithmParameters(Map<String, String> params) {
         this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
-                         RingsDetection.class.getName());
+                         RingsDetectionWithProperty.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
                          IdListList.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,

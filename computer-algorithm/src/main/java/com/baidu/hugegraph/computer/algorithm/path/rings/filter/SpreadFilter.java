@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.path.rings;
+package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,8 +75,8 @@ public class SpreadFilter {
             return true;
         }
 
-        Map<String, Map<String, Value<?>>> params = ImmutableMap.of(ELEMENT,
-                                                                    vertex.properties().get());
+        Map<String, Map<String, Value<?>>> params =
+                    ImmutableMap.of(ELEMENT, vertex.properties().get());
         return filter(params, expressions);
     }
 
@@ -95,8 +95,8 @@ public class SpreadFilter {
                                  })
                                  .collect(Collectors.toList());
 
-        Map<String, Map<String, Value<?>>> params = ImmutableMap.of(ELEMENT,
-                                                                    edge.properties().get());
+        Map<String, Map<String, Value<?>>> params =
+                    ImmutableMap.of(ELEMENT, edge.properties().get());
         return filter(params, expressions);
     }
 

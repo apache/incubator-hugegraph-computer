@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import com.baidu.hugegraph.computer.algorithm.centrality.degree.DegreeCentralityTest;
+import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankTest;
 import com.baidu.hugegraph.computer.algorithm.community.wcc.WccTest;
 import com.baidu.hugegraph.config.OptionSpace;
@@ -33,8 +34,9 @@ import com.baidu.hugegraph.config.OptionSpace;
     PageRankTest.class,
     DegreeCentralityTest.class,
     WccTest.class,
+    TriangleCountTest.class,
     RingsDetectionTest.class,
-    TriangleCountTest.class
+    RingsDetectionWithPropertyTest.class
 })
 public class AlgorithmTestSuite {
 

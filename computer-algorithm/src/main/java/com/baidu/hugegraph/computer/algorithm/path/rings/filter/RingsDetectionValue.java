@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.path.rings;
+package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
 import java.io.IOException;
 
@@ -48,7 +48,7 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     }
 
     @Override
-    public ValueType type() {
+    public ValueType valueType() {
         return ValueType.UNKNOWN;
     }
 
