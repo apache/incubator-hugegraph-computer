@@ -60,22 +60,22 @@ public class FilterDescribe {
 
     public static class DescribeItem {
 
-        private final String labelName;
+        private final String label;
         private final String propertyFilter;
 
         @JsonCreator
-        private DescribeItem(@JsonProperty(value = "label_name",
+        private DescribeItem(@JsonProperty(value = "label",
                                            required = true)
-                             String labelName,
+                             String label,
                              @JsonProperty(value = "property_filter",
                                            required = true)
                              String propertyFilter) {
-            this.labelName = labelName;
+            this.label = label;
             this.propertyFilter = propertyFilter;
         }
 
         public String labelName() {
-            return this.labelName;
+            return this.label;
         }
 
         public String propertyFilter() {

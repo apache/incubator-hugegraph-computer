@@ -60,7 +60,7 @@ public class RingsDetection implements Computation<RingsDetectionValue> {
         message.addPath(vertex);
         for (Edge edge : vertex.edges()) {
             if (this.filter.filter(edge)) {
-                message.degreeEdgeProp(edge.properties());
+                message.walkEdgeProp(edge.properties());
                 context.sendMessage(edge.targetId(), message);
             }
         }
@@ -105,7 +105,7 @@ public class RingsDetection implements Computation<RingsDetectionValue> {
                         path.add(vertex.id());
                         for (Edge edge : vertex.edges()) {
                             if (this.filter.filter(edge, message)) {
-                                message.degreeEdgeProp(edge.properties());
+                                message.walkEdgeProp(edge.properties());
                                 context.sendMessage(edge.targetId(), message);
                             }
                         }

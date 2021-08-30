@@ -38,8 +38,8 @@ import com.googlecode.aviator.Expression;
 public class SpreadFilter {
 
     private static final String ALL = "*";
-    private static final String DEGREE = "D";
-    private static final String CURRENT = "C";
+    private static final String MESSAGE = "$message";
+    private static final String ELEMENT = "$element";
     private static final List<Expression> PASS = ImmutableList.of();
 
     private final Map<String, Expression> vertexFilter;
@@ -69,20 +69,20 @@ public class SpreadFilter {
 
     public boolean filter(Vertex vertex) {
         String label = vertex.label();
-        List<Expression> expressions = getExpression(this.vertexFilter, label);
+        List<Expression> expressions = expressions(this.vertexFilter, label);
 
         if (expressions == PASS) {
             return true;
         }
 
-        Map<String, Map<String, Value<?>>> params = ImmutableMap.of(CURRENT,
-                                                     vertex.properties().get());
+        Map<String, Map<String, Value<?>>> params = ImmutableMap.of(ELEMENT,
+                                                                    vertex.properties().get());
         return filter(params, expressions);
     }
 
     public boolean filter(Edge edge) {
         String label = edge.label();
-        List<Expression> expressions = getExpression(this.edgeFilter, label);
+        List<Expression> expressions = expressions(this.edgeFilter, label);
 
         if (expressions == PASS) {
             return true;
@@ -91,26 +91,26 @@ public class SpreadFilter {
         expressions = expressions.stream()
                                  .filter(expression -> {
                                      return !expression.getVariableNames()
-                                                       .contains(DEGREE);
+                                                       .contains(MESSAGE);
                                  })
                                  .collect(Collectors.toList());
 
-        Map<String, Map<String, Value<?>>> params = ImmutableMap.of(CURRENT,
-                                                    edge.properties().get());
+        Map<String, Map<String, Value<?>>> params = ImmutableMap.of(ELEMENT,
+                                                                    edge.properties().get());
         return filter(params, expressions);
     }
 
     public boolean filter(Edge edge, RingsDetectionValue message) {
         String label = edge.label();
-        List<Expression> expressions = getExpression(this.edgeFilter, label);
+        List<Expression> expressions = expressions(this.edgeFilter, label);
 
         if (expressions == PASS) {
             return true;
         }
 
         Map<String, Map<String, Value<?>>> params =
-                    ImmutableMap.of(CURRENT, edge.properties().get(),
-                                    DEGREE, message.degreeEdgeProp().get());
+                    ImmutableMap.of(ELEMENT, edge.properties().get(),
+                                    MESSAGE, message.walkEdgeProp().get());
         return filter(params, expressions);
     }
 
@@ -123,9 +123,8 @@ public class SpreadFilter {
                           });
     }
 
-    private static List<Expression> getExpression(
-            Map<String, Expression> filter,
-            String label) {
+    private static List<Expression> expressions(Map<String, Expression> filter,
+                                                String label) {
         if (filter.size() == 0) {
             return PASS;
         }

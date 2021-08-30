@@ -40,11 +40,11 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
                                                                .graphFactory();
 
     private final IdList path;
-    private Properties inEdgeProp;
+    private Properties walkEdgeProps;
 
     public RingsDetectionValue() {
         this.path = new IdList();
-        this.inEdgeProp = new DefaultProperties(FACTORY);
+        this.walkEdgeProps = new DefaultProperties(FACTORY);
     }
 
     @Override
@@ -65,13 +65,13 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     @Override
     public void read(RandomAccessInput in) throws IOException {
         this.path.read(in);
-        this.inEdgeProp.read(in);
+        this.walkEdgeProps.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
         this.path.write(out);
-        this.inEdgeProp.write(out);
+        this.walkEdgeProps.write(out);
     }
 
     @Override
@@ -87,12 +87,12 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
         this.path.add(vertex.id());
     }
 
-    public Properties degreeEdgeProp() {
-        return this.inEdgeProp;
+    public Properties walkEdgeProp() {
+        return this.walkEdgeProps;
     }
 
-    public void degreeEdgeProp(Properties properties) {
-        this.inEdgeProp = properties;
+    public void walkEdgeProp(Properties properties) {
+        this.walkEdgeProps = properties;
     }
 
     @Override

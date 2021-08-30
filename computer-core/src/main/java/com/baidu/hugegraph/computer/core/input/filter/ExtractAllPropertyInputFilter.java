@@ -23,7 +23,7 @@ import com.baidu.hugegraph.computer.core.input.InputFilter;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
 
-public class ExtractAllProperty implements InputFilter {
+public class ExtractAllPropertyInputFilter implements InputFilter {
 
     @Override
     public Vertex filter(Vertex vertex) {

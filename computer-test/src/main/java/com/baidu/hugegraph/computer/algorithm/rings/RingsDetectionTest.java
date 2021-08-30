@@ -58,41 +58,41 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         HugeClient client = client();
         SchemaManager schema = client.schema();
 
-        schema.propertyKey("data")
+        schema.propertyKey("weight")
               .asInt()
               .ifNotExist()
               .create();
         schema.vertexLabel("user")
-              .properties("data")
+              .properties("weight")
               .useCustomizeStringId()
               .ifNotExist()
               .create();
         schema.edgeLabel("know")
               .sourceLabel("user")
               .targetLabel("user")
-              .properties("data")
+              .properties("weight")
               .ifNotExist()
               .create();
 
         GraphManager graph = client.graph();
-        Vertex vA = graph.addVertex(T.label, "user", T.id, "A", "data", 1);
-        Vertex vB = graph.addVertex(T.label, "user", T.id, "B", "data", 1);
-        Vertex vC = graph.addVertex(T.label, "user", T.id, "C", "data", 1);
-        Vertex vD = graph.addVertex(T.label, "user", T.id, "D", "data", 1);
-        Vertex vE = graph.addVertex(T.label, "user", T.id, "E", "data", 3);
+        Vertex vA = graph.addVertex(T.label, "user", T.id, "A", "weight", 1);
+        Vertex vB = graph.addVertex(T.label, "user", T.id, "B", "weight", 1);
+        Vertex vC = graph.addVertex(T.label, "user", T.id, "C", "weight", 1);
+        Vertex vD = graph.addVertex(T.label, "user", T.id, "D", "weight", 1);
+        Vertex vE = graph.addVertex(T.label, "user", T.id, "E", "weight", 3);
 
-        vA.addEdge("know", vB, "data", 1);
-        vA.addEdge("know", vC, "data", 1);
-        vA.addEdge("know", vD, "data", 1);
-        vB.addEdge("know", vA, "data", 2);
-        vB.addEdge("know", vC, "data", 1);
-        vB.addEdge("know", vE, "data", 1);
-        vC.addEdge("know", vA, "data", 1);
-        vC.addEdge("know", vB, "data", 1);
-        vC.addEdge("know", vD, "data", 1);
-        vD.addEdge("know", vC, "data", 1);
-        vD.addEdge("know", vE, "data", 1);
-        vE.addEdge("know", vC, "data", 1);
+        vA.addEdge("know", vB, "weight", 1);
+        vA.addEdge("know", vC, "weight", 1);
+        vA.addEdge("know", vD, "weight", 1);
+        vB.addEdge("know", vA, "weight", 2);
+        vB.addEdge("know", vC, "weight", 1);
+        vB.addEdge("know", vE, "weight", 1);
+        vC.addEdge("know", vA, "weight", 1);
+        vC.addEdge("know", vB, "weight", 1);
+        vC.addEdge("know", vD, "weight", 1);
+        vD.addEdge("know", vC, "weight", 1);
+        vD.addEdge("know", vE, "weight", 1);
+        vE.addEdge("know", vC, "weight", 1);
     }
 
     @AfterClass
@@ -114,15 +114,16 @@ public class RingsDetectionTest extends AlgorithmTestBase {
             String filter = "{" +
                             "    \"vertex_filter\": [" +
                             "        {" +
-                            "            \"label_name\": \"user\"," +
-                            "            \"property_filter\": \"C.data==1\"" +
+                            "            \"label\": \"user\"," +
+                            "            \"property_filter\": \"$element" +
+                            ".weight==1\"" +
                             "        }" +
                             "    ]," +
                             "    \"edge_filter\": [" +
                             "        {" +
-                            "            \"label_name\": \"know\"," +
-                            "            \"property_filter\": \"D.data==C" +
-                            ".data\"" +
+                            "            \"label\": \"know\"," +
+                            "            \"property_filter\": \"$message" +
+                            ".weight==$element.weight\"" +
                             "        }" +
                             "    ]" +
                             "}";
