@@ -104,6 +104,11 @@ public class OptimizedBytesOutput implements BytesOutput {
     }
 
     @Override
+    public void writeUTF(String s) throws IOException {
+        this.writeString(s);
+    }
+
+    @Override
     public long position() {
         return this.out.position();
     }
@@ -122,11 +127,6 @@ public class OptimizedBytesOutput implements BytesOutput {
     public void write(RandomAccessInput input, long offset, long length)
                       throws IOException {
         this.out.write(input, offset, length);
-    }
-
-    @Override
-    public void writeUTF(String s) throws IOException {
-        this.writeString(s);
     }
 
     @Override

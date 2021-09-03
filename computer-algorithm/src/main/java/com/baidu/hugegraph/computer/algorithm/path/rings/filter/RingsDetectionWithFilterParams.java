@@ -27,12 +27,12 @@ import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
 import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
-public class RingsDetectionWithPropertyParams implements AlgorithmParams {
+public class RingsDetectionWithFilterParams implements AlgorithmParams {
 
     @Override
     public void setAlgorithmParameters(Map<String, String> params) {
         this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
-                         RingsDetectionWithProperty.class.getName());
+                         RingsDetectionWithFilter.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
                          IdListList.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,

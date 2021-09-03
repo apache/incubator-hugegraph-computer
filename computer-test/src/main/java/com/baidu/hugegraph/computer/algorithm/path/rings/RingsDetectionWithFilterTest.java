@@ -27,7 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
-import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithPropertyParams;
+import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilterParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.HugeClient;
@@ -37,7 +37,7 @@ import com.baidu.hugegraph.structure.graph.Vertex;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-public class RingsDetectionWithPropertyTest extends AlgorithmTestBase {
+public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
 
     private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
@@ -103,7 +103,7 @@ public class RingsDetectionWithPropertyTest extends AlgorithmTestBase {
     }
 
     public static class RingsDetectionsTestParams
-                  extends RingsDetectionWithPropertyParams {
+            extends RingsDetectionWithFilterParams {
 
         @Override
         public void setAlgorithmParameters(Map<String, String> params) {

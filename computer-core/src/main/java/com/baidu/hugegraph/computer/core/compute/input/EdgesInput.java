@@ -261,6 +261,7 @@ public class EdgesInput {
                                         e, this.edgeFile.getAbsoluteFile());
         }
     }
+
     public static class EmptyEdges implements Edges {
 
         private static final EmptyEdges INSTANCE = new EmptyEdges();

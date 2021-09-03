@@ -30,14 +30,14 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
-public class RingsDetectionWithProperty implements
-                                        Computation<RingsDetectionValue> {
+public class RingsDetectionWithFilter implements
+                                      Computation<RingsDetectionValue> {
 
     private SpreadFilter filter;
 
     @Override
     public String name() {
-        return "ringsDetectionWithProperty";
+        return "rings_with_filter";
     }
 
     @Override
