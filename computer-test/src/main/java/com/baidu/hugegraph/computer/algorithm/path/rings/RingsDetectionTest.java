@@ -22,17 +22,10 @@ package com.baidu.hugegraph.computer.algorithm.path.rings;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.driver.GraphManager;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.SchemaManager;
-import com.baidu.hugegraph.structure.constant.T;
-import com.baidu.hugegraph.structure.graph.Vertex;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -45,47 +38,47 @@ public class RingsDetectionTest extends AlgorithmTestBase {
                     "C", ImmutableSet.of("CEDC")
             );
 
-    @BeforeClass
-    public static void setup() {
-        clearAll();
-
-        HugeClient client = client();
-        SchemaManager schema = client.schema();
-
-        schema.vertexLabel("user")
-              .useCustomizeStringId()
-              .ifNotExist()
-              .create();
-        schema.edgeLabel("know")
-              .sourceLabel("user")
-              .targetLabel("user")
-              .ifNotExist()
-              .create();
-
-        GraphManager graph = client.graph();
-        Vertex vA = graph.addVertex(T.label, "user", T.id, "A");
-        Vertex vB = graph.addVertex(T.label, "user", T.id, "B");
-        Vertex vC = graph.addVertex(T.label, "user", T.id, "C");
-        Vertex vD = graph.addVertex(T.label, "user", T.id, "D");
-        Vertex vE = graph.addVertex(T.label, "user", T.id, "E");
-
-        vA.addEdge("know", vB);
-        vA.addEdge("know", vC);
-        vA.addEdge("know", vD);
-        vB.addEdge("know", vC);
-        vC.addEdge("know", vA);
-        vC.addEdge("know", vE);
-        vD.addEdge("know", vA);
-        vD.addEdge("know", vC);
-        vE.addEdge("know", vD);
-
-        RingsDetectionTestOutput.EXPECT_RINGS = EXPECT_RINGS;
-    }
-
-    @AfterClass
-    public static void clear() {
-        clearAll();
-    }
+    //@BeforeClass
+    //public static void setup() {
+    //    clearAll();
+    //
+    //    HugeClient client = client();
+    //    SchemaManager schema = client.schema();
+    //
+    //    schema.vertexLabel("user")
+    //          .useCustomizeStringId()
+    //          .ifNotExist()
+    //          .create();
+    //    schema.edgeLabel("know")
+    //          .sourceLabel("user")
+    //          .targetLabel("user")
+    //          .ifNotExist()
+    //          .create();
+    //
+    //    GraphManager graph = client.graph();
+    //    Vertex vA = graph.addVertex(T.label, "user", T.id, "A");
+    //    Vertex vB = graph.addVertex(T.label, "user", T.id, "B");
+    //    Vertex vC = graph.addVertex(T.label, "user", T.id, "C");
+    //    Vertex vD = graph.addVertex(T.label, "user", T.id, "D");
+    //    Vertex vE = graph.addVertex(T.label, "user", T.id, "E");
+    //
+    //    vA.addEdge("know", vB);
+    //    vA.addEdge("know", vC);
+    //    vA.addEdge("know", vD);
+    //    vB.addEdge("know", vC);
+    //    vC.addEdge("know", vA);
+    //    vC.addEdge("know", vE);
+    //    vD.addEdge("know", vA);
+    //    vD.addEdge("know", vC);
+    //    vE.addEdge("know", vD);
+    //
+    //    RingsDetectionTestOutput.EXPECT_RINGS = EXPECT_RINGS;
+    //}
+    //
+    //@AfterClass
+    //public static void clear() {
+    //    clearAll();
+    //}
 
     @Test
     public void test() throws InterruptedException {
