@@ -47,6 +47,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
+import com.baidu.hugegraph.computer.core.graph.value.StringValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
@@ -174,6 +175,8 @@ public final class BuiltinGraphFactory implements GraphFactory {
                 return new IdListList();
             case LIST_VALUE:
                 return new ListValue<>();
+            case STRING:
+                return new StringValue();
             default:
                 throw new ComputerException("Can't create Value for %s",
                                             type.name());
