@@ -22,11 +22,18 @@ package com.baidu.hugegraph.computer.algorithm.path.rings;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilterParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.driver.GraphManager;
+import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.driver.SchemaManager;
+import com.baidu.hugegraph.structure.constant.T;
+import com.baidu.hugegraph.structure.graph.Vertex;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -39,56 +46,56 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
                     "C", ImmutableSet.of("CDC")
             );
 
-    //@BeforeClass
-    //public static void setup() {
-    //    clearAll();
-    //
-    //    HugeClient client = client();
-    //    SchemaManager schema = client.schema();
-    //
-    //    schema.propertyKey("weight")
-    //          .asInt()
-    //          .ifNotExist()
-    //          .create();
-    //    schema.vertexLabel("user")
-    //          .properties("weight")
-    //          .useCustomizeStringId()
-    //          .ifNotExist()
-    //          .create();
-    //    schema.edgeLabel("know")
-    //          .sourceLabel("user")
-    //          .targetLabel("user")
-    //          .properties("weight")
-    //          .ifNotExist()
-    //          .create();
-    //
-    //    GraphManager graph = client.graph();
-    //    Vertex vA = graph.addVertex(T.label, "user", T.id, "A", "weight", 1);
-    //    Vertex vB = graph.addVertex(T.label, "user", T.id, "B", "weight", 1);
-    //    Vertex vC = graph.addVertex(T.label, "user", T.id, "C", "weight", 1);
-    //    Vertex vD = graph.addVertex(T.label, "user", T.id, "D", "weight", 1);
-    //    Vertex vE = graph.addVertex(T.label, "user", T.id, "E", "weight", 3);
-    //
-    //    vA.addEdge("know", vB, "weight", 1);
-    //    vA.addEdge("know", vC, "weight", 1);
-    //    vA.addEdge("know", vD, "weight", 1);
-    //    vB.addEdge("know", vA, "weight", 2);
-    //    vB.addEdge("know", vC, "weight", 1);
-    //    vB.addEdge("know", vE, "weight", 1);
-    //    vC.addEdge("know", vA, "weight", 1);
-    //    vC.addEdge("know", vB, "weight", 1);
-    //    vC.addEdge("know", vD, "weight", 1);
-    //    vD.addEdge("know", vC, "weight", 1);
-    //    vD.addEdge("know", vE, "weight", 1);
-    //    vE.addEdge("know", vC, "weight", 1);
-    //
-    //    RingsDetectionTestOutput.EXPECT_RINGS = EXPECT_RINGS;
-    //}
-    //
-    //@AfterClass
-    //public static void clear() {
-    //    clearAll();
-    //}
+    @BeforeClass
+    public static void setup() {
+        clearAll();
+
+        HugeClient client = client();
+        SchemaManager schema = client.schema();
+
+        schema.propertyKey("weight")
+              .asInt()
+              .ifNotExist()
+              .create();
+        schema.vertexLabel("user")
+              .properties("weight")
+              .useCustomizeStringId()
+              .ifNotExist()
+              .create();
+        schema.edgeLabel("know")
+              .sourceLabel("user")
+              .targetLabel("user")
+              .properties("weight")
+              .ifNotExist()
+              .create();
+
+        GraphManager graph = client.graph();
+        Vertex vA = graph.addVertex(T.label, "user", T.id, "A", "weight", 1);
+        Vertex vB = graph.addVertex(T.label, "user", T.id, "B", "weight", 1);
+        Vertex vC = graph.addVertex(T.label, "user", T.id, "C", "weight", 1);
+        Vertex vD = graph.addVertex(T.label, "user", T.id, "D", "weight", 1);
+        Vertex vE = graph.addVertex(T.label, "user", T.id, "E", "weight", 3);
+
+        vA.addEdge("know", vB, "weight", 1);
+        vA.addEdge("know", vC, "weight", 1);
+        vA.addEdge("know", vD, "weight", 1);
+        vB.addEdge("know", vA, "weight", 2);
+        vB.addEdge("know", vC, "weight", 1);
+        vB.addEdge("know", vE, "weight", 1);
+        vC.addEdge("know", vA, "weight", 1);
+        vC.addEdge("know", vB, "weight", 1);
+        vC.addEdge("know", vD, "weight", 1);
+        vD.addEdge("know", vC, "weight", 1);
+        vD.addEdge("know", vE, "weight", 1);
+        vE.addEdge("know", vC, "weight", 1);
+
+        RingsDetectionTestOutput.EXPECT_RINGS = EXPECT_RINGS;
+    }
+
+    @AfterClass
+    public static void clear() {
+        clearAll();
+    }
 
     @Test
     public void test() throws InterruptedException {
