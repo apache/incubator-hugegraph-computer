@@ -71,8 +71,10 @@ public class UnitTestBase {
                                         "0123456789" +
                                         "abcdefghijklmnopqrstuvxyz";
 
-    private static final String URL = "http://127.0.0.1:8080";
-    private static final String GRAPH = "hugegraph";
+    private static final String URL = ComputerOptions.HUGEGRAPH_URL
+                                                     .defaultValue();
+    private static final String GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME
+                                                       .defaultValue();
     private static final HugeClient CLIENT = HugeClient.builder(URL, GRAPH)
                                                        .build();
 
