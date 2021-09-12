@@ -96,10 +96,12 @@ public class AlgorithmTestBase extends UnitTestBase {
         List<EdgeLabel> edgeLabels = schema.getEdgeLabels(edgeLabelNames);
         edgeLabels.forEach(label -> schema.removeEdgeLabel(label.name()));
 
-        List<VertexLabel> vertexLabels = schema.getVertexLabels(vertexLabelNames);
+        List<VertexLabel> vertexLabels = schema.getVertexLabels(
+                                                vertexLabelNames);
         vertexLabels.forEach(label -> schema.removeVertexLabel(label.name()));
 
-        List<PropertyKey> propertyKeys = schema.getPropertyKeys(propertyKeyNames);
+        List<PropertyKey> propertyKeys = schema.getPropertyKeys(
+                                                propertyKeyNames);
         propertyKeys.forEach(label -> schema.removePropertyKey(label.name()));
     }
 

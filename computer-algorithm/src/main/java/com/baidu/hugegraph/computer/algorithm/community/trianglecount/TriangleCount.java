@@ -49,7 +49,7 @@ public class TriangleCount implements Computation<IdList> {
         IdList idList = new IdList();
         idList.add(vertex.id());
 
-        context.sendMessageToAllEdgesIf(vertex, idList, (ids, targetId)-> {
+        context.sendMessageToAllEdgesIf(vertex, idList, (ids, targetId) -> {
             return !ids.get(0).equals(targetId);
         });
         vertex.value(new TriangleValue());
