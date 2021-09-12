@@ -19,15 +19,106 @@
 
 package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
+import java.util.Map;
+
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.driver.GraphManager;
+import com.baidu.hugegraph.driver.SchemaManager;
+import com.baidu.hugegraph.structure.constant.T;
+import com.baidu.hugegraph.structure.graph.Vertex;
+import com.baidu.hugegraph.testutil.Assert;
+
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 public class TriangleCountTest extends AlgorithmTestBase {
+    
+    private static final String VERTX_LABEL = "tc_user";
+    private static final String EDGE_LABEL = "tc_know";
+    private static final String PROPERTY_KEY = "tc_weight";
+
+    protected static final Map<Object, Long> EXPECTED_RESULTS =
+              ImmutableMap.of("tc_A", 2L,
+                              "tc_B", 1L,
+                              "tc_C", 3L,
+                              "tc_D", 2L,
+                              "tc_E", 1L);
+
+    @BeforeClass
+    public static void setup() {
+        AlgorithmTestBase.setup();
+
+        SchemaManager schema = HG_CLIENT.schema();
+        schema.propertyKey(PROPERTY_KEY)
+              .asInt()
+              .ifNotExist()
+              .create();
+        schema.vertexLabel(VERTX_LABEL)
+              .properties(PROPERTY_KEY)
+              .useCustomizeStringId()
+              .ifNotExist()
+              .create();
+        schema.edgeLabel(EDGE_LABEL)
+              .sourceLabel(VERTX_LABEL)
+              .targetLabel(VERTX_LABEL)
+              .properties(PROPERTY_KEY)
+              .ifNotExist()
+              .create();
+
+        GraphManager graph = HG_CLIENT.graph();
+        Vertex vA = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_A",
+                                    PROPERTY_KEY, 1);
+        Vertex vB = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_B",
+                                    PROPERTY_KEY, 1);
+        Vertex vC = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_C",
+                                    PROPERTY_KEY, 1);
+        Vertex vD = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_D",
+                                    PROPERTY_KEY, 1);
+        Vertex vE = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_E",
+                                    PROPERTY_KEY, 1);
+
+        vA.addEdge(EDGE_LABEL, vB, PROPERTY_KEY, 1);
+        vA.addEdge(EDGE_LABEL, vC, PROPERTY_KEY, 1);
+        vB.addEdge(EDGE_LABEL, vC, PROPERTY_KEY, 1);
+        vC.addEdge(EDGE_LABEL, vD, PROPERTY_KEY, 1);
+        vD.addEdge(EDGE_LABEL, vA, PROPERTY_KEY, 1);
+        vD.addEdge(EDGE_LABEL, vE, PROPERTY_KEY, 1);
+        vE.addEdge(EDGE_LABEL, vD, PROPERTY_KEY, 1);
+        vE.addEdge(EDGE_LABEL, vC, PROPERTY_KEY, 1);
+    }
+
+    @AfterClass
+    public static void teardown() {
+        clearAll(Lists.newArrayList(EDGE_LABEL),
+                 Lists.newArrayList(VERTX_LABEL),
+                 Lists.newArrayList(PROPERTY_KEY, "triangleCount"));
+        AlgorithmTestBase.teardown();
+    }
 
     @Test
     public void testServiceWith1Worker() throws InterruptedException {
-        runAlgorithm(TriangleCountParams.class.getName());
-        System.out.println("COUNT: "+ (TriangleCountOutput.COUNT.doubleValue() / 3));
+        runAlgorithm(TriangleCountParams.class.getName(),
+                     ComputerOptions.OUTPUT_CLASS.name(),
+                     TriangleCountOutputTest.class.getName());
+    }
+
+    public static class TriangleCountOutputTest extends TriangleCountOutput {
+
+        @Override
+        public Vertex constructHugeVertex(
+                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+            Vertex result = super.constructHugeVertex(vertex);
+            Long expected = EXPECTED_RESULTS.get(result.id());
+            if (expected != null) {
+                Assert.assertEquals(expected, result.property(super.name()));
+            }
+
+            return result;
+        }
     }
 }

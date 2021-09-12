@@ -19,19 +19,15 @@
 
 package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
-import java.util.concurrent.atomic.DoubleAdder;
-
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
 public class TriangleCountOutput extends HugeOutput {
 
-    public static final DoubleAdder COUNT = new DoubleAdder();
-
     @Override
     public String name() {
-        return "triangle_count";
+        return "triangleCount";
     }
 
     @Override
@@ -50,7 +46,6 @@ public class TriangleCountOutput extends HugeOutput {
                 new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
         long value = ((TriangleValue) vertex.value()).value();
-        COUNT.add(value);
         hugeVertex.property(this.name(), value);
         return hugeVertex;
     }
