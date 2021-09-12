@@ -79,7 +79,6 @@ public class StreamGraphOutput implements GraphComputeOutput {
                     out.writeUTF(edge.label());
                     this.writeId(out, edge.targetId());
                 }, out -> {
-                    this.writeLabel(out, edge.label());
                     this.writeProperties(out, edge.properties());
                 });
             }
@@ -95,7 +94,6 @@ public class StreamGraphOutput implements GraphComputeOutput {
                     out.writeUTF(edge.name());
                     this.writeId(out, edge.targetId());
                 }, out -> {
-                    this.writeLabel(out, edge.label());
                     this.writeProperties(out, edge.properties());
                 });
             }
