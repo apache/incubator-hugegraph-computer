@@ -58,7 +58,8 @@ public class BufferedFileInput extends AbstractBufferedFileInput {
             super.readFully(b, off, len);
         } else {
             super.readFully(b, off, remaining);
-            this.file.readFully(b, off + remaining, len - remaining);
+            len -= remaining;
+            this.file.readFully(b, off + remaining, len);
             this.fileOffset += len;
         }
     }
