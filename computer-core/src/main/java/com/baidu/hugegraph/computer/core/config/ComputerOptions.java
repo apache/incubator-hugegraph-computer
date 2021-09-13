@@ -726,7 +726,7 @@ public class ComputerOptions extends OptionHolder {
                     "hgkv.max_file_size",
                     "The max number of bytes in each hgkv-file.",
                     positiveInt(),
-                    Bytes.GB * 4
+                    Bytes.GB * 2
             );
 
     public static final ConfigOption<Long> HGKV_DATABLOCK_SIZE =
@@ -743,7 +743,7 @@ public class ComputerOptions extends OptionHolder {
                     "The max number of files to merge at one time.",
                     positiveInt(),
                     // TODO: test if the default value is appropriate.
-                    200
+                    10
             );
 
     public static final ConfigOption<String> HGKV_TEMP_DIR =
