@@ -34,23 +34,23 @@ import com.baidu.hugegraph.computer.core.util.JsonUtil;
 public class TriangleValue implements Value<TriangleValue> {
 
     private IdList idList;
-    private LongValue value;
+    private LongValue count;
 
     public TriangleValue() {
         this.idList = new IdList();
-        this.value = new LongValue();
+        this.count = new LongValue();
     }
 
     public IdList idList() {
         return this.idList;
     }
 
-    public long value() {
-        return this.value.value();
+    public long count() {
+        return this.count.value();
     }
 
-    public void value(Long value) {
-        this.value.value(value);
+    public void count(Long count) {
+        this.count.value(count);
     }
 
     @Override
@@ -67,20 +67,20 @@ public class TriangleValue implements Value<TriangleValue> {
     public Value<TriangleValue> copy() {
         TriangleValue triangleValue = new TriangleValue();
         triangleValue.idList = this.idList.copy();
-        triangleValue.value = this.value.copy();
+        triangleValue.count = this.count.copy();
         return triangleValue;
     }
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
         this.idList.read(in);
-        this.value.read(in);
+        this.count.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
         this.idList.write(out);
-        this.value.write(out);
+        this.count.write(out);
     }
 
     @Override

@@ -89,9 +89,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 if (workerService != null) {
                     workerService.close();
                 }
-                if (countDownLatch.getCount() > 0) {
-                    countDownLatch.countDown();
-                }
+                countDownLatch.countDown();
             }
         });
 
@@ -142,9 +140,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 if (masterService != null) {
                     masterService.close();
                 }
-                if (countDownLatch.getCount() > 0) {
-                    countDownLatch.countDown();
-                }
+                countDownLatch.countDown();
             }
         });
 

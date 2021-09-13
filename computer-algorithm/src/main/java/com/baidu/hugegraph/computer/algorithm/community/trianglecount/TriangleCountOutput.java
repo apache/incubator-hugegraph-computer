@@ -45,7 +45,7 @@ public class TriangleCountOutput extends HugeOutput {
         com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
                 new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
-        long value = ((TriangleValue) vertex.value()).value();
+        long value = ((TriangleValue) vertex.value()).count();
         hugeVertex.property(this.name(), value);
         return hugeVertex;
     }

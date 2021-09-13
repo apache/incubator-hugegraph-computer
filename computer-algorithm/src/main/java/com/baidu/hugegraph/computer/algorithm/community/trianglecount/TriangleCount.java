@@ -60,22 +60,22 @@ public class TriangleCount implements Computation<IdList> {
                         Iterator<IdList> messages) {
         Long count = this.computeWithReturn(context, vertex, messages);
         if (count != null) {
-            ((TriangleValue) vertex.value()).value(count);
+            ((TriangleValue) vertex.value()).count(count);
             vertex.inactivate();
         }
     }
 
-    public Long computeWithReturn(ComputationContext context, Vertex vertex,
-                                  Iterator<IdList> messages) {
+    private Long computeWithReturn(ComputationContext context, Vertex vertex,
+                                   Iterator<IdList> messages) {
         IdList neighbors = ((TriangleValue) vertex.value()).idList();
         if (context.superstep() == 1) {
-            // Collection outgoing neighbors
-            Set<Id> outNeighborSet = this.getOutNeighborSet(vertex, neighbors);
+            // Collect outgoing neighbors
+            Set<Id> outNeighbors = getOutNeighbors(vertex, neighbors);
 
-            // Collection incoming neighbors
+            // Collect incoming neighbors
             while (messages.hasNext()) {
                 Id inId = messages.next().get(0);
-                if (!outNeighborSet.contains(inId)) {
+                if (!outNeighbors.contains(inId)) {
                     neighbors.add(inId);
                 }
             }
@@ -102,14 +102,14 @@ public class TriangleCount implements Computation<IdList> {
         return null;
     }
 
-    private Set<Id> getOutNeighborSet(Vertex vertex, IdList neighbors) {
+    private static Set<Id> getOutNeighbors(Vertex vertex, IdList neighbors) {
         Set<Id> outNeighborSet = new HashSet<>();
         Edges edges = vertex.edges();
         for (Edge edge : edges) {
             Id targetId = edge.targetId();
             if (!vertex.id().equals(targetId)) {
-                boolean add = outNeighborSet.add(targetId);
-                if (add) {
+                boolean added = outNeighborSet.add(targetId);
+                if (added) {
                     neighbors.add(targetId);
                 }
             }
