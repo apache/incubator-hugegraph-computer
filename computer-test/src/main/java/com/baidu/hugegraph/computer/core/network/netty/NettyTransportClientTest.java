@@ -112,7 +112,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     public void testStartAsync() throws Exception {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         Future<Void> future = client.startSessionAsync();
-        future.get(conf.syncRequestTimeout(), TimeUnit.MILLISECONDS);
+        future.get(conf.timeoutSyncRequest(), TimeUnit.MILLISECONDS);
     }
 
     @Test
@@ -126,9 +126,9 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     public void testFinishAsync() throws Exception {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         Future<Void> startFuture = client.startSessionAsync();
-        startFuture.get(conf.syncRequestTimeout(), TimeUnit.MILLISECONDS);
+        startFuture.get(conf.timeoutSyncRequest(), TimeUnit.MILLISECONDS);
         Future<Void> finishFuture = client.finishSessionAsync();
-        finishFuture.get(conf.finishSessionTimeout(), TimeUnit.MILLISECONDS);
+        finishFuture.get(conf.timeoutFinishSession(), TimeUnit.MILLISECONDS);
     }
 
     @Test
@@ -213,7 +213,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Whitebox.setInternalState(client.clientSession(),
                                   "sendFunction", sendFunc);
 
-        Whitebox.setInternalState(client, "finishSessionTimeout",
+        Whitebox.setInternalState(client, "timeoutFinishSession",
                                   1000L);
 
         Assert.assertThrows(TransportException.class, () -> {
@@ -327,7 +327,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         boolean send = client.send(MessageType.MSG, 1, buffer);
         Assert.assertTrue(send);
 
-        Whitebox.setInternalState(client, "finishSessionTimeout",
+        Whitebox.setInternalState(client, "timeoutFinishSession",
                                   1000L);
 
         Assert.assertThrows(TransportException.class, () -> {

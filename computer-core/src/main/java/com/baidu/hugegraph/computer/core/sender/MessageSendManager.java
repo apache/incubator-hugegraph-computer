@@ -44,6 +44,7 @@ import com.baidu.hugegraph.computer.core.graph.partition.Partitioner;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.util.Log;
@@ -59,12 +60,14 @@ public class MessageSendManager implements Manager {
     private final SortManager sortManager;
     private final MessageSender sender;
     private final AtomicReference<Throwable> exception;
+    private final TransportConf transportConf;
 
     public MessageSendManager(ComputerContext context, SortManager sortManager,
                               MessageSender sender) {
         this.buffers = new MessageSendBuffers(context);
         this.partitioner = context.config().createObject(
                            ComputerOptions.WORKER_PARTITIONER);
+        this.transportConf = TransportConf.wrapConfig(context.config());
         // The sort and client manager is inited at WorkerService init()
         this.sortManager = sortManager;
         this.sender = sender;
@@ -239,13 +242,17 @@ public class MessageSendManager implements Manager {
                                         "send message async");
         }
 
+        long timeout = type == MessageType.FINISH ?
+                       this.transportConf.timeoutFinishSession() :
+                       this.transportConf.timeoutSyncRequest();
         try {
             for (CompletableFuture<Void> future : futures) {
-                future.get(Constants.FUTURE_TIMEOUT, TimeUnit.SECONDS);
+                future.get(timeout, TimeUnit.MILLISECONDS);
             }
         } catch (TimeoutException e) {
-            throw new ComputerException("Timed out to wait for controling " +
-                                        "message(%s) to finished", e, type);
+            throw new ComputerException("Timeout(%sms) to wait for " +
+                                        "controling message(%s) to finished",
+                                        e, timeout, type);
         } catch (InterruptedException | ExecutionException e) {
             throw new ComputerException("Failed to wait for controling " +
                                         "message(%s) to finished", e, type);
