@@ -242,10 +242,9 @@ public class MessageSendManager implements Manager {
                                         "send message async");
         }
 
-        long timeout = this.transportConf.syncRequestTimeout();
-        if (type == MessageType.FINISH) {
-            timeout = this.transportConf.finishSessionTimeout();
-        }
+        long timeout = type == MessageType.FINISH ?
+                       this.transportConf.timeoutFinishSession() :
+                       this.transportConf.timeoutSyncRequest();
         try {
             for (CompletableFuture<Void> future : futures) {
                 future.get(timeout, TimeUnit.MILLISECONDS);

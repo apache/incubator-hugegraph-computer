@@ -140,7 +140,7 @@ public class TransportConf {
         return this.config.get(ComputerOptions.TRANSPORT_CLOSE_TIMEOUT);
     }
 
-    public long syncRequestTimeout() {
+    public long timeoutSyncRequest() {
         return this.config.get(ComputerOptions.TRANSPORT_SYNC_REQUEST_TIMEOUT);
     }
 
@@ -148,7 +148,7 @@ public class TransportConf {
      * Timeout of finish session, if less than or equal 0 the default value is
      * TRANSPORT_SYNC_REQUEST_TIMEOUT * TRANSPORT_MAX_PENDING_REQUESTS
      */
-    public long finishSessionTimeout() {
+    public long timeoutFinishSession() {
         long timeout = this.config.get(
                        ComputerOptions.TRANSPORT_FINISH_SESSION_TIMEOUT);
         return timeout > 0 ? timeout :

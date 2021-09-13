@@ -48,8 +48,8 @@ public class NettyTransportClient implements TransportClient {
     private final NettyClientFactory clientFactory;
     private final ClientHandler handler;
     private final ClientSession session;
-    private final long syncRequestTimeout;
-    private final long finishSessionTimeout;
+    private final long timeoutSyncRequest;
+    private final long timeoutFinishSession;
 
     protected NettyTransportClient(Channel channel, ConnectionId connectionId,
                                    NettyClientFactory clientFactory,
@@ -64,8 +64,8 @@ public class NettyTransportClient implements TransportClient {
         this.handler = clientHandler;
 
         TransportConf conf = this.clientFactory.conf();
-        this.syncRequestTimeout = conf.syncRequestTimeout();
-        this.finishSessionTimeout = conf.finishSessionTimeout();
+        this.timeoutSyncRequest = conf.timeoutSyncRequest();
+        this.timeoutFinishSession = conf.timeoutFinishSession();
         this.session = new ClientSession(conf, this.createSendFunction());
     }
 
@@ -128,7 +128,7 @@ public class NettyTransportClient implements TransportClient {
 
     @Override
     public void startSession() throws TransportException {
-        this.startSession(this.syncRequestTimeout);
+        this.startSession(this.timeoutSyncRequest);
     }
 
     private void startSession(long timeout) throws TransportException {
@@ -152,7 +152,7 @@ public class NettyTransportClient implements TransportClient {
 
     @Override
     public void finishSession() throws TransportException {
-        this.finishSession(this.finishSessionTimeout);
+        this.finishSession(this.timeoutFinishSession);
     }
 
     private void finishSession(long timeout) throws TransportException {

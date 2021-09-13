@@ -121,7 +121,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         this.syncStartWithAutoComplete(executorService, clientSession);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            clientSession.start(conf.syncRequestTimeout());
+            clientSession.start(conf.timeoutSyncRequest());
         }, e -> {
             Assert.assertContains("The state must be READY " +
                                   "instead of ESTABLISHED at startAsync()",
@@ -159,7 +159,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         this.syncFinishWithAutoComplete(executorService, clientSession, 1);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            clientSession.finish(conf.finishSessionTimeout());
+            clientSession.finish(conf.timeoutFinishSession());
         }, e -> {
             Assert.assertContains("The state must be ESTABLISHED " +
                                   "instead of READY at finishAsync()",
@@ -284,7 +284,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
             }
         }, 2, TimeUnit.SECONDS);
 
-        clientSession.start(conf.syncRequestTimeout());
+        clientSession.start(conf.timeoutSyncRequest());
 
         Assert.assertEquals(TransportState.ESTABLISHED,
                             clientSession.state());
@@ -316,7 +316,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
             }
         }, 2, TimeUnit.SECONDS);
 
-        clientSession.finish(conf.finishSessionTimeout());
+        clientSession.finish(conf.timeoutFinishSession());
 
         Assert.assertEquals(TransportState.READY,
                             clientSession.state());
