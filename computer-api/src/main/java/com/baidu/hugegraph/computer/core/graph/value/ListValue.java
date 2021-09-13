@@ -20,8 +20,8 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;

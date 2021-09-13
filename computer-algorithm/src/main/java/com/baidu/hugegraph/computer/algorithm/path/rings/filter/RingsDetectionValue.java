@@ -36,15 +36,13 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public class RingsDetectionValue implements Value<RingsDetectionValue> {
 
-    private static final GraphFactory FACTORY = ComputerContext.instance()
-                                                               .graphFactory();
-
     private final IdList path;
     private Properties walkEdgeProps;
 
     public RingsDetectionValue() {
+        GraphFactory graphFactory = ComputerContext.instance().graphFactory();
         this.path = new IdList();
-        this.walkEdgeProps = new DefaultProperties(FACTORY);
+        this.walkEdgeProps = new DefaultProperties(graphFactory);
     }
 
     @Override

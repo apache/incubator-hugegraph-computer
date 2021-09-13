@@ -22,10 +22,10 @@ package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
+import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionOutput;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
-import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
 public class RingsDetectionWithFilterParams implements AlgorithmParams {
 
@@ -38,7 +38,7 @@ public class RingsDetectionWithFilterParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          RingsDetectionValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         LimitedLogOutput.class.getName());
+                         RingsDetectionOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.RINGS_DETECTION_FILTER,
                          "{}");
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,
