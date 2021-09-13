@@ -61,11 +61,15 @@ public class TransportConf {
     }
 
     public int serverThreads() {
-        return this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS);
+        return Math.min(
+               this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS),
+               this.config.get(ComputerOptions.JOB_WORKERS_COUNT));
     }
 
     public int clientThreads() {
-        return this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS);
+        return Math.min(
+               this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS),
+               this.config.get(ComputerOptions.JOB_WORKERS_COUNT));
     }
 
     public TransportProvider transportProvider() {
