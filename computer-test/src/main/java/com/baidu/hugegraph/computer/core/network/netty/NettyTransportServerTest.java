@@ -78,6 +78,7 @@ public class NettyTransportServerTest extends UnitTestBase {
         int port = this.server.listen(config, messageHandler);
 
         TransportConf conf = this.server.conf();
+        Assert.assertLte(3, conf.serverThreads());
         Assert.assertEquals(IOMode.NIO, conf.ioMode());
         Assert.assertEquals("127.0.0.1",
                             conf.serverAddress().getHostAddress());

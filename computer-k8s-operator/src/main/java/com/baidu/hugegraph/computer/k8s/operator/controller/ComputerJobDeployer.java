@@ -197,17 +197,17 @@ public class ComputerJobDeployer {
             config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
         }
 
-        // Set a default number of transport threads,
-        // if the number of CPU quantity of the worker is not specified
+        /*
+        Set a default number of transport threads,
+        if the number of CPU quantity of the worker is not specified
+         */
         if (spec.getWorkerCpu() == null) {
-            String transportThreads = String.valueOf(
-                                      Math.min(spec.getWorkerInstances(),
-                                               DEFAULT_TRANSPORT_THREADS));
+            String defaultThreads = String.valueOf(DEFAULT_TRANSPORT_THREADS);
 
             config.putIfAbsent(ComputerOptions.TRANSPORT_CLIENT_THREADS.name(),
-                               transportThreads);
+                               defaultThreads);
             config.putIfAbsent(ComputerOptions.TRANSPORT_SERVER_THREADS.name(),
-                               transportThreads);
+                               defaultThreads);
         }
 
         ContainerPort transportContainerPort = new ContainerPortBuilder()
@@ -427,13 +427,13 @@ public class ComputerJobDeployer {
         envVars.add(jvmOptionsEnv);
 
         Quantity cpu;
-        Quantity memoryLimit;
+        Quantity memory;
         if (name.contains("master")) {
             cpu = spec.getMasterCpu();
-            memoryLimit = spec.getMasterMemory();
+            memory = spec.getMasterMemory();
         } else {
             cpu = spec.getWorkerCpu();
-            memoryLimit = spec.getWorkerMemory();
+            memory = spec.getWorkerMemory();
         }
 
         List<VolumeMount> volumeMounts = spec.getVolumeMounts();
@@ -457,7 +457,7 @@ public class ComputerJobDeployer {
                 .addAllToPorts(ports)
                 .withNewResources()
                     .addToLimits(ResourceName.CPU.value(), cpu)
-                    .addToLimits(ResourceName.MEMORY.value(), memoryLimit)
+                    .addToLimits(ResourceName.MEMORY.value(), memory)
                 .endResources()
                 .build();
     }
