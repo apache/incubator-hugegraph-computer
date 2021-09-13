@@ -84,6 +84,7 @@ public class ComputerJobDeployer {
     private static final String RPC_PORT_NAME = "rpc-port";
     private static final int DEFAULT_TRANSPORT_PORT = 8099;
     private static final int DEFAULT_RPC_PORT = 8090;
+    private static final int DEFAULT_TRANSPORT_THREADS = 8;
 
     private static final String CONFIG_MAP_VOLUME = "config-map-volume";
 
@@ -194,6 +195,19 @@ public class ComputerJobDeployer {
         if (StringUtils.isBlank(rpcPort) || RANDOM_PORT.equals(rpcPort)) {
             rpcPort = String.valueOf(DEFAULT_RPC_PORT);
             config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
+        }
+
+        /*
+        Set a default number of transport threads,
+        if the number of CPU quantity of the worker is not specified
+         */
+        if (spec.getWorkerCpu() == null) {
+            String defaultThreads = String.valueOf(DEFAULT_TRANSPORT_THREADS);
+
+            config.putIfAbsent(ComputerOptions.TRANSPORT_CLIENT_THREADS.name(),
+                               defaultThreads);
+            config.putIfAbsent(ComputerOptions.TRANSPORT_SERVER_THREADS.name(),
+                               defaultThreads);
         }
 
         ContainerPort transportContainerPort = new ContainerPortBuilder()
@@ -412,8 +426,15 @@ public class ComputerJobDeployer {
                 .build();
         envVars.add(jvmOptionsEnv);
 
-        Quantity masterCpu = spec.getMasterCpu();
-        Quantity masterMemory = spec.getMasterMemory();
+        Quantity cpu;
+        Quantity memory;
+        if (name.contains("master")) {
+            cpu = spec.getMasterCpu();
+            memory = spec.getMasterMemory();
+        } else {
+            cpu = spec.getWorkerCpu();
+            memory = spec.getWorkerMemory();
+        }
 
         List<VolumeMount> volumeMounts = spec.getVolumeMounts();
         if (volumeMounts == null) {
@@ -435,8 +456,8 @@ public class ComputerJobDeployer {
                 .addAllToArgs(args)
                 .addAllToPorts(ports)
                 .withNewResources()
-                    .addToLimits(ResourceName.CPU.value(), masterCpu)
-                    .addToLimits(ResourceName.MEMORY.value(), masterMemory)
+                    .addToLimits(ResourceName.CPU.value(), cpu)
+                    .addToLimits(ResourceName.MEMORY.value(), memory)
                 .endResources()
                 .build();
     }
