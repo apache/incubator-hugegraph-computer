@@ -34,7 +34,6 @@ import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 public class TriangleCountTest extends AlgorithmTestBase {
     
@@ -43,17 +42,15 @@ public class TriangleCountTest extends AlgorithmTestBase {
     private static final String PROPERTY_KEY = "tc_weight";
 
     protected static final Map<Object, Long> EXPECTED_RESULTS =
-              ImmutableMap.of("tc_A", 2L,
-                              "tc_B", 1L,
-                              "tc_C", 3L,
-                              "tc_D", 2L,
+              ImmutableMap.of("tc_A", 2L, "tc_B", 1L,
+                              "tc_C", 3L, "tc_D", 2L,
                               "tc_E", 1L);
 
     @BeforeClass
     public static void setup() {
-        AlgorithmTestBase.setup();
+        clearAll();
 
-        SchemaManager schema = HG_CLIENT.schema();
+        SchemaManager schema = client().schema();
         schema.propertyKey(PROPERTY_KEY)
               .asInt()
               .ifNotExist()
@@ -70,7 +67,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
               .ifNotExist()
               .create();
 
-        GraphManager graph = HG_CLIENT.graph();
+        GraphManager graph = client().graph();
         Vertex vA = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_A",
                                     PROPERTY_KEY, 1);
         Vertex vB = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_B",
@@ -94,10 +91,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
 
     @AfterClass
     public static void teardown() {
-        clearAll(Lists.newArrayList(EDGE_LABEL),
-                 Lists.newArrayList(VERTX_LABEL),
-                 Lists.newArrayList(PROPERTY_KEY, "triangleCount"));
-        AlgorithmTestBase.teardown();
+        clearAll();
     }
 
     @Test

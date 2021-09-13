@@ -21,14 +21,11 @@ package com.baidu.hugegraph.computer.algorithm;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -39,71 +36,10 @@ import com.baidu.hugegraph.computer.core.worker.MockWorkerService;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.config.RpcOptions;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.SchemaManager;
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.graph.Vertex;
-import com.baidu.hugegraph.structure.schema.EdgeLabel;
-import com.baidu.hugegraph.structure.schema.PropertyKey;
-import com.baidu.hugegraph.structure.schema.VertexLabel;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;
 
 public class AlgorithmTestBase extends UnitTestBase {
-
-    public static HugeClient HG_CLIENT;
-
-    @BeforeClass
-    public static void setup() {
-        HG_CLIENT = HugeClient.builder(
-                    ComputerOptions.HUGEGRAPH_URL.defaultValue(),
-                    ComputerOptions.HUGEGRAPH_GRAPH_NAME.defaultValue())
-                              .build();
-    }
-
-    @AfterClass
-    public static void teardown() {
-        HG_CLIENT.close();
-    }
-
-    protected static void clearAll(List<String> edgeLabelNames,
-                                   List<String> vertexLabelNames,
-                                   List<String> propertyKeyNames) {
-        clearData(edgeLabelNames, vertexLabelNames);
-        clearSchema(edgeLabelNames, vertexLabelNames, propertyKeyNames);
-    }
-
-    protected static void clearData(List<String> edgeLabelNames,
-                                    List<String> vertexLabelNames) {
-        for (String edgeLabelName : edgeLabelNames) {
-            List<Edge> edges = HG_CLIENT.graph().listEdges(edgeLabelName);
-            edges.forEach(edge -> HG_CLIENT.graph().removeEdge(edge.id()));
-        }
-
-        for (String vertexLabelName : vertexLabelNames) {
-            List<Vertex> vertices = HG_CLIENT.graph()
-                                             .listVertices(vertexLabelName);
-            vertices.forEach(vertex -> HG_CLIENT.graph()
-                                                .removeVertex(vertex.id()));
-        }
-    }
-
-    protected static void clearSchema(List<String> edgeLabelNames,
-                                      List<String> vertexLabelNames,
-                                      List<String> propertyKeyNames) {
-        SchemaManager schema = HG_CLIENT.schema();
-
-        List<EdgeLabel> edgeLabels = schema.getEdgeLabels(edgeLabelNames);
-        edgeLabels.forEach(label -> schema.removeEdgeLabel(label.name()));
-
-        List<VertexLabel> vertexLabels = schema.getVertexLabels(
-                                                vertexLabelNames);
-        vertexLabels.forEach(label -> schema.removeVertexLabel(label.name()));
-
-        List<PropertyKey> propertyKeys = schema.getPropertyKeys(
-                                                propertyKeyNames);
-        propertyKeys.forEach(label -> schema.removePropertyKey(label.name()));
-    }
 
     public static void runAlgorithm(String algorithmParams, String ... options)
                        throws InterruptedException {
@@ -146,11 +82,16 @@ public class AlgorithmTestBase extends UnitTestBase {
             } catch (Throwable e) {
                 log.error("Failed to start worker", e);
                 exceptions[0] = e;
+                while (countDownLatch.getCount() > 0) {
+                    countDownLatch.countDown();
+                }
             } finally {
                 if (workerService != null) {
                     workerService.close();
                 }
-                countDownLatch.countDown();
+                if (countDownLatch.getCount() > 0) {
+                    countDownLatch.countDown();
+                }
             }
         });
 
@@ -189,6 +130,9 @@ public class AlgorithmTestBase extends UnitTestBase {
             } catch (Throwable e) {
                 log.error("Failed to start master", e);
                 exceptions[1] = e;
+                while (countDownLatch.getCount() > 0) {
+                    countDownLatch.countDown();
+                }
             } finally {
                 /*
                  * It must close the service first. The pool will be shutdown
@@ -198,7 +142,9 @@ public class AlgorithmTestBase extends UnitTestBase {
                 if (masterService != null) {
                     masterService.close();
                 }
-                countDownLatch.countDown();
+                if (countDownLatch.getCount() > 0) {
+                    countDownLatch.countDown();
+                }
             }
         });
 

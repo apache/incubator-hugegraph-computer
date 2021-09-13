@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -36,8 +37,7 @@ import com.baidu.hugegraph.util.E;
 public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
     // TODO: try to reduce call ComputerContext.instance() directly.
-    private static final GraphFactory GRAPH_FACTORY =
-                                      ComputerContext.instance().graphFactory();
+    private final GraphFactory graphFactory;
 
     private ValueType elemType;
     private List<T> values;
@@ -47,12 +47,13 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public ListValue(ValueType elemType) {
-        this(elemType, GRAPH_FACTORY.createList());
+        this(elemType, new ArrayList<>());
     }
 
     public ListValue(ValueType elemType, List<T> values) {
         this.elemType = elemType;
         this.values = values;
+        this.graphFactory = ComputerContext.instance().graphFactory();
     }
 
     public void add(T value) {
@@ -117,7 +118,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     @Override
     @SuppressWarnings("unchecked")
     public ListValue<T> copy() {
-        List<T> values = GRAPH_FACTORY.createList();
+        List<T> values = this.graphFactory.createList();
         for (T value : this.values) {
             values.add((T) value.copy());
         }
@@ -136,14 +137,14 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
             this.elemType = SerialEnum.fromCode(ValueType.class, in.readByte());
         }
         if (size > this.values.size() || size < this.values.size() / 2) {
-            this.values = GRAPH_FACTORY.createList(size);
+            this.values = this.graphFactory.createList(size);
         } else {
             this.values.clear();
         }
 
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
-            T value = (T) GRAPH_FACTORY.createValue(this.elemType);
+            T value = (T) this.graphFactory.createValue(this.elemType);
             value.read(in);
             this.values.add(value);
         }
