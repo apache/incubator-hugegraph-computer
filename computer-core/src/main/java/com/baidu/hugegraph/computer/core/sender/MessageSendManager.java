@@ -250,7 +250,7 @@ public class MessageSendManager implements Manager {
                 future.get(timeout, TimeUnit.MILLISECONDS);
             }
         } catch (TimeoutException e) {
-            throw new ComputerException("Timeout(%sms) out to wait for " +
+            throw new ComputerException("Timeout(%sms) to wait for " +
                                         "controling message(%s) to finished",
                                         e, timeout, type);
         } catch (InterruptedException | ExecutionException e) {
