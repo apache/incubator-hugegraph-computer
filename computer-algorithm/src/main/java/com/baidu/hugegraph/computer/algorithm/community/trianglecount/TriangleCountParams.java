@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 
 public class TriangleCountParams implements AlgorithmParams {
@@ -37,5 +38,7 @@ public class TriangleCountParams implements AlgorithmParams {
                          TriangleValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          TriangleCountOutput.class.getName());
+        this.setIfAbsent(params, ComputerOptions.INPUT_EDGE_FREQ.name(),
+                         EdgeFrequency.SINGLE.name());
     }
 }
