@@ -21,10 +21,13 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -68,6 +71,21 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
             this.elemType = value.valueType();
         }
         this.values.add(value);
+    }
+
+    public void addAll(Collection<T> values) {
+        if (CollectionUtils.isEmpty(values)) {
+            return;
+        }
+
+        Iterator<T> iterator = values.iterator();
+        T value = iterator.next();
+        this.add(value);
+        iterator.remove();
+
+        if (iterator.hasNext()) {
+            this.values.addAll(values);
+        }
     }
 
     public T get(int index) {

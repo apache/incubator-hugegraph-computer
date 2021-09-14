@@ -95,7 +95,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
     }
 
     @Test
-    public void testServiceWith1Worker() throws InterruptedException {
+    public void testTriangleCount() throws InterruptedException {
         runAlgorithm(TriangleCountParams.class.getName(),
                      ComputerOptions.OUTPUT_CLASS.name(),
                      TriangleCountOutputTest.class.getName());

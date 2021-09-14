@@ -71,7 +71,8 @@ public class TriangleCount implements Computation<IdList> {
 
         if (context.superstep() == 1) {
             // Collect outgoing neighbors
-            Set<Id> outNeighbors = getOutNeighbors(vertex, neighbors);
+            Set<Id> outNeighbors = getOutNeighbors(vertex);
+            neighbors.addAll(outNeighbors);
 
             // Collect incoming neighbors
             while (messages.hasNext()) {
@@ -105,16 +106,13 @@ public class TriangleCount implements Computation<IdList> {
         return null;
     }
 
-    private static Set<Id> getOutNeighbors(Vertex vertex, IdList neighbors) {
+    private static Set<Id> getOutNeighbors(Vertex vertex) {
         Set<Id> outNeighbors = new HashSet<>();
         Edges edges = vertex.edges();
         for (Edge edge : edges) {
             Id targetId = edge.targetId();
             if (!vertex.id().equals(targetId)) {
-                boolean added = outNeighbors.add(targetId);
-                if (added) {
-                    neighbors.add(targetId);
-                }
+                outNeighbors.add(targetId);
             }
         }
         return outNeighbors;
