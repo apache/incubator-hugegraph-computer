@@ -53,6 +53,7 @@ import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
+import com.baidu.hugegraph.structure.constant.GraphReadMode;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.structure.schema.EdgeLabel;
@@ -92,6 +93,8 @@ public class UnitTestBase {
     }
 
     private static void clearSchema() {
+        CLIENT.graphs().readMode(GRAPH, GraphReadMode.ALL);
+
         SchemaManager schema = CLIENT.schema();
 
         List<IndexLabel> indexLabels = schema.getIndexLabels();
