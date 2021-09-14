@@ -58,6 +58,7 @@ public abstract class MessageRecvPartition {
     private final boolean withSubKv;
     private final int mergeFileNum;
     private long totalBytes;
+    private long totalBufferCount;
 
     private final AtomicReference<Throwable> exception;
 
@@ -80,6 +81,7 @@ public abstract class MessageRecvPartition {
                                                   waitSortTimeout);
         this.outputFiles = new ArrayList<>();
         this.totalBytes = 0L;
+        this.totalBufferCount = 0L;
         this.exception = new AtomicReference<>();
     }
 
@@ -88,6 +90,7 @@ public abstract class MessageRecvPartition {
      */
     public synchronized void addBuffer(ManagedBuffer buffer) {
         this.totalBytes += buffer.length();
+        this.totalBufferCount++;
         this.recvBuffers.addBuffer(buffer);
         if (this.recvBuffers.full()) {
             this.sortBuffers.waitSorted();
@@ -115,8 +118,12 @@ public abstract class MessageRecvPartition {
         return this.totalBytes;
     }
 
+    public long totalBufferCount() {
+        return this.totalBufferCount;
+    }
+
     public RecvMessageStat recvMessageStat() {
-        return new RecvMessageStat(0L, this.totalBytes);
+        return new RecvMessageStat(this.totalBufferCount, this.totalBytes);
     }
 
     protected abstract OuterSortFlusher outerSortFlusher();

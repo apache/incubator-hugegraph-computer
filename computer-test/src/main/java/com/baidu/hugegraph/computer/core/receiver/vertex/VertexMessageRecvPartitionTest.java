@@ -94,6 +94,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
     public void testVertexMessageRecvPartition() throws IOException {
         Assert.assertEquals(MessageType.VERTEX.name(), this.partition.type());
         Assert.assertEquals(0L, this.partition.totalBytes());
+        Assert.assertEquals(0L, this.partition.totalBufferCount());
         addTenVertexBuffer(this.partition::addBuffer);
 
         PeekableIterator<KvEntry> it = this.partition.iterator();
