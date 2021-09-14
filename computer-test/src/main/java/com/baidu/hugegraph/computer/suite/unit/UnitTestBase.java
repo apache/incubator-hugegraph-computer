@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.suite.unit;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -52,14 +51,6 @@ import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.SchemaManager;
-import com.baidu.hugegraph.structure.constant.GraphReadMode;
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.graph.Vertex;
-import com.baidu.hugegraph.structure.schema.EdgeLabel;
-import com.baidu.hugegraph.structure.schema.IndexLabel;
-import com.baidu.hugegraph.structure.schema.PropertyKey;
-import com.baidu.hugegraph.structure.schema.VertexLabel;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
@@ -80,34 +71,7 @@ public class UnitTestBase {
                                                        .build();
 
     protected static void clearAll() {
-        clearData();
-        clearSchema();
-    }
-
-    protected static void clearData() {
-        List<Edge> edges = CLIENT.graph().listEdges();
-        edges.forEach(edge -> CLIENT.graph().removeEdge(edge.id()));
-
-        List<Vertex> vertices = CLIENT.graph().listVertices();
-        vertices.forEach(vertex -> CLIENT.graph().removeVertex(vertex.id()));
-    }
-
-    private static void clearSchema() {
-        CLIENT.graphs().readMode(GRAPH, GraphReadMode.ALL);
-
-        SchemaManager schema = CLIENT.schema();
-
-        List<IndexLabel> indexLabels = schema.getIndexLabels();
-        indexLabels.forEach(label -> schema.removeIndexLabel(label.name()));
-
-        List<EdgeLabel> edgeLabels = schema.getEdgeLabels();
-        edgeLabels.forEach(label -> schema.removeEdgeLabel(label.name()));
-
-        List<VertexLabel> vertexLabels = schema.getVertexLabels();
-        vertexLabels.forEach(label -> schema.removeVertexLabel(label.name()));
-
-        List<PropertyKey> propertyKeys = schema.getPropertyKeys();
-        propertyKeys.forEach(label -> schema.removePropertyKey(label.name()));
+        CLIENT.graphs().clear(GRAPH, "I'm sure to delete all data");
     }
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
