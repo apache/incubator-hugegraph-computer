@@ -36,9 +36,7 @@ import com.baidu.hugegraph.util.E;
 
 public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
-    // TODO: try to reduce call ComputerContext.instance() directly.
     private final GraphFactory graphFactory;
-
     private ValueType elemType;
     private List<T> values;
 
@@ -53,6 +51,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     public ListValue(ValueType elemType, List<T> values) {
         this.elemType = elemType;
         this.values = values;
+        // TODO: try to reduce call ComputerContext.instance() directly.
         this.graphFactory = ComputerContext.instance().graphFactory();
     }
 

@@ -35,7 +35,7 @@ public class TriangleCountParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          IdList.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                         TriangleValue.class.getName());
+                         TriangleCountValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          TriangleCountOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_EDGE_FREQ.name(),

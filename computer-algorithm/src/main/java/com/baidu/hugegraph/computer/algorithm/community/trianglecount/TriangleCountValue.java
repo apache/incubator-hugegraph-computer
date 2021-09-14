@@ -31,12 +31,12 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
 
-public class TriangleValue implements Value<TriangleValue> {
+public class TriangleCountValue implements Value<TriangleCountValue> {
 
     private IdList idList;
     private LongValue count;
 
-    public TriangleValue() {
+    public TriangleCountValue() {
         this.idList = new IdList();
         this.count = new LongValue();
     }
@@ -59,16 +59,16 @@ public class TriangleValue implements Value<TriangleValue> {
     }
 
     @Override
-    public void assign(Value<TriangleValue> other) {
+    public void assign(Value<TriangleCountValue> other) {
         throw new NotSupportedException();
     }
 
     @Override
-    public Value<TriangleValue> copy() {
-        TriangleValue triangleValue = new TriangleValue();
-        triangleValue.idList = this.idList.copy();
-        triangleValue.count = this.count.copy();
-        return triangleValue;
+    public Value<TriangleCountValue> copy() {
+        TriangleCountValue triangleCountValue = new TriangleCountValue();
+        triangleCountValue.idList = this.idList.copy();
+        triangleCountValue.count = this.count.copy();
+        return triangleCountValue;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class TriangleValue implements Value<TriangleValue> {
     }
 
     @Override
-    public int compareTo(TriangleValue other) {
+    public int compareTo(TriangleCountValue other) {
         throw new NotSupportedException();
     }
 
