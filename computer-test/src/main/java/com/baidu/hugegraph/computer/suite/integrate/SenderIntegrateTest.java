@@ -134,6 +134,7 @@ public class SenderIntegrateTest {
                 service.execute();
                 service.close();
             } catch (Exception e) {
+                e.printStackTrace();
                 Assert.fail(e.getMessage());
             }
         });
