@@ -32,11 +32,9 @@ import io.netty.channel.epoll.Epoll;
 public class TransportConf {
 
     public static final String SERVER_THREAD_GROUP_NAME =
-                               "hugegraph-netty-server";
+                               "transport-netty-server";
     public static final String CLIENT_THREAD_GROUP_NAME =
-                               "hugegraph-netty-client";
-    public static final int NUMBER_CPU_CORES =
-                            Runtime.getRuntime().availableProcessors();
+                               "transport-netty-client";
 
     private final Config config;
 
