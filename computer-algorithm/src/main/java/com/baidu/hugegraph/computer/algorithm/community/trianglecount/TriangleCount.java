@@ -93,8 +93,8 @@ public class TriangleCount implements Computation<IdList> {
 
             Set<Id> allNeighbors = new HashSet<>(neighbors.values());
             while (messages.hasNext()) {
-                IdList idList = messages.next();
-                for (Id twoDegreeNeighbor : idList.values()) {
+                IdList twoDegreeNeighbors = messages.next();
+                for (Id twoDegreeNeighbor : twoDegreeNeighbors.values()) {
                     if (allNeighbors.contains(twoDegreeNeighbor)) {
                         count++;
                     }
