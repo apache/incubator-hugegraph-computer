@@ -35,7 +35,8 @@ public class TransportConf {
                                "transport-netty-server";
     public static final String CLIENT_THREAD_GROUP_NAME =
                                "transport-netty-client";
-
+    public static final int NUMBER_CPU_CORES =
+                            Runtime.getRuntime().availableProcessors();
     private final Config config;
 
     public static TransportConf wrapConfig(Config config) {

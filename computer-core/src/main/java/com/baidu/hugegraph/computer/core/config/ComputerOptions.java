@@ -31,6 +31,7 @@ import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.input.DefaultInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportProvider;
 import com.baidu.hugegraph.computer.core.output.LogOutput;
 import com.baidu.hugegraph.config.ConfigConvOption;
@@ -517,7 +518,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.server_threads",
                     "The number of transport threads for server.",
                     positiveInt(),
-                    8
+                    TransportConf.NUMBER_CPU_CORES
             );
 
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
@@ -525,7 +526,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.client_threads",
                     "The number of transport threads for client.",
                     positiveInt(),
-                    8
+                    TransportConf.NUMBER_CPU_CORES
             );
 
     public static final ConfigOption<Class<?>> TRANSPORT_PROVIDER_CLASS =
