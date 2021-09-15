@@ -134,7 +134,6 @@ public class SenderIntegrateTest {
                 service.execute();
                 service.close();
             } catch (Exception e) {
-                e.printStackTrace();
                 Assert.fail(e.getMessage());
             }
         });
@@ -142,6 +141,7 @@ public class SenderIntegrateTest {
         List<Thread> workers = new ArrayList<>(workerCount);
         for (int i = 1; i <= workerCount; i++) {
             int port = 8090 + i;
+            String dir = "jobs-" + i;
             workers.add(new Thread(() -> {
                 String[] args;
                 args = OptionsBuilder.newInstance()
@@ -156,13 +156,13 @@ public class SenderIntegrateTest {
                                      .withPartitionCount(partitionCount)
                                      .withTransoprtServerPort(port)
                                      .withRpcServerRemote("127.0.0.1:8090")
+                                     .withDataDirs(dir)
                                      .build();
                 try {
                     WorkerService service = initWorker(args);
                     service.execute();
                     service.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
                     Assert.fail(e.getMessage());
                 }
             }));
@@ -391,6 +391,12 @@ public class SenderIntegrateTest {
         public OptionsBuilder withRpcServerRemote(String remoteUrl) {
             this.options.add(RpcOptions.RPC_REMOTE_URL.name());
             this.options.add(remoteUrl);
+            return this;
+        }
+
+        public OptionsBuilder withDataDirs(String dataDirs) {
+            this.options.add(ComputerOptions.WORKER_DATA_DIRS.name());
+            this.options.add(String.valueOf(dataDirs));
             return this;
         }
     }
