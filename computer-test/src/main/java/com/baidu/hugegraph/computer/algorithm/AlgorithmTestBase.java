@@ -68,12 +68,12 @@ public class AlgorithmTestBase extends UnitTestBase {
                            "10");
                 params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
                            algorithmParams);
-                Config config = ComputerContextUtil.initContext(params);
                 if (options != null) {
                     for (int i = 0; i < options.length; i += 2) {
                         params.put(options[i], options[i + 1]);
                     }
                 }
+                Config config = ComputerContextUtil.initContext(params);
                 workerService = new MockWorkerService();
 
                 Thread.sleep(2000L);
