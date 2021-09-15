@@ -58,7 +58,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
         this.graphFactory = ComputerContext.instance().graphFactory();
     }
 
-    public void add(T value) {
+    public void checkAndSetType(T value) {
         E.checkArgument(value != null,
                         "Can't add null to %s", this.valueType().string());
         if (this.elemType != ValueType.UNKNOWN) {
@@ -70,6 +70,10 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
         } else {
             this.elemType = value.valueType();
         }
+    }
+
+    public void add(T value) {
+        this.checkAndSetType(value);
         this.values.add(value);
     }
 
@@ -80,12 +84,8 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
         Iterator<T> iterator = values.iterator();
         T value = iterator.next();
-        this.add(value);
-        iterator.remove();
-
-        if (iterator.hasNext()) {
-            this.values.addAll(values);
-        }
+        this.checkAndSetType(value);
+        this.values.addAll(values);
     }
 
     public T get(int index) {

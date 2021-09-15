@@ -113,7 +113,7 @@ public class SenderIntegrateTest {
 
     @Test
     public void testMultiWorkers() throws InterruptedException {
-        int workerCount = 5;
+        int workerCount = 3;
         int partitionCount = 5;
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
