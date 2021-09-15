@@ -21,6 +21,8 @@ package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
 import java.util.Map;
 
+import javax.ws.rs.NotSupportedException;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -92,6 +94,22 @@ public class TriangleCountTest extends AlgorithmTestBase {
     @AfterClass
     public static void teardown() {
         clearAll();
+    }
+
+    @Test
+    public void testTriangleCountValue() {
+        TriangleCountValue value = new TriangleCountValue();
+        value.count(10L);
+        Assert.assertThrows(NotSupportedException.class,
+                            () -> value.assign(null));
+        Assert.assertThrows(NotSupportedException.class,
+                            () -> value.compareTo(new TriangleCountValue()));
+
+        TriangleCountValue copy = (TriangleCountValue) value.copy();
+        Assert.assertEquals(10L, copy.count());
+        Assert.assertNotSame(value.count(), copy.count());
+
+        Assert.assertContains("10", value.toString());
     }
 
     @Test
