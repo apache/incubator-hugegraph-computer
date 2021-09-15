@@ -517,7 +517,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.server_threads",
                     "The number of transport threads for server.",
                     positiveInt(),
-                    4
+                    8
             );
 
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
