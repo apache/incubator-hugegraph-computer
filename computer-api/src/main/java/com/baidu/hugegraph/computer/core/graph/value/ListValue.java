@@ -83,8 +83,8 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
         }
 
         Iterator<T> iterator = values.iterator();
-        T value = iterator.next();
-        this.checkAndSetType(value);
+        T firstValue = iterator.next();
+        this.checkAndSetType(firstValue);
         this.values.addAll(values);
     }
 
