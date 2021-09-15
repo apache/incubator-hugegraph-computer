@@ -65,7 +65,7 @@ public class TransportConf {
                                   .get(ComputerOptions.JOB_WORKERS_COUNT);
         Integer partitions = this.config
                                  .get(ComputerOptions.JOB_PARTITIONS_COUNT);
-        int maxTransportThreads = workerCount / partitions;
+        int maxTransportThreads = partitions / workerCount;
         return Math.min(
                this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS),
                maxTransportThreads);
