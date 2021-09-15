@@ -141,7 +141,7 @@ public class SenderIntegrateTest {
         List<Thread> workers = new ArrayList<>(workerCount);
         for (int i = 1; i <= workerCount; i++) {
             int port = 8090 + i;
-            String dir = "jobs-" + i;
+            String dir = "[jobs-" + i + "]";
             workers.add(new Thread(() -> {
                 String[] args;
                 args = OptionsBuilder.newInstance()
