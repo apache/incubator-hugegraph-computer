@@ -23,13 +23,14 @@ import java.io.IOException;
 
 import javax.ws.rs.NotSupportedException;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.util.JsonUtil;
 
 public class TriangleCountValue implements Value<TriangleCountValue> {
 
@@ -90,6 +91,9 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
 
     @Override
     public String toString() {
-        return JsonUtil.toJson(this);
+        return new ToStringBuilder(this)
+                   .append("idList", this.idList)
+                   .append("count", this.count)
+                   .toString();
     }
 }

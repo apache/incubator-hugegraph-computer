@@ -107,7 +107,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
 
         TriangleCountValue copy = (TriangleCountValue) value.copy();
         Assert.assertEquals(10L, copy.count());
-        Assert.assertNotSame(value.count(), copy.count());
+        Assert.assertNotSame(value.idList(), copy.idList());
 
         Assert.assertContains("10", value.toString());
     }
