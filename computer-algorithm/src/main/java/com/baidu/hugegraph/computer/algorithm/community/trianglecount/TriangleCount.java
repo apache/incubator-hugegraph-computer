@@ -34,9 +34,11 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
 public class TriangleCount implements Computation<IdList> {
 
+    public static final String ALGORITHM_NAME = "triangle_count";
+
     @Override
     public String name() {
-        return "triangle_count";
+        return ALGORITHM_NAME;
     }
 
     @Override

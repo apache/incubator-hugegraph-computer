@@ -27,7 +27,7 @@ public class TriangleCountOutput extends HugeOutput {
 
     @Override
     public String name() {
-        return "triangleCount";
+        return TriangleCount.ALGORITHM_NAME;
     }
 
     @Override

@@ -76,7 +76,6 @@ public class AlgorithmTestBase extends UnitTestBase {
                 Config config = ComputerContextUtil.initContext(params);
                 workerService = new MockWorkerService();
 
-                Thread.sleep(2000L);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
