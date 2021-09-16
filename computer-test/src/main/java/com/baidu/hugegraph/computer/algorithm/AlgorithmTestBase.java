@@ -81,6 +81,7 @@ public class AlgorithmTestBase extends UnitTestBase {
             } catch (Throwable e) {
                 log.error("Failed to start worker", e);
                 exceptions[0] = e;
+                // If worker failed, the master also should quit
                 while (countDownLatch.getCount() > 0) {
                     countDownLatch.countDown();
                 }
@@ -127,6 +128,7 @@ public class AlgorithmTestBase extends UnitTestBase {
             } catch (Throwable e) {
                 log.error("Failed to start master", e);
                 exceptions[1] = e;
+                // If master failed, the worker also should quit
                 while (countDownLatch.getCount() > 0) {
                     countDownLatch.countDown();
                 }
