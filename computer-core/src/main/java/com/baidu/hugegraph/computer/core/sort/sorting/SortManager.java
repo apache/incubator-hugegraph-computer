@@ -64,10 +64,12 @@ public class SortManager implements Manager {
     public static final Logger LOG = Log.logger(SortManager.class);
 
     private static final String NAME = "sort";
-    private static final String PREFIX = "sort-executor-%s";
+    private static final String SORT_BUFFER = "sort-buffer-executor-%s";
+    private static final String MERGE_BUFFERS = "merge-buffers-executor-%s";
 
     private final ComputerContext context;
-    private final ExecutorService sortExecutor;
+    private final ExecutorService sortBufferExecutor;
+    private final ExecutorService mergeBuffersExecutor;
     private final Sorter sorter;
     private final int capacity;
     private final int flushThreshold;
@@ -76,7 +78,10 @@ public class SortManager implements Manager {
         this.context = context;
         Config config = context.config();
         int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
-        this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, PREFIX);
+        this.sortBufferExecutor = ExecutorUtil.newFixedThreadPool(
+                                  threadNum, SORT_BUFFER);
+        this.mergeBuffersExecutor = ExecutorUtil.newFixedThreadPool(
+                                    threadNum, MERGE_BUFFERS);
         this.sorter = new SorterImpl(config);
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
@@ -96,10 +101,14 @@ public class SortManager implements Manager {
 
     @Override
     public void close(Config config) {
-        this.sortExecutor.shutdown();
+        this.sortBufferExecutor.shutdown();
+        this.mergeBuffersExecutor.shutdown();
         try {
-            this.sortExecutor.awaitTermination(Constants.SHUTDOWN_TIMEOUT,
-                                               TimeUnit.MILLISECONDS);
+            this.sortBufferExecutor.awaitTermination(Constants.SHUTDOWN_TIMEOUT,
+                                                     TimeUnit.MILLISECONDS);
+            this.mergeBuffersExecutor.awaitTermination(
+                                      Constants.SHUTDOWN_TIMEOUT,
+                                      TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             LOG.warn("Interrupted when waiting sort executor terminated");
         }
@@ -123,7 +132,7 @@ public class SortManager implements Manager {
             }
 
             return ByteBuffer.wrap(output.buffer(), 0, (int) output.position());
-        }, this.sortExecutor);
+        }, this.sortBufferExecutor);
     }
 
     public CompletableFuture<Void> mergeBuffers(List<RandomAccessInput> inputs,
@@ -141,7 +150,7 @@ public class SortManager implements Manager {
                           "Failed to merge %s buffers to file '%s'",
                           e, inputs.size(), path);
             }
-        }, this.sortExecutor);
+        }, this.mergeBuffersExecutor);
     }
 
     public void mergeInputs(List<String> inputs, List<String> outputs,
