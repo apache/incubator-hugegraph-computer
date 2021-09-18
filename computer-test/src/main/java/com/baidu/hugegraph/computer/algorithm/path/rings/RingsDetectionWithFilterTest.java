@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
+import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilter;
 import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilterParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.driver.GraphManager;
@@ -99,7 +100,24 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
 
     @Test
     public void test() throws InterruptedException {
-        runAlgorithm(RingsDetectionsTestParams.class.getName());
+        String filter = "{" +
+                        "    \"vertex_filter\": [" +
+                        "        {" +
+                        "            \"label\": \"user\"," +
+                        "            \"property_filter\": \"$element" +
+                        ".weight==1\"" +
+                        "        }" +
+                        "    ]," +
+                        "    \"edge_filter\": [" +
+                        "        {" +
+                        "            \"label\": \"know\"," +
+                        "            \"property_filter\": \"$message" +
+                        ".weight==$element.weight\"" +
+                        "        }" +
+                        "    ]" +
+                        "}";
+        runAlgorithm(RingsDetectionsTestParams.class.getName(),
+                     RingsDetectionWithFilter.OPTION_FILTER, filter);
     }
 
     public static class RingsDetectionsTestParams
@@ -109,24 +127,6 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
         public void setAlgorithmParameters(Map<String, String> params) {
             this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                              RingsDetectionTestOutput.class.getName());
-            String filter = "{" +
-                            "    \"vertex_filter\": [" +
-                            "        {" +
-                            "            \"label\": \"user\"," +
-                            "            \"property_filter\": \"$element" +
-                            ".weight==1\"" +
-                            "        }" +
-                            "    ]," +
-                            "    \"edge_filter\": [" +
-                            "        {" +
-                            "            \"label\": \"know\"," +
-                            "            \"property_filter\": \"$message" +
-                            ".weight==$element.weight\"" +
-                            "        }" +
-                            "    ]" +
-                            "}";
-            this.setIfAbsent(params, ComputerOptions.RINGS_DETECTION_FILTER,
-                             filter);
             super.setAlgorithmParameters(params);
         }
     }

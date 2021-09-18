@@ -762,14 +762,4 @@ public class ComputerOptions extends OptionHolder {
                     positiveInt(),
                     Bytes.GB
             );
-
-    public static final ConfigOption<String> RINGS_DETECTION_FILTER =
-            new ConfigOption<>(
-                    "rings.property_filter",
-                    "The property filter of rings-detection, used to " +
-                    "calculate vertex or edge properties and determine " +
-                    "whether continue detection.",
-                    disallowEmpty(),
-                    "{}"
-            );
 }

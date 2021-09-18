@@ -39,8 +39,6 @@ public class RingsDetectionWithFilterParams implements AlgorithmParams {
                          RingsDetectionValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          RingsDetectionOutput.class.getName());
-        this.setIfAbsent(params, ComputerOptions.RINGS_DETECTION_FILTER,
-                         "{}");
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,
                          ExtractAllPropertyInputFilter.class.getName());
     }

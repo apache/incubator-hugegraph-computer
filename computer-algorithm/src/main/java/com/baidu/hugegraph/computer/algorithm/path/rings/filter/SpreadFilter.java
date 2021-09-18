@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -45,9 +43,7 @@ public class SpreadFilter {
     private final Map<String, Expression> vertexFilter;
     private final Map<String, Expression> edgeFilter;
 
-    public SpreadFilter(Config config) {
-        String describe = config.get(
-                                 ComputerOptions.RINGS_DETECTION_FILTER);
+    public SpreadFilter(String describe) {
         FilterDescribe filter = FilterDescribe.of(describe);
 
         this.vertexFilter = new HashMap<>();

@@ -33,6 +33,8 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 public class RingsDetectionWithFilter implements
                                       Computation<RingsDetectionValue> {
 
+    public static final String OPTION_FILTER = "rings.property_filter";
+
     private SpreadFilter filter;
 
     @Override
@@ -47,7 +49,7 @@ public class RingsDetectionWithFilter implements
 
     @Override
     public void init(Config config) {
-        this.filter = new SpreadFilter(config);
+        this.filter = new SpreadFilter(config.getString(OPTION_FILTER, "{}"));
     }
 
     @Override
