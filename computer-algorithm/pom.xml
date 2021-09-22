@@ -44,7 +44,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>com.googlecode.aviator:aviator</include>
+                                    <include>*:*</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
