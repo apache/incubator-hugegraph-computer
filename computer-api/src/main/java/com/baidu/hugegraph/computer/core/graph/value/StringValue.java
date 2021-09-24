@@ -29,6 +29,7 @@ public class StringValue implements Value<StringValue> {
     private String value;
 
     public StringValue() {
+        this.value = "";
     }
 
     public StringValue(String value) {
@@ -47,7 +48,7 @@ public class StringValue implements Value<StringValue> {
     }
 
     @Override
-    public Value<StringValue> copy() {
+    public StringValue copy() {
         return new StringValue(this.value);
     }
 
@@ -76,6 +77,24 @@ public class StringValue implements Value<StringValue> {
 
     @Override
     public Object object() {
+        return this.value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof StringValue)) {
+            return false;
+        }
+        return ((StringValue) obj).value.equals(this.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.value.hashCode();
+    }
+
+    @Override
+    public String toString() {
         return this.value;
     }
 }
