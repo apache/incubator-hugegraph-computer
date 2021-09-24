@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 import com.baidu.hugegraph.computer.algorithm.centrality.degree.DegreeCentralityTest;
+import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
 import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankTest;

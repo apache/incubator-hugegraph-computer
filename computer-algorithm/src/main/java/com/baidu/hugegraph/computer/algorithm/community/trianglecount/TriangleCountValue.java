@@ -96,4 +96,9 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
                    .append("count", this.count)
                    .toString();
     }
+
+    @Override
+    public Object object() {
+        throw new NotSupportedException();
+    }
 }

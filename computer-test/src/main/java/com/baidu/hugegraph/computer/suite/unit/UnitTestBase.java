@@ -74,31 +74,6 @@ public class UnitTestBase {
         CLIENT.graphs().clear(GRAPH, "I'm sure to delete all data");
     }
 
-    protected static void clearData() {
-        List<Edge> edges = CLIENT.graph().listEdges();
-        edges.forEach(edge -> CLIENT.graph().removeEdge(edge.id()));
-
-        List<Vertex> vertices = CLIENT.graph().listVertices();
-        vertices.forEach(vertex -> CLIENT.graph().removeVertex(vertex.id()));
-    }
-
-    private static void clearSchema() {
-        SchemaManager schema = CLIENT.schema();
-
-        List<IndexLabel> indexLabels = schema.getIndexLabels();
-        indexLabels.forEach(label -> schema.removeIndexLabel(label.name()));
-
-        List<EdgeLabel> edgeLabels = schema.getEdgeLabels();
-        edgeLabels.forEach(label -> schema.removeEdgeLabel(label.name()));
-
-        List<VertexLabel> vertexLabels = schema.getVertexLabels();
-        vertexLabels.forEach(label -> schema.removeVertexLabel(label.name()));
-
-        List<PropertyKey> propertyKeys = schema.getPropertyKeys();
-        propertyKeys.forEach(label -> schema.removePropertyKey(label.name()));
-        CLIENT.graphs().clear(GRAPH, "I'm sure to delete all data");
-    }
-
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
                                                       throws IOException {
         byte[] bytes;
