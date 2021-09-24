@@ -68,20 +68,23 @@ public class AlgorithmTestBase extends UnitTestBase {
                            "10");
                 params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
                            algorithmParams);
-                Config config = ComputerContextUtil.initContext(params);
                 if (options != null) {
                     for (int i = 0; i < options.length; i += 2) {
                         params.put(options[i], options[i + 1]);
                     }
                 }
+                Config config = ComputerContextUtil.initContext(params);
                 workerService = new MockWorkerService();
 
-                Thread.sleep(2000L);
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
                 log.error("Failed to start worker", e);
                 exceptions[0] = e;
+                // If worker failed, the master also should quit
+                while (countDownLatch.getCount() > 0) {
+                    countDownLatch.countDown();
+                }
             } finally {
                 if (workerService != null) {
                     workerService.close();
@@ -125,6 +128,10 @@ public class AlgorithmTestBase extends UnitTestBase {
             } catch (Throwable e) {
                 log.error("Failed to start master", e);
                 exceptions[1] = e;
+                // If master failed, the worker also should quit
+                while (countDownLatch.getCount() > 0) {
+                    countDownLatch.countDown();
+                }
             } finally {
                 /*
                  * It must close the service first. The pool will be shutdown

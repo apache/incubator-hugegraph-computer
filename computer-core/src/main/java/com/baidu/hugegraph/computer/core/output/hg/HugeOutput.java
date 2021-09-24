@@ -34,7 +34,7 @@ import com.baidu.hugegraph.util.Log;
 
 public abstract class HugeOutput implements ComputerOutput {
 
-    private static final Logger LOG = Log.logger(PageRankOutput.class);
+    private static final Logger LOG = Log.logger(HugeOutput.class);
 
     private int partition;
     private TaskManager taskManager;

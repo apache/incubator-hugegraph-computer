@@ -71,10 +71,10 @@ import com.baidu.hugegraph.util.Log;
     SenderTestSuite.class,
     ReceiverTestSuite.class,
     ComputeTestSuite.class,
-    AlgorithmTestSuite.class,
     ComputerDistTestSuite.class,
     DriverTestSuite.class,
     K8sTestSuite.class,
+    AlgorithmTestSuite.class,
 })
 public class UnitTestSuite {
 

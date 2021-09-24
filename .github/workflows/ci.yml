@@ -56,11 +56,11 @@ jobs:
           $TRAVIS_DIR/install-hugegraph-from-source.sh $COMMIT_ID | grep -v "Downloading\|Downloaded"
           $TRAVIS_DIR/load-data-into-hugegraph.sh
 
-      - name: Unit test
-        run: mvn test -P unit-test
-
       - name: Integrate test
         run: mvn test -P integrate-test
+
+      - name: Unit test
+        run: mvn test -P unit-test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1

@@ -20,10 +20,14 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -35,10 +39,7 @@ import com.baidu.hugegraph.util.E;
 
 public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
 
-    // TODO: try to reduce call ComputerContext.instance() directly.
-    private static final GraphFactory GRAPH_FACTORY =
-                                      ComputerContext.instance().graphFactory();
-
+    private final GraphFactory graphFactory;
     private ValueType elemType;
     private List<T> values;
 
@@ -47,15 +48,17 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     public ListValue(ValueType elemType) {
-        this(elemType, GRAPH_FACTORY.createList());
+        this(elemType, new ArrayList<>());
     }
 
     public ListValue(ValueType elemType, List<T> values) {
         this.elemType = elemType;
         this.values = values;
+        // TODO: try to reduce call ComputerContext.instance() directly.
+        this.graphFactory = ComputerContext.instance().graphFactory();
     }
 
-    public void add(T value) {
+    public void checkAndSetType(T value) {
         E.checkArgument(value != null,
                         "Can't add null to %s", this.valueType().string());
         if (this.elemType != ValueType.UNKNOWN) {
@@ -67,7 +70,22 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
         } else {
             this.elemType = value.valueType();
         }
+    }
+
+    public void add(T value) {
+        this.checkAndSetType(value);
         this.values.add(value);
+    }
+
+    public void addAll(Collection<T> values) {
+        if (CollectionUtils.isEmpty(values)) {
+            return;
+        }
+
+        Iterator<T> iterator = values.iterator();
+        T firstValue = iterator.next();
+        this.checkAndSetType(firstValue);
+        this.values.addAll(values);
     }
 
     public T get(int index) {
@@ -117,7 +135,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     @Override
     @SuppressWarnings("unchecked")
     public ListValue<T> copy() {
-        List<T> values = GRAPH_FACTORY.createList();
+        List<T> values = this.graphFactory.createList();
         for (T value : this.values) {
             values.add((T) value.copy());
         }
@@ -136,14 +154,14 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
             this.elemType = SerialEnum.fromCode(ValueType.class, in.readByte());
         }
         if (size > this.values.size() || size < this.values.size() / 2) {
-            this.values = GRAPH_FACTORY.createList(size);
+            this.values = this.graphFactory.createList(size);
         } else {
             this.values.clear();
         }
 
         for (int i = 0; i < size; i++) {
             @SuppressWarnings("unchecked")
-            T value = (T) GRAPH_FACTORY.createValue(this.elemType);
+            T value = (T) this.graphFactory.createValue(this.elemType);
             value.read(in);
             this.values.add(value);
         }
