@@ -35,7 +35,7 @@ public class RingsDetectionTestOutput extends RingsDetectionOutput {
     public void write(
            com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
         super.write(vertex);
-        //this.assertResult(vertex);
+        this.assertResult(vertex);
     }
 
     private void assertResult(

@@ -121,7 +121,7 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
     }
 
     public static class RingsDetectionsTestParams
-            extends RingsDetectionWithFilterParams {
+           extends RingsDetectionWithFilterParams {
 
         @Override
         public void setAlgorithmParameters(Map<String, String> params) {
