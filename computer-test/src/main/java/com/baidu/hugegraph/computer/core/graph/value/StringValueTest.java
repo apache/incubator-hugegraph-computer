@@ -109,6 +109,9 @@ public class StringValueTest {
         StringValue value2 = new StringValue("test");
 
         Assert.assertEquals(value1, value2);
+
+        DoubleValue value3 = new DoubleValue(1.1);
+        Assert.assertFalse(value1.equals(value3));
     }
 
     @Test
