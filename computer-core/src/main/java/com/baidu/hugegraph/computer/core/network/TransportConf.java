@@ -76,7 +76,7 @@ public class TransportConf {
                                   .get(ComputerOptions.JOB_WORKERS_COUNT);
         Integer partitions = this.config
                                  .get(ComputerOptions.JOB_PARTITIONS_COUNT);
-        return partitions / workerCount;
+        return partitions / workerCount + 1;
     }
 
     public TransportProvider transportProvider() {
