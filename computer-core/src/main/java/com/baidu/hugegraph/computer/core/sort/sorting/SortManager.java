@@ -80,13 +80,21 @@ public class SortManager implements Manager {
         int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
         this.sortBufferExecutor = ExecutorUtil.newFixedThreadPool(
                                   threadNum, SORT_BUFFER);
+        int mergeBuffersThreads = Math.max(threadNum,
+                                           this.maxMergeBuffersThreads(config));
         this.mergeBuffersExecutor = ExecutorUtil.newFixedThreadPool(
-                                    threadNum, MERGE_BUFFERS);
+                                    mergeBuffersThreads, MERGE_BUFFERS);
         this.sorter = new SorterImpl(config);
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
         this.flushThreshold = config.get(
                               ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
+    }
+
+    private int maxMergeBuffersThreads(Config config) {
+        Integer workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
+        Integer partitions = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
+        return partitions / workerCount;
     }
 
     @Override
