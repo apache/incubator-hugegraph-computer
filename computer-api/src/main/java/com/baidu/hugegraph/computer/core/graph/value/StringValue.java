@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
@@ -29,7 +30,7 @@ public class StringValue implements Value<StringValue> {
     private String value;
 
     public StringValue() {
-        this.value = "";
+        this.value = Constants.EMPTY_STR;
     }
 
     public StringValue(String value) {

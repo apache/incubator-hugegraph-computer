@@ -56,7 +56,7 @@ public class SpreadFilter {
     private void init(Map<String, Expression> filter,
                       List<FilterDescribe.DescribeItem> describes) {
         for (FilterDescribe.DescribeItem describe : describes) {
-            String labelName = describe.labelName();
+            String labelName = describe.label();
             Expression expression = AviatorEvaluator.compile(
                                                      describe.propertyFilter());
             filter.put(labelName, expression);

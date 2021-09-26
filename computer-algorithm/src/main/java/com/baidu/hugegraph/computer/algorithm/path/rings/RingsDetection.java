@@ -75,7 +75,7 @@ public class RingsDetection implements Computation<IdList> {
             if (id.equals(sequence.get(0))) {
                 // Use the smallest vertex record ring
                 boolean isMin = true;
-                for (int i = 0; i < sequence.size(); i++) {
+                for (int i = 1; i < sequence.size(); i++) {
                     Id pathVertexValue = sequence.get(i);
                     if (id.compareTo(pathVertexValue) > 0) {
                         isMin = false;

@@ -74,7 +74,7 @@ public class FilterDescribe {
             this.propertyFilter = propertyFilter;
         }
 
-        public String labelName() {
+        public String label() {
             return this.label;
         }
 
