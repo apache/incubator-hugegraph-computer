@@ -185,8 +185,8 @@ public class NettyProtocol {
 
     private IdleStateHandler newServerIdleStateHandler() {
         long timeout = this.conf.serverIdleTimeout();
-        return new IdleStateHandler(DISABLE_IDLE_TIME, DISABLE_IDLE_TIME,
-                                    timeout, TimeUnit.MILLISECONDS);
+        return new IdleStateHandler(timeout, DISABLE_IDLE_TIME,
+                                    DISABLE_IDLE_TIME, TimeUnit.MILLISECONDS);
     }
 
     private IdleStateHandler newClientIdleStateHandler() {

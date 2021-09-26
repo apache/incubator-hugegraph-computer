@@ -32,12 +32,11 @@ import io.netty.channel.epoll.Epoll;
 public class TransportConf {
 
     public static final String SERVER_THREAD_GROUP_NAME =
-                               "hugegraph-netty-server";
+                               "transport-netty-server";
     public static final String CLIENT_THREAD_GROUP_NAME =
-                               "hugegraph-netty-client";
+                               "transport-netty-client";
     public static final int NUMBER_CPU_CORES =
                             Runtime.getRuntime().availableProcessors();
-
     private final Config config;
 
     public static TransportConf wrapConfig(Config config) {
@@ -63,13 +62,21 @@ public class TransportConf {
     public int serverThreads() {
         return Math.min(
                this.config.get(ComputerOptions.TRANSPORT_SERVER_THREADS),
-               this.config.get(ComputerOptions.JOB_WORKERS_COUNT));
+               this.maxTransportThreads());
     }
 
     public int clientThreads() {
         return Math.min(
                this.config.get(ComputerOptions.TRANSPORT_CLIENT_THREADS),
-               this.config.get(ComputerOptions.JOB_WORKERS_COUNT));
+               this.maxTransportThreads());
+    }
+
+    private int maxTransportThreads() {
+        Integer workerCount = this.config
+                                  .get(ComputerOptions.JOB_WORKERS_COUNT);
+        Integer partitions = this.config
+                                 .get(ComputerOptions.JOB_PARTITIONS_COUNT);
+        return partitions / workerCount + 1;
     }
 
     public TransportProvider transportProvider() {

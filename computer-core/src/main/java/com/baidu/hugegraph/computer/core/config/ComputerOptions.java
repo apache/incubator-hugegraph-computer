@@ -516,8 +516,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_SERVER_THREADS =
             new ConfigOption<>(
                     "transport.server_threads",
-                    "The number of transport threads for server, the default " +
-                    "value is CPUs.",
+                    "The number of transport threads for server.",
                     positiveInt(),
                     TransportConf.NUMBER_CPU_CORES
             );
@@ -525,8 +524,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
             new ConfigOption<>(
                     "transport.client_threads",
-                    "The number of transport threads for client, the default " +
-                    "value is CPUs.",
+                    "The number of transport threads for client.",
                     positiveInt(),
                     TransportConf.NUMBER_CPU_CORES
             );
@@ -718,7 +716,7 @@ public class ComputerOptions extends OptionHolder {
                     "response continuously > max_heartbeat_timeouts the " +
                     "channel will be closed from client side.",
                     positiveInt(),
-                    90
+                    120
             );
 
     public static final ConfigOption<Long> HGKV_MAX_FILE_SIZE =
