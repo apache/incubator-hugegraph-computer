@@ -36,6 +36,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
+import com.baidu.hugegraph.computer.core.graph.value.StringValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.util.E;
 
@@ -71,6 +72,8 @@ public final class HugeConverter {
             return new FloatValue((float) rawValue);
         } else if (rawValue instanceof Double) {
             return new DoubleValue((double) rawValue);
+        } else if (rawValue instanceof String) {
+            return new StringValue((String) rawValue);
         } else if (rawValue instanceof Collection) {
             @SuppressWarnings("unchecked")
             Collection<Object> collection = (Collection<Object>) rawValue;

@@ -49,6 +49,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
             // Write id
             this.writeId(out, vertex.id());
         }, out -> {
+            // Write label
+            this.writeLabel(out, vertex.label());
             // Write properties
             this.writeProperties(out, vertex.properties());
         });
@@ -66,6 +68,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                 writer.writeSubKv(out -> {
                     this.writeId(out, edge.targetId());
                 }, out -> {
+                    this.writeLabel(out, edge.label());
                     this.writeProperties(out, edge.properties());
                 });
             }
@@ -133,5 +136,10 @@ public class StreamGraphOutput implements GraphComputeOutput {
             out.writeUTF(entry.getKey());
             this.writeValue(out, entry.getValue());
         }
+    }
+
+    private void writeLabel(RandomAccessOutput output, String label)
+                            throws IOException {
+        output.writeUTF(label);
     }
 }

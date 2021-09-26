@@ -175,7 +175,7 @@ if [ ! -a "${COPY_CONF_DIR}" ]; then
 fi
 
 NEW_COMPUTER_CONF_PATH="${COPY_CONF_DIR}/$(basename "${COMPUTER_CONF_PATH}")"
-envsubst < "${COMPUTER_CONF_PATH}" > "${NEW_COMPUTER_CONF_PATH}"
+envsubst '${POD_IP}' < "${COMPUTER_CONF_PATH}" > "${NEW_COMPUTER_CONF_PATH}"
 chmod 777 "${NEW_COMPUTER_CONF_PATH}"
 
 if [ "${LOG4J_CONF_PATH}" != "" ];then

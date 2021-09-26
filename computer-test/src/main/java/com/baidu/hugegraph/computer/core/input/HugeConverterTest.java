@@ -36,6 +36,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
+import com.baidu.hugegraph.computer.core.graph.value.StringValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -73,6 +74,8 @@ public class HugeConverterTest extends UnitTestBase {
                             HugeConverter.convertValue(0.999F));
         Assert.assertEquals(new DoubleValue(-0.001D),
                             HugeConverter.convertValue(-0.001D));
+        Assert.assertEquals(new StringValue("test"),
+                            HugeConverter.convertValue("test"));
         ListValue<IntValue> listValue = new ListValue<>(ValueType.INT);
         listValue.add(new IntValue(1));
         listValue.add(new IntValue(2));

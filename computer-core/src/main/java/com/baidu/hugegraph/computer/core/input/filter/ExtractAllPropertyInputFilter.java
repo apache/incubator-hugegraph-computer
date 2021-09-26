@@ -17,22 +17,21 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.input;
+package com.baidu.hugegraph.computer.core.input.filter;
 
+import com.baidu.hugegraph.computer.core.input.InputFilter;
 import com.baidu.hugegraph.structure.graph.Edge;
 import com.baidu.hugegraph.structure.graph.Vertex;
 
-public class DefaultInputFilter implements InputFilter {
+public class ExtractAllPropertyInputFilter implements InputFilter {
 
     @Override
     public Vertex filter(Vertex vertex) {
-        vertex.properties().clear();
         return vertex;
     }
 
     @Override
     public Edge filter(Edge edge) {
-        edge.properties().clear();
         return edge;
     }
 }

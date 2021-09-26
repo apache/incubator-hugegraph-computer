@@ -28,6 +28,10 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public interface Vertex extends Recyclable {
 
+    String label();
+
+    void label(String label);
+
     Id id();
 
     void id(Id id);

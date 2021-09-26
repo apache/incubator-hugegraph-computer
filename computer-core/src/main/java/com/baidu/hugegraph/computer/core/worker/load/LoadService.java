@@ -126,9 +126,10 @@ public class LoadService {
                                vertex) {
             vertex = inputFilter.filter(vertex);
             Id id = HugeConverter.convertId(vertex.id());
+            String label = vertex.label();
             Properties properties = HugeConverter.convertProperties(
-                                    vertex.properties());
-            Vertex computerVertex = graphFactory.createVertex(id, null);
+                                                  vertex.properties());
+            Vertex computerVertex = graphFactory.createVertex(label, id, null);
             computerVertex.properties(properties);
             return computerVertex;
         }
@@ -224,6 +225,7 @@ public class LoadService {
             Edge computerEdge = graphFactory.createEdge(edge.label(),
                                                         edge.name(), targetId
             );
+            computerEdge.label(edge.label());
             computerEdge.properties(properties);
             return computerEdge;
         }

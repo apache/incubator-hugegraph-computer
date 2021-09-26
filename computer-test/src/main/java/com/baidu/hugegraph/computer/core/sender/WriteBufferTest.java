@@ -166,7 +166,7 @@ public class WriteBufferTest extends UnitTestBase {
         buffer = new WriteBuffer(ComputerContext.instance(), 100, 110);
         buffer.writeEdges(vertex);
         long position2 = buffer.output().position();
-        Assert.assertGt(position1, position2);
+        Assert.assertGte(position1, position2);
 
         UnitTestBase.updateOptions(
             ComputerOptions.INPUT_EDGE_FREQ, "MULTIPLE"
@@ -175,7 +175,7 @@ public class WriteBufferTest extends UnitTestBase {
         buffer = new WriteBuffer(ComputerContext.instance(), 100, 110);
         buffer.writeEdges(vertex);
         long position3 = buffer.output().position();
-        Assert.assertGt(position2, position3);
+        Assert.assertGte(position2, position3);
     }
 
     @Test

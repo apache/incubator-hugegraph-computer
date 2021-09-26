@@ -31,6 +31,7 @@ public enum ValueType implements SerialEnum {
     LONG(4, 8, "long"),
     FLOAT(5, 4, "float"),
     DOUBLE(6, 8, "double"),
+    STRING(7, -1, "string"),
     ID_VALUE(20, -1, "id"),
     ID_VALUE_LIST(30, -1, "idlist"),
     ID_VALUE_LIST_LIST(40, -1, "idlistlist"),

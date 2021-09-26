@@ -120,4 +120,9 @@ public class FloatValue extends Number implements Value<FloatValue> {
     public String toString() {
         return String.valueOf(this.value);
     }
+
+    @Override
+    public Object object() {
+        return this.value;
+    }
 }

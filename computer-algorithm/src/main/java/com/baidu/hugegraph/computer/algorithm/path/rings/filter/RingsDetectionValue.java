@@ -17,41 +17,32 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
+package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
 import java.io.IOException;
 
 import javax.ws.rs.NotSupportedException;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class TriangleCountValue implements Value<TriangleCountValue> {
+public class RingsDetectionValue implements Value<RingsDetectionValue> {
 
-    private IdList idList;
-    private LongValue count;
+    private final IdList path;
+    private Properties walkEdgeProps;
 
-    public TriangleCountValue() {
-        this.idList = new IdList();
-        this.count = new LongValue();
-    }
-
-    public IdList idList() {
-        return this.idList;
-    }
-
-    public long count() {
-        return this.count.value();
-    }
-
-    public void count(Long count) {
-        this.count.value(count);
+    public RingsDetectionValue() {
+        GraphFactory graphFactory = ComputerContext.instance().graphFactory();
+        this.path = new IdList();
+        this.walkEdgeProps = new DefaultProperties(graphFactory);
     }
 
     @Override
@@ -60,41 +51,46 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
     }
 
     @Override
-    public void assign(Value<TriangleCountValue> other) {
+    public void assign(Value<RingsDetectionValue> other) {
         throw new NotSupportedException();
     }
 
     @Override
-    public Value<TriangleCountValue> copy() {
-        TriangleCountValue triangleCountValue = new TriangleCountValue();
-        triangleCountValue.idList = this.idList.copy();
-        triangleCountValue.count = this.count.copy();
-        return triangleCountValue;
+    public int compareTo(RingsDetectionValue o) {
+        throw new NotSupportedException();
     }
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        this.idList.read(in);
-        this.count.read(in);
+        this.path.read(in);
+        this.walkEdgeProps.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
-        this.idList.write(out);
-        this.count.write(out);
+        this.path.write(out);
+        this.walkEdgeProps.write(out);
     }
 
     @Override
-    public int compareTo(TriangleCountValue other) {
+    public RingsDetectionValue copy() {
         throw new NotSupportedException();
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                   .append("idList", this.idList)
-                   .append("count", this.count)
-                   .toString();
+    public IdList path() {
+        return this.path;
+    }
+
+    public void addPath(Vertex vertex) {
+        this.path.add(vertex.id());
+    }
+
+    public Properties walkEdgeProp() {
+        return this.walkEdgeProps;
+    }
+
+    public void walkEdgeProp(Properties properties) {
+        this.walkEdgeProps = properties;
     }
 
     @Override

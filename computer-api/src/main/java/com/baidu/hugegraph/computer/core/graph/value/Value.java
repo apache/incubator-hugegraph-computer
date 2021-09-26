@@ -53,4 +53,9 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
                             this.getClass().getSimpleName());
         }
     }
+
+    /**
+     * @return value of this object
+     */
+    Object object();
 }

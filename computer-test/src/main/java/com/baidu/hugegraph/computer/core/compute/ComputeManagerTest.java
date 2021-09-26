@@ -31,6 +31,7 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.config.Null;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
@@ -42,7 +43,9 @@ import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
+import com.baidu.hugegraph.computer.core.io.GraphComputeOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
+import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
@@ -54,9 +57,9 @@ import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
+import com.baidu.hugegraph.testutil.Whitebox;
 
 public class ComputeManagerTest extends UnitTestBase {
 
@@ -174,13 +177,9 @@ public class ComputeManagerTest extends UnitTestBase {
         BytesOutput bytesOutput = IOFactory.createBytesOutput(
                                   Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
-
-        entryOutput.writeEntry(out -> {
-            vertex.id().write(out);
-        }, out -> {
-            vertex.properties().write(out);
-        });
-
+        GraphComputeOutput output = new StreamGraphOutput(context(),
+                                                          entryOutput);
+        output.writeVertex(vertex);
         return bytesOutput.toByteArray();
     }
 
@@ -204,28 +203,20 @@ public class ComputeManagerTest extends UnitTestBase {
                 edges.add(edge);
             }
             vertex.edges(edges);
-            ReceiverUtil.consumeBuffer(writeEdges(vertex), consumer);
+            ReceiverUtil.consumeBuffer(writeEdges(vertex, EdgeFrequency.SINGLE),
+                                       consumer);
         }
     }
 
-    private static byte[] writeEdges(Vertex vertex) throws IOException {
+    private static byte[] writeEdges(Vertex vertex, EdgeFrequency freq)
+                                     throws IOException {
         BytesOutput bytesOutput = IOFactory.createBytesOutput(
                                   Constants.SMALL_BUF_SIZE);
         EntryOutput entryOutput = new EntryOutputImpl(bytesOutput);
-
-        Id id = vertex.id();
-        KvEntryWriter subKvWriter = entryOutput.writeEntry(out -> {
-            id.write(out);
-        });
-        for (Edge edge : vertex.edges()) {
-            Id targetId = edge.targetId();
-            subKvWriter.writeSubKv(out -> {
-                targetId.write(out);
-            }, out -> {
-                edge.properties().write(out);
-            });
-        }
-        subKvWriter.writeFinish();
+        GraphComputeOutput output = new StreamGraphOutput(context(),
+                                                          entryOutput);
+        Whitebox.setInternalState(output, "frequency", freq);
+        output.writeEdges(vertex);
         return bytesOutput.toByteArray();
     }
 

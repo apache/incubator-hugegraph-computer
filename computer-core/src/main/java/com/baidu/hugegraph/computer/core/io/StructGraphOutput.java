@@ -86,6 +86,7 @@ public abstract class StructGraphOutput implements GraphWritebackOutput {
             case LONG:
             case FLOAT:
             case DOUBLE:
+            case STRING:
                 value.write(this.out);
                 break;
             default:
