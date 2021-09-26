@@ -29,6 +29,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.connection.ConnectionManager;
 import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
+import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.worker.MockComputation;
@@ -54,7 +55,7 @@ public class DataServerManagerTest extends UnitTestBase {
         );
         FileManager fileManager = new FileManager();
         fileManager.init(config);
-        SortManager sortManager = new SortManager(context());
+        SortManager sortManager = new RecvSortManager(context());
         sortManager.init(config);
         MessageRecvManager recvManager = new MessageRecvManager(context(),
                                                                 fileManager,

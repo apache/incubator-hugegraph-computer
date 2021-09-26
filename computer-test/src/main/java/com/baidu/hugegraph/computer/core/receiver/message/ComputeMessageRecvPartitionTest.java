@@ -38,6 +38,7 @@ import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
@@ -65,7 +66,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         FileUtils.deleteQuietly(new File("data_dir2"));
         FileManager fileManager = new FileManager();
         fileManager.init(config);
-        SortManager sortManager = new SortManager(context());
+        SortManager sortManager = new RecvSortManager(context());
         sortManager.init(config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                fileManager, 0);
@@ -98,7 +99,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         FileUtils.deleteQuietly(new File("data_dir2"));
         FileManager fileManager = new FileManager();
         fileManager.init(config);
-        SortManager sortManager = new SortManager(context());
+        SortManager sortManager = new RecvSortManager(context());
         sortManager.init(config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                fileManager, 0);
