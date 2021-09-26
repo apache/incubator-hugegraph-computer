@@ -80,7 +80,7 @@ public class SortManager implements Manager {
         int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
         this.sortBufferExecutor = ExecutorUtil.newFixedThreadPool(
                                   threadNum, SORT_BUFFER);
-        int mergeBuffersThreads = Math.max(threadNum,
+        int mergeBuffersThreads = Math.min(threadNum,
                                            this.maxMergeBuffersThreads(config));
         this.mergeBuffersExecutor = ExecutorUtil.newFixedThreadPool(
                                     mergeBuffersThreads, MERGE_BUFFERS);
