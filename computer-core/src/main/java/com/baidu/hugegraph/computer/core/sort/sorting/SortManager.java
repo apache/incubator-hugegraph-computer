@@ -59,17 +59,12 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 
-public class SortManager implements Manager {
+public abstract class SortManager implements Manager {
 
     public static final Logger LOG = Log.logger(SortManager.class);
 
-    private static final String NAME = "sort";
-    private static final String SORT_BUFFER = "sort-buffer-executor-%s";
-    private static final String MERGE_BUFFERS = "merge-buffers-executor-%s";
-
     private final ComputerContext context;
-    private final ExecutorService sortBufferExecutor;
-    private final ExecutorService mergeBuffersExecutor;
+    private final ExecutorService sortExecutor;
     private final Sorter sorter;
     private final int capacity;
     private final int flushThreshold;
@@ -77,13 +72,8 @@ public class SortManager implements Manager {
     public SortManager(ComputerContext context) {
         this.context = context;
         Config config = context.config();
-        int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
-        this.sortBufferExecutor = ExecutorUtil.newFixedThreadPool(
-                                  threadNum, SORT_BUFFER);
-        int mergeBuffersThreads = Math.min(threadNum,
-                                           this.maxMergeBuffersThreads(config));
-        this.mergeBuffersExecutor = ExecutorUtil.newFixedThreadPool(
-                                    mergeBuffersThreads, MERGE_BUFFERS);
+        this.sortExecutor = ExecutorUtil.newFixedThreadPool(
+                            this.threadNum(config), this.threadPrefix());
         this.sorter = new SorterImpl(config);
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
@@ -91,15 +81,12 @@ public class SortManager implements Manager {
                               ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
     }
 
-    private int maxMergeBuffersThreads(Config config) {
-        Integer workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
-        Integer partitions = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
-        return partitions / workerCount;
-    }
+    public abstract String name();
 
-    @Override
-    public String name() {
-        return NAME;
+    protected abstract String threadPrefix();
+
+    protected Integer threadNum(Config config) {
+        return config.get(ComputerOptions.SORT_THREAD_NUMS);
     }
 
     @Override
@@ -109,14 +96,10 @@ public class SortManager implements Manager {
 
     @Override
     public void close(Config config) {
-        this.sortBufferExecutor.shutdown();
-        this.mergeBuffersExecutor.shutdown();
+        this.sortExecutor.shutdown();
         try {
-            this.sortBufferExecutor.awaitTermination(Constants.SHUTDOWN_TIMEOUT,
-                                                     TimeUnit.MILLISECONDS);
-            this.mergeBuffersExecutor.awaitTermination(
-                                      Constants.SHUTDOWN_TIMEOUT,
-                                      TimeUnit.MILLISECONDS);
+            this.sortExecutor.awaitTermination(Constants.SHUTDOWN_TIMEOUT,
+                                               TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             LOG.warn("Interrupted when waiting sort executor terminated");
         }
@@ -140,7 +123,7 @@ public class SortManager implements Manager {
             }
 
             return ByteBuffer.wrap(output.buffer(), 0, (int) output.position());
-        }, this.sortBufferExecutor);
+        }, this.sortExecutor);
     }
 
     public CompletableFuture<Void> mergeBuffers(List<RandomAccessInput> inputs,
@@ -158,7 +141,7 @@ public class SortManager implements Manager {
                           "Failed to merge %s buffers to file '%s'",
                           e, inputs.size(), path);
             }
-        }, this.mergeBuffersExecutor);
+        }, this.sortExecutor);
     }
 
     public void mergeInputs(List<String> inputs, List<String> outputs,
