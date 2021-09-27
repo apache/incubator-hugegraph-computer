@@ -20,6 +20,8 @@
 package com.baidu.hugegraph.computer.core.sort.sorting;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 
 public class RecvSortManager extends SortManager {
 
@@ -38,5 +40,17 @@ public class RecvSortManager extends SortManager {
     @Override
     protected String threadPrefix() {
         return PREFIX;
+    }
+
+    @Override
+    protected Integer threadNum(Config config) {
+        return Math.min(super.threadNum(config),
+                        this.maxSendSortThreads(config));
+    }
+
+    private int maxSendSortThreads(Config config) {
+        Integer workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
+        Integer partitions = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
+        return partitions / workerCount;
     }
 }
