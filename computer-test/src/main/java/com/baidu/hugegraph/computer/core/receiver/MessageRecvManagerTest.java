@@ -39,6 +39,7 @@ import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitionT
 import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitionTest;
 import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitionTest;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -68,7 +69,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
         );
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
-        this.sortManager = new SortManager(context());
+        this.sortManager = new RecvSortManager(context());
         this.sortManager.init(this.config);
         this.receiveManager = new MessageRecvManager(context(),
                                                      this.fileManager,

@@ -59,12 +59,9 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 
-public class SortManager implements Manager {
+public abstract class SortManager implements Manager {
 
     public static final Logger LOG = Log.logger(SortManager.class);
-
-    private static final String NAME = "sort";
-    private static final String PREFIX = "sort-executor-%s";
 
     private final ComputerContext context;
     private final ExecutorService sortExecutor;
@@ -75,8 +72,8 @@ public class SortManager implements Manager {
     public SortManager(ComputerContext context) {
         this.context = context;
         Config config = context.config();
-        int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
-        this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, PREFIX);
+        this.sortExecutor = ExecutorUtil.newFixedThreadPool(
+                            this.threadNum(config), this.threadPrefix());
         this.sorter = new SorterImpl(config);
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
@@ -84,9 +81,12 @@ public class SortManager implements Manager {
                               ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
     }
 
-    @Override
-    public String name() {
-        return NAME;
+    public abstract String name();
+
+    protected abstract String threadPrefix();
+
+    protected Integer threadNum(Config config) {
+        return config.get(ComputerOptions.SORT_THREAD_NUMS);
     }
 
     @Override

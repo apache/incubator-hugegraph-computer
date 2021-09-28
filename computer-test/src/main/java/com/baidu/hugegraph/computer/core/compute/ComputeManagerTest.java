@@ -53,6 +53,7 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
+import com.baidu.hugegraph.computer.core.sort.sorting.SendSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
@@ -95,7 +96,7 @@ public class ComputeManagerTest extends UnitTestBase {
         this.managers = new Managers();
         FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
-        SortManager sortManager = new SortManager(context());
+        SortManager sortManager = new SendSortManager(context());
         this.managers.add(sortManager);
 
         MessageSendManager sendManager = new MessageSendManager(

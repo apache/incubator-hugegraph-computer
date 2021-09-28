@@ -48,6 +48,7 @@ import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -84,7 +85,7 @@ public class MessageInputTest extends UnitTestBase {
         this.managers = new Managers();
         FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
-        SortManager sortManager = new SortManager(context());
+        SortManager sortManager = new RecvSortManager(context());
         this.managers.add(sortManager);
 
         MessageRecvManager receiveManager = new MessageRecvManager(context(),

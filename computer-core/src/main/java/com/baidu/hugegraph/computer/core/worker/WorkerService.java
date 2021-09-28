@@ -51,6 +51,8 @@ import com.baidu.hugegraph.computer.core.network.connection.TransportConnectionM
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.rpc.WorkerRpcManager;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
+import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
+import com.baidu.hugegraph.computer.core.sort.sorting.SendSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.util.ShutdownHook;
@@ -308,12 +310,11 @@ public class WorkerService implements Closeable {
         FileManager fileManager = new FileManager();
         this.managers.add(fileManager);
 
-        SortManager sortManager = new SortManager(this.context);
-        this.managers.add(sortManager);
+        SortManager recvSortManager = new RecvSortManager(this.context);
+        this.managers.add(recvSortManager);
 
         MessageRecvManager recvManager = new MessageRecvManager(this.context,
-                                                                fileManager,
-                                                                sortManager);
+                                         fileManager, recvSortManager);
         this.managers.add(recvManager);
 
         ConnectionManager connManager = new TransportConnectionManager();
@@ -326,8 +327,12 @@ public class WorkerService implements Closeable {
                                                                 this.context);
         this.managers.add(clientManager);
 
+        SortManager sendSortManager = new SendSortManager(this.context);
+        this.managers.add(sendSortManager);
+
         MessageSendManager sendManager = new MessageSendManager(this.context,
-                                         sortManager, clientManager.sender());
+                                         sendSortManager,
+                                         clientManager.sender());
         this.managers.add(sendManager);
 
         WorkerInputManager inputManager = new WorkerInputManager(this.context,

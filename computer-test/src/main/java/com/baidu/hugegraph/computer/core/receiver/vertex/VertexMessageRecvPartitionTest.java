@@ -44,6 +44,7 @@ import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
@@ -74,7 +75,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         FileUtils.deleteQuietly(new File("data_dir2"));
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
-        this.sortManager = new SortManager(context());
+        this.sortManager = new RecvSortManager(context());
         this.sortManager.init(this.config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
