@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
+package com.baidu.hugegraph.computer.algorithm.community.cc;
 
 import java.util.Map;
 
@@ -28,6 +28,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
+import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.SchemaManager;
@@ -37,16 +38,16 @@ import com.baidu.hugegraph.testutil.Assert;
 
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
-public class TriangleCountTest extends AlgorithmTestBase {
+public class ClusteringCoefficientTest extends AlgorithmTestBase {
     
     private static final String VERTX_LABEL = "tc_user";
     private static final String EDGE_LABEL = "tc_know";
     private static final String PROPERTY_KEY = "tc_weight";
 
-    protected static final Map<Object, Long> EXPECTED_RESULTS =
-              ImmutableMap.of("tc_A", 2L, "tc_B", 1L,
-                              "tc_C", 3L, "tc_D", 2L,
-                              "tc_E", 1L);
+    protected static final Map<String, Object> EXPECTED_RESULTS =
+              ImmutableMap.of("tc_A", 0.6666667F, "tc_B", 1.0F,
+                              "tc_C", 0.5F, "tc_D", 0.6666667F,
+                              "tc_E", 1.0F);
 
     @BeforeClass
     public static void setup() {
@@ -97,7 +98,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
     }
 
     @Test
-    public void testTriangleCountValue() {
+    public void testClusteringCoefficientValue() {
         TriangleCountValue value = new TriangleCountValue();
         value.count(10L);
         Assert.assertThrows(NotSupportedException.class,
@@ -113,23 +114,23 @@ public class TriangleCountTest extends AlgorithmTestBase {
     }
 
     @Test
-    public void testTriangleCount() throws InterruptedException {
-        runAlgorithm(TriangleCountParams.class.getName(),
+    public void testClusteringCoefficient() throws InterruptedException {
+        runAlgorithm(ClusteringCoefficientParams.class.getName(),
                      ComputerOptions.OUTPUT_CLASS.name(),
-                     TriangleCountOutputTest.class.getName());
+                     ClusteringCoefficientOutputTest.class.getName());
     }
 
-    public static class TriangleCountOutputTest extends TriangleCountOutput {
-
+    public static class ClusteringCoefficientOutputTest
+                  extends ClusteringCoefficientOutput {
         @Override
         public Vertex constructHugeVertex(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Vertex result = super.constructHugeVertex(vertex);
-            Long expected = EXPECTED_RESULTS.get(result.id());
+            Float expected = (Float) EXPECTED_RESULTS.get(result.id());
+
             if (expected != null) {
                 Assert.assertEquals(expected, result.property(super.name()));
             }
-
             return result;
         }
     }

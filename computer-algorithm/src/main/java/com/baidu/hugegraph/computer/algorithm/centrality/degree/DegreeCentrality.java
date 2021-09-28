@@ -58,8 +58,8 @@ public class DegreeCentrality implements Computation<NullValue> {
         if (!this.calculateByWeightProperty) {
             vertex.value(new DoubleValue(vertex.numEdges()));
         } else {
-            Edge edge = null;
-            /**
+            Edge edge;
+            /*
              *  TODO: Here we use doubleValue type now, we will use BigDecimal
              *  and output "BigDecimalValue" to resolve double type overflow
              *  int the future;
@@ -71,7 +71,7 @@ public class DegreeCentrality implements Computation<NullValue> {
                 double weight = weightValue(edge.property(this.weightProperty));
                 totalWeight += weight;
                 if (Double.isInfinite(totalWeight)) {
-                    throw new ComputerException("Calculate weight overflow," +
+                    throw new ComputerException("Calculate weight overflow, " +
                                                 "current is %s, edge '%s' " +
                                                 "is %s",
                                                 totalWeight, edge, weight);

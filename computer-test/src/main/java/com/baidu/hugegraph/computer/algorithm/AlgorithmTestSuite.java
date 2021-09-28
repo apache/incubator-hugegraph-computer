@@ -29,6 +29,7 @@ import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
 import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankTest;
 import com.baidu.hugegraph.computer.algorithm.community.wcc.WccTest;
+import com.baidu.hugegraph.computer.algorithm.community.cc.ClusteringCoefficientTest;
 import com.baidu.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
@@ -38,7 +39,8 @@ import com.baidu.hugegraph.config.OptionSpace;
     WccTest.class,
     TriangleCountTest.class,
     RingsDetectionTest.class,
-    RingsDetectionWithFilterTest.class
+    RingsDetectionWithFilterTest.class,
+    ClusteringCoefficientTest.class
 })
 public class AlgorithmTestSuite {
 
