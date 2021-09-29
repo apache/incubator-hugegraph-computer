@@ -40,7 +40,20 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
         this.config = config;
         String url = config.get(ComputerOptions.HUGEGRAPH_URL);
         String graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
-        this.client = new HugeClientBuilder(url, graph).build();
+        String token = config.get(ComputerOptions.AUTH_TOKEN);
+        String usrname = config.get(ComputerOptions.AUTH_USRNAME);
+        String passwd = config.get(ComputerOptions.AUTH_PASSWD);
+        // TODO: need refact after HugeClient upgrade..
+        HugeClientBuilder clientBuilder = new HugeClientBuilder(url, graph);
+
+        if (token != null && token.length() != 0) {
+            this.client = clientBuilder.build();
+            this.client.setAuthContext(token);
+        } else if (usrname != null && usrname.length() != 0){
+            this.client = clientBuilder.configUser(usrname, passwd).build();
+        } else {
+            this.client = clientBuilder.build();
+        }
     }
 
     @Override
