@@ -181,18 +181,21 @@ public class LoadService {
             if (!this.hasNext()) {
                 throw new NoSuchElementException();
             }
-
             com.baidu.hugegraph.structure.graph.Edge hugeEdge;
+   
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
             while (edgeFetcher.hasNext()) {
                 hugeEdge = edgeFetcher.next();
+
                 Edge edge = this.convert(hugeEdge);
                 Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
+                Id targetId = HugeConverter.convertId(hugeEdge.targetId());
                 if (this.currentVertex == null) {
                     this.currentVertex = new DefaultVertex(graphFactory,
                                                            sourceId, null);
                     this.currentVertex.addEdge(edge);
-                } else if (this.currentVertex.id().equals(sourceId) &&
+                } else if ((this.currentVertex.id().equals(sourceId) || 
+                           this.currentVertex.id().equals(targetId)) &&
                            this.currentVertex.numEdges() < this.maxEdges) {
                     /*
                      * Current edge is the adjacent edge of previous vertex and
@@ -227,6 +230,8 @@ public class LoadService {
             );
             computerEdge.label(edge.label());
             computerEdge.properties(properties);
+            Id sourceId = HugeConverter.convertId(edge.sourceId());
+            computerEdge.sourceId(sourceId);
             return computerEdge;
         }
     }

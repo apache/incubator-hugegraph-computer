@@ -35,6 +35,7 @@ public class DefaultVertex implements Vertex {
     private Id id;
     private Value<?> value;
     private Edges edges;
+    private Edges edgesbothdirection;
     private Properties properties;
     private boolean active;
 
@@ -52,6 +53,7 @@ public class DefaultVertex implements Vertex {
         this.id = id;
         this.value = value;
         this.edges = graphFactory.createEdges();
+        this.edgesbothdirection = graphFactory.createEdges();
         this.properties = graphFactory.createProperties();
         this.active = true;
     }
@@ -96,15 +98,36 @@ public class DefaultVertex implements Vertex {
     public Edges edges() {
         return this.edges;
     }
+    
+    @Override
+    public int numEdgesBothDirection() {
+        return this.edgesbothdirection.size();
+    }    
+
+    @Override
+    public Edges edgesBothDirection() {
+        return this.edgesbothdirection;
+    }
 
     @Override
     public void edges(Edges edges) {
-        this.edges = edges;
+        this.edgesbothdirection = edges;
+        this.edges.clear();
+        for (Edge edge : edges) {
+            Id sourceId = edge.sourceId();
+            if (this.id().equals(sourceId)) {
+                this.edges.add(edge);
+            }
+        }
     }
 
     @Override
     public void addEdge(Edge edge) {
-        this.edges.add(edge);
+        this.edgesbothdirection.add(edge);
+        Id sourceId = edge.sourceId();
+        if (this.id().equals(sourceId)) {
+            this.edges.add(edge);
+        }
     }
 
     @Override

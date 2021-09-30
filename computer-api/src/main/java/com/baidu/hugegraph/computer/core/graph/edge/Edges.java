@@ -24,4 +24,6 @@ public interface Edges extends Iterable<Edge> {
     int size();
 
     void add(Edge edge);
+
+    void clear();
 }

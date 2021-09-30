@@ -43,6 +43,10 @@ public interface Vertex extends Recyclable {
     int numEdges();
 
     Edges edges();
+ 
+    int numEdgesBothDirection();
+ 
+    Edges edgesBothDirection();
 
     void edges(Edges edges);
 

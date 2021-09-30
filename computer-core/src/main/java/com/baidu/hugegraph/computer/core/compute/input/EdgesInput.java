@@ -157,6 +157,12 @@ public class EdgesInput {
         }
 
         @Override
+        public void clear() {
+            throw new ComputerException(
+                      "Not support clear edges during computing");
+        }
+
+        @Override
         @Nonnull
         public Iterator<Edge> iterator() {
             try {
@@ -284,6 +290,12 @@ public class EdgesInput {
         public void add(Edge edge) {
             throw new ComputerException(
                       "Not support adding edges during computing");
+        }
+
+        @Override
+        public void clear() {
+            throw new ComputerException(
+                      "Not support clear edges during computing");
         }
 
         @Override

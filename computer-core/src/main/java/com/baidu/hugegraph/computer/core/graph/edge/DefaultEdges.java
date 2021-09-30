@@ -44,6 +44,11 @@ public class DefaultEdges implements Edges {
     }
 
     @Override
+    public void clear() {
+        this.edges.clear();
+    }
+
+    @Override
     public Iterator<Edge> iterator() {
         return this.edges.iterator();
     }

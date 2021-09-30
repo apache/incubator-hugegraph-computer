@@ -34,6 +34,10 @@ public interface Edge extends Recyclable {
 
     void name(String name);
 
+    Id sourceId();
+
+    void sourceId(Id sourceId);
+
     Id targetId();
 
     void targetId(Id targetId);

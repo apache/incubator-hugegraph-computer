@@ -32,6 +32,7 @@ public class DefaultEdge implements Edge {
     private String label;
     private String name;
     private Id targetId;
+    private Id sourceId;
     private Properties properties;
 
     public DefaultEdge(GraphFactory graphFactory) {
@@ -43,6 +44,7 @@ public class DefaultEdge implements Edge {
         this.label = label;
         this.name = name;
         this.targetId = targetId;
+        this.sourceId = graphFactory.createId("");
         this.properties = graphFactory.createProperties();
     }
 
@@ -72,10 +74,20 @@ public class DefaultEdge implements Edge {
     }
 
     @Override
+    public Id sourceId() {
+        return this.sourceId;
+    }
+
+    @Override
     public void targetId(Id targetId) {
         this.targetId = targetId;
     }
-
+   
+    @Override
+    public void sourceId(Id sourceId) {
+        this.sourceId = sourceId;
+    }
+  
     @Override
     public Properties properties() {
         return this.properties;
