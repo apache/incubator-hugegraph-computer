@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
+import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest.RingsDetectionTestOutput;
 import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilter;
 import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilterParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -99,7 +100,7 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
     }
 
     @Test
-    public void test() throws InterruptedException {
+    public void testRunAlgorithm() throws InterruptedException {
         String filter = "{" +
                         "    \"vertex_filter\": [" +
                         "        {" +

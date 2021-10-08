@@ -38,7 +38,7 @@ import com.baidu.hugegraph.testutil.Assert;
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 public class TriangleCountTest extends AlgorithmTestBase {
-    
+
     private static final String VERTX_LABEL = "tc_user";
     private static final String EDGE_LABEL = "tc_know";
     private static final String PROPERTY_KEY = "tc_weight";
@@ -97,6 +97,13 @@ public class TriangleCountTest extends AlgorithmTestBase {
     }
 
     @Test
+    public void testRunAlgorithm() throws InterruptedException {
+        runAlgorithm(TriangleCountParams.class.getName(),
+                     ComputerOptions.OUTPUT_CLASS.name(),
+                     TriangleCountOutputTest.class.getName());
+    }
+
+    @Test
     public void testTriangleCountValue() {
         TriangleCountValue value = new TriangleCountValue();
         value.count(10L);
@@ -110,13 +117,6 @@ public class TriangleCountTest extends AlgorithmTestBase {
         Assert.assertNotSame(value.idList(), copy.idList());
 
         Assert.assertContains("10", value.toString());
-    }
-
-    @Test
-    public void testTriangleCount() throws InterruptedException {
-        runAlgorithm(TriangleCountParams.class.getName(),
-                     ComputerOptions.OUTPUT_CLASS.name(),
-                     TriangleCountOutputTest.class.getName());
     }
 
     public static class TriangleCountOutputTest extends TriangleCountOutput {

@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.algorithm.path.rings;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,11 +29,14 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
 import com.baidu.hugegraph.structure.constant.T;
 import com.baidu.hugegraph.structure.graph.Vertex;
+import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -88,7 +92,7 @@ public class RingsDetectionTest extends AlgorithmTestBase {
     }
 
     @Test
-    public void test() throws InterruptedException {
+    public void testRunAlgorithm() throws InterruptedException {
         runAlgorithm(RingsDetectionTestParams.class.getName());
     }
 
@@ -99,6 +103,36 @@ public class RingsDetectionTest extends AlgorithmTestBase {
             this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                              RingsDetectionTestOutput.class.getName());
             super.setAlgorithmParameters(params);
+        }
+    }
+
+    public static class RingsDetectionTestOutput extends RingsDetectionOutput {
+
+        public static Map<String, Set<String>> EXPECT_RINGS;
+
+        @Override
+        public void write(
+               com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+            super.write(vertex);
+            this.assertResult(vertex);
+        }
+
+        private void assertResult(
+                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+            IdListList rings = vertex.value();
+            Set<String> expect =
+                        EXPECT_RINGS.getOrDefault(vertex.id().toString(),
+                                                  new HashSet<>());
+
+            Assert.assertEquals(expect.size(), rings.size());
+            for (int i = 0; i < rings.size(); i++) {
+                IdList ring = rings.get(0);
+                StringBuilder ringValue = new StringBuilder();
+                for (int j = 0; j < ring.size(); j++) {
+                    ringValue.append(ring.get(j).toString());
+                }
+                Assert.assertTrue(expect.contains(ringValue.toString()));
+            }
         }
     }
 }
