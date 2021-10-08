@@ -178,6 +178,7 @@ public class MasterService implements Closeable {
      * After the superstep iteration, output the result.
      */
     public void execute() {
+        long start = System.currentTimeMillis();
         this.checkInited();
 
         LOG.info("{} MasterService execute", this);
@@ -204,6 +205,7 @@ public class MasterService implements Closeable {
         if (superstep == Constants.INPUT_SUPERSTEP) {
             superstepStat = this.inputstep();
             superstep++;
+            LOG.info("input cost:{}ms", System.currentTimeMillis() - start);
         } else {
             // TODO: Get superstepStat from bsp service.
             superstepStat = null;
@@ -211,6 +213,7 @@ public class MasterService implements Closeable {
         E.checkState(superstep <= this.maxSuperStep,
                      "The superstep {} can't be > maxSuperStep {}",
                      superstep, this.maxSuperStep);
+        long startCompute = System.currentTimeMillis();
         // Step 3: Iteration computation of all supersteps.
         for (; superstepStat.active(); superstep++) {
             LOG.info("{} MasterService superstep {} started",
@@ -254,9 +257,13 @@ public class MasterService implements Closeable {
             LOG.info("{} MasterService superstep {} finished",
                      this, superstep);
         }
+        LOG.info("compute cost: {}ms",
+                 System.currentTimeMillis() - startCompute);
 
+        long startOutput = System.currentTimeMillis();
         // Step 4: Output superstep for outputting results.
         this.outputstep();
+        LOG.info("output cost: {}ms", System.currentTimeMillis() - startOutput);
     }
 
     @Override
