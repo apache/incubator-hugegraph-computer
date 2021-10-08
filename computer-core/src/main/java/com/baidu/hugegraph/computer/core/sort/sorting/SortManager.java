@@ -81,6 +81,7 @@ public abstract class SortManager implements Manager {
                               ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
     }
 
+    @Override
     public abstract String name();
 
     protected abstract String threadPrefix();
@@ -225,8 +226,8 @@ public abstract class SortManager implements Manager {
 
     private Combiner<Pointer> createMessageCombiner() {
         Config config = this.context.config();
-        Combiner<?> valueCombiner = config.createObject(
-                    ComputerOptions.WORKER_COMBINER_CLASS, false);
+        Combiner<Value<?>> valueCombiner = config.createObject(
+                           ComputerOptions.WORKER_COMBINER_CLASS, false);
 
         if (valueCombiner == null) {
             return null;
@@ -235,7 +236,7 @@ public abstract class SortManager implements Manager {
         Value<?> v1 = config.createObject(
                       ComputerOptions.ALGORITHM_MESSAGE_CLASS);
         Value<?> v2 = v1.copy();
-        return new PointerCombiner(v1, v2, valueCombiner);
+        return new PointerCombiner<>(v1, v2, valueCombiner);
     }
 
     private Combiner<Pointer> createPropertiesCombiner(
