@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
 public class Lpa implements Computation<Id> {
 
-    private final Random R = new Random();
+    private final Random random = new Random();
 
     @Override
     public String name() {
@@ -95,7 +95,7 @@ public class Lpa implements Computation<Id> {
         }
 
         // Random choice
-        int selected = this.R.nextInt(maxLabels.size());
+        int selected = this.random.nextInt(maxLabels.size());
         return maxLabels.get(selected);
     }
 }
