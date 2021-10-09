@@ -42,8 +42,9 @@ public class DefaultEdgeTest extends UnitTestBase {
         Assert.assertEquals(new DefaultProperties(graphFactory()),
                             edge.properties());
 
-        edge = new DefaultEdge(graphFactory(), "knows", "2021-06-01",
-                               BytesId.of(1L));
+        edge = new DefaultEdge(graphFactory(), BytesId.of(1L), "knows",
+                               "2021-06-01", BytesId.of(1L));
+        Assert.assertEquals(BytesId.of(1L), edge.id());
         Assert.assertEquals("knows", edge.label());
         Assert.assertEquals("2021-06-01", edge.name());
         Assert.assertEquals(BytesId.of(1L), edge.targetId());
@@ -71,6 +72,7 @@ public class DefaultEdgeTest extends UnitTestBase {
     @Test
     public void testEquals() {
         DefaultEdge edge1 = new DefaultEdge(graphFactory());
+        edge1.id(BytesId.of(1L));
         edge1.label("knows");
         edge1.name("2021-06-01");
         edge1.targetId(BytesId.of(1L));
@@ -79,8 +81,9 @@ public class DefaultEdgeTest extends UnitTestBase {
         properties.put("p2", new DoubleValue(2.0D));
         edge1.properties(properties);
 
-        DefaultEdge edge2 = new DefaultEdge(graphFactory(), "knows",
-                                            "2021-06-01", BytesId.of(1L));
+        DefaultEdge edge2 = new DefaultEdge(graphFactory(), BytesId.of(1L),
+                                            "knows", "2021-06-01",
+                                            BytesId.of(1L));
         edge2.properties().put("p1", new LongValue(1L));
         edge2.properties().put("p2", new DoubleValue(2.0D));
 

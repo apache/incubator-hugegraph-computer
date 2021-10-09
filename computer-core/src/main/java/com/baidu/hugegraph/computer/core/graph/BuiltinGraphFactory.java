@@ -111,18 +111,19 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Edge createEdge(Id targetId) {
-        return new DefaultEdge(this, Constants.EMPTY_STR,
+        return new DefaultEdge(this, null, Constants.EMPTY_STR,
                                Constants.EMPTY_STR, targetId);
     }
 
     @Override
     public Edge createEdge(String label, Id targetId) {
-        return new DefaultEdge(this, label, Constants.EMPTY_STR, targetId);
+        return new DefaultEdge(this, null, label, Constants.EMPTY_STR,
+                               targetId);
     }
 
     @Override
     public Edge createEdge(String label, String name, Id targetId) {
-        return new DefaultEdge(this, label, name, targetId);
+        return new DefaultEdge(this, null, label, name, targetId);
     }
 
     @Override

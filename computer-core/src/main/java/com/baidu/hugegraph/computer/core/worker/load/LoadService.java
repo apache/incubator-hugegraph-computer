@@ -225,6 +225,7 @@ public class LoadService {
             Edge computerEdge = graphFactory.createEdge(edge.label(),
                                                         edge.name(), targetId
             );
+            computerEdge.id(HugeConverter.convertId(edge.id()));
             computerEdge.label(edge.label());
             computerEdge.properties(properties);
             return computerEdge;
