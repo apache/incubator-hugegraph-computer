@@ -68,7 +68,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                 writer.writeSubKv(out -> {
                     this.writeId(out, edge.targetId());
                 }, out -> {
-                    out.writeUTF(edge.label());
+                    this.writeLabel(out, edge.label());
                     this.writeProperties(out, edge.properties());
                 });
             }
