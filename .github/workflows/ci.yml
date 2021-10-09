@@ -32,6 +32,15 @@ jobs:
       - name: Interact with the cluster
         run: kubectl get nodes
 
+      - uses: actions/setup-python@v2
+          with:
+            python-version: '3.8'
+      - name: Setup HDFS
+        uses: beyondstorage/setup-hdfs@master
+        with:
+          hdfs-version: '3.3.1'
+      - run: curl ${{ env.HDFS_NAMENODE_ADDR }}
+
       - name: Cache Maven packages
         uses: actions/cache@v2
         with:

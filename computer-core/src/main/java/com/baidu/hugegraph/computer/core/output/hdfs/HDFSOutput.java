@@ -54,7 +54,7 @@ public class HDFSOutput implements ComputerOutput {
             this.writeHeaders();
         } catch (IOException | URISyntaxException | InterruptedException e) {
             throw new ComputerException("Failed to init hdfs output on " +
-                                        "partition [{}]", partition, e);
+                                        "partition [%s]", e, partition);
         }
     }
 
