@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 public class PageRankTest extends AlgorithmTestBase {
 
     @Test
-    public void testServiceWith1Worker() throws InterruptedException {
+    public void testRunAlgorithm() throws InterruptedException {
        runAlgorithm(PageRankParams.class.getName());
     }
 }

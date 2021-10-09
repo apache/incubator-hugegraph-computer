@@ -76,7 +76,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
             for (Edge edge : vertex.edges()) {
                 // Use label + targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
-                    out.writeUTF(edge.label());
+                    this.writeLabel(out, edge.label());
                     this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
@@ -90,8 +90,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
                  * use properties as subValue
                  */
                 writer.writeSubKv(out -> {
-                    out.writeUTF(edge.label());
-                    out.writeUTF(edge.name());
+                    this.writeLabel(out, edge.label());
+                    this.writeLabel(out, edge.name());
                     this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());

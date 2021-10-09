@@ -58,8 +58,8 @@ public class StreamGraphInput implements GraphComputeInput {
         this.in.readEntry(in -> {
             vertex.id(readId(in));
         }, in -> {
-            vertex.label(this.readLabel(in));
-            vertex.properties(this.readProperties(in));
+            vertex.label(readLabel(in));
+            vertex.properties(readProperties(in));
         });
         return vertex;
     }
@@ -79,7 +79,7 @@ public class StreamGraphInput implements GraphComputeInput {
                     edge.targetId(readId(in));
                 }, in -> {
                     edge.label(readLabel(in));
-                    edge.properties(this.readProperties(in));
+                    edge.properties(readProperties(in));
                 });
                 vertex.addEdge(edge);
             }
@@ -88,10 +88,10 @@ public class StreamGraphInput implements GraphComputeInput {
                 Edge edge = this.graphFactory.createEdge();
                 // Use label + targetId as subKey, use properties as subValue
                 reader.readSubKv(in -> {
-                    edge.label(in.readUTF());
+                    edge.label(readLabel(in));
                     edge.targetId(readId(in));
                 }, in -> {
-                    edge.properties(this.readProperties(in));
+                    edge.properties(readProperties(in));
                 });
                 vertex.addEdge(edge);
             }
@@ -104,8 +104,8 @@ public class StreamGraphInput implements GraphComputeInput {
                  * use properties as subValue
                  */
                 reader.readSubKv(in -> {
-                    edge.label(in.readUTF());
-                    edge.name(in.readUTF());
+                    edge.label(readLabel(in));
+                    edge.name(readLabel(in));
                     edge.targetId(readId(in));
                 }, in -> {
                     edge.properties(this.readProperties(in));
@@ -143,12 +143,6 @@ public class StreamGraphInput implements GraphComputeInput {
         return value;
     }
 
-    public static Id readId(RandomAccessInput in) throws IOException {
-        Id id = new BytesId();
-        id.read(in);
-        return id;
-    }
-
     private Properties readProperties(RandomAccessInput in) throws IOException {
         Properties properties = this.graphFactory.createProperties();
         int size = in.readInt();
@@ -158,6 +152,12 @@ public class StreamGraphInput implements GraphComputeInput {
             properties.put(key, value);
         }
         return properties;
+    }
+
+    public static Id readId(RandomAccessInput in) throws IOException {
+        Id id = new BytesId();
+        id.read(in);
+        return id;
     }
 
     public static String readLabel(RandomAccessInput in) throws IOException {

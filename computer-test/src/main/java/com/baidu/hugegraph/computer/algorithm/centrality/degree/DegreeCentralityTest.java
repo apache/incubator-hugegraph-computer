@@ -38,11 +38,11 @@ import com.google.common.collect.Streams;
 public class DegreeCentralityTest extends AlgorithmTestBase {
 
     @Test
-    public void testServiceWith1Worker() throws InterruptedException {
+    public void testRunAlgorithm() throws InterruptedException {
         runAlgorithm(DegreeCentralityTestParams.class.getName(),
-                     DegreeCentrality.OPTION_WEIGHT_PROPERTY,
-                     "rate");
+                     DegreeCentrality.OPTION_WEIGHT_PROPERTY, "rate");
         DegreeCentralityTestOutput.assertResult();
+
         runAlgorithm(DegreeCentralityTestParams.class.getName());
         DegreeCentralityTestOutput.assertResult();
     }

@@ -173,7 +173,9 @@ public abstract class MessageRecvPartition {
          * TODO Restore genOutputFileNames(sqrt(outputFiles.size()))
          *  after add Sorter#iterator() of subkv
          */
-        List<String> newOutputs = this.genOutputFileNames(1);
+        int mergeFileNum = this.mergeFileNum;
+        mergeFileNum = 1;
+        List<String> newOutputs = this.genOutputFileNames(mergeFileNum);
         this.sortManager.mergeInputs(this.outputFiles, newOutputs,
                                      this.withSubKv, this.outerSortFlusher());
         this.outputFiles = newOutputs;
