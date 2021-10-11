@@ -22,17 +22,18 @@ package com.baidu.hugegraph.computer.algorithm.path.filter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FilterDescribe {
+public class PropertyFilterDescribe {
 
     private final String label;
     private final String propertyFilter;
 
     @JsonCreator
-    public FilterDescribe(@JsonProperty(value = "label", required = true)
-                          String label,
-                          @JsonProperty(value = "property_filter",
-                                        required = true)
-                          String propertyFilter) {
+    public PropertyFilterDescribe(@JsonProperty(value = "label",
+                                                required = true)
+                                  String label,
+                                  @JsonProperty(value = "property_filter",
+                                                required = true)
+                                  String propertyFilter) {
         this.label = label;
         this.propertyFilter = propertyFilter;
     }

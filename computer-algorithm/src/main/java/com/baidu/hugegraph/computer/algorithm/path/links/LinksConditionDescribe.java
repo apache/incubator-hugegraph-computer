@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.baidu.hugegraph.computer.algorithm.path.filter.FilterDescribe;
+import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -33,20 +33,17 @@ import com.google.common.collect.ImmutableList;
 public class LinksConditionDescribe {
 
     private final ImmutableList<String> startVertexes;
-    private final FilterDescribe edgeEndCondition;
-    private final FilterDescribe edgeCompareCondition;
+    private final PropertyFilterDescribe edgeEndCondition;
+    private final PropertyFilterDescribe edgeCompareCondition;
 
     @JsonCreator
-    private LinksConditionDescribe(@JsonProperty(value = "start_vertexes",
-                                                 required = true)
-                                   List<String> startVertexes,
-                                   @JsonProperty(value = "edge_end_condition",
-                                                 required = true)
-                                   FilterDescribe edgeEndCondition,
-                                   @JsonProperty(
-                                   value = "edge_compare_condition",
-                                   required = true)
-                                   FilterDescribe edgeCompareCondition) {
+    private LinksConditionDescribe(
+            @JsonProperty(value = "start_vertexes", required = true)
+            List<String> startVertexes,
+            @JsonProperty(value = "edge_end_condition", required = true)
+            PropertyFilterDescribe edgeEndCondition,
+            @JsonProperty(value = "edge_compare_condition", required = true)
+            PropertyFilterDescribe edgeCompareCondition) {
         E.checkArgument(CollectionUtils.isNotEmpty(startVertexes),
                         "Parameter start_vertexes must not be empty");
         this.startVertexes = ImmutableList.copyOf(startVertexes);
@@ -62,11 +59,11 @@ public class LinksConditionDescribe {
         return this.startVertexes;
     }
 
-    public FilterDescribe edgeEndCondition() {
+    public PropertyFilterDescribe edgeEndCondition() {
         return this.edgeEndCondition;
     }
 
-    public FilterDescribe edgeCompareCondition() {
+    public PropertyFilterDescribe edgeCompareCondition() {
         return this.edgeCompareCondition;
     }
 }

@@ -27,7 +27,7 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.baidu.hugegraph.computer.algorithm.path.filter.FilterDescribe;
+import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -56,13 +56,14 @@ public class LinksSpreadFilter {
                                 .forEach(this.startVertexes::add);
 
         Expression expression;
-        FilterDescribe edgeEndCondition = describe.edgeEndCondition();
+        PropertyFilterDescribe edgeEndCondition = describe.edgeEndCondition();
         expression = AviatorEvaluator.compile(
                                       edgeEndCondition.propertyFilter());
         this.endEdgeCondition = new ImmutablePair<>(edgeEndCondition.label(),
                                                     expression);
 
-        FilterDescribe edgeSpreadCondition = describe.edgeCompareCondition();
+        PropertyFilterDescribe edgeSpreadCondition =
+                               describe.edgeCompareCondition();
         expression = AviatorEvaluator.compile(
                                       edgeSpreadCondition.propertyFilter());
         this.edgeSpreadCondition = new ImmutablePair<>(
@@ -109,7 +110,7 @@ public class LinksSpreadFilter {
     }
 
     private static Map<String, Object> convertParamsValueToObject(
-            Map<String, Map<String, Value<?>>> params) {
+                   Map<String, Map<String, Value<?>>> params) {
         Map<String, Object> result = new HashMap<>();
         for (Map.Entry<String, Map<String, Value<?>>> entry :
                 params.entrySet()) {

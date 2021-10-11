@@ -35,7 +35,7 @@ public class RingsDetectionWithFilter implements
 
     public static final String OPTION_FILTER = "rings.property_filter";
 
-    private SpreadFilter filter;
+    private RingsDetectionSpreadFilter filter;
 
     @Override
     public String name() {
@@ -49,7 +49,8 @@ public class RingsDetectionWithFilter implements
 
     @Override
     public void init(Config config) {
-        this.filter = new SpreadFilter(config.getString(OPTION_FILTER, "{}"));
+        this.filter = new RingsDetectionSpreadFilter(
+                          config.getString(OPTION_FILTER, "{}"));
     }
 
     @Override

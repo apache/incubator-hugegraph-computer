@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.baidu.hugegraph.computer.algorithm.path.filter.FilterDescribe;
+import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,14 +31,15 @@ import com.google.common.collect.ImmutableList;
 
 public class RingsDetectionFilterDescribe {
 
-    private final List<FilterDescribe> vertexFilter;
-    private final List<FilterDescribe> edgeFilter;
+    private final List<PropertyFilterDescribe> vertexFilter;
+    private final List<PropertyFilterDescribe> edgeFilter;
 
     @JsonCreator
-    private RingsDetectionFilterDescribe(@JsonProperty("vertex_filter")
-                                         List<FilterDescribe> vertexFilter,
-                                         @JsonProperty("edge_filter")
-                                         List<FilterDescribe> edgeFilter) {
+    private RingsDetectionFilterDescribe(
+            @JsonProperty("vertex_filter")
+            List<PropertyFilterDescribe> vertexFilter,
+            @JsonProperty("edge_filter")
+            List<PropertyFilterDescribe> edgeFilter) {
         this.vertexFilter = CollectionUtils.isEmpty(vertexFilter) ?
                             ImmutableList.of() :
                             ImmutableList.copyOf(vertexFilter);
@@ -51,11 +52,11 @@ public class RingsDetectionFilterDescribe {
         return JsonUtil.fromJson(describe, RingsDetectionFilterDescribe.class);
     }
 
-    public List<FilterDescribe> vertexFilter() {
+    public List<PropertyFilterDescribe> vertexFilter() {
         return this.vertexFilter;
     }
 
-    public List<FilterDescribe> edgeFilter() {
+    public List<PropertyFilterDescribe> edgeFilter() {
         return this.edgeFilter;
     }
 }

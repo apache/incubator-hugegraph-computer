@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.baidu.hugegraph.computer.algorithm.path.filter.FilterDescribe;
+import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -34,7 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
 
-public class SpreadFilter {
+public class RingsDetectionSpreadFilter {
 
     private static final String ALL = "*";
     private static final String MESSAGE = "$message";
@@ -44,7 +44,7 @@ public class SpreadFilter {
     private final Map<String, Expression> vertexFilter;
     private final Map<String, Expression> edgeFilter;
 
-    public SpreadFilter(String describe) {
+    public RingsDetectionSpreadFilter(String describe) {
         RingsDetectionFilterDescribe filter =
                                      RingsDetectionFilterDescribe.of(describe);
 
@@ -56,8 +56,8 @@ public class SpreadFilter {
     }
 
     private void init(Map<String, Expression> filter,
-                      List<FilterDescribe> describes) {
-        for (FilterDescribe describe : describes) {
+                      List<PropertyFilterDescribe> describes) {
+        for (PropertyFilterDescribe describe : describes) {
             String labelName = describe.label();
             Expression expression = AviatorEvaluator.compile(
                                                      describe.propertyFilter());
