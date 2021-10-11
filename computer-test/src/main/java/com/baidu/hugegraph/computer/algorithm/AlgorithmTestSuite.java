@@ -27,6 +27,7 @@ import com.baidu.hugegraph.computer.algorithm.centrality.degree.DegreeCentrality
 import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankTest;
 import com.baidu.hugegraph.computer.algorithm.community.lpa.LpaTest;
 import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountTest;
+import com.baidu.hugegraph.computer.algorithm.path.links.LinksTest;
 import com.baidu.hugegraph.computer.algorithm.community.wcc.WccTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
@@ -40,7 +41,8 @@ import com.baidu.hugegraph.config.OptionSpace;
     LpaTest.class,
     TriangleCountTest.class,
     RingsDetectionTest.class,
-    RingsDetectionWithFilterTest.class
+    RingsDetectionWithFilterTest.class,
+    LinksTest.class
 })
 public class AlgorithmTestSuite {
 
