@@ -36,7 +36,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.ComputerOutput;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 
-public class HDFSOutput implements ComputerOutput {
+public class HdfsOutput implements ComputerOutput {
 
     private FileSystem fs;
     private FSDataOutputStream fileOutputStream;

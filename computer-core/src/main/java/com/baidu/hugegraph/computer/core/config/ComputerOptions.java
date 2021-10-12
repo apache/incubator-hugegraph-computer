@@ -269,7 +269,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> OUTPUT_HDFS_URL =
             new ConfigOption<>(
                     "output.hdfs_url",
-                    "The hdfs url of output",
+                    "The hdfs url of output.",
                     disallowEmpty(),
                     "hdfs://127.0.0.1:9000"
             );
@@ -277,7 +277,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> OUTPUT_HDFS_USER =
             new ConfigOption<>(
                     "output.hdfs_user",
-                    "The hdfs user of output",
+                    "The hdfs user of output.",
                     disallowEmpty(),
                     "hadoop"
             );
@@ -285,7 +285,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Short> OUTPUT_HDFS_REPLICATION =
             new ConfigOption<>(
                     "output.hdfs_replication",
-                    "The replication number of hdfs",
+                    "The replication number of hdfs.",
                     positiveInt(),
                     (short) 3
             );
@@ -293,7 +293,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> OUTPUT_HDFS_DIR =
             new ConfigOption<>(
                     "output.hdfs_path_prefix",
-                    "The directory of hdfs output result",
+                    "The directory of hdfs output result.",
                     disallowEmpty(),
                     "/hugegraph-computer/results"
             );
@@ -301,15 +301,15 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> OUTPUT_HDFS_DELIMITER =
             new ConfigOption<>(
                     "output.hdfs_delimiter",
-                    "The delimiter of hdfs output",
+                    "The delimiter of hdfs output.",
                     disallowEmpty(),
                     String.valueOf((char) 27)
             );
 
     public static final ConfigOption<Boolean> OUTPUT_HDFS_MERGE =
             new ConfigOption<>(
-                    "output.hdfs_merge",
-                    "Whether merge hdfs output files",
+                    "output.hdfs_merge_files",
+                    "Whether merge output files of multiple partitions.",
                     allowValues(true, false),
                     true
             );

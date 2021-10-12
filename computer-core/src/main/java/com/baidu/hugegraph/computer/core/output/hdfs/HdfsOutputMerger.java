@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 
-public class HDFSOutputMerger {
+public class HdfsOutputMerger {
 
     private FileSystem fs;
     private Path[] sourcePaths;
@@ -66,7 +66,7 @@ public class HDFSOutputMerger {
     private Path[] paths(String dir, String jobId, int partitions) {
         Path[] paths = new Path[partitions];
         for (int i = 0; i < partitions; i++) {
-            Path path = HDFSOutput.buildPath(dir, jobId, i);
+            Path path = HdfsOutput.buildPath(dir, jobId, i);
             paths[i] = path;
         }
         return paths;

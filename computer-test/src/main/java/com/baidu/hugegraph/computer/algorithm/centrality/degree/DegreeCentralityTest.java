@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.hdfs.HDFSOutput;
+import com.baidu.hugegraph.computer.core.output.hdfs.HdfsOutput;
 import com.google.common.collect.Streams;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
@@ -62,7 +62,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
         }
     }
 
-    public static class DegreeCentralityTestOutput extends HDFSOutput {
+    public static class DegreeCentralityTestOutput extends HdfsOutput {
 
         private String weight;
 
