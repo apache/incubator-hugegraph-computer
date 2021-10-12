@@ -39,7 +39,7 @@ jobs:
         uses: beyondstorage/setup-hdfs@master
         with:
           hdfs-version: '3.3.1'
-      - run: curl ${{ env.HDFS_NAMENODE_ADDR }}
+      - run: sleep 5 && curl ${{ env.HDFS_NAMENODE_ADDR }}
 
       - name: Cache Maven packages
         uses: actions/cache@v2

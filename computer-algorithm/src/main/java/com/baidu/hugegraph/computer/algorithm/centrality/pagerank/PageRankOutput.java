@@ -17,10 +17,11 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.output.hg;
+package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
 
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
 public class PageRankOutput extends HugeOutput {
