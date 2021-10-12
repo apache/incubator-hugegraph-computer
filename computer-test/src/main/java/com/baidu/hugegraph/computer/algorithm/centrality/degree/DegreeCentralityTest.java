@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
+import com.baidu.hugegraph.computer.core.output.hdfs.HDFSOutput;
 import com.google.common.collect.Streams;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
@@ -54,11 +54,13 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
         public void setAlgorithmParameters(Map<String, String> params) {
             params.put(ComputerOptions.OUTPUT_CLASS.name(),
                        DegreeCentralityTestOutput.class.getName());
+            params.put(ComputerOptions.OUTPUT_HDFS_URL.name(),
+                       "hdfs://127.0.0.1:9000");
             super.setAlgorithmParameters(params);
         }
     }
 
-    public static class DegreeCentralityTestOutput extends LimitedLogOutput {
+    public static class DegreeCentralityTestOutput extends HDFSOutput {
 
         private String weight;
 

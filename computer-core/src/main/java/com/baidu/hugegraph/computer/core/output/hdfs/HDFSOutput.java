@@ -43,7 +43,7 @@ public class HDFSOutput implements ComputerOutput {
     private String delimiter;
     private static final String REPLICATION_KEY = "dfs.replication";
     private static final String FILE_PREFIX = "partition_";
-    public static final String FILE_SUFFIX = ".csv";
+    private static final String FILE_SUFFIX = ".csv";
 
     @Override
     public void init(Config config, int partition) {
@@ -61,7 +61,7 @@ public class HDFSOutput implements ComputerOutput {
                                                         URISyntaxException,
                                                         InterruptedException {
         Configuration configuration = new Configuration();
-        short replication = config.get(ComputerOptions.OUTPUT_HDFS_REPLICATION);
+        Short replication = config.get(ComputerOptions.OUTPUT_HDFS_REPLICATION);
         configuration.set(REPLICATION_KEY, String.valueOf(replication));
         String url = config.get(ComputerOptions.OUTPUT_HDFS_URL);
         String user = config.get(ComputerOptions.OUTPUT_HDFS_USER);
