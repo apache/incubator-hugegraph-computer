@@ -241,46 +241,6 @@ public class ComputerOptions extends OptionHolder {
                     1
             );
 
-    public static final ConfigOption<String> OUTPUT_HDFS_URL =
-            new ConfigOption<>(
-                    "output.hdfs_url",
-                    "The hdfs url of output",
-                    disallowEmpty(),
-                    "hdfs://yq01-sw-huge-cassandra19.yq01.baidu.com:8020"
-            );
-
-    public static final ConfigOption<String> OUTPUT_HDFS_USER =
-            new ConfigOption<>(
-                    "output.hdfs_user",
-                    "The hdfs user of output",
-                    disallowEmpty(),
-                    "hadoop"
-            );
-
-    public static final ConfigOption<Short> OUTPUT_HDFS_REPLICATION =
-            new ConfigOption<>(
-                    "output.hdfs_replication",
-                    "The replication number of hdfs",
-                    positiveInt(),
-                    (short) 2
-            );
-
-    public static final ConfigOption<String> OUTPUT_HDFS_DIR =
-            new ConfigOption<>(
-                    "output.hdfs_path_prefix",
-                    "The directory of hdfs output result",
-                    disallowEmpty(),
-                    "/hugegraph-computer/results"
-            );
-
-    public static final ConfigOption<String> OUTPUT_HDFS_DELIMITER =
-            new ConfigOption<>(
-                    "output.hdfs_delimiter",
-                    "The delimiter of hdfs output",
-                    disallowEmpty(),
-                    String.valueOf((char) 27)
-            );
-
     public static final ConfigOption<Integer>
             OUTPUT_THREAD_POOL_SHUTDOWN_TIMEOUT =
             new ConfigOption<>(
@@ -304,6 +264,54 @@ public class ComputerOptions extends OptionHolder {
                     "The retry interval when output failed",
                     positiveInt(),
                     10
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_URL =
+            new ConfigOption<>(
+                    "output.hdfs_url",
+                    "The hdfs url of output",
+                    disallowEmpty(),
+                    "hdfs://127.0.0.1:9000"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_USER =
+            new ConfigOption<>(
+                    "output.hdfs_user",
+                    "The hdfs user of output",
+                    disallowEmpty(),
+                    "hadoop"
+            );
+
+    public static final ConfigOption<Short> OUTPUT_HDFS_REPLICATION =
+            new ConfigOption<>(
+                    "output.hdfs_replication",
+                    "The replication number of hdfs",
+                    positiveInt(),
+                    (short) 3
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_DIR =
+            new ConfigOption<>(
+                    "output.hdfs_path_prefix",
+                    "The directory of hdfs output result",
+                    disallowEmpty(),
+                    "/hugegraph-computer/results"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_DELIMITER =
+            new ConfigOption<>(
+                    "output.hdfs_delimiter",
+                    "The delimiter of hdfs output",
+                    disallowEmpty(),
+                    String.valueOf((char) 27)
+            );
+
+    public static final ConfigOption<Boolean> OUTPUT_HDFS_MERGE =
+            new ConfigOption<>(
+                    "output.hdfs_merge",
+                    "Whether merge hdfs output files",
+                    allowValues(true, false),
+                    true
             );
 
     public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
@@ -525,7 +533,7 @@ public class ComputerOptions extends OptionHolder {
                     "hugegraph.url",
                     "The hugegraph url to load data and write results back.",
                     disallowEmpty(),
-                    "http://10.27.154.55:8001"
+                    "http://127.0.0.1:8080"
             );
 
     public static final ConfigOption<String> HUGEGRAPH_GRAPH_NAME =

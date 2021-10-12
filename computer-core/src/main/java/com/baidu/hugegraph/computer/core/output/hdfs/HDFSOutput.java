@@ -42,16 +42,14 @@ public class HDFSOutput implements ComputerOutput {
     private FSDataOutputStream fileOutputStream;
     private String delimiter;
     private static final String REPLICATION_KEY = "dfs.replication";
-    private static final String FILE_SUFFIX = ".csv";
-    private static final String VERTEX_ID_COLUMN = "vertexId";
-    private static final String RESULT_COLUMN = "result";
+    private static final String FILE_PREFIX = "partition_";
+    public static final String FILE_SUFFIX = ".csv";
 
     @Override
     public void init(Config config, int partition) {
         try {
             this.delimiter = config.get(ComputerOptions.OUTPUT_HDFS_DELIMITER);
             this.openHDFS(config, partition);
-            this.writeHeaders();
         } catch (IOException | URISyntaxException | InterruptedException e) {
             throw new ComputerException("Failed to init hdfs output on " +
                                         "partition [%s]", e, partition);
@@ -71,16 +69,8 @@ public class HDFSOutput implements ComputerOutput {
 
         String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
         String jobId = config.get(ComputerOptions.JOB_ID);
-        String filePath = this.path(dir, jobId, partition);
-        Path hdfsPath = new Path(filePath);
+        Path hdfsPath = buildPath(dir, jobId, partition);
         this.fileOutputStream = this.fs.create(hdfsPath, true);
-    }
-
-    protected void writeHeaders() throws IOException {
-        this.writeString(VERTEX_ID_COLUMN);
-        this.writeString(this.delimiter);
-        this.writeString(RESULT_COLUMN);
-        this.writeString(System.lineSeparator());
     }
 
     @Override
@@ -108,13 +98,9 @@ public class HDFSOutput implements ComputerOutput {
         return vertex.value().toString();
     }
 
-    private String path(String dir, String jobId, int partition) {
-        if (dir.endsWith(Path.SEPARATOR)) {
-            return dir + jobId + Path.SEPARATOR + partition + FILE_SUFFIX;
-        } else {
-            return dir + Path.SEPARATOR + jobId + Path.SEPARATOR
-                       + partition + FILE_SUFFIX;
-        }
+    public static Path buildPath(String dir, String jobId, int partition) {
+        Path dirPath = new Path(dir, jobId);
+        return new Path(dirPath, FILE_PREFIX + partition + FILE_SUFFIX);
     }
 
     @Override
