@@ -72,7 +72,7 @@ public class UnitTestSuite {
                              "com.baidu.hugegraph.config.RpcOptions");
 
         Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                                  "defaultValue", "http://localhost:2379");
+                                  "defaultValue", "http://localhost:2579");
         UnitTestBase.updateOptions(
             ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()
         );

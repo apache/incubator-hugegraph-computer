@@ -56,6 +56,8 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
                        DegreeCentralityTestOutput.class.getName());
             params.put(ComputerOptions.OUTPUT_HDFS_URL.name(),
                        "hdfs://127.0.0.1:9000");
+            params.put(ComputerOptions.OUTPUT_HDFS_USER.name(),
+                       System.getProperty("user.name"));
             super.setAlgorithmParameters(params);
         }
     }

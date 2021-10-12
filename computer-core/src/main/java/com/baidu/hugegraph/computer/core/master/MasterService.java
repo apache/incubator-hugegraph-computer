@@ -23,6 +23,7 @@ import java.io.Closeable;
 import java.net.InetSocketAddress;
 import java.util.List;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
@@ -49,6 +50,7 @@ import com.baidu.hugegraph.computer.core.util.ShutdownHook;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
+import com.baidu.hugegraph.util.TimeUtil;
 
 /**
  * Master service is job's controller. It controls the superstep iteration of
@@ -180,7 +182,7 @@ public class MasterService implements Closeable {
      * After the superstep iteration, output the result.
      */
     public void execute() {
-        long start = System.currentTimeMillis();
+        StopWatch watcher = new StopWatch();
         this.checkInited();
 
         LOG.info("{} MasterService execute", this);
@@ -204,18 +206,23 @@ public class MasterService implements Closeable {
          * Constants.INPUT_SUPERSTEP.
          */
         SuperstepStat superstepStat;
+        watcher.start();
         if (superstep == Constants.INPUT_SUPERSTEP) {
             superstepStat = this.inputstep();
             superstep++;
-            LOG.info("input cost:{}ms", System.currentTimeMillis() - start);
         } else {
             // TODO: Get superstepStat from bsp service.
             superstepStat = null;
         }
+        watcher.stop();
+        LOG.info("{} MasterService input step cost: {}",
+                 this, TimeUtil.readableTime(watcher.getTime()));
         E.checkState(superstep <= this.maxSuperStep,
                      "The superstep {} can't be > maxSuperStep {}",
                      superstep, this.maxSuperStep);
-        long startCompute = System.currentTimeMillis();
+
+        watcher.reset();
+        watcher.start();
         // Step 3: Iteration computation of all supersteps.
         for (; superstepStat.active(); superstep++) {
             LOG.info("{} MasterService superstep {} started",
@@ -259,13 +266,17 @@ public class MasterService implements Closeable {
             LOG.info("{} MasterService superstep {} finished",
                      this, superstep);
         }
-        LOG.info("compute cost: {}ms",
-                 System.currentTimeMillis() - startCompute);
+        watcher.stop();
+        LOG.info("{} MasterService compute step cost: {}",
+                 this, TimeUtil.readableTime(watcher.getTime()));
 
-        long startOutput = System.currentTimeMillis();
+        watcher.reset();
+        watcher.start();
         // Step 4: Output superstep for outputting results.
         this.outputstep();
-        LOG.info("output cost: {}ms", System.currentTimeMillis() - startOutput);
+        watcher.stop();
+        LOG.info("{} MasterService output step cost: {}",
+                 this, TimeUtil.readableTime(watcher.getTime()));
     }
 
     @Override

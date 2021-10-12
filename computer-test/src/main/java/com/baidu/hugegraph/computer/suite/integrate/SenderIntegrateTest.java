@@ -29,9 +29,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.master.MasterService;
@@ -257,18 +257,18 @@ public class SenderIntegrateTest {
     }
 
     private MasterService initMaster(String[] args) {
-        ComputerContextUtil.initContext(args);
-        ComputerContext context = ComputerContext.instance();
+        Config config = ComputerContextUtil.initContext(
+                        ComputerContextUtil.convertToMap(args));
         MasterService service = new MasterService();
-        service.init(context.config());
+        service.init(config);
         return service;
     }
 
     private WorkerService initWorker(String[] args) {
-        ComputerContextUtil.initContext(args);
-        ComputerContext context = ComputerContext.instance();
+        Config config = ComputerContextUtil.initContext(
+                        ComputerContextUtil.convertToMap(args));
         WorkerService service = new WorkerService();
-        service.init(context.config());
+        service.init(config);
         return service;
     }
 
