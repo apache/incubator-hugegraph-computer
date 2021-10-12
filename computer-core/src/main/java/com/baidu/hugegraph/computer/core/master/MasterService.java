@@ -372,11 +372,11 @@ public class MasterService implements Closeable {
         LOG.info("{} MasterService outputstep started", this);
         this.bsp4Master.waitWorkersOutputDone();
         // Merge multiple partition output
-        this.mergeWorkerHDFSOutput();
+        this.mergeWorkerHdfsOutput();
         LOG.info("{} MasterService outputstep finished", this);
     }
 
-    private void mergeWorkerHDFSOutput() {
+    private void mergeWorkerHdfsOutput() {
         Class<?> outputClass = this.config.get(ComputerOptions.OUTPUT_CLASS);
         Boolean merge = this.config.get(ComputerOptions.OUTPUT_HDFS_MERGE);
         if (HdfsOutput.class.isAssignableFrom(outputClass) && merge) {
