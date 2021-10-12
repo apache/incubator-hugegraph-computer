@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -36,8 +37,8 @@ public class DefaultEdge implements Edge {
     private Properties properties;
 
     public DefaultEdge(GraphFactory graphFactory) {
-        this(graphFactory, null, Constants.EMPTY_STR, Constants.EMPTY_STR,
-             null);
+        this(graphFactory, BytesId.of(Constants.EMPTY_STR), Constants.EMPTY_STR,
+             Constants.EMPTY_STR, null);
     }
 
     public DefaultEdge(GraphFactory graphFactory, Id id, String label,
