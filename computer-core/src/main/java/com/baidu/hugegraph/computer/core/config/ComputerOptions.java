@@ -97,7 +97,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Integer> INPUT_SPLIT_FETCH_TIMEOUT =
             new ConfigOption<>(
                     "input.split_fetch_timeout",
-                    "The timeout seconds of fetch split",
+                    "The timeout in seconds to fetch input splits",
                     positiveInt(),
                     300
             );
