@@ -94,6 +94,14 @@ public class ComputerOptions extends OptionHolder {
                     "hugegraph"
             );
 
+    public static final ConfigOption<Integer> INPUT_SPLIT_FETCH_TIMEOUT =
+            new ConfigOption<>(
+                    "input.split_fetch_timeout",
+                    "The timeout seconds of fetch split",
+                    positiveInt(),
+                    300
+            );
+
     public static final ConfigOption<Long> INPUT_SPLITS_SIZE =
             new ConfigOption<>(
                     "input.split_size",
