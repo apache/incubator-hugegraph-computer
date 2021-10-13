@@ -28,7 +28,7 @@ public class PageRankOutput extends HugeOutput {
 
     @Override
     public String name() {
-        return "pagerank";
+        return "page_rank";
     }
 
     @Override
