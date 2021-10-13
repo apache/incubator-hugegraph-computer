@@ -28,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -35,8 +36,11 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.ComputerOutput;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
+import com.baidu.hugegraph.util.Log;
 
 public class HdfsOutput implements ComputerOutput {
+
+    private static final Logger LOG = Log.logger(HdfsOutput.class);
 
     private FileSystem fs;
     private FSDataOutputStream fileOutputStream;
@@ -114,6 +118,22 @@ public class HdfsOutput implements ComputerOutput {
             }
         } catch (IOException e) {
             throw new ComputerException("Failed to close hdfs", e);
+        }
+    }
+
+    public static void mergePartitions(Config config) {
+        Class<?> outputClass = config.get(ComputerOptions.OUTPUT_CLASS);
+        Boolean merge = config.get(ComputerOptions.OUTPUT_HDFS_MERGE);
+        if (HdfsOutput.class.isAssignableFrom(outputClass) && merge) {
+            LOG.info("Merge hdfs output partitions started");
+            HdfsOutputMerger hdfsOutputMerger = new HdfsOutputMerger();
+            try {
+                hdfsOutputMerger.init(config);
+                hdfsOutputMerger.merge();
+            } finally {
+                hdfsOutputMerger.close();
+            }
+            LOG.info("Merge hdfs output partitions finished");
         }
     }
 }

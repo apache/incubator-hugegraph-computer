@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 
-public class HdfsOutputMerger {
+class HdfsOutputMerger {
 
     private FileSystem fs;
     private Path[] sourcePaths;

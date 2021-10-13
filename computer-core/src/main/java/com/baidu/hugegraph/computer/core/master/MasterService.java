@@ -44,7 +44,6 @@ import com.baidu.hugegraph.computer.core.input.MasterInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.output.hdfs.HdfsOutput;
-import com.baidu.hugegraph.computer.core.output.hdfs.HdfsOutputMerger;
 import com.baidu.hugegraph.computer.core.rpc.MasterRpcManager;
 import com.baidu.hugegraph.computer.core.util.ShutdownHook;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
@@ -371,25 +370,9 @@ public class MasterService implements Closeable {
     private void outputstep() {
         LOG.info("{} MasterService outputstep started", this);
         this.bsp4Master.waitWorkersOutputDone();
-        // Merge multiple partition output
-        this.mergeWorkerHdfsOutput();
+        // Merge output files of multiple partitions
+        HdfsOutput.mergePartitions(this.config);
         LOG.info("{} MasterService outputstep finished", this);
-    }
-
-    private void mergeWorkerHdfsOutput() {
-        Class<?> outputClass = this.config.get(ComputerOptions.OUTPUT_CLASS);
-        Boolean merge = this.config.get(ComputerOptions.OUTPUT_HDFS_MERGE);
-        if (HdfsOutput.class.isAssignableFrom(outputClass) && merge) {
-            LOG.info("{} MasterService merge hdfs output files started", this);
-            HdfsOutputMerger hdfsOutputMerger = new HdfsOutputMerger();
-            try {
-                hdfsOutputMerger.init(this.config);
-                hdfsOutputMerger.merge();
-            } finally {
-                hdfsOutputMerger.close();
-            }
-            LOG.info("{} MasterService merge hdfs output files finished", this);
-        }
     }
 
     private class DefaultMasterContext implements MasterContext {

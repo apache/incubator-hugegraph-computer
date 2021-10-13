@@ -308,7 +308,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Boolean> OUTPUT_HDFS_MERGE =
             new ConfigOption<>(
-                    "output.hdfs_merge_files",
+                    "output.hdfs_merge_partitions",
                     "Whether merge output files of multiple partitions.",
                     allowValues(true, false),
                     true
