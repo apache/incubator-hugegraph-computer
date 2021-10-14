@@ -69,7 +69,7 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
     private static class HgkvDirEntryIter implements EntryIterator {
 
         private final List<HgkvFile> segments;
-        private List<EntryIterator> segmentsIters;
+        private final List<EntryIterator> segmentsIters;
         private int segmentIndex;
         private long numEntries;
         private EntryIterator kvIter;
@@ -112,13 +112,12 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
 
         @Override
         public void close() throws Exception {
-            for (HgkvFile segment : this.segments) {
-                segment.close();
-            }
             for (EntryIterator iterator : this.segmentsIters) {
                 iterator.close();
             }
-            this.kvIter.close();
+            for (HgkvFile segment : this.segments) {
+                segment.close();
+            }
         }
 
         private EntryIterator nextKeyIter() throws Exception {
