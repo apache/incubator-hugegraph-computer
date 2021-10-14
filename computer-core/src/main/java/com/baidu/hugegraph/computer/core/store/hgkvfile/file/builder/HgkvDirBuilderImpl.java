@@ -73,7 +73,6 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
         long entrySize = this.segmentBuilder.sizeOfEntry(entry);
         long segmentSize = this.segmentBuilder.dataLength();
         if ((entrySize + segmentSize) > this.maxEntriesBytes) {
-            this.segmentBuilder.finish();
             // Create new hgkvFile.
             this.segmentBuilder = nextSegmentBuilder(this.config, this.dir,
                                                      ++this.segmentId);
@@ -95,10 +94,12 @@ public class HgkvDirBuilderImpl implements HgkvDirBuilder {
         this.finish();
     }
 
-    private static HgkvFileBuilder nextSegmentBuilder(Config config,
-                                                      HgkvDir dir,
-                                                      int segmentId)
-                                                      throws IOException {
+    private HgkvFileBuilder nextSegmentBuilder(Config config, HgkvDir dir,
+                                               int segmentId)
+                                               throws IOException {
+        if (this.segmentBuilder != null) {
+            this.segmentBuilder.finish();
+        }
         String fileName = StringUtils.join(HgkvDirImpl.FILE_NAME_PREFIX,
                                            String.valueOf(segmentId),
                                            HgkvDirImpl.FILE_EXTEND_NAME);

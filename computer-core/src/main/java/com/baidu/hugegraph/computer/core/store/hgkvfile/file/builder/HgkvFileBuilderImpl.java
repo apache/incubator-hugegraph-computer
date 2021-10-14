@@ -36,6 +36,7 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
     // Max entries size of a block
     private final long maxDataBlockSize;
 
+    private final HgkvFile file;
     private final RandomAccessOutput output;
     private final BlockBuilder dataBlockBuilder;
     private final IndexBlockBuilder indexBlockBuilder;
@@ -51,8 +52,8 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
 
     public HgkvFileBuilderImpl(Config config, String path) throws IOException {
         this.maxDataBlockSize = config.get(ComputerOptions.HGKV_DATABLOCK_SIZE);
-        HgkvFile hgkvFile = HgkvFileImpl.create(path);
-        this.output = hgkvFile.output();
+        this.file = HgkvFileImpl.create(path);
+        this.output = this.file.output();
         this.dataBlockBuilder = new DataBlockBuilderImpl(this.output);
         this.indexBlockBuilder = new IndexBlockBuilderImpl(this.output);
         this.buildFinished = false;
@@ -94,6 +95,7 @@ public class HgkvFileBuilderImpl implements HgkvFileBuilder {
         this.writeIndexBlock();
         this.writeFooter();
         this.output.close();
+        this.file.close();
         this.buildFinished = true;
     }
 
