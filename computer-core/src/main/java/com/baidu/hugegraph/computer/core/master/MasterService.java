@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.master;
 
 import java.io.Closeable;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -45,7 +44,6 @@ import com.baidu.hugegraph.computer.core.input.MasterInputManager;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.output.ComputerOutput;
-import com.baidu.hugegraph.computer.core.output.hdfs.HdfsOutput;
 import com.baidu.hugegraph.computer.core.rpc.MasterRpcManager;
 import com.baidu.hugegraph.computer.core.util.ShutdownHook;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
