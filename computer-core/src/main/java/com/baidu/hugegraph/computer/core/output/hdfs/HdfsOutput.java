@@ -108,6 +108,22 @@ public class HdfsOutput implements ComputerOutput {
     }
 
     @Override
+    public void mergePartitions(Config config) {
+        Boolean merge = config.get(ComputerOptions.OUTPUT_HDFS_MERGE);
+        if (merge) {
+            LOG.info("Merge hdfs output partitions started");
+            HdfsOutputMerger hdfsOutputMerger = new HdfsOutputMerger();
+            try {
+                hdfsOutputMerger.init(config);
+                hdfsOutputMerger.merge();
+            } finally {
+                hdfsOutputMerger.close();
+            }
+            LOG.info("Merge hdfs output partitions finished");
+        }
+    }
+
+    @Override
     public void close() {
         try {
             if (this.fileOutputStream != null) {
@@ -118,22 +134,6 @@ public class HdfsOutput implements ComputerOutput {
             }
         } catch (IOException e) {
             throw new ComputerException("Failed to close hdfs", e);
-        }
-    }
-
-    public static void mergePartitions(Config config) {
-        Class<?> outputClass = config.get(ComputerOptions.OUTPUT_CLASS);
-        Boolean merge = config.get(ComputerOptions.OUTPUT_HDFS_MERGE);
-        if (HdfsOutput.class.isAssignableFrom(outputClass) && merge) {
-            LOG.info("Merge hdfs output partitions started");
-            HdfsOutputMerger hdfsOutputMerger = new HdfsOutputMerger();
-            try {
-                hdfsOutputMerger.init(config);
-                hdfsOutputMerger.merge();
-            } finally {
-                hdfsOutputMerger.close();
-            }
-            LOG.info("Merge hdfs output partitions finished");
         }
     }
 }

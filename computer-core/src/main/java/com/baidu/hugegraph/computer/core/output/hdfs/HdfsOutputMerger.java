@@ -30,14 +30,17 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 
-class HdfsOutputMerger {
+public class HdfsOutputMerger {
 
     private FileSystem fs;
     private Path[] sourcePaths;
     private Path mergedPath;
     private static final String MERGED_FILE_NAME = "all.csv";
 
-    public void init(Config config) {
+    protected HdfsOutputMerger() {
+    }
+
+    protected void init(Config config) {
         try {
             String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
             String jobId = config.get(ComputerOptions.JOB_ID);
@@ -54,7 +57,7 @@ class HdfsOutputMerger {
         }
     }
 
-    public void merge() {
+    protected void merge() {
         try {
             this.fs.create(this.mergedPath, true).close();
             this.fs.concat(this.mergedPath, this.sourcePaths);
@@ -72,7 +75,7 @@ class HdfsOutputMerger {
         return paths;
     }
 
-    public void close() {
+    protected void close() {
         try {
             if (this.fs != null) {
                 this.fs.close();
