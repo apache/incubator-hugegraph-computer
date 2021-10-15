@@ -24,12 +24,18 @@ import java.util.Iterator;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.worker.load.LoadService;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
+import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 
 public class WorkerInputManager implements Manager {
 
@@ -40,6 +46,7 @@ public class WorkerInputManager implements Manager {
      * to computer-vertices and computer-edges
      */
     private final LoadService loadService;
+    private final GraphFactory graphFactory;
     /*
      * Send vertex/edge or message to target worker
      */
@@ -50,6 +57,7 @@ public class WorkerInputManager implements Manager {
                               MessageSendManager sendManager) {
         this.loadService = new LoadService(context);
         this.sendManager = sendManager;
+        this.graphFactory = context.graphFactory();
     }
 
     @Override
@@ -87,27 +95,32 @@ public class WorkerInputManager implements Manager {
             this.sendManager.sendVertex(vertex);
         }
         this.sendManager.finishSend(MessageType.VERTEX);
-
-        boolean bothdirection = this.config.get(ComputerOptions.
-                                          VERTEX_WITH_EDGES_BOTHDIRECTION);
-        if (!bothdirection) {
-            //the old version, consider output edge only
-            this.sendManager.startSend(MessageType.EDGE);
-            iterator = this.loadService.createIteratorFromEdge();
-            while (iterator.hasNext()) {
-                Vertex vertex = iterator.next();
-                this.sendManager.sendEdge(vertex);
+            
+        this.sendManager.startSend(MessageType.EDGE);
+        iterator = this.loadService.createIteratorFromEdge();
+        while (iterator.hasNext()) {
+            Vertex vertex = iterator.next();
+            this.sendManager.sendEdge(vertex);
+            if (this.config.get(
+                     ComputerOptions.VERTEX_WITH_EDGES_BOTHDIRECTION)) {
+                continue;
             }
-            this.sendManager.finishSend(MessageType.EDGE);
+            for (Edge edge:vertex.edges()) {
+                Id targetId = edge.targetId();
+                Id sourceId = vertex.id();
+                
+                Vertex vertexInv = new DefaultVertex(graphFactory,
+                                                  targetId, null);
+                Edge edgeInv = graphFactory.
+                               createEdge(edge.label(), edge.name(), sourceId
+                );
+                Properties properties = edge.properties();
+                properties.put("inv", new BooleanValue(true));
+                edgeInv.properties(properties);
+                vertexInv.addEdge(edgeInv);
+                this.sendManager.sendEdge(vertexInv);    
+           }
         }
-        else {
-            this.sendManager.startSend(MessageType.EDGE);
-            iterator = this.loadService.createIteratorFromEdgeBothDirection();
-            while (iterator.hasNext()) {
-                Vertex vertex = iterator.next();
-                this.sendManager.sendEdge(vertex);
-            }
-            this.sendManager.finishSend(MessageType.EDGE);
-        }
+        this.sendManager.finishSend(MessageType.EDGE);
     }
 }

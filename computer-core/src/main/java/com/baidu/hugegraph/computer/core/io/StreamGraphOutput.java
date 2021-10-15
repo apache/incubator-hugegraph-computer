@@ -32,6 +32,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 
 public class StreamGraphOutput implements GraphComputeOutput {
 
@@ -65,7 +66,10 @@ public class StreamGraphOutput implements GraphComputeOutput {
         if (this.frequency == EdgeFrequency.SINGLE) {
             for (Edge edge : vertex.edges()) {
                 // Only use targetId as subKey, use properties as subValue
+                BooleanValue inv = edge.property("inv");
+                byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 writer.writeSubKv(out -> {
+                    out.writeByte(binv);
                     this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeLabel(out, edge.label());
@@ -74,8 +78,11 @@ public class StreamGraphOutput implements GraphComputeOutput {
             }
         } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
             for (Edge edge : vertex.edges()) {
+                BooleanValue inv = edge.property("inv");
+                byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 // Use label + targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
+                    out.writeByte(binv);
                     this.writeLabel(out, edge.label());
                     this.writeId(out, edge.targetId());
                 }, out -> {
@@ -89,7 +96,10 @@ public class StreamGraphOutput implements GraphComputeOutput {
                  * Use label + sortValues + targetId as subKey,
                  * use properties as subValue
                  */
+                BooleanValue inv = edge.property("inv");
+                byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 writer.writeSubKv(out -> {
+                    out.writeByte(binv);
                     this.writeLabel(out, edge.label());
                     this.writeLabel(out, edge.name());
                     this.writeId(out, edge.targetId());
@@ -131,10 +141,12 @@ public class StreamGraphOutput implements GraphComputeOutput {
     private void writeProperties(RandomAccessOutput out, Properties properties)
                                  throws IOException {
         Map<String, Value<?>> keyValues = properties.get();
-        out.writeInt(keyValues.size());
+        out.writeInt(keyValues.size() - 1);
         for (Map.Entry<String, Value<?>> entry : keyValues.entrySet()) {
-            out.writeUTF(entry.getKey());
-            this.writeValue(out, entry.getValue());
+            if (!entry.getKey().equals("inv")) {
+                out.writeUTF(entry.getKey());
+                this.writeValue(out, entry.getValue());
+            }
         }
     }
 
