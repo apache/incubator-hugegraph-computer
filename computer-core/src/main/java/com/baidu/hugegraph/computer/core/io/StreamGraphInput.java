@@ -37,6 +37,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryReader;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 
 public class StreamGraphInput implements GraphComputeInput {
 
@@ -75,12 +76,20 @@ public class StreamGraphInput implements GraphComputeInput {
             while (reader.hasRemaining()) {
                 Edge edge = this.graphFactory.createEdge();
                 // Only use targetId as subKey, use properties as subValue
+                BooleanValue inv = new BooleanValue();
                 reader.readSubKv(in -> {
+                    boolean inv_ = (in.readByte() == 1) ? true : false;
+                    inv.value(inv_);
                     edge.targetId(readId(in));
                 }, in -> {
                     edge.label(readLabel(in));
                     edge.properties(readProperties(in));
                 });
+                if (inv.value()) {
+                    Properties properties = edge.properties();
+                    properties.put("inv", new BooleanValue(true));
+                    edge.properties(properties);
+                }
                 vertex.addEdge(edge);
             }
         } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
