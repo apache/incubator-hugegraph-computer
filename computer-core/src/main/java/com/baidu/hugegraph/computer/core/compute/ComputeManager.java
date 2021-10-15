@@ -25,6 +25,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Managers;
@@ -73,13 +74,26 @@ public class ComputeManager<M extends Value<M>> {
         for (Map.Entry<Integer, PeekableIterator<KvEntry>> entry :
              vertices.entrySet()) {
             int partition = entry.getKey();
+            PeekableIterator<KvEntry> vertexIter = entry.getValue();
+            PeekableIterator<KvEntry> edgesIter =
+                                      edges.getOrDefault(
+                                            partition,
+                                            PeekableIterator.emptyIterator());
+
             FileGraphPartition<M> part = new FileGraphPartition<>(this.context,
                                                                   this.managers,
                                                                   partition);
-            PartitionStat partitionStat = part.input(entry.getValue(),
-                                                     edges.get(partition));
+            PartitionStat partitionStat = part.input(vertexIter, edgesIter);
             workerStat.add(partitionStat);
             this.partitions.put(partition, part);
+
+            try {
+                vertexIter.close();
+                edgesIter.close();
+            } catch (Exception e) {
+                throw new ComputerException("Failed to close vertex or edge " +
+                                            "file iterator", e);
+            }
         }
         return workerStat;
     }

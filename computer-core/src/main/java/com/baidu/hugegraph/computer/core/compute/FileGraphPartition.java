@@ -95,9 +95,6 @@ public class FileGraphPartition<M extends Value<M>> {
 
     protected PartitionStat input(PeekableIterator<KvEntry> vertices,
                                   PeekableIterator<KvEntry> edges) {
-        if (edges == null) {
-            edges = PeekableIterator.emptyIterator();
-        }
         try {
             createFile(this.vertexFile);
             createFile(this.edgeFile);
@@ -114,9 +111,7 @@ public class FileGraphPartition<M extends Value<M>> {
             }
             vertexOut.close();
             edgeOut.close();
-            vertices.close();
-            edges.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new ComputerException(
                       "Failed to init FileGraphPartition '%s'",
                       e, this.partition);
