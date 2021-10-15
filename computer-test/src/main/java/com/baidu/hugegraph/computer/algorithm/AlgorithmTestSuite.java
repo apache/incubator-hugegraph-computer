@@ -32,6 +32,7 @@ import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCo
 import com.baidu.hugegraph.computer.algorithm.community.wcc.WccTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
+import com.baidu.hugegraph.computer.algorithm.community.cc.ClusteringCoefficientTest;
 import com.baidu.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
@@ -43,6 +44,7 @@ import com.baidu.hugegraph.config.OptionSpace;
     TriangleCountTest.class,
     RingsDetectionTest.class,
     RingsDetectionWithFilterTest.class,
+    ClusteringCoefficientTest.class,
     ClosenessCentralityTest.class,
     BetweennessCentralityTest.class,
 })
