@@ -17,27 +17,23 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.centrality.closeness;
-
-import java.util.Map;
+package com.baidu.hugegraph.computer.algorithm.centrality.betweenness;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 import com.baidu.hugegraph.util.Log;
 
-public class ClosenessCentralityOutput extends HugeOutput {
+public class BetweennessCentralityOutput extends HugeOutput {
 
     private static final Logger LOG =
-            Log.logger(ClosenessCentralityOutput.class);
+            Log.logger(BetweennessCentralityOutput.class);
 
     @Override
     public String name() {
-        return "closeness_centrality";
+        return "betweenness_centrality";
     }
 
     @Override
@@ -56,16 +52,10 @@ public class ClosenessCentralityOutput extends HugeOutput {
                 new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
 
-        // TODO：How to get the total vertices count here?
-        // long n = context.totalVertexCount() - 1;
-        ClosenessValue localValue = vertex.value();
-        // Cumulative distance
-        double centrality = 0;
-        for (Map.Entry<Id, DoubleValue> entry : localValue.entrySet()) {
-            centrality += 1.0D / entry.getValue().value();
-        }
+        BetweennessValue localValue = vertex.value();
+        double centrality = localValue.betweenness().value();
         hugeVertex.property(this.name(), centrality);
-        LOG.info("The closeness centrality of vertex {} is {}",
+        LOG.info("The betweenness centrality of vertex {} is {}",
                  vertex, centrality);
         return hugeVertex;
     }

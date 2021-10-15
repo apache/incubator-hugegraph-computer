@@ -17,35 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.combiner;
+package com.baidu.hugegraph.computer.algorithm.centrality.betweenness;
 
-import java.util.Iterator;
+import org.slf4j.Logger;
 
-public interface Combiner<T> {
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
+import com.baidu.hugegraph.util.Log;
 
-    /**
-     * @return The name of the combiner.
-     */
-    default String name() {
-        return this.getClass().getName();
-    }
+public class BetweennessCentralityLogOutput extends LimitedLogOutput {
 
-    /**
-     * Combine v1 and v2, return the combined value. The combined value may
-     * take use v1 or v2. The value of v1 and v2 may be updated. Should not
-     * use v1 and v2 after combine them.
-     */
-    T combine(T v1, T v2);
+    private static final Logger LOG =
+            Log.logger(BetweennessCentralityLogOutput.class);
 
-
-    static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
-        if (!values.hasNext()) {
-            return null;
-        }
-        T result = values.next();
-        while (values.hasNext()) {
-            result = combiner.combine(result, values.next());
-        }
-        return result;
+    @Override
+    public void write(Vertex vertex) {
+        BetweennessValue localValue = vertex.value();
+        double centrality = localValue.betweenness().value();
+        LOG.info("The betweenness centrality of vertex {} is {}",
+                 vertex, centrality);
     }
 }

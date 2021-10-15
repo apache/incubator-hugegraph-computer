@@ -45,54 +45,61 @@ public class AlgorithmTestBase extends UnitTestBase {
 
     public static void runAlgorithm(String algorithmParams, String ... options)
                                     throws InterruptedException {
-        ExecutorService pool = Executors.newFixedThreadPool(2);
-        CountDownLatch countDownLatch = new CountDownLatch(2);
-        Throwable[] exceptions = new Throwable[2];
+        final int workers = 1;
+        ExecutorService pool = Executors.newFixedThreadPool(1 + workers);
+        CountDownLatch countDownLatch = new CountDownLatch(1 + workers);
+        Throwable[] exceptions = new Throwable[1 + workers];
 
-        pool.submit(() -> {
-            WorkerService workerService = null;
-            try {
-                Map<String, String> params = new HashMap<>();
-                params.put(RpcOptions.RPC_REMOTE_URL.name(),
-                           "127.0.0.1:8090");
-                params.put(ComputerOptions.JOB_ID.name(),
-                           "local_002");
-                params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
-                           "1");
-                params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(),
-                           "8086");
-                params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(),
-                           "100000");
-                params.put(ComputerOptions.BSP_LOG_INTERVAL.name(),
-                           "30000");
-                params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(),
-                           "10");
-                params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
-                           algorithmParams);
-                if (options != null) {
-                    for (int i = 0; i < options.length; i += 2) {
-                        params.put(options[i], options[i + 1]);
+        for (int w = 0; w < workers; w++) {
+            final int workerId = 1 + w;
+            final int port = 8086 + w;
+            pool.submit(() -> {
+                WorkerService workerService = null;
+                try {
+                    Map<String, String> params = new HashMap<>();
+                    params.put(RpcOptions.RPC_REMOTE_URL.name(),
+                               "127.0.0.1:8090");
+                    params.put(ComputerOptions.JOB_ID.name(),
+                               "local_002");
+                    params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
+                               String.valueOf(workers));
+                    params.put(ComputerOptions.JOB_PARTITIONS_COUNT.name(),
+                               String.valueOf(workers));
+                    params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(),
+                               String.valueOf(port));
+                    params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(),
+                               "100000");
+                    params.put(ComputerOptions.BSP_LOG_INTERVAL.name(),
+                               "30000");
+                    params.put(ComputerOptions.BSP_MAX_SUPER_STEP.name(),
+                               "10");
+                    params.put(ComputerOptions.ALGORITHM_PARAMS_CLASS.name(),
+                               algorithmParams);
+                    if (options != null) {
+                        for (int i = 0; i < options.length; i += 2) {
+                            params.put(options[i], options[i + 1]);
+                        }
                     }
-                }
-                Config config = ComputerContextUtil.initContext(params);
-                workerService = new MockWorkerService();
+                    Config config = ComputerContextUtil.initContext(params);
+                    workerService = new MockWorkerService();
 
-                workerService.init(config);
-                workerService.execute();
-            } catch (Throwable e) {
-                LOG.error("Failed to start worker", e);
-                exceptions[0] = e;
-                // If worker failed, the master also should quit
-                while (countDownLatch.getCount() > 0) {
+                    workerService.init(config);
+                    workerService.execute();
+                } catch (Throwable e) {
+                    LOG.error("Failed to start worker", e);
+                    exceptions[workerId] = e;
+                    // If worker failed, the master also should quit
+                    while (countDownLatch.getCount() > 0) {
+                        countDownLatch.countDown();
+                    }
+                } finally {
+                    if (workerService != null) {
+                        workerService.close();
+                    }
                     countDownLatch.countDown();
                 }
-            } finally {
-                if (workerService != null) {
-                    workerService.close();
-                }
-                countDownLatch.countDown();
-            }
-        });
+            });
+        }
 
         pool.submit(() -> {
             MasterService masterService = null;
@@ -105,7 +112,9 @@ public class AlgorithmTestBase extends UnitTestBase {
                 params.put(ComputerOptions.JOB_ID.name(),
                            "local_002");
                 params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
-                           "1");
+                           String.valueOf(workers));
+                params.put(ComputerOptions.JOB_PARTITIONS_COUNT.name(),
+                           String.valueOf(workers));
                 params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(),
                            "100000");
                 params.put(ComputerOptions.BSP_LOG_INTERVAL.name(),
@@ -128,7 +137,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 masterService.execute();
             } catch (Throwable e) {
                 LOG.error("Failed to start master", e);
-                exceptions[1] = e;
+                exceptions[0] = e;
                 // If master failed, the worker also should quit
                 while (countDownLatch.getCount() > 0) {
                     countDownLatch.countDown();

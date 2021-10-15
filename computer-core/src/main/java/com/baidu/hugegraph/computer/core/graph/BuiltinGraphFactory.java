@@ -21,8 +21,10 @@ package com.baidu.hugegraph.computer.core.graph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -41,6 +43,7 @@ import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -134,6 +137,16 @@ public final class BuiltinGraphFactory implements GraphFactory {
     }
 
     @Override
+    public <V> Set<V> createSet() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public <V> Set<V> createSet(int capacity) {
+        return new HashSet<>(capacity);
+    }
+
+    @Override
     public <K, V> Map<K, V> createMap() {
         return new HashMap<>();
     }
@@ -173,6 +186,8 @@ public final class BuiltinGraphFactory implements GraphFactory {
                 return new IdListList();
             case LIST_VALUE:
                 return new ListValue<>();
+            case ID_SET:
+                return new IdSet();
             case MAP_VALUE:
                 return new MapValue<>();
             case STRING:

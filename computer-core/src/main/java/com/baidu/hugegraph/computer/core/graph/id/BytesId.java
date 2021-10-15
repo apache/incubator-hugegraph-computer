@@ -91,6 +91,10 @@ public class BytesId implements Id {
         return new BytesId(IdType.UUID, output.buffer(), output.position());
     }
 
+    public byte[] bytes() {
+        return this.bytes;
+    }
+
     @Override
     public IdType idType() {
         return this.idType;

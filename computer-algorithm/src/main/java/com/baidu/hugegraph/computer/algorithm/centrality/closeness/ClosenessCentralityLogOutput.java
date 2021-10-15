@@ -44,6 +44,6 @@ public class ClosenessCentralityLogOutput extends LimitedLogOutput {
             centrality += 1.0D / entry.getValue().value();
         }
         LOG.info("The closeness centrality of vertex {} is {}",
-                 centrality, vertex);
+                 vertex, centrality);
     }
 }
