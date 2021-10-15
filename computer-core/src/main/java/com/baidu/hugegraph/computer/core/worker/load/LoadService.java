@@ -22,6 +22,8 @@ package com.baidu.hugegraph.computer.core.worker.load;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -40,8 +42,11 @@ import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.Log;
 
 public class LoadService {
+
+    private static final Logger LOG = Log.logger(LoadService.class);
 
     private final GraphFactory graphFactory;
     private final Config config;
@@ -186,7 +191,17 @@ public class LoadService {
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
             while (edgeFetcher.hasNext()) {
                 hugeEdge = edgeFetcher.next();
-                Edge edge = this.convert(hugeEdge);
+                /*
+                 * TODO: Restore the code after huge-server fix a problem
+                 *       where id may not be a four-part problem
+                 */
+                Edge edge;
+                try {
+                    edge = this.convert(hugeEdge);
+                } catch (Exception e) {
+                    LOG.error("Fail to convert edge: {}", hugeEdge, e);
+                    continue;
+                }
                 Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
                 if (this.currentVertex == null) {
                     this.currentVertex = new DefaultVertex(graphFactory,
