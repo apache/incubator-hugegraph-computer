@@ -56,7 +56,7 @@ public class ComputerContextUtil {
         algorithmParams.setAlgorithmParameters(params);
 
         Config config = new DefaultConfig(params);
-        GraphFactory graphFactory = new BuiltinGraphFactory(config);
+        GraphFactory graphFactory = new BuiltinGraphFactory();
         Allocator allocator = new DefaultAllocator(config, graphFactory);
         ComputerContext.initContext(config, graphFactory, allocator);
         return config;

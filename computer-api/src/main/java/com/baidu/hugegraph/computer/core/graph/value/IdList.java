@@ -28,12 +28,12 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 public class IdList extends ListValue<Id> {
 
     public IdList() {
-        super(ValueType.ID_VALUE);
+        super(ValueType.ID);
     }
 
     @Override
     public ValueType valueType() {
-        return ValueType.ID_VALUE_LIST;
+        return ValueType.ID_LIST;
     }
 
     @Override

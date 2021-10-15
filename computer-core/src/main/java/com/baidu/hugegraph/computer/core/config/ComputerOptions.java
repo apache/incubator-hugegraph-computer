@@ -266,15 +266,6 @@ public class ComputerOptions extends OptionHolder {
                     10
             );
 
-    public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
-            new ConfigOption<>(
-                    "computer.vertex_average_degree",
-                    "The average degree of a vertex, it represents the " +
-                    "average number of adjacent edges per vertex",
-                    positiveInt(),
-                    10
-            );
-
     public static final ConfigOption<Integer>
            ALLOCATOR_MAX_VERTICES_PER_THREAD = new ConfigOption<>(
                     "allocator.max_vertices_per_thread",

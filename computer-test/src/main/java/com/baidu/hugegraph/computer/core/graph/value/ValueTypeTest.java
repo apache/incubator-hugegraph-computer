@@ -36,7 +36,7 @@ public class ValueTypeTest {
         Assert.assertEquals(4, ValueType.LONG.code());
         Assert.assertEquals(5, ValueType.FLOAT.code());
         Assert.assertEquals(6, ValueType.DOUBLE.code());
-        Assert.assertEquals(20, ValueType.ID_VALUE.code());
+        Assert.assertEquals(20, ValueType.ID.code());
 
         Assert.assertEquals(0, ValueType.NULL.byteSize());
         Assert.assertEquals(1, ValueType.BOOLEAN.byteSize());
@@ -44,7 +44,7 @@ public class ValueTypeTest {
         Assert.assertEquals(8, ValueType.LONG.byteSize());
         Assert.assertEquals(4, ValueType.FLOAT.byteSize());
         Assert.assertEquals(8, ValueType.DOUBLE.byteSize());
-        Assert.assertEquals(-1, ValueType.ID_VALUE.byteSize());
+        Assert.assertEquals(-1, ValueType.ID.byteSize());
     }
 
     @Test

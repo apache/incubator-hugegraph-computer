@@ -47,7 +47,7 @@ public class BytesIdTest extends UnitTestBase {
         Id longId9 = new BytesId();
 
         Assert.assertEquals(IdType.LONG, longId1.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, longId1.valueType());
+        Assert.assertEquals(ValueType.ID, longId1.valueType());
 
         Assert.assertEquals(new Long(123L), longId1.asObject());
         Assert.assertEquals(123L, longId1.asObject());
@@ -88,7 +88,7 @@ public class BytesIdTest extends UnitTestBase {
         Assert.assertEquals(3, utf8Id2.length());
 
         Assert.assertEquals(IdType.UTF8, utf8Id2.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, utf8Id2.valueType());
+        Assert.assertEquals(ValueType.ID, utf8Id2.valueType());
 
         Assert.assertEquals("abc", utf8Id2.asObject());
 
@@ -115,7 +115,7 @@ public class BytesIdTest extends UnitTestBase {
         Id uuidId3 = BytesId.of(uuid1);
 
         Assert.assertEquals(IdType.UUID, uuidId1.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, uuidId1.valueType());
+        Assert.assertEquals(ValueType.ID, uuidId1.valueType());
 
         Assert.assertEquals(uuid1, uuidId1.asObject());
         ByteBuffer buffer = ByteBuffer.allocate(16);
