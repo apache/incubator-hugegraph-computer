@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.MapValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
@@ -57,17 +58,15 @@ public class ClosenessCentralityOutput extends HugeGraphOutput {
                 new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
 
-        // TODO：How to get the total vertices count here?
-        // long n = context.totalVertexCount() - 1;
-        ClosenessValue localValue = vertex.value();
+        MapValue<DoubleValue> localValue = vertex.value();
         // Cumulative distance
         double centrality = 0;
         for (Map.Entry<Id, DoubleValue> entry : localValue.entrySet()) {
             centrality += 1.0D / entry.getValue().value();
         }
         hugeVertex.property(this.name(), centrality);
-        LOG.info("The closeness centrality of vertex {} is {}",
-                 centrality, vertex);
+        LOG.debug("The closeness centrality of vertex {} is {}",
+                  centrality, vertex);
         return hugeVertex;
     }
 }

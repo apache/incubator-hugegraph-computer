@@ -123,8 +123,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
             Vertex result = super.constructHugeVertex(vertex);
             Double expect = expectResults.get(result.id());
             Assert.assertNotNull(expect);
-            assertDoubleValueEqual(expect,
-                                   (double) result.property(super.name()));
+            assertEquals(expect, (double) result.property(super.name()));
             return result;
         }
     }
@@ -156,8 +155,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
             Vertex result = super.constructHugeVertex(vertex);
             Double expect = expectResults.get(result.id());
             Assert.assertNotNull(expect);
-            assertDoubleValueEqual(expect,
-                                   (double) result.property(super.name()));
+            assertEquals(expect, (double) result.property(super.name()));
             return result;
         }
     }

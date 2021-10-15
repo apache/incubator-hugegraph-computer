@@ -105,7 +105,7 @@ public class UnitTestBase {
         }
     }
 
-    public static void assertDoubleValueEqual(double v1, double v2) {
+    public static void assertEquals(double v1, double v2) {
         Assert.assertEquals(v1, v2, 1E-6);
     }
 

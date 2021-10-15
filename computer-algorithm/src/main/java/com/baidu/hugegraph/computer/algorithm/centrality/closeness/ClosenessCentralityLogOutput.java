@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.MapValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 import com.baidu.hugegraph.util.Log;
@@ -36,8 +37,7 @@ public class ClosenessCentralityLogOutput extends LimitedLogOutput {
 
     @Override
     public void write(Vertex vertex) {
-        // long n = context.totalVertexCount() - 1;
-        ClosenessValue localValue = vertex.value();
+        MapValue<DoubleValue> localValue = vertex.value();
         // Cumulative distance
         double centrality = 0;
         for (Map.Entry<Id, DoubleValue> entry : localValue.entrySet()) {

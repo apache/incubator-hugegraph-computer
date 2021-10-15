@@ -23,6 +23,7 @@ import java.util.Map;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.value.MapValue;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 
@@ -35,7 +36,7 @@ public class ClosenessCentralityParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
                          ClosenessCentrality.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                         ClosenessValue.class.getName());
+                         MapValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          ClosenessMessage.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
