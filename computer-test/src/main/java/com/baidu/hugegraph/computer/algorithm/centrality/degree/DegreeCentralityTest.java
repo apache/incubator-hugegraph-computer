@@ -37,6 +37,8 @@ import com.google.common.collect.Streams;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
 
+    public static boolean isRun;
+
     @Test
     public void testRunAlgorithm() throws InterruptedException {
         runAlgorithm(DegreeCentralityTestParams.class.getName(),
@@ -64,10 +66,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
 
         private String weight;
 
-        public static boolean isRun;
-
         public DegreeCentralityTestOutput() {
-            isRun = false;
         }
 
         @Override
