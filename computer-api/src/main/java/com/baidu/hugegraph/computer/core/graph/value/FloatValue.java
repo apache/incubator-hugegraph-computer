@@ -90,6 +90,11 @@ public class FloatValue extends Number implements Tvalue<Float> {
     }
 
     @Override
+    public boolean isNumber() {
+        return true;
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readFloat();
     }

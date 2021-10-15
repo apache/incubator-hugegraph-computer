@@ -42,10 +42,10 @@ public class IdValueTest extends UnitTestBase {
         Value value3 = BytesId.of(1L);
         Value value4 = BytesId.of("1");
 
-        Assert.assertEquals(ValueType.ID_VALUE, value1.valueType());
-        Assert.assertEquals(ValueType.ID_VALUE, value2.valueType());
-        Assert.assertEquals(ValueType.ID_VALUE, value3.valueType());
-        Assert.assertEquals(ValueType.ID_VALUE, value4.valueType());
+        Assert.assertEquals(ValueType.ID, value1.valueType());
+        Assert.assertEquals(ValueType.ID, value2.valueType());
+        Assert.assertEquals(ValueType.ID, value3.valueType());
+        Assert.assertEquals(ValueType.ID, value4.valueType());
     }
 
     @Test

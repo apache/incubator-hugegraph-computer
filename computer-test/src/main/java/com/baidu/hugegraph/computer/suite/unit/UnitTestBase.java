@@ -105,6 +105,10 @@ public class UnitTestBase {
         }
     }
 
+    public static void assertDoubleValueEqual(double v1, double v2) {
+        Assert.assertEquals(v1, v2, 1E-6);
+    }
+
     public static void updateOptions(Object... optionKeyValues) {
         if (optionKeyValues == null || optionKeyValues.length == 0) {
             throw new ComputerException("Options can't be null or empty");

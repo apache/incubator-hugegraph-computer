@@ -41,6 +41,8 @@ import com.baidu.hugegraph.util.Log;
 
 public class AlgorithmTestBase extends UnitTestBase {
 
+    public static final Logger LOG = Log.logger(AlgorithmTestBase.class);
+
     public static void runAlgorithm(String algorithmParams, String ... options)
                                     throws InterruptedException {
         final Logger log = Log.logger(AlgorithmTestBase.class);
@@ -79,7 +81,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
-                log.error("Failed to start worker", e);
+                LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
                 // If worker failed, the master also should quit
                 while (countDownLatch.getCount() > 0) {
@@ -126,7 +128,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 masterService.init(config);
                 masterService.execute();
             } catch (Throwable e) {
-                log.error("Failed to start master", e);
+                LOG.error("Failed to start master", e);
                 exceptions[1] = e;
                 // If master failed, the worker also should quit
                 while (countDownLatch.getCount() > 0) {

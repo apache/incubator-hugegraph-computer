@@ -118,7 +118,7 @@ public class WriteBuffersTest extends UnitTestBase {
         Properties properties = graphFactory.createProperties();
         properties.put("name", BytesId.of("marko"));
         properties.put("age", new IntValue(18));
-        properties.put("city", new ListValue<>(ValueType.ID_VALUE,
+        properties.put("city", new ListValue<>(ValueType.ID,
                                ImmutableList.of(BytesId.of("wuhan"),
                                                 BytesId.of("xian"))));
         vertex.properties(properties);

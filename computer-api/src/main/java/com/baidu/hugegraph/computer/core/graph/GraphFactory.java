@@ -33,6 +33,8 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public interface GraphFactory {
 
+    Id createId();
+
     Id createId(long id);
 
     Id createId(String id);
