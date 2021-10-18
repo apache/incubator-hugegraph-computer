@@ -19,10 +19,6 @@
 
 package com.baidu.hugegraph.computer.algorithm.path.rings;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 import com.baidu.hugegraph.structure.graph.Vertex;
@@ -48,16 +44,9 @@ public class RingsDetectionOutput extends HugeOutput {
     public Vertex constructHugeVertex(
            com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
         com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                new com.baidu.hugegraph.structure.graph.Vertex(null);
+        new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
-
-        IdListList value = vertex.value();
-        List<String> propValue = new ArrayList<>();
-        for (int i = 0; i < value.size(); i++) {
-            propValue.add(value.get(i).toString());
-        }
-
-        hugeVertex.property(this.name(), propValue);
+        hugeVertex.property(this.name(), vertex.value().toString());
         return hugeVertex;
     }
 }

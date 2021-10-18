@@ -17,30 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
+package com.baidu.hugegraph.computer.algorithm.path.links;
 
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
-import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionOutput;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
+import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
-public class RingsDetectionWithFilterParams implements AlgorithmParams {
+public class LinksParams implements AlgorithmParams {
 
     @Override
     public void setAlgorithmParameters(Map<String, String> params) {
         this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
-                         RingsDetectionWithFilter.class.getName());
+                         Links.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                         IdListList.class.getName());
+                         LinksValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                         RingsDetectionMessage.class.getName());
+                         LinksMessage.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         RingsDetectionOutput.class.getName());
+                         LimitedLogOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,
                          ExtractAllPropertyInputFilter.class.getName());
+
         params.put(ComputerOptions.INPUT_EDGE_FREQ.name(), "MULTIPLE");
     }
 }
