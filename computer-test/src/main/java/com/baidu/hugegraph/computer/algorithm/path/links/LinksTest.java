@@ -126,15 +126,16 @@ public class LinksTest extends AlgorithmTestBase {
                          "    ]," +
                          "    \"edge_end_condition\": {" +
                          "        \"label\": \"pay\"," +
-                         "        \"property_filter\": \"double($element" +
-                         ".weight) >= 4\"" +
+                         "        \"property_filter\": \"double($out.weight) " +
+                         ">= 4\"" +
                          "    }," +
                          "    \"edge_compare_condition\": {" +
                          "        \"label\": \"pay\"," +
-                         "        \"property_filter\": \"$element.weight " +
-                         "> $message.weight\"" +
+                         "        \"property_filter\": \"$out.weight " +
+                         "> $in.weight\"" +
                          "    }" +
                          "}";
+        System.out.println(analyze);
         runAlgorithm(LinksTestParams.class.getName(),
                      Links.OPTION_ANALYZE_CONFIG, analyze);
     }

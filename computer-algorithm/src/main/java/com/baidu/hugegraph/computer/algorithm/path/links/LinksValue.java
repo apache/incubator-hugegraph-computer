@@ -85,8 +85,8 @@ public class LinksValue implements Value<LinksValue> {
         throw new NotSupportedException();
     }
 
-    public void addValue(LinksValueItem value) {
-        this.values.add(value);
+    public void addValue(IdList vertexes, IdList edges) {
+        this.values.add(new LinksValue.LinksValueItem(vertexes, edges));
     }
 
     @Override

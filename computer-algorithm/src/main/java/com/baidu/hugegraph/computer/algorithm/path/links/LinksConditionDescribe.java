@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 public class LinksConditionDescribe {
 
     private final ImmutableList<String> startVertexes;
+    private final PropertyFilterDescribe vertexEndCondition;
     private final PropertyFilterDescribe edgeEndCondition;
     private final PropertyFilterDescribe edgeCompareCondition;
 
@@ -40,13 +41,19 @@ public class LinksConditionDescribe {
     private LinksConditionDescribe(
             @JsonProperty(value = "start_vertexes", required = true)
             List<String> startVertexes,
-            @JsonProperty(value = "edge_end_condition", required = true)
+            @JsonProperty(value = "vertex_end_condition")
+            PropertyFilterDescribe vertexEndCondition,
+            @JsonProperty(value = "edge_end_condition")
             PropertyFilterDescribe edgeEndCondition,
             @JsonProperty(value = "edge_compare_condition", required = true)
             PropertyFilterDescribe edgeCompareCondition) {
         E.checkArgument(CollectionUtils.isNotEmpty(startVertexes),
                         "Parameter start_vertexes must not be empty");
         this.startVertexes = ImmutableList.copyOf(startVertexes);
+        E.checkArgument(vertexEndCondition != null || edgeEndCondition != null,
+                        "Parameter vertex_end_condition and " +
+                        "edge_end_condition can't all be null");
+        this.vertexEndCondition = vertexEndCondition;
         this.edgeEndCondition = edgeEndCondition;
         this.edgeCompareCondition = edgeCompareCondition;
     }
@@ -57,6 +64,10 @@ public class LinksConditionDescribe {
 
     public List<String> startVertexes() {
         return this.startVertexes;
+    }
+
+    public PropertyFilterDescribe vertexEndCondition() {
+        return this.vertexEndCondition;
     }
 
     public PropertyFilterDescribe edgeEndCondition() {

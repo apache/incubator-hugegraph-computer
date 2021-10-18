@@ -40,11 +40,13 @@ import com.googlecode.aviator.Expression;
 
 public class LinksSpreadFilter {
 
-    private static final String MESSAGE = "$message";
     private static final String ELEMENT = "$element";
+    private static final String IN = "$in";
+    private static final String OUT = "$out";
 
     private final Set<Id> startVertexes;
-    private final Pair<String, Expression> endEdgeCondition;
+    private Pair<String, Expression> endVertexCondition;
+    private Pair<String, Expression> endEdgeCondition;
     private final Pair<String, Expression> edgeSpreadCondition;
 
     public LinksSpreadFilter(String config) {
@@ -56,50 +58,75 @@ public class LinksSpreadFilter {
                                 .forEach(this.startVertexes::add);
 
         Expression expression;
+
+        PropertyFilterDescribe vertexEndCondition =
+                               describe.vertexEndCondition();
+        if (vertexEndCondition != null) {
+            expression = AviatorEvaluator.compile(
+                                          vertexEndCondition.propertyFilter());
+            this.endVertexCondition = new ImmutablePair<>(
+                                          vertexEndCondition.label(),
+                                          expression);
+        }
+
         PropertyFilterDescribe edgeEndCondition = describe.edgeEndCondition();
-        expression = AviatorEvaluator.compile(
-                                      edgeEndCondition.propertyFilter());
-        this.endEdgeCondition = new ImmutablePair<>(edgeEndCondition.label(),
-                                                    expression);
+        if (edgeEndCondition != null) {
+            expression = AviatorEvaluator.compile(
+                                          edgeEndCondition.propertyFilter());
+            this.endEdgeCondition = new ImmutablePair<>(
+                                        edgeEndCondition.label(), expression);
+        }
+
 
         PropertyFilterDescribe edgeSpreadCondition =
                                describe.edgeCompareCondition();
         expression = AviatorEvaluator.compile(
                                       edgeSpreadCondition.propertyFilter());
         this.edgeSpreadCondition = new ImmutablePair<>(
-                                   edgeSpreadCondition.label(), expression);
+                                       edgeSpreadCondition.label(),
+                                       expression);
     }
 
     public boolean isStartVertexes(Vertex vertex) {
         return this.startVertexes.contains(vertex.id());
     }
 
-    public boolean isEndEdge(Edge edge) {
-        if (!this.endEdgeCondition.getKey().equals(edge.label())) {
+    public boolean isEndVertex(Vertex vertex) {
+        if (this.endVertexCondition == null ||
+            !this.endVertexCondition.getKey().equals(vertex.label())) {
             return false;
         }
 
-        Map<String, Map<String, Value<?>>> param = ImmutableMap.of(
-                                                   ELEMENT,
-                                                   edge.properties().get());
+        Map<String, Map<String, Value<?>>> param =
+                    ImmutableMap.of(ELEMENT, vertex.properties().get());
+        return this.expressionExecute(param,
+                                      this.endVertexCondition.getValue());
+    }
+
+    public boolean isEndEdge(Edge edge) {
+        if (this.endEdgeCondition == null ||
+            !this.endEdgeCondition.getKey().equals(edge.label())) {
+            return false;
+        }
+
+        Map<String, Map<String, Value<?>>> param =
+                    ImmutableMap.of(OUT, edge.properties().get());
         return this.expressionExecute(param, this.endEdgeCondition.getValue());
     }
 
     public boolean isEdgeCanSpread0(Edge edge) {
-        return this.edgeSpreadCondition.getKey().equals(edge.label());
+        return this.endEdgeCondition.getKey().equals(edge.label());
     }
 
     public boolean isEdgeCanSpread(Edge edge,
                                    Properties lastEdgeProperties) {
-        if (!this.edgeSpreadCondition.getKey().equals(edge.label())) {
+        if (!this.endEdgeCondition.getKey().equals(edge.label())) {
             return false;
         }
 
-        Map<String, Map<String, Value<?>>> param = ImmutableMap.of(
-                                                   ELEMENT,
-                                                   edge.properties().get(),
-                                                   MESSAGE,
-                                                   lastEdgeProperties.get());
+        Map<String, Map<String, Value<?>>> param =
+                    ImmutableMap.of(OUT, edge.properties().get(),
+                                    IN, lastEdgeProperties.get());
         return this.expressionExecute(param,
                                       this.edgeSpreadCondition.getValue());
     }
