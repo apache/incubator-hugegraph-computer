@@ -58,11 +58,13 @@ public class Links implements Computation<LinksMessage> {
         }
 
         LinksMessage message = new LinksMessage();
+        if (this.isEndVertexAndSaveValue(vertex, message)) {
+            return;
+        }
         message.addVertex(vertex.id());
         for (Edge edge : vertex.edges()) {
             LinksMessage copyMessage = message.copy();
-            if (this.isEndVertexAndSaveValue(vertex, copyMessage) ||
-                this.isEndEdgeAndSaveValue(vertex, edge, copyMessage)) {
+            if (this.isEndEdgeAndSaveValue(vertex, edge, copyMessage)) {
                 continue;
             }
             if (this.filter.isEdgeCanSpread0(edge)) {
@@ -80,11 +82,13 @@ public class Links implements Computation<LinksMessage> {
         while (messages.hasNext()) {
             half = false;
             LinksMessage message = messages.next();
+            if (this.isEndVertexAndSaveValue(vertex, message)) {
+                continue;
+            }
             message.addVertex(vertex.id());
             for (Edge edge : vertex.edges()) {
                 LinksMessage copyMessage = message.copy();
-                if (this.isEndVertexAndSaveValue(vertex, copyMessage) ||
-                    this.isEndEdgeAndSaveValue(vertex, edge, copyMessage)) {
+                if (this.isEndEdgeAndSaveValue(vertex, edge, copyMessage)) {
                     continue;
                 }
                 if (this.filter.isEdgeCanSpread(edge,
