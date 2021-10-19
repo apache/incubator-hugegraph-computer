@@ -58,18 +58,16 @@ public class Links implements Computation<LinksMessage> {
         }
 
         LinksMessage message = new LinksMessage();
+        if (this.isEndVertexAndSaveValue(vertex, message)) {
+            return;
+        }
         message.addVertex(vertex.id());
         for (Edge edge : vertex.edges()) {
             LinksMessage copyMessage = message.copy();
-            if (this.filter.isEndEdge(edge)) {
-                copyMessage.addVertex(edge.targetId());
-                copyMessage.addEdge(edge.id());
-                LinksValue.LinksValueItem valueItem =
-                new LinksValue.LinksValueItem(copyMessage.pathVertexes(),
-                                              copyMessage.pathEdge());
-                LinksValue value = vertex.value();
-                value.addValue(valueItem);
-            } else if (this.filter.isEdgeCanSpread0(edge)) {
+            if (this.isEndEdgeAndSaveValue(vertex, edge, copyMessage)) {
+                continue;
+            }
+            if (this.filter.isEdgeCanSpread0(edge)) {
                 copyMessage.addEdge(edge.id());
                 copyMessage.walkEdgeProp(edge.properties());
                 context.sendMessage(edge.targetId(), copyMessage);
@@ -84,19 +82,17 @@ public class Links implements Computation<LinksMessage> {
         while (messages.hasNext()) {
             half = false;
             LinksMessage message = messages.next();
+            if (this.isEndVertexAndSaveValue(vertex, message)) {
+                continue;
+            }
             message.addVertex(vertex.id());
             for (Edge edge : vertex.edges()) {
                 LinksMessage copyMessage = message.copy();
-                if (this.filter.isEndEdge(edge)) {
-                    copyMessage.addVertex(edge.targetId());
-                    copyMessage.addEdge(edge.id());
-                    LinksValue.LinksValueItem valueItem =
-                    new LinksValue.LinksValueItem(copyMessage.pathVertexes(),
-                                                  copyMessage.pathEdge());
-                    LinksValue value = vertex.value();
-                    value.addValue(valueItem);
-                } else if (this.filter.isEdgeCanSpread(
-                                       edge, copyMessage.walkEdgeProp())) {
+                if (this.isEndEdgeAndSaveValue(vertex, edge, copyMessage)) {
+                    continue;
+                }
+                if (this.filter.isEdgeCanSpread(edge,
+                                                copyMessage.walkEdgeProp())) {
                     copyMessage.addEdge(edge.id());
                     copyMessage.walkEdgeProp(edge.properties());
                     context.sendMessage(edge.targetId(), copyMessage);
@@ -106,5 +102,29 @@ public class Links implements Computation<LinksMessage> {
         if (half) {
             vertex.inactivate();
         }
+    }
+
+    private boolean isEndVertexAndSaveValue(Vertex vertex,
+                                            LinksMessage message) {
+        if (this.filter.isEndVertex(vertex)) {
+            message.addVertex(vertex.id());
+            LinksValue value = vertex.value();
+            value.addValue(message.pathVertexes(), message.pathEdge());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isEndEdgeAndSaveValue(Vertex vertex, Edge edge,
+                                          LinksMessage message) {
+        if (this.filter.isEndEdge(edge)) {
+            message.addVertex(edge.targetId());
+            message.addEdge(edge.id());
+            LinksValue value = vertex.value();
+            value.addValue(message.pathVertexes(),
+                           message.pathEdge());
+            return true;
+        }
+        return false;
     }
 }
