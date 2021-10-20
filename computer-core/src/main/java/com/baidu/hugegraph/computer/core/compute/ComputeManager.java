@@ -83,17 +83,34 @@ public class ComputeManager<M extends Value<M>> {
             FileGraphPartition<M> part = new FileGraphPartition<>(this.context,
                                                                   this.managers,
                                                                   partition);
-            PartitionStat partitionStat = part.input(vertexIter, edgesIter);
+            PartitionStat partitionStat = null;
+            ComputerException inputException = null;
+            try {
+                partitionStat = part.input(vertexIter, edgesIter);
+            } catch (ComputerException e) {
+                inputException = e;
+            } finally {
+                try {
+                    vertexIter.close();
+                    edgesIter.close();
+                } catch (Exception e) {
+                    String message = "Failed to close vertex or edge file " +
+                                     "iterator";
+                    ComputerException closeException = new ComputerException(
+                                                           message, e);
+                    if (inputException != null) {
+                        inputException.addSuppressed(closeException);
+                    } else {
+                        throw closeException;
+                    }
+                }
+                if (inputException != null) {
+                    throw inputException;
+                }
+            }
+
             workerStat.add(partitionStat);
             this.partitions.put(partition, part);
-
-            try {
-                vertexIter.close();
-                edgesIter.close();
-            } catch (Exception e) {
-                throw new ComputerException("Failed to close vertex or edge " +
-                                            "file iterator", e);
-            }
         }
         return workerStat;
     }
