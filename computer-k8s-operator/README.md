@@ -1,6 +1,6 @@
 # Quick Start
 
-## Install etcd crd and hugegraph-computer crd
+## Install etcd CRD and hugegraph-computer CRD
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/hugegraph/hugegraph-computer/master/computer-k8s-operator/manifest/etcd-operator-crd.v1beta1.yaml
@@ -8,7 +8,7 @@ kubectl apply -f https://raw.githubusercontent.com/hugegraph/hugegraph-computer/
 kubectl apply -f https://raw.githubusercontent.com/hugegraph/hugegraph-computer/master/computer-k8s-operator/manifest/hugegraph-computer-crd.v1beta1.yaml
 ```
 
-## Show crd
+## Show CRD
 
 ```bash
 kubectl get crd
@@ -45,7 +45,7 @@ apiVersion: hugegraph.baidu.com/v1
 kind: HugeGraphComputerJob
 metadata:
   namespace: hugegraph-computer-system
-  name: &jobName page-rank-test123
+  name: &jobName pagerank-sample
 spec:
   jobId: *jobName
   algorithmName: page_rank
@@ -64,27 +64,34 @@ EOF
 ## Show job
 
 ```bash
-kubectl get hcjob -n hugegraph-computer-system
+kubectl get hcjob/pagerank-sample -n hugegraph-computer-system
+
+NAME               JOBID              JOBSTATUS
+pagerank-sample    pagerank-sample    RUNNING
 ```
 
-## Show log
+## Show logs of node of running
 
 ```bash
 # Show the master log
-kubectl logs -l component=pagerank-test123-master -n hugegraph-computer-system
+kubectl logs -l component=pagerank-sample-master -n hugegraph-computer-system
 
 # Show the worker log
-kubectl logs -l component=pagerank-test123-worker -n hugegraph-computer-system
+kubectl logs -l component=pagerank-sample-worker -n hugegraph-computer-system
 ```
 
-## Show the diagnostics log when the job fails (it will only be saved for one hour)
+## Show diagnostics log of a job
+
+> NOTE: diagnostics log exist only when the job fails, and it will only be saved for one hour.
 
 ```bash
-kubectl get event --field-selector reason=ComputerJobFailed --field-selector involvedObject.name=pagerank-test123 -n hugegraph-computer-system
+kubectl get event --field-selector reason=ComputerJobFailed --field-selector involvedObject.name=pagerank-sample -n hugegraph-computer-system
 ```
 
-## Show job success event (it will only be saved for one hour)
+## Show success event of a job
+
+> NOTE: it will only be saved for one hour
 
 ```bash
-kubectl get event --field-selector reason=ComputerJobSucceed --field-selector involvedObject.name=pagerank-test123 -n hugegraph-computer-system
+kubectl get event --field-selector reason=ComputerJobSucceed --field-selector involvedObject.name=pagerank-sample -n hugegraph-computer-system
 ```
