@@ -51,6 +51,12 @@
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>computer-core</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>okhttp</artifactId>
+                    <groupId>com.squareup.okhttp</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
