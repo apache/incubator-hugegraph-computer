@@ -26,7 +26,6 @@ import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
-import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
 public class DegreeCentralityParams implements AlgorithmParams {
 
@@ -43,6 +42,6 @@ public class DegreeCentralityParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.WORKER_COMBINER_CLASS,
                          DoubleValueSumCombiner.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         LimitedLogOutput.class.getName());
+                         DegreeCentralityOutput.class.getName());
     }
 }
