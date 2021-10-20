@@ -20,8 +20,8 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -225,7 +225,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         return this.values;
     }
 }

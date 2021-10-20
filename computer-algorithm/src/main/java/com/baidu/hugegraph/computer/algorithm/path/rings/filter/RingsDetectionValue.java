@@ -94,7 +94,7 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new NotSupportedException();
     }
 }
