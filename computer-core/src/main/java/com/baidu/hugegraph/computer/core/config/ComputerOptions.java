@@ -807,4 +807,30 @@ public class ComputerOptions extends OptionHolder {
                     positiveInt(),
                     Bytes.GB
             );
+
+    public static final ConfigOption<String> AUTH_TOKEN =
+            new ConfigOption<>(
+                    "hugegraph.token",
+                    "The auth value for compute job to certificate," +
+                    " should only used for HugeGraph server now",
+                    ""
+            );
+
+    public static final ConfigOption<String> AUTH_USRNAME =
+            new ConfigOption<>(
+                    "hugegraph.usrname",
+                    "The usrname for compute job to certificate with " +
+                    "basic auth, should only used in test environment, " +
+                    "consider ban it in future.",
+                    ""
+            );
+
+    public static final ConfigOption<String> AUTH_PASSWD =
+            new ConfigOption<>(
+                    "hugegraph.passwd",
+                    "The password for compute job to certificate with " +
+                    "basic auth, should only used in test environment, " +
+                    "consider ban it in future.",
+                    ""
+            );
 }
