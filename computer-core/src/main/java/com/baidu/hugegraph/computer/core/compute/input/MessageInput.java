@@ -71,6 +71,10 @@ public class MessageInput<T extends Value<?>> {
         return new MessageIterator(vidPointer);
     }
 
+    public void close() throws Exception {
+        this.messages.close();
+    }
+
     private class MessageIterator implements Iterator<T> {
 
         // It indicates whether the value can be returned to client.
