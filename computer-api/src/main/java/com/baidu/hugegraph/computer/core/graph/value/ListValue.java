@@ -225,7 +225,7 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
-    public Object value() {
+    public List<T> value() {
         return this.values;
     }
 }

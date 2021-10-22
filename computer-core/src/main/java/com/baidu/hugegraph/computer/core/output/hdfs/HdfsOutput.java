@@ -99,7 +99,7 @@ public class HdfsOutput implements ComputerOutput {
     }
 
     protected String constructValueString(Vertex vertex) {
-        return vertex.value().resultString();
+        return vertex.value().string();
     }
 
     public static Path buildPath(String dir, String jobId, int partition) {

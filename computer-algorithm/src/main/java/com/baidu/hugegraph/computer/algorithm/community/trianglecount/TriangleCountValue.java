@@ -96,7 +96,7 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
     }
 
     @Override
-    public String resultString() {
+    public String string() {
         return String.valueOf(this.count);
     }
 

@@ -21,8 +21,6 @@ package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
 import java.io.IOException;
 
-import javax.ws.rs.NotSupportedException;
-
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
@@ -52,12 +50,12 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
 
     @Override
     public void assign(Value<RingsDetectionValue> other) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int compareTo(RingsDetectionValue o) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -74,7 +72,7 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
 
     @Override
     public RingsDetectionValue copy() {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     public IdList path() {
@@ -95,6 +93,6 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
 
     @Override
     public Object value() {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 }
