@@ -25,7 +25,6 @@ public interface Combiner<T> {
 
     /**
      * @return The name of the combiner.
-     * @return class name by default.
      */
     default String name() {
         return this.getClass().getName();

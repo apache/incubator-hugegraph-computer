@@ -26,6 +26,10 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public interface Edge extends Recyclable {
 
+    Id id();
+
+    void id(Id id);
+
     String label();
 
     void label(String label);

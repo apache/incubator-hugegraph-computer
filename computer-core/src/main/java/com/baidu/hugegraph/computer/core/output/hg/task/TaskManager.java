@@ -47,8 +47,8 @@ public final class TaskManager {
     public static final String BATCH_WORKER = "batch-worker-%d";
     public static final String SINGLE_WORKER = "single-worker-%d";
 
-    private HugeClient client;
-    private Config config;
+    private final HugeClient client;
+    private final Config config;
 
     private final Semaphore batchSemaphore;
     private final Semaphore singleSemaphore;
@@ -61,7 +61,20 @@ public final class TaskManager {
         this.config = config;
         String url = config.get(ComputerOptions.HUGEGRAPH_URL);
         String graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
-        this.client = new HugeClientBuilder(url, graph).build();
+        String token = config.get(ComputerOptions.AUTH_TOKEN);
+        String usrname = config.get(ComputerOptions.AUTH_USRNAME);
+        String passwd = config.get(ComputerOptions.AUTH_PASSWD);
+
+        // Use token first, then try passwd mode
+        HugeClientBuilder clientBuilder = new HugeClientBuilder(url, graph);
+        if (token != null && token.length() != 0) {
+            this.client = clientBuilder.configToken(token).build();
+        } else if (usrname != null && usrname.length() != 0) {
+            this.client = clientBuilder.configUser(usrname, passwd).build();
+        } else {
+            this.client = clientBuilder.build();
+        }
+
         // Try to make all batch threads running and don't wait for producer
         this.batchSemaphore = new Semaphore(this.batchSemaphoreNum());
         /*

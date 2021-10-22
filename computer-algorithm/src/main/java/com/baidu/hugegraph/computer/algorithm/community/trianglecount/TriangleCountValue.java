@@ -21,10 +21,6 @@ package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
 import java.io.IOException;
 
-import javax.ws.rs.NotSupportedException;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -61,7 +57,7 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
 
     @Override
     public void assign(Value<TriangleCountValue> other) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -86,19 +82,16 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
 
     @Override
     public int compareTo(TriangleCountValue other) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                   .append("idList", this.idList)
-                   .append("count", this.count)
-                   .toString();
+        return String.valueOf(this.count);
     }
 
     @Override
     public Object object() {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 }

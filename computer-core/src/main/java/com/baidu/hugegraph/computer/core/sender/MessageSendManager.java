@@ -126,7 +126,7 @@ public class MessageSendManager implements Manager {
         WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
                                                             MessageType.MSG);
         try {
-            // Write vertex to buffer
+            // Write message to buffer
             buffer.writeMessage(targetId, value);
         } catch (IOException e) {
             throw new ComputerException("Failed to write message", e);

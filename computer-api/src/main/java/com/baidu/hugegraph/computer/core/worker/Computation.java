@@ -30,8 +30,8 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
  * interface. #compute() is called for every active vertex in a superstep.
  * The algorithm can set the vertex inactive. If a vertex is inactive and no
  * message received, the vertex will not be computed. If a vertex is inactive
- * and any message is received, the framework will reactive the vertex and the
- * vertex will be computed. The algorithm can inactive a vertex many times.
+ * and any message is received, the framework will reactivate the vertex and the
+ * vertex will be computed. The algorithm can inactivate a vertex many times.
  * If a vertex is active(not set inactive by algorithm), the vertex will be
  * computed.
  * @param <M>

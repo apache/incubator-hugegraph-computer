@@ -220,6 +220,7 @@ public class EdgesInput {
                     boolean inv = (in.readByte() == 1) ? true : false;
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
+                    edge.id(StreamGraphInput.readId(in));
                     edge.label(StreamGraphInput.readLabel(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
@@ -239,6 +240,7 @@ public class EdgesInput {
                     edge.label(StreamGraphInput.readLabel(in));
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
+                    edge.id(StreamGraphInput.readId(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
@@ -262,6 +264,7 @@ public class EdgesInput {
                     edge.name(StreamGraphInput.readLabel(in));
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
+                    edge.id(StreamGraphInput.readId(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);

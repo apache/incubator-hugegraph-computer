@@ -94,6 +94,14 @@ public class ComputerOptions extends OptionHolder {
                     "hugegraph"
             );
 
+    public static final ConfigOption<Integer> INPUT_SPLIT_FETCH_TIMEOUT =
+            new ConfigOption<>(
+                    "input.split_fetch_timeout",
+                    "The timeout in seconds to fetch input splits",
+                    positiveInt(),
+                    300
+            );
+
     public static final ConfigOption<Long> INPUT_SPLITS_SIZE =
             new ConfigOption<>(
                     "input.split_size",
@@ -266,13 +274,52 @@ public class ComputerOptions extends OptionHolder {
                     10
             );
 
-    public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
+    public static final ConfigOption<String> OUTPUT_HDFS_URL =
             new ConfigOption<>(
-                    "computer.vertex_average_degree",
-                    "The average degree of a vertex, it represents the " +
-                    "average number of adjacent edges per vertex",
+                    "output.hdfs_url",
+                    "The hdfs url of output.",
+                    disallowEmpty(),
+                    "hdfs://127.0.0.1:9000"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_USER =
+            new ConfigOption<>(
+                    "output.hdfs_user",
+                    "The hdfs user of output.",
+                    disallowEmpty(),
+                    "hadoop"
+            );
+
+    public static final ConfigOption<Short> OUTPUT_HDFS_REPLICATION =
+            new ConfigOption<>(
+                    "output.hdfs_replication",
+                    "The replication number of hdfs.",
                     positiveInt(),
-                    10
+                    (short) 3
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_DIR =
+            new ConfigOption<>(
+                    "output.hdfs_path_prefix",
+                    "The directory of hdfs output result.",
+                    disallowEmpty(),
+                    "/hugegraph-computer/results"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_DELIMITER =
+            new ConfigOption<>(
+                    "output.hdfs_delimiter",
+                    "The delimiter of hdfs output.",
+                    disallowEmpty(),
+                    String.valueOf((char) 27)
+            );
+
+    public static final ConfigOption<Boolean> OUTPUT_HDFS_MERGE =
+            new ConfigOption<>(
+                    "output.hdfs_merge_partitions",
+                    "Whether merge output files of multiple partitions.",
+                    allowValues(true, false),
+                    true
             );
 
     public static final ConfigOption<Integer>
@@ -767,5 +814,29 @@ public class ComputerOptions extends OptionHolder {
                     "add in edge to vertex",
                     allowValues(true, false),
                     false
+    public static final ConfigOption<String> AUTH_TOKEN =
+            new ConfigOption<>(
+                    "hugegraph.token",
+                    "The auth value for compute job to certificate," +
+                    " should only used for HugeGraph server now",
+                    ""
+            );
+
+    public static final ConfigOption<String> AUTH_USRNAME =
+            new ConfigOption<>(
+                    "hugegraph.usrname",
+                    "The usrname for compute job to certificate with " +
+                    "basic auth, should only used in test environment, " +
+                    "consider ban it in future.",
+                    ""
+            );
+
+    public static final ConfigOption<String> AUTH_PASSWD =
+            new ConfigOption<>(
+                    "hugegraph.passwd",
+                    "The password for compute job to certificate with " +
+                    "basic auth, should only used in test environment, " +
+                    "consider ban it in future.",
+                    ""
             );
 }

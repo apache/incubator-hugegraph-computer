@@ -17,36 +17,33 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.output.hg;
+package com.baidu.hugegraph.computer.algorithm.centrality.closeness;
 
+import java.util.Map;
+
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.structure.constant.WriteType;
+import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
+import com.baidu.hugegraph.util.Log;
 
-public class PageRankOutput extends HugeOutput {
+public class ClosenessCentralityLogOutput extends LimitedLogOutput {
 
-    @Override
-    public String name() {
-        return "pagerank";
-    }
-
-    @Override
-    public void prepareSchema() {
-        this.client().schema().propertyKey(this.name())
-                     .asDouble()
-                     .writeType(WriteType.OLAP_RANGE)
-                     .ifNotExist()
-                     .create();
-    }
+    private static final Logger LOG =
+            Log.logger(ClosenessCentralityLogOutput.class);
 
     @Override
-    public com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(
-                                                      Vertex vertex) {
-        com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                new com.baidu.hugegraph.structure.graph.Vertex(null);
-        hugeVertex.id(vertex.id().asObject());
-        hugeVertex.property(this.name(),
-                            ((DoubleValue) vertex.value()).value());
-        return hugeVertex;
+    public void write(Vertex vertex) {
+        // long n = context.totalVertexCount() - 1;
+        ClosenessValue localValue = vertex.value();
+        // Cumulative distance
+        double centrality = 0;
+        for (Map.Entry<Id, DoubleValue> entry : localValue.entrySet()) {
+            centrality += 1.0D / entry.getValue().value();
+        }
+        LOG.info("The closeness centrality of vertex {} is {}",
+                 vertex, centrality);
     }
 }
