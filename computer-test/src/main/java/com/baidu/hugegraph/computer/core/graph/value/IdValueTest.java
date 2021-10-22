@@ -41,8 +41,8 @@ public class IdValueTest extends UnitTestBase {
         Value<Id> value1 = new BytesId();
         Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
 
-        Assert.assertEquals(ValueType.ID_VALUE, value1.valueType());
-        Assert.assertEquals(ValueType.ID_VALUE, value2.valueType());
+        Assert.assertEquals(ValueType.ID, value1.valueType());
+        Assert.assertEquals(ValueType.ID, value2.valueType());
     }
 
     @Test

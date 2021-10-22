@@ -29,7 +29,7 @@ public class LimitedLogOutput implements ComputerOutput {
 
     private static final Logger LOG = Log.logger(LimitedLogOutput.class);
     private static final String CONF_LIMIT_OUTPUT_PER_PARTITION_KEY =
-                                "output.limit_logt_output";
+                                "output.limit_log_output";
     private static final int CONF_LIMIT_OUTPUT_PER_PARTITION_DEFAULT = 10;
 
     private int partition;

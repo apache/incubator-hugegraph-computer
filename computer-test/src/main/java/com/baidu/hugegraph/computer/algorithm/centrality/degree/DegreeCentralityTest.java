@@ -32,10 +32,12 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
+import com.baidu.hugegraph.computer.core.output.hdfs.HdfsOutput;
 import com.google.common.collect.Streams;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
+
+    public static boolean isRun;
 
     @Test
     public void testRunAlgorithm() throws InterruptedException {
@@ -54,18 +56,17 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
         public void setAlgorithmParameters(Map<String, String> params) {
             params.put(ComputerOptions.OUTPUT_CLASS.name(),
                        DegreeCentralityTestOutput.class.getName());
+            params.put(ComputerOptions.OUTPUT_HDFS_USER.name(),
+                       System.getProperty("user.name"));
             super.setAlgorithmParameters(params);
         }
     }
 
-    public static class DegreeCentralityTestOutput extends LimitedLogOutput {
+    public static class DegreeCentralityTestOutput extends HdfsOutput {
 
         private String weight;
 
-        public static boolean isRun;
-
         public DegreeCentralityTestOutput() {
-            isRun = false;
         }
 
         @Override
@@ -82,8 +83,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
             isRun = true;
             DoubleValue value = vertex.value();
             if (StringUtils.isEmpty(this.weight)) {
-                Assert.assertEquals(vertex.numEdges(),
-                                    value.value(), 0.000001);
+                Assert.assertEquals(vertex.numEdges(), value.value(), 0.000001);
             } else {
                 Iterator<Edge> edges = vertex.edges().iterator();
                 double totalValue = Streams.stream(edges).map(

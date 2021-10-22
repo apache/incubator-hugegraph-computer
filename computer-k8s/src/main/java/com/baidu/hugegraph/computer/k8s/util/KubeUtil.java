@@ -99,7 +99,7 @@ public class KubeUtil {
     }
 
     public static String crName(String jobId) {
-        return jobId.toLowerCase();
+        return jobId.toLowerCase().replaceAll("_", "-");
     }
 
     public static String genJobId(String algorithmName) {

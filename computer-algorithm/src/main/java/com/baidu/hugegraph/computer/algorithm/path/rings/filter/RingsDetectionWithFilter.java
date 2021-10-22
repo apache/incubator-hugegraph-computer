@@ -31,11 +31,11 @@ import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
 public class RingsDetectionWithFilter implements
-                                      Computation<RingsDetectionValue> {
+                                      Computation<RingsDetectionMessage> {
 
     public static final String OPTION_FILTER = "rings.property_filter";
 
-    private SpreadFilter filter;
+    private RingsDetectionSpreadFilter filter;
 
     @Override
     public String name() {
@@ -49,7 +49,8 @@ public class RingsDetectionWithFilter implements
 
     @Override
     public void init(Config config) {
-        this.filter = new SpreadFilter(config.getString(OPTION_FILTER, "{}"));
+        this.filter = new RingsDetectionSpreadFilter(
+                          config.getString(OPTION_FILTER, "{}"));
     }
 
     @Override
@@ -59,7 +60,7 @@ public class RingsDetectionWithFilter implements
             return;
         }
 
-        RingsDetectionValue message = new RingsDetectionValue();
+        RingsDetectionMessage message = new RingsDetectionMessage();
         message.addPath(vertex);
         for (Edge edge : vertex.edges()) {
             if (this.filter.filter(edge)) {
@@ -71,13 +72,13 @@ public class RingsDetectionWithFilter implements
 
     @Override
     public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<RingsDetectionValue> messages) {
+                        Iterator<RingsDetectionMessage> messages) {
         boolean halt = true;
         if (this.filter.filter(vertex)) {
             Id vertexId = vertex.id();
             while (messages.hasNext()) {
                 halt = false;
-                RingsDetectionValue message = messages.next();
+                RingsDetectionMessage message = messages.next();
                 IdList path = message.path();
                 if (vertexId.equals(path.get(0))) {
                     // Use the smallest vertex record ring

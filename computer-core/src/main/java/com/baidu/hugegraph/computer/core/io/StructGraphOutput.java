@@ -72,11 +72,11 @@ public abstract class StructGraphOutput implements GraphWritebackOutput {
 
     public void writeValue(Value<?> value) throws IOException {
         switch (value.valueType()) {
-            case ID_VALUE:
+            case ID:
                 this.writeIdValue((Id) value);
                 break;
-            case ID_VALUE_LIST:
-            case ID_VALUE_LIST_LIST:
+            case ID_LIST:
+            case ID_LIST_LIST:
             case LIST_VALUE:
                 this.writeListValue((ListValue<?>) value);
                 break;

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
@@ -33,7 +34,7 @@ import com.google.common.collect.ImmutableMap;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
 
-public class SpreadFilter {
+public class RingsDetectionSpreadFilter {
 
     private static final String ALL = "*";
     private static final String MESSAGE = "$message";
@@ -43,8 +44,9 @@ public class SpreadFilter {
     private final Map<String, Expression> vertexFilter;
     private final Map<String, Expression> edgeFilter;
 
-    public SpreadFilter(String describe) {
-        FilterDescribe filter = FilterDescribe.of(describe);
+    public RingsDetectionSpreadFilter(String describe) {
+        RingsDetectionFilterDescribe filter =
+                                     RingsDetectionFilterDescribe.of(describe);
 
         this.vertexFilter = new HashMap<>();
         this.edgeFilter = new HashMap<>();
@@ -54,8 +56,8 @@ public class SpreadFilter {
     }
 
     private void init(Map<String, Expression> filter,
-                      List<FilterDescribe.DescribeItem> describes) {
-        for (FilterDescribe.DescribeItem describe : describes) {
+                      List<PropertyFilterDescribe> describes) {
+        for (PropertyFilterDescribe describe : describes) {
             String labelName = describe.label();
             Expression expression = AviatorEvaluator.compile(
                                                      describe.propertyFilter());
@@ -96,7 +98,7 @@ public class SpreadFilter {
         return filter(params, expressions);
     }
 
-    public boolean filter(Edge edge, RingsDetectionValue message) {
+    public boolean filter(Edge edge, RingsDetectionMessage message) {
         String label = edge.label();
         List<Expression> expressions = expressions(this.edgeFilter, label);
 

@@ -19,10 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.io;
 
-import static com.baidu.hugegraph.computer.core.common.Constants.UINT16_MAX;
-
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
 import com.baidu.hugegraph.util.E;
 
@@ -207,9 +206,9 @@ public class OptimizedBytesOutput implements BytesOutput {
     }
 
     private void writeBytes(byte[] bytes) throws IOException {
-        E.checkArgument(bytes.length <= UINT16_MAX,
+        E.checkArgument(bytes.length <= Constants.UINT16_MAX,
                         "The max length of bytes is %s, but got %s",
-                        UINT16_MAX, bytes.length);
+                        Constants.UINT16_MAX, bytes.length);
         this.writeVInt(bytes.length);
         this.write(bytes);
     }

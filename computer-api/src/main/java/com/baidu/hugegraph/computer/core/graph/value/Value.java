@@ -54,6 +54,10 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
         }
     }
 
+    default boolean isNumber() {
+        return false;
+    }
+
     /**
      * @return value of this object
      */

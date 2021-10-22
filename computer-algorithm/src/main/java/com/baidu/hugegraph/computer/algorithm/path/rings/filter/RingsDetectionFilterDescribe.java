@@ -23,21 +23,23 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 
-public class FilterDescribe {
+public class RingsDetectionFilterDescribe {
 
-    private final List<DescribeItem> vertexFilter;
-    private final List<DescribeItem> edgeFilter;
+    private final List<PropertyFilterDescribe> vertexFilter;
+    private final List<PropertyFilterDescribe> edgeFilter;
 
     @JsonCreator
-    private FilterDescribe(@JsonProperty("vertex_filter")
-                           List<DescribeItem> vertexFilter,
-                           @JsonProperty("edge_filter")
-                           List<DescribeItem> edgeFilter) {
+    private RingsDetectionFilterDescribe(
+            @JsonProperty("vertex_filter")
+            List<PropertyFilterDescribe> vertexFilter,
+            @JsonProperty("edge_filter")
+            List<PropertyFilterDescribe> edgeFilter) {
         this.vertexFilter = CollectionUtils.isEmpty(vertexFilter) ?
                             ImmutableList.of() :
                             ImmutableList.copyOf(vertexFilter);
@@ -46,40 +48,15 @@ public class FilterDescribe {
                           ImmutableList.copyOf(edgeFilter);
     }
 
-    public static FilterDescribe of(String describe) {
-        return JsonUtil.fromJson(describe, FilterDescribe.class);
+    public static RingsDetectionFilterDescribe of(String describe) {
+        return JsonUtil.fromJson(describe, RingsDetectionFilterDescribe.class);
     }
 
-    public List<DescribeItem> vertexFilter() {
+    public List<PropertyFilterDescribe> vertexFilter() {
         return this.vertexFilter;
     }
 
-    public List<DescribeItem> edgeFilter() {
+    public List<PropertyFilterDescribe> edgeFilter() {
         return this.edgeFilter;
-    }
-
-    public static class DescribeItem {
-
-        private final String label;
-        private final String propertyFilter;
-
-        @JsonCreator
-        private DescribeItem(@JsonProperty(value = "label",
-                                           required = true)
-                             String label,
-                             @JsonProperty(value = "property_filter",
-                                           required = true)
-                             String propertyFilter) {
-            this.label = label;
-            this.propertyFilter = propertyFilter;
-        }
-
-        public String label() {
-            return this.label;
-        }
-
-        public String propertyFilter() {
-            return this.propertyFilter;
-        }
     }
 }

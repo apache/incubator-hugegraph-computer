@@ -23,27 +23,41 @@ import java.util.Objects;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
 public class DefaultEdge implements Edge {
 
+    private Id id;
     private String label;
     private String name;
     private Id targetId;
     private Properties properties;
 
     public DefaultEdge(GraphFactory graphFactory) {
-        this(graphFactory, Constants.EMPTY_STR, Constants.EMPTY_STR, null);
+        this(graphFactory, BytesId.of(Constants.EMPTY_STR), Constants.EMPTY_STR,
+             Constants.EMPTY_STR, null);
     }
 
-    public DefaultEdge(GraphFactory graphFactory, String label,
+    public DefaultEdge(GraphFactory graphFactory, Id id, String label,
                        String name, Id targetId) {
+        this.id = id;
         this.label = label;
         this.name = name;
         this.targetId = targetId;
         this.properties = graphFactory.createProperties();
+    }
+
+    @Override
+    public Id id() {
+        return this.id;
+    }
+
+    @Override
+    public void id(Id id) {
+        this.id = id;
     }
 
     @Override
@@ -100,7 +114,8 @@ public class DefaultEdge implements Edge {
             return false;
         }
         DefaultEdge other = (DefaultEdge) obj;
-        return Objects.equals(this.label, other.label) &&
+        return Objects.equals(this.id, other.id) &&
+               Objects.equals(this.label, other.label) &&
                Objects.equals(this.targetId, other.targetId) &&
                Objects.equals(this.name, other.name) &&
                this.properties.equals(other.properties);

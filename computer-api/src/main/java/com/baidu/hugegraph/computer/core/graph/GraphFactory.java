@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.graph;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
@@ -32,6 +33,8 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public interface GraphFactory {
+
+    Id createId();
 
     Id createId(long id);
 
@@ -62,6 +65,10 @@ public interface GraphFactory {
     <V> List<V> createList();
 
     <V> List<V> createList(int capacity);
+
+    <V> Set<V> createSet();
+
+    <V> Set<V> createSet(int size);
 
     <K, V> Map<K, V> createMap();
 

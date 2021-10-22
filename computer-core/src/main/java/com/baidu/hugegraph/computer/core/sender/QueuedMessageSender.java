@@ -143,6 +143,8 @@ public class QueuedMessageSender implements MessageSender {
                      * until any queue is available
                      */
                     if (emptyQueueCount >= channelCount) {
+                        LOG.info("The send executor was blocked " +
+                                 "to wait any queue not empty");
                         QueuedMessageSender.this.waitAnyQueueNotEmpty();
                     }
                     /*
@@ -150,6 +152,8 @@ public class QueuedMessageSender implements MessageSender {
                      * until any client is available
                      */
                     if (busyClientCount >= channelCount) {
+                        LOG.info("The send executor was blocked " +
+                                 "to wait any client not busy");
                         QueuedMessageSender.this.waitAnyClientNotBusy();
                     }
                 } catch (InterruptedException e) {
@@ -263,10 +267,10 @@ public class QueuedMessageSender implements MessageSender {
                 assert future != null;
 
                 if (e != null) {
-                    LOG.info("Failed to start session connected to {}", this);
+                    LOG.debug("Failed to start session connected to {}", this);
                     future.completeExceptionally(e);
                 } else {
-                    LOG.info("Start session connected to {}", this);
+                    LOG.debug("Start session connected to {}", this);
                     future.complete(null);
                 }
             });
@@ -278,10 +282,10 @@ public class QueuedMessageSender implements MessageSender {
                 assert future != null;
 
                 if (e != null) {
-                    LOG.info("Failed to finish session connected to {}", this);
+                    LOG.debug("Failed to finish session connected to {}", this);
                     future.completeExceptionally(e);
                 } else {
-                    LOG.info("Finish session connected to {}", this);
+                    LOG.debug("Finish session connected to {}", this);
                     future.complete(null);
                 }
             });

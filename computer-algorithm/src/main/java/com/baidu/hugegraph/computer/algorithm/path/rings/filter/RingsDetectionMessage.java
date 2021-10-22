@@ -21,8 +21,6 @@ package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
 import java.io.IOException;
 
-import javax.ws.rs.NotSupportedException;
-
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
@@ -34,12 +32,12 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class RingsDetectionValue implements Value<RingsDetectionValue> {
+public class RingsDetectionMessage implements Value<RingsDetectionMessage> {
 
     private final IdList path;
     private Properties walkEdgeProps;
 
-    public RingsDetectionValue() {
+    public RingsDetectionMessage() {
         GraphFactory graphFactory = ComputerContext.instance().graphFactory();
         this.path = new IdList();
         this.walkEdgeProps = new DefaultProperties(graphFactory);
@@ -51,13 +49,13 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     }
 
     @Override
-    public void assign(Value<RingsDetectionValue> other) {
-        throw new NotSupportedException();
+    public void assign(Value<RingsDetectionMessage> other) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public int compareTo(RingsDetectionValue o) {
-        throw new NotSupportedException();
+    public int compareTo(RingsDetectionMessage o) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -73,8 +71,8 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     }
 
     @Override
-    public RingsDetectionValue copy() {
-        throw new NotSupportedException();
+    public RingsDetectionMessage copy() {
+        throw new UnsupportedOperationException();
     }
 
     public IdList path() {
@@ -95,6 +93,6 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
 
     @Override
     public Object object() {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 }

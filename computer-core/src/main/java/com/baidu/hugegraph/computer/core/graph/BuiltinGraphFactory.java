@@ -21,15 +21,15 @@ package com.baidu.hugegraph.computer.core.graph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
@@ -43,9 +43,11 @@ import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.computer.core.graph.value.MapValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.value.StringValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -55,10 +57,11 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public final class BuiltinGraphFactory implements GraphFactory {
 
-    private final Config config;
+    private static final int AVERAGE_DEGREE = 10;
 
-    public BuiltinGraphFactory(Config config) {
-        this.config = config;
+    @Override
+    public Id createId() {
+        return new BytesId();
     }
 
     @Override
@@ -94,9 +97,7 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Edges createEdges() {
-        int averageDegree = this.config.get(
-                            ComputerOptions.VERTEX_AVERAGE_DEGREE);
-        return createEdges(averageDegree);
+        return this.createEdges(AVERAGE_DEGREE);
     }
 
     @Override
@@ -111,18 +112,21 @@ public final class BuiltinGraphFactory implements GraphFactory {
 
     @Override
     public Edge createEdge(Id targetId) {
-        return new DefaultEdge(this, Constants.EMPTY_STR,
-                               Constants.EMPTY_STR, targetId);
+        return new DefaultEdge(this, BytesId.of(Constants.EMPTY_STR),
+                               Constants.EMPTY_STR, Constants.EMPTY_STR,
+                               targetId);
     }
 
     @Override
     public Edge createEdge(String label, Id targetId) {
-        return new DefaultEdge(this, label, Constants.EMPTY_STR, targetId);
+        return new DefaultEdge(this, BytesId.of(Constants.EMPTY_STR),
+                               label, Constants.EMPTY_STR, targetId);
     }
 
     @Override
     public Edge createEdge(String label, String name, Id targetId) {
-        return new DefaultEdge(this, label, name, targetId);
+        return new DefaultEdge(this, BytesId.of(Constants.EMPTY_STR),
+                               label, name, targetId);
     }
 
     @Override
@@ -133,6 +137,16 @@ public final class BuiltinGraphFactory implements GraphFactory {
     @Override
     public <V> List<V> createList(int capacity) {
         return new ArrayList<>(capacity);
+    }
+
+    @Override
+    public <V> Set<V> createSet() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public <V> Set<V> createSet(int capacity) {
+        return new HashSet<>(capacity);
     }
 
     @Override
@@ -167,14 +181,18 @@ public final class BuiltinGraphFactory implements GraphFactory {
                 return new FloatValue();
             case DOUBLE:
                 return new DoubleValue();
-            case ID_VALUE:
+            case ID:
                 return new BytesId();
-            case ID_VALUE_LIST:
+            case ID_LIST:
                 return new IdList();
-            case ID_VALUE_LIST_LIST:
+            case ID_LIST_LIST:
                 return new IdListList();
             case LIST_VALUE:
                 return new ListValue<>();
+            case ID_SET:
+                return new IdSet();
+            case MAP_VALUE:
+                return new MapValue<>();
             case STRING:
                 return new StringValue();
             default:
