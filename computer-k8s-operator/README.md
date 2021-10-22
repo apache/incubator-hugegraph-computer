@@ -70,7 +70,7 @@ NAME               JOBID              JOBSTATUS
 pagerank-sample    pagerank-sample    RUNNING
 ```
 
-## Show logs of node of running
+## Show log of running nodes
 
 ```bash
 # Show the master log
@@ -80,9 +80,9 @@ kubectl logs -l component=pagerank-sample-master -n hugegraph-computer-system
 kubectl logs -l component=pagerank-sample-worker -n hugegraph-computer-system
 ```
 
-## Show diagnostics log of a job
+## Show diagnostic log of a job
 
-> NOTE: diagnostics log exist only when the job fails, and it will only be saved for one hour.
+> NOTE: diagnostic log exist only when the job fails, and it will only be saved for one hour.
 
 ```bash
 kubectl get event --field-selector reason=ComputerJobFailed --field-selector involvedObject.name=pagerank-sample -n hugegraph-computer-system
