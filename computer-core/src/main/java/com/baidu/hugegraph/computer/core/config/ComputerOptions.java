@@ -162,7 +162,7 @@ public class ComputerOptions extends OptionHolder {
                     "targetId to identify it.",
                     allowValues("SINGLE", "SINGLE_PER_LABEL", "MULTIPLE"),
                     EdgeFrequency::valueOf,
-                    "SINGLE"
+                    "MULTIPLY"
             );
 
     public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
