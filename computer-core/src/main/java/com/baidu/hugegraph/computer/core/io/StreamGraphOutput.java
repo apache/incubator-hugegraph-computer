@@ -67,6 +67,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
             for (Edge edge : vertex.edges()) {
                 // Only use targetId as subKey, use properties as subValue
                 BooleanValue inv = edge.property("inv");
+                edge.properties().remove("inv");
                 byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 writer.writeSubKv(out -> {
                     out.writeByte(binv);
@@ -79,6 +80,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
         } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
             for (Edge edge : vertex.edges()) {
                 BooleanValue inv = edge.property("inv");
+                edge.properties().remove("inv");
                 byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 // Use label + targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
@@ -97,6 +99,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                  * use properties as subValue
                  */
                 BooleanValue inv = edge.property("inv");
+                edge.properties().remove("inv");
                 byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 writer.writeSubKv(out -> {
                     out.writeByte(binv);
@@ -142,12 +145,10 @@ public class StreamGraphOutput implements GraphComputeOutput {
                                        Properties properties)
                                  throws IOException {
         Map<String, Value<?>> keyValues = properties.get();
-        out.writeInt(keyValues.size() - 1);
+        out.writeInt(keyValues.size());
         for (Map.Entry<String, Value<?>> entry : keyValues.entrySet()) {
-            if (!entry.getKey().equals("inv")) {
-                out.writeUTF(entry.getKey());
-                this.writeValue(out, entry.getValue());
-            }
+            out.writeUTF(entry.getKey());
+            this.writeValue(out, entry.getValue());
         }
     }
 
