@@ -21,15 +21,10 @@ package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
 
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class PageRankOutput extends HugeOutput {
-
-    @Override
-    public String name() {
-        return "page_rank";
-    }
+public class PageRankOutput extends HugeGraphOutput {
 
     @Override
     public void prepareSchema() {
@@ -41,13 +36,7 @@ public class PageRankOutput extends HugeOutput {
     }
 
     @Override
-    public com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(
-                                                      Vertex vertex) {
-        com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                new com.baidu.hugegraph.structure.graph.Vertex(null);
-        hugeVertex.id(vertex.id().asObject());
-        hugeVertex.property(this.name(),
-                            ((DoubleValue) vertex.value()).value());
-        return hugeVertex;
+    public Object value(Vertex vertex) {
+        return ((DoubleValue) vertex.value()).value();
     }
 }

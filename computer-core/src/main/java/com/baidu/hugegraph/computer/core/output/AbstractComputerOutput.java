@@ -19,41 +19,37 @@
 
 package com.baidu.hugegraph.computer.core.output;
 
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.worker.Computation;
+import com.baidu.hugegraph.util.Log;
 
-/**
- * Computer output is used to output computer results. There is an output object
- * for every partition.
- */
-public interface ComputerOutput {
+public abstract class AbstractComputerOutput implements ComputerOutput {
 
-    /**
-     * Initialize the output. Create connection to target output system.
-     */
-    void init(Config config, int partition);
+    private static final Logger LOG = Log.logger(ComputerOutput.class);
 
-    /**
-     * For each vertex in partition, this method is called regardless
-     * vertex's status.
-     */
-    void write(Vertex vertex);
+    private String name;
+    private int partition;
 
-    /**
-     * Merge output files of multiple partitions if applicable.
-     */
-    default void mergePartitions(Config config) {
-        // pass
+    @Override
+    public void init(Config config, int partition) {
+        Computation<?> computation = config.createObject(
+                                     ComputerOptions.WORKER_COMPUTATION_CLASS);
+        this.name = computation.name();
+        this.partition = partition;
+
+        LOG.info("Start write back partition {} for {}",
+                 this.partition(), this.name());
     }
 
-    /**
-     * Close the connection to target output system. Commit if target output
-     * required.
-     */
-    void close();
+    @Override
+    public String name() {
+        return this.name;
+    }
 
-    /**
-     * The name of output property.
-     */
-    String name();
+    public int partition() {
+        return this.partition;
+    }
 }

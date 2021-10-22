@@ -20,15 +20,10 @@
 package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class TriangleCountOutput extends HugeOutput {
-
-    @Override
-    public String name() {
-        return TriangleCount.ALGORITHM_NAME;
-    }
+public class TriangleCountOutput extends HugeGraphOutput {
 
     @Override
     public void prepareSchema() {
@@ -40,13 +35,7 @@ public class TriangleCountOutput extends HugeOutput {
     }
 
     @Override
-    public com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(
-                                                      Vertex vertex) {
-        com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                new com.baidu.hugegraph.structure.graph.Vertex(null);
-        hugeVertex.id(vertex.id().asObject());
-        long value = ((TriangleCountValue) vertex.value()).count();
-        hugeVertex.property(this.name(), value);
-        return hugeVertex;
+    public Object value(Vertex vertex) {
+        return ((TriangleCountValue) vertex.value()).count();
     }
 }
