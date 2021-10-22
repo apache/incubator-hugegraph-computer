@@ -143,6 +143,7 @@ public class MasterService implements Closeable {
      * Stop the the master service. Stop the managers created in
      * {@link #init(Config)}.
      */
+    @Override
     public void close() {
         this.checkInited();
         if (this.closed) {
@@ -315,12 +316,12 @@ public class MasterService implements Closeable {
         if (!masterContinue) {
             return true;
         }
-        if (context.superstep() == this.maxSuperStep - 1) {
+        if (context.superstep() >= this.maxSuperStep - 1) {
             return true;
         }
-        long notFinishedVertexCount = context.totalVertexCount() -
-                                      context.finishedVertexCount();
-        return context.messageCount() == 0L && notFinishedVertexCount == 0L;
+        long activeVertexCount = context.totalVertexCount() -
+                                 context.finishedVertexCount();
+        return context.messageCount() == 0L && activeVertexCount == 0L;
     }
 
     /**
@@ -451,12 +452,12 @@ public class MasterService implements Closeable {
 
         @Override
         public long messageCount() {
-            return this.superstepStat.messageCount();
+            return this.superstepStat.messageSendCount();
         }
 
         @Override
         public long messageBytes() {
-            return this.superstepStat.messageBytes();
+            return this.superstepStat.messageSendBytes();
         }
 
         @Override

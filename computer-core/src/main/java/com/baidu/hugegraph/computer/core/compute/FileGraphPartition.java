@@ -121,7 +121,7 @@ public class FileGraphPartition<M extends Value<M>> {
         }
 
         return new PartitionStat(this.partition, this.vertexCount,
-                                 this.edgeCount);
+                                 this.edgeCount, 0L);
     }
 
     protected PartitionStat compute0(ComputationContext context,
@@ -155,7 +155,7 @@ public class FileGraphPartition<M extends Value<M>> {
         }
         return new PartitionStat(this.partition, this.vertexCount,
                                  this.edgeCount,
-                                 this.vertexCount - activeVertexCount, 0L, 0L);
+                                 this.vertexCount - activeVertexCount);
     }
 
     protected PartitionStat compute(ComputationContext context,
@@ -213,7 +213,7 @@ public class FileGraphPartition<M extends Value<M>> {
         }
         return new PartitionStat(this.partition, this.vertexCount,
                                  this.edgeCount,
-                                 this.vertexCount - activeVertexCount, 0L, 0L);
+                                 this.vertexCount - activeVertexCount);
     }
 
     protected PartitionStat output() {
@@ -244,7 +244,7 @@ public class FileGraphPartition<M extends Value<M>> {
         }
         output.close();
         return new PartitionStat(this.partition, this.vertexCount,
-                                 this.edgeCount);
+                                 this.edgeCount, 0L);
     }
 
     /**

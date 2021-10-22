@@ -46,6 +46,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.receiver.MessageStat;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.util.Log;
 
@@ -153,20 +154,28 @@ public class MessageSendManager implements Manager {
      */
     public void finishSend(MessageType type) {
         Map<Integer, WriteBuffers> all = this.buffers.all();
-        this.sortLastBatchBuffer(all, type);
+        MessageStat stat = this.sortAndSendLastBuffer(all, type);
 
         Set<Integer> workerIds = all.keySet().stream()
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
         this.sendControlMessageToWorkers(workerIds, MessageType.FINISH);
-        LOG.info("Finish sending message(type={})", type);
+        LOG.info("Finish sending message(type={},count={},bytes={})",
+                 type, stat.messageCount(), stat.messageBytes());
+    }
+
+    public MessageStat messageStat(int partitionId) {
+        return this.buffers.get(partitionId).messageWritten();
     }
 
     private WriteBuffers sortIfTargetBufferIsFull(Id id, MessageType type) {
         int partitionId = this.partitioner.partitionId(id);
         WriteBuffers buffer = this.buffers.get(partitionId);
         if (buffer.reachThreshold()) {
-            // After switch, the buffer can be continued to write
+            /*
+             * Switch buffers if writing buffer is full,
+             * After switch, the buffer can be continued to write.
+             */
             buffer.switchForSorting();
             this.sortThenSend(partitionId, type, buffer);
         }
@@ -198,8 +207,9 @@ public class MessageSendManager implements Manager {
         });
     }
 
-    private void sortLastBatchBuffer(Map<Integer, WriteBuffers> all,
-                                     MessageType type) {
+    private MessageStat sortAndSendLastBuffer(Map<Integer, WriteBuffers> all,
+                                              MessageType type) {
+        MessageStat messageWritten = new MessageStat();
         List<Future<?>> futures = new ArrayList<>(all.size());
         // Sort and send the last buffer
         for (Map.Entry<Integer, WriteBuffers> entry : all.entrySet()) {
@@ -213,6 +223,8 @@ public class MessageSendManager implements Manager {
                 buffer.prepareSorting();
                 futures.add(this.sortThenSend(partitionId, type, buffer));
             }
+            // Record total message count & bytes
+            messageWritten.increase(buffer.messageWritten());
         }
         this.checkException();
 
@@ -228,6 +240,8 @@ public class MessageSendManager implements Manager {
             throw new ComputerException("Failed to wait for sorting task " +
                                         "to finished", e);
         }
+
+        return messageWritten;
     }
 
     private void sendControlMessageToWorkers(Set<Integer> workerIds,
