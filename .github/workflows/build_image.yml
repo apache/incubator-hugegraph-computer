@@ -3,6 +3,9 @@ name: Package hugegraph-computer image
 on:
   workflow_dispatch:
     inputs:
+      repository_branch:
+        required: true
+        default: 'master'
       framework_image_url:
         required: true
         default: 'hugegraph-computer:0.1.0'
@@ -40,6 +43,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          ref: ${{ github.event.inputs.repository_branch }}
           fetch-depth: 2
 
       - name: Replace jar
