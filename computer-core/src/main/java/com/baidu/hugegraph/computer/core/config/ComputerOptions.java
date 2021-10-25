@@ -841,12 +841,4 @@ public class ComputerOptions extends OptionHolder {
                     "consider ban it in future.",
                     ""
             );
-
-    public static final ConfigOption<Boolean> VERTEX_WITH_EDGES_BOTHDIRECTION =
-            new ConfigOption<>(
-                    "input.vertex_with_edges_bothdirection",
-                    "add in edge to vertex",
-                    allowValues(true, false),
-                    false
-            );
 }
