@@ -840,6 +840,7 @@ public class ComputerOptions extends OptionHolder {
                     "basic auth, should only used in test environment, " +
                     "consider ban it in future.",
                     ""
+            );
 
     public static final ConfigOption<Boolean> VERTEX_WITH_EDGES_BOTHDIRECTION =
             new ConfigOption<>(
