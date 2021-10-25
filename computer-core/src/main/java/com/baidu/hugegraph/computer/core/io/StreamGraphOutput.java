@@ -67,12 +67,12 @@ public class StreamGraphOutput implements GraphComputeOutput {
             for (Edge edge : vertex.edges()) {
                 // Only use targetId as subKey, use properties as subValue
                 BooleanValue inv = edge.property("inv");
+                edge.properties().remove("inv");
                 byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 writer.writeSubKv(out -> {
                     out.writeByte(binv);
                     this.writeId(out, edge.targetId());
                 }, out -> {
-                    this.writeId(out, edge.id());
                     this.writeLabel(out, edge.label());
                     this.writeProperties(out, edge.properties());
                 });
@@ -80,6 +80,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
         } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
             for (Edge edge : vertex.edges()) {
                 BooleanValue inv = edge.property("inv");
+                edge.properties().remove("inv");
                 byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 // Use label + targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
@@ -87,7 +88,6 @@ public class StreamGraphOutput implements GraphComputeOutput {
                     this.writeLabel(out, edge.label());
                     this.writeId(out, edge.targetId());
                 }, out -> {
-                    this.writeId(out, edge.id());
                     this.writeProperties(out, edge.properties());
                 });
             }
@@ -99,6 +99,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                  * use properties as subValue
                  */
                 BooleanValue inv = edge.property("inv");
+                edge.properties().remove("inv");
                 byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 writer.writeSubKv(out -> {
                     out.writeByte(binv);
@@ -106,7 +107,6 @@ public class StreamGraphOutput implements GraphComputeOutput {
                     this.writeLabel(out, edge.name());
                     this.writeId(out, edge.targetId());
                 }, out -> {
-                    this.writeId(out, edge.id());
                     this.writeProperties(out, edge.properties());
                 });
             }
@@ -141,7 +141,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
         value.write(out);
     }
 
-    private void writeProperties(RandomAccessOutput out, Properties properties)
+    private void writeProperties(RandomAccessOutput out, 
+                                       Properties properties)
                                  throws IOException {
         Map<String, Value<?>> keyValues = properties.get();
         out.writeInt(keyValues.size() - 1);

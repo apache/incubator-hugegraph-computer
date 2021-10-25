@@ -72,13 +72,20 @@ public class DefaultProperties implements Properties {
     }
 
     @Override
+    public void remove(String key) {
+        this.keyValues.remove(key);
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.keyValues.clear();
         int size = in.readInt();
         for (int i = 0; i < size; i++) {
             String key = in.readUTF();
+            Byte byteType = in.readByte();
+ 
             ValueType valueType = SerialEnum.fromCode(ValueType.class,
-                                                      in.readByte());
+                                                      byteType);
             Value<?> value = this.graphFactory.createValue(valueType);
             value.read(in);
             this.keyValues.put(key, value);
