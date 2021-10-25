@@ -23,8 +23,9 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
+import com.baidu.hugegraph.computer.core.receiver.MessageStat;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class WorkerStatTest {
@@ -32,8 +33,8 @@ public class WorkerStatTest {
     @Test
     public void testConstructor() {
         WorkerStat workerStat1 = new WorkerStat();
-        PartitionStat stat1 = new PartitionStat(0, 1L, 2L);
-        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat stat1 = new PartitionStat(0, 1L, 2L, 0L);
+        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L);
         workerStat1.add(stat1);
         workerStat1.add(stat2);
         Assert.assertEquals(2, workerStat1.size());
@@ -47,8 +48,8 @@ public class WorkerStatTest {
     @Test
     public void testReadWrite() throws IOException {
         WorkerStat workerStat = new WorkerStat(1);
-        PartitionStat stat1 = new PartitionStat(0, 1L, 2L);
-        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat stat1 = new PartitionStat(0, 1L, 2L, 0L);
+        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L);
         workerStat.add(stat1);
         workerStat.add(stat2);
         WorkerStat stats1ReadObj = new WorkerStat();
@@ -57,8 +58,8 @@ public class WorkerStatTest {
 
     @Test
     public void testEquals() {
-        PartitionStat stat1 = new PartitionStat(0, 1L, 2L);
-        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat stat1 = new PartitionStat(0, 1L, 2L, 0L);
+        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L);
         WorkerStat workerStat1 = new WorkerStat();
         workerStat1.add(stat1);
         workerStat1.add(stat2);
@@ -76,8 +77,8 @@ public class WorkerStatTest {
 
     @Test
     public void testHashCode() {
-        PartitionStat stat1 = new PartitionStat(0, 1L, 2L);
-        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat stat1 = new PartitionStat(0, 1L, 2L, 0L);
+        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L);
         WorkerStat workerStat1 = new WorkerStat(1);
         workerStat1.add(stat1);
         workerStat1.add(stat2);
@@ -94,18 +95,24 @@ public class WorkerStatTest {
 
     @Test
     public void testToString() {
-        PartitionStat stat1 = new PartitionStat(0, 1L, 2L);
-        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat stat1 = new PartitionStat(0, 1L, 2L, 0L);
+        PartitionStat stat2 = new PartitionStat(1, 4L, 3L, 2L);
+        stat2.mergeSendMessageStat(new MessageStat(5L, 6L));
+        stat2.mergeRecvMessageStat(new MessageStat(7L, 8L));
+
         WorkerStat workerStat = new WorkerStat();
         workerStat.add(stat1);
         workerStat.add(stat2);
         String str = "WorkerStat{\"workerId\":0," +
                      "\"partitionStats\":[{\"partitionId\":0," +
                      "\"vertexCount\":1,\"edgeCount\":2,\"" +
-                     "finishedVertexCount\":0,\"messageCount\":0,\"" +
-                     "messageBytes\":0},{\"partitionId\":1,\"vertexCount\":4," +
-                     "\"edgeCount\":3,\"finishedVertexCount\":2,\"" +
-                     "messageCount\":5,\"messageBytes\":6}]}";
+                     "finishedVertexCount\":0," +
+                     "\"messageSendCount\":0,\"messageSendBytes\":0," +
+                     "\"messageRecvCount\":0,\"messageRecvBytes\":0}," +
+                     "{\"partitionId\":1,\"vertexCount\":4," +
+                     "\"edgeCount\":3,\"finishedVertexCount\":2," +
+                     "\"messageSendCount\":5,\"messageSendBytes\":6," +
+                     "\"messageRecvCount\":7,\"messageRecvBytes\":8}]}";
         Assert.assertEquals(str, workerStat.toString());
     }
 }

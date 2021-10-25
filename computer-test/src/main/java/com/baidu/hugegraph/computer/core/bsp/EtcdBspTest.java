@@ -28,13 +28,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.common.ContainerInfo;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class EtcdBspTest extends UnitTestBase {
@@ -98,8 +98,8 @@ public class EtcdBspTest extends UnitTestBase {
     public void testInput() throws InterruptedException {
         // If both two threads reach countDown, it means no exception is thrown.
         WorkerStat workerStat = new WorkerStat();
-        workerStat.add(new PartitionStat(0, 100L, 200L));
-        workerStat.add(new PartitionStat(1, 200L, 300L));
+        workerStat.add(new PartitionStat(0, 100L, 200L, 0L));
+        workerStat.add(new PartitionStat(1, 200L, 300L, 0L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
             this.bsp4Master.masterResumeDone(-1);
@@ -126,8 +126,8 @@ public class EtcdBspTest extends UnitTestBase {
     public void testIterate() throws InterruptedException {
         // If both two threads reach countDown, it means no exception is thrown.
         WorkerStat workerStat = new WorkerStat();
-        workerStat.add(new PartitionStat(0, 100L, 200L));
-        workerStat.add(new PartitionStat(1, 200L, 300L));
+        workerStat.add(new PartitionStat(0, 100L, 200L, 0L));
+        workerStat.add(new PartitionStat(1, 200L, 300L, 0L));
         CountDownLatch countDownLatch = new CountDownLatch(2);
         this.executorService.submit(() -> {
             for (int i = 0; i < this.maxSuperStep; i++) {
@@ -156,10 +156,8 @@ public class EtcdBspTest extends UnitTestBase {
                 this.bsp4Worker.waitMasterStepPrepareDone(superstep);
                 this.bsp4Worker.workerStepComputeDone(superstep);
                 this.bsp4Worker.waitMasterStepComputeDone(superstep);
-                PartitionStat stat1 = new PartitionStat(0, 100L, 200L,
-                                                        50L, 60L, 70L);
-                PartitionStat stat2 = new PartitionStat(1, 200L, 300L,
-                                                        80L, 90L, 100);
+                PartitionStat stat1 = new PartitionStat(0, 100L, 200L, 50L);
+                PartitionStat stat2 = new PartitionStat(1, 200L, 300L, 80L);
                 WorkerStat workerStatInSuperstep = new WorkerStat();
                 workerStatInSuperstep.add(stat1);
                 workerStatInSuperstep.add(stat2);

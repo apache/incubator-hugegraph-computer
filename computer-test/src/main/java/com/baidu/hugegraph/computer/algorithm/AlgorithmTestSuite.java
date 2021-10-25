@@ -50,5 +50,7 @@ public class AlgorithmTestSuite {
         OptionSpace.register("computer",
                              "com.baidu.hugegraph.computer.core.config." +
                              "ComputerOptions");
+        OptionSpace.register("computer-rpc",
+                             "com.baidu.hugegraph.config.RpcOptions");
     }
 }

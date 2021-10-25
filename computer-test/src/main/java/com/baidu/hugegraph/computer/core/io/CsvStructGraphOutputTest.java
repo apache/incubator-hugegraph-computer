@@ -68,6 +68,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             output.writeVertex(vertex);
             dos.close();
 
+            @SuppressWarnings("deprecation")
             String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,999" + System.lineSeparator(), text);
         } finally {
@@ -103,6 +104,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             output.writeVertex(vertex);
             dos.close();
 
+            @SuppressWarnings("deprecation")
             String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[998,999],[{200,\"knows\",\"\"}," +
                                 "{300,\"watch\",\"1111\"}]" +
@@ -152,6 +154,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
             output.writeVertex(vertex);
             dos.close();
 
+            @SuppressWarnings("deprecation")
             String text = FileUtils.readFileToString(file);
             Assert.assertEquals("100,[[66],[998,999]],{true,127,-0.01,16383," +
                                 "100,0.1,1000000,10000000000}" +
