@@ -118,6 +118,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
                             .put("F", 1.45)
                             .build();
 
+        @Override
         public Vertex constructHugeVertex(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Vertex result = super.constructHugeVertex(vertex);
@@ -151,6 +152,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
                             .put("F", 3.333333333333333)
                             .build();
 
+        @Override
         public Vertex constructHugeVertex(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Vertex result = super.constructHugeVertex(vertex);

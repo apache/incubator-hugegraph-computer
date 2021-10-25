@@ -130,6 +130,7 @@ public class BetweennessCentralityTest extends AlgorithmTestBase {
     public static class BetweennessCentralityTestOutput
                   extends BetweennessCentralityOutput {
 
+        @Override
         public Vertex constructHugeVertex(
                 com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Vertex result = super.constructHugeVertex(vertex);
