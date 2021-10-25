@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
-import com.baidu.hugegraph.computer.core.receiver.RecvMessageStat;
+import com.baidu.hugegraph.computer.core.receiver.MessageStat;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
@@ -151,13 +151,21 @@ public class ComputeManager<M extends Value<M>> {
         }
         this.sendManager.finishSend(MessageType.MSG);
         // After compute and send finish signal.
-        Map<Integer, RecvMessageStat> recvStats =
-                                      this.recvManager.recvMessageStats();
+        Map<Integer, MessageStat> recvStats = this.recvManager.messageStats();
         for (Map.Entry<Integer, PartitionStat> entry :
                                                partitionStats.entrySet()) {
-            PartitionStat partitionStat = entry.getValue();
-            partitionStat.merge(recvStats.get(partitionStat.partitionId()));
-            workerStat.add(partitionStat);
+            PartitionStat partStat = entry.getValue();
+            int partitionId = partStat.partitionId();
+
+            MessageStat sendStat = this.sendManager.messageStat(partitionId);
+            partStat.mergeSendMessageStat(sendStat);
+
+            MessageStat recvStat = recvStats.get(partitionId);
+            if (recvStat != null) {
+                partStat.mergeRecvMessageStat(recvStat);
+            }
+
+            workerStat.add(partStat);
         }
         return workerStat;
     }
