@@ -59,7 +59,8 @@ public class IntValue extends Number implements Value<IntValue> {
         this.value = value;
     }
 
-    public int value() {
+    @Override
+    public Integer value() {
         return this.value;
     }
 
@@ -119,10 +120,5 @@ public class IntValue extends Number implements Value<IntValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }
