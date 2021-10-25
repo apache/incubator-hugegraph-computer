@@ -814,10 +814,7 @@ public class ComputerOptions extends OptionHolder {
                     "add in edge to vertex",
                     allowValues(true, false),
                     false
-<<<<<<< HEAD
-=======
 
->>>>>>> 157839e595641a890f513e51ca80de38ea31a7a2
     public static final ConfigOption<String> AUTH_TOKEN =
             new ConfigOption<>(
                     "hugegraph.token",
