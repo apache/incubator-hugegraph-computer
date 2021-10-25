@@ -59,7 +59,8 @@ public class LongValue extends Number implements Value<LongValue> {
         this.value = value;
     }
 
-    public long value() {
+    @Override
+    public Long value() {
         return this.value;
     }
 
@@ -124,10 +125,5 @@ public class LongValue extends Number implements Value<LongValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }

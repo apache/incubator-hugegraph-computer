@@ -56,7 +56,7 @@ public class LinksValue implements Value<LinksValue> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new NotSupportedException();
     }
 
@@ -133,7 +133,7 @@ public class LinksValue implements Value<LinksValue> {
         }
 
         @Override
-        public Object object() {
+        public Object value() {
             throw new NotSupportedException();
         }
 

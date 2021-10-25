@@ -61,5 +61,12 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
     /**
      * @return value of this object
      */
-    Object object();
+    Object value();
+
+    /**
+     * @return result string value of this object
+     */
+    default String string() {
+        return this.toString();
+    }
 }

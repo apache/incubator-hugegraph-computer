@@ -66,7 +66,7 @@ public class BetweennessValue implements Value<BetweennessValue> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new UnsupportedOperationException();
     }
 

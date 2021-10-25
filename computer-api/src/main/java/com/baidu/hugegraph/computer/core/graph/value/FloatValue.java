@@ -59,7 +59,8 @@ public class FloatValue extends Number implements Value<FloatValue> {
         this.value = value;
     }
 
-    public float value() {
+    @Override
+    public Float value() {
         return this.value;
     }
 
@@ -124,10 +125,5 @@ public class FloatValue extends Number implements Value<FloatValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }

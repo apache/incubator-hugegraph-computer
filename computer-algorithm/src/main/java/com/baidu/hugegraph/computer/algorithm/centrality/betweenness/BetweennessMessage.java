@@ -74,7 +74,7 @@ public class BetweennessMessage implements Value<BetweennessMessage> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new UnsupportedOperationException();
     }
 

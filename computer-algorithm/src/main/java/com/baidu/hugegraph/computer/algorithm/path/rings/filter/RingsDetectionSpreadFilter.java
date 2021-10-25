@@ -145,7 +145,7 @@ public class RingsDetectionSpreadFilter {
             Map<String, Object> subKv = new HashMap<>();
             Map<String, Value<?>> param = entry.getValue();
             for (Map.Entry<String, Value<?>> paramItem : param.entrySet()) {
-                subKv.put(paramItem.getKey(), paramItem.getValue().object());
+                subKv.put(paramItem.getKey(), paramItem.getValue().value());
             }
             result.put(entry.getKey(), subKv);
         }

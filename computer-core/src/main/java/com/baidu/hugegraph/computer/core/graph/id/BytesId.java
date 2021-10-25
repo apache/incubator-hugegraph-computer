@@ -205,7 +205,7 @@ public class BytesId implements Id {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         return this.bytes;
     }
 }

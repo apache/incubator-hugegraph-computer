@@ -86,7 +86,7 @@ public class NullValue implements Value<NullValue> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         return null;
     }
 }

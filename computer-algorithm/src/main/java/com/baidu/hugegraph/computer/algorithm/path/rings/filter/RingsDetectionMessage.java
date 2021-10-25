@@ -92,7 +92,7 @@ public class RingsDetectionMessage implements Value<RingsDetectionMessage> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new UnsupportedOperationException();
     }
 }
