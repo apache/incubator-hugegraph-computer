@@ -71,7 +71,7 @@ public class ClosenessValue implements Value<ClosenessValue> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new UnsupportedOperationException();
     }
 

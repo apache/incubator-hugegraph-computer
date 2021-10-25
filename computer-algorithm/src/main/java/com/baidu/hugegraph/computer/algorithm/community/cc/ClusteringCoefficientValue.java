@@ -111,7 +111,7 @@ public class ClusteringCoefficientValue implements
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new NotSupportedException();
     }
 }

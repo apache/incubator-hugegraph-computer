@@ -76,7 +76,7 @@ public class IdSet implements Value<IdSet> {
     }
 
     @Override
-    public Object object() {
+    public Set<Id> value() {
         return this.values;
     }
 

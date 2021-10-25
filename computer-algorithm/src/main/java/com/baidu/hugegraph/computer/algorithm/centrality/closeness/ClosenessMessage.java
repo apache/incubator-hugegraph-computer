@@ -78,7 +78,7 @@ public class ClosenessMessage implements Value<ClosenessMessage> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new UnsupportedOperationException();
     }
 

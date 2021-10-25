@@ -86,7 +86,7 @@ public class LinksMessage implements Value<LinksMessage> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new NotSupportedException();
     }
 

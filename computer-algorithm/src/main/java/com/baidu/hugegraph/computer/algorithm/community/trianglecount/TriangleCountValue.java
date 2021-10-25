@@ -59,7 +59,7 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
 
     @Override
     public void assign(Value<TriangleCountValue> other) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
