@@ -47,7 +47,6 @@ jobs:
           fetch-depth: 2
 
       - name: Replace jar
-        if: github.event.inputs.repository_url == 'starhugegraph/hugegraph-computer'
         env:
           TRAVIS_DIR: computer-dist/src/assembly/travis
         run: |
