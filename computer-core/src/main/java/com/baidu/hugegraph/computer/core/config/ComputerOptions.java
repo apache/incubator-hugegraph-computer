@@ -814,6 +814,7 @@ public class ComputerOptions extends OptionHolder {
                     "add in edge to vertex",
                     allowValues(true, false),
                     false
+            );
 
     public static final ConfigOption<String> AUTH_TOKEN =
             new ConfigOption<>(
