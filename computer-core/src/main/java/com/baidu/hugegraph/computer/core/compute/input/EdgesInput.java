@@ -38,6 +38,7 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 
 public class EdgesInput {
 
@@ -216,6 +217,7 @@ public class EdgesInput {
                 for (int i = 0; i < count; i++) {
                     Edge edge = this.graphFactory.createEdge();
                     // Only use targetId as subKey, use props as subValue
+                    boolean inv = (in.readByte() == 1) ? true : false;
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
                     edge.id(StreamGraphInput.readId(in));
@@ -223,12 +225,18 @@ public class EdgesInput {
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }         
                     edges.add(edge);
                 }
             } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
                 for (int i = 0; i < count; i++) {
                     Edge edge = this.graphFactory.createEdge();
                     // Use label + targetId as subKey, use props as subValue
+                    boolean inv = (in.readByte() == 1) ? true : false;
                     edge.label(StreamGraphInput.readLabel(in));
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
@@ -236,6 +244,11 @@ public class EdgesInput {
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }
                     edges.add(edge);
                 }
             } else {
@@ -246,6 +259,7 @@ public class EdgesInput {
                      * Use label + sortValues + targetId as subKey,
                      * use properties as subValue
                      */
+                    boolean inv = (in.readByte() == 1) ? true : false;
                     edge.label(StreamGraphInput.readLabel(in));
                     edge.name(StreamGraphInput.readLabel(in));
                     edge.targetId(StreamGraphInput.readId(in));
@@ -254,6 +268,11 @@ public class EdgesInput {
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }
                     edges.add(edge);
                 }
             }

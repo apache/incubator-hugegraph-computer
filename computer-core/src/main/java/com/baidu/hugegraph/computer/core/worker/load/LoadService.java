@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.core.worker.load;
 
-import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -38,14 +37,10 @@ import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import com.baidu.hugegraph.computer.core.graph.value.StringValue;
-
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 public class LoadService {
-
-    private static final Logger LOG = Log.logger(LoadService.class);
 
     private final GraphFactory graphFactory;
     private final Config config;
@@ -89,10 +84,6 @@ public class LoadService {
 
     public Iterator<Vertex> createIteratorFromEdge() {
         return new IteratorFromEdge();
-    }
-
-    public Iterator<Vertex> createIteratorFromEdgeBothDirection() {
-        return new IteratorFromEdgeBothDirection();
     }
 
     private class IteratorFromVertex implements Iterator<Vertex> {
@@ -194,17 +185,7 @@ public class LoadService {
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
             while (edgeFetcher.hasNext()) {
                 hugeEdge = edgeFetcher.next();
-                /*
-                 * TODO: Restore the code after huge-server fix a problem
-                 *       where id may not be a four-part problem
-                 */
-                Edge edge;
-                try {
-                    edge = this.convert(hugeEdge);
-                } catch (Exception e) {
-                    LOG.error("Fail to convert edge: {}", hugeEdge, e);
-                    continue;
-                }
+                Edge edge = this.convert(hugeEdge);
                 Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
                 if (this.currentVertex == null) {
                     this.currentVertex = new DefaultVertex(graphFactory,
@@ -241,217 +222,7 @@ public class LoadService {
             Id targetId = HugeConverter.convertId(edge.targetId());
             Properties properties = HugeConverter.convertProperties(
                                     edge.properties());
-            Edge computerEdge = graphFactory.createEdge(edge.label(),
-                                                        edge.name(), targetId
-            );
-            computerEdge.id(HugeConverter.convertId(edge.id()));
-            computerEdge.label(edge.label());
-            computerEdge.properties(properties);
-            return computerEdge;
-        }
-    }
-
-    private class IteratorFromEdgeBothDirection implements Iterator<Vertex> {
-        /*
-         * TODO: If it is an in edge, we should get the data from the in shard;
-         * if it is a both edge, should get the data from the out, and then
-         * convert each edge to two vertices. For the time being, only consider
-         * the case of the out edge.
-         */
-        // private final Direction direction;
-        private final int maxEdges;
-        private InputSplit currentSplit;
-        private Vertex currentVertex;
-        private Vertex cacheVertex;
-        private boolean hasCacheVertex;
-
-        public IteratorFromEdgeBothDirection() {
-            // this.direction = config.get(ComputerOptions.EDGE_DIRECTION);
-            this.maxEdges = config.get(
-                            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
-            this.currentSplit = null;
-            this.currentVertex = null;
-            this.cacheVertex = null;
-            this.hasCacheVertex = false;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (this.hasCacheVertex) {
-                return true;
-            }
-            if (InputSplit.END_SPLIT.equals(this.currentSplit)) {
-                return false;
-            }
-            EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
-            while (!edgeFetcher.hasNext()) {
-                /*
-                 * The first time or the current split is complete,
-                 * need to fetch next input split meta
-                 */
-                this.currentSplit = fetcher.nextEdgeInputSplit();
-                if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
-                    return false;
-                }
-                edgeFetcher.prepareLoadInputSplit(this.currentSplit);
-            }
-            return true;
-        }
-
-        @Override
-        public Vertex next() {
-            if (!this.hasNext()) {
-                throw new NoSuchElementException();
-            }
-            if (this.hasCacheVertex) {
-                this.hasCacheVertex = false;
-                return this.cacheVertex;
-            }
-
-            com.baidu.hugegraph.structure.graph.Edge hugeEdge;
-            EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
-            while (edgeFetcher.hasNext()) {
-                hugeEdge = edgeFetcher.next();
-
-                Edge edge = this.convert(hugeEdge);
-                Edge edgeInverse = this.convert(hugeEdge);
-
-                Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
-                Id targetId = HugeConverter.convertId(hugeEdge.targetId());
-
-                Properties properties = edgeInverse.properties();
-                StringValue value = new StringValue(
-                                         sourceId.asObject().toString());
-                properties.put("sourceId", value);
-                edgeInverse.properties(properties);
-
-                Vertex vertex = new DefaultVertex(graphFactory,
-                                                  sourceId, null);
-                vertex.addEdge(edge);
-
-
-                Vertex vertex1 = new DefaultVertex(graphFactory,
-                                                  targetId, null);
-                vertex1.addEdge(edgeInverse);
-
-                this.cacheVertex = vertex1;
-                this.hasCacheVertex = true;
-
-                return vertex;
-            }
-            return null;
-        }
-
-        private Edge convert(com.baidu.hugegraph.structure.graph.Edge edge) {
-            edge = inputFilter.filter(edge);
-            Id targetId = HugeConverter.convertId(edge.targetId());
-            Properties properties = HugeConverter.convertProperties(
-                                    edge.properties());
-            Edge computerEdge = graphFactory.createEdge(edge.label(),
-                                                        edge.name(), targetId
-            );
-            computerEdge.label(edge.label());
-            computerEdge.properties(properties);
-            return computerEdge;
-        }
-    }
-
-    private class IteratorFromEdgeBothDirection implements Iterator<Vertex> {
-        /*
-         * TODO: If it is an in edge, we should get the data from the in shard;
-         * if it is a both edge, should get the data from the out, and then
-         * convert each edge to two vertices. For the time being, only consider
-         * the case of the out edge.
-         */
-        // private final Direction direction;
-        private final int maxEdges;
-        private InputSplit currentSplit;
-        private Vertex currentVertex;
-        private Vertex cacheVertex;
-        private boolean hasCacheVertex;
-
-        public IteratorFromEdgeBothDirection() {
-            // this.direction = config.get(ComputerOptions.EDGE_DIRECTION);
-            this.maxEdges = config.get(
-                            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
-            this.currentSplit = null;
-            this.currentVertex = null;
-            this.cacheVertex = null;
-            this.hasCacheVertex = false;
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (this.hasCacheVertex) {
-                return true;
-            }
-            if (InputSplit.END_SPLIT.equals(this.currentSplit)) {
-                return false;
-            }
-            EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
-            while (!edgeFetcher.hasNext()) {
-                /*
-                 * The first time or the current split is complete,
-                 * need to fetch next input split meta
-                 */
-                this.currentSplit = fetcher.nextEdgeInputSplit();
-                if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
-                    return false;
-                }
-                edgeFetcher.prepareLoadInputSplit(this.currentSplit);
-            }
-            return true;
-        }
-
-        @Override
-        public Vertex next() {
-            if (!this.hasNext()) {
-                throw new NoSuchElementException();
-            }
-            if (this.hasCacheVertex) {
-                this.hasCacheVertex = false;
-                return this.cacheVertex;
-            }
-
-            com.baidu.hugegraph.structure.graph.Edge hugeEdge;
-            EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
-            while (edgeFetcher.hasNext()) {
-                hugeEdge = edgeFetcher.next();
-
-                Edge edge = this.convert(hugeEdge);
-                Edge edgeInverse = this.convert(hugeEdge);
-
-                Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
-                Id targetId = HugeConverter.convertId(hugeEdge.targetId());
-
-                Properties properties = edgeInverse.properties();
-                StringValue value = new StringValue(
-                                         sourceId.asObject().toString());
-                properties.put("sourceId", value);
-                edgeInverse.properties(properties);
-
-                Vertex vertex = new DefaultVertex(graphFactory,
-                                                  sourceId, null);
-                vertex.addEdge(edge);
-
-
-                Vertex vertex1 = new DefaultVertex(graphFactory,
-                                                  targetId, null);
-                vertex1.addEdge(edgeInverse);
-
-                this.cacheVertex = vertex1;
-                this.hasCacheVertex = true;
-
-                return vertex;
-            }
-            return null;
-        }
-
-        private Edge convert(com.baidu.hugegraph.structure.graph.Edge edge) {
-            edge = inputFilter.filter(edge);
-            Id targetId = HugeConverter.convertId(edge.targetId());
-            Properties properties = HugeConverter.convertProperties(
-                                    edge.properties());
+            properties.put("inv", new BooleanValue(false));
             Edge computerEdge = graphFactory.createEdge(edge.label(),
                                                         edge.name(), targetId
             );
