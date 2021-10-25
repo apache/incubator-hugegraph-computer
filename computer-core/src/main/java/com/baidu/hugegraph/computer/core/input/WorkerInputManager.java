@@ -23,6 +23,7 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
@@ -43,6 +44,7 @@ public class WorkerInputManager implements Manager {
      * Send vertex/edge or message to target worker
      */
     private final MessageSendManager sendManager;
+    private Config config;
 
     public WorkerInputManager(ComputerContext context,
                               MessageSendManager sendManager) {
@@ -59,6 +61,7 @@ public class WorkerInputManager implements Manager {
     public void init(Config config) {
         this.loadService.init();
         this.sendManager.init(config);
+        this.config = config;
     }
 
     @Override
@@ -85,12 +88,26 @@ public class WorkerInputManager implements Manager {
         }
         this.sendManager.finishSend(MessageType.VERTEX);
 
-        this.sendManager.startSend(MessageType.EDGE);
-        iterator = this.loadService.createIteratorFromEdge();
-        while (iterator.hasNext()) {
-            Vertex vertex = iterator.next();
-            this.sendManager.sendEdge(vertex);
+        boolean bothdirection = this.config.get(ComputerOptions.
+                                          VERTEX_WITH_EDGES_BOTHDIRECTION);
+        if (!bothdirection) {
+            //the old version, consider output edge only
+            this.sendManager.startSend(MessageType.EDGE);
+            iterator = this.loadService.createIteratorFromEdge();
+            while (iterator.hasNext()) {
+                Vertex vertex = iterator.next();
+                this.sendManager.sendEdge(vertex);
+            }
+            this.sendManager.finishSend(MessageType.EDGE);
         }
-        this.sendManager.finishSend(MessageType.EDGE);
+        else {
+            this.sendManager.startSend(MessageType.EDGE);
+            iterator = this.loadService.createIteratorFromEdgeBothDirection();
+            while (iterator.hasNext()) {
+                Vertex vertex = iterator.next();
+                this.sendManager.sendEdge(vertex);
+            }
+            this.sendManager.finishSend(MessageType.EDGE);
+        }
     }
 }

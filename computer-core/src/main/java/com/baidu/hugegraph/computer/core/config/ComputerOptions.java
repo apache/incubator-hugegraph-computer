@@ -162,7 +162,7 @@ public class ComputerOptions extends OptionHolder {
                     "targetId to identify it.",
                     allowValues("SINGLE", "SINGLE_PER_LABEL", "MULTIPLE"),
                     EdgeFrequency::valueOf,
-                    "MULTIPLE"
+                    "SINGLE"
             );
 
     public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
@@ -832,5 +832,12 @@ public class ComputerOptions extends OptionHolder {
                     "basic auth, should only used in test environment, " +
                     "consider ban it in future.",
                     ""
+
+    public static final ConfigOption<Boolean> VERTEX_WITH_EDGES_BOTHDIRECTION =
+            new ConfigOption<>(
+                    "input.vertex_with_edges_bothdirection",
+                    "add in edge to vertex",
+                    allowValues(true, false),
+                    false
             );
 }
