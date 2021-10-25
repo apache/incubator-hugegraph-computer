@@ -37,7 +37,8 @@ public class BooleanValue implements Value<BooleanValue> {
         this.value = value;
     }
 
-    public boolean value() {
+    @Override
+    public Boolean value() {
         return this.value;
     }
 
@@ -97,10 +98,5 @@ public class BooleanValue implements Value<BooleanValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }

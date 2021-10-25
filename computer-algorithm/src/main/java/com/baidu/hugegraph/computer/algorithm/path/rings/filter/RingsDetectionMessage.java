@@ -32,12 +32,12 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class RingsDetectionMessage implements Value<RingsDetectionMessage> {
+public class RingsDetectionValue implements Value<RingsDetectionValue> {
 
     private final IdList path;
     private Properties walkEdgeProps;
 
-    public RingsDetectionMessage() {
+    public RingsDetectionValue() {
         GraphFactory graphFactory = ComputerContext.instance().graphFactory();
         this.path = new IdList();
         this.walkEdgeProps = new DefaultProperties(graphFactory);
@@ -49,12 +49,12 @@ public class RingsDetectionMessage implements Value<RingsDetectionMessage> {
     }
 
     @Override
-    public void assign(Value<RingsDetectionMessage> other) {
+    public void assign(Value<RingsDetectionValue> other) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int compareTo(RingsDetectionMessage o) {
+    public int compareTo(RingsDetectionValue o) {
         throw new UnsupportedOperationException();
     }
 
@@ -71,7 +71,7 @@ public class RingsDetectionMessage implements Value<RingsDetectionMessage> {
     }
 
     @Override
-    public RingsDetectionMessage copy() {
+    public RingsDetectionValue copy() {
         throw new UnsupportedOperationException();
     }
 
@@ -92,7 +92,7 @@ public class RingsDetectionMessage implements Value<RingsDetectionMessage> {
     }
 
     @Override
-    public Object object() {
+    public Object value() {
         throw new UnsupportedOperationException();
     }
 }

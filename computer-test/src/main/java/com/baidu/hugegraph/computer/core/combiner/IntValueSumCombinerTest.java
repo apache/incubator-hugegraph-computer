@@ -34,7 +34,7 @@ public class IntValueSumCombinerTest {
             IntValue value = new IntValue(i);
             sum = combiner.combine(sum, value);
         }
-        Assert.assertEquals(55L, sum.value());
+        Assert.assertEquals(55, sum.value());
     }
 
     @Test

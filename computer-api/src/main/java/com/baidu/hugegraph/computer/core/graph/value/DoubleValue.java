@@ -59,7 +59,8 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
         this.value = value;
     }
 
-    public double value() {
+    @Override
+    public Double value() {
         return this.value;
     }
 
@@ -124,10 +125,5 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }
