@@ -68,17 +68,13 @@ public class StringValue implements Value<StringValue> {
         return this.value.compareTo(other.value);
     }
 
+    @Override
     public String value() {
         return this.value;
     }
 
     public void value(String value) {
         this.value = value;
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 
     @Override

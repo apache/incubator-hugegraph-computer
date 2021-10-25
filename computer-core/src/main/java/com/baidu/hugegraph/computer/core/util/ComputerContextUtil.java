@@ -36,10 +36,6 @@ import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 
 public class ComputerContextUtil {
 
-    public static void initContext(String... params) {
-        initContext(convertToMap(params));
-    }
-
     public static Config initContext(Map<String, String> params) {
         // Set algorithm's parameters
         String algorithmParamsName = params.get(

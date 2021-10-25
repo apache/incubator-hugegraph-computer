@@ -20,7 +20,8 @@
 package com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -67,7 +68,9 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
 
     private static class HgkvDirEntryIter implements EntryIterator {
 
-        private final Iterator<HgkvFile> segments;
+        private final List<HgkvFile> segments;
+        private final List<EntryIterator> segmentsIters;
+        private int segmentIndex;
         private long numEntries;
         private EntryIterator kvIter;
         private final boolean useInlinePointer;
@@ -76,7 +79,9 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
         public HgkvDirEntryIter(HgkvDir hgkvDir, boolean useInlinePointer,
                                 boolean withSubKv)
                                 throws IOException {
-            this.segments = hgkvDir.segments().iterator();
+            this.segments = hgkvDir.segments();
+            this.segmentsIters = new ArrayList<>();
+            this.segmentIndex = 0;
             this.numEntries = hgkvDir.numEntries();
             this.kvIter = null;
             this.useInlinePointer = useInlinePointer;
@@ -95,11 +100,7 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
             }
 
             try {
-                if (this.kvIter == null) {
-                    this.kvIter = this.nextKeyIter();
-                }
-                if (!this.kvIter.hasNext()) {
-                    this.kvIter.close();
+                if (this.kvIter == null || !this.kvIter.hasNext()) {
                     this.kvIter = this.nextKeyIter();
                 }
                 this.numEntries--;
@@ -111,24 +112,22 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
 
         @Override
         public void close() throws Exception {
-            this.kvIter.close();
+            for (EntryIterator iterator : this.segmentsIters) {
+                iterator.close();
+            }
+            for (HgkvFile segment : this.segments) {
+                segment.close();
+            }
         }
 
         private EntryIterator nextKeyIter() throws Exception {
-            EntryIterator iterator;
-            while (this.segments.hasNext()) {
-                HgkvFile segment = this.segments.next();
-                HgkvFileReader reader = new HgkvFileReaderImpl(
-                                        segment.path(), this.useInlinePointer,
-                                        this.withSubKv);
-                iterator = reader.iterator();
-                if (iterator.hasNext()) {
-                    return iterator;
-                } else {
-                    iterator.close();
-                }
-            }
-            throw new NoSuchElementException();
+            HgkvFile segment = this.segments.get(this.segmentIndex++);
+            HgkvFileReader reader = new HgkvFileReaderImpl(
+                                    segment.path(), this.useInlinePointer,
+                                    this.withSubKv);
+            EntryIterator iterator = reader.iterator();
+            this.segmentsIters.add(iterator);
+            return iterator;
         }
 
         private boolean hasNextKey() {

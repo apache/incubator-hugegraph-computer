@@ -95,9 +95,6 @@ public class FileGraphPartition<M extends Value<M>> {
 
     protected PartitionStat input(PeekableIterator<KvEntry> vertices,
                                   PeekableIterator<KvEntry> edges) {
-        if (edges == null) {
-            edges = PeekableIterator.emptyIterator();
-        }
         try {
             createFile(this.vertexFile);
             createFile(this.edgeFile);
@@ -150,7 +147,7 @@ public class FileGraphPartition<M extends Value<M>> {
         }
         try {
             this.afterCompute(0);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ComputerException("Error occurred when afterCompute", e);
         }
         return new PartitionStat(this.partition, this.vertexCount,
@@ -206,7 +203,7 @@ public class FileGraphPartition<M extends Value<M>> {
         }
         try {
             this.afterCompute(superstep);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ComputerException(
                       "Error occurred when afterCompute at superstep %s",
                       e, superstep);
@@ -371,10 +368,11 @@ public class FileGraphPartition<M extends Value<M>> {
         this.curValueOutput = new BufferedFileOutput(this.curValueFile);
     }
 
-    private void afterCompute(int superstep) throws IOException {
+    private void afterCompute(int superstep) throws Exception {
         this.vertexInput.close();
         this.edgesInput.close();
         if (superstep != 0) {
+            this.messageInput.close();
             this.preStatusInput.close();
             this.preValueInput.close();
             this.preStatusFile.delete();

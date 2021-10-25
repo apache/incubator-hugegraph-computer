@@ -58,6 +58,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
 
     private static class EntryIter implements EntryIterator {
 
+        private final HgkvFile file;
         private final RandomAccessInput input;
         private final RandomAccessInput userAccessInput;
         private long numEntries;
@@ -67,8 +68,9 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
         public EntryIter(HgkvFile hgkvFile, boolean useInlinePointer,
                          boolean withSubKv)
                          throws IOException {
-            this.numEntries = hgkvFile.numEntries();
-            File file = new File(hgkvFile.path());
+            this.file = hgkvFile;
+            this.numEntries = this.file.numEntries();
+            File file = new File(this.file.path());
             this.input = IOFactory.createFileInput(file);
             this.userAccessInput = this.input.duplicate();
             this.useInlinePointer = useInlinePointer;
@@ -95,6 +97,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
 
         @Override
         public void close() throws IOException {
+            this.file.close();
             this.input.close();
             this.userAccessInput.close();
         }
