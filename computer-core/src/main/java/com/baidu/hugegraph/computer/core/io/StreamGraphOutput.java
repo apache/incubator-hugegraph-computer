@@ -73,6 +73,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                     out.writeByte(binv);
                     this.writeId(out, edge.targetId());
                 }, out -> {
+                    this.writeId(out, edge.id());
                     this.writeLabel(out, edge.label());
                     this.writeProperties(out, edge.properties());
                 });
@@ -88,6 +89,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                     this.writeLabel(out, edge.label());
                     this.writeId(out, edge.targetId());
                 }, out -> {
+                    this.writeId(out, edge.id());
                     this.writeProperties(out, edge.properties());
                 });
             }
@@ -107,6 +109,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
                     this.writeLabel(out, edge.name());
                     this.writeId(out, edge.targetId());
                 }, out -> {
+                    this.writeId(out, edge.id());
                     this.writeProperties(out, edge.properties());
                 });
             }
