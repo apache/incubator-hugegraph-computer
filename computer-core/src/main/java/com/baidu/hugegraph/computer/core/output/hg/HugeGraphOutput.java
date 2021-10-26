@@ -27,29 +27,26 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.ComputerOutput;
+import com.baidu.hugegraph.computer.core.output.AbstractComputerOutput;
 import com.baidu.hugegraph.computer.core.output.hg.task.TaskManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.util.Log;
 
-public abstract class HugeOutput implements ComputerOutput {
+public abstract class HugeGraphOutput extends AbstractComputerOutput {
 
-    private static final Logger LOG = Log.logger(HugeOutput.class);
+    private static final Logger LOG = Log.logger(HugeGraphOutput.class);
 
-    private int partition;
     private TaskManager taskManager;
-    private List<com.baidu.hugegraph.structure.graph.Vertex> vertexBatch;
+    private List<com.baidu.hugegraph.structure.graph.Vertex> localVertices;
     private int batchSize;
 
     @Override
     public void init(Config config, int partition) {
-        LOG.info("Start write back partition {}", this.partition);
-
-        this.partition = partition;
+        super.init(config, partition);
 
         this.taskManager = new TaskManager(config);
-        this.vertexBatch = new ArrayList<>();
         this.batchSize = config.get(ComputerOptions.OUTPUT_BATCH_SIZE);
+        this.localVertices = new ArrayList<>(this.batchSize);
 
         this.prepareSchema();
     }
@@ -58,35 +55,41 @@ public abstract class HugeOutput implements ComputerOutput {
         return this.taskManager.client();
     }
 
-    public abstract String name();
-
-    public abstract void prepareSchema();
-
     @Override
     public void write(Vertex vertex) {
-        this.vertexBatch.add(this.constructHugeVertex(vertex));
-        if (this.vertexBatch.size() >= this.batchSize) {
+        this.localVertices.add(this.constructHugeVertex(vertex));
+        if (this.localVertices.size() >= this.batchSize) {
             this.commit();
         }
     }
 
-    public abstract com.baidu.hugegraph.structure.graph.Vertex
-                    constructHugeVertex(Vertex vertex);
-
     @Override
     public void close() {
-        if (!this.vertexBatch.isEmpty()) {
+        if (!this.localVertices.isEmpty()) {
             this.commit();
         }
         this.taskManager.waitFinished();
         this.taskManager.shutdown();
-        LOG.info("End write back partition {}", this.partition);
+        LOG.info("End write back partition {}", this.partition());
     }
 
-    private void commit() {
-        this.taskManager.submitBatch(this.vertexBatch);
-        LOG.info("Write back {} vertices", this.vertexBatch.size());
+    protected void commit() {
+        this.taskManager.submitBatch(this.localVertices);
+        LOG.info("Write back {} vertices", this.localVertices.size());
 
-        this.vertexBatch = new ArrayList<>();
+        this.localVertices = new ArrayList<>(this.batchSize);
     }
+
+    protected com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(
+                                                         Vertex vertex) {
+        com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
+                new com.baidu.hugegraph.structure.graph.Vertex(null);
+        hugeVertex.id(vertex.id().asObject());
+        hugeVertex.property(this.name(), this.value(vertex));
+        return hugeVertex;
+    }
+
+    protected abstract void prepareSchema();
+
+    protected abstract Object value(Vertex vertex);
 }
