@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.graph;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -39,8 +40,13 @@ public class SuperstepStat implements Readable, Writable {
     private long vertexCount;
     private long edgeCount;
     private long finishedVertexCount;
-    private long messageCount;
-    private long messageBytes;
+
+    private long messageSendCount;
+    private long messageSendBytes;
+
+    private long messageRecvCount;
+    private long messageRecvBytes;
+
     private boolean active;
 
     public SuperstepStat() {
@@ -53,8 +59,10 @@ public class SuperstepStat implements Readable, Writable {
         this.vertexCount += partitionStat.vertexCount();
         this.edgeCount += partitionStat.edgeCount();
         this.finishedVertexCount += partitionStat.finishedVertexCount();
-        this.messageCount += partitionStat.messageCount();
-        this.messageBytes += partitionStat.messageBytes();
+        this.messageSendCount += partitionStat.messageSendCount();
+        this.messageSendBytes += partitionStat.messageSendBytes();
+        this.messageRecvCount += partitionStat.messageRecvCount();
+        this.messageRecvBytes += partitionStat.messageRecvBytes();
     }
 
     public void increase(WorkerStat workerStat) {
@@ -76,12 +84,20 @@ public class SuperstepStat implements Readable, Writable {
         return this.finishedVertexCount;
     }
 
-    public long messageCount() {
-        return this.messageCount;
+    public long messageSendCount() {
+        return this.messageSendCount;
     }
 
-    public long messageBytes() {
-        return this.messageBytes;
+    public long messageSendBytes() {
+        return this.messageSendBytes;
+    }
+
+    public long messageRecvCount() {
+        return this.messageRecvCount;
+    }
+
+    public long messageRecvBytes() {
+        return this.messageRecvBytes;
     }
 
     public void inactivate() {
@@ -97,8 +113,10 @@ public class SuperstepStat implements Readable, Writable {
         this.vertexCount = in.readLong();
         this.edgeCount = in.readLong();
         this.finishedVertexCount = in.readLong();
-        this.messageCount = in.readLong();
-        this.messageBytes = in.readLong();
+        this.messageSendCount = in.readLong();
+        this.messageSendBytes = in.readLong();
+        this.messageRecvCount = in.readLong();
+        this.messageRecvBytes = in.readLong();
         this.active = in.readBoolean();
     }
 
@@ -107,8 +125,10 @@ public class SuperstepStat implements Readable, Writable {
         out.writeLong(this.vertexCount);
         out.writeLong(this.edgeCount);
         out.writeLong(this.finishedVertexCount);
-        out.writeLong(this.messageCount);
-        out.writeLong(this.messageBytes);
+        out.writeLong(this.messageSendCount);
+        out.writeLong(this.messageSendBytes);
+        out.writeLong(this.messageRecvCount);
+        out.writeLong(this.messageRecvBytes);
         out.writeBoolean(this.active);
     }
 
@@ -121,21 +141,20 @@ public class SuperstepStat implements Readable, Writable {
         return this.vertexCount == other.vertexCount &&
                this.edgeCount == other.edgeCount &&
                this.finishedVertexCount == other.finishedVertexCount &&
-               this.messageCount == other.messageCount &&
-               this.messageBytes == other.messageBytes &&
+               this.messageSendCount == other.messageSendCount &&
+               this.messageSendBytes == other.messageSendBytes &&
+               this.messageRecvCount == other.messageRecvCount &&
+               this.messageRecvBytes == other.messageRecvBytes &&
                this.active == other.active;
     }
 
     @Override
     public int hashCode() {
-        return (Long.hashCode(this.vertexCount) >>> 56) ^
-               (Long.hashCode(this.edgeCount) >>> 48) ^
-               (Long.hashCode(this.messageCount) >>> 40) ^
-               (Long.hashCode(this.edgeCount) >>> 32) ^
-               (Long.hashCode(this.finishedVertexCount) >>> 24) ^
-               (Long.hashCode(this.messageCount) >>> 16) ^
-               (Long.hashCode(this.messageBytes) >>> 8) ^
-               Boolean.hashCode(this.active);
+        return Objects.hash(this.vertexCount, this.edgeCount,
+                            this.finishedVertexCount,
+                            this.messageSendCount, this.messageSendBytes,
+                            this.messageRecvCount, this.messageRecvBytes,
+                            this.active);
     }
 
     @Override

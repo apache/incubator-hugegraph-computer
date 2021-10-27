@@ -29,6 +29,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.receiver.MessageStat;
 import com.baidu.hugegraph.util.E;
 
 public class WriteBuffers {
@@ -37,6 +38,9 @@ public class WriteBuffers {
     private WriteBuffer writingBuffer;
     // For sorting
     private WriteBuffer sortingBuffer;
+    // Total count & bytes written
+    private long totalCount;
+    private long totalBytes;
 
     public WriteBuffers(ComputerContext context, int threshold, int capacity) {
         E.checkArgument(threshold > 0,
@@ -50,6 +54,8 @@ public class WriteBuffers {
                         threshold, capacity);
         this.writingBuffer = new WriteBuffer(context, threshold, capacity);
         this.sortingBuffer = new WriteBuffer(context, threshold, capacity);
+        this.totalCount = 0L;
+        this.totalBytes = 0L;
     }
 
     public boolean reachThreshold() {
@@ -58,6 +64,10 @@ public class WriteBuffers {
 
     public boolean isEmpty() {
         return this.writingBuffer.isEmpty();
+    }
+
+    public MessageStat messageWritten() {
+        return new MessageStat(this.totalCount, this.totalBytes);
     }
 
     public synchronized void writeVertex(Vertex vertex) throws IOException {
@@ -94,6 +104,9 @@ public class WriteBuffers {
                                             "sorting buffer empty");
             }
         }
+        // Record total message bytes
+        this.totalCount += this.writingBuffer.writeCount();
+        this.totalBytes += this.writingBuffer.numBytes();
         // Swap the writing buffer and sorting buffer pointer
         WriteBuffer temp = this.writingBuffer;
         this.writingBuffer = this.sortingBuffer;

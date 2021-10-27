@@ -46,12 +46,12 @@ public interface MasterComputationContext extends MasterContext {
     long finishedVertexCount();
 
     /**
-     * @return the message count at current superstep.
+     * @return the sent message count at current superstep.
      */
     long messageCount();
 
     /**
-     * @return the message received in bytes at current superstep.
+     * @return the message sent in bytes at current superstep.
      */
     long messageBytes();
 

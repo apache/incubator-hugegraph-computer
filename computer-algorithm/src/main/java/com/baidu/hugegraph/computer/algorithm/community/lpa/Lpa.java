@@ -70,6 +70,7 @@ public class Lpa implements Computation<Id> {
     private Id voteLabel(Iterator<Id> messages) {
         // Calculate label frequency
         Map<Id, MutableInt> labels = new HashMap<>();
+        assert messages.hasNext();
         while (messages.hasNext()) {
             Id label = messages.next();
             MutableInt labelCount = labels.get(label);

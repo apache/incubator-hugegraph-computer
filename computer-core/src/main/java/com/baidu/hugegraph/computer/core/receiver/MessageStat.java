@@ -20,14 +20,18 @@
 package com.baidu.hugegraph.computer.core.receiver;
 
 /**
- * Received message stat for a partition.
+ * Send or Received message stat for a partition.
  */
-public class RecvMessageStat {
+public class MessageStat {
 
-    private final long messageCount;
-    private final long messageBytes;
+    private long messageCount;
+    private long messageBytes;
 
-    public RecvMessageStat(long messageCount, long messageBytes) {
+    public MessageStat() {
+        this(0L, 0L);
+    }
+
+    public MessageStat(long messageCount, long messageBytes) {
         this.messageCount = messageCount;
         this.messageBytes = messageBytes;
     }
@@ -38,5 +42,10 @@ public class RecvMessageStat {
 
     public long messageBytes() {
         return this.messageBytes;
+    }
+
+    public void increase(MessageStat other) {
+        this.messageCount += other.messageCount;
+        this.messageBytes += other.messageBytes;
     }
 }

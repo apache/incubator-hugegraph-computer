@@ -23,9 +23,10 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
+import com.baidu.hugegraph.computer.core.receiver.MessageStat;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class SuperstepStatTest {
@@ -33,7 +34,9 @@ public class SuperstepStatTest {
     @Test
     public void testIncreasePartitionStat() {
         SuperstepStat stat = new SuperstepStat();
-        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L);
+        partitionStat.mergeSendMessageStat(new MessageStat(5L, 6L));
+        partitionStat.mergeRecvMessageStat(new MessageStat(7L, 8L));
         stat.increase(partitionStat);
         stat.increase(partitionStat);
 
@@ -43,38 +46,52 @@ public class SuperstepStatTest {
 
         Assert.assertEquals(partitionStat.finishedVertexCount() * 2L,
                             stat.finishedVertexCount());
-        Assert.assertEquals(partitionStat.messageCount() * 2L,
-                            stat.messageCount());
-        Assert.assertEquals(partitionStat.messageBytes() * 2L,
-                            stat.messageBytes());
+
+        Assert.assertEquals(partitionStat.messageSendCount() * 2L,
+                            stat.messageSendCount());
+        Assert.assertEquals(partitionStat.messageSendBytes() * 2L,
+                            stat.messageSendBytes());
+
+        Assert.assertEquals(partitionStat.messageRecvCount() * 2L,
+                            stat.messageRecvCount());
+        Assert.assertEquals(partitionStat.messageRecvBytes() * 2L,
+                            stat.messageRecvBytes());
     }
 
     @Test
-    public void testIncreasePartitionworkerStat() {
+    public void testIncreaseWorkerStat() {
         SuperstepStat stat = new SuperstepStat();
-        PartitionStat partitionStat1 = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
-        PartitionStat partitionStat2 = new PartitionStat(2, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat partitionStat1 = new PartitionStat(1, 4L, 3L, 2L);
+        partitionStat1.mergeSendMessageStat(new MessageStat(5L, 6L));
+        partitionStat1.mergeRecvMessageStat(new MessageStat(7L, 8L));
+
+        PartitionStat partitionStat2 = new PartitionStat(2, 14L, 13L, 12L);
+        partitionStat2.mergeSendMessageStat(new MessageStat(15L, 16L));
+        partitionStat2.mergeRecvMessageStat(new MessageStat(17L, 18L));
+
         WorkerStat workerStat = new WorkerStat();
         workerStat.add(partitionStat1);
         workerStat.add(partitionStat2);
         stat.increase(workerStat);
 
-        Assert.assertEquals(partitionStat1.vertexCount() * 2L,
-                            stat.vertexCount());
-        Assert.assertEquals(partitionStat1.edgeCount() * 2L, stat.edgeCount());
+        Assert.assertEquals(18, stat.vertexCount());
+        Assert.assertEquals(16, stat.edgeCount());
 
-        Assert.assertEquals(partitionStat1.finishedVertexCount() * 2L,
-                            stat.finishedVertexCount());
-        Assert.assertEquals(partitionStat1.messageCount() * 2L,
-                            stat.messageCount());
-        Assert.assertEquals(partitionStat1.messageBytes() * 2L,
-                            stat.messageBytes());
+        Assert.assertEquals(14L, stat.finishedVertexCount());
+
+        Assert.assertEquals(20L, stat.messageSendCount());
+        Assert.assertEquals(22L, stat.messageSendBytes());
+
+        Assert.assertEquals(24L, stat.messageRecvCount());
+        Assert.assertEquals(26L, stat.messageRecvBytes());
     }
 
     @Test
     public void testReadWrite() throws IOException {
         SuperstepStat stat1 = new SuperstepStat();
-        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L);
+        partitionStat.mergeSendMessageStat(new MessageStat(5L, 6L));
+        partitionStat.mergeRecvMessageStat(new MessageStat(7L, 8L));
         stat1.increase(partitionStat);
         stat1.increase(partitionStat);
         SuperstepStat stat1ReadObj = new SuperstepStat();
@@ -84,7 +101,9 @@ public class SuperstepStatTest {
     @Test
     public void testEquals() {
         SuperstepStat stat1 = new SuperstepStat();
-        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L);
+        partitionStat.mergeSendMessageStat(new MessageStat(5L, 6L));
+        partitionStat.mergeRecvMessageStat(new MessageStat(7L, 8L));
         stat1.increase(partitionStat);
         stat1.increase(partitionStat);
         SuperstepStat stat2 = new SuperstepStat();
@@ -104,7 +123,9 @@ public class SuperstepStatTest {
     @Test
     public void testHashCode() {
         SuperstepStat stat1 = new SuperstepStat();
-        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L);
+        partitionStat.mergeSendMessageStat(new MessageStat(5L, 6L));
+        partitionStat.mergeRecvMessageStat(new MessageStat(7L, 8L));
         stat1.increase(partitionStat);
         stat1.increase(partitionStat);
         SuperstepStat stat2 = new SuperstepStat();
@@ -118,7 +139,9 @@ public class SuperstepStatTest {
     @Test
     public void testActive() {
         SuperstepStat stat = new SuperstepStat();
-        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L);
+        partitionStat.mergeSendMessageStat(new MessageStat(5L, 6L));
+        partitionStat.mergeRecvMessageStat(new MessageStat(7L, 8L));
         stat.increase(partitionStat);
         stat.increase(partitionStat);
         Assert.assertTrue(stat.active());
@@ -129,11 +152,14 @@ public class SuperstepStatTest {
     @Test
     public void testToString() {
         SuperstepStat stat = new SuperstepStat();
-        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L, 5L, 6L);
+        PartitionStat partitionStat = new PartitionStat(1, 4L, 3L, 2L);
+        partitionStat.mergeSendMessageStat(new MessageStat(5L, 6L));
+        partitionStat.mergeRecvMessageStat(new MessageStat(7L, 8L));
         stat.increase(partitionStat);
         String str = "SuperstepStat{\"vertexCount\":4,\"edgeCount\":3,\"" +
-                     "finishedVertexCount\":2,\"messageCount\":5,\"" +
-                     "messageBytes\":6,\"active\":true}";
+                     "finishedVertexCount\":2,\"messageSendCount\":5,\"" +
+                     "messageSendBytes\":6,\"messageRecvCount\":7,\"" +
+                     "messageRecvBytes\":8,\"active\":true}";
         Assert.assertEquals(str, stat.toString());
     }
 }

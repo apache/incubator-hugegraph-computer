@@ -331,9 +331,6 @@ public class ComputerOptions extends OptionHolder {
                     10000
             );
 
-    public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
-    );
-
     public static final ConfigOption<String> JOB_ID =
             new ConfigOption<>(
                     "job.id",
@@ -833,4 +830,7 @@ public class ComputerOptions extends OptionHolder {
                     "consider ban it in future.",
                     ""
             );
+
+    public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
+    );
 }
