@@ -97,13 +97,21 @@ public class StreamGraphInput implements GraphComputeInput {
             while (reader.hasRemaining()) {
                 Edge edge = this.graphFactory.createEdge();
                 // Use label + targetId as subKey, use properties as subValue
+                BooleanValue inv = new BooleanValue();
                 reader.readSubKv(in -> {
+                    boolean inv_ = (in.readByte() == 1) ? true : false;
+                    inv.value(inv_);
                     edge.label(readLabel(in));
                     edge.targetId(readId(in));
                 }, in -> {
                     edge.id(readId(in));
                     edge.properties(readProperties(in));
                 });
+                if (inv.value()) {
+                    Properties properties = edge.properties();
+                    properties.put("inv", new BooleanValue(true));
+                    edge.properties(properties);
+                }
                 vertex.addEdge(edge);
             }
         } else {
@@ -114,7 +122,10 @@ public class StreamGraphInput implements GraphComputeInput {
                  * Use label + sortValues + targetId as subKey,
                  * use properties as subValue
                  */
+                BooleanValue inv = new BooleanValue();
                 reader.readSubKv(in -> {
+                    boolean inv_ = (in.readByte() == 1) ? true : false;
+                    inv.value(inv_);
                     edge.label(readLabel(in));
                     edge.name(readLabel(in));
                     edge.targetId(readId(in));
@@ -122,6 +133,11 @@ public class StreamGraphInput implements GraphComputeInput {
                     edge.id(readId(in));
                     edge.properties(this.readProperties(in));
                 });
+                if (inv.value()) {
+                    Properties properties = edge.properties();
+                    properties.put("inv", new BooleanValue(true));
+                    edge.properties(properties);
+                }
                 vertex.addEdge(edge);
             }
         }

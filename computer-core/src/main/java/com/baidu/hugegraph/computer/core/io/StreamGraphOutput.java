@@ -67,8 +67,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
             for (Edge edge : vertex.edges()) {
                 // Only use targetId as subKey, use properties as subValue
                 BooleanValue inv = edge.property("inv");
+                byte binv = (byte) (inv == null ? 0x00 : 0x01);
                 edge.properties().remove("inv");
-                byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 writer.writeSubKv(out -> {
                     out.writeByte(binv);
                     this.writeId(out, edge.targetId());
@@ -81,8 +81,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
         } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
             for (Edge edge : vertex.edges()) {
                 BooleanValue inv = edge.property("inv");
+                byte binv = (byte) (inv == null ? 0x00 : 0x01);
                 edge.properties().remove("inv");
-                byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 // Use label + targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
                     out.writeByte(binv);
@@ -101,8 +101,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
                  * use properties as subValue
                  */
                 BooleanValue inv = edge.property("inv");
+                byte binv = (byte) (inv == null ? 0x00 : 0x01);
                 edge.properties().remove("inv");
-                byte binv = (byte) (inv.value() ? 0x01 : 0x00);
                 writer.writeSubKv(out -> {
                     out.writeByte(binv);
                     this.writeLabel(out, edge.label());
