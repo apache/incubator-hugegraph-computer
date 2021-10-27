@@ -24,8 +24,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.Comparator;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -34,8 +35,6 @@ import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
 public class Lpa implements Computation<Id> {
-
-    private final Random random = new Random();
 
     @Override
     public String name() {
@@ -51,19 +50,16 @@ public class Lpa implements Computation<Id> {
     public void compute0(ComputationContext context, Vertex vertex) {
         Id value = vertex.id();
         vertex.value(value);
-        vertex.inactivate();
         context.sendMessageToAllEdges(vertex, value);
+        vertex.inactivate();
     }
 
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<Id> messages) {
         Id label = this.voteLabel(messages);
-        Id value = vertex.value();
-        if (!value.equals(label)) {
-            vertex.value(label);
-            context.sendMessageToAllEdges(vertex, label);
-        }
+        vertex.value(label);
+        context.sendMessageToAllEdges(vertex, label);
         vertex.inactivate();
     }
 
@@ -95,8 +91,12 @@ public class Lpa implements Computation<Id> {
             }
         }
 
-        // Random choice
-        int selected = this.random.nextInt(maxLabels.size());
-        return maxLabels.get(selected);
+        // Choose min label
+        return maxLabels.stream()
+                        .min((Comparator.naturalOrder()))
+                        .orElseThrow(() -> {
+                            return new ComputerException(
+                                       "Can't find min label in maxLabels");
+                        });
     }
 }
