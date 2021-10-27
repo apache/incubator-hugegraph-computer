@@ -29,7 +29,6 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
@@ -135,7 +134,6 @@ public class LinksTest extends AlgorithmTestBase {
                          "> $in.weight\"" +
                          "    }" +
                          "}";
-        System.out.println(analyze);
         runAlgorithm(LinksTestParams.class.getName(),
                      Links.OPTION_ANALYZE_CONFIG, analyze);
     }
@@ -150,7 +148,7 @@ public class LinksTest extends AlgorithmTestBase {
         }
     }
 
-    public static class LinksTestOutput extends LimitedLogOutput {
+    public static class LinksTestOutput extends LinksHugeOutput {
 
         public static Map<String, Set<String>> EXPECT_RESULT;
 
@@ -165,6 +163,7 @@ public class LinksTest extends AlgorithmTestBase {
             values.values().forEach(value -> {
                 Assert.assertTrue(result.contains(value.toString()));
             });
+            super.write(vertex);
         }
     }
 }
