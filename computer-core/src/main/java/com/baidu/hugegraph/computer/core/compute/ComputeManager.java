@@ -133,23 +133,16 @@ public class ComputeManager<M extends Value<M>> {
         WorkerStat workerStat = new WorkerStat();
         Map<Integer, PartitionStat> partitionStats = new HashMap<>(
                                                      this.partitions.size());
-        if (superstep == 0) {
-            // TODO: parallel compute process.
-            for (FileGraphPartition<M> partition : this.partitions.values()) {
-                PartitionStat stat = partition.compute0(context,
-                                                        this.computation);
-                partitionStats.put(stat.partitionId(), stat);
-            }
-        } else {
-            // TODO: parallel compute process.
-            for (FileGraphPartition<M> partition : this.partitions.values()) {
-                PartitionStat stat = partition.compute(context,
-                                                       this.computation,
-                                                       superstep);
-                partitionStats.put(stat.partitionId(), stat);
-            }
+        // TODO: parallel compute process.
+        for (FileGraphPartition<M> partition : this.partitions.values()) {
+            PartitionStat stat = partition.compute(context,
+                                                   this.computation,
+                                                   superstep);
+            partitionStats.put(stat.partitionId(), stat);
         }
+
         this.sendManager.finishSend(MessageType.MSG);
+
         // After compute and send finish signal.
         Map<Integer, MessageStat> recvStats = this.recvManager.messageStats();
         for (Map.Entry<Integer, PartitionStat> entry :
