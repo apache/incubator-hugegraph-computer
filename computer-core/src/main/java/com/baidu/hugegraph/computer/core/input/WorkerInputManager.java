@@ -23,12 +23,19 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
+import com.baidu.hugegraph.computer.core.graph.vertex.DefaultVertex;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.worker.load.LoadService;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 
 public class WorkerInputManager implements Manager {
 
@@ -39,15 +46,18 @@ public class WorkerInputManager implements Manager {
      * to computer-vertices and computer-edges
      */
     private final LoadService loadService;
+    private final GraphFactory graphFactory;
     /*
      * Send vertex/edge or message to target worker
      */
     private final MessageSendManager sendManager;
+    private Config config;
 
     public WorkerInputManager(ComputerContext context,
                               MessageSendManager sendManager) {
         this.loadService = new LoadService(context);
         this.sendManager = sendManager;
+        this.graphFactory = context.graphFactory();
     }
 
     @Override
@@ -59,6 +69,7 @@ public class WorkerInputManager implements Manager {
     public void init(Config config) {
         this.loadService.init();
         this.sendManager.init(config);
+        this.config = config;
     }
 
     @Override
@@ -90,6 +101,26 @@ public class WorkerInputManager implements Manager {
         while (iterator.hasNext()) {
             Vertex vertex = iterator.next();
             this.sendManager.sendEdge(vertex);
+            //inverse edge here
+            if (!this.config.get(
+                     ComputerOptions.VERTEX_WITH_EDGES_BOTHDIRECTION)) {
+                continue;
+            }
+            for (Edge edge:vertex.edges()) {
+                Id targetId = edge.targetId();
+                Id sourceId = vertex.id();
+
+                Vertex vertexInv = new DefaultVertex(graphFactory,
+                                                  targetId, null);
+                Edge edgeInv = graphFactory.
+                               createEdge(edge.label(), edge.name(), sourceId
+                );
+                Properties properties = edge.properties();
+                properties.put("inv", new BooleanValue(true));
+                edgeInv.properties(properties);
+                vertexInv.addEdge(edgeInv);
+                this.sendManager.sendEdge(vertexInv);
+           }
         }
         this.sendManager.finishSend(MessageType.EDGE);
     }

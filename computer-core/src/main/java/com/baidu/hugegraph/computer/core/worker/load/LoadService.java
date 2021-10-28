@@ -43,6 +43,7 @@ import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 
 public class LoadService {
 
@@ -237,6 +238,7 @@ public class LoadService {
             Id targetId = HugeConverter.convertId(edge.targetId());
             Properties properties = HugeConverter.convertProperties(
                                     edge.properties());
+            properties.put("inv", new BooleanValue(false));
             Edge computerEdge = graphFactory.createEdge(edge.label(),
                                                         edge.name(), targetId
             );

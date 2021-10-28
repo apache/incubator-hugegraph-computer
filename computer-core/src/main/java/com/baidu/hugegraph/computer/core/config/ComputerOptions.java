@@ -805,6 +805,14 @@ public class ComputerOptions extends OptionHolder {
                     Bytes.GB
             );
 
+    public static final ConfigOption<Boolean> VERTEX_WITH_EDGES_BOTHDIRECTION =
+            new ConfigOption<>(
+                    "input.vertex_with_edges_bothdirection",
+                    "add in edge to vertex",
+                    allowValues(true, false),
+                    false
+            );
+
     public static final ConfigOption<String> AUTH_TOKEN =
             new ConfigOption<>(
                     "hugegraph.token",

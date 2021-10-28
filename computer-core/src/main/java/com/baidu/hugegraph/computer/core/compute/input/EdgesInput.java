@@ -216,6 +216,7 @@ public class EdgesInput {
                 for (int i = 0; i < count; i++) {
                     Edge edge = this.graphFactory.createEdge();
                     // Only use targetId as subKey, use props as subValue
+                    boolean inv = (in.readByte() == 1) ? true : false;
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
                     edge.id(StreamGraphInput.readId(in));
@@ -229,6 +230,7 @@ public class EdgesInput {
                 for (int i = 0; i < count; i++) {
                     Edge edge = this.graphFactory.createEdge();
                     // Use label + targetId as subKey, use props as subValue
+                    boolean inv = (in.readByte() == 1) ? true : false;
                     edge.label(StreamGraphInput.readLabel(in));
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
@@ -246,6 +248,7 @@ public class EdgesInput {
                      * Use label + sortValues + targetId as subKey,
                      * use properties as subValue
                      */
+                    boolean inv = (in.readByte() == 1) ? true : false;
                     edge.label(StreamGraphInput.readLabel(in));
                     edge.name(StreamGraphInput.readLabel(in));
                     edge.targetId(StreamGraphInput.readId(in));
