@@ -66,6 +66,11 @@ public class WriteBuffers {
         return this.writingBuffer.isEmpty();
     }
 
+    public void resetMessageWritten() {
+        this.totalCount = 0L;
+        this.totalBytes = 0L;
+    }
+
     public MessageStat messageWritten() {
         return new MessageStat(this.totalCount, this.totalBytes);
     }
