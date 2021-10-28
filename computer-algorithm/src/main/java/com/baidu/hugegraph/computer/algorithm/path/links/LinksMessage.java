@@ -21,8 +21,6 @@ package com.baidu.hugegraph.computer.algorithm.path.links;
 
 import java.io.IOException;
 
-import javax.ws.rs.NotSupportedException;
-
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -54,12 +52,12 @@ public class LinksMessage implements Value<LinksMessage> {
 
     @Override
     public void assign(Value<LinksMessage> other) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int compareTo(LinksMessage o) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -86,8 +84,8 @@ public class LinksMessage implements Value<LinksMessage> {
     }
 
     @Override
-    public Object object() {
-        throw new NotSupportedException();
+    public Object value() {
+        throw new UnsupportedOperationException();
     }
 
     public IdList pathVertexes() {

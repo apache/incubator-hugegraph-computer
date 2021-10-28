@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ws.rs.NotSupportedException;
-
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
@@ -47,17 +45,17 @@ public class LinksValue implements Value<LinksValue> {
 
     @Override
     public void assign(Value<LinksValue> value) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Value<LinksValue> copy() {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Object object() {
-        throw new NotSupportedException();
+    public Object value() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -82,7 +80,7 @@ public class LinksValue implements Value<LinksValue> {
 
     @Override
     public int compareTo(LinksValue o) {
-        throw new NotSupportedException();
+        throw new UnsupportedOperationException();
     }
 
     public void addValue(IdList vertexes, IdList edges) {
@@ -124,17 +122,17 @@ public class LinksValue implements Value<LinksValue> {
 
         @Override
         public void assign(Value<LinksValueItem> value) {
-            throw new NotSupportedException();
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Value<LinksValueItem> copy() {
-            throw new NotSupportedException();
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public Object object() {
-            throw new NotSupportedException();
+        public Object value() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -151,7 +149,7 @@ public class LinksValue implements Value<LinksValue> {
 
         @Override
         public int compareTo(LinksValueItem other) {
-            throw new NotSupportedException();
+            throw new UnsupportedOperationException();
         }
 
         @Override
