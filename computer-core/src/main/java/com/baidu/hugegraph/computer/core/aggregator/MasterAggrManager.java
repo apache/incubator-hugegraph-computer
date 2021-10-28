@@ -56,7 +56,7 @@ public class MasterAggrManager implements Manager {
     @Override
     public void inited(Config config) {
         /*
-         * Apply aggregators registerd by master init(), so that workers can
+         * Apply aggregators registered by master init(), so that workers can
          * get aggregators from master.
          */
         this.aggregatorsHandler.resetAggregators(this.registerAggregators);

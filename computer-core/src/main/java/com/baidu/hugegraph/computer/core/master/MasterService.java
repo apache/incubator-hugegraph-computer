@@ -63,16 +63,16 @@ public class MasterService implements Closeable {
     private final ComputerContext context;
     private final Managers managers;
 
+    private int maxSuperStep;
     private volatile boolean inited;
     private volatile boolean closed;
-    private Config config;
     private volatile Bsp4Master bsp4Master;
+    private Config config;
     private ContainerInfo masterInfo;
     private List<ContainerInfo> workers;
-    private int maxSuperStep;
     private MasterComputation masterComputation;
 
-    private volatile ShutdownHook shutdownHook;
+    private final ShutdownHook shutdownHook;
     private volatile Thread serviceThread;
 
     public MasterService() {
@@ -255,12 +255,16 @@ public class MasterService implements Closeable {
             superstepStat = SuperstepStat.from(workerStats);
             SuperstepContext context = new SuperstepContext(superstep,
                                                             superstepStat);
+            this.masterComputation.beforeSuperstep(context);
             // Call master compute(), note the worker afterSuperstep() is done
             boolean masterContinue = this.masterComputation.compute(context);
             if (this.finishedIteration(masterContinue, context)) {
                 superstepStat.inactivate();
             }
+
             this.managers.afterSuperstep(this.config, superstep);
+            // We should get final aggregate value here
+            this.masterComputation.afterSuperstep(context);
             this.bsp4Master.masterStepDone(superstep, superstepStat);
 
             LOG.info("{} MasterService superstep {} finished",
@@ -367,9 +371,11 @@ public class MasterService implements Closeable {
     /**
      * Wait the workers write result back. After this, the job is finished
      * successfully.
+     * Shall we add code here to support the output by master?
      */
     private void outputstep() {
         LOG.info("{} MasterService outputstep started", this);
+        this.masterComputation.output();
         this.bsp4Master.waitWorkersOutputDone();
         // Merge output files of multiple partitions
         ComputerOutput output = this.config.createObject(

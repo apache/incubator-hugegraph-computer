@@ -52,4 +52,30 @@ public interface MasterComputation {
      * @return true if want to continue the next iteration.
      */
     boolean compute(MasterComputationContext context);
+
+    /**
+     * This method is called before every superstep, override this method if
+     * want to get aggregate value in master at previous superstep.
+     */
+    default void beforeSuperstep(MasterComputationContext context) {
+        // pass
+    }
+
+    /**
+     * This method is called after every superstep, override this method if
+     * want to get aggregate value in master
+     */
+    default void afterSuperstep(MasterComputationContext context) {
+        // pass
+    }
+
+    /**
+     * This method can output aggregators to log / file at the end (after all
+     * supersteps finished)
+     */
+    default void output() {
+        // pass
+    }
+
+
 }

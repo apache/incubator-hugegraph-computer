@@ -50,6 +50,8 @@ public class PageRank4Master implements MasterComputation {
 
     private double l1DiffThreshold;
 
+    private MasterComputationContext finalContext;
+
     @Override
     public void init(MasterContext context) {
         this.l1DiffThreshold = context.config().getDouble(
@@ -100,5 +102,25 @@ public class PageRank4Master implements MasterComputation {
         } else {
             return true;
         }
+    }
+
+    @Override
+    public void afterSuperstep(MasterComputationContext context) {
+        this.finalContext = context;
+    }
+
+    @Override
+    public void output() {
+        LOG.info("# Master output for :" + this.getClass().getSimpleName());
+        LongValue danglingVerticesNum = this.finalContext.aggregatedValue(
+                                        AGGR_DANGLING_VERTICES_NUM);
+        DoubleValue danglingProbability = this.finalContext.aggregatedValue(
+                                          AGGR_COMULATIVE_DANGLING_PROBABILITY);
+        DoubleValue cumulativeProbability = this.finalContext.aggregatedValue(
+                                            AGGR_COMULATIVE_PROBABILITY);
+        DoubleValue l1NormDifference = this.finalContext.aggregatedValue(
+                                       AGGR_L1_NORM_DIFFERENCE_KEY);
+        LOG.info("## {}, {}, {}, {}", danglingVerticesNum, danglingProbability,
+                 cumulativeProbability, l1NormDifference);
     }
 }
