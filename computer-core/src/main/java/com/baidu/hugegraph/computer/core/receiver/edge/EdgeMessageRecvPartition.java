@@ -37,7 +37,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class EdgeMessageRecvPartition extends MessageRecvPartition {
 
-    private static final String TYPE = MessageType.EDGE.name();
+    private static final String TYPE = MessageType.EDGE.name().toLowerCase();
 
     private final OuterSortFlusher flusher;
 
