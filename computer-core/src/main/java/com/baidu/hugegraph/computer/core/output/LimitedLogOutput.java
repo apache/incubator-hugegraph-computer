@@ -47,7 +47,7 @@ public class LimitedLogOutput extends AbstractComputerOutput {
     @Override
     public void write(Vertex vertex) {
         if (this.logged < this.limit) {
-            LOG.info("'{}': '{}'", vertex.id(), vertex.value());
+            LOG.info("'{}': '{}'", vertex.id(), vertex.value().string());
             this.logged++;
         }
     }

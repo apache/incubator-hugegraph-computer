@@ -35,7 +35,7 @@ public class LogOutput extends AbstractComputerOutput {
 
     @Override
     public void write(Vertex vertex) {
-        LOG.info("'{}': '{}'", vertex.id(), vertex.value());
+        LOG.info("'{}': '{}'", vertex.id(), vertex.value().string());
     }
 
     @Override

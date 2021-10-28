@@ -96,8 +96,8 @@ public class PageRank implements Computation<DoubleValue> {
             this.danglingVertexNumAggr.aggregateValue(1L);
             this.danglingCumulativeAggr.aggregateValue(rank);
         } else {
-            DoubleValue contribValue = new DoubleValue(rank / edgeCount);
-            context.sendMessageToAllEdges(vertex, contribValue);
+            this.contribValue.value(rank / edgeCount);
+            context.sendMessageToAllEdges(vertex, this.contribValue);
         }
     }
 
