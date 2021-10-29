@@ -82,15 +82,20 @@ public class UnitTestSuite {
 
     static {
         Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                                  "defaultValue", "http://localhost:2579");
+                                  "defaultValue",
+                                  "http://localhost:2579");
         Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_URL,
-                                  "defaultValue", "http://127.0.0.1:8080");
+                                  "defaultValue",
+                                  "http://127.0.0.1:8080");
         Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_GRAPH_NAME,
-                                  "defaultValue", "hugegraph");
+                                  "defaultValue",
+                                  "hugegraph");
         Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_URL,
-                                  "defaultValue", "hdfs://127.0.0.1:9000");
+                                  "defaultValue",
+                                  "hdfs://127.0.0.1:9000");
         Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_USER,
-                                  "defaultValue", System.getProperty("user.name"));
+                                  "defaultValue",
+                                  System.getProperty("user.name"));
     }
 
     @BeforeClass
