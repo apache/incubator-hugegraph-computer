@@ -159,6 +159,7 @@ public final class BuiltinGraphFactory implements GraphFactory {
         return new DefaultProperties(this);
     }
 
+    @Override
     public Value<?> createValue(byte code) {
         ValueType type = SerialEnum.fromCode(ValueType.class, code);
         return createValue(type);
@@ -167,6 +168,7 @@ public final class BuiltinGraphFactory implements GraphFactory {
     /**
      * Create property value by type.
      */
+    @Override
     public Value<?> createValue(ValueType type) {
         switch (type) {
             case NULL:

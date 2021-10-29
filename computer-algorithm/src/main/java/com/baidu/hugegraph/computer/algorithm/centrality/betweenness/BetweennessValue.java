@@ -86,4 +86,9 @@ public class BetweennessValue implements Value<BetweennessValue> {
     public int compareTo(BetweennessValue o) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String string() {
+        return this.betweenness.toString();
+    }
 }

@@ -83,6 +83,7 @@ public class ClusteringCoefficientValue implements
         ClusteringCoefficientValue ccValue = new ClusteringCoefficientValue();
         ccValue.idList = this.idList.copy();
         ccValue.count = this.count.copy();
+        ccValue.degree = this.degree.copy();
         return ccValue;
     }
 
@@ -90,12 +91,14 @@ public class ClusteringCoefficientValue implements
     public void read(RandomAccessInput in) throws IOException {
         this.idList.read(in);
         this.count.read(in);
+        this.degree.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
         this.idList.write(out);
         this.count.write(out);
+        this.degree.write(out);
     }
 
     @Override
@@ -113,5 +116,11 @@ public class ClusteringCoefficientValue implements
     @Override
     public Object value() {
         throw new NotSupportedException();
+    }
+
+    @Override
+    public String string() {
+        return String.valueOf(2 * this.count.floatValue() / degree.value() /
+                              (degree.value() - 1));
     }
 }

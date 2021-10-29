@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.algorithm.community.cc;
 
-import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
@@ -49,8 +48,9 @@ public class ClusteringCoefficientOutput extends HugeOutput {
         com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
                 new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
-        float triangle = ((TriangleCountValue) vertex.value()).count();
-        int degree = ((TriangleCountValue) vertex.value()).idList().size();
+        float triangle = ((ClusteringCoefficientValue) vertex.value()).count();
+        int degree = ((ClusteringCoefficientValue) vertex.value())
+                                                  .idList().size();
         hugeVertex.property(this.name(), 2 * triangle / degree / (degree - 1));
         return hugeVertex;
     }

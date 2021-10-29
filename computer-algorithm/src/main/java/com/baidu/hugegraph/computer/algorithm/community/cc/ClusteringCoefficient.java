@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
@@ -77,7 +76,7 @@ public class ClusteringCoefficient implements Computation<IdList> {
         context.sendMessageToAllEdgesIf(vertex, selfId, (ids, targetId) -> {
             return !ids.get(0).equals(targetId);
         });
-        vertex.value(new TriangleCountValue());
+        vertex.value(new ClusteringCoefficientValue());
     }
 
     @Override
@@ -85,14 +84,15 @@ public class ClusteringCoefficient implements Computation<IdList> {
                         Iterator<IdList> messages) {
         Long count = this.triangleCount(context, vertex, messages);
         if (count != null) {
-            ((TriangleCountValue) vertex.value()).count(count);
+            ((ClusteringCoefficientValue) vertex.value()).count(count);
             vertex.inactivate();
         }
     }
 
     private Long triangleCount(ComputationContext context, Vertex vertex,
                                Iterator<IdList> messages) {
-        IdList neighbors = ((TriangleCountValue) vertex.value()).idList();
+        IdList neighbors = ((ClusteringCoefficientValue) vertex
+                                                         .value()).idList();
 
         if (context.superstep() == 1) {
             // Collect outgoing neighbors
@@ -109,6 +109,8 @@ public class ClusteringCoefficient implements Computation<IdList> {
                 }
             }
             // Save degree to vertex value here (optional)
+            ((ClusteringCoefficientValue) vertex.value())
+                                          .setDegree(neighbors.size());
 
             // Send all neighbors to neighbors
             for (Id targetId : neighbors.values()) {

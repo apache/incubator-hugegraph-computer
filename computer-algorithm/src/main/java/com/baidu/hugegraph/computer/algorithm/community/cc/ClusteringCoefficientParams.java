@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.algorithm.community.cc;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
-import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
@@ -36,7 +35,7 @@ public class ClusteringCoefficientParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          IdList.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                         TriangleCountValue.class.getName());
+                         ClusteringCoefficientValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          ClusteringCoefficientOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_EDGE_FREQ.name(),

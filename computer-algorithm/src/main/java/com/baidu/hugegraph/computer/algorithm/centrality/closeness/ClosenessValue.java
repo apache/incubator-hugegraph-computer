@@ -103,4 +103,9 @@ public class ClosenessValue implements Value<ClosenessValue> {
     public int compareTo(ClosenessValue o) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String string() {
+        return String.valueOf(this.map);
+    }
 }
