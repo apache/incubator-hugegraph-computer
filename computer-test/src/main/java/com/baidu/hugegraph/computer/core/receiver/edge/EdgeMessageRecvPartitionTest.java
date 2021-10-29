@@ -43,7 +43,6 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
@@ -97,7 +96,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
     public void testEdgeMessageRecvPartition() throws IOException {
-        Assert.assertEquals(MessageType.EDGE.name(), this.partition.type());
+        Assert.assertEquals("edge", this.partition.type());
 
         addTenEdgeBuffer((ManagedBuffer buffer) -> {
             this.partition.addBuffer(buffer);
@@ -110,7 +109,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
     public void testOverwriteCombiner() throws IOException {
-        Assert.assertEquals(MessageType.EDGE.name(), this.partition.type());
+        Assert.assertEquals("edge", this.partition.type());
 
         addTenEdgeBuffer(this.partition::addBuffer);
         addTenEdgeBuffer(this.partition::addBuffer);
@@ -141,7 +140,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
                                                Constants.INPUT_SUPERSTEP);
         this.partition = new EdgeMessageRecvPartition(context(), fileGenerator,
                                                       this.sortManager);
-        Assert.assertEquals(MessageType.EDGE.name(), this.partition.type());
+        Assert.assertEquals("edge", this.partition.type());
 
         addTenDuplicateEdgeBuffer(this.partition::addBuffer);
 

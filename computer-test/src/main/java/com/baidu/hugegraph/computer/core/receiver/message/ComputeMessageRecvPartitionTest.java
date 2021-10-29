@@ -35,7 +35,6 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
@@ -73,7 +72,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
                                                 context(), fileGenerator,
                                                 sortManager);
-        Assert.assertEquals(MessageType.MSG.name(), partition.type());
+        Assert.assertEquals("msg", partition.type());
 
         addTwentyCombineMessageBuffer(partition::addBuffer);
 
@@ -106,7 +105,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
         ComputeMessageRecvPartition partition = new ComputeMessageRecvPartition(
                                                 context(), fileGenerator,
                                                 sortManager);
-        Assert.assertEquals(MessageType.MSG.name(), partition.type());
+        Assert.assertEquals("msg", partition.type());
 
         addTwentyDuplicateIdValueListMessageBuffer(partition::addBuffer);
 
