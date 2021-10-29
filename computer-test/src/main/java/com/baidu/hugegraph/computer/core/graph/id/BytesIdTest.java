@@ -43,11 +43,15 @@ public class BytesIdTest extends UnitTestBase {
         Id longId6 = BytesId.of(0L);
         Id longId7 = BytesId.of(-100L);
 
-        Id longId8 = new BytesId();
-        Id longId9 = new BytesId();
+        Id longId8 = BytesId.of(0L);
 
         Assert.assertEquals(IdType.LONG, longId1.idType());
         Assert.assertEquals(ValueType.ID_VALUE, longId1.valueType());
+        Assert.assertEquals(1, longId1.length());
+
+        Assert.assertEquals(IdType.LONG, longId2.idType());
+        Assert.assertEquals(ValueType.ID_VALUE, longId2.valueType());
+        Assert.assertEquals(2, longId2.length());
 
         Assert.assertEquals(new Long(123L), longId1.asObject());
         Assert.assertEquals(123L, longId1.asObject());
@@ -64,9 +68,9 @@ public class BytesIdTest extends UnitTestBase {
         Assert.assertTrue(longId6.compareTo(longId5) < 0);
         Assert.assertEquals(0, longId5.compareTo(longId7));
 
-        Assert.assertEquals(0, longId8.compareTo(longId9));
+        Assert.assertEquals(0, longId8.compareTo(longId6));
         Assert.assertTrue(longId8.compareTo(longId1) < 0);
-        Assert.assertTrue(longId1.compareTo(longId9) > 0);
+        Assert.assertTrue(longId1.compareTo(longId8) > 0);
 
         Assert.assertEquals(longId1, longId3);
         Assert.assertNotEquals(longId1, longId2);
@@ -83,16 +87,30 @@ public class BytesIdTest extends UnitTestBase {
         Id utf8Id4 = BytesId.of("abd");
         Id utf8Id5 = BytesId.of("abc");
         Id utf8Id6 = BytesId.of("100");
+        Id utf8Id7 = new BytesId();
 
         Assert.assertEquals(IdType.UTF8, utf8Id1.idType());
-        Assert.assertEquals(3, utf8Id2.length());
+        Assert.assertEquals(ValueType.ID_VALUE, utf8Id1.valueType());
+        Assert.assertEquals(0, utf8Id1.length());
 
         Assert.assertEquals(IdType.UTF8, utf8Id2.idType());
         Assert.assertEquals(ValueType.ID_VALUE, utf8Id2.valueType());
+        Assert.assertEquals(3, utf8Id2.length());
 
+        Assert.assertEquals(IdType.UTF8, utf8Id3.idType());
+        Assert.assertEquals(ValueType.ID_VALUE, utf8Id3.valueType());
+        Assert.assertEquals(4, utf8Id3.length());
+
+        Assert.assertEquals(IdType.UTF8, utf8Id7.idType());
+        Assert.assertEquals(ValueType.ID_VALUE, utf8Id7.valueType());
+        Assert.assertEquals(0, utf8Id7.length());
+
+        Assert.assertEquals("", utf8Id1.asObject());
         Assert.assertEquals("abc", utf8Id2.asObject());
-
+        Assert.assertEquals("abcd", utf8Id3.asObject());
         Assert.assertEquals("100", utf8Id6.asObject());
+        Assert.assertEquals("", utf8Id7.asObject());
+
         Assert.assertTrue(utf8Id3.compareTo(utf8Id2) > 0);
         Assert.assertTrue(utf8Id2.compareTo(utf8Id3) < 0);
         Assert.assertEquals(0, utf8Id2.compareTo(utf8Id2));
@@ -101,6 +119,7 @@ public class BytesIdTest extends UnitTestBase {
 
         Assert.assertEquals(utf8Id2, utf8Id5);
         Assert.assertNotEquals(utf8Id2, utf8Id4);
+        Assert.assertEquals(utf8Id1, utf8Id7);
 
         Assert.assertEquals(utf8Id2.hashCode(), utf8Id5.hashCode());
         Assert.assertNotEquals(utf8Id2.hashCode(), utf8Id3.hashCode());
@@ -116,6 +135,11 @@ public class BytesIdTest extends UnitTestBase {
 
         Assert.assertEquals(IdType.UUID, uuidId1.idType());
         Assert.assertEquals(ValueType.ID_VALUE, uuidId1.valueType());
+        Assert.assertEquals(19, uuidId1.length());
+
+        Assert.assertEquals(IdType.UUID, uuidId2.idType());
+        Assert.assertEquals(ValueType.ID_VALUE, uuidId2.valueType());
+        Assert.assertEquals(19, uuidId2.length());
 
         Assert.assertEquals(uuid1, uuidId1.asObject());
         ByteBuffer buffer = ByteBuffer.allocate(16);

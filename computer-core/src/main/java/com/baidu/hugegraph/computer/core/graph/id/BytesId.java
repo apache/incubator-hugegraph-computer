@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -38,7 +39,7 @@ import com.baidu.hugegraph.util.E;
 
 public class BytesId implements Id {
 
-    public static final BytesId EMPTY = BytesId.of("");
+    public static final BytesId EMPTY = BytesId.of(Constants.EMPTY_STR);
 
     private IdType idType;
     private byte[] bytes;
@@ -81,7 +82,7 @@ public class BytesId implements Id {
         E.checkArgument(value != null, "The value can't be null");
         long high = value.getMostSignificantBits();
         long low = value.getLeastSignificantBits();
-        BytesOutput output = IOFactory.createBytesOutput(18);
+        BytesOutput output = IOFactory.createBytesOutput(16);
         try {
             output.writeLong(high);
             output.writeLong(low);
@@ -93,13 +94,13 @@ public class BytesId implements Id {
     }
 
     @Override
-    public IdType idType() {
-        return this.idType;
+    public ValueType valueType() {
+        return ValueType.ID_VALUE;
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.ID_VALUE;
+    public IdType idType() {
+        return this.idType;
     }
 
     @Override
@@ -119,6 +120,11 @@ public class BytesId implements Id {
     @Override
     public int length() {
         return this.length;
+    }
+
+    @Override
+    public Object value() {
+        return this.asObject();
     }
 
     @Override
@@ -200,10 +206,5 @@ public class BytesId implements Id {
     @Override
     public String toString() {
         return this.asObject().toString();
-    }
-
-    @Override
-    public Object value() {
-        return this.asObject();
     }
 }
