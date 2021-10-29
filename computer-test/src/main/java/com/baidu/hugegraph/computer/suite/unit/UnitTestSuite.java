@@ -80,6 +80,19 @@ public class UnitTestSuite {
 
     private static final Logger LOG = Log.logger(UnitTestSuite.class);
 
+    static {
+        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
+                                  "defaultValue", "http://localhost:2579");
+        Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_URL,
+                                  "defaultValue", "http://127.0.0.1:8080");
+        Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_GRAPH_NAME,
+                                  "defaultValue", "hugegraph");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_URL,
+                                  "defaultValue", "hdfs://127.0.0.1:9000");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_USER,
+                                  "defaultValue", System.getProperty("user.name"));
+    }
+
     @BeforeClass
     public static void setup() throws ClassNotFoundException {
         LOG.info("Setup for UnitTestSuite of hugegraph-computer");
@@ -91,8 +104,6 @@ public class UnitTestSuite {
         OptionSpace.register("computer-rpc",
                              "com.baidu.hugegraph.config.RpcOptions");
 
-        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                                  "defaultValue", "http://localhost:2579");
         UnitTestBase.updateOptions(
             ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()
         );
