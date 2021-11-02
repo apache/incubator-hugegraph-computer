@@ -78,9 +78,10 @@ public class WorkerService implements Closeable {
     private Combiner<Value<?>> combiner;
 
     private ContainerInfo masterInfo;
-
     private volatile ShutdownHook shutdownHook;
     private volatile Thread serviceThread;
+
+    private WorkerStat inputWorkerStat;
 
     public WorkerService() {
         this.context = ComputerContext.instance();
@@ -229,8 +230,32 @@ public class WorkerService implements Closeable {
             // TODO: Get superstepStat from bsp service.
             superstepStat = null;
         }
+        
+        if (true) {
+            WorkerContext context0 = new SuperstepContext(-3, superstepStat);
+            this.bsp4Worker.workerStepPrepareDone(-3);
+            this.bsp4Worker.waitMasterStepPrepareDone(-3);
+            this.managers.beforeSuperstep(this.config, -3);
 
-        /*
+            this.computeManager.sendHashIdMsg(context0);
+
+            this.managers.afterSuperstep(this.config, -3);
+            this.bsp4Worker.workerStepComputeDone(-3);
+            this.bsp4Worker.waitMasterStepComputeDone(-3);
+
+            this.computeManager.takeRecvedMessages(false);
+
+            this.bsp4Worker.workerStepPrepareDone(-2);
+            this.bsp4Worker.waitMasterStepPrepareDone(-2);
+            this.managers.beforeSuperstep(this.config, -2);
+
+            this.computeManager.recvHashIdMsg();
+
+            this.managers.afterSuperstep(this.config, -2);
+            this.bsp4Worker.workerStepComputeDone(-2);
+            this.bsp4Worker.waitMasterStepComputeDone(-2);
+         }
+         /*
          * The master determine whether to execute the next superstep. The
          * superstepStat is active while master decides to execute the next
          * superstep.
@@ -239,8 +264,9 @@ public class WorkerService implements Closeable {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
+
             if (superstep > 0) {
-                this.computeManager.takeRecvedMessages();
+                this.computeManager.takeRecvedMessages(true);
             }
             /*
              * Call beforeSuperstep() before all workers compute() called.
@@ -257,9 +283,10 @@ public class WorkerService implements Closeable {
              */
             this.bsp4Worker.workerStepPrepareDone(superstep);
             this.bsp4Worker.waitMasterStepPrepareDone(superstep);
-            WorkerStat workerStat = this.computeManager.compute(context,
-                                                                superstep);
 
+            WorkerStat workerStat = this.inputWorkerStat;
+            workerStat = this.computeManager.compute(context, superstep);
+            
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
 
@@ -276,7 +303,7 @@ public class WorkerService implements Closeable {
 
             this.bsp4Worker.workerStepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
-
+            
             superstepStat = this.bsp4Worker.waitMasterStepDone(superstep);
             superstep++;
         }
@@ -369,6 +396,7 @@ public class WorkerService implements Closeable {
         this.bsp4Worker.waitMasterInputDone();
 
         WorkerStat workerStat = this.computeManager.input();
+        this.inputWorkerStat = workerStat;
 
         this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
                                        workerStat);

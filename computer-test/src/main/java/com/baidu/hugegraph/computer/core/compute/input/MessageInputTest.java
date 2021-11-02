@@ -118,7 +118,7 @@ public class MessageInputTest extends UnitTestBase {
         receiveManager.onFinished(this.connectionId);
         PeekableIterator<KvEntry> it = receiveManager.messagePartitions()
                                                      .get(0);
-        MessageInput<IdList> input = new MessageInput<>(context(), it);
+        MessageInput<IdList> input = new MessageInput<>(context(), it, true);
         Map<Id, List<IdList>> expectedMessages = expectedMessages();
         checkMessages(expectedMessages, input);
     }

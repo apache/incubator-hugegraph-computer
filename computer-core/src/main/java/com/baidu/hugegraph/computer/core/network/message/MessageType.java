@@ -31,6 +31,7 @@ public enum MessageType implements SerialEnum {
     MSG(0x01, DATA),
     VERTEX(0x02, DATA),
     EDGE(0x03, DATA),
+    HASHID(0x04, DATA),
     ACK(0x80, CONTROL),
     FAIL(0X81, CONTROL),
     START(0x82, CONTROL),

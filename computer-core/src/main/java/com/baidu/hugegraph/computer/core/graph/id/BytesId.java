@@ -166,7 +166,7 @@ public class BytesId implements Id {
     @Override
     public void write(RandomAccessOutput out) throws IOException {
         out.writeByte(this.idType.code());
-        out.writeInt(this.length);
+        out.writeByte(this.length);
         out.write(this.bytes, 0, this.length);
     }
 

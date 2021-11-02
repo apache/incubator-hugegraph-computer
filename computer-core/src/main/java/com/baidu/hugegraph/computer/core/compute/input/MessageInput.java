@@ -34,6 +34,7 @@ import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
 
 public class MessageInput<T extends Value<?>> {
 
@@ -42,7 +43,8 @@ public class MessageInput<T extends Value<?>> {
     private T value;
 
     public MessageInput(ComputerContext context,
-                        PeekableIterator<KvEntry> messages) {
+                        PeekableIterator<KvEntry> messages,
+                        boolean inCompute) {
         if (messages == null) {
             this.messages = PeekableIterator.emptyIterator();
         } else {
@@ -50,8 +52,14 @@ public class MessageInput<T extends Value<?>> {
         }
         this.config = context.config();
 
-        this.value = this.config.createObject(
+        if (!inCompute) {
+            this.value = (T)(new IdList());
+            System.out.println(MessageInput.this.value.valueType());
+        }
+        else {
+            this.value = this.config.createObject(
                      ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+        }
     }
 
     public Iterator<T> iterator(ReusablePointer vidPointer) {

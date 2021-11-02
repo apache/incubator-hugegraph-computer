@@ -23,7 +23,7 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+//import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
@@ -102,10 +102,10 @@ public class WorkerInputManager implements Manager {
             Vertex vertex = iterator.next();
             this.sendManager.sendEdge(vertex);
             //inverse edge here
-            if (!this.config.get(
-                     ComputerOptions.VERTEX_WITH_EDGES_BOTHDIRECTION)) {
-                continue;
-            }
+            //if (!this.config.get(
+            //         ComputerOptions.VERTEX_WITH_EDGES_BOTHDIRECTION)) {
+                //continue;
+            //}
             for (Edge edge:vertex.edges()) {
                 Id targetId = edge.targetId();
                 Id sourceId = vertex.id();

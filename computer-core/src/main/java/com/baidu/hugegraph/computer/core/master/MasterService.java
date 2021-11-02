@@ -223,6 +223,21 @@ public class MasterService implements Closeable {
 
         watcher.reset();
         watcher.start();
+
+        // Step 2.5 send id hash
+        for (int i = 0; i < 2; i++) {
+            superstep = -3 + i;
+
+            this.bsp4Master.waitWorkersStepPrepareDone(superstep);
+            this.managers.beforeSuperstep(this.config, superstep);
+            this.bsp4Master.masterStepPrepareDone(superstep);
+
+            this.bsp4Master.waitWorkersStepComputeDone(superstep);
+            this.bsp4Master.masterStepComputeDone(superstep);
+            this.managers.afterSuperstep(this.config, superstep);
+        }
+        superstep = 0;
+
         // Step 3: Iteration computation of all supersteps.
         for (; superstepStat.active(); superstep++) {
             LOG.info("{} MasterService superstep {} started",
@@ -245,6 +260,7 @@ public class MasterService implements Closeable {
              *    know whether to continue the next superstep iteration.
              */
             this.bsp4Master.waitWorkersStepPrepareDone(superstep);
+
             this.managers.beforeSuperstep(this.config, superstep);
             this.bsp4Master.masterStepPrepareDone(superstep);
 

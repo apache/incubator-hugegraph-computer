@@ -38,16 +38,21 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
+import java.nio.ByteBuffer;
 
 public class EdgesInput {
 
     private RandomAccessInput input;
-    private final ReusablePointer idPointer;
+    private ReusablePointer idPointer;
     private final ReusablePointer valuePointer;
     private final File edgeFile;
     private final GraphFactory graphFactory;
     private final int flushThreshold;
     private final EdgeFrequency frequency;
+    private final ComputerContext context;
+    private boolean useFixLength;
+    private int idBytes;
 
     public EdgesInput(ComputerContext context, File edgeFile) {
         this.graphFactory = context.graphFactory();
@@ -57,6 +62,9 @@ public class EdgesInput {
         this.flushThreshold = context.config().get(
                               ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
         this.frequency = context.config().get(ComputerOptions.INPUT_EDGE_FREQ);
+        this.context = context;
+        this.useFixLength = false;
+        this.idBytes = 8;
     }
 
     public void init() throws IOException {
@@ -67,12 +75,43 @@ public class EdgesInput {
         this.input.close();
     }
 
+    public void switchToFixLength() {
+       this.useFixLength = true;
+    }
+
+    public void readIdBytes() {
+       try {
+           this.idBytes = this.input.readFixedInt();
+       } catch (IOException e) {
+            throw new ComputerException("Can't read from edges input '%s'",
+                                        e, this.edgeFile.getAbsoluteFile());
+        }
+    }
+
     public Edges edges(ReusablePointer vidPointer) {
         try {
             while (this.input.available() > 0) {
                 long startPosition = this.input.position();
-                this.idPointer.read(this.input);
-                int status = vidPointer.compareTo(this.idPointer);
+                int status = -1;
+                if (!useFixLength) {
+                    this.idPointer.read(this.input);
+                    status = vidPointer.compareTo(this.idPointer);
+                }
+                else {
+                    byte[] bId = this.input.readBytes(Long.BYTES);
+                    byte[] blId = new byte[8];
+                    for (int j = 0; j < this.idBytes; j++) {
+                        int j_ = j + Long.BYTES - this.idBytes;
+                        blId[j_] = bId[j];
+                    }
+                    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+                    buffer.put(blId, 0, Long.BYTES);
+                    buffer.flip();
+                    Long lId = buffer.getLong();
+                    this.idPointer = new ReusablePointer(blId, Long.BYTES);
+                    status = vidPointer.compareTo(this.idPointer);
+                }
+
                 if (status < 0) { // No edges
                     /*
                      * The current batch belong to vertex that vertex id is
@@ -211,19 +250,44 @@ public class EdgesInput {
     private Edges readEdges(RandomAccessInput in) {
         try {
             int count = in.readFixedInt();
+
             Edges edges = this.graphFactory.createEdges(count);
             if (this.frequency == EdgeFrequency.SINGLE) {
                 for (int i = 0; i < count; i++) {
                     Edge edge = this.graphFactory.createEdge();
                     // Only use targetId as subKey, use props as subValue
+                    long p0 = in.position();
                     boolean inv = (in.readByte() == 1) ? true : false;
-                    edge.targetId(StreamGraphInput.readId(in));
+                    if (!this.useFixLength) {
+                        edge.targetId(StreamGraphInput.readId(in));
+                    } 
+                    else {
+                       byte[] bId = in.readBytes(Long.BYTES);
+                       byte[] blId = new byte[8];
+                       for (int j = 0; j < this.idBytes; j++) {
+                           int j_ = j + Long.BYTES - this.idBytes;
+                           blId[j_] = bId[j];
+                       }
+                       ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+                       buffer.put(blId, 0, Long.BYTES);
+                       buffer.flip();
+                       Long lId = buffer.getLong();
+                       edge.targetId(this.context.
+                                      graphFactory().createId(lId)); 
+                    }
                     // Read subValue
                     edge.id(StreamGraphInput.readId(in));
+
                     edge.label(StreamGraphInput.readLabel(in));
+                    
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }         
                     edges.add(edge);
                 }
             } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
@@ -232,12 +296,33 @@ public class EdgesInput {
                     // Use label + targetId as subKey, use props as subValue
                     boolean inv = (in.readByte() == 1) ? true : false;
                     edge.label(StreamGraphInput.readLabel(in));
-                    edge.targetId(StreamGraphInput.readId(in));
+                    if (!this.useFixLength) {
+                        edge.targetId(StreamGraphInput.readId(in));
+                    }
+                    else {
+                       byte[] bId = in.readBytes(Long.BYTES);
+                       byte[] blId = new byte[8];
+                       for (int j = 0; j < this.idBytes; j++) {
+                           int j_ = j + Long.BYTES - this.idBytes;
+                           blId[j_] = bId[j];
+                       }
+                       ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+                       buffer.put(blId, 0, Long.BYTES);
+                       buffer.flip();
+                       Long lId = buffer.getLong();
+                       edge.targetId(this.context.
+                                      graphFactory().createId(lId));
+                    }
                     // Read subValue
                     edge.id(StreamGraphInput.readId(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }
                     edges.add(edge);
                 }
             } else {
@@ -251,12 +336,36 @@ public class EdgesInput {
                     boolean inv = (in.readByte() == 1) ? true : false;
                     edge.label(StreamGraphInput.readLabel(in));
                     edge.name(StreamGraphInput.readLabel(in));
-                    edge.targetId(StreamGraphInput.readId(in));
+
+                    if (!this.useFixLength) {
+                        edge.targetId(StreamGraphInput.readId(in));
+                    }
+                    else {
+                       byte[] bId = in.readBytes(Long.BYTES);
+                       byte[] blId = new byte[8];
+                       for (int j = 0; j < this.idBytes; j++) {
+                           int j_ = j + Long.BYTES - this.idBytes;
+                           blId[j_] = bId[j];
+                       }
+                       ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+                       buffer.put(blId, 0, Long.BYTES);
+                       buffer.flip();
+                       Long lId = buffer.getLong();
+                       edge.targetId(this.context.
+                                      graphFactory().createId(lId));
+                    }
                     // Read subValue
                     edge.id(StreamGraphInput.readId(in));
+
+                    // Read properties
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }
                     edges.add(edge);
                 }
             }

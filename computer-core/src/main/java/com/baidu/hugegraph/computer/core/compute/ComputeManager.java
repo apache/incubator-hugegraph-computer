@@ -115,16 +115,34 @@ public class ComputeManager<M extends Value<M>> {
         return workerStat;
     }
 
+    public void sendHashIdMsg(ComputationContext context) {
+        this.sendManager.startSend(MessageType.HASHID);
+        for (FileGraphPartition<M> partition : this.partitions.values()) {
+            partition.sendIdHash(context);
+        }
+        this.sendManager.finishSend(MessageType.HASHID);
+    }
+
+    public void recvHashIdMsg() {
+        for (FileGraphPartition<M> partition : this.partitions.values()) {
+            partition.partitionHashId();
+        }
+    }
     /**
      * Get compute-messages from MessageRecvManager, then put message to
      * corresponding partition. Be called before
      * {@link MessageRecvManager#beforeSuperstep} is called.
      */
-    public void takeRecvedMessages() {
-        Map<Integer, PeekableIterator<KvEntry>> messages =
-                     this.recvManager.messagePartitions();
+    public void takeRecvedMessages(boolean inCompute) {
+        Map<Integer, PeekableIterator<KvEntry>> messages;
+        if (!inCompute) {
+            messages = this.recvManager.hashIdMessagePartitions();
+        }
+        else {
+            messages = this.recvManager.messagePartitions();
+        }
         for (FileGraphPartition<M> partition : this.partitions.values()) {
-            partition.messages(messages.get(partition.partition()));
+            partition.messages(messages.get(partition.partition()), inCompute);
         }
     }
 
