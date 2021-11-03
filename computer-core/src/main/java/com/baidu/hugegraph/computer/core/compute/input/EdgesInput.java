@@ -98,7 +98,7 @@ public class EdgesInput {
                     status = vidPointer.compareTo(this.idPointer);
                 }
                 else {
-                    byte[] bId = this.input.readBytes(Long.BYTES);
+                    byte[] bId = this.input.readBytes(this.idBytes);
                     byte[] blId = new byte[8];
                     for (int j = 0; j < this.idBytes; j++) {
                         int j_ = j + Long.BYTES - this.idBytes;
@@ -262,7 +262,7 @@ public class EdgesInput {
                         edge.targetId(StreamGraphInput.readId(in));
                     } 
                     else {
-                       byte[] bId = in.readBytes(Long.BYTES);
+                       byte[] bId = in.readBytes(this.idBytes);
                        byte[] blId = new byte[8];
                        for (int j = 0; j < this.idBytes; j++) {
                            int j_ = j + Long.BYTES - this.idBytes;
@@ -300,7 +300,7 @@ public class EdgesInput {
                         edge.targetId(StreamGraphInput.readId(in));
                     }
                     else {
-                       byte[] bId = in.readBytes(Long.BYTES);
+                       byte[] bId = in.readBytes(this.idBytes);
                        byte[] blId = new byte[8];
                        for (int j = 0; j < this.idBytes; j++) {
                            int j_ = j + Long.BYTES - this.idBytes;
@@ -341,7 +341,7 @@ public class EdgesInput {
                         edge.targetId(StreamGraphInput.readId(in));
                     }
                     else {
-                       byte[] bId = in.readBytes(Long.BYTES);
+                       byte[] bId = in.readBytes(this.idBytes);
                        byte[] blId = new byte[8];
                        for (int j = 0; j < this.idBytes; j++) {
                            int j_ = j + Long.BYTES - this.idBytes;
@@ -355,8 +355,17 @@ public class EdgesInput {
                                       graphFactory().createId(lId));
                     }
                     // Read subValue
+                    //System.out.printf("\n\n\n %s %s %s \n", 
+                    //           edge.label(), edge.name(), edge.targetId());
+                    //Long pos = in.position();
+                    //byte[] btest = in.readBytes(2);
+                    //for (int l = 0; l < 2; l++) {
+                    //    System.out.printf("%02X ", btest[l]);
+                    //}
+                    //System.out.printf("\n\n");
+                    //in.seek(pos);
                     edge.id(StreamGraphInput.readId(in));
-
+                   
                     // Read properties
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);

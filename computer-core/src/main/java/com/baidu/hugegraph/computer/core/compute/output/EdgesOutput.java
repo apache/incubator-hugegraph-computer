@@ -133,7 +133,7 @@ public class EdgesOutput {
                         edge.targetId().write(this.output);
                     }
                     else {
-                        long lid = (long)(vertex.id().asObject());
+                        long lid = (long)(edge.targetId().asObject());
                         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
                         buffer.putLong(0, lid);
                         byte[] bid = buffer.array();
@@ -195,7 +195,7 @@ public class EdgesOutput {
                         edge.targetId().write(this.output);
                     }
                     else {
-                        long lid = (long)(vertex.id().asObject());
+                        long lid = (long)(edge.targetId().asObject());
                         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
                         buffer.putLong(0, lid);
                         byte[] bid = buffer.array();
@@ -259,7 +259,7 @@ public class EdgesOutput {
                         edge.targetId().write(this.output);
                     }
                     else {
-                        long lid = (long)(vertex.id().asObject());
+                        long lid = (long)(edge.targetId().asObject());
                         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
                         buffer.putLong(0, lid);
                         byte[] bid = buffer.array();

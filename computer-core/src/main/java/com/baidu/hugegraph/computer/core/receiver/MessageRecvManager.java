@@ -92,6 +92,8 @@ public class MessageRecvManager implements Manager, MessageHandler {
                                 this.context, fileGenerator, this.sortManager);
         this.edgePartitions = new EdgeMessageRecvPartitions(
                               this.context, fileGenerator, this.sortManager);
+        this.hashIdMessagePartitions = new HashIdMessageRecvPartitions(
+                                 this.context, fileGenerator, this.sortManager);
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
@@ -106,8 +108,6 @@ public class MessageRecvManager implements Manager, MessageHandler {
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager, superstep);
         this.messagePartitions = new ComputeMessageRecvPartitions(
-                                 this.context, fileGenerator, this.sortManager);
-        this.hashIdMessagePartitions = new HashIdMessageRecvPartitions(
                                  this.context, fileGenerator, this.sortManager);
         this.expectedFinishMessages = this.workerCount;
         this.finishMessagesLatch = new CountDownLatch(
@@ -178,7 +178,10 @@ public class MessageRecvManager implements Manager, MessageHandler {
                 this.messagePartitions.addBuffer(partition, buffer);
                 break;
             case HASHID:
+                //System.out.println("!!!!!!! \n\n\n");
+                //System.out.println(this.hashIdMessagePartitions);
                 this.hashIdMessagePartitions.addBuffer(partition, buffer);
+                //System.out.println("aa \n\n\n");
                 break;
             default:
                 throw new ComputerException(
