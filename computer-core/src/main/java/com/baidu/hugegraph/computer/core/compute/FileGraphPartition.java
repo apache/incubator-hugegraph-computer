@@ -188,7 +188,7 @@ public class FileGraphPartition<M extends Value<M>> {
                 path.add(vertex.id());
                 path.add(id);
 
-                context.sendMessage(targetId, path);
+                this.sendManager.sendHashIdMessage(targetId, path);
             }
             selfIncreaseID++;
         }

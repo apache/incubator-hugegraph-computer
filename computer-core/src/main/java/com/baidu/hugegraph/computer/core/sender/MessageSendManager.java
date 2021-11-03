@@ -134,6 +134,19 @@ public class MessageSendManager implements Manager {
         }
     }
 
+    public void sendHashIdMessage(Id targetId, Value<?> value) {
+        this.checkException();
+
+        WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
+                                                            MessageType.HASHID);
+        try {
+            // Write message to buffer
+            buffer.writeMessage(targetId, value);
+        } catch (IOException e) {
+            throw new ComputerException("Failed to write message", e);
+        }
+    }
+
     /**
      * Start send message, put an START signal into queue
      * @param type the message type

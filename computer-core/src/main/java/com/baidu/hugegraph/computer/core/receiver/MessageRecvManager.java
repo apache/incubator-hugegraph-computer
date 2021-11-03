@@ -178,9 +178,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
                 this.messagePartitions.addBuffer(partition, buffer);
                 break;
             case HASHID:
-                System.out.printf("\n\n\n recvManager HashID \n\n\n");
                 this.hashIdMessagePartitions.addBuffer(partition, buffer);
-                System.out.printf("\n\n ttttt \n\n");
                 break;
             default:
                 throw new ComputerException(
