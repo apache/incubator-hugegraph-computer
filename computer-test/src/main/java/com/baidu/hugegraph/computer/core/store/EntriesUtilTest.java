@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.store;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 
 import org.junit.Test;
@@ -91,5 +92,26 @@ public class EntriesUtilTest {
                                 StoreTestUtil.idFromPointer(iter.next().key()));
             Assert.assertThrows(NoSuchElementException.class, iter::next);
         }
+    }
+
+    @Test
+    public void testKvEntryWithFirstSubKv() throws IOException {
+        BytesOutput output = IOFactory.createBytesOutput(
+                                       Constants.SMALL_BUF_SIZE);
+        EntryOutput entryOutput = new EntryOutputImpl(output);
+        KvEntryWriter subKvWriter = entryOutput.writeEntry(BytesId.of(100));
+        subKvWriter.writeSubKv(BytesId.of(1), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(1), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(1), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(1), BytesId.of(1));
+        subKvWriter.writeFinish();
+
+        BytesInput input = EntriesUtil.inputFromOutput(output);
+
+        // Read entry from buffer
+        KvEntry entry = EntriesUtil.kvEntryFromInput(input, true, true);
+        entry = EntriesUtil.kvEntryWithFirstSubKv(entry);
+        // Assert subKvEntry size
+        Assert.assertEquals(4, entry.numSubEntries());
     }
 }

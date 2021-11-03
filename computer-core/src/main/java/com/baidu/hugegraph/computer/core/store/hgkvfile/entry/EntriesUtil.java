@@ -149,7 +149,7 @@ public final class EntriesUtil {
             BytesInput input = IOFactory.createBytesInput(entry.value()
                                                                .bytes());
             // Read sub-entry size
-            long subKvNum = input.skip(Integer.BYTES);
+            long subKvNum = input.readFixedInt();
             KvEntry firstSubKv = EntriesUtil.subKvEntryFromInput(input, true);
 
             return new KvEntryWithFirstSubKv(entry.key(), entry.value(),
