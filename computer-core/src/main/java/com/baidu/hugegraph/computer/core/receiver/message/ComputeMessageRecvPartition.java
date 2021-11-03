@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 
 public class ComputeMessageRecvPartition extends MessageRecvPartition {
 
-    private static final String TYPE = MessageType.MSG.name();
+    private static final String TYPE = MessageType.MSG.name().toLowerCase();
 
     private final OuterSortFlusher flusher;
 

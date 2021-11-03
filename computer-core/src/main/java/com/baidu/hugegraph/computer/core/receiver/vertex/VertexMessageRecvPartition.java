@@ -37,7 +37,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class VertexMessageRecvPartition extends MessageRecvPartition {
 
-    private static final String TYPE = MessageType.VERTEX.name();
+    private static final String TYPE = MessageType.VERTEX.name().toLowerCase();
 
     private final OuterSortFlusher flusher;
 
@@ -47,7 +47,7 @@ public class VertexMessageRecvPartition extends MessageRecvPartition {
         super(context.config(), fileGenerator, sortManager, false);
         Config config = context.config();
         Combiner<Properties> propertiesCombiner = config.createObject(
-        ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
+                ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
 
         /*
          * If propertiesCombiner is OverwriteCombiner, just remain the

@@ -41,7 +41,6 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
@@ -93,7 +92,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
     public void testVertexMessageRecvPartition() throws IOException {
-        Assert.assertEquals(MessageType.VERTEX.name(), this.partition.type());
+        Assert.assertEquals("vertex", this.partition.type());
         Assert.assertEquals(0L, this.partition.totalBytes());
         addTenVertexBuffer(this.partition::addBuffer);
 
