@@ -21,6 +21,8 @@ package com.baidu.hugegraph.computer.core.output.hdfs;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -42,16 +44,17 @@ public class HdfsOutputMerger {
 
     protected void init(Config config) {
         try {
-            String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
-            String jobId = config.get(ComputerOptions.JOB_ID);
-            int partitions = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
-            this.sourcePaths = this.paths(dir, jobId, partitions);
-            this.mergedPath = new Path(new Path(dir, jobId), MERGED_FILE_NAME);
-
             Configuration configuration = new Configuration();
             String url = config.get(ComputerOptions.OUTPUT_HDFS_URL);
             String user = config.get(ComputerOptions.OUTPUT_HDFS_USER);
             this.fs = FileSystem.get(new URI(url), configuration, user);
+
+            String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
+            String jobId = config.get(ComputerOptions.JOB_ID);
+            int partitions = config.get(ComputerOptions.JOB_PARTITIONS_COUNT);
+            this.sourcePaths = this.existsPartitionPaths(dir, jobId, partitions)
+                                   .toArray(new Path[0]);
+            this.mergedPath = new Path(new Path(dir, jobId), MERGED_FILE_NAME);
         } catch (Exception e) {
             throw new ComputerException("Failed to init hdfs output merger", e);
         }
@@ -66,13 +69,16 @@ public class HdfsOutputMerger {
         }
     }
 
-    private Path[] paths(String dir, String jobId, int partitions) {
-        Path[] paths = new Path[partitions];
+    private List<Path> existsPartitionPaths(String dir, String jobId,
+                                            int partitions) throws IOException {
+        List<Path> pathList = new ArrayList<>();
         for (int i = 0; i < partitions; i++) {
             Path path = HdfsOutput.buildPath(dir, jobId, i);
-            paths[i] = path;
+            if (this.fs.exists(path)) {
+                pathList.add(path);
+            }
         }
-        return paths;
+        return pathList;
     }
 
     protected void close() {
