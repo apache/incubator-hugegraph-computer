@@ -113,6 +113,21 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     @Override
     public void afterSuperstep(Config config, int superstep) {
+        final int firstMsgSuperstep = Constants.INPUT_SUPERSTEP + 1;
+
+        if (superstep > firstMsgSuperstep) {
+            this.messagePartitions.clearOldFiles();
+        } else {
+            assert superstep == firstMsgSuperstep;
+
+            assert this.vertexPartitions != null;
+            this.vertexPartitions.clearOldFiles();
+            this.vertexPartitions = null;
+
+            assert this.edgePartitions != null;
+            this.edgePartitions.clearOldFiles();
+            this.edgePartitions = null;
+        }
     }
 
     @Override
@@ -198,7 +213,6 @@ public class MessageRecvManager implements Manager, MessageHandler {
         E.checkState(this.vertexPartitions != null,
                      "The vertexPartitions can't be null");
         VertexMessageRecvPartitions partitions = this.vertexPartitions;
-        this.vertexPartitions = null;
         return partitions.iterators();
     }
 
@@ -206,7 +220,6 @@ public class MessageRecvManager implements Manager, MessageHandler {
         E.checkState(this.edgePartitions != null,
                      "The edgePartitions can't be null");
         EdgeMessageRecvPartitions partitions = this.edgePartitions;
-        this.edgePartitions = null;
         return partitions.iterators();
     }
 

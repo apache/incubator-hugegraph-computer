@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.receiver.message;
 
+import java.util.List;
+
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
@@ -37,5 +39,10 @@ public class ComputeMessageRecvPartitions
     public ComputeMessageRecvPartition createPartition() {
         return new ComputeMessageRecvPartition(this.context, this.fileGenerator,
                                                this.sortManager);
+    }
+
+    @Override
+    public List<String> needClearDirs(ComputeMessageRecvPartition partition) {
+        return this.fileGenerator.preStepDirs(partition.type());
     }
 }

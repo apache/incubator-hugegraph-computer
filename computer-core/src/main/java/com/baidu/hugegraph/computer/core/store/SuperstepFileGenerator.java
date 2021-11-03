@@ -19,6 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.store;
 
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class SuperstepFileGenerator {
@@ -36,5 +39,23 @@ public class SuperstepFileGenerator {
         String[] paths = {type, Integer.toString(this.superstep),
                           UUID.randomUUID().toString()};
         return this.fileGenerator.nextDirectory(paths);
+    }
+
+    public List<String> preStepDirs(String type) {
+        List<String> preStepDirs = new ArrayList<>();
+        String[] paths = {type, Integer.toString(this.superstep - 1)};
+        for (String dir : this.fileGenerator.dirs()) {
+            preStepDirs.add(Paths.get(dir, paths).toString());
+        }
+        return preStepDirs;
+    }
+
+    public List<String> curStepDirs(String type) {
+        List<String> curStepDirs = new ArrayList<>();
+        String[] paths = {type, Integer.toString(this.superstep)};
+        for (String dir : this.fileGenerator.dirs()) {
+            curStepDirs.add(Paths.get(dir, paths).toString());
+        }
+        return curStepDirs;
     }
 }
