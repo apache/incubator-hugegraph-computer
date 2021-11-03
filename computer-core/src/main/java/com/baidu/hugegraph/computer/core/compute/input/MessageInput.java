@@ -39,7 +39,7 @@ public class MessageInput<T extends Value<?>> {
 
     private final Config config;
     private final PeekableIterator<KvEntry> messages;
-    private T value;
+    private final T value;
 
     public MessageInput(ComputerContext context,
                         PeekableIterator<KvEntry> messages) {

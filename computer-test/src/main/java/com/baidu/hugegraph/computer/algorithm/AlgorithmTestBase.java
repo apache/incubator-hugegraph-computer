@@ -42,7 +42,7 @@ import com.baidu.hugegraph.util.Log;
 public class AlgorithmTestBase extends UnitTestBase {
 
     public static void runAlgorithm(String algorithmParams, String ... options)
-                       throws InterruptedException {
+                                    throws InterruptedException {
         final Logger log = Log.logger(AlgorithmTestBase.class);
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch countDownLatch = new CountDownLatch(2);
@@ -55,7 +55,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 params.put(RpcOptions.RPC_REMOTE_URL.name(),
                            "127.0.0.1:8090");
                 params.put(ComputerOptions.JOB_ID.name(),
-                           "local_002");
+                           "algo_test_job1");
                 params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
                            "1");
                 params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(),
@@ -102,7 +102,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 params.put(RpcOptions.RPC_SERVER_PORT.name(),
                            "8090");
                 params.put(ComputerOptions.JOB_ID.name(),
-                           "local_002");
+                           "algo_test_job1");
                 params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
                            "1");
                 params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(),

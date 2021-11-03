@@ -40,9 +40,13 @@ public class IdValueTest extends UnitTestBase {
     public void testType() {
         Value<Id> value1 = new BytesId();
         Value<Id> value2 = new BytesId(IdType.LONG, new byte[]{1, 2, 3});
+        Value<Id> value3 = BytesId.of(1L);
+        Value<Id> value4 = BytesId.of("1");
 
         Assert.assertEquals(ValueType.ID_VALUE, value1.valueType());
         Assert.assertEquals(ValueType.ID_VALUE, value2.valueType());
+        Assert.assertEquals(ValueType.ID_VALUE, value3.valueType());
+        Assert.assertEquals(ValueType.ID_VALUE, value4.valueType());
     }
 
     @Test
@@ -93,6 +97,32 @@ public class IdValueTest extends UnitTestBase {
 
         copy.assign(value2);
         Assert.assertEquals(value2, copy);
+    }
+
+    @Test
+    public void testValue() {
+        Value<Id> value1 = BytesId.of(1234L);
+        Value<Id> value2 = BytesId.of("1234");
+        Value<Id> value3 = BytesId.of("12345");
+        Value<Id> value4 = new BytesId();
+
+        Assert.assertEquals(1234L, value1.value());
+        Assert.assertEquals("1234", value2.value());
+        Assert.assertEquals("12345", value3.value());
+        Assert.assertEquals("", value4.value());
+    }
+
+    @Test
+    public void testString() {
+        Value<Id> value1 = BytesId.of(1234L);
+        Value<Id> value2 = BytesId.of("1234");
+        Value<Id> value3 = BytesId.of("12345");
+        Value<Id> value4 = new BytesId();
+
+        Assert.assertEquals("1234", value1.string());
+        Assert.assertEquals("1234", value2.string());
+        Assert.assertEquals("12345", value3.string());
+        Assert.assertEquals("", value4.string());
     }
 
     @Test
@@ -177,7 +207,7 @@ public class IdValueTest extends UnitTestBase {
         Value<Id> value2 = BytesId.of(123);
         Value<Id> value3 = BytesId.of("123");
 
-        Assert.assertEquals("0", value1.toString());
+        Assert.assertEquals("", value1.toString());
         Assert.assertEquals("123", value2.toString());
         Assert.assertEquals("123", value3.toString());
     }
