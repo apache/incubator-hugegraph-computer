@@ -62,17 +62,20 @@ jobs:
           TRAVIS_DIR: computer-dist/src/assembly/travis
         run: |
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-client-1.9.7.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-client -Dversion=1.9.7 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/client-pom.xml
+          md5sum /home/runner/.m2/repository/com/baidu/hugegraph/hugegraph-client/1.9.7/hugegraph-client-1.9.7.jar
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-common-1.8.9.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-common -Dversion=1.8.9 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/common-pom.xml
-          mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-loader-0.12.0.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-loader -Dversion=0.12.0 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/loader-pom.xml
+          mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Download" | grep -v "Progress"
 
       - name: Prepare env and service
         env:
           TRAVIS_DIR: computer-dist/src/assembly/travis
-          COMMIT_ID: e65641517361d7da7ef1801489c15e3af7863a39
+          BRANCH: gh-pre-release
+          COMMIT_ID: 17a8c166096b7379c019e6580507b0c5d3128398
         run: |
           $TRAVIS_DIR/install-env.sh
-          $TRAVIS_DIR/install-hugegraph-from-source.sh $COMMIT_ID | grep -v "Downloading\|Downloaded"
-          $TRAVIS_DIR/load-data-into-hugegraph.sh
+          $TRAVIS_DIR/install-hugegraph-from-source.sh $COMMIT_ID | grep -v "Download" | grep -v "Progress" | grep -v "Warn"
+          $TRAVIS_DIR/load-data-into-hugegraph.sh | grep -v "Download" | grep -v "Progress"
 
       - name: Integrate test
         run: mvn test -P integrate-test
