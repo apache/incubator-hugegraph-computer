@@ -95,15 +95,12 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         return entries;
     }
 
-    public List<String> needClearDirs(P partition) {
-        return this.fileGenerator.curStepDirs(partition.type());
-    }
-
-    public void clearOldFiles() {
+    public void clearOldFiles(int superstep) {
         P partition = this.partitions.values().stream()
                                      .findFirst().orElse(null);
         if (partition != null) {
-            List<String> dirs = this.needClearDirs(partition);
+            List<String> dirs = this.fileGenerator
+                                    .superstepDirs(superstep, partition.type());
             for (String dir : dirs) {
                 FileUtils.deleteQuietly(new File(dir));
             }

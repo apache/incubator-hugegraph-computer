@@ -116,16 +116,16 @@ public class MessageRecvManager implements Manager, MessageHandler {
         final int firstMsgSuperstep = Constants.INPUT_SUPERSTEP + 1;
 
         if (superstep > firstMsgSuperstep) {
-            this.messagePartitions.clearOldFiles();
+            this.messagePartitions.clearOldFiles(superstep - 1);
         } else {
             assert superstep == firstMsgSuperstep;
 
             assert this.vertexPartitions != null;
-            this.vertexPartitions.clearOldFiles();
+            this.vertexPartitions.clearOldFiles(Constants.INPUT_SUPERSTEP);
             this.vertexPartitions = null;
 
             assert this.edgePartitions != null;
-            this.edgePartitions.clearOldFiles();
+            this.edgePartitions.clearOldFiles(Constants.INPUT_SUPERSTEP);
             this.edgePartitions = null;
         }
     }
