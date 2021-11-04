@@ -41,24 +41,6 @@ public class SuperstepFileGenerator {
         return this.fileGenerator.nextDirectory(paths);
     }
 
-    public List<String> preStepDirs(String type) {
-        List<String> preStepDirs = new ArrayList<>();
-        String[] paths = {type, Integer.toString(this.superstep - 1)};
-        for (String dir : this.fileGenerator.dirs()) {
-            preStepDirs.add(Paths.get(dir, paths).toString());
-        }
-        return preStepDirs;
-    }
-
-    public List<String> curStepDirs(String type) {
-        List<String> curStepDirs = new ArrayList<>();
-        String[] paths = {type, Integer.toString(this.superstep)};
-        for (String dir : this.fileGenerator.dirs()) {
-            curStepDirs.add(Paths.get(dir, paths).toString());
-        }
-        return curStepDirs;
-    }
-
     public List<String> superstepDirs(int superstep, String type) {
         List<String> superstepDirs = new ArrayList<>();
         String[] paths = {type, Integer.toString(superstep)};
