@@ -121,40 +121,6 @@ public class FileGraphPartition<M extends Value<M>> {
                                  this.edgeCount, 0L);
     }
 
-    protected PartitionStat compute0(ComputationContext context,
-                                     Computation<M> computation) {
-        long activeVertexCount = 0L;
-        try {
-            this.beforeCompute(0);
-        } catch (IOException e) {
-            throw new ComputerException(
-                      "Error occurred when beforeCompute at superstep 0", e);
-        }
-        while (this.vertexInput.hasNext()) {
-            Vertex vertex = this.vertexInput.next();
-            Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
-            vertex.edges(edges);
-            computation.compute0(context, vertex);
-            if (vertex.active()) {
-                activeVertexCount++;
-            }
-            try {
-                this.saveVertex(vertex);
-            } catch (IOException e) {
-                throw new ComputerException(
-                          "Error occurred when saveVertex: %s", e, vertex);
-            }
-        }
-        try {
-            this.afterCompute(0);
-        } catch (Exception e) {
-            throw new ComputerException("Error occurred when afterCompute", e);
-        }
-        return new PartitionStat(this.partition, this.vertexCount,
-                                 this.edgeCount,
-                                 this.vertexCount - activeVertexCount);
-    }
-
     protected PartitionStat compute(ComputationContext context,
                                     Computation<M> computation,
                                     int superstep) {
@@ -165,6 +131,61 @@ public class FileGraphPartition<M extends Value<M>> {
                       "Error occurred when beforeCompute at superstep %s",
                       e, superstep);
         }
+
+        long activeVertexCount;
+        try {
+            activeVertexCount = superstep == 0 ?
+                                this.compute0(context, computation) :
+                                this.compute1(context, computation, superstep);
+        } catch (Exception e) {
+            throw new ComputerException(
+                      "Error occurred when compute at superstep %s",
+                      e, superstep);
+        }
+
+        try {
+            this.afterCompute(superstep);
+        } catch (Exception e) {
+            throw new ComputerException(
+                      "Error occurred when afterCompute at superstep %s",
+                      e, superstep);
+        }
+
+        return new PartitionStat(this.partition, this.vertexCount,
+                                 this.edgeCount,
+                                 this.vertexCount - activeVertexCount);
+    }
+
+
+    private long compute0(ComputationContext context,
+                          Computation<M> computation) {
+        long activeVertexCount = 0L;
+        while (this.vertexInput.hasNext()) {
+            Vertex vertex = this.vertexInput.next();
+            vertex.reactivate();
+
+            Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
+            vertex.edges(edges);
+
+            computation.compute0(context, vertex);
+
+            if (vertex.active()) {
+                activeVertexCount++;
+            }
+
+            try {
+                this.saveVertexStatusAndValue(vertex);
+            } catch (IOException e) {
+                throw new ComputerException(
+                          "Error occurred when saveVertex: %s", e, vertex);
+            }
+        }
+        return activeVertexCount;
+    }
+
+    private long compute1(ComputationContext context,
+                          Computation<M> computation,
+                          int superstep) {
         Value<?> result = this.context.config().createObject(
                           ComputerOptions.ALGORITHM_RESULT_CLASS);
         long activeVertexCount = 0L;
@@ -195,22 +216,13 @@ public class FileGraphPartition<M extends Value<M>> {
             }
 
             try {
-                this.saveVertex(vertex);
+                this.saveVertexStatusAndValue(vertex);
             } catch (IOException e) {
                 throw new ComputerException(
                           "Error occurred when saveVertex", e);
             }
         }
-        try {
-            this.afterCompute(superstep);
-        } catch (Exception e) {
-            throw new ComputerException(
-                      "Error occurred when afterCompute at superstep %s",
-                      e, superstep);
-        }
-        return new PartitionStat(this.partition, this.vertexCount,
-                                 this.edgeCount,
-                                 this.vertexCount - activeVertexCount);
+        return activeVertexCount;
     }
 
     protected PartitionStat output() {
@@ -231,6 +243,7 @@ public class FileGraphPartition<M extends Value<M>> {
 
             Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
             vertex.edges(edges);
+
             output.write(vertex);
         }
 
@@ -267,7 +280,7 @@ public class FileGraphPartition<M extends Value<M>> {
             }
         } catch (IOException e) {
             throw new ComputerException(
-                      "Failed to read status of vertex %s", e, vertex);
+                      "Failed to read status of vertex '%s'", e, vertex);
         }
 
         try {
@@ -275,11 +288,11 @@ public class FileGraphPartition<M extends Value<M>> {
             vertex.value(result);
         } catch (IOException e) {
             throw new ComputerException(
-                      "Failed to read status of vertex %s", e, vertex);
+                      "Failed to read value of vertex '%s'", e, vertex);
         }
     }
 
-    private void saveVertex(Vertex vertex) throws IOException {
+    private void saveVertexStatusAndValue(Vertex vertex) throws IOException {
         this.curStatusOutput.writeBoolean(vertex.active());
         Value<?> value = vertex.value();
         E.checkNotNull(value, "Vertex's value can't be null");
