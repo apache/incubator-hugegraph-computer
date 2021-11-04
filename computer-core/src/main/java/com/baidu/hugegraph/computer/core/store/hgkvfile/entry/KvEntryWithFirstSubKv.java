@@ -24,8 +24,8 @@ public class KvEntryWithFirstSubKv extends DefaultKvEntry {
     private final KvEntry firstSubKv;
 
     public KvEntryWithFirstSubKv(Pointer key, Pointer value,
-                                 KvEntry firstSubKv) {
-        super(key, value);
+                                 KvEntry firstSubKv, long subKvNum) {
+        super(key, value, subKvNum);
         this.firstSubKv = firstSubKv;
     }
 
