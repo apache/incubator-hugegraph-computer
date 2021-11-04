@@ -208,7 +208,7 @@ public abstract class AbstractK8sTest {
                 .load(new File("../computer-k8s-operator/manifest" +
                                "/hugegraph-computer-crd.v1beta1.yaml"));
         crd.createOrReplace();
-        crd.waitUntilReady(10, TimeUnit.SECONDS);
+        crd.waitUntilReady(2, TimeUnit.SECONDS);
         Assert.assertNotNull(crd.get());
     }
 }
