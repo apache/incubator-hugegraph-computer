@@ -56,8 +56,6 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
         public void setAlgorithmParameters(Map<String, String> params) {
             params.put(ComputerOptions.OUTPUT_CLASS.name(),
                        DegreeCentralityTestOutput.class.getName());
-            params.put(ComputerOptions.OUTPUT_HDFS_USER.name(),
-                       System.getProperty("user.name"));
             super.setAlgorithmParameters(params);
         }
     }
