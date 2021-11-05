@@ -175,6 +175,16 @@ public class ComputerOptions extends OptionHolder {
                     200
             );
 
+    public static final ConfigOption<Integer> INPUT_LIMIT_EDGES_IN_ONE_VERTEX =
+            new ConfigOption<>(
+                    "input.limit_edges_in_one_vertex",
+                    "The maximum number of adjacent edges allowed to be " +
+                    "attached to a vertex, the adjacent edges will be " +
+                    "stored and transferred together as a batch unit.",
+                    disallowEmpty(),
+                    -1
+            );
+
     public static final ConfigOption<Integer> SORT_THREAD_NUMS =
             new ConfigOption<>(
                     "sort.thread_nums",
