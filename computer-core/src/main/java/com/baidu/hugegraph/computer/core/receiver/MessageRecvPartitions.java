@@ -19,8 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
+import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -89,5 +93,18 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
             entries.put(entry.getKey(), entry.getValue().messageStat());
         }
         return entries;
+    }
+
+    // Clear all directory of assign superstep files
+    public void clearOldFiles(int superstep) {
+        P partition = this.partitions.values().stream()
+                                     .findFirst().orElse(null);
+        if (partition != null) {
+            List<String> dirs = this.fileGenerator
+                                    .superstepDirs(superstep, partition.type());
+            for (String dir : dirs) {
+                FileUtils.deleteQuietly(new File(dir));
+            }
+        }
     }
 }

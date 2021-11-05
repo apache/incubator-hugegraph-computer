@@ -19,6 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.store;
 
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class SuperstepFileGenerator {
@@ -36,5 +39,19 @@ public class SuperstepFileGenerator {
         String[] paths = {type, Integer.toString(this.superstep),
                           UUID.randomUUID().toString()};
         return this.fileGenerator.nextDirectory(paths);
+    }
+
+    /*
+        Get all directory of assign superstep files.
+        It will used for delete old files and file must be use nextPath function
+        to generate otherwise will can't delete old files.
+    */
+    public List<String> superstepDirs(int superstep, String type) {
+        List<String> superstepDirs = new ArrayList<>();
+        String[] paths = {type, Integer.toString(superstep)};
+        for (String dir : this.fileGenerator.dirs()) {
+            superstepDirs.add(Paths.get(dir, paths).toString());
+        }
+        return superstepDirs;
     }
 }

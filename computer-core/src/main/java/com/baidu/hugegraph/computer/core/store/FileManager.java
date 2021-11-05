@@ -98,6 +98,11 @@ public class FileManager implements FileGenerator, Manager {
         return this.dirs.get(index % this.dirs.size());
     }
 
+    @Override
+    public List<String> dirs() {
+        return this.dirs;
+    }
+
     /**
      * Creates the directory named by specified dir.
      */
