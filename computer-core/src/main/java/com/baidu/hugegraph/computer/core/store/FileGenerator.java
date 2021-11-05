@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.store;
 
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 public interface FileGenerator {
@@ -62,4 +63,6 @@ public interface FileGenerator {
                          UUID.randomUUID().toString())
                     .toString();
     }
+
+    List<String> dirs();
 }
