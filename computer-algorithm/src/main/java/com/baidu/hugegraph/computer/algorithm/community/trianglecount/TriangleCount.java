@@ -20,14 +20,13 @@
 package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
@@ -60,40 +59,56 @@ public class TriangleCount implements Computation<IdList> {
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<IdList> messages) {
-        Long count = this.triangleCount(context, vertex, messages);
+        Integer count = this.triangleCount(context, vertex, messages);
         if (count != null) {
             ((TriangleCountValue) vertex.value()).count(count);
             vertex.inactivate();
         }
     }
 
-    private Long triangleCount(ComputationContext context, Vertex vertex,
-                               Iterator<IdList> messages) {
-        IdList neighbors = ((TriangleCountValue) vertex.value()).idList();
+    private Integer triangleCount(ComputationContext context, Vertex vertex,
+                                  Iterator<IdList> messages) {
+        IdSet allNeighbors = ((TriangleCountValue) vertex.value()).idSet();
 
         if (context.superstep() == 1) {
+            IdList neighbors = new IdList();
+
             // Collect outgoing neighbors
-            Set<Id> outNeighbors = getOutNeighbors(vertex);
-            neighbors.addAll(outNeighbors);
+            Edges edges = vertex.edges();
+            for (Edge edge : edges) {
+                Id outId = edge.targetId();
+                int compareResult = outId.compareTo(vertex.id());
+                if (compareResult != 0 && !allNeighbors.contains(outId)) {
+                    // Collect id of id less than self from outgoing neighbors
+                    if (compareResult < 0) {
+                        neighbors.add(outId);
+                    }
+                    allNeighbors.add(outId);
+                }
+            }
 
             // Collect incoming neighbors
             while (messages.hasNext()) {
                 IdList idList = messages.next();
                 assert idList.size() == 1;
                 Id inId = idList.get(0);
-                if (!outNeighbors.contains(inId)) {
-                    neighbors.add(inId);
+                int compareResult = inId.compareTo(vertex.id());
+                if (compareResult != 0 && !allNeighbors.contains(inId)) {
+                    // Collect id of id less than self from incoming neighbors
+                    if (compareResult < 0) {
+                        neighbors.add(inId);
+                    }
+                    allNeighbors.add(inId);
                 }
             }
 
-            // Send all neighbors to neighbors
-            for (Id targetId : neighbors.values()) {
+            // Send all neighbors of id less than self to neighbors
+            for (Id targetId : allNeighbors.values()) {
                 context.sendMessage(targetId, neighbors);
             }
         } else if (context.superstep() == 2) {
-            long count = 0L;
+            int count = 0;
 
-            Set<Id> allNeighbors = new HashSet<>(neighbors.values());
             while (messages.hasNext()) {
                 IdList twoDegreeNeighbors = messages.next();
                 for (Id twoDegreeNeighbor : twoDegreeNeighbors.values()) {
@@ -103,20 +118,8 @@ public class TriangleCount implements Computation<IdList> {
                 }
             }
 
-            return count >> 1;
+            return count;
         }
         return null;
-    }
-
-    private static Set<Id> getOutNeighbors(Vertex vertex) {
-        Set<Id> outNeighbors = new HashSet<>();
-        Edges edges = vertex.edges();
-        for (Edge edge : edges) {
-            Id targetId = edge.targetId();
-            if (!vertex.id().equals(targetId)) {
-                outNeighbors.add(targetId);
-            }
-        }
-        return outNeighbors;
     }
 }

@@ -33,7 +33,7 @@ public class TriangleCountOutput extends HugeOutput {
     @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                     .asLong()
+                     .asInt()
                      .writeType(WriteType.OLAP_RANGE)
                      .ifNotExist()
                      .create();
@@ -45,7 +45,7 @@ public class TriangleCountOutput extends HugeOutput {
         com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
                 new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
-        long value = ((TriangleCountValue) vertex.value()).count();
+        int value = ((TriangleCountValue) vertex.value()).count();
         hugeVertex.property(this.name(), value);
         return hugeVertex;
     }
