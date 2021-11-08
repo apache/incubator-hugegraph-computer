@@ -50,6 +50,7 @@ public class NettyTransportClient implements TransportClient {
     private final ClientSession session;
     private final long timeoutSyncRequest;
     private final long timeoutFinishSession;
+    private volatile boolean preSendAvailable;
 
     protected NettyTransportClient(Channel channel, ConnectionId connectionId,
                                    NettyClientFactory clientFactory,
@@ -67,6 +68,7 @@ public class NettyTransportClient implements TransportClient {
         this.timeoutSyncRequest = conf.timeoutSyncRequest();
         this.timeoutFinishSession = conf.timeoutFinishSession();
         this.session = new ClientSession(conf, this.createSendFunction());
+        this.preSendAvailable = false;
     }
 
     public Channel channel() {
@@ -164,9 +166,11 @@ public class NettyTransportClient implements TransportClient {
     }
 
     protected void checkAndNoticeSendAvailable() {
-        if (this.checkSendAvailable()) {
+        boolean sendAvailable = this.checkSendAvailable();
+        if (sendAvailable && !this.preSendAvailable) {
             this.handler.sendAvailable(this.connectionId);
         }
+        this.preSendAvailable = sendAvailable;
     }
 
     @Override
