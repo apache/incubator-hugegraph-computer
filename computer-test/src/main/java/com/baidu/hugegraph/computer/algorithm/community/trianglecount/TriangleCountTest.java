@@ -104,15 +104,15 @@ public class TriangleCountTest extends AlgorithmTestBase {
     @Test
     public void testTriangleCountValue() {
         TriangleCountValue value = new TriangleCountValue();
-        value.count(10L);
+        value.count(10);
         Assert.assertThrows(UnsupportedOperationException.class,
                             () -> value.assign(null));
         Assert.assertThrows(UnsupportedOperationException.class,
                             () -> value.compareTo(new TriangleCountValue()));
 
         TriangleCountValue copy = (TriangleCountValue) value.copy();
-        Assert.assertEquals(10L, copy.count());
-        Assert.assertNotSame(value.idList(), copy.idList());
+        Assert.assertEquals(10, copy.count());
+        Assert.assertNotSame(value.idSet(), copy.idSet());
 
         Assert.assertContains("10", value.toString());
     }
