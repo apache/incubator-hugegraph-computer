@@ -165,7 +165,7 @@ public class NettyTransportClient implements TransportClient {
         return !this.session.flowBlocking() && this.channel.isWritable();
     }
 
-    protected void checkAndNoticeSendAvailable() {
+    protected void checkAndNotifySendAvailable() {
         boolean sendAvailable = this.checkSendAvailable();
         if (sendAvailable && !this.preSendAvailable) {
             this.handler.sendAvailable(this.connectionId);
@@ -192,7 +192,7 @@ public class NettyTransportClient implements TransportClient {
         @Override
         public void onSuccess(Channel channel, ChannelFuture future) {
             super.onSuccess(channel, future);
-            NettyTransportClient.this.checkAndNoticeSendAvailable();
+            NettyTransportClient.this.checkAndNotifySendAvailable();
         }
     }
 }
