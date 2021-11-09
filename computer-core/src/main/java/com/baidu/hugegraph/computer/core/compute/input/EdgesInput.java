@@ -38,6 +38,7 @@ import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.io.BufferedFileInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 
 public class EdgesInput {
 
@@ -240,6 +241,11 @@ public class EdgesInput {
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }
                     edges.add(edge);
                 }
             } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
@@ -254,6 +260,11 @@ public class EdgesInput {
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }
                     edges.add(edge);
                 }
             } else {
@@ -273,6 +284,11 @@ public class EdgesInput {
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
+                    if (inv) {
+                        Properties properties = edge.properties();
+                        properties.put("inv", new BooleanValue(true));
+                        edge.properties(properties);
+                    }
                     edges.add(edge);
                 }
             }

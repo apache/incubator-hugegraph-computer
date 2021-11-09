@@ -28,6 +28,7 @@ import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 
 public class DefaultVertex implements Vertex {
 
@@ -35,6 +36,7 @@ public class DefaultVertex implements Vertex {
     private Id id;
     private Value<?> value;
     private Edges edges;
+    private Edges edgesbothdir;
     private Properties properties;
     private boolean active;
 
@@ -52,6 +54,7 @@ public class DefaultVertex implements Vertex {
         this.id = id;
         this.value = value;
         this.edges = graphFactory.createEdges();
+        this.edgesbothdir = graphFactory.createEdges();
         this.properties = graphFactory.createProperties();
         this.active = true;
     }
@@ -98,8 +101,21 @@ public class DefaultVertex implements Vertex {
     }
 
     @Override
+    public Edges edgesbothdir() {
+        return this.edgesbothdir;
+    }
+
+    @Override
     public void edges(Edges edges) {
-        this.edges = edges;
+        for (Edge edge:edges) {
+            BooleanValue inv = edge.properties().get("inv");
+            boolean inv_ = (inv == null) ? false : inv.value();
+            this.edgesbothdir.add(edge);
+            if (!inv_) {
+                this.edges.add(edge);
+            }
+        }
+        //this.edges = edges;
     }
 
     @Override

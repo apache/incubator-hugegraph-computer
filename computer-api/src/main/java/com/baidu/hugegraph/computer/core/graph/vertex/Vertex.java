@@ -44,6 +44,8 @@ public interface Vertex extends Recyclable {
 
     Edges edges();
 
+    Edges edgesbothdir();
+
     void edges(Edges edges);
 
     void addEdge(Edge edge);
