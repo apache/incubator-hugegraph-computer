@@ -109,17 +109,8 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.finishMessagesLatch = new CountDownLatch(
                                    this.expectedFinishMessages);
         this.superstep = superstep;
-    }
 
-    @Override
-    public void afterSuperstep(Config config, int superstep) {
-        final int firstMsgSuperstep = Constants.INPUT_SUPERSTEP + 1;
-
-        if (superstep > firstMsgSuperstep) {
-            this.messagePartitions.clearOldFiles(superstep - 1);
-        } else {
-            assert superstep == firstMsgSuperstep;
-
+        if (this.superstep == Constants.INPUT_SUPERSTEP + 1) {
             assert this.vertexPartitions != null;
             this.vertexPartitions.clearOldFiles(Constants.INPUT_SUPERSTEP);
             this.vertexPartitions = null;
@@ -127,6 +118,13 @@ public class MessageRecvManager implements Manager, MessageHandler {
             assert this.edgePartitions != null;
             this.edgePartitions.clearOldFiles(Constants.INPUT_SUPERSTEP);
             this.edgePartitions = null;
+        }
+    }
+
+    @Override
+    public void afterSuperstep(Config config, int superstep) {
+        if (superstep > Constants.INPUT_SUPERSTEP + 1) {
+            this.messagePartitions.clearOldFiles(superstep - 1);
         }
     }
 
