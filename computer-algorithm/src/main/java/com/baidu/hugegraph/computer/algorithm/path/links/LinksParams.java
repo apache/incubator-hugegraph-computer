@@ -24,7 +24,6 @@ import java.util.Map;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
-import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 
 public class LinksParams implements AlgorithmParams {
 
@@ -37,7 +36,7 @@ public class LinksParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          LinksMessage.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         LimitedLogOutput.class.getName());
+                         LinksHugeOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,
                          ExtractAllPropertyInputFilter.class.getName());
 
