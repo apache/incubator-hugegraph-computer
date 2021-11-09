@@ -104,7 +104,7 @@ public class TriangleCount implements Computation<IdList> {
 
     private static Set<Id> getAllNeighbors(Vertex vertex) {
         Set<Id> neighbors = new HashSet<>();
-        Edges edges = vertex.edgesbothdir();
+        Edges edges = vertex.edges();
         for (Edge edge : edges) {
             Id targetId = edge.targetId();
             if (!targetId.equals(vertex.id())) {
