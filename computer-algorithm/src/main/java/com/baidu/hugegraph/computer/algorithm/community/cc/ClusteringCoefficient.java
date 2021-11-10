@@ -20,13 +20,10 @@
 package com.baidu.hugegraph.computer.algorithm.community.cc;
 
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IdSet;
@@ -74,14 +71,17 @@ public class ClusteringCoefficient implements Computation<IdList> {
         ClusteringCoefficientValue value = new ClusteringCoefficientValue();
         IdSet allNeighbors = value.idSet();
 
-        // Collect all neighbors, include of incoming and outgoing
-        allNeighbors.addAll(getAllNeighbors(vertex));
-
-        // Collect neighbors of id less than self from all neighbors
         IdList neighbors = new IdList();
-        for (Id neighbor : allNeighbors.values()) {
-            if (neighbor.compareTo(vertex.id()) < 0) {
-                neighbors.add(neighbor);
+        for (Edge edge : vertex.edges()) {
+            Id targetId = edge.targetId();
+            int compareResult = targetId.compareTo(vertex.id());
+            if (compareResult != 0) {
+                // Collect neighbors of id less than self from all neighbors
+                if (compareResult < 0 && !allNeighbors.contains(targetId)) {
+                    neighbors.add(targetId);
+                }
+                // Collect all neighbors, include of incoming and outgoing
+                allNeighbors.add(targetId);
             }
         }
 
@@ -122,17 +122,5 @@ public class ClusteringCoefficient implements Computation<IdList> {
             return count;
         }
         return null;
-    }
-
-    private static Set<Id> getAllNeighbors(Vertex vertex) {
-        Set<Id> neighbors = new HashSet<>();
-        Edges edges = vertex.edges();
-        for (Edge edge : edges) {
-            Id targetId = edge.targetId();
-            if (!vertex.id().equals(targetId)) {
-                neighbors.add(targetId);
-            }
-        }
-        return neighbors;
     }
 }
