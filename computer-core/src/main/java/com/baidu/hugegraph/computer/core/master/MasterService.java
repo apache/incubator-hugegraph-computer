@@ -69,7 +69,6 @@ public class MasterService implements Closeable {
     private volatile Bsp4Master bsp4Master;
     private Config config;
     private ContainerInfo masterInfo;
-    private List<ContainerInfo> workers;
     private MasterComputation masterComputation;
 
     private final ShutdownHook shutdownHook;
@@ -116,9 +115,8 @@ public class MasterService implements Closeable {
         LOG.info("{} register MasterService", this);
         this.bsp4Master.masterInitDone(this.masterInfo);
 
-        this.workers = this.bsp4Master.waitWorkersInitDone();
         LOG.info("{} waited all workers registered, workers count: {}",
-                 this, this.workers.size());
+                 this, this.bsp4Master.waitWorkersInitDone().size());
 
         LOG.info("{} MasterService initialized", this);
         this.inited = true;
@@ -225,6 +223,7 @@ public class MasterService implements Closeable {
         watcher.start();
         // Step 3: Iteration computation of all supersteps.
         for (; superstepStat.active(); superstep++) {
+            long currentStepTime = watcher.getTime();
             LOG.info("{} MasterService superstep {} started",
                      this, superstep);
             /*
@@ -267,8 +266,9 @@ public class MasterService implements Closeable {
             this.masterComputation.afterSuperstep(context);
             this.bsp4Master.masterStepDone(superstep, superstepStat);
 
-            LOG.info("{} MasterService superstep {} finished",
-                     this, superstep);
+            LOG.info("{} MasterService superstep {} finished, cost {}", this,
+                     superstep, TimeUtil.readableTime(watcher.getTime() -
+                                                      currentStepTime));
         }
         watcher.stop();
         LOG.info("{} MasterService compute step cost: {}",
