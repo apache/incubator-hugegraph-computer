@@ -80,6 +80,9 @@ public class HdfsOutput implements ComputerOutput {
     @Override
     public void write(Vertex vertex) {
         try {
+            if (!this.filter(vertex)) {
+                return;
+            }
             this.writeString(vertex.id().toString());
             this.writeString(this.delimiter);
             this.writeString(this.constructValueString(vertex));
@@ -88,6 +91,10 @@ public class HdfsOutput implements ComputerOutput {
             throw new ComputerException("Failed to write vertex: {}",
                                         vertex.toString(), e);
         }
+    }
+
+    protected boolean filter(Vertex vertex) {
+        return true;
     }
 
     protected void writeBytes(byte[] bytes) throws IOException {

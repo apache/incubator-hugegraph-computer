@@ -26,6 +26,9 @@ import java.util.List;
 
 import javax.ws.rs.NotSupportedException;
 
+import org.apache.commons.collections.CollectionUtils;
+
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
@@ -92,6 +95,13 @@ public class LinksValue implements Value<LinksValue> {
     @Override
     public String toString() {
         return this.values.toString();
+    }
+
+    @Override
+    public String string() {
+        return CollectionUtils.isNotEmpty(this.values) ?
+               this.values.toString() :
+               Constants.EMPTY_STR;
     }
 
     public List<LinksValueItem> values() {
