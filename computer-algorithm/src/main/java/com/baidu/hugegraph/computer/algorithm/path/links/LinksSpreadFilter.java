@@ -115,12 +115,12 @@ public class LinksSpreadFilter {
     }
 
     public boolean isEdgeCanSpread0(Edge edge) {
-        return this.endEdgeCondition.getKey().equals(edge.label());
+        return this.edgeSpreadCondition.getKey().equals(edge.label());
     }
 
     public boolean isEdgeCanSpread(Edge edge,
                                    Properties lastEdgeProperties) {
-        if (!this.endEdgeCondition.getKey().equals(edge.label())) {
+        if (!this.edgeSpreadCondition.getKey().equals(edge.label())) {
             return false;
         }
 
