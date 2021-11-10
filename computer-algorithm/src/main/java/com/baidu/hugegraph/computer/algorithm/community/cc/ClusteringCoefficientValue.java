@@ -25,9 +25,8 @@ import javax.ws.rs.NotSupportedException;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -38,25 +37,25 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
  */
 public class ClusteringCoefficientValue implements
                                         Value<ClusteringCoefficientValue> {
-    private IdList idList;
-    private LongValue count;
+    private IdSet idSet;
+    private IntValue count;
     private IntValue degree;
 
     public ClusteringCoefficientValue() {
-        this.idList = new IdList();
-        this.count = new LongValue();
+        this.idSet = new IdSet();
+        this.count = new IntValue();
         this.degree = new IntValue();
     }
 
-    public IdList idList() {
-        return this.idList;
+    public IdSet idSet() {
+        return this.idSet;
     }
 
-    public long count() {
+    public int count() {
         return this.count.value();
     }
 
-    public void count(Long count) {
+    public void count(Integer count) {
         this.count.value(count);
     }
 
@@ -81,7 +80,7 @@ public class ClusteringCoefficientValue implements
     @Override
     public Value<ClusteringCoefficientValue> copy() {
         ClusteringCoefficientValue ccValue = new ClusteringCoefficientValue();
-        ccValue.idList = this.idList.copy();
+        ccValue.idSet = (IdSet) this.idSet.copy();
         ccValue.count = this.count.copy();
         ccValue.degree = this.degree.copy();
         return ccValue;
@@ -89,14 +88,14 @@ public class ClusteringCoefficientValue implements
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        this.idList.read(in);
+        this.idSet.read(in);
         this.count.read(in);
         this.degree.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
-        this.idList.write(out);
+        this.idSet.write(out);
         this.count.write(out);
         this.degree.write(out);
     }

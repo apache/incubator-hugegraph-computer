@@ -113,4 +113,8 @@ public class IdSet implements Value<IdSet> {
     public int compareTo(IdSet obj) {
         throw new UnsupportedOperationException();
     }
+
+    public int size() {
+        return this.values.size();
+    }
 }

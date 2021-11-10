@@ -40,5 +40,8 @@ public class ClusteringCoefficientParams implements AlgorithmParams {
                          ClusteringCoefficientOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_EDGE_FREQ.name(),
                          EdgeFrequency.SINGLE.name());
+        this.setIfAbsent(params,
+                         ComputerOptions.VERTEX_WITH_EDGES_BOTHDIRECTION.name(),
+                         Boolean.TRUE.toString());
     }
 }

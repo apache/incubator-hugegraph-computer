@@ -41,10 +41,10 @@ public class TriangleCountTest extends AlgorithmTestBase {
     private static final String EDGE_LABEL = "tc_know";
     private static final String PROPERTY_KEY = "tc_weight";
 
-    protected static final Map<Object, Long> EXPECTED_RESULTS =
-              ImmutableMap.of("tc_A", 2L, "tc_B", 1L,
-                              "tc_C", 3L, "tc_D", 2L,
-                              "tc_E", 1L);
+    protected static final Map<Object, Integer> EXPECTED_RESULTS =
+              ImmutableMap.of("tc_A", 2, "tc_B", 1,
+                              "tc_C", 3, "tc_D", 2,
+                              "tc_E", 1);
 
     @BeforeClass
     public static void setup() {
@@ -123,7 +123,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
         public Vertex constructHugeVertex(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Vertex result = super.constructHugeVertex(vertex);
-            Long expected = EXPECTED_RESULTS.get(result.id());
+            Integer expected = EXPECTED_RESULTS.get(result.id());
             if (expected != null) {
                 Assert.assertEquals(expected, result.property(super.name()));
             }

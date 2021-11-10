@@ -44,7 +44,7 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
         return this.idSet;
     }
 
-    public long count() {
+    public int count() {
         return this.count.value();
     }
 

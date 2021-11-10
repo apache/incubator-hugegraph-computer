@@ -46,11 +46,11 @@ public class ClusteringCoefficientOutput extends HugeOutput {
     public com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(
                                                       Vertex vertex) {
         com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                new com.baidu.hugegraph.structure.graph.Vertex(null);
+                  new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
         float triangle = ((ClusteringCoefficientValue) vertex.value()).count();
         int degree = ((ClusteringCoefficientValue) vertex.value())
-                                                  .idList().size();
+                                                  .idSet().size();
         hugeVertex.property(this.name(), 2 * triangle / degree / (degree - 1));
         return hugeVertex;
     }

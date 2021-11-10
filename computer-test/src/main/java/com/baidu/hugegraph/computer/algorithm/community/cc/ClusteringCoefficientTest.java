@@ -41,7 +41,7 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
     private static final String EDGE_LABEL = "tc_know";
     private static final String PROPERTY_KEY = "tc_weight";
 
-    protected static final Map<String, Object> EXPECTED_RESULTS =
+    protected static final Map<String, Float> EXPECTED_RESULTS =
               ImmutableMap.of("tc_A", 0.6666667F, "tc_B", 1.0F,
                               "tc_C", 0.5F, "tc_D", 0.6666667F,
                               "tc_E", 1.0F);
@@ -97,12 +97,12 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
     @Test
     public void testClusteringCoefficientValue() {
         ClusteringCoefficientValue value = new ClusteringCoefficientValue();
-        value.count(10L);
+        value.count(10);
 
         ClusteringCoefficientValue copy;
         copy = (ClusteringCoefficientValue) value.copy();
-        Assert.assertEquals(10L, copy.count());
-        Assert.assertNotSame(value.idList(), copy.idList());
+        Assert.assertEquals(10, copy.count());
+        Assert.assertNotSame(value.idSet(), copy.idSet());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
         public Vertex constructHugeVertex(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Vertex result = super.constructHugeVertex(vertex);
-            Float expected = (Float) EXPECTED_RESULTS.get(result.id());
+            Float expected = EXPECTED_RESULTS.get(result.id());
 
             if (expected != null) {
                 Assert.assertEquals(expected, result.property(super.name()));
