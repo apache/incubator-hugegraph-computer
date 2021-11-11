@@ -19,10 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -179,6 +181,9 @@ public abstract class MessageRecvPartition {
         List<String> newOutputs = this.genOutputFileNames(mergeFileNum);
         this.sortManager.mergeInputs(this.outputFiles, newOutputs,
                                      this.withSubKv, this.outerSortFlusher());
+        this.outputFiles.stream()
+                        .map(File::new)
+                        .forEach(FileUtils::deleteQuietly);
         this.outputFiles = newOutputs;
     }
 
