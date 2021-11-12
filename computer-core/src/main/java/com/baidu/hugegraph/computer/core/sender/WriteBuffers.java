@@ -127,4 +127,9 @@ public class WriteBuffers {
         return IOFactory.createBytesInput(output.buffer(),
                                           (int) output.position());
     }
+
+    public void resetMessageWritten() {
+        this.totalCount = 0L;
+        this.totalBytes = 0L;
+    }
 }
