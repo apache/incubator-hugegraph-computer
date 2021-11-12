@@ -19,12 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.receiver;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -36,6 +34,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.util.Log;
 
 /**
@@ -181,9 +180,7 @@ public abstract class MessageRecvPartition {
         List<String> newOutputs = this.genOutputFileNames(mergeFileNum);
         this.sortManager.mergeInputs(this.outputFiles, newOutputs,
                                      this.withSubKv, this.outerSortFlusher());
-        this.outputFiles.stream()
-                        .map(File::new)
-                        .forEach(FileUtils::deleteQuietly);
+        FileUtil.deleteFilesQuietly(this.outputFiles);
         this.outputFiles = newOutputs;
     }
 

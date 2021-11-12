@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
-
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
@@ -37,6 +35,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.util.E;
 
 public class HgkvDirMergerImpl implements HgkvDirMerger {
@@ -71,9 +70,7 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
                                             subInputs, inputToEntries, flusher);
                     // Don't remove original file
                     if (round != 0) {
-                        subInputs.stream()
-                                 .map(File::new)
-                                 .forEach(FileUtils::deleteQuietly);
+                        FileUtil.deleteFilesQuietly(subInputs);
                     }
                     subInputs.clear();
                     newInputs.add(subOutput);
