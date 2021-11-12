@@ -28,6 +28,8 @@ import com.baidu.hugegraph.structure.constant.WriteType;
  */
 public class ClusteringCoefficientOutput extends HugeOutput {
 
+    private static final int SINGLE_NODE_DEGREE = 1;
+
     @Override
     public String name() {
         return "clustering_coefficient";
@@ -51,7 +53,12 @@ public class ClusteringCoefficientOutput extends HugeOutput {
         float triangle = ((ClusteringCoefficientValue) vertex.value()).count();
         int degree = ((ClusteringCoefficientValue) vertex.value())
                                                   .idSet().size();
-        hugeVertex.property(this.name(), 2 * triangle / degree / (degree - 1));
+        if (degree <= SINGLE_NODE_DEGREE) {
+            hugeVertex.property(this.name(), 0.0);
+        } else {
+            hugeVertex.property(this.name(),
+                                2 * triangle / degree / (degree - 1));
+        }
         return hugeVertex;
     }
 }
