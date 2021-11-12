@@ -139,6 +139,7 @@ public class MessageSendManager implements Manager {
      * @param type the message type
      */
     public void startSend(MessageType type) {
+        this.sender.restSentLogStat();
         Map<Integer, WriteBuffers> all = this.buffers.all();
         all.values().forEach(WriteBuffers::resetMessageWritten);
         Set<Integer> workerIds = all.keySet().stream()

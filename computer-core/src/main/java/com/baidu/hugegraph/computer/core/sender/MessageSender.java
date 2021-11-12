@@ -39,4 +39,9 @@ public interface MessageSender {
      * @param message message payload
      */
     void send(int workerId, QueuedMessage message) throws InterruptedException;
+
+
+    default void restSentLogStat() {
+
+    }
 }

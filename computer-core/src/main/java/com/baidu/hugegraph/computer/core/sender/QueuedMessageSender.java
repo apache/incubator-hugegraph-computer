@@ -40,6 +40,11 @@ public class QueuedMessageSender implements MessageSender {
 
     private static final String NAME = "send-executor";
 
+    private final long logInterval;
+    private long sendBufferCount;
+    private long sendBufferBytes;
+    private long lastLogTime;
+
     // Each target worker has a WorkerChannel
     private final WorkerChannel[] channels;
     // The thread used to send vertex/message, only one is enough
@@ -49,6 +54,7 @@ public class QueuedMessageSender implements MessageSender {
 
     public QueuedMessageSender(Config config) {
         int workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
+        this.logInterval = config.get(ComputerOptions.BSP_LOG_INTERVAL);
         // NOTE: the workerId start from 1
         this.channels = new WorkerChannel[workerCount];
         // TODO: pass send-executor in and share executor with others
@@ -131,6 +137,7 @@ public class QueuedMessageSender implements MessageSender {
                             continue;
                         }
                         if (channel.doSend(message)) {
+                            QueuedMessageSender.this.bufferSentLog(message);
                             // Only consume the message after it is sent
                             channel.queue.take();
                         } else {
@@ -301,6 +308,29 @@ public class QueuedMessageSender implements MessageSender {
         public String toString() {
             return String.format("workerId=%s(remoteAddress=%s)",
                                  this.workerId, this.client.remoteAddress());
+        }
+    }
+
+    @Override
+    public void restSentLogStat() {
+        this.sendBufferCount = 0L;
+        this.sendBufferBytes = 0L;
+        this.lastLogTime = System.currentTimeMillis();
+    }
+
+    private void bufferSentLog(QueuedMessage message) {
+        MessageType type = message.type();
+        if (type == MessageType.MSG ||
+            type == MessageType.EDGE ||
+            type == MessageType.VERTEX) {
+            this.sendBufferCount++;
+            this.sendBufferBytes += message.buffer().remaining();
+            long interval = System.currentTimeMillis() - this.lastLogTime;
+            if (interval >= this.logInterval) {
+                LOG.info("Sent buffer(type={}) count:{}, bytes:{}",
+                         type, this.sendBufferCount, this.sendBufferBytes);
+                this.lastLogTime = System.currentTimeMillis();
+            }
         }
     }
 }

@@ -22,11 +22,14 @@ package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 
 public class PageRankTest extends AlgorithmTestBase {
 
     @Test
     public void testRunAlgorithm() throws InterruptedException {
-       runAlgorithm(PageRankParams.class.getName());
+       runAlgorithm(PageRankParams.class.getName(),
+                    ComputerOptions.BSP_LOG_INTERVAL.name(),
+                    "1000");
     }
 }
