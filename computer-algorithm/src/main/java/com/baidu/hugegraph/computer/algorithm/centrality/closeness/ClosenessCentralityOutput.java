@@ -37,11 +37,6 @@ public class ClosenessCentralityOutput extends HugeGraphOutput {
             Log.logger(ClosenessCentralityOutput.class);
 
     @Override
-    public String name() {
-        return "closeness_centrality";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asDouble()

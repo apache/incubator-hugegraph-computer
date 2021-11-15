@@ -161,7 +161,7 @@ public class MapValue<T extends Value<?>> implements Value<MapValue<T>> {
     }
 
     @Override
-    public String toString() {
+    public String string() {
         return "MapValue{elemType=" + this.elemType + ", map=" + this.map + "}";
     }
 }
