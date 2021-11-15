@@ -30,7 +30,7 @@ import com.baidu.hugegraph.structure.constant.WriteType;
 public class RingsDetectionOutput extends HugeGraphOutput {
 
     @Override
-    public void prepareSchema() {
+    protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asText()
                      .writeType(WriteType.OLAP_COMMON)
@@ -40,7 +40,7 @@ public class RingsDetectionOutput extends HugeGraphOutput {
     }
 
     @Override
-    public Object value(Vertex vertex) {
+    protected Object value(Vertex vertex) {
         IdListList value = vertex.value();
         List<String> propValues = new ArrayList<>();
         for (int i = 0; i < value.size(); i++) {

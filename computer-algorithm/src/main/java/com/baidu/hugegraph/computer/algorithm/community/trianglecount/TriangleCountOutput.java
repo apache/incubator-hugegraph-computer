@@ -19,23 +19,17 @@
 
 package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
 public class TriangleCountOutput extends HugeGraphOutput {
 
     @Override
-    public void prepareSchema() {
+    protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asLong()
                      .writeType(WriteType.OLAP_RANGE)
                      .ifNotExist()
                      .create();
-    }
-
-    @Override
-    public Object value(Vertex vertex) {
-        return ((TriangleCountValue) vertex.value()).count();
     }
 }

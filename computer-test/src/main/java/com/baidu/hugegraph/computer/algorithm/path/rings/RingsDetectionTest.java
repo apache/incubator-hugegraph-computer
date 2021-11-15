@@ -29,6 +29,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.driver.GraphManager;
@@ -111,18 +112,16 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         public static Map<String, Set<String>> EXPECT_RINGS;
 
         @Override
-        public void write(
+        public Object value(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            super.write(vertex);
-            this.assertResult(vertex);
+            IdListList rings = (IdListList) super.value(vertex);
+            this.assertResult(vertex.id(), rings);
+            return rings;
         }
 
-        private void assertResult(
-                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            IdListList rings = vertex.value();
-            Set<String> expect =
-                        EXPECT_RINGS.getOrDefault(vertex.id().toString(),
-                                                  new HashSet<>());
+        private void assertResult(Id id, IdListList rings) {
+            Set<String> expect = EXPECT_RINGS.getOrDefault(id.toString(),
+                                                           new HashSet<>());
 
             Assert.assertEquals(expect.size(), rings.size());
             for (int i = 0; i < rings.size(); i++) {

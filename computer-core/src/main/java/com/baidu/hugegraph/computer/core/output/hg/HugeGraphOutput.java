@@ -89,7 +89,9 @@ public abstract class HugeGraphOutput extends AbstractComputerOutput {
         return hugeVertex;
     }
 
-    protected abstract void prepareSchema();
+    protected Object value(Vertex vertex) {
+        return vertex.value().value();
+    }
 
-    protected abstract Object value(Vertex vertex);
+    protected abstract void prepareSchema();
 }
