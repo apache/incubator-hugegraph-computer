@@ -44,7 +44,7 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
     private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
-                    "A", ImmutableSet.of("ABCA", "ACA", "ABCDEA", "ADA",
+                    "A", ImmutableSet.of("ABCA", "ACA", "ABCEDA", "ADA",
                                              "ADCA", "ACEDA"),
                     "C", ImmutableSet.of("CEDC")
             );
@@ -126,7 +126,7 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
             Assert.assertEquals(expect.size(), rings.size());
             for (int i = 0; i < rings.size(); i++) {
-                IdList ring = rings.get(0);
+                IdList ring = rings.get(i);
                 StringBuilder ringValue = new StringBuilder();
                 for (int j = 0; j < ring.size(); j++) {
                     ringValue.append(ring.get(j).toString());
