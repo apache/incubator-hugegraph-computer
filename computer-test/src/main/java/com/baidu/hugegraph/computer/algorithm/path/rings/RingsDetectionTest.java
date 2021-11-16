@@ -44,9 +44,13 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
     private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
-                    "A", ImmutableSet.of("ABCA", "ACA", "ABCEDA", "ADA",
-                                         "ADCA", "ACEDA"),
-                    "C", ImmutableSet.of("CEDC")
+                    "A", ImmutableSet.of("[A, B, C, A]",
+                                         "[A, C, A]",
+                                         "[A, B, C, D, E, A]",
+                                         "[A, D, A]",
+                                         "[A, D, C, A]",
+                                         "[A, C, E, D, A]"),
+                    "C", ImmutableSet.of("[C, E, D, C]")
             );
 
     @BeforeClass
