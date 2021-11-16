@@ -45,7 +45,7 @@ public class RingsDetectionTest extends AlgorithmTestBase {
     private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
                     "A", ImmutableSet.of("ABCA", "ACA", "ABCEDA", "ADA",
-                                             "ADCA", "ACEDA"),
+                                         "ADCA", "ACEDA"),
                     "C", ImmutableSet.of("CEDC")
             );
 
@@ -108,7 +108,7 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
     public static class RingsDetectionTestOutput extends RingsDetectionOutput {
 
-        public static Map<String, Set<String>> EXPECT_RINGS;
+        protected static Map<String, Set<String>> EXPECT_RINGS;
 
         @Override
         public List<String> value(
@@ -125,7 +125,8 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
             Assert.assertEquals(expect.size(), rings.size());
             for (String ring : rings) {
-                Assert.assertTrue(expect.contains(ring));
+                String error = "Expect: '" + ring + "' in " + expect;
+                Assert.assertTrue(error, expect.contains(ring));
             }
         }
     }
