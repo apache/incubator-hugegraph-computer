@@ -66,39 +66,34 @@ public interface Value extends Writable, Readable, Comparable<Value> {
         return String.valueOf(this.value());
     }
 
-    public interface Talue<T> extends Value {
+    /**
+     * Value class with template parameter for simple subclass extension
+     */
+    interface Talue<T> extends Value {
 
         @Override
         T value();
     }
 
-    public interface CompositeValue<T> extends Talue<T> {
+    /**
+     * Value class with template parameter for composite subclass extension,
+     * A custom Value class of the algorithm may need to extend this class.
+     */
+    interface CompositeValue<T> extends Talue<T> {
 
         @Override
-        default void assign(Value other) {
-            throw new UnsupportedOperationException();
+        default void assign(Value value) {
+            throw new UnsupportedOperationException("assign");
         }
 
         @Override
         default Value copy() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("copy");
         }
 
         @Override
-        default int compareTo(Value o) {
-            throw new UnsupportedOperationException();
+        default int compareTo(Value other) {
+            throw new UnsupportedOperationException("compareTo");
         }
     }
-
-//    public interface SimpleValue extends Value {
-//
-//        @Override
-//        T value();
-//    }
-//
-//    public interface CompositeValue<T, R> extends Value {
-//
-//        @Override
-//        R value();
-//    }
 }
