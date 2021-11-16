@@ -76,7 +76,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
 
         @Override
         public Double value(Vertex vertex) {
-            Double value = super.value(vertex);
+            Double value = (Double) super.value(vertex);
             isRun = true;
             if (StringUtils.isEmpty(this.weight)) {
                 Assert.assertEquals(vertex.numEdges(), value, 0.000001);

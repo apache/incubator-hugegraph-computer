@@ -113,7 +113,8 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         @Override
         public List<String> value(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            List<String> rings = super.value(vertex);
+            @SuppressWarnings("unchecked")
+            List<String> rings = (List<String>) super.value(vertex);
             this.assertResult(vertex.id(), rings);
             return rings;
         }
