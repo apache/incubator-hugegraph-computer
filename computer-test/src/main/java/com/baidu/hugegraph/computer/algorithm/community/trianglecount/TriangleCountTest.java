@@ -120,9 +120,9 @@ public class TriangleCountTest extends AlgorithmTestBase {
     public static class TriangleCountOutputTest extends TriangleCountOutput {
 
         @Override
-        public Object value(
+        public Long value(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            Object value = super.value(vertex);
+            Long value = super.value(vertex);
             Long expected = EXPECTED_RESULTS.get(vertex.id());
             if (expected != null) {
                 Assert.assertEquals(expected, value);

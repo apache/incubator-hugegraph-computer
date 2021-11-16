@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.algorithm.path.rings;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,8 +31,6 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.IdList;
-import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
@@ -112,25 +111,20 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         public static Map<String, Set<String>> EXPECT_RINGS;
 
         @Override
-        public Object value(
+        public List<String> value(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            IdListList rings = (IdListList) super.value(vertex);
+            List<String> rings = super.value(vertex);
             this.assertResult(vertex.id(), rings);
             return rings;
         }
 
-        private void assertResult(Id id, IdListList rings) {
+        private void assertResult(Id id, List<String> rings) {
             Set<String> expect = EXPECT_RINGS.getOrDefault(id.toString(),
                                                            new HashSet<>());
 
             Assert.assertEquals(expect.size(), rings.size());
-            for (int i = 0; i < rings.size(); i++) {
-                IdList ring = rings.get(i);
-                StringBuilder ringValue = new StringBuilder();
-                for (int j = 0; j < ring.size(); j++) {
-                    ringValue.append(ring.get(j).toString());
-                }
-                Assert.assertTrue(expect.contains(ringValue.toString()));
+            for (String ring : rings) {
+                Assert.assertTrue(expect.contains(ring));
             }
         }
     }
