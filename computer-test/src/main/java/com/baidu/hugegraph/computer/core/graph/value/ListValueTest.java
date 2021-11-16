@@ -24,6 +24,7 @@ import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.value.Value.Talue;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
@@ -64,7 +65,7 @@ public class ListValueTest extends UnitTestBase {
         value2.add(new FloatValue(202f));
         Assert.assertEquals(2, value2.size());
 
-        ListValue<Value> value3 = new ListValue<>(ValueType.FLOAT);
+        ListValue<Talue<?>> value3 = new ListValue<>(ValueType.FLOAT);
         value3.add(new FloatValue(301f));
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
@@ -83,7 +84,7 @@ public class ListValueTest extends UnitTestBase {
                                   e.getMessage());
         });
 
-        ListValue<Value> value4 = new ListValue<>(ValueType.UNKNOWN);
+        ListValue<Talue<?>> value4 = new ListValue<>(ValueType.UNKNOWN);
         Assert.assertEquals(ValueType.UNKNOWN, value4.elemType());
         value4.add(new IntValue(303));
         Assert.assertEquals(ValueType.INT, value4.elemType());
@@ -247,26 +248,21 @@ public class ListValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<ListValue<IntValue>> v = (Value) value2;
-            value3.assign(v);
+            value3.assign(value2);
         }, e -> {
             Assert.assertContains("Can't assign list<float> to list<int>",
                                   e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<ListValue<FloatValue>> v = (Value) value1;
-            value4.assign(v);
+            value4.assign(value1);
         }, e -> {
             Assert.assertContains("Can't assign list<int> to list<float>",
                                   e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<ListValue<IntValue>> v = (Value) new IntValue();
+            Value v = new IntValue();
             value3.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to ListValue",
@@ -274,8 +270,7 @@ public class ListValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<ListValue<FloatValue>> v = (Value) new LongValue();
+            Value v = new LongValue();
             value4.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(LongValue) to ListValue",

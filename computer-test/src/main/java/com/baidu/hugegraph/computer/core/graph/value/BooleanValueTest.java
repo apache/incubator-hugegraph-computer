@@ -74,8 +74,7 @@ public class BooleanValueTest extends UnitTestBase {
         Assert.assertEquals(false, value3.value());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<BooleanValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to BooleanValue",
@@ -83,8 +82,7 @@ public class BooleanValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<BooleanValue> v = (Value) new LongValue();
+            Value v = new LongValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(LongValue) to BooleanValue",

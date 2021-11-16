@@ -58,8 +58,7 @@ public class NullValueTest extends UnitTestBase {
         Assert.assertEquals(value1, value2);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<NullValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to NullValue",
@@ -67,8 +66,7 @@ public class NullValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<NullValue> v = (Value) new LongValue();
+            Value v = new LongValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(LongValue) to NullValue",

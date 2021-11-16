@@ -80,8 +80,7 @@ public class LongValueTest extends UnitTestBase {
         Assert.assertEquals(Long.MAX_VALUE, value4.value());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<LongValue> v = (Value) new FloatValue();
+            Value v = new FloatValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0.0'(FloatValue) to LongValue",
@@ -89,8 +88,7 @@ public class LongValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<LongValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to LongValue",

@@ -58,8 +58,7 @@ public class StringValueTest {
         Assert.assertEquals("test", value2.value());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<StringValue> v = (Value) new FloatValue();
+            Value v = new FloatValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0.0'(FloatValue) to " +

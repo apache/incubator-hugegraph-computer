@@ -55,7 +55,7 @@ public class CsvStructGraphOutputTest extends UnitTestBase {
         GraphFactory factory = context.graphFactory();
 
         Id longId = BytesId.of(100L);
-        Value<Id> value = BytesId.of(999L);
+        Value value = BytesId.of(999L);
         Vertex vertex = factory.createVertex(longId, value);
 
         String fileName = "output.csv";

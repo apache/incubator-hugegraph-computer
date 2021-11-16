@@ -80,8 +80,7 @@ public class DoubleValueTest extends UnitTestBase {
         Assert.assertEquals(Double.MAX_VALUE, value4.value(), 0d);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<DoubleValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to DoubleValue",
@@ -89,8 +88,7 @@ public class DoubleValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<DoubleValue> v = (Value) new FloatValue();
+            Value v = new FloatValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0.0'(FloatValue) to " +
