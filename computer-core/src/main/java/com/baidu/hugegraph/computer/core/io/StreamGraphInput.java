@@ -117,8 +117,8 @@ public class StreamGraphInput implements GraphComputeInput {
     }
 
     @Override
-    public Pair<Id, Value<?>> readMessage() throws IOException {
-        MutablePair<Id, Value<?>> pair = MutablePair.of(null, null);
+    public Pair<Id, Value> readMessage() throws IOException {
+        MutablePair<Id, Value> pair = MutablePair.of(null, null);
         this.in.readEntry(in -> {
             // Read id
             pair.setLeft(readId(in));
@@ -128,17 +128,17 @@ public class StreamGraphInput implements GraphComputeInput {
         return pair;
     }
 
-    private Value<?> readMessage(RandomAccessInput in) throws IOException {
-        Value<?> value = this.config.createObject(
-                         ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+    private Value readMessage(RandomAccessInput in) throws IOException {
+        Value value = this.config.createObject(
+                      ComputerOptions.ALGORITHM_MESSAGE_CLASS);
         value.read(in);
         return value;
     }
 
     @Override
-    public Value<?> readValue(RandomAccessInput in) throws IOException {
+    public Value readValue(RandomAccessInput in) throws IOException {
         byte code = in.readByte();
-        Value<?> value = this.graphFactory.createValue(code);
+        Value value = this.graphFactory.createValue(code);
         value.read(in);
         return value;
     }
@@ -148,7 +148,7 @@ public class StreamGraphInput implements GraphComputeInput {
         int size = in.readInt();
         for (int i = 0; i < size; i++) {
             String key = in.readUTF();
-            Value<?> value = this.readValue(in);
+            Value value = this.readValue(in);
             properties.put(key, value);
         }
         return properties;

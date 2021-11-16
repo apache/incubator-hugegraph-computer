@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.combiner;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.util.E;
 
-public class ValueMinCombiner<T extends Value<T>> implements Combiner<T> {
+public class ValueMinCombiner<T extends Value> implements Combiner<T> {
 
     @Override
     public T combine(T v1, T v2) {

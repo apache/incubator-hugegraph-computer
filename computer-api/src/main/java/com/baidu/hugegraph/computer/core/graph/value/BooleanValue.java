@@ -21,11 +21,12 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.graph.value.Value.Talue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class BooleanValue implements Value<BooleanValue> {
+public class BooleanValue implements Talue<Boolean> {
 
     private boolean value;
 
@@ -56,7 +57,7 @@ public class BooleanValue implements Value<BooleanValue> {
     }
 
     @Override
-    public void assign(Value<BooleanValue> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
         this.value = ((BooleanValue) other).value;
     }
@@ -77,9 +78,13 @@ public class BooleanValue implements Value<BooleanValue> {
     }
 
     @Override
-    public int compareTo(BooleanValue obj) {
+    public int compareTo(Value obj) {
         E.checkArgumentNotNull(obj, "The compare argument can't be null");
-        return Boolean.compare(this.value, obj.value);
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        return Boolean.compare(this.value, ((BooleanValue) obj).value);
     }
 
     @Override

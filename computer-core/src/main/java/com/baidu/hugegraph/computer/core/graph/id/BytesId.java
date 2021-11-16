@@ -104,7 +104,7 @@ public class BytesId implements Id {
     }
 
     @Override
-    public void assign(Value<Id> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
         this.idType = ((BytesId) other).idType;
         this.bytes = ((BytesId) other).bytes;
@@ -175,10 +175,14 @@ public class BytesId implements Id {
     }
 
     @Override
-    public int compareTo(Id obj) {
-        int cmp = this.idType().code() - obj.idType().code();
-        if (cmp != 0) {
-            return cmp;
+    public int compareTo(Value obj) {
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        typeDiff = this.idType().code() - ((Id) obj).idType().code();
+        if (typeDiff != 0) {
+            return typeDiff;
         }
         BytesId other = (BytesId) obj;
         return BytesUtil.compare(this.bytes, this.length,

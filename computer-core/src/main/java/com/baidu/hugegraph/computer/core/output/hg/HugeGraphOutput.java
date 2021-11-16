@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.output.hg.task.TaskManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.util.Log;
 
-public abstract class HugeGraphOutput extends AbstractComputerOutput {
+public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
 
     private static final Logger LOG = Log.logger(HugeGraphOutput.class);
 
@@ -89,8 +89,10 @@ public abstract class HugeGraphOutput extends AbstractComputerOutput {
         return hugeVertex;
     }
 
-    protected Object value(Vertex vertex) {
-        return vertex.value().value();
+    protected T value(Vertex vertex) {
+        @SuppressWarnings("unchecked")
+        T value = (T) vertex.value().value();
+        return value;
     }
 
     protected abstract void prepareSchema();

@@ -83,7 +83,7 @@ public class WriteBuffers {
         this.writingBuffer.writeEdges(vertex);
     }
 
-    public synchronized void writeMessage(Id targetId, Value<?> value)
+    public synchronized void writeMessage(Id targetId, Value value)
                                           throws IOException {
         this.writingBuffer.writeMessage(targetId, value);
     }

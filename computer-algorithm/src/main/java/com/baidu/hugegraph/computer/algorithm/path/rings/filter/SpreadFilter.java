@@ -82,7 +82,7 @@ public class SpreadFilter {
             return true;
         }
 
-        Map<String, Map<String, Value<?>>> params =
+        Map<String, Map<String, Value>> params =
                     ImmutableMap.of(ELEMENT, vertex.properties().get());
         return filter(params, expressions);
     }
@@ -95,12 +95,12 @@ public class SpreadFilter {
             return true;
         }
 
-        Map<String, Map<String, Value<?>>> params =
+        Map<String, Map<String, Value>> params =
                     ImmutableMap.of(ELEMENT, edge.properties().get());
         return filter(params, expressions);
     }
 
-    public boolean filter(Edge edge, RingsDetectionValue message) {
+    public boolean filter(Edge edge, RingsDetectionMessage message) {
         String label = edge.label();
         List<Serializable> expressions = expressions(this.edgeSpreadFilter,
                                                      label);
@@ -109,13 +109,13 @@ public class SpreadFilter {
             return true;
         }
 
-        Map<String, Map<String, Value<?>>> params =
+        Map<String, Map<String, Value>> params =
                     ImmutableMap.of(ELEMENT, edge.properties().get(),
                                     MESSAGE, message.walkEdgeProp().get());
         return filter(params, expressions);
     }
 
-    private static boolean filter(Map<String, Map<String, Value<?>>> params,
+    private static boolean filter(Map<String, Map<String, Value>> params,
                                   List<Serializable> expressions) {
         Map<String, Object> map = convertParamsValueToObject(params);
         return expressions.stream()
@@ -143,13 +143,12 @@ public class SpreadFilter {
     }
 
     private static Map<String, Object> convertParamsValueToObject(
-                   Map<String, Map<String, Value<?>>> params) {
+                   Map<String, Map<String, Value>> params) {
         Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, Map<String, Value<?>>> entry :
-                                                      params.entrySet()) {
+        for (Map.Entry<String, Map<String, Value>> entry : params.entrySet()) {
             Map<String, Object> subKv = new HashMap<>();
-            Map<String, Value<?>> param = entry.getValue();
-            for (Map.Entry<String, Value<?>> paramItem : param.entrySet()) {
+            Map<String, Value> param = entry.getValue();
+            for (Map.Entry<String, Value> paramItem : param.entrySet()) {
                 subKv.put(paramItem.getKey(), paramItem.getValue().value());
             }
             result.put(entry.getKey(), subKv);

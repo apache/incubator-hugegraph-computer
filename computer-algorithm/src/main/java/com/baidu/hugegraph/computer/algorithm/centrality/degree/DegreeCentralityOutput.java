@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class DegreeCentralityOutput extends HugeGraphOutput {
+public class DegreeCentralityOutput extends HugeGraphOutput<Double> {
 
     @Override
     protected void prepareSchema() {

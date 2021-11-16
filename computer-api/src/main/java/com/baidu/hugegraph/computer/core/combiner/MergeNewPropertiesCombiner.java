@@ -35,8 +35,8 @@ public class MergeNewPropertiesCombiner implements PropertiesCombiner {
     public Properties combine(Properties v1, Properties v2) {
         E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
-        Map<String, Value<?>> v2Map = v2.get();
-        for (Map.Entry<String, Value<?>> entry : v2Map.entrySet()) {
+        Map<String, Value> v2Map = v2.get();
+        for (Map.Entry<String, Value> entry : v2Map.entrySet()) {
              v1.putIfAbsent(entry.getKey(), entry.getValue());
         }
         return v1;

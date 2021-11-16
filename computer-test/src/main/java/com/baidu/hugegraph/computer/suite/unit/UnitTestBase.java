@@ -90,7 +90,7 @@ public class UnitTestBase {
         }
     }
 
-    public static void assertValueEqualAfterWriteAndRead(Value<?> oldValue)
+    public static void assertValueEqualAfterWriteAndRead(Value oldValue)
                                                          throws IOException {
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
@@ -99,7 +99,7 @@ public class UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        Value<?> newValue = graphFactory().createValue(oldValue.valueType());
+        Value newValue = graphFactory().createValue(oldValue.valueType());
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newValue.read(bai);
             Assert.assertEquals(oldValue, newValue);

@@ -90,7 +90,7 @@ class WriteBuffer {
         this.graphOutput.writeEdges(vertex);
     }
 
-    public void writeMessage(Id targetId, Value<?> value) throws IOException {
+    public void writeMessage(Id targetId, Value value) throws IOException {
         this.writeCount++;
         this.graphOutput.writeMessage(targetId, value);
     }

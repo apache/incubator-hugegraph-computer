@@ -23,7 +23,7 @@ import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.util.E;
 
-public interface Value<T> extends Writable, Readable, Comparable<T> {
+public interface Value extends Writable, Readable, Comparable<Value> {
 
     /**
      * @return the value type of this instance
@@ -33,17 +33,22 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
     /**
      * Assign a new value to this object
      */
-    void assign(Value<T> value);
+    void assign(Value value);
 
     /**
      * @return copy a value instance of this object
      */
-    Value<T> copy();
+    Value copy();
+
+    /**
+     * @return value of this object
+     */
+    Object value();
 
     /**
      * Check whether a value can be assigned to this object
      */
-    default void checkAssign(Value<T> other) {
+    default void checkAssign(Value other) {
         if (other == null) {
             E.checkArgument(false, "Can't assign null to %s",
                             this.getClass().getSimpleName());
@@ -55,14 +60,45 @@ public interface Value<T> extends Writable, Readable, Comparable<T> {
     }
 
     /**
-     * @return value of this object
-     */
-    Object value();
-
-    /**
      * @return result string value of this object
      */
     default String string() {
-        return this.toString();
+        return String.valueOf(this.value());
     }
+
+    public interface Talue<T> extends Value {
+
+        @Override
+        T value();
+    }
+
+    public interface CompositeValue<T> extends Talue<T> {
+
+        @Override
+        default void assign(Value other) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        default Value copy() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        default int compareTo(Value o) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+//    public interface SimpleValue extends Value {
+//
+//        @Override
+//        T value();
+//    }
+//
+//    public interface CompositeValue<T, R> extends Value {
+//
+//        @Override
+//        R value();
+//    }
 }

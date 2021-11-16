@@ -31,26 +31,26 @@ import com.google.common.collect.ImmutableMap;
 
 public class Aggregators {
 
-    private final Map<String, Aggregator<? extends Value<?>>> aggregators;
+    private final Map<String, Aggregator<? extends Value>> aggregators;
 
     public Aggregators() {
         this(ImmutableMap.of());
     }
 
-    public Aggregators(Map<String, Aggregator<? extends Value<?>>> aggrs) {
+    public Aggregators(Map<String, Aggregator<? extends Value>> aggrs) {
         this.aggregators = new ConcurrentHashMap<>(aggrs);
     }
 
-    public Map<String, Value<?>> values() {
-        Map<String, Value<?>> values = new HashMap<>();
-        for (Entry<String, Aggregator<? extends Value<?>>> aggr :
+    public Map<String, Value> values() {
+        Map<String, Value> values = new HashMap<>();
+        for (Entry<String, Aggregator<? extends Value>> aggr :
              this.aggregators.entrySet()) {
             values.put(aggr.getKey(), aggr.getValue().aggregatedValue());
         }
         return values;
     }
 
-    public <V extends Value<?>> Aggregator<V> get(String name,
+    public <V extends Value> Aggregator<V> get(String name,
                                                   AggregateRpcService service) {
         Aggregator<?> aggregator = this.aggregators.get(name);
         if (aggregator == null) {

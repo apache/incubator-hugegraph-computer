@@ -27,13 +27,13 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 
 public interface Properties extends Readable, Writable {
 
-    Map<String, Value<?>> get();
+    Map<String, Value> get();
 
-    <T extends Value<T>> T get(String key);
+    <T extends Value> T get(String key);
 
-    void put(String key, Value<?> value);
+    void put(String key, Value value);
 
-    void putIfAbsent(String key, Value<?> value);
+    void putIfAbsent(String key, Value value);
 
     int size();
 }

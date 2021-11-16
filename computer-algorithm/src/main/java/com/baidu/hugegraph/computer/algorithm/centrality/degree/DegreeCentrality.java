@@ -82,7 +82,7 @@ public class DegreeCentrality implements Computation<NullValue> {
         vertex.inactivate();
     }
 
-    private static double weightValue(Value<?> value) {
+    private static double weightValue(Value value) {
         if (value == null) {
             return 1.0;
         }

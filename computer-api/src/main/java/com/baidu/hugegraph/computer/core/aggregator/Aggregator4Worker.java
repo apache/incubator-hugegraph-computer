@@ -37,7 +37,7 @@ public interface Aggregator4Worker {
      * Throws ComputerException if master-computation does not register
      * aggregator with the specified name.
      */
-    <V extends Value<?>> Aggregator<V> createAggregator(String name);
+    <V extends Value> Aggregator<V> createAggregator(String name);
 
     /**
      * Set aggregate value in worker. The value of aggregator will be
@@ -49,7 +49,7 @@ public interface Aggregator4Worker {
      * aggregator with the specified name.
      * @param value The value to be aggregated
      */
-    <V extends Value<?>> void aggregateValue(String name, V value);
+    <V extends Value> void aggregateValue(String name, V value);
 
     /**
      * Get the aggregated value in worker-computation, the value is aggregated
@@ -63,5 +63,5 @@ public interface Aggregator4Worker {
      * Throws ComputerException if master-computation does not register
      * aggregator with the specified name.
      */
-    <V extends Value<?>> V aggregatedValue(String name);
+    <V extends Value> V aggregatedValue(String name);
 }

@@ -20,24 +20,25 @@
 package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
 import java.io.IOException;
+import java.util.List;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.Value.CompositeValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class RingsDetectionValue implements Value<RingsDetectionValue> {
+public class RingsDetectionMessage implements CompositeValue<List<Object>> {
 
     private final IdList path;
     private Properties walkEdgeProps;
 
-    public RingsDetectionValue() {
+    public RingsDetectionMessage() {
         GraphFactory graphFactory = ComputerContext.instance().graphFactory();
         this.path = new IdList();
         this.walkEdgeProps = new DefaultProperties(graphFactory);
@@ -46,16 +47,6 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     @Override
     public ValueType valueType() {
         return ValueType.UNKNOWN;
-    }
-
-    @Override
-    public void assign(Value<RingsDetectionValue> other) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int compareTo(RingsDetectionValue o) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -68,11 +59,6 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     public void write(RandomAccessOutput out) throws IOException {
         this.path.write(out);
         this.walkEdgeProps.write(out);
-    }
-
-    @Override
-    public RingsDetectionValue copy() {
-        throw new UnsupportedOperationException();
     }
 
     public IdList path() {
@@ -92,7 +78,7 @@ public class RingsDetectionValue implements Value<RingsDetectionValue> {
     }
 
     @Override
-    public Object value() {
-        throw new UnsupportedOperationException();
+    public List<Object> value() {
+        return this.path.value();
     }
 }

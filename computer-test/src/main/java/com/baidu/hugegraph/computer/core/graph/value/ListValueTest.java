@@ -64,7 +64,7 @@ public class ListValueTest extends UnitTestBase {
         value2.add(new FloatValue(202f));
         Assert.assertEquals(2, value2.size());
 
-        ListValue<Value<?>> value3 = new ListValue<>(ValueType.FLOAT);
+        ListValue<Value> value3 = new ListValue<>(ValueType.FLOAT);
         value3.add(new FloatValue(301f));
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
@@ -83,7 +83,7 @@ public class ListValueTest extends UnitTestBase {
                                   e.getMessage());
         });
 
-        ListValue<Value<?>> value4 = new ListValue<>(ValueType.UNKNOWN);
+        ListValue<Value> value4 = new ListValue<>(ValueType.UNKNOWN);
         Assert.assertEquals(ValueType.UNKNOWN, value4.elemType());
         value4.add(new IntValue(303));
         Assert.assertEquals(ValueType.INT, value4.elemType());

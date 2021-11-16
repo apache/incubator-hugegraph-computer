@@ -102,7 +102,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
     }
 
     @Override
-    public void writeMessage(Id id, Value<?> value) throws IOException {
+    public void writeMessage(Id id, Value value) throws IOException {
         this.out.writeEntry(out -> {
             // Write id
             this.writeId(out, id);
@@ -117,22 +117,22 @@ public class StreamGraphOutput implements GraphComputeOutput {
     }
 
     @Override
-    public void writeValue(RandomAccessOutput out, Value<?> value)
+    public void writeValue(RandomAccessOutput out, Value value)
                            throws IOException {
         out.writeByte(value.valueType().code());
         value.write(out);
     }
 
-    private void writeMessage(RandomAccessOutput out, Value<?> value)
+    private void writeMessage(RandomAccessOutput out, Value value)
                               throws IOException {
         value.write(out);
     }
 
     private void writeProperties(RandomAccessOutput out, Properties properties)
                                  throws IOException {
-        Map<String, Value<?>> keyValues = properties.get();
+        Map<String, Value> keyValues = properties.get();
         out.writeInt(keyValues.size());
-        for (Map.Entry<String, Value<?>> entry : keyValues.entrySet()) {
+        for (Map.Entry<String, Value> entry : keyValues.entrySet()) {
             out.writeUTF(entry.getKey());
             this.writeValue(out, entry.getValue());
         }

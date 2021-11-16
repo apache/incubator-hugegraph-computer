@@ -41,9 +41,9 @@ public interface GraphFactory {
 
     Vertex createVertex();
 
-    <V extends Value<?>> Vertex createVertex(Id id, V value);
+    <V extends Value> Vertex createVertex(Id id, V value);
 
-    <V extends Value<?>> Vertex createVertex(String label, Id id, V value);
+    <V extends Value> Vertex createVertex(String label, Id id, V value);
 
     Edges createEdges();
 
@@ -65,7 +65,7 @@ public interface GraphFactory {
 
     <K, V> Map<K, V> createMap();
 
-    Value<?> createValue(byte code);
+    Value createValue(byte code);
 
-    Value<?> createValue(ValueType type);
+    Value createValue(ValueType type);
 }

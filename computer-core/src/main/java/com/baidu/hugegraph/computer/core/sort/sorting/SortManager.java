@@ -226,16 +226,17 @@ public abstract class SortManager implements Manager {
 
     private Combiner<Pointer> createMessageCombiner() {
         Config config = this.context.config();
-        Combiner<Value<?>> valueCombiner = config.createObject(
-                           ComputerOptions.WORKER_COMBINER_CLASS, false);
+        Combiner<Value> valueCombiner = config.createObject(
+                                        ComputerOptions.WORKER_COMBINER_CLASS,
+                                        false);
 
         if (valueCombiner == null) {
             return null;
         }
 
-        Value<?> v1 = config.createObject(
-                      ComputerOptions.ALGORITHM_MESSAGE_CLASS);
-        Value<?> v2 = v1.copy();
+        Value v1 = config.createObject(
+                   ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+        Value v2 = v1.copy();
         return new PointerCombiner<>(v1, v2, valueCombiner);
     }
 

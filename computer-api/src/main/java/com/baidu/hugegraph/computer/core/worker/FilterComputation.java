@@ -33,7 +33,7 @@ import com.baidu.hugegraph.iterator.MapperIterator;
  * ring detection.
  * @param <M> Message type
  */
-public interface FilterComputation<M extends Value<?>> extends Computation<M> {
+public interface FilterComputation<M extends Value> extends Computation<M> {
 
     /**
      * Set vertex's value and return initial message. The message will be

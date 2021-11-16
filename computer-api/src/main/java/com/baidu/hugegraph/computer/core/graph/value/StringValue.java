@@ -22,10 +22,12 @@ package com.baidu.hugegraph.computer.core.graph.value;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.graph.value.Value.Talue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.util.E;
 
-public class StringValue implements Value<StringValue> {
+public class StringValue implements Talue<String> {
 
     private String value;
 
@@ -43,7 +45,7 @@ public class StringValue implements Value<StringValue> {
     }
 
     @Override
-    public void assign(Value<StringValue> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
         this.value = ((StringValue) other).value;
     }
@@ -64,8 +66,13 @@ public class StringValue implements Value<StringValue> {
     }
 
     @Override
-    public int compareTo(StringValue other) {
-        return this.value.compareTo(other.value);
+    public int compareTo(Value obj) {
+        E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        return this.value.compareTo(((StringValue) obj).value);
     }
 
     @Override

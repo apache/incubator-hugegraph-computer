@@ -80,8 +80,7 @@ public class IntValueTest extends UnitTestBase {
         Assert.assertEquals(Integer.MAX_VALUE, intValue4.value());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<IntValue> v = (Value) new FloatValue();
+            Value v = new FloatValue();
             intValue2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0.0'(FloatValue) to IntValue",
@@ -89,8 +88,7 @@ public class IntValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<IntValue> v = (Value) new LongValue();
+            Value v = new LongValue();
             intValue2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(LongValue) to IntValue",

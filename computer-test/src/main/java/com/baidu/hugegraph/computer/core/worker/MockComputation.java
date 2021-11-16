@@ -32,20 +32,20 @@ import com.baidu.hugegraph.testutil.Assert;
 
 public class MockComputation implements Computation<DoubleValue> {
 
-    private Aggregator<Value<?>> aggrCustomInt;
-    private Aggregator<Value<?>> aggrCustomFloat;
+    private Aggregator<Value> aggrCustomInt;
+    private Aggregator<Value> aggrCustomFloat;
 
-    private Aggregator<Value<?>> aggrIntSum;
-    private Aggregator<Value<?>> aggrIntMax;
+    private Aggregator<Value> aggrIntSum;
+    private Aggregator<Value> aggrIntMax;
 
-    private Aggregator<Value<?>> aggrLongSum;
-    private Aggregator<Value<?>> aggrLongMax;
+    private Aggregator<Value> aggrLongSum;
+    private Aggregator<Value> aggrLongMax;
 
-    private Aggregator<Value<?>> aggrFloatSum;
-    private Aggregator<Value<?>> aggrFloatMin;
+    private Aggregator<Value> aggrFloatSum;
+    private Aggregator<Value> aggrFloatMin;
 
-    private Aggregator<Value<?>> aggrDoubleSum;
-    private Aggregator<Value<?>> aggrDoubleMin;
+    private Aggregator<Value> aggrDoubleSum;
+    private Aggregator<Value> aggrDoubleMin;
 
     @Override
     public void beforeSuperstep(WorkerContext context) {

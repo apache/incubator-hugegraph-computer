@@ -49,7 +49,7 @@ import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 import com.baidu.hugegraph.util.E;
 
-public class FileGraphPartition<M extends Value<M>> {
+public class FileGraphPartition<M extends Value> {
 
     private static final String VERTEX = "vertex";
     private static final String EDGE = "edge";
@@ -186,8 +186,8 @@ public class FileGraphPartition<M extends Value<M>> {
     private long compute1(ComputationContext context,
                           Computation<M> computation,
                           int superstep) {
-        Value<?> result = this.context.config().createObject(
-                          ComputerOptions.ALGORITHM_RESULT_CLASS);
+        Value result = this.context.config().createObject(
+                       ComputerOptions.ALGORITHM_RESULT_CLASS);
         long activeVertexCount = 0L;
         while (this.vertexInput.hasNext()) {
             Vertex vertex = this.vertexInput.next();
@@ -235,8 +235,8 @@ public class FileGraphPartition<M extends Value<M>> {
             throw new ComputerException("Error occurred when beforeOutput", e);
         }
 
-        Value<?> result = this.context.config().createObject(
-                          ComputerOptions.ALGORITHM_RESULT_CLASS);
+        Value result = this.context.config().createObject(
+                       ComputerOptions.ALGORITHM_RESULT_CLASS);
         while (this.vertexInput.hasNext()) {
             Vertex vertex = this.vertexInput.next();
             this.readVertexStatusAndValue(vertex, result);
@@ -270,7 +270,7 @@ public class FileGraphPartition<M extends Value<M>> {
         return this.partition;
     }
 
-    private void readVertexStatusAndValue(Vertex vertex, Value<?> result) {
+    private void readVertexStatusAndValue(Vertex vertex, Value result) {
         try {
             boolean activate = this.preStatusInput.readBoolean();
             if (activate) {
@@ -294,7 +294,7 @@ public class FileGraphPartition<M extends Value<M>> {
 
     private void saveVertexStatusAndValue(Vertex vertex) throws IOException {
         this.curStatusOutput.writeBoolean(vertex.active());
-        Value<?> value = vertex.value();
+        Value value = vertex.value();
         E.checkNotNull(value, "Vertex's value can't be null");
         value.write(this.curValueOutput);
     }

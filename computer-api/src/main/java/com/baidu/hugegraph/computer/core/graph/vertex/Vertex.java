@@ -36,9 +36,9 @@ public interface Vertex extends Recyclable {
 
     void id(Id id);
 
-    <V extends Value<?>> V value();
+    <V extends Value> V value();
 
-    <V extends Value<?>> void value(V value);
+    <V extends Value> void value(V value);
 
     int numEdges();
 
@@ -52,7 +52,7 @@ public interface Vertex extends Recyclable {
 
     void properties(Properties properties);
 
-    <T extends Value<T>> T property(String key);
+    <T extends Value> T property(String key);
 
     boolean active();
 

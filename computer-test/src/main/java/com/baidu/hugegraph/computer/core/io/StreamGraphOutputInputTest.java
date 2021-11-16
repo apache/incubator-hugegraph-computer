@@ -175,7 +175,7 @@ public class StreamGraphOutputInputTest extends UnitTestBase {
         );
 
         Id id = BytesId.of(999L);
-        Value<?> value = new DoubleValue(0.85D);
+        Value value = new DoubleValue(0.85D);
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
                                Constants.SMALL_BUF_SIZE)) {

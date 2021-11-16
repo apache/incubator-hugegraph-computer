@@ -36,7 +36,7 @@ public class RingsDetectionWithFilterParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
                          IdListList.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                         RingsDetectionValue.class.getName());
+                         RingsDetectionMessage.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          RingsDetectionOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,

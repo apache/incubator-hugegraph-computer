@@ -40,7 +40,7 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.Log;
 
-public class ComputeManager<M extends Value<M>> {
+public class ComputeManager<M extends Value> {
 
     private static final Logger LOG = Log.logger(ComputeManager.class);
 

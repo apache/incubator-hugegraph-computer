@@ -82,13 +82,12 @@ public final class BuiltinGraphFactory implements GraphFactory {
     }
 
     @Override
-    public <V extends Value<?>> Vertex createVertex(Id id, V value) {
+    public <V extends Value> Vertex createVertex(Id id, V value) {
         return new DefaultVertex(this, id, value);
     }
 
     @Override
-    public <V extends Value<?>> Vertex createVertex(String label, Id id,
-                                                    V value) {
+    public <V extends Value> Vertex createVertex(String label, Id id, V value) {
         return new DefaultVertex(this, label, id, value);
     }
 
@@ -145,7 +144,8 @@ public final class BuiltinGraphFactory implements GraphFactory {
         return new DefaultProperties(this);
     }
 
-    public Value<?> createValue(byte code) {
+    @Override
+    public Value createValue(byte code) {
         ValueType type = SerialEnum.fromCode(ValueType.class, code);
         return createValue(type);
     }
@@ -153,7 +153,8 @@ public final class BuiltinGraphFactory implements GraphFactory {
     /**
      * Create property value by type.
      */
-    public Value<?> createValue(ValueType type) {
+    @Override
+    public Value createValue(ValueType type) {
         switch (type) {
             case NULL:
                 return NullValue.get();

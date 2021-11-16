@@ -23,7 +23,7 @@ import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-public interface Aggregator<V extends Value<?>> {
+public interface Aggregator<V extends Value> {
 
     /**
      * Used by worker to aggregate a new value when compute a vertex.
