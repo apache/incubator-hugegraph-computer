@@ -46,7 +46,7 @@ public class RingsDetectionTest extends AlgorithmTestBase {
             ImmutableMap.of(
                     "A", ImmutableSet.of("[A, B, C, A]",
                                          "[A, C, A]",
-                                         "[A, B, C, D, E, A]",
+                                         "[A, B, C, E, D, A]",
                                          "[A, D, A]",
                                          "[A, D, C, A]",
                                          "[A, C, E, D, A]"),
