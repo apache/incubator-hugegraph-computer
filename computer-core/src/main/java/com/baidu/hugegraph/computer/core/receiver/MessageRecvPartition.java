@@ -34,6 +34,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.util.Log;
 
 /**
@@ -179,6 +180,7 @@ public abstract class MessageRecvPartition {
         List<String> newOutputs = this.genOutputFileNames(mergeFileNum);
         this.sortManager.mergeInputs(this.outputFiles, newOutputs,
                                      this.withSubKv, this.outerSortFlusher());
+        FileUtil.deleteFilesQuietly(this.outputFiles);
         this.outputFiles = newOutputs;
     }
 
