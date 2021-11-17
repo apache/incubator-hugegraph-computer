@@ -28,7 +28,6 @@ import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.Value.CompositeValue;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
@@ -42,11 +41,6 @@ public class RingsDetectionMessage implements CompositeValue<List<Object>> {
         GraphFactory graphFactory = ComputerContext.instance().graphFactory();
         this.path = new IdList();
         this.walkEdgeProps = new DefaultProperties(graphFactory);
-    }
-
-    @Override
-    public ValueType valueType() {
-        return ValueType.UNKNOWN;
     }
 
     @Override

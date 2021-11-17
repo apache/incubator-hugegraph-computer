@@ -82,6 +82,11 @@ public interface Value extends Writable, Readable, Comparable<Value> {
     interface CompositeValue<T> extends Talue<T> {
 
         @Override
+        default ValueType valueType() {
+            return ValueType.CUSTOMIZE_VALUE;
+        }
+
+        @Override
         default void assign(Value value) {
             throw new UnsupportedOperationException("assign");
         }
