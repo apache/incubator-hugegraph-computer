@@ -419,6 +419,11 @@ public class KubernetesDriver implements ComputerDriver {
 
     @Override
     public void close() {
+        for (String jobId : this.waits.keySet()) {
+            this.waits.get(jobId).getKey().cancel(true);
+        }
+        this.waits.clear();
+
         if (this.watch != null) {
             this.watch.close();
             this.watchActive.setFalse();

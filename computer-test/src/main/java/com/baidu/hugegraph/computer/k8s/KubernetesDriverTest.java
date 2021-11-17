@@ -234,7 +234,11 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         this.driver.watchJob(jobId, params, jobObserver);
 
         this.driver.cancelJob(jobId, params);
-        this.driver.watchJob(jobId, params, jobObserver).get();
+        CompletableFuture<Void> watchJob = this.driver.watchJob(jobId, params,
+                                                                jobObserver);
+        if (watchJob != null) {
+            watchJob.get();
+        }
     }
 
     @Test
