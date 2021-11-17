@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -210,16 +211,17 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     }
 
     @Test
-    public void testWaitJobAndCancel() {
+    public void testWatchJobAndCancel() throws ExecutionException,
+                                              InterruptedException {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
         String jobId = this.driver.submitJob("PageRank3", params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        });
+        CompletableFuture<Void> future = this.driver.watchJob(jobId,
+                                                              params,
+                                                              jobObserver);
 
         Mockito.verify(jobObserver, Mockito.timeout(5000L).atLeast(1))
                .onJobStateChanged(Mockito.any(DefaultJobState.class));
@@ -229,10 +231,10 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         MutableBoolean watchActive = Whitebox.getInternalState(this.driver,
                                                                "watchActive");
         watchActive.setFalse();
-        this.driver.waitJob(jobId, params, jobObserver);
+        this.driver.watchJob(jobId, params, jobObserver);
 
         this.driver.cancelJob(jobId, params);
-        this.driver.waitJob(jobId, params, jobObserver);
+        this.driver.watchJob(jobId, params, jobObserver).get();
     }
 
     @Test
