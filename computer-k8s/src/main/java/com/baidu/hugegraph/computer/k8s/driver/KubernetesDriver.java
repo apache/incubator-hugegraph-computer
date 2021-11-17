@@ -72,7 +72,6 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
@@ -287,13 +286,14 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     @Override
-    public void waitJob(String jobId, Map<String, String> params,
-                        JobObserver observer) {
+    public CompletableFuture<Void> watchJob(String jobId,
+                                            Map<String, String> params,
+                                            JobObserver observer) {
         JobState jobState = this.jobState(jobId, params);
         if (jobState == null) {
             LOG.warn("Unable to fetch state of job '{}', it may have been " +
                      "deleted", jobId);
-            return;
+            return null;
         } else {
             observer.onJobStateChanged(jobState);
         }
@@ -309,14 +309,7 @@ public class KubernetesDriver implements ComputerDriver {
             }
         }
 
-        try {
-            if (future != null) {
-                future.get();
-            }
-        } catch (Throwable e) {
-            this.cancelWait(jobId);
-            throw KubernetesClientException.launderThrowable(e);
-        }
+        return future;
     }
 
     private Watch initWatch() {
@@ -426,6 +419,11 @@ public class KubernetesDriver implements ComputerDriver {
 
     @Override
     public void close() {
+        for (String jobId : this.waits.keySet()) {
+            this.waits.get(jobId).getKey().cancel(true);
+        }
+        this.waits.clear();
+
         if (this.watch != null) {
             this.watch.close();
             this.watchActive.setFalse();
