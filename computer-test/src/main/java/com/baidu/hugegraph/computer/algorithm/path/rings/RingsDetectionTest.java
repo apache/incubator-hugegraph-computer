@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.algorithm.path.rings;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,8 +30,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.graph.value.IdList;
-import com.baidu.hugegraph.computer.core.graph.value.IdListList;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
@@ -44,9 +44,13 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
     private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
-                    "A", ImmutableSet.of("ABCA", "ACA", "ABCEDA", "ADA",
-                                             "ADCA", "ACEDA"),
-                    "C", ImmutableSet.of("CEDC")
+                    "A", ImmutableSet.of("[A, B, C, A]",
+                                         "[A, C, A]",
+                                         "[A, B, C, E, D, A]",
+                                         "[A, D, A]",
+                                         "[A, D, C, A]",
+                                         "[A, C, E, D, A]"),
+                    "C", ImmutableSet.of("[C, E, D, C]")
             );
 
     @BeforeClass
@@ -108,30 +112,25 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
     public static class RingsDetectionTestOutput extends RingsDetectionOutput {
 
-        public static Map<String, Set<String>> EXPECT_RINGS;
+        protected static Map<String, Set<String>> EXPECT_RINGS;
 
         @Override
-        public void write(
+        public List<String> value(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            super.write(vertex);
-            this.assertResult(vertex);
+            @SuppressWarnings("unchecked")
+            List<String> rings = (List<String>) super.value(vertex);
+            this.assertResult(vertex.id(), rings);
+            return rings;
         }
 
-        private void assertResult(
-                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            IdListList rings = vertex.value();
-            Set<String> expect =
-                        EXPECT_RINGS.getOrDefault(vertex.id().toString(),
-                                                  new HashSet<>());
+        private void assertResult(Id id, List<String> rings) {
+            Set<String> expect = EXPECT_RINGS.getOrDefault(id.toString(),
+                                                           new HashSet<>());
 
             Assert.assertEquals(expect.size(), rings.size());
-            for (int i = 0; i < rings.size(); i++) {
-                IdList ring = rings.get(i);
-                StringBuilder ringValue = new StringBuilder();
-                for (int j = 0; j < ring.size(); j++) {
-                    ringValue.append(ring.get(j).toString());
-                }
-                Assert.assertTrue(expect.contains(ringValue.toString()));
+            for (String ring : rings) {
+                String error = "Expect: '" + ring + "' in " + expect;
+                Assert.assertTrue(error, expect.contains(ring));
             }
         }
     }

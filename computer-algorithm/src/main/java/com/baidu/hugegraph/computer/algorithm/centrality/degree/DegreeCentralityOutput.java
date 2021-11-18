@@ -17,12 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
+package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class PageRankOutput extends HugeGraphOutput {
+public class DegreeCentralityOutput extends HugeGraphOutput {
 
     @Override
     protected void prepareSchema() {

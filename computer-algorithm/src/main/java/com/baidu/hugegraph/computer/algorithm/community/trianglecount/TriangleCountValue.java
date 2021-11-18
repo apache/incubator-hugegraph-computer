@@ -45,10 +45,10 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
     }
 
     public long count() {
-        return this.count.value();
+        return this.count.longValue();
     }
 
-    public void count(Long count) {
+    public void count(long count) {
         this.count.value(count);
     }
 
@@ -97,11 +97,11 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
 
     @Override
     public String string() {
-        return String.valueOf(this.count);
+        return String.valueOf(this.value());
     }
 
     @Override
     public Object value() {
-        throw new UnsupportedOperationException();
+        return this.count.value();
     }
 }

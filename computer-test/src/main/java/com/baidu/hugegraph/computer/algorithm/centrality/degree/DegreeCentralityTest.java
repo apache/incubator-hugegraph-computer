@@ -32,12 +32,9 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.hdfs.HdfsOutput;
 import com.google.common.collect.Streams;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
-
-    public static boolean isRun;
 
     @Test
     public void testRunAlgorithm() throws InterruptedException {
@@ -60,9 +57,11 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
         }
     }
 
-    public static class DegreeCentralityTestOutput extends HdfsOutput {
+    public static class DegreeCentralityTestOutput
+                  extends DegreeCentralityOutput {
 
         private String weight;
+        private static boolean isRun;
 
         public DegreeCentralityTestOutput() {
         }
@@ -71,18 +70,16 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
         public void init(Config config, int partition) {
             super.init(config, partition);
             this.weight = config.getString(
-            DegreeCentrality.OPTION_WEIGHT_PROPERTY, "");
+                          DegreeCentrality.OPTION_WEIGHT_PROPERTY, "");
             isRun = false;
         }
 
         @Override
-        public void write(Vertex vertex) {
-            super.write(vertex);
+        public Double value(Vertex vertex) {
+            Double value = (Double) super.value(vertex);
             isRun = true;
-            DoubleValue value = vertex.value();
             if (StringUtils.isEmpty(this.weight)) {
-                Assert.assertEquals(vertex.numEdges(),
-                                    value.value(), 0.000001);
+                Assert.assertEquals(vertex.numEdges(), value, 0.000001);
             } else {
                 Iterator<Edge> edges = vertex.edges().iterator();
                 double totalValue = Streams.stream(edges).map(
@@ -95,13 +92,9 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
                                             return weightValue.value();
                                         }
                                     }).reduce(Double::sum).orElse(0.0);
-                Assert.assertEquals(totalValue, value.value(), 0.000001);
+                Assert.assertEquals(totalValue, value, 0.000001);
             }
-        }
-
-        @Override
-        public void close() {
-            super.close();
+            return value;
         }
 
         public static void assertResult() {
