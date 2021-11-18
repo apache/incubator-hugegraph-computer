@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -279,16 +280,14 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     @Override
-    public void cancelJob(String jobId, Map<String, String> params) {
-        Boolean delete = this.operation.withName(KubeUtil.crName(jobId))
-                                       .delete();
-        E.checkState(delete, "Failed to cancel Job, jobId: ", jobId);
+    public boolean cancelJob(String jobId, Map<String, String> params) {
+        return this.operation.withName(KubeUtil.crName(jobId)).delete();
     }
 
     @Override
-    public CompletableFuture<Void> watchJob(String jobId,
-                                            Map<String, String> params,
-                                            JobObserver observer) {
+    public CompletableFuture<Void> waitJobAsync(String jobId,
+                                                Map<String, String> params,
+                                                JobObserver observer) {
         JobState jobState = this.jobState(jobId, params);
         if (jobState == null) {
             LOG.warn("Unable to fetch state of job '{}', it may have been " +
@@ -419,10 +418,13 @@ public class KubernetesDriver implements ComputerDriver {
 
     @Override
     public void close() {
-        for (String jobId : this.waits.keySet()) {
-            this.waits.get(jobId).getKey().cancel(true);
+        Iterator<Pair<CompletableFuture<Void>, JobObserver>> iterator =
+        this.waits.values().iterator();
+        while (iterator.hasNext()) {
+            CompletableFuture<Void> future = iterator.next().getLeft();
+            future.cancel(true);
+            iterator.remove();
         }
-        this.waits.clear();
 
         if (this.watch != null) {
             this.watch.close();

@@ -48,19 +48,21 @@ public interface ComputerDriver extends Closeable {
      * the job.
      * @param params reserved for other parameters in addition to jobId used
      *               to cancel job.
+     * @return Whether the job was successfully cancelled
      */
-    void cancelJob(String jobId, Map<String, String> params);
+    boolean cancelJob(String jobId, Map<String, String> params);
 
     /**
-     * Watch the job state, it will trace the execution of job and notify
+     * Wait the job to finish, it will trace the execution of job and notify
      * the observer at every superstep. Throws ComputerException if the
      * job is waiting by another thread.
      * @param params reserved for other parameters in addition to jobId used
      *               to wait job.
      * @return future for watch the job
      */
-    CompletableFuture<Void> watchJob(String jobId, Map<String, String> params,
-                                     JobObserver observer);
+    CompletableFuture<Void> waitJobAsync(String jobId,
+                                         Map<String, String> params,
+                                         JobObserver observer);
 
     /**
      * Get the current job state. Throws ComputerException if can't found the

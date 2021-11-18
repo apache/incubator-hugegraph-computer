@@ -110,8 +110,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId, params,
-                                                              jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -141,8 +141,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId, params,
-                                                              jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -174,8 +174,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId, params,
-                                                              jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -205,8 +205,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId, params,
-                                                              jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.FAILED);
@@ -236,8 +236,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId, params,
-                                                              jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -271,8 +271,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId, params,
-                                                              jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.RUNNING);
@@ -303,8 +303,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId, params,
-                                                              jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.FAILED);
@@ -327,8 +327,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId, params,
-                                                              jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
