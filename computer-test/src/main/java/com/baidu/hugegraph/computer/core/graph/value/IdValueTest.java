@@ -61,7 +61,6 @@ public class IdValueTest extends UnitTestBase {
         Assert.assertEquals(value3, value2);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
             Value v = new FloatValue();
             value2.assign(v);
         }, e -> {
@@ -70,7 +69,6 @@ public class IdValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
             Value v = new LongValue();
             value2.assign(v);
         }, e -> {
@@ -175,6 +173,14 @@ public class IdValueTest extends UnitTestBase {
 
         Assert.assertLt(0, value1.compareTo(value5));
         Assert.assertLt(0, value1.compareTo(value6));
+
+        Assert.assertGt(0, value1.compareTo(NullValue.get()));
+        Assert.assertGt(0, value1.compareTo(new BooleanValue()));
+        Assert.assertGt(0, value1.compareTo(new IntValue(123)));
+        Assert.assertGt(0, value1.compareTo(new FloatValue(123)));
+        Assert.assertGt(0, value1.compareTo(new DoubleValue(123)));
+        Assert.assertGt(0, value1.compareTo(new StringValue("123")));
+        Assert.assertLt(0, value1.compareTo(new ListValue<>(ValueType.INT)));
     }
 
     @Test
