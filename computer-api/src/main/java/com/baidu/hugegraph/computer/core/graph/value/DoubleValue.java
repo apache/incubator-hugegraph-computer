@@ -21,12 +21,12 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value.Talue;
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class DoubleValue extends Number implements Talue<Double> {
+public class DoubleValue extends Number implements Tvalue<Double> {
 
     private static final long serialVersionUID = -524902178200973565L;
 

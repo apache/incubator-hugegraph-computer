@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
-import com.baidu.hugegraph.computer.core.graph.value.Value.Talue;
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
@@ -66,7 +66,7 @@ public class ListValueTest extends UnitTestBase {
         value2.add(new FloatValue(202f));
         Assert.assertEquals(2, value2.size());
 
-        ListValue<Talue<?>> value3 = new ListValue<>(ValueType.FLOAT);
+        ListValue<Tvalue<?>> value3 = new ListValue<>(ValueType.FLOAT);
         value3.add(new FloatValue(301f));
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
@@ -85,7 +85,7 @@ public class ListValueTest extends UnitTestBase {
                                   e.getMessage());
         });
 
-        ListValue<Talue<?>> value4 = new ListValue<>(ValueType.UNKNOWN);
+        ListValue<Tvalue<?>> value4 = new ListValue<>(ValueType.UNKNOWN);
         Assert.assertEquals(ValueType.UNKNOWN, value4.elemType());
         value4.add(new IntValue(303));
         Assert.assertEquals(ValueType.INT, value4.elemType());

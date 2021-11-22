@@ -33,12 +33,12 @@ import org.apache.commons.collections.ListUtils;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.value.Value.Talue;
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class ListValue<T extends Talue<?>> implements Talue<List<Object>> {
+public class ListValue<T extends Tvalue<?>> implements Tvalue<List<Object>> {
 
     private final GraphFactory graphFactory;
     private ValueType elemType;
@@ -208,7 +208,7 @@ public class ListValue<T extends Talue<?>> implements Talue<List<Object>> {
             return cmp;
         }
         for (int i = 0; i < this.size(); i++) {
-            Talue<?> self = this.values.get(i);
+            Tvalue<?> self = this.values.get(i);
             cmp = self.compareTo(other.values.get(i));
             if (cmp != 0) {
                 return cmp;

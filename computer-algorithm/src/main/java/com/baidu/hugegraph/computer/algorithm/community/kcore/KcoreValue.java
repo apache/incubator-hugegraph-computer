@@ -25,12 +25,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.Value.CompositeValue;
+import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class KcoreValue implements CompositeValue<Object> {
+public class KcoreValue implements CustomizeValue<Object> {
 
     private int degree;
     private Id core;

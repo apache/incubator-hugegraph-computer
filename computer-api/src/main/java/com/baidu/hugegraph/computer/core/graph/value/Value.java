@@ -69,7 +69,7 @@ public interface Value extends Writable, Readable, Comparable<Value> {
     /**
      * Value class with template parameter for simple subclass extension
      */
-    interface Talue<T> extends Value {
+    interface Tvalue<T> extends Value {
 
         @Override
         T value();
@@ -77,9 +77,9 @@ public interface Value extends Writable, Readable, Comparable<Value> {
 
     /**
      * Value class with template parameter for composite subclass extension,
-     * A custom Value class of the algorithm may need to extend this class.
+     * A customize Value class of the algorithm may need to extend this class.
      */
-    interface CompositeValue<T> extends Talue<T> {
+    interface CustomizeValue<T> extends Tvalue<T> {
 
         @Override
         default ValueType valueType() {

@@ -27,12 +27,12 @@ import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
-import com.baidu.hugegraph.computer.core.graph.value.Value.CompositeValue;
+import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class RingsDetectionMessage implements CompositeValue<List<Object>> {
+public class RingsDetectionMessage implements CustomizeValue<List<Object>> {
 
     private final IdList path;
     private Properties walkEdgeProps;
