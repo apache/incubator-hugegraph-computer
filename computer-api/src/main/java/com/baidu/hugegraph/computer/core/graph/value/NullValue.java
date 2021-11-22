@@ -41,6 +41,16 @@ public class NullValue implements Talue<Void> {
     }
 
     @Override
+    public Void value() {
+        return null;
+    }
+
+    @Override
+    public String string() {
+        return "";
+    }
+
+    @Override
     public ValueType valueType() {
         return ValueType.NULL;
     }
@@ -89,10 +99,5 @@ public class NullValue implements Talue<Void> {
     @Override
     public String toString() {
         return "<null>";
-    }
-
-    @Override
-    public Void value() {
-        return null;
     }
 }

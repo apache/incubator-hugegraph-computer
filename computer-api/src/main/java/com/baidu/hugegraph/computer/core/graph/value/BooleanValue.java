@@ -31,11 +31,15 @@ public class BooleanValue implements Talue<Boolean> {
     private boolean value;
 
     public BooleanValue() {
-        this.value = false;
+        this(false);
     }
 
     public BooleanValue(boolean value) {
         this.value = value;
+    }
+
+    public boolean boolValue() {
+        return this.value;
     }
 
     @Override
