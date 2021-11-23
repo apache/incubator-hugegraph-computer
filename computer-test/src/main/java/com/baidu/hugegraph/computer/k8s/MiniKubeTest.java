@@ -28,16 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -56,7 +53,6 @@ import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 
@@ -68,17 +64,6 @@ public class MiniKubeTest extends AbstractK8sTest {
     private static final Logger LOG = Log.logger(MiniKubeTest.class);
 
     private static final String ALGORITHM_NAME = "PageRank";
-    private static ExecutorService POOL;
-
-    @BeforeClass
-    public static void init() {
-        POOL = ExecutorUtil.newFixedThreadPool(1, "minikube-test-pool");
-    }
-
-    @AfterClass
-    public static void clear() {
-        POOL.shutdown();
-    }
 
     @Before
     public void setup() throws IOException {
@@ -125,9 +110,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -139,7 +123,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -157,9 +141,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -171,7 +154,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -191,9 +174,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -210,7 +192,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         String diagnostics = this.driver.diagnostics(jobId, params);
         Assert.assertContains("No such file or directory", diagnostics);
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -223,9 +205,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.FAILED);
@@ -235,7 +216,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         String diagnostics = this.driver.diagnostics(jobId, params);
         Assert.assertContains("Unschedulable", diagnostics);
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -255,9 +236,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -271,7 +251,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -291,9 +271,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.RUNNING);
@@ -312,7 +291,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         UnitTestBase.sleep(1000L);
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -324,9 +303,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.FAILED);
@@ -336,7 +314,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         String diagnostics = this.driver.diagnostics(jobId, params);
         Assert.assertContains("ImagePullBackOff", diagnostics);
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -349,9 +327,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -371,6 +348,6 @@ public class MiniKubeTest extends AbstractK8sTest {
                                          new HashMap<String, String>());
         Assert.assertNotEquals(0, pods.size());
 
-        future.getNow(null);
+        future.cancel(true);
     }
 }
