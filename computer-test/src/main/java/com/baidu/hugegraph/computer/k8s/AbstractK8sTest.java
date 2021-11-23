@@ -95,19 +95,21 @@ public abstract class AbstractK8sTest {
     @Before
     public void setup() throws IOException {
         this.initConfig();
-        this.kubeClient = new DefaultKubernetesClient()
-                              .inNamespace(this.namespace);
+        @SuppressWarnings("resource")
+        DefaultKubernetesClient client = new DefaultKubernetesClient();
+        this.kubeClient = client.inNamespace(this.namespace);
+
         this.createCRD(this.kubeClient);
         this.initKubernetesDriver();
         this.initOperator();
     }
 
     @After
-    public void teardown() throws IOException, ExecutionException,
-                                  InterruptedException {
+    public void teardown() throws InterruptedException, ExecutionException {
         this.driver.close();
         this.entrypoint.shutdown();
         this.operatorFuture.get();
+        this.kubeClient.close();
         Set<String> keySet = OperatorOptions.instance().options().keySet();
         for (String key : keySet) {
             System.clearProperty(key);
