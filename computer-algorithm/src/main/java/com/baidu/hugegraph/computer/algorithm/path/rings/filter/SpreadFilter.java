@@ -19,53 +19,64 @@
 
 package com.baidu.hugegraph.computer.algorithm.path.rings.filter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
+
+import org.mvel2.MVEL;
 
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.googlecode.aviator.AviatorEvaluator;
-import com.googlecode.aviator.Expression;
 
 public class SpreadFilter {
 
     private static final String ALL = "*";
     private static final String MESSAGE = "$message";
     private static final String ELEMENT = "$element";
-    private static final List<Expression> PASS = ImmutableList.of();
+    private static final List<Serializable> PASS = ImmutableList.of();
 
-    private final Map<String, Expression> vertexFilter;
-    private final Map<String, Expression> edgeFilter;
+    private final Map<String, Serializable> vertexFilter;
+    private final Map<String, Serializable> edgeSpreadFilter;
+    private final Map<String, Serializable> edgeFilter;
 
     public SpreadFilter(String describe) {
-        FilterDescribe filter = FilterDescribe.of(describe);
+        FilterDescribe des = FilterDescribe.of(describe);
 
         this.vertexFilter = new HashMap<>();
+        this.edgeSpreadFilter = new HashMap<>();
         this.edgeFilter = new HashMap<>();
 
-        this.init(this.vertexFilter, filter.vertexFilter());
-        this.init(this.edgeFilter, filter.edgeFilter());
+        this.init(this.vertexFilter, des.vertexFilter(), expression -> true);
+        this.init(this.edgeSpreadFilter, des.edgeFilter(), expression -> true);
+        // TODO: Use a better scheme to parse expressions with only $element
+        this.init(this.edgeFilter, des.edgeFilter(), expression -> {
+            return !expression.contains(MESSAGE);
+        });
     }
 
-    private void init(Map<String, Expression> filter,
-                      List<FilterDescribe.DescribeItem> describes) {
+    private void init(Map<String, Serializable> filter,
+                      List<FilterDescribe.DescribeItem> describes,
+                      Predicate<? super String> predicate) {
         for (FilterDescribe.DescribeItem describe : describes) {
             String labelName = describe.label();
-            Expression expression = AviatorEvaluator.compile(
-                                                     describe.propertyFilter());
-            filter.put(labelName, expression);
+            String propertyFilter = describe.propertyFilter();
+            if (predicate.test(propertyFilter) || ALL.equals(labelName)) {
+                Serializable expression = MVEL.compileExpression(
+                                               describe.propertyFilter());
+                filter.put(labelName, expression);
+            }
         }
     }
 
     public boolean filter(Vertex vertex) {
         String label = vertex.label();
-        List<Expression> expressions = expressions(this.vertexFilter, label);
+        List<Serializable> expressions = expressions(this.vertexFilter, label);
 
         if (expressions == PASS) {
             return true;
@@ -78,18 +89,11 @@ public class SpreadFilter {
 
     public boolean filter(Edge edge) {
         String label = edge.label();
-        List<Expression> expressions = expressions(this.edgeFilter, label);
+        List<Serializable> expressions = expressions(this.edgeFilter, label);
 
         if (expressions == PASS) {
             return true;
         }
-
-        expressions = expressions.stream()
-                                 .filter(expression -> {
-                                     return !expression.getVariableNames()
-                                                       .contains(MESSAGE);
-                                 })
-                                 .collect(Collectors.toList());
 
         Map<String, Map<String, Value<?>>> params =
                     ImmutableMap.of(ELEMENT, edge.properties().get());
@@ -98,7 +102,8 @@ public class SpreadFilter {
 
     public boolean filter(Edge edge, RingsDetectionValue message) {
         String label = edge.label();
-        List<Expression> expressions = expressions(this.edgeFilter, label);
+        List<Serializable> expressions = expressions(this.edgeSpreadFilter,
+                                                     label);
 
         if (expressions == PASS) {
             return true;
@@ -111,20 +116,22 @@ public class SpreadFilter {
     }
 
     private static boolean filter(Map<String, Map<String, Value<?>>> params,
-                                  List<Expression> expressions) {
+                                  List<Serializable> expressions) {
         Map<String, Object> map = convertParamsValueToObject(params);
         return expressions.stream()
                           .allMatch(expression -> {
-                              return (Boolean) expression.execute(map);
+                              return (Boolean) MVEL.executeExpression(
+                                                    expression, map);
                           });
     }
 
-    private static List<Expression> expressions(Map<String, Expression> filter,
-                                                String label) {
+    private static List<Serializable> expressions(
+                                      Map<String, Serializable> filter,
+                                      String label) {
         if (filter.size() == 0) {
             return PASS;
         }
-        List<Expression> expressions = new ArrayList<>();
+        List<Serializable> expressions = new ArrayList<>();
         if (filter.containsKey(ALL)) {
             expressions.add(filter.get(ALL));
         }
