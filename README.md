@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-0E78BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Build Status](https://github.com/hugegraph/hugegraph-computer/actions/workflows/ci.yml/badge.svg)](https://github.com/hugegraph/hugegraph-computer/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/hugegraph/hugegraph-computer/branch/master/graph/badge.svg)](https://codecov.io/gh/hugegraph/hugegraph-computer)
+[![docker pulls](https://img.shields.io/docker/pulls/hugegraph/hugegraph-computer-based-algorithm)](https://hub.docker.com/repository/docker/hugegraph/hugegraph-computer-based-algorithm)
 
 hugegraph-computer is a distributed graph processing system for hugegraph. It is an implementaion of [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf). It runs on Kubernetes or YARN framework.
 
