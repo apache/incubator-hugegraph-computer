@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
-public class MessageInput<T extends Value<?>> {
+public class MessageInput<T extends Value> {
 
     private final Config config;
     private final PeekableIterator<KvEntry> messages;

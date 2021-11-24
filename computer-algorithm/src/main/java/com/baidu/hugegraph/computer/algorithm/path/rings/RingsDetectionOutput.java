@@ -27,7 +27,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class RingsDetectionOutput extends HugeGraphOutput {
+public class RingsDetectionOutput extends HugeGraphOutput<List<String>> {
 
     @Override
     protected void prepareSchema() {
@@ -40,7 +40,7 @@ public class RingsDetectionOutput extends HugeGraphOutput {
     }
 
     @Override
-    protected Object value(Vertex vertex) {
+    protected List<String> value(Vertex vertex) {
         IdListList value = vertex.value();
         List<String> propValues = new ArrayList<>();
         for (int i = 0; i < value.size(); i++) {

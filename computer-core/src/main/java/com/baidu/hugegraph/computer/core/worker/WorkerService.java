@@ -74,8 +74,8 @@ public class WorkerService implements Closeable {
     private ComputeManager<?> computeManager;
     private ContainerInfo workerInfo;
 
-    private Computation<Value<?>> computation;
-    private Combiner<Value<?>> combiner;
+    private Computation<Value> computation;
+    private Combiner<Value> combiner;
 
     private ContainerInfo masterInfo;
 
@@ -411,28 +411,27 @@ public class WorkerService implements Closeable {
         }
 
         @Override
-        public <V extends Value<?>> Aggregator<V> createAggregator(
-                                                  String name) {
+        public <V extends Value> Aggregator<V> createAggregator(String name) {
             return this.aggrManager.createAggregator(name);
         }
 
         @Override
-        public <V extends Value<?>> void aggregateValue(String name, V value) {
+        public <V extends Value> void aggregateValue(String name, V value) {
             this.aggrManager.aggregateValue(name, value);
         }
 
         @Override
-        public <V extends Value<?>> V aggregatedValue(String name) {
+        public <V extends Value> V aggregatedValue(String name) {
             return this.aggrManager.aggregatedValue(name);
         }
 
         @Override
-        public void sendMessage(Id target, Value<?> value) {
+        public void sendMessage(Id target, Value value) {
             this.sendManager.sendMessage(target, value);
         }
 
         @Override
-        public void sendMessageToAllEdges(Vertex vertex, Value<?> value) {
+        public void sendMessageToAllEdges(Vertex vertex, Value value) {
             for (Edge edge : vertex.edges()) {
                 this.sendMessage(edge.targetId(), value);
             }
@@ -458,7 +457,7 @@ public class WorkerService implements Closeable {
          */
         @Override
         @SuppressWarnings("unchecked")
-        public <V extends Value<?>> Combiner<V> combiner() {
+        public <V extends Value> Combiner<V> combiner() {
             return (Combiner<V>) WorkerService.this.combiner;
         }
     }

@@ -82,14 +82,13 @@ public class MasterAggrManager implements Manager {
         return this.aggregatorsHandler;
     }
 
-    public <V extends Value<?>> void registerAggregator(String name,
-                                                        Aggregator<V> aggr) {
+    public <V extends Value> void registerAggregator(String name,
+                                                     Aggregator<V> aggr) {
         // Called when master init()
         this.registerAggregators.put(name, aggr);
     }
 
-    public <V extends Value<?>> void aggregatedAggregator(String name,
-                                                          V value) {
+    public <V extends Value> void aggregatedAggregator(String name, V value) {
         // Called when master compute()
         E.checkArgument(value != null,
                         "Can't set value to null for aggregator '%s'", name);
@@ -97,7 +96,7 @@ public class MasterAggrManager implements Manager {
         aggr.aggregatedValue(value);
     }
 
-    public <V extends Value<?>> V aggregatedValue(String name) {
+    public <V extends Value> V aggregatedValue(String name) {
         // Called when master compute()
         Aggregator<V> aggr = this.aggregatorsHandler.getAggregator(name);
         return aggr.aggregatedValue();
@@ -117,20 +116,20 @@ public class MasterAggrManager implements Manager {
         }
 
         @Override
-        public Map<String, Value<?>> listAggregators() {
+        public Map<String, Value> listAggregators() {
             return this.aggregators.values();
         }
 
         @Override
-        public void aggregateAggregators(Map<String, Value<?>> aggregators) {
-            for (Entry<String, Value<?>> aggr : aggregators.entrySet()) {
+        public void aggregateAggregators(Map<String, Value> aggregators) {
+            for (Entry<String, Value> aggr : aggregators.entrySet()) {
                 this.aggregateAggregator(aggr.getKey(), aggr.getValue());
             }
             LOG.info("Master aggregate aggregators: {}", aggregators);
         }
 
         @Override
-        public <V extends Value<?>> Aggregator<V> getAggregator(String name) {
+        public <V extends Value> Aggregator<V> getAggregator(String name) {
             Aggregator<?> aggr = this.aggregators.get(name, null);
             assert aggr != null;
             @SuppressWarnings("unchecked")
@@ -139,8 +138,8 @@ public class MasterAggrManager implements Manager {
         }
 
         @Override
-        public <V extends Value<?>> void aggregateAggregator(String name,
-                                                             V value) {
+        public <V extends Value> void aggregateAggregator(String name,
+                                                          V value) {
             Aggregator<V> aggr = this.getAggregator(name);
             synchronized (aggr) {
                 aggr.aggregateValue(value);

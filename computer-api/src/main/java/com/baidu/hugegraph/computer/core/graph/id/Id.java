@@ -19,9 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.graph.id;
 
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 
-public interface Id extends Value<Id> {
+public interface Id extends Tvalue<Object> {
 
     IdType idType();
 

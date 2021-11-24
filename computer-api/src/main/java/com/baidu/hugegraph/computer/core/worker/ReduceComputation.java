@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
  * null will be passed. Compute message will return a result that send to
  * all adjacent vertices by default.
  */
-public interface ReduceComputation<M extends Value<?>>
+public interface ReduceComputation<M extends Value>
        extends Computation<M> {
 
     /**

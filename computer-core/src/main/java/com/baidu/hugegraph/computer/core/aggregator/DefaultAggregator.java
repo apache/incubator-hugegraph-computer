@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.util.E;
 
-public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
+public class DefaultAggregator<V extends Value> implements Aggregator<V> {
 
     private final ValueType type;
     private final Class<? extends Combiner<V>> combinerClass;

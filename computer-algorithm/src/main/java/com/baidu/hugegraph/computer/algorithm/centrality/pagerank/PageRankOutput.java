@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class PageRankOutput extends HugeGraphOutput {
+public class PageRankOutput extends HugeGraphOutput<Double> {
 
     @Override
     protected void prepareSchema() {

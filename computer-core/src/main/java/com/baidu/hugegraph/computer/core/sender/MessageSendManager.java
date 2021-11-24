@@ -121,7 +121,7 @@ public class MessageSendManager implements Manager {
         }
     }
 
-    public void sendMessage(Id targetId, Value<?> value) {
+    public void sendMessage(Id targetId, Value value) {
         this.checkException();
 
         WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,

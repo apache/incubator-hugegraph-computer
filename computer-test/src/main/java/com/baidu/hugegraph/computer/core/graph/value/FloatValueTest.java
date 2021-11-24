@@ -58,6 +58,47 @@ public class FloatValueTest extends UnitTestBase {
     }
 
     @Test
+    public void testNumber() {
+        FloatValue value1 = new FloatValue();
+        FloatValue value2 = new FloatValue(1234.56f);
+        FloatValue value3 = new FloatValue(Float.MIN_VALUE);
+        FloatValue value4 = new FloatValue(Float.MAX_VALUE);
+
+        Assert.assertEquals(0, value1.intValue());
+        Assert.assertEquals(0L, value1.longValue());
+        Assert.assertEquals(0.0f, value1.floatValue(), 0.0f);
+        Assert.assertEquals(0.0d, value1.doubleValue(), 0.0d);
+
+        Assert.assertEquals(1234, value2.intValue());
+        Assert.assertEquals(1234L, value2.longValue());
+        Assert.assertEquals(1234.56f, value2.floatValue(), 0.0f);
+        Assert.assertEquals(1234.56005859375d, value2.doubleValue(), 0.0d);
+
+        Assert.assertEquals(0, value3.intValue());
+        Assert.assertEquals(0L, value3.longValue());
+        Assert.assertEquals(1.4E-45f, value3.floatValue(), 0.0f);
+        Assert.assertEquals(1.401298464324817E-45d, value3.doubleValue(), 0.0d);
+
+        Assert.assertEquals(2147483647, value4.intValue());
+        Assert.assertEquals(9223372036854775807L, value4.longValue());
+        Assert.assertEquals(3.4028235E38f, value4.floatValue(), 0.0f);
+        Assert.assertEquals(3.4028234663852886E38d, value4.doubleValue(), 0.0d);
+    }
+
+    @Test
+    public void testString() {
+        FloatValue value1 = new FloatValue();
+        FloatValue value2 = new FloatValue(1234.56f);
+        FloatValue value3 = new FloatValue(Float.MIN_VALUE);
+        FloatValue value4 = new FloatValue(Float.MAX_VALUE);
+
+        Assert.assertEquals("0.0", value1.string());
+        Assert.assertEquals("1234.56", value2.string());
+        Assert.assertEquals("1.4E-45", value3.string());
+        Assert.assertEquals("3.4028235E38", value4.string());
+    }
+
+    @Test
     public void testAssign() {
         FloatValue value1 = new FloatValue();
         FloatValue value2 = new FloatValue(1234.56f);
@@ -80,8 +121,7 @@ public class FloatValueTest extends UnitTestBase {
         Assert.assertEquals(Float.MAX_VALUE, value4.value(), 0f);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<FloatValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to FloatValue",
@@ -89,8 +129,7 @@ public class FloatValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<FloatValue> v = (Value) new DoubleValue();
+            Value v = new DoubleValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0.0'(DoubleValue) to " +
@@ -136,6 +175,12 @@ public class FloatValueTest extends UnitTestBase {
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+
+        Assert.assertGt(0, value1.compareTo(NullValue.get()));
+        Assert.assertGt(0, value1.compareTo(new IntValue(123)));
+        Assert.assertGt(0, value1.compareTo(new LongValue(123)));
+        Assert.assertLt(0, value1.compareTo(new DoubleValue(123)));
+        Assert.assertLt(0, value1.compareTo(new StringValue("123")));
     }
 
     @Test

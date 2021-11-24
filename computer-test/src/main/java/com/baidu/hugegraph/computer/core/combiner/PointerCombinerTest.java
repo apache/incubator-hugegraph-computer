@@ -122,7 +122,7 @@ public class PointerCombinerTest extends UnitTestBase {
 
             Properties combinedValue = graphFactory.createProperties();
             combinedValue.read(input);
-            Map<String, Value<?>> map = combinedValue.get();
+            Map<String, Value> map = combinedValue.get();
             Assert.assertEquals(2, map.size());
             Assert.assertEquals(new LongValue(1L), map.get("p1"));
             Assert.assertEquals(new LongValue(2L), map.get("p2"));

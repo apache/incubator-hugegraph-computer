@@ -25,12 +25,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class TriangleCountValue implements Value<TriangleCountValue> {
+public class TriangleCountValue implements CustomizeValue<Long> {
 
     private IdList idList;
     private LongValue count;
@@ -53,17 +52,7 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.UNKNOWN;
-    }
-
-    @Override
-    public void assign(Value<TriangleCountValue> other) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Value<TriangleCountValue> copy() {
+    public TriangleCountValue copy() {
         TriangleCountValue triangleCountValue = new TriangleCountValue();
         triangleCountValue.idList = this.idList.copy();
         triangleCountValue.count = this.count.copy();
@@ -83,11 +72,6 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
     }
 
     @Override
-    public int compareTo(TriangleCountValue other) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public String toString() {
         return new ToStringBuilder(this)
                    .append("idList", this.idList)
@@ -96,12 +80,7 @@ public class TriangleCountValue implements Value<TriangleCountValue> {
     }
 
     @Override
-    public String string() {
-        return String.valueOf(this.value());
-    }
-
-    @Override
-    public Object value() {
+    public Long value() {
         return this.count.value();
     }
 }

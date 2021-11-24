@@ -388,7 +388,7 @@ public class MasterService implements Closeable {
         }
 
         @Override
-        public <V extends Value<?>, C extends Aggregator<V>>
+        public <V extends Value, C extends Aggregator<V>>
         void registerAggregator(String name, Class<C> aggregatorClass) {
             E.checkArgument(aggregatorClass != null,
                             "The aggregator class can't be null");
@@ -403,14 +403,14 @@ public class MasterService implements Closeable {
         }
 
         @Override
-        public <V extends Value<?>, C extends Combiner<V>>
+        public <V extends Value, C extends Combiner<V>>
         void registerAggregator(String name, ValueType type,
                                 Class<C> combinerClass) {
             this.registerAggregator(name, type, combinerClass, null);
         }
 
         @Override
-        public <V extends Value<?>, C extends Combiner<V>>
+        public <V extends Value, C extends Combiner<V>>
         void registerAggregator(String name, V defaultValue,
                                 Class<C> combinerClass) {
             E.checkArgument(defaultValue != null,
@@ -422,7 +422,7 @@ public class MasterService implements Closeable {
                                     combinerClass, defaultValue);
         }
 
-        private <V extends Value<?>, C extends Combiner<V>>
+        private <V extends Value, C extends Combiner<V>>
         void registerAggregator(String name, ValueType type,
                                 Class<C> combinerClass, V defaultValue) {
             Aggregator<V> aggr = new DefaultAggregator<>(
@@ -432,12 +432,12 @@ public class MasterService implements Closeable {
         }
 
         @Override
-        public <V extends Value<?>> void aggregatedValue(String name, V value) {
+        public <V extends Value> void aggregatedValue(String name, V value) {
             this.aggrManager.aggregatedAggregator(name, value);
         }
 
         @Override
-        public <V extends Value<?>> V aggregatedValue(String name) {
+        public <V extends Value> V aggregatedValue(String name) {
             return this.aggrManager.aggregatedValue(name);
         }
 

@@ -37,7 +37,7 @@ public interface Aggregator4Master {
      * Register the aggregator with specified name. The name must be unique.
      * Used by algorithm's master-computation init() to register aggregators.
      */
-    <V extends Value<?>, C extends Aggregator<V>>
+    <V extends Value, C extends Aggregator<V>>
     void registerAggregator(String name, Class<C> aggregator);
 
     /**
@@ -45,7 +45,7 @@ public interface Aggregator4Master {
      * combine values with specified value type. The name must be unique.
      * Used by algorithm's master-computation init() to register aggregators.
      */
-    <V extends Value<?>, C extends Combiner<V>>
+    <V extends Value, C extends Combiner<V>>
     void registerAggregator(String name, ValueType type, Class<C> combiner);
 
     /**
@@ -54,7 +54,7 @@ public interface Aggregator4Master {
      * The name must be unique.
      * Used by algorithm's master-computation init() to register aggregators.
      */
-    <V extends Value<?>, C extends Combiner<V>>
+    <V extends Value, C extends Combiner<V>>
     void registerAggregator(String name, V defaultValue, Class<C> combiner);
 
     /**
@@ -64,7 +64,7 @@ public interface Aggregator4Master {
      * Throws ComputerException if master-computation does not register
      * aggregator with specified name.
      */
-    <V extends Value<?>> void aggregatedValue(String name, V value);
+    <V extends Value> void aggregatedValue(String name, V value);
 
     /**
      * Get the aggregated value. Each worker aggregate the aggregator value
@@ -76,5 +76,5 @@ public interface Aggregator4Master {
      * Throws ComputerException if master-computation does not register
      * aggregator with the specified name.
      */
-    <V extends Value<?>> V aggregatedValue(String name);
+    <V extends Value> V aggregatedValue(String name);
 }

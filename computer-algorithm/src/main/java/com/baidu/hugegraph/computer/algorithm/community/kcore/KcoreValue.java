@@ -25,13 +25,12 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
+import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class KcoreValue implements Value<KcoreValue> {
+public class KcoreValue implements CustomizeValue<Object> {
 
     private int degree;
     private Id core;
@@ -70,17 +69,7 @@ public class KcoreValue implements Value<KcoreValue> {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.UNKNOWN;
-    }
-
-    @Override
-    public void assign(Value<KcoreValue> other) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Value<KcoreValue> copy() {
+    public KcoreValue copy() {
         KcoreValue kcoreValue = new KcoreValue();
         kcoreValue.core = (Id) this.core.copy();
         kcoreValue.degree = this.degree;
@@ -100,11 +89,6 @@ public class KcoreValue implements Value<KcoreValue> {
     }
 
     @Override
-    public int compareTo(KcoreValue other) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public String toString() {
         return new ToStringBuilder(this)
                    .append("core", this.core)
@@ -113,12 +97,7 @@ public class KcoreValue implements Value<KcoreValue> {
     }
 
     @Override
-    public String string() {
-        return String.valueOf(this.value());
-    }
-
-    @Override
     public Object value() {
-        return this.core;
+        return this.core.value();
     }
 }

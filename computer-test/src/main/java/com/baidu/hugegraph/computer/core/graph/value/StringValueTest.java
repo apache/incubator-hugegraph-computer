@@ -26,6 +26,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class StringValueTest {
@@ -49,6 +50,19 @@ public class StringValueTest {
     }
 
     @Test
+    public void testString() {
+        StringValue value1 = new StringValue();
+        StringValue value2 = new StringValue("t1");
+        StringValue value3 = new StringValue("t1");
+        StringValue value4 = new StringValue("test");
+
+        Assert.assertEquals("", value1.string());
+        Assert.assertEquals("t1", value2.string());
+        Assert.assertEquals("t1", value3.string());
+        Assert.assertEquals("test", value4.string());
+    }
+
+    @Test
     public void testAssign() {
         StringValue value1 = new StringValue();
         StringValue value2 = new StringValue("test");
@@ -58,8 +72,7 @@ public class StringValueTest {
         Assert.assertEquals("test", value2.value());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<StringValue> v = (Value) new FloatValue();
+            Value v = new FloatValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0.0'(FloatValue) to " +
@@ -97,10 +110,20 @@ public class StringValueTest {
 
     @Test
     public void testCompare() {
-        StringValue value1 = new StringValue("abc");
-        StringValue value2 = new StringValue("bcd");
+        StringValue value1 = new StringValue("123");
+        StringValue value2 = new StringValue("abc");
+        StringValue value3 = new StringValue("bcd");
 
         Assert.assertLt(0, value1.compareTo(value2));
+        Assert.assertLt(0, value2.compareTo(value3));
+        Assert.assertGt(0, value3.compareTo(value1));
+
+        Assert.assertGt(0, value1.compareTo(NullValue.get()));
+        Assert.assertGt(0, value1.compareTo(new BooleanValue()));
+        Assert.assertGt(0, value1.compareTo(new IntValue(123)));
+        Assert.assertGt(0, value1.compareTo(new FloatValue(123)));
+        Assert.assertGt(0, value1.compareTo(new DoubleValue(123)));
+        Assert.assertLt(0, value1.compareTo(BytesId.of("123")));
     }
 
     @Test

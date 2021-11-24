@@ -42,8 +42,19 @@ public class NullValueTest extends UnitTestBase {
         NullValue value1 = NullValue.get();
         NullValue value2 = NullValue.get();
 
-        Assert.assertEquals(NullValue.get(), value1);
         Assert.assertEquals(value1, value2);
+        Assert.assertEquals(value1.value(), value2.value());
+        Assert.assertNull(value1.value());
+        Assert.assertNull(value2.value());
+    }
+
+    @Test
+    public void testString() {
+        NullValue value1 = NullValue.get();
+        NullValue value2 = NullValue.get();
+
+        Assert.assertEquals("", value1.string());
+        Assert.assertEquals("", value2.string());
     }
 
     @Test
@@ -58,8 +69,7 @@ public class NullValueTest extends UnitTestBase {
         Assert.assertEquals(value1, value2);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<NullValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to NullValue",
@@ -67,8 +77,7 @@ public class NullValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<NullValue> v = (Value) new LongValue();
+            Value v = new LongValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(LongValue) to NullValue",
@@ -106,6 +115,10 @@ public class NullValueTest extends UnitTestBase {
         NullValue value1 = NullValue.get();
         NullValue value2 = NullValue.get();
         Assert.assertEquals(0, value1.compareTo(value2));
+
+        Assert.assertLt(0, value1.compareTo(new BooleanValue()));
+        Assert.assertLt(0, value1.compareTo(new IntValue()));
+        Assert.assertLt(0, value1.compareTo(new StringValue("")));
     }
 
     @Test

@@ -43,7 +43,7 @@ public class WorkerAggrManager implements Manager {
     // Registered aggregators from master
     private RegisterAggregators registerAggregators;
     // Cache the aggregators of the previous superstep
-    private Map<String, Value<?>> lastAggregators;
+    private Map<String, Value> lastAggregators;
     // Cache the aggregators of the current superstep
     private Aggregators currentAggregators;
 
@@ -100,7 +100,7 @@ public class WorkerAggrManager implements Manager {
         this.service = service;
     }
 
-    public <V extends Value<?>> Aggregator<V> createAggregator(String name) {
+    public <V extends Value> Aggregator<V> createAggregator(String name) {
         /*
          * Create aggregator for the current superstep, this method would
          * be called once per superstep for each aggregator, generally called
@@ -112,22 +112,22 @@ public class WorkerAggrManager implements Manager {
         return aggr;
     }
 
-    public <V extends Value<?>> void aggregateValue(String name, V value) {
+    public <V extends Value> void aggregateValue(String name, V value) {
         /*
          * Update aggregator for the current superstep,
          * generally called when computation.afterSuperstep().
          */
         E.checkArgument(value != null,
                         "Can't set value to null for aggregator '%s'", name);
-        Aggregator<Value<?>> aggr = this.currentAggregators.get(name,
-                                                                this.service());
+        Aggregator<Value> aggr = this.currentAggregators.get(name,
+                                                             this.service());
         // May be executed in parallel by multiple threads in a worker
         synchronized (aggr) {
             aggr.aggregateValue(value);
         }
     }
 
-    public <V extends Value<?>> V aggregatedValue(String name) {
+    public <V extends Value> V aggregatedValue(String name) {
         // Get aggregator value from the previous superstep
         @SuppressWarnings("unchecked")
         V value = (V) this.lastAggregators.get(name);
@@ -137,7 +137,7 @@ public class WorkerAggrManager implements Manager {
     }
 
     private void flushAggregators() {
-        Map<String, Value<?>> aggregators = this.currentAggregators.values();
+        Map<String, Value> aggregators = this.currentAggregators.values();
         this.service().aggregateAggregators(aggregators);
         this.currentAggregators.clear();
     }

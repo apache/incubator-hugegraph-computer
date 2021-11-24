@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class TriangleCountOutput extends HugeGraphOutput {
+public class TriangleCountOutput extends HugeGraphOutput<Long> {
 
     @Override
     protected void prepareSchema() {

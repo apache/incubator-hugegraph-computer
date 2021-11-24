@@ -58,6 +58,47 @@ public class LongValueTest extends UnitTestBase {
     }
 
     @Test
+    public void testNumber() {
+        LongValue value1 = new LongValue();
+        LongValue value2 = new LongValue(123456L);
+        LongValue value3 = new LongValue(Long.MIN_VALUE);
+        LongValue value4 = new LongValue(Long.MAX_VALUE);
+
+        Assert.assertEquals(0, value1.intValue());
+        Assert.assertEquals(0L, value1.longValue());
+        Assert.assertEquals(0.0f, value1.floatValue(), 0.0f);
+        Assert.assertEquals(0.0d, value1.doubleValue(), 0.0d);
+
+        Assert.assertEquals(123456, value2.intValue());
+        Assert.assertEquals(123456L, value2.longValue());
+        Assert.assertEquals(123456f, value2.floatValue(), 0.0f);
+        Assert.assertEquals(123456d, value2.doubleValue(), 0.0d);
+
+        Assert.assertEquals(0, value3.intValue());
+        Assert.assertEquals(-9223372036854775808L, value3.longValue());
+        Assert.assertEquals(-9223372036854775808f, value3.floatValue(), 0.0f);
+        Assert.assertEquals(-9223372036854775808d, value3.doubleValue(), 0.0d);
+
+        Assert.assertEquals(-1, value4.intValue());
+        Assert.assertEquals(9223372036854775807L, value4.longValue());
+        Assert.assertEquals(9223372036854775807f, value4.floatValue(), 0.0f);
+        Assert.assertEquals(9223372036854775807d, value4.doubleValue(), 0.0d);
+    }
+
+    @Test
+    public void testString() {
+        LongValue value1 = new LongValue();
+        LongValue value2 = new LongValue(123456L);
+        LongValue value3 = new LongValue(Long.MIN_VALUE);
+        LongValue value4 = new LongValue(Long.MAX_VALUE);
+
+        Assert.assertEquals("0", value1.string());
+        Assert.assertEquals("123456", value2.string());
+        Assert.assertEquals("-9223372036854775808", value3.string());
+        Assert.assertEquals("9223372036854775807", value4.string());
+    }
+
+    @Test
     public void testAssign() {
         LongValue value1 = new LongValue();
         LongValue value2 = new LongValue(123456L);
@@ -80,8 +121,7 @@ public class LongValueTest extends UnitTestBase {
         Assert.assertEquals(Long.MAX_VALUE, value4.value());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<LongValue> v = (Value) new FloatValue();
+            Value v = new FloatValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0.0'(FloatValue) to LongValue",
@@ -89,8 +129,7 @@ public class LongValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<LongValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to LongValue",
@@ -135,6 +174,13 @@ public class LongValueTest extends UnitTestBase {
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+
+        Assert.assertGt(0, value1.compareTo(NullValue.get()));
+        Assert.assertGt(0, value1.compareTo(new BooleanValue()));
+        Assert.assertGt(0, value1.compareTo(new IntValue(123)));
+        Assert.assertLt(0, value1.compareTo(new FloatValue(123)));
+        Assert.assertLt(0, value1.compareTo(new DoubleValue(123)));
+        Assert.assertLt(0, value1.compareTo(new StringValue("123")));
     }
 
     @Test

@@ -38,6 +38,7 @@ import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.value.StringValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.util.E;
 
 public final class HugeConverter {
@@ -59,7 +60,7 @@ public final class HugeConverter {
         }
     }
 
-    public static Value<?> convertValue(Object rawValue) {
+    public static Tvalue<?> convertValue(Object rawValue) {
         if (rawValue == null) {
             return NullValue.get();
         } else if (rawValue instanceof Boolean) {
@@ -77,7 +78,7 @@ public final class HugeConverter {
         } else if (rawValue instanceof Collection) {
             @SuppressWarnings("unchecked")
             Collection<Object> collection = (Collection<Object>) rawValue;
-            ListValue<Value<?>> listValue = new ListValue<>();
+            ListValue<Tvalue<?>> listValue = new ListValue<>();
             for (Object nestedRawValue : collection) {
                 listValue.add(convertValue(nestedRawValue));
             }
@@ -93,7 +94,7 @@ public final class HugeConverter {
         Properties properties = GRAPH_FACTORY.createProperties();
         for (Map.Entry<String, Object> entry : rawProperties.entrySet()) {
             String key = entry.getKey();
-            Value<?> value = convertValue(entry.getValue());
+            Value value = convertValue(entry.getValue());
             properties.put(key, value);
         }
         return properties;

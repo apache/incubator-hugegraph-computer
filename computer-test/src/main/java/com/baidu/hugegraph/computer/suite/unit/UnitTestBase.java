@@ -67,11 +67,10 @@ public class UnitTestBase {
                                                      .defaultValue();
     private static final String GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME
                                                        .defaultValue();
-    private static final HugeClient CLIENT = HugeClient.builder(URL, GRAPH)
-                                                       .build();
+    private static HugeClient CLIENT = null;
 
     protected static void clearAll() {
-        CLIENT.graphs().clear(GRAPH, "I'm sure to delete all data");
+        client().graphs().clear(GRAPH, "I'm sure to delete all data");
     }
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
@@ -90,7 +89,7 @@ public class UnitTestBase {
         }
     }
 
-    public static void assertValueEqualAfterWriteAndRead(Value<?> oldValue)
+    public static void assertValueEqualAfterWriteAndRead(Value oldValue)
                                                          throws IOException {
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
@@ -99,7 +98,7 @@ public class UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        Value<?> newValue = graphFactory().createValue(oldValue.valueType());
+        Value newValue = graphFactory().createValue(oldValue.valueType());
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newValue.read(bai);
             Assert.assertEquals(oldValue, newValue);
@@ -208,7 +207,10 @@ public class UnitTestBase {
                                                                output);
     }
 
-    protected static HugeClient client() {
+    protected static synchronized HugeClient client() {
+        if (CLIENT == null) {
+            CLIENT = HugeClient.builder(URL, GRAPH).build();
+        }
         return CLIENT;
     }
 

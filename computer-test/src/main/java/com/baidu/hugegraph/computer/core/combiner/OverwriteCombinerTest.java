@@ -39,7 +39,7 @@ public class OverwriteCombinerTest extends UnitTestBase {
         LongValue value1 = new LongValue(1L);
         LongValue value2 = new LongValue(2L);
         OverwriteCombiner<LongValue> combiner = new OverwriteCombiner<>();
-        Value<?> value = combiner.combine(value1, value2);
+        Value value = combiner.combine(value1, value2);
         Assert.assertEquals(value2, value);
     }
 
