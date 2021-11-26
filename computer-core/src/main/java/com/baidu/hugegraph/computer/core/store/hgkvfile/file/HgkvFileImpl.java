@@ -97,7 +97,7 @@ public class HgkvFileImpl extends AbstractHgkvFile {
             int footerLength = input.readFixedInt();
             switch (version) {
                 case "1.0":
-                    this.readFooterV1d0(input, footerLength);
+                    this.readFooterV1d0(input, file.length() - footerLength);
                     break;
                 default:
                     throw new ComputerException("Illegal HgkvFile version '%s'",
@@ -106,16 +106,15 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         }
     }
 
-    private void readFooterV1d0(RandomAccessInput input, int footerLength)
+    private void readFooterV1d0(RandomAccessInput input, long footerBegin)
                                 throws IOException {
-        File file = new File(this.path);
-        input.seek(file.length() - footerLength);
+        input.seek(footerBegin);
 
         // Read magic
         String magic = new String(input.readBytes(MAGIC.length()));
         E.checkArgument(HgkvFileImpl.MAGIC.equals(magic),
                         "Failed to read footer, illegal hgvk-file magic in " +
-                        "file: '%s'", file.getPath());
+                        "file: '%s'", this.path);
         this.magic = magic;
         // Read numEntries
         this.numEntries = input.readLong();
@@ -129,9 +128,9 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         long maxKeyOffset = input.readLong();
         long minKeyOffset = input.readLong();
         // Read version
-        short primaryVersion = input.readShort();
+        short majorVersion = input.readShort();
         short minorVersion = input.readShort();
-        this.version = primaryVersion + "." + minorVersion;
+        this.version = version(majorVersion, minorVersion);
 
         if (this.numEntries > 0) {
             // Read max key
