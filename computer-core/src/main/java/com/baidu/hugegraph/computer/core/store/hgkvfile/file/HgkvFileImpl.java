@@ -22,6 +22,8 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -66,6 +68,10 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         return hgkvFile;
     }
 
+    private static String version(short majorVersion, short minorVersion) {
+        return StringUtils.join(majorVersion, ".", minorVersion);
+    }
+
     @Override
     public RandomAccessOutput output() throws IOException {
         return IOFactory.createFileOutput(new File(this.path));
@@ -81,13 +87,12 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         // The footerLength occupied 4 bytes, versionLength 2 * 2 bytes
         long versionOffset = file.length() - Short.BYTES * 2 - Integer.BYTES;
 
-        try (RandomAccessInput input =
-                               IOFactory.createFileInput(new File(this.path))) {
+        try (RandomAccessInput input = IOFactory.createFileInput(file)) {
             input.seek(versionOffset);
             // Read version
             short majorVersion = input.readShort();
             short minorVersion = input.readShort();
-            String version = majorVersion + "." + minorVersion;
+            String version = version(majorVersion, minorVersion);
             // Read footerLength
             int footerLength = input.readFixedInt();
             switch (version) {
