@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
@@ -211,18 +210,16 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     }
 
     @Test
-    public void testWatchJobAndCancel() throws ExecutionException,
-                                              InterruptedException {
+    public void testWatchJobAndCancel() {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
         String jobId = this.driver.submitJob("PageRank3", params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.watchJob(jobId,
-                                                              params,
-                                                              jobObserver);
-
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId,
+                                                                  params,
+                                                                  jobObserver);
         Mockito.verify(jobObserver, Mockito.timeout(5000L).atLeast(1))
                .onJobStateChanged(Mockito.any(DefaultJobState.class));
 
@@ -231,14 +228,15 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         MutableBoolean watchActive = Whitebox.getInternalState(this.driver,
                                                                "watchActive");
         watchActive.setFalse();
-        this.driver.watchJob(jobId, params, jobObserver);
+        this.driver.waitJobAsync(jobId, params, jobObserver);
 
         this.driver.cancelJob(jobId, params);
-        CompletableFuture<Void> watchJob = this.driver.watchJob(jobId, params,
-                                                                jobObserver);
-        if (watchJob != null) {
-            watchJob.get();
-        }
+        UnitTestBase.sleep(1000L);
+
+        CompletableFuture<Void> future2 = this.driver.waitJobAsync(jobId,
+                                                                   params,
+                                                                   jobObserver);
+        Assert.assertNull(future2);
     }
 
     @Test

@@ -108,6 +108,7 @@ public abstract class AbstractK8sTest {
         this.driver.close();
         this.entrypoint.shutdown();
         this.operatorFuture.get();
+        this.kubeClient.close();
         Set<String> keySet = OperatorOptions.instance().options().keySet();
         for (String key : keySet) {
             System.clearProperty(key);
