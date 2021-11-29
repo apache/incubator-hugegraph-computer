@@ -47,4 +47,8 @@ public interface Edge extends Recyclable {
     void properties(Properties properties);
 
     <T extends Value<T>> T property(String key);
+
+    boolean inDirection();
+
+    void inDirection(boolean inDirection);
 }

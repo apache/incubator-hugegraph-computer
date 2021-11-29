@@ -32,7 +32,6 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
-import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
 
 public class StreamGraphOutput implements GraphComputeOutput {
 
@@ -66,12 +65,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
         if (this.frequency == EdgeFrequency.SINGLE) {
             for (Edge edge : vertex.edges()) {
                 // Only use targetId as subKey, use properties as subValue
-                BooleanValue inv = edge.property("inv");
-                boolean inv_ = (inv == null) ? false : inv.value();
-                byte binv = (byte)(inv_ ? 0x01 : 0x00);
-                edge.properties().remove("inv");
                 writer.writeSubKv(out -> {
-                    out.writeByte(binv);
+                    out.writeBoolean(edge.inDirection());
                     this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeId(out, edge.id());
@@ -82,12 +77,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
         } else if (this.frequency == EdgeFrequency.SINGLE_PER_LABEL) {
             for (Edge edge : vertex.edges()) {
                 // Use label + targetId as subKey, use properties as subValue
-                BooleanValue inv = edge.property("inv");
-                boolean inv_ = (inv == null) ? false : inv.value();
-                byte binv = (byte)(inv_ ? 0x01 : 0x00);
-                edge.properties().remove("inv");
                 writer.writeSubKv(out -> {
-                    out.writeByte(binv);
+                    out.writeBoolean(edge.inDirection());
                     this.writeLabel(out, edge.label());
                     this.writeId(out, edge.targetId());
                 }, out -> {
@@ -102,12 +93,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
                  * Use label + sortValues + targetId as subKey,
                  * use properties as subValue
                  */
-                BooleanValue inv = edge.property("inv");
-                boolean inv_ = (inv == null) ? false : inv.value();
-                byte binv = (byte)(inv_ ? 0x01 : 0x00);
-                edge.properties().remove("inv");
                 writer.writeSubKv(out -> {
-                    out.writeByte(binv);
+                    out.writeBoolean(edge.inDirection());
                     this.writeLabel(out, edge.label());
                     this.writeLabel(out, edge.name());
                     this.writeId(out, edge.targetId());

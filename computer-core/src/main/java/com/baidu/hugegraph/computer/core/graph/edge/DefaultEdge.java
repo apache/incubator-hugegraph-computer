@@ -35,6 +35,7 @@ public class DefaultEdge implements Edge {
     private String name;
     private Id targetId;
     private Properties properties;
+    private boolean isInDirection;
 
     public DefaultEdge(GraphFactory graphFactory) {
         this(graphFactory, BytesId.of(Constants.EMPTY_STR), Constants.EMPTY_STR,
@@ -103,6 +104,16 @@ public class DefaultEdge implements Edge {
     @Override
     public <T extends Value<T>> T property(String key) {
         return this.properties.get(key);
+    }
+
+    @Override
+    public boolean inDirection() {
+        return this.isInDirection;
+    }
+
+    @Override
+    public void inDirection(boolean inEdge) {
+        this.isInDirection = inEdge;
     }
 
     @Override
