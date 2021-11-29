@@ -46,6 +46,13 @@ public final class HashPartitioner implements Partitioner {
     }
 
     @Override
+    public int partitionIdFixIdLength(Id vertexId) {
+        long lId = (long)vertexId.asObject();
+        int partitionId = (int)(lId >> 32);
+        return partitionId;
+    }
+
+    @Override
     public int workerId(int partitionId) {
         // Note: workerId start from 1
         return (partitionId % this.workerCount) + 1;

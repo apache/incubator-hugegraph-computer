@@ -38,6 +38,7 @@ import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitions;
+import com.baidu.hugegraph.computer.core.receiver.message.HashIdMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
@@ -60,6 +61,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
     private VertexMessageRecvPartitions vertexPartitions;
     private EdgeMessageRecvPartitions edgePartitions;
     private ComputeMessageRecvPartitions messagePartitions;
+    private HashIdMessageRecvPartitions hashIdMessagePartitions;    
 
     private int workerCount;
     private int expectedFinishMessages;
@@ -90,6 +92,8 @@ public class MessageRecvManager implements Manager, MessageHandler {
                                 this.context, fileGenerator, this.sortManager);
         this.edgePartitions = new EdgeMessageRecvPartitions(
                               this.context, fileGenerator, this.sortManager);
+        this.hashIdMessagePartitions = new HashIdMessageRecvPartitions(
+                                 this.context, fileGenerator, this.sortManager);
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
@@ -186,6 +190,12 @@ public class MessageRecvManager implements Manager, MessageHandler {
             case MSG:
                 this.messagePartitions.addBuffer(partition, buffer);
                 break;
+            case HASHID:
+                //System.out.println("!!!!!!! \n\n\n");
+                //System.out.println(this.hashIdMessagePartitions);
+                this.hashIdMessagePartitions.addBuffer(partition, buffer);
+                //System.out.println("aa \n\n\n");
+                break;
             default:
                 throw new ComputerException(
                           "Unable handle ManagedBuffer with type '%s'",
@@ -226,6 +236,14 @@ public class MessageRecvManager implements Manager, MessageHandler {
                      "The messagePartitions can't be null");
         ComputeMessageRecvPartitions partitions = this.messagePartitions;
         this.messagePartitions = null;
+        return partitions.iterators();
+    }
+
+    public Map<Integer, PeekableIterator<KvEntry>> hashIdMessagePartitions() {
+        E.checkState(this.hashIdMessagePartitions != null,
+                     "The messagePartitions can't be null");
+        HashIdMessageRecvPartitions partitions = this.hashIdMessagePartitions;
+        this.hashIdMessagePartitions = null;
         return partitions.iterators();
     }
 

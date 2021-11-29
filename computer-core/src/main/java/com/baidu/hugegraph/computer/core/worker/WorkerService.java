@@ -72,15 +72,18 @@ public class WorkerService implements Closeable {
     private Config config;
     private Bsp4Worker bsp4Worker;
     private ComputeManager<?> computeManager;
+    private MessageSendManager sendManager;
     private ContainerInfo workerInfo;
 
     private Computation<Value<?>> computation;
     private Combiner<Value<?>> combiner;
 
     private ContainerInfo masterInfo;
-
     private volatile ShutdownHook shutdownHook;
     private volatile Thread serviceThread;
+
+    private WorkerStat inputWorkerStat;
+    private boolean useIdFixLength;
 
     public WorkerService() {
         this.context = ComputerContext.instance();
@@ -146,9 +149,11 @@ public class WorkerService implements Closeable {
                                                               this.managers,
                                                               this.computation);
         this.computeManager = computeManager;
-
         this.managers.initedAll(this.config);
         LOG.info("{} WorkerService initialized", this);
+
+        this.useIdFixLength = this.config.get(ComputerOptions.
+                                            USE_ID_FIXLENGTH); 
         this.inited = true;
     }
 
@@ -230,7 +235,40 @@ public class WorkerService implements Closeable {
             superstepStat = null;
         }
 
-        /*
+        LOG.info("Begin to send id map to others {}", this);
+        WorkerContext context0 = new SuperstepContext(-2, superstepStat);
+        this.bsp4Worker.workerStepPrepareDone(-2);
+        this.bsp4Worker.waitMasterStepPrepareDone(-2);
+        this.managers.beforeSuperstep(this.config, -2);
+
+        if (this.useIdFixLength) {
+            this.computeManager.sendHashIdMsg(context0);
+        }
+
+        this.managers.afterSuperstep(this.config, -2);
+        this.bsp4Worker.workerStepComputeDone(-2);
+        this.bsp4Worker.waitMasterStepComputeDone(-2);
+
+        if (this.useIdFixLength) {
+            LOG.info("Finish send id map to others {}", this);
+            this.computeManager.takeRecvedMessages(false);
+            LOG.info("Begin to build id map {}", this);
+        }
+
+        this.bsp4Worker.workerStepPrepareDone(-1);
+        this.bsp4Worker.waitMasterStepPrepareDone(-1);
+        this.managers.beforeSuperstep(this.config, -1);
+
+        if (this.useIdFixLength) {
+            this.computeManager.recvHashIdMsg();
+        }
+        this.managers.afterSuperstep(this.config, -1);
+        this.bsp4Worker.workerStepComputeDone(-1);
+        this.bsp4Worker.waitMasterStepComputeDone(-1);
+
+        LOG.info("Finish build id map {}", this);
+        superstep = 0;
+         /*
          * The master determine whether to execute the next superstep. The
          * superstepStat is active while master decides to execute the next
          * superstep.
@@ -239,8 +277,9 @@ public class WorkerService implements Closeable {
             WorkerContext context = new SuperstepContext(superstep,
                                                          superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
+
             if (superstep > 0) {
-                this.computeManager.takeRecvedMessages();
+                this.computeManager.takeRecvedMessages(true);
             }
             /*
              * Call beforeSuperstep() before all workers compute() called.
@@ -257,9 +296,14 @@ public class WorkerService implements Closeable {
              */
             this.bsp4Worker.workerStepPrepareDone(superstep);
             this.bsp4Worker.waitMasterStepPrepareDone(superstep);
-            WorkerStat workerStat = this.computeManager.compute(context,
-                                                                superstep);
 
+            if (!this.useIdFixLength) {
+                this.computeManager.useVariableLengthOnly();
+                this.sendManager.useVariableLengthOnly();
+            }
+            WorkerStat workerStat = this.inputWorkerStat;
+            workerStat = this.computeManager.compute(context, superstep);
+            
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
 
@@ -276,7 +320,7 @@ public class WorkerService implements Closeable {
 
             this.bsp4Worker.workerStepDone(superstep, workerStat);
             LOG.info("End computation of superstep {}", superstep);
-
+            
             superstepStat = this.bsp4Worker.waitMasterStepDone(superstep);
             superstep++;
         }
@@ -334,6 +378,7 @@ public class WorkerService implements Closeable {
                                          sendSortManager,
                                          clientManager.sender());
         this.managers.add(sendManager);
+        this.sendManager = sendManager;
 
         WorkerInputManager inputManager = new WorkerInputManager(this.context,
                                                                  sendManager);
@@ -369,6 +414,7 @@ public class WorkerService implements Closeable {
         this.bsp4Worker.waitMasterInputDone();
 
         WorkerStat workerStat = this.computeManager.input();
+        this.inputWorkerStat = workerStat;
 
         this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
                                        workerStat);

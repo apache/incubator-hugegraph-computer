@@ -150,18 +150,20 @@ public class ComputeManagerTest extends UnitTestBase {
             receiveManager.handle(MessageType.MSG, 0, buffer);
         });
         receiveManager.onFinished(this.connectionId);
+        this.computeManager.useVariableLengthOnly();
         this.computeManager.compute(null, 0);
         receiveManager.afterSuperstep(this.config, 0);
 
         // Superstep 1
-        this.computeManager.takeRecvedMessages();
+        this.computeManager.takeRecvedMessages(true);
         receiveManager.beforeSuperstep(this.config, 1);
         receiveManager.onStarted(this.connectionId);
         receiveManager.onFinished(this.connectionId);
+        this.computeManager.useVariableLengthOnly();
         this.computeManager.compute(null, 1);
         receiveManager.afterSuperstep(this.config, 1);
-
         // Output
+        this.computeManager.useVariableLengthOnly();
         this.computeManager.output();
     }
 

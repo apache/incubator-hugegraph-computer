@@ -29,6 +29,8 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.compute.input.EdgesInput;
 import com.baidu.hugegraph.computer.core.compute.input.MessageInput;
 import com.baidu.hugegraph.computer.core.compute.input.VertexInput;
+import com.baidu.hugegraph.computer.core.compute.output.EdgesOutput;
+import com.baidu.hugegraph.computer.core.compute.output.VertexOutput;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.partition.PartitionStat;
@@ -49,7 +51,18 @@ import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 import com.baidu.hugegraph.util.E;
 
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.edge.Edge;
+import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
+import com.baidu.hugegraph.computer.core.graph.value.BooleanValue;
+
+import com.baidu.hugegraph.util.Log;
+import org.slf4j.Logger;
+
 public class FileGraphPartition<M extends Value<M>> {
+
+    private static final Logger LOG = Log.logger("partition");
 
     private static final String VERTEX = "vertex";
     private static final String EDGE = "edge";
@@ -62,6 +75,8 @@ public class FileGraphPartition<M extends Value<M>> {
 
     private final File vertexFile;
     private final File edgeFile;
+    private final File vertexComputeFile;
+    private final File edgeComputeFile;
 
     private File preStatusFile;
     private File curStatusFile;
@@ -79,7 +94,11 @@ public class FileGraphPartition<M extends Value<M>> {
 
     private VertexInput vertexInput;
     private EdgesInput edgesInput;
+    private VertexInput vertexOriginInput;
     private MessageInput<M> messageInput;
+
+    private final MessageSendManager sendManager;
+    private boolean useVariableLengthOnly;
 
     public FileGraphPartition(ComputerContext context,
                               Managers managers,
@@ -89,8 +108,14 @@ public class FileGraphPartition<M extends Value<M>> {
         this.partition = partition;
         this.vertexFile = new File(this.fileGenerator.randomDirectory(VERTEX));
         this.edgeFile = new File(this.fileGenerator.randomDirectory(EDGE));
+        this.vertexComputeFile = 
+                           new File(this.fileGenerator.randomDirectory(VERTEX));
+        this.edgeComputeFile = 
+                           new File(this.fileGenerator.randomDirectory(EDGE));
         this.vertexCount = 0L;
         this.edgeCount = 0L;
+        this.sendManager = managers.get(MessageSendManager.NAME);
+        this.useVariableLengthOnly = false;
     }
 
     protected PartitionStat input(PeekableIterator<KvEntry> vertices,
@@ -98,6 +123,8 @@ public class FileGraphPartition<M extends Value<M>> {
         try {
             createFile(this.vertexFile);
             createFile(this.edgeFile);
+            createFile(this.vertexComputeFile);
+            createFile(this.edgeComputeFile);
             BufferedFileOutput vertexOut = new BufferedFileOutput(
                                            this.vertexFile);
             BufferedFileOutput edgeOut = new BufferedFileOutput(
@@ -155,6 +182,133 @@ public class FileGraphPartition<M extends Value<M>> {
                                  this.vertexCount - activeVertexCount);
     }
 
+    public void sendIdHash(ComputationContext context) {
+        try {
+            //this.beforeCompute(-1);
+            this.vertexInput = new VertexInput(this.context,
+                                       this.vertexFile, this.vertexCount);
+            this.edgesInput = new EdgesInput(this.context, this.edgeFile);
+            this.vertexInput.init();
+            this.edgesInput.init();
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Error occurred when beforeCompute at superstep %s",
+                      e, -1);
+        }
+        int selfIncreaseID = 0;
+        int partitionID = this.partition;
+        while (this.vertexInput.hasNext()) {
+            Vertex vertex = this.vertexInput.next();
+            Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
+            for (Edge edge : edges) {
+                BooleanValue inv = edge.properties().get("inv");
+                boolean inv_ = (inv == null) ? false : inv.value();
+                if (!inv_) {
+                    continue;
+                }
+
+                Id targetId = edge.targetId();
+                long nid = (((long)partitionID) << 32) | 
+                            (selfIncreaseID & 0xffffffffL);
+                Id id = this.context.graphFactory().createId(nid);
+                IdList path = new IdList();
+                path.add(vertex.id());
+                path.add(id);
+
+                this.sendManager.sendHashIdMessage(targetId, path);
+            }
+            selfIncreaseID++;
+        }
+        try {
+            this.vertexInput.close();
+            this.edgesInput.close();
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Error occurred when beforeCompute at superstep %s",
+                      e, -1);
+        }
+    }
+
+    public void partitionHashId() {
+        try {
+            //this.beforeCompute(-1);
+            this.vertexInput = new VertexInput(this.context,
+                                       this.vertexFile, this.vertexCount);
+            this.edgesInput = new EdgesInput(this.context, this.edgeFile);
+            this.vertexInput.init();
+            this.edgesInput.init();
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Error occurred when beforeCompute at superstep %s",
+                      e, -1);
+        }
+
+        VertexOutput vertexOutput = new VertexOutput(
+                                    this.context, this.vertexComputeFile);
+        EdgesOutput edgesOutput = new EdgesOutput(
+                                  this.context, this.edgeComputeFile);
+        try {
+            vertexOutput.init();
+            edgesOutput.init();
+
+            vertexOutput.switchToFixLength();
+            edgesOutput.switchToFixLength();
+
+            vertexOutput.writeIdBytes();
+            edgesOutput.writeIdBytes();
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Error occurred when beforeCompute at superstep %d",
+                      e, 0);
+        }
+
+        LOG.info("{} begin hash and write id", this);
+        long selfIncreaseID = 0;
+        while (this.vertexInput.hasNext()) {
+            Vertex vertex = this.vertexInput.next();
+            Id id = this.context.graphFactory().createId(selfIncreaseID);
+            vertex.id(id);
+            vertexOutput.writeVertex(vertex);
+
+            Iterator<M> messageIter = this.messageInput.iterator(
+                                      this.vertexInput.idPointer());
+ 
+            Edges edges = this.edgesInput.edges(
+                              this.vertexInput.idPointer());
+            Iterator<Edge> it = edges.iterator();
+            edgesOutput.startWriteEdge(vertex);
+            while (messageIter.hasNext()) {
+                if (it.hasNext()) {
+                    Edge edge = it.next();
+
+                    IdList idList = (IdList)(messageIter.next());
+                    Id originId = idList.get(0);
+                    Id newId = idList.get(1);
+             
+                    edge.targetId(newId);
+                    edgesOutput.writeEdge(edge);
+                }
+                else {
+                    LOG.info("{} no hash id, may drop edge", this);
+                }
+            }
+            edgesOutput.finishWriteEdge();
+            selfIncreaseID++;
+        }
+        LOG.info("{} end hash and write id", this);
+
+        try {
+            this.vertexInput.close();
+            this.edgesInput.close();
+            vertexOutput.close();
+            edgesOutput.close();
+        } catch (IOException e) {
+            throw new ComputerException(
+                      "Error occurred when beforeCompute at superstep %d",
+                      e, 0);
+        }
+    }
+
     protected PartitionStat compute(ComputationContext context,
                                     Computation<M> computation,
                                     int superstep) {
@@ -171,9 +325,15 @@ public class FileGraphPartition<M extends Value<M>> {
         while (this.vertexInput.hasNext()) {
             Vertex vertex = this.vertexInput.next();
             this.readVertexStatusAndValue(vertex, result);
-
-            Iterator<M> messageIter = this.messageInput.iterator(
-                                      this.vertexInput.idPointer());
+            Iterator<M> messageIter;
+            if (this.useVariableLengthOnly) {
+                messageIter = this.messageInput.iterator(
+                                            this.vertexInput.idPointer());
+            }
+            else {
+                long lid = (long)vertex.id().asObject();
+                messageIter = this.messageInput.iterator(lid);
+            }
             if (messageIter.hasNext()) {
                 vertex.reactivate();
             }
@@ -229,6 +389,12 @@ public class FileGraphPartition<M extends Value<M>> {
             Vertex vertex = this.vertexInput.next();
             this.readVertexStatusAndValue(vertex, result);
 
+            if (!this.useVariableLengthOnly) {
+                if (this.vertexOriginInput.hasNext()) {
+                    Vertex vertex1 = this.vertexOriginInput.next();
+                    vertex.id(vertex1.id());
+                }
+            }
             Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
             vertex.edges(edges);
             output.write(vertex);
@@ -249,8 +415,16 @@ public class FileGraphPartition<M extends Value<M>> {
      * this partition. The messages is null if no messages sent to this
      * partition at previous superstep.
      */
-    protected void messages(PeekableIterator<KvEntry> messages) {
-        this.messageInput = new MessageInput<>(this.context, messages);
+    protected void messages(PeekableIterator<KvEntry> messages, 
+                                              boolean inCompute) {
+        if (!inCompute) {
+            this.messageInput = new MessageInput<>(this.context,
+                                                   messages, false);
+        }
+        else {
+            this.messageInput = new MessageInput<>(this.context, 
+                                                   messages, true);
+        }
     }
 
     protected int partition() {
@@ -275,7 +449,7 @@ public class FileGraphPartition<M extends Value<M>> {
             vertex.value(result);
         } catch (IOException e) {
             throw new ComputerException(
-                      "Failed to read status of vertex %s", e, vertex);
+                      "Failed to read value of vertex %s", e, vertex);
         }
     }
 
@@ -338,14 +512,36 @@ public class FileGraphPartition<M extends Value<M>> {
         }
     }
 
+    //only for test when no id map applied
+    public void useVariableLengthOnly() {
+        this.useVariableLengthOnly = true;
+    }
+
     private void beforeCompute(int superstep) throws IOException {
-        this.vertexInput = new VertexInput(this.context, this.vertexFile,
-                                           this.vertexCount);
-        this.edgesInput = new EdgesInput(this.context, this.edgeFile);
-        // Inputs of vertex, edges, status, and value.
-        this.vertexInput.init();
-        this.edgesInput.init();
-        if (superstep != 0) {
+
+        if (this.useVariableLengthOnly) {
+            LOG.info("{} workerservice use variable length id", this);
+            this.vertexInput = new VertexInput(this.context, 
+                                        this.vertexFile, this.vertexCount);
+            this.edgesInput = new EdgesInput(this.context, this.edgeFile);
+            this.vertexInput.init();
+            this.edgesInput.init();
+        }
+        else {
+            LOG.info("{} workerservice use fix length id", this);
+            this.vertexInput = new VertexInput(this.context, 
+                                    this.vertexComputeFile, this.vertexCount);
+            this.edgesInput = new EdgesInput(this.context, 
+                                    this.edgeComputeFile);
+            this.vertexInput.init();
+            this.edgesInput.init();
+            this.vertexInput.switchToFixLength();
+            this.edgesInput.switchToFixLength();
+            this.vertexInput.readIdBytes();
+            this.edgesInput.readIdBytes();
+        }
+
+        if (superstep > 0) {
             this.preStatusFile = this.curStatusFile;
             this.preValueFile = this.curValueFile;
             this.preStatusInput = new BufferedFileInput(this.preStatusFile);
@@ -371,7 +567,7 @@ public class FileGraphPartition<M extends Value<M>> {
     private void afterCompute(int superstep) throws Exception {
         this.vertexInput.close();
         this.edgesInput.close();
-        if (superstep != 0) {
+        if (superstep > 0) {
             this.messageInput.close();
             this.preStatusInput.close();
             this.preValueInput.close();
@@ -383,12 +579,31 @@ public class FileGraphPartition<M extends Value<M>> {
     }
 
     private void beforeOutput() throws IOException {
-        this.vertexInput = new VertexInput(this.context, this.vertexFile,
-                                           this.vertexCount);
-        this.edgesInput = new EdgesInput(this.context, this.edgeFile);
+        if (this.useVariableLengthOnly) {
+            this.vertexInput = new VertexInput(this.context, 
+                                     this.vertexFile, this.vertexCount);
+            this.edgesInput = new EdgesInput(this.context, this.edgeFile);
 
-        this.vertexInput.init();
-        this.edgesInput.init();
+            this.vertexInput.init();
+            this.edgesInput.init();
+        }
+        else {
+            this.vertexOriginInput = new VertexInput(this.context,
+                                     this.vertexFile, this.vertexCount);
+            this.vertexInput = new VertexInput(this.context, 
+                                     this.vertexComputeFile, this.vertexCount);
+            this.edgesInput = new EdgesInput(this.context, 
+                                     this.edgeComputeFile);
+            this.vertexOriginInput.init();
+            this.vertexInput.init();
+            this.edgesInput.init();
+
+            vertexInput.switchToFixLength();
+            edgesInput.switchToFixLength();
+
+            vertexInput.readIdBytes();
+            edgesInput.readIdBytes();
+        }
 
         this.preStatusFile = this.curStatusFile;
         this.preValueFile = this.curValueFile;
@@ -410,6 +625,9 @@ public class FileGraphPartition<M extends Value<M>> {
 
         this.vertexFile.delete();
         this.edgeFile.delete();
+
+        this.vertexComputeFile.delete();
+        this.edgeComputeFile.delete();
     }
 
     private static void createFile(File file) throws IOException {

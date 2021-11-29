@@ -37,9 +37,12 @@ import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.baidu.hugegraph.util.Log;
+import org.slf4j.Logger;
 
 public class LinksTest extends AlgorithmTestBase {
 
+    private static final Logger LOG = Log.logger("LinksTest");
     private static final String PROPERTY_WEIGHT = "weight";
     private static final String LABEL_USER = "user";
     private static final String LABEL_PAY = "pay";
@@ -156,11 +159,13 @@ public class LinksTest extends AlgorithmTestBase {
         public void write(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             LinksValue values = vertex.value();
+
             Set<String> result =
-                        EXPECT_RESULT.getOrDefault(vertex.id().toString(),
-                                                   new HashSet<>());
+               EXPECT_RESULT.getOrDefault(vertex.id().toString(), 
+                                                  new HashSet<>());
             Assert.assertEquals(result.size(), values.size());
             values.values().forEach(value -> {
+                LOG.info("valuelink is {}", value.toString());
                 Assert.assertTrue(result.contains(value.toString()));
             });
             super.write(vertex);

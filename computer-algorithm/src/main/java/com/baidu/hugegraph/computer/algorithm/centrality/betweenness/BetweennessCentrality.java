@@ -98,7 +98,8 @@ public class BetweennessCentrality implements Computation<BetweennessMessage> {
         IdList sequence = new IdList();
         sequence.add(vertex.id());
         context.sendMessageToAllEdges(vertex, new BetweennessMessage(sequence));
-        LOG.info("Finished compute-0 step");
+        LOG.info("Finished compute-0 step {} {}", 
+               vertex.id(), vertex.numEdges());
     }
 
     @Override
@@ -137,6 +138,7 @@ public class BetweennessCentrality implements Computation<BetweennessMessage> {
         BetweennessValue value = vertex.value();
         IdSet arrivedVertices = value.arrivedVertices();
         Id source = sequence.get(0);
+
         // The source vertex is arriving at first time
         if (!arrivedVertices.contains(source)) {
             arrivingVertices.add(source);

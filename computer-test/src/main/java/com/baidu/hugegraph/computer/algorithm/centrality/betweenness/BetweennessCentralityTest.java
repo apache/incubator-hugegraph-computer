@@ -34,9 +34,11 @@ import com.baidu.hugegraph.structure.constant.T;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableMap;
+import org.slf4j.Logger;
+import com.baidu.hugegraph.util.Log;
 
 public class BetweennessCentralityTest extends AlgorithmTestBase {
-
+    private static final Logger LOG = Log.logger("betweenness centrality");
     private static final Map<String, Double> EXPECT_RESULTS =
                          ImmutableMap.<String, Double>builder()
                                      .put("0", 0D)
@@ -135,8 +137,11 @@ public class BetweennessCentralityTest extends AlgorithmTestBase {
                 com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Vertex result = super.constructHugeVertex(vertex);
             Double expect = EXPECT_RESULTS.get(result.id());
+            LOG.info("result is {} {}", result.id(), expect);
+            LOG.info("property is {} {}", result.properties(), super.name()); 
             Assert.assertNotNull(expect);
-            assertDoubleEquals(expect, (double) result.property(super.name()));
+            assertDoubleEquals(expect,
+              (double) result.property(super.name()));
             return result;
         }
     }

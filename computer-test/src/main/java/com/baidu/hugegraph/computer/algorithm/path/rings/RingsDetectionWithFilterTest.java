@@ -117,6 +117,7 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
                         "        }" +
                         "    ]" +
                         "}";
+        
         runAlgorithm(RingsDetectionsTestParams.class.getName(),
                      RingsDetectionWithFilter.OPTION_FILTER, filter);
     }

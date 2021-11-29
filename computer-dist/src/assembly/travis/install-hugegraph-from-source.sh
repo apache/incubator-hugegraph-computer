@@ -11,7 +11,7 @@ COMMIT_ID=$1
 HUGEGRAPH_GIT_URL="https://github.com/starhugegraph/hugegraph.git"
 
 # reduce useless commit history to speed up
-git clone -b "${BRANCH}" --depth 10 ${HUGEGRAPH_GIT_URL}
+git clone -b "${BRANCHBAK}" --depth 10 ${HUGEGRAPH_GIT_URL}
 cd hugegraph
 git log | head -15
 #git checkout "${COMMIT_ID}"

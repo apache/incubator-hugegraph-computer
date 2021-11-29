@@ -34,6 +34,9 @@ import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.id.IdType;
 
 public class MessageInput<T extends Value<?>> {
 
@@ -42,7 +45,8 @@ public class MessageInput<T extends Value<?>> {
     private T value;
 
     public MessageInput(ComputerContext context,
-                        PeekableIterator<KvEntry> messages) {
+                        PeekableIterator<KvEntry> messages,
+                        boolean inCompute) {
         if (messages == null) {
             this.messages = PeekableIterator.emptyIterator();
         } else {
@@ -50,14 +54,52 @@ public class MessageInput<T extends Value<?>> {
         }
         this.config = context.config();
 
-        this.value = this.config.createObject(
+        if (!inCompute) {
+            this.value = (T)(new IdList());
+        }
+        else {
+            this.value = this.config.createObject(
                      ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+        }
+    }
+
+    public Iterator<T> iterator(long vid) {
+        while (this.messages.hasNext()) {
+            KvEntry entry = this.messages.peek();
+            Pointer key = entry.key();
+            try {
+                byte[] bkey = key.bytes();
+                int length = bkey[1];
+                byte[] blId = new byte[length];
+                for (int j = 0; j < length; j++) {
+                    blId[j] = bkey[j + 2];
+                }
+                BytesId id = new BytesId(IdType.LONG, blId);
+                long lid = (long)id.asObject();
+                if (lid > vid) {
+                    return Collections.emptyIterator();
+                }
+                else if (lid == vid) {
+                    ReusablePointer vidPointer = 
+                                    new ReusablePointer(bkey,
+                                                     bkey.length);
+                    return new MessageIterator(vidPointer);
+                }
+                else {
+                    this.messages.next();
+                }
+            } catch (IOException e) {
+                throw new ComputerException("read id error", e);
+            }
+        }
+        return Collections.emptyIterator();
     }
 
     public Iterator<T> iterator(ReusablePointer vidPointer) {
         while (this.messages.hasNext()) {
             KvEntry entry = this.messages.peek();
             Pointer key = entry.key();
+            Pointer value = entry.value();
             int status = vidPointer.compareTo(key);
             if (status < 0) {
                 return Collections.emptyIterator();

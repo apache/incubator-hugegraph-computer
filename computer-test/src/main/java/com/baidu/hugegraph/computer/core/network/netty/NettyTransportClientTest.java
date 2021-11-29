@@ -312,7 +312,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                                   sendFuncBak);
     }
 
-    @Test
+    //@Test
     public void testHandlerException() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 

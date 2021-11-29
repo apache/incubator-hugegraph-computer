@@ -28,8 +28,12 @@ import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
+import org.slf4j.Logger;
+import com.baidu.hugegraph.util.Log;
 
 public class RingsDetection implements Computation<IdList> {
+
+    private static final Logger LOG = Log.logger(RingsDetection.class);
 
     @Override
     public String name() {

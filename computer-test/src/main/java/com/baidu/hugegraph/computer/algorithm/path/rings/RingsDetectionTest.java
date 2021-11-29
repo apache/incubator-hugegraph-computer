@@ -40,8 +40,11 @@ import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-public class RingsDetectionTest extends AlgorithmTestBase {
+import org.slf4j.Logger;
+import com.baidu.hugegraph.util.Log;
 
+public class RingsDetectionTest extends AlgorithmTestBase {
+    private static final Logger LOG = Log.logger("rings detection test");
     private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
                     "A", ImmutableSet.of("ABCA", "ACA", "ABCDEA", "ADA",
@@ -120,10 +123,12 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         private void assertResult(
                 com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             IdListList rings = vertex.value();
+            //Long lId = (long)vertex.id().asObject();
             Set<String> expect =
-                        EXPECT_RINGS.getOrDefault(vertex.id().toString(),
+                        EXPECT_RINGS.getOrDefault(vertex.id().toString(), 
                                                   new HashSet<>());
-
+            LOG.info("result is {}", rings);
+            LOG.info("expect is {}", expect); 
             Assert.assertEquals(expect.size(), rings.size());
             for (int i = 0; i < rings.size(); i++) {
                 IdList ring = rings.get(0);

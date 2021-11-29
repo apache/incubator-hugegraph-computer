@@ -101,8 +101,9 @@ public class StreamGraphInput implements GraphComputeInput {
                 reader.readSubKv(in -> {
                     boolean inv_ = (in.readByte() == 1) ? true : false;
                     inv.value(inv_);
-                    edge.label(readLabel(in));
                     edge.targetId(readId(in));
+                    edge.label(readLabel(in));
+                    //edge.targetId(readId(in));
                 }, in -> {
                     edge.id(readId(in));
                     edge.properties(readProperties(in));
@@ -126,9 +127,10 @@ public class StreamGraphInput implements GraphComputeInput {
                 reader.readSubKv(in -> {
                     boolean inv_ = (in.readByte() == 1) ? true : false;
                     inv.value(inv_);
+                    edge.targetId(readId(in));
                     edge.label(readLabel(in));
                     edge.name(readLabel(in));
-                    edge.targetId(readId(in));
+                    //edge.targetId(readId(in));
                 }, in -> {
                     edge.id(readId(in));
                     edge.properties(this.readProperties(in));

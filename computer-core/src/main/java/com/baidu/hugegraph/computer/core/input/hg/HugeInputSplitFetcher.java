@@ -21,6 +21,8 @@ package com.baidu.hugegraph.computer.core.input.hg;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import com.baidu.hugegraph.util.Log;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -33,6 +35,8 @@ import com.baidu.hugegraph.util.E;
 
 public class HugeInputSplitFetcher implements InputSplitFetcher {
 
+    private static final Logger LOG = Log.logger("huge fetcher");
+   
     private final Config config;
     private final HugeClient client;
 
@@ -43,6 +47,7 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
         String token = config.get(ComputerOptions.AUTH_TOKEN);
         String usrname = config.get(ComputerOptions.AUTH_USRNAME);
         String passwd = config.get(ComputerOptions.AUTH_PASSWD);
+        LOG.info("{} {}", usrname, token);
 
         // Use token first, then try passwd mode
         HugeClientBuilder clientBuilder = new HugeClientBuilder(url, graph);
@@ -51,7 +56,9 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
         } else if (usrname != null && usrname.length() != 0) {
             this.client = clientBuilder.configUser(usrname, passwd).build();
         } else {
+            LOG.info("a0 {} {}", url, graph);
             this.client = clientBuilder.build();
+            LOG.info("a1");
         }
     }
 

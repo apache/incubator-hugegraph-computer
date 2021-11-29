@@ -73,5 +73,5 @@ public final class Constants {
 
     public static final String EMPTY_STR = "";
 
-    public static final int INPUT_SUPERSTEP = -1;
+    public static final int INPUT_SUPERSTEP = -3;
 }

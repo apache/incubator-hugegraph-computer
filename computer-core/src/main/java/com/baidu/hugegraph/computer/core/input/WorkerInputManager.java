@@ -102,9 +102,12 @@ public class WorkerInputManager implements Manager {
             Vertex vertex = iterator.next();
             this.sendManager.sendEdge(vertex);
             //inverse edge here
-            if (!this.config.get(
-                     ComputerOptions.VERTEX_WITH_EDGES_BOTHDIRECTION)) {
-                continue;
+            if (!this.config.get(ComputerOptions.
+                                     USE_ID_FIXLENGTH)) {
+                if (!this.config.get(
+                       ComputerOptions.VERTEX_WITH_EDGES_BOTHDIRECTION)) {
+                    continue;
+                }
             }
             for (Edge edge:vertex.edges()) {
                 Id targetId = edge.targetId();

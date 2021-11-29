@@ -194,10 +194,13 @@ public class SortLargeDataTest {
         long result = sumOfEntryValue(sorter, ImmutableList.of(resultFile));
         Assert.assertEquals(totalValue, result);
         assertFileOrder(sorter, ImmutableList.of(resultFile));
+
+        LOG.info("testMergeBuffers finished");
     }
 
     @Test
     public void testMergeBuffersAllSameKey() throws Exception {
+        LOG.info("testMergeBuffersAllSameKy begin");
         List<RandomAccessInput> buffers = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
             BytesOutput buffer = IOFactory.createBytesOutput(
@@ -217,10 +220,12 @@ public class SortLargeDataTest {
         // Assert result
         long result = sumOfEntryValue(sorter, ImmutableList.of(resultFile));
         Assert.assertEquals(1000 * 100, result);
+        LOG.info("testMergeBuffersAllSameKy finish");
     }
 
     @Test
     public void testDiffNumEntriesFileMerge() throws Exception {
+        LOG.info("testMergeBuffersAllSameKy begin");
         Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MERGE_FILES_NUM, "3"
         );
@@ -258,6 +263,7 @@ public class SortLargeDataTest {
             mergeTotal += HgkvDirImpl.open(output).numEntries();
         }
         Assert.assertEquals(total, mergeTotal);
+        LOG.info("testMergeBuffersAllSameKy end");
     }
 
     private static RandomAccessInput sortBuffer(Sorter sorter,

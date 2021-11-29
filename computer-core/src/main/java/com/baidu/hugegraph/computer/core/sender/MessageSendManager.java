@@ -62,6 +62,7 @@ public class MessageSendManager implements Manager {
     private final MessageSender sender;
     private final AtomicReference<Throwable> exception;
     private final TransportConf transportConf;
+    private boolean useVariableLengthOnly;
 
     public MessageSendManager(ComputerContext context, SortManager sortManager,
                               MessageSender sender) {
@@ -73,6 +74,7 @@ public class MessageSendManager implements Manager {
         this.sortManager = sortManager;
         this.sender = sender;
         this.exception = new AtomicReference<>();
+        this.useVariableLengthOnly = false;
     }
 
     @Override
@@ -134,6 +136,19 @@ public class MessageSendManager implements Manager {
         }
     }
 
+    public void sendHashIdMessage(Id targetId, Value<?> value) {
+        this.checkException();
+
+        WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
+                                                            MessageType.HASHID);
+        try {
+            // Write message to buffer
+            buffer.writeMessage(targetId, value);
+        } catch (IOException e) {
+            throw new ComputerException("Failed to write message", e);
+        }
+    }
+
     /**
      * Start send message, put an START signal into queue
      * @param type the message type
@@ -170,8 +185,18 @@ public class MessageSendManager implements Manager {
         return this.buffers.get(partitionId).messageWritten();
     }
 
+    public void useVariableLengthOnly() {
+        this.useVariableLengthOnly = true;
+    }
+
     private WriteBuffers sortIfTargetBufferIsFull(Id id, MessageType type) {
-        int partitionId = this.partitioner.partitionId(id);
+        int partitionId;
+        if (type == MessageType.MSG && !this.useVariableLengthOnly) {
+            partitionId = this.partitioner.partitionIdFixIdLength(id);
+        }
+        else {
+            partitionId = this.partitioner.partitionId(id);
+        }
         WriteBuffers buffer = this.buffers.get(partitionId);
         if (buffer.reachThreshold()) {
             /*

@@ -95,12 +95,12 @@ public class IntValue extends Number implements Value<IntValue> {
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        this.value = in.readInt();
+        this.value = in.readFixedInt();
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
-        out.writeInt(this.value);
+        out.writeFixedInt(this.value);
     }
 
     @Override

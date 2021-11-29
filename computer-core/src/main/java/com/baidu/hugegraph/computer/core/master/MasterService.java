@@ -94,9 +94,9 @@ public class MasterService implements Closeable {
         this.config = config;
 
         this.maxSuperStep = this.config.get(ComputerOptions.BSP_MAX_SUPER_STEP);
-
+        LOG.info("{} aa", this);
         InetSocketAddress rpcAddress = this.initManagers();
-
+        LOG.info("{} bb", this);
         this.masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
                                             TransportUtil.host(rpcAddress),
                                             rpcAddress.getPort());
@@ -221,6 +221,21 @@ public class MasterService implements Closeable {
 
         watcher.reset();
         watcher.start();
+
+        // Step 2.5 send id hash
+        for (int i = 0; i < 2; i++) {
+            superstep = -2 + i;
+
+            this.bsp4Master.waitWorkersStepPrepareDone(superstep);
+            this.managers.beforeSuperstep(this.config, superstep);
+            this.bsp4Master.masterStepPrepareDone(superstep);
+
+            this.bsp4Master.waitWorkersStepComputeDone(superstep);
+            this.bsp4Master.masterStepComputeDone(superstep);
+            this.managers.afterSuperstep(this.config, superstep);
+        }
+        superstep = 0;
+
         // Step 3: Iteration computation of all supersteps.
         for (; superstepStat.active(); superstep++) {
             long currentStepTime = watcher.getTime();
@@ -244,6 +259,7 @@ public class MasterService implements Closeable {
              *    know whether to continue the next superstep iteration.
              */
             this.bsp4Master.waitWorkersStepPrepareDone(superstep);
+
             this.managers.beforeSuperstep(this.config, superstep);
             this.bsp4Master.masterStepPrepareDone(superstep);
 

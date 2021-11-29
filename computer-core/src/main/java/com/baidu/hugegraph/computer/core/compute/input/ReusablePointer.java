@@ -29,12 +29,16 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
+import com.baidu.hugegraph.util.Log;
+import org.slf4j.Logger;
 
 public class ReusablePointer implements Pointer, Readable {
 
     private int length;
     private byte[] bytes;
     private RandomAccessInput input;
+
+    private static final Logger LOG = Log.logger("ReusablePointer");
 
     public ReusablePointer() {
         this.bytes = Constants.EMPTY_BYTES;

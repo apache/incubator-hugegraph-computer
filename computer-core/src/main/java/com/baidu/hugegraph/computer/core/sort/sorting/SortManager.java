@@ -188,6 +188,10 @@ public abstract class SortManager implements Manager {
                 combiner = this.createMessageCombiner();
                 needSortSubKv = false;
                 break;
+            case HASHID:
+                combiner = null;
+                needSortSubKv = false;
+                break;
             default:
                 throw new ComputerException("Unsupported combine message " +
                                             "type for %s", type);

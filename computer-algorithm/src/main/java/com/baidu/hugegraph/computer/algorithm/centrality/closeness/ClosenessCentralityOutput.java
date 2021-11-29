@@ -52,9 +52,13 @@ public class ClosenessCentralityOutput extends HugeOutput {
     @Override
     public com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(
                                                       Vertex vertex) {
+        LOG.info("The closeness centrality aaa\n");
+
         com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
                 new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
+
+        LOG.info("The closeness centrality bbb\n");
 
         // TODO：How to get the total vertices count here?
         // long n = context.totalVertexCount() - 1;
@@ -64,6 +68,7 @@ public class ClosenessCentralityOutput extends HugeOutput {
         for (Map.Entry<Id, DoubleValue> entry : localValue.entrySet()) {
             centrality += 1.0D / entry.getValue().value();
         }
+        LOG.info("The closeness centrality ccc\n");
         hugeVertex.property(this.name(), centrality);
         LOG.info("The closeness centrality of vertex {} is {}",
                  vertex, centrality);

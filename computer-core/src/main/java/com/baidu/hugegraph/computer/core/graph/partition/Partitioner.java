@@ -33,6 +33,11 @@ public interface Partitioner {
      * Get the partition id by specified vertex id.
      */
     int partitionId(Id vertexId);
+    
+    /**
+     * Get the partition id if id is fixed length.
+     */
+    int partitionIdFixIdLength(Id vertexId);
 
     /**
      * Get the worker id by specified partition id.
