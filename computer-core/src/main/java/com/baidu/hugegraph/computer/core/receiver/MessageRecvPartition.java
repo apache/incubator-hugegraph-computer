@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.receiver;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,6 +37,8 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
+import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.Log;
 
 /**
@@ -185,6 +188,24 @@ public abstract class MessageRecvPartition {
                         .map(File::new)
                         .forEach(FileUtils::deleteQuietly);
         this.outputFiles = newOutputs;
+        this.logMergeFiles();
+    }
+
+    private void logMergeFiles() {
+        long outputFilesSize = 0L;
+        String filePath = null;
+        try {
+            for (String output : this.outputFiles) {
+                filePath = output;
+                outputFilesSize += HgkvDirImpl.open(output).fileSize();
+            }
+        } catch (IOException e) {
+            LOG.error("Failed to open HgkvDir for path: {}", filePath, e);
+        }
+        Integer superstep = Whitebox.getInternalState(this.fileGenerator,
+                                                      "superstep");
+        LOG.info("Merge {} file in superstep {} file size: {}",
+                 this.type(), superstep, outputFilesSize);
     }
 
     private List<String> genOutputFileNames(int targetSize) {

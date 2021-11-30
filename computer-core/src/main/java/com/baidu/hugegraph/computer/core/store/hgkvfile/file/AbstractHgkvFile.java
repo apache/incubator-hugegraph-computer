@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
 
+import java.io.File;
+
 public abstract class AbstractHgkvFile implements HgkvFile {
 
     public static final byte MAJOR_VERSION;
@@ -32,6 +34,7 @@ public abstract class AbstractHgkvFile implements HgkvFile {
     }
 
     protected final String path;
+    protected final File file;
     protected String magic;
     protected long numEntries;
     protected long numSubEntries;
@@ -43,11 +46,17 @@ public abstract class AbstractHgkvFile implements HgkvFile {
 
     public AbstractHgkvFile(String path) {
         this.path = path;
+        this.file = new File(path);
     }
 
     @Override
     public String path() {
         return this.path;
+    }
+
+    @Override
+    public long fileSize() {
+        return this.file.length();
     }
 
     @Override

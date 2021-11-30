@@ -32,6 +32,11 @@ public interface HgkvFile extends Closeable {
     String path();
 
     /**
+     * Byte size of file
+     */
+    long fileSize();
+
+    /**
      * Number of entries in file.
      */
     long numEntries();

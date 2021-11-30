@@ -116,6 +116,13 @@ public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
     }
 
     @Override
+    public long fileSize() {
+        return this.segments.stream()
+                            .mapToLong(HgkvFile::fileSize)
+                            .sum();
+    }
+
+    @Override
     public void close() throws IOException {
         // pass
     }
