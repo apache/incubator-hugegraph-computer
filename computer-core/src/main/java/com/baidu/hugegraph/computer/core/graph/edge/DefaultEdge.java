@@ -106,6 +106,10 @@ public class DefaultEdge implements Edge {
     }
 
     @Override
+    public boolean isInverse() {
+        return this.properties().get("inv") != null;
+    }
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
