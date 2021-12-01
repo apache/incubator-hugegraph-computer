@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -85,8 +86,8 @@ public class ComputerJobDeployer {
     private static final int DEFAULT_TRANSPORT_PORT = 8099;
     private static final int DEFAULT_RPC_PORT = 8090;
     private static final int DEFAULT_TRANSPORT_THREADS = 8;
-
-    private static final String CONFIG_MAP_VOLUME = "config-map-volume";
+    private static final String COMPUTER_CONFIG_MAP_VOLUME =
+            "computer-config-map-volume";
 
     private static final String POD_IP_KEY = "status.podIP";
     private static final String POD_NAMESPACE_KEY = "metadata.namespace";
@@ -300,16 +301,16 @@ public class ComputerJobDeployer {
 
     private Job getJob(String crName, ObjectMeta meta, ComputerJobSpec spec,
                        int instances, List<Container> containers) {
-
-        String configMapName = KubeUtil.configMapName(crName);
-
         List<Volume> volumes = spec.getVolumes();
         if (volumes == null) {
             volumes = new ArrayList<>();
         } else {
             volumes = Lists.newArrayList(volumes);
         }
-        Volume configVolume = this.getConfigVolume(configMapName);
+        volumes.addAll(this.getConfigMapAndSecretVolumes(spec));
+
+        String configMapName = KubeUtil.configMapName(crName);
+        Volume configVolume = this.getComputerConfigVolume(configMapName);
         volumes.add(configVolume);
 
         PodSpec podSpec = new PodSpecBuilder()
@@ -333,6 +334,40 @@ public class ComputerJobDeployer {
                                .endTemplate()
                                .endSpec()
                                .build();
+    }
+
+    private List<Volume> getConfigMapAndSecretVolumes(ComputerJobSpec spec) {
+        List<Volume> volumes = new ArrayList<>();
+
+        Map<String, String> configMapPaths = spec.getConfigMapPaths();
+        if (MapUtils.isNotEmpty(configMapPaths)) {
+            Set<String> configMapNames = configMapPaths.keySet();
+            for (String configMapName : configMapNames) {
+                Volume volume = new VolumeBuilder()
+                        .withName(this.volumeName(configMapName))
+                        .withNewConfigMap()
+                        .withName(configMapName)
+                        .endConfigMap()
+                        .build();
+                volumes.add(volume);
+            }
+        }
+
+        Map<String, String> secretPaths = spec.getSecretPaths();
+        if (MapUtils.isNotEmpty(secretPaths)) {
+            Set<String> secretNames = secretPaths.keySet();
+            for (String secretName : secretNames) {
+                Volume volume = new VolumeBuilder()
+                        .withName(this.volumeName(secretName))
+                        .withNewSecret()
+                        .withSecretName(secretName)
+                        .endSecret()
+                        .build();
+                volumes.add(volume);
+            }
+        }
+
+        return volumes;
     }
 
     private Container getContainer(String name, ComputerJobSpec spec,
@@ -442,7 +477,28 @@ public class ComputerJobDeployer {
         } else {
             volumeMounts = Lists.newArrayList(volumeMounts);
         }
-        VolumeMount configMount = this.getConfigMount();
+
+        // Mount configmap and secret files
+        Map<String, String> paths = new HashMap<>();
+        Map<String, String> configMapPaths = spec.getConfigMapPaths();
+        if (MapUtils.isNotEmpty(configMapPaths)) {
+            paths.putAll(configMapPaths);
+        }
+        Map<String, String> secretPaths = spec.getSecretPaths();
+        if (MapUtils.isNotEmpty(secretPaths)) {
+            paths.putAll(secretPaths);
+        }
+        Set<Map.Entry<String, String>> entries = paths.entrySet();
+        for (Map.Entry<String, String> entry : entries) {
+            VolumeMount volumeMount = new VolumeMountBuilder()
+                    .withName(this.volumeName(entry.getKey()))
+                    .withMountPath(entry.getValue())
+                    .withReadOnly(true)
+                    .build();
+            volumeMounts.add(volumeMount);
+        }
+
+        VolumeMount configMount = this.getComputerConfigMount();
         volumeMounts.add(configMount);
 
         return new ContainerBuilder()
@@ -462,16 +518,16 @@ public class ComputerJobDeployer {
                 .build();
     }
 
-    private VolumeMount getConfigMount() {
+    private VolumeMount getComputerConfigMount() {
         return new VolumeMountBuilder()
-                .withName(CONFIG_MAP_VOLUME)
+                .withName(COMPUTER_CONFIG_MAP_VOLUME)
                 .withMountPath(Constants.CONFIG_DIR)
                 .build();
     }
 
-    private Volume getConfigVolume(String configMapName) {
+    private Volume getComputerConfigVolume(String configMapName) {
         return new VolumeBuilder()
-                .withName(CONFIG_MAP_VOLUME)
+                .withName(COMPUTER_CONFIG_MAP_VOLUME)
                 .withNewConfigMap()
                 .withName(configMapName)
                 .endConfigMap()
@@ -500,5 +556,9 @@ public class ComputerJobDeployer {
                                       .addToLabels(labels)
                                       .withOwnerReferences(ownerReference)
                                       .build();
+    }
+
+    private String volumeName(String name) {
+        return name + "-volume";
     }
 }

@@ -24,6 +24,8 @@ import static io.fabric8.kubernetes.client.Config.getKubeconfigFilename;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,8 +58,12 @@ import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretBuilder;
 
 public class MiniKubeTest extends AbstractK8sTest {
 
@@ -347,6 +353,67 @@ public class MiniKubeTest extends AbstractK8sTest {
                                          this.namespace, Pod.class,
                                          new HashMap<String, String>());
         Assert.assertNotEquals(0, pods.size());
+
+        future.cancel(true);
+    }
+
+    @Test
+    public void testMountConfigMapAndSecret() {
+        String dataBase64 = Base64.getEncoder()
+                                  .encodeToString("test123\ntest".getBytes());
+
+        String configMapName = "config-map-test";
+        ConfigMap configMap = new ConfigMapBuilder()
+                              .withNewMetadata()
+                              .withNamespace(this.namespace)
+                              .withName(configMapName)
+                              .endMetadata()
+                              .addToData("1.txt", "test123\ntest")
+                              .build();
+        this.kubeClient.configMaps().createOrReplace(configMap);
+
+        String secretName = "secret-test";
+        Secret secret = new SecretBuilder().withNewMetadata()
+                        .withNamespace(this.namespace)
+                        .withName(secretName)
+                        .endMetadata()
+                        .withType("Opaque")
+                        .addToData("2.txt", dataBase64)
+                        .build();
+        this.kubeClient.secrets().createOrReplace(secret);
+
+        ArrayList<String> args = Lists.newArrayList(
+                                 "cat /opt/configmap123/1.txt && " +
+                                 "cat /opt/secret123/2.txt");
+        super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(), args);
+        super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(), args);
+        Object defaultSpec = Whitebox.invoke(KubernetesDriver.class,
+                                             "defaultSpec", this.driver);
+        Whitebox.setInternalState(this.driver, "defaultSpec", defaultSpec);
+
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.CONFIG_MAP_PATHS.name(),
+                   String.format("[%s:/opt/configmap123]",
+                                 configMapName));
+        params.put(KubeSpecOptions.SECRET_PATHS.name(),
+                   String.format("[%s:/opt/secret123]", secretName));
+
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.INITIALIZING);
+        Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+        DefaultJobState jobState2 = new DefaultJobState();
+        jobState2.jobStatus(JobStatus.SUCCEEDED);
+        Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState2));
 
         future.cancel(true);
     }
