@@ -22,6 +22,8 @@ package com.baidu.hugegraph.computer.core.store.hgkvfile.file;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -30,11 +32,8 @@ import com.baidu.hugegraph.util.E;
 
 public class HgkvFileImpl extends AbstractHgkvFile {
 
-    private final RandomAccessInput input;
-
-    public HgkvFileImpl(String path) throws IOException {
+    public HgkvFileImpl(String path) {
         super(path);
-        this.input = IOFactory.createFileInput(new File(path));
     }
 
     public static HgkvFile create(String path) throws IOException {
@@ -69,6 +68,10 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         return hgkvFile;
     }
 
+    private static String version(short majorVersion, short minorVersion) {
+        return StringUtils.join(majorVersion, ".", minorVersion);
+    }
+
     @Override
     public RandomAccessOutput output() throws IOException {
         return IOFactory.createFileOutput(new File(this.path));
@@ -76,40 +79,42 @@ public class HgkvFileImpl extends AbstractHgkvFile {
 
     @Override
     public void close() throws IOException {
-        this.input.close();
+        // pass
     }
 
     private void readFooter() throws IOException {
         File file = new File(this.path);
         // The footerLength occupied 4 bytes, versionLength 2 * 2 bytes
         long versionOffset = file.length() - Short.BYTES * 2 - Integer.BYTES;
-        this.input.seek(versionOffset);
-        // Read version
-        short majorVersion = this.input.readShort();
-        short minorVersion = this.input.readShort();
-        String version = majorVersion + "." + minorVersion;
-        // Read footerLength
-        int footerLength = this.input.readFixedInt();
-        switch (version) {
-            case "1.0":
-                this.readFooterV1d0(this.input, footerLength);
-                break;
-            default:
-                throw new ComputerException("Illegal HgkvFile version '%s'",
-                                            version);
+
+        try (RandomAccessInput input = IOFactory.createFileInput(file)) {
+            input.seek(versionOffset);
+            // Read version
+            short majorVersion = input.readShort();
+            short minorVersion = input.readShort();
+            String version = version(majorVersion, minorVersion);
+            // Read footerLength
+            int footerLength = input.readFixedInt();
+            switch (version) {
+                case "1.0":
+                    this.readFooterV1d0(input, file.length() - footerLength);
+                    break;
+                default:
+                    throw new ComputerException("Illegal HgkvFile version '%s'",
+                                                version);
+            }
         }
     }
 
-    private void readFooterV1d0(RandomAccessInput input, int footerLength)
+    private void readFooterV1d0(RandomAccessInput input, long footerBegin)
                                 throws IOException {
-        File file = new File(this.path);
-        input.seek(file.length() - footerLength);
+        input.seek(footerBegin);
 
         // Read magic
         String magic = new String(input.readBytes(MAGIC.length()));
         E.checkArgument(HgkvFileImpl.MAGIC.equals(magic),
                         "Failed to read footer, illegal hgvk-file magic in " +
-                        "file: '%s'", file.getPath());
+                        "file: '%s'", this.path);
         this.magic = magic;
         // Read numEntries
         this.numEntries = input.readLong();
@@ -123,9 +128,9 @@ public class HgkvFileImpl extends AbstractHgkvFile {
         long maxKeyOffset = input.readLong();
         long minKeyOffset = input.readLong();
         // Read version
-        short primaryVersion = input.readShort();
+        short majorVersion = input.readShort();
         short minorVersion = input.readShort();
-        this.version = primaryVersion + "." + minorVersion;
+        this.version = version(majorVersion, minorVersion);
 
         if (this.numEntries > 0) {
             // Read max key
