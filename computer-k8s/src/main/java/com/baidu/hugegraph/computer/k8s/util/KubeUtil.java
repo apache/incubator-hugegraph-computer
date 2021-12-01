@@ -66,6 +66,7 @@ public class KubeUtil {
      * @param interval     the check interval
      * @param timeout      the timeout period
      * @param condition    the condition
+     * @param executor     the executor
      * @return returns true if gracefully finished
      */
     public static boolean waitUntilReady(Duration initialDelay,
