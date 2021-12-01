@@ -19,12 +19,12 @@ jobs:
             {
               "push": {
                 "FRAMEWORK_IMAGE_URL": "hugegraph/hugegraph-computer-framework:latest",
-                "ALGORITHM_IMAGE_URL": "hugegraph/hugegraph-computer-based-algorithm:latest",
+                "ALGORITHM_IMAGE_URL": "hugegraph/hugegraph-builtin-algorithms:latest",
                 "OPERATOR_IMAGE_URL": "hugegraph/hugegraph-computer-operator:latest"
               },
               "release": {
                 "FRAMEWORK_IMAGE_URL": "hugegraph/hugegraph-computer-framework:${{ github.ref_name }}",
-                "ALGORITHM_IMAGE_URL": "hugegraph/hugegraph-computer-based-algorithm:${{ github.ref_name }}",
+                "ALGORITHM_IMAGE_URL": "hugegraph/hugegraph-builtin-algorithms:${{ github.ref_name }}",
                 "OPERATOR_IMAGE_URL": "hugegraph/hugegraph-computer-operator:${{ github.ref_name }}"
               }
             }
@@ -58,19 +58,9 @@ jobs:
         run: bash computer-dist/builddocker.sh
 
       - name: Build images
-        run: |
-          PROJECT_VERSION=$(mvn -f "./pom.xml" -q -N \
-          org.codehaus.mojo:exec-maven-plugin:1.3.1:exec \
-          -Dexec.executable='echo' -Dexec.args='${project.version}')
-
-          docker tag hugegraph/hugegraph-computer-framework:${PROJECT_VERSION} ${{ env.FRAMEWORK_IMAGE_URL }}
-          echo "FROM ${{ env.FRAMEWORK_IMAGE_URL }}
-          LABEL maintainer='HugeGraph Docker Maintainers <hugegraph@googlegroups.com>'
-          COPY target/computer-algorithm-*.jar /opt/jars/hugegraph-builtin-algorithms.jar
-          ENV JAR_FILE_PATH=/opt/jars/hugegraph-builtin-algorithms.jar" | \
-          docker build -t ${{ env.ALGORITHM_IMAGE_URL }} -f - ./computer-algorithm
-
-          docker build -t ${{ env.OPERATOR_IMAGE_URL }} -f computer-k8s-operator/Dockerfile ./computer-k8s-operator
+        env:
+          TRAVIS_DIR: computer-dist/src/assembly/travis
+        run: $TRAVIS_DIR/build_images.sh ${{ env.FRAMEWORK_IMAGE_URL }} ${{ env.ALGORITHM_IMAGE_URL }} ${{ env.OPERATOR_IMAGE_URL }}
 
       - name: Docker images
         run: docker images
