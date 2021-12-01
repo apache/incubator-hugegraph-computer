@@ -66,8 +66,8 @@ jobs:
           docker tag hugegraph/hugegraph-computer-framework:${PROJECT_VERSION} ${{ env.FRAMEWORK_IMAGE_URL }}
           echo "FROM ${{ env.FRAMEWORK_IMAGE_URL }}
           LABEL maintainer='HugeGraph Docker Maintainers <hugegraph@googlegroups.com>'
-          COPY target/computer-algorithm-*.jar /opt/jars/computer-algorithm-based.jar
-          ENV JAR_FILE_PATH=/opt/jars/computer-algorithm-based.jar" | \
+          COPY target/computer-algorithm-*.jar /opt/jars/hugegraph-builtin-algorithms.jar
+          ENV JAR_FILE_PATH=/opt/jars/hugegraph-builtin-algorithms.jar" | \
           docker build -t ${{ env.ALGORITHM_IMAGE_URL }} -f - ./computer-algorithm
 
           docker build -t ${{ env.OPERATOR_IMAGE_URL }} -f computer-k8s-operator/Dockerfile ./computer-k8s-operator
