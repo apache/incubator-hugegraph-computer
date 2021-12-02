@@ -50,7 +50,7 @@ spec:
   jobId: *jobName
   algorithmName: page_rank
   image: hugegraph/hugegraph-computer-based-algorithm:latest # algorithm image url
-  jarFile: /opt/jars/computer-algorithm-based.jar
+  jarFile: /opt/jars/hugegraph-builtin-algorithms.jar
   pullPolicy: Always
   workerInstances: 50
   computerConf:
