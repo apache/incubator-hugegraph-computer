@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.output.hdfs;
 
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -35,6 +34,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.AbstractComputerOutput;
+import com.baidu.hugegraph.computer.core.util.HdfsUtil;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.util.Log;
 
@@ -69,9 +69,7 @@ public class HdfsOutput extends AbstractComputerOutput {
         Configuration configuration = new Configuration();
         Short replication = config.get(ComputerOptions.OUTPUT_HDFS_REPLICATION);
         configuration.set(REPLICATION_KEY, String.valueOf(replication));
-        String url = config.get(ComputerOptions.OUTPUT_HDFS_URL);
-        String user = config.get(ComputerOptions.OUTPUT_HDFS_USER);
-        this.fs = FileSystem.get(new URI(url), configuration, user);
+        this.fs = HdfsUtil.openHdfs(config, configuration);
 
         String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
         String jobId = config.get(ComputerOptions.JOB_ID);

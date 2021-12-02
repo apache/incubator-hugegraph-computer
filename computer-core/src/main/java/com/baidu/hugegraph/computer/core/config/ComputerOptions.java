@@ -183,6 +183,22 @@ public class ComputerOptions extends OptionHolder {
                     4
             );
 
+    public static final ConfigOption<String> HDFS_URL =
+            new ConfigOption<>(
+                    "hdfs.url",
+                    "The hdfs url.",
+                    disallowEmpty(),
+                    "hdfs://127.0.0.1:9000"
+            );
+
+    public static final ConfigOption<String> HDFS_USER =
+            new ConfigOption<>(
+                    "hdfs.user",
+                    "The hdfs user.",
+                    disallowEmpty(),
+                    "hadoop"
+            );
+
     public static final ConfigOption<Class<?>> OUTPUT_CLASS =
             new ConfigOption<>(
                     "output.output_class",
@@ -272,22 +288,6 @@ public class ComputerOptions extends OptionHolder {
                     "The retry interval when output failed",
                     positiveInt(),
                     10
-            );
-
-    public static final ConfigOption<String> OUTPUT_HDFS_URL =
-            new ConfigOption<>(
-                    "output.hdfs_url",
-                    "The hdfs url of output.",
-                    disallowEmpty(),
-                    "hdfs://127.0.0.1:9000"
-            );
-
-    public static final ConfigOption<String> OUTPUT_HDFS_USER =
-            new ConfigOption<>(
-                    "output.hdfs_user",
-                    "The hdfs user of output.",
-                    disallowEmpty(),
-                    "hadoop"
             );
 
     public static final ConfigOption<Short> OUTPUT_HDFS_REPLICATION =
