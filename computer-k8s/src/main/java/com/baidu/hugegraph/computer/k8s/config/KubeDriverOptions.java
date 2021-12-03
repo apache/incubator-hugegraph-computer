@@ -155,6 +155,6 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.internal_algorithm_image_url",
                     "The image url of internal algorithm.",
                     disallowEmpty(),
-                    "hugegraph/hugegraph-computer-based-algorithm:latest"
+                    "hugegraph/hugegraph-builtin-algorithms:latest"
             );
 }

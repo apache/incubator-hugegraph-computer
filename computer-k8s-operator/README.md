@@ -49,7 +49,7 @@ metadata:
 spec:
   jobId: *jobName
   algorithmName: page_rank
-  image: hugegraph/hugegraph-computer-based-algorithm:latest # algorithm image url
+  image: hugegraph/hugegraph-builtin-algorithms:latest # algorithm image url
   jarFile: /opt/jars/hugegraph-builtin-algorithms.jar
   pullPolicy: Always
   workerInstances: 50
