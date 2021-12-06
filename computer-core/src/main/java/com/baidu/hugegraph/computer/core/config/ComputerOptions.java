@@ -284,22 +284,6 @@ public class ComputerOptions extends OptionHolder {
                     10
             );
 
-    public static final ConfigOption<String> OUTPUT_HDFS_URL =
-            new ConfigOption<>(
-                    "output.hdfs_url",
-                    "The hdfs url of output.",
-                    disallowEmpty(),
-                    "hdfs://127.0.0.1:9000"
-            );
-
-    public static final ConfigOption<String> OUTPUT_HDFS_USER =
-            new ConfigOption<>(
-                    "output.hdfs_user",
-                    "The hdfs user of output.",
-                    disallowEmpty(),
-                    "hadoop"
-            );
-
     public static final ConfigOption<Short> OUTPUT_HDFS_REPLICATION =
             new ConfigOption<>(
                     "output.hdfs_replication",
@@ -330,6 +314,54 @@ public class ComputerOptions extends OptionHolder {
                     "Whether merge output files of multiple partitions.",
                     allowValues(true, false),
                     true
+            );
+
+    public static final ConfigOption<String> HDFS_URL =
+            new ConfigOption<>(
+                    "hdfs.url",
+                    "The hdfs url of output.",
+                    disallowEmpty(),
+                    "hdfs://127.0.0.1:9000"
+            );
+
+    public static final ConfigOption<String> HDFS_USER =
+            new ConfigOption<>(
+                    "hdfs.user",
+                    "The user of hdfs.",
+                    disallowEmpty(),
+                    "hadoop"
+            );
+
+    public static final ConfigOption<Boolean> HDFS_KERBEROS_ENABLE =
+            new ConfigOption<>(
+                    "hdfs.kerberos_enable",
+                    "Is Kerberos authentication enabled for Hdfs.",
+                    allowValues(true, false),
+                    false
+            );
+
+    public static final ConfigOption<String> HDFS_KRB5_CONF =
+            new ConfigOption<>(
+                    "hdfs.krb5_conf",
+                    "Kerberos configuration file.",
+                    disallowEmpty(),
+                    "/etc/krb5.conf"
+            );
+
+    public static final ConfigOption<String> HDFS_KERBEROS_PRINCIPAL =
+            new ConfigOption<>(
+                    "hdfs.kerberos_principal",
+                    "The Hdfs's principal for kerberos authentication.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> HDFS_KERBEROS_KEYTAB =
+            new ConfigOption<>(
+                    "hdfs.kerberos_keytab",
+                    "The Hdfs's key tab file for kerberos authentication.",
+                    null,
+                    ""
             );
 
     public static final ConfigOption<Integer>

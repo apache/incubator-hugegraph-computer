@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.output.hdfs;
 
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -35,6 +34,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.ComputerOutput;
+import com.baidu.hugegraph.computer.core.util.HdfsUtil;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.util.Log;
 
@@ -52,29 +52,21 @@ public class HdfsOutput implements ComputerOutput {
     @Override
     public void init(Config config, int partition) {
         try {
+            Configuration configuration = new Configuration();
+            Short replication = config.get(
+                                ComputerOptions.OUTPUT_HDFS_REPLICATION);
+            configuration.set(REPLICATION_KEY, String.valueOf(replication));
+            this.fs = HdfsUtil.openHDFS(config, configuration);
+
             this.delimiter = config.get(ComputerOptions.OUTPUT_HDFS_DELIMITER);
-            this.openHDFS(config, partition);
+            String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
+            String jobId = config.get(ComputerOptions.JOB_ID);
+            Path hdfsPath = buildPath(dir, jobId, partition);
+            this.fileOutputStream = this.fs.create(hdfsPath, true);
         } catch (IOException | URISyntaxException | InterruptedException e) {
             throw new ComputerException("Failed to init hdfs output on " +
                                         "partition [%s]", e, partition);
         }
-    }
-
-    private void openHDFS(Config config, int partition) throws
-                                                        IOException,
-                                                        URISyntaxException,
-                                                        InterruptedException {
-        Configuration configuration = new Configuration();
-        Short replication = config.get(ComputerOptions.OUTPUT_HDFS_REPLICATION);
-        configuration.set(REPLICATION_KEY, String.valueOf(replication));
-        String url = config.get(ComputerOptions.OUTPUT_HDFS_URL);
-        String user = config.get(ComputerOptions.OUTPUT_HDFS_USER);
-        this.fs = FileSystem.get(new URI(url), configuration, user);
-
-        String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
-        String jobId = config.get(ComputerOptions.JOB_ID);
-        Path hdfsPath = buildPath(dir, jobId, partition);
-        this.fileOutputStream = this.fs.create(hdfsPath, true);
     }
 
     @Override
