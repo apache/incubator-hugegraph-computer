@@ -300,6 +300,22 @@ public class ComputerOptions extends OptionHolder {
                     "hadoop"
             );
 
+    public static final ConfigOption<String> OUTPUT_CORE_SITE_PATH =
+            new ConfigOption<>(
+                    "output.core_site_path",
+                    "The hdfs core site path.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_SITE_PATH =
+            new ConfigOption<>(
+                    "output.hdfs_site_path",
+                    "The hdfs site path.",
+                    null,
+                    ""
+            );
+
     public static final ConfigOption<Short> OUTPUT_HDFS_REPLICATION =
             new ConfigOption<>(
                     "output.hdfs_replication",
@@ -330,6 +346,38 @@ public class ComputerOptions extends OptionHolder {
                     "Whether merge output files of multiple partitions.",
                     allowValues(true, false),
                     true
+            );
+
+    public static final ConfigOption<Boolean> OUTPUT_HDFS_KERBEROS_ENABLE =
+            new ConfigOption<>(
+                    "output.hdfs_kerberos_enable",
+                    "Is Kerberos authentication enabled for Hdfs.",
+                    allowValues(true, false),
+                    false
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_KRB5_CONF =
+            new ConfigOption<>(
+                    "output.hdfs_krb5_conf",
+                    "Kerberos configuration file.",
+                    disallowEmpty(),
+                    "/etc/krb5.conf"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_KERBEROS_PRINCIPAL =
+            new ConfigOption<>(
+                    "output.hdfs_kerberos_principal",
+                    "The Hdfs's principal for kerberos authentication.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_KERBEROS_KEYTAB =
+            new ConfigOption<>(
+                    "output.hdfs_kerberos_keytab",
+                    "The Hdfs's key tab file for kerberos authentication.",
+                    null,
+                    ""
             );
 
     public static final ConfigOption<Integer>
