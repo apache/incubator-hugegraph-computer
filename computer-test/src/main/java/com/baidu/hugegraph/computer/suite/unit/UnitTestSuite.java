@@ -109,6 +109,14 @@ public class UnitTestSuite {
                  ComputerOptions.OUTPUT_HDFS_KERBEROS_PRINCIPAL,
                  "defaultValue",
                  "");
+        Whitebox.setInternalState(
+                 ComputerOptions.INPUT_SCHEMA_PATH,
+                 "defaultValue",
+                 "src/main/resources/hdfs_input_test/schema.json");
+        Whitebox.setInternalState(
+                 ComputerOptions.INPUT_STRUCT_PATH,
+                 "defaultValue",
+                 "src/main/resources/hdfs_input_test/struct.json");
     }
 
     @BeforeClass

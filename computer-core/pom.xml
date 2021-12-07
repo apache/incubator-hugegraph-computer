@@ -56,5 +56,9 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>hugegraph-loader</artifactId>
+        </dependency>
     </dependencies>
 </project>
