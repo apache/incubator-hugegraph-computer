@@ -153,6 +153,7 @@ public class KubernetesDriver implements ComputerDriver {
         Config config;
         try {
             File file = new File(kubeConfig);
+            @SuppressWarnings("deprecation")
             String kubeConfigContents = FileUtils.readFileToString(file);
             config = Config.fromKubeconfig(kubeConfigContents);
         } catch (IOException e) {
@@ -336,6 +337,7 @@ public class KubernetesDriver implements ComputerDriver {
                     CompletableFuture<?> future = pair.getLeft();
                     JobObserver observer = pair.getRight();
 
+                    @SuppressWarnings("resource")
                     KubernetesDriver driver = KubernetesDriver.this;
                     JobState jobState = driver.buildJobState(computerJob);
 
@@ -547,6 +549,7 @@ public class KubernetesDriver implements ComputerDriver {
         if (StringUtils.isNotBlank(log4jXmlPath)) {
             try {
                 File file = new File(log4jXmlPath);
+                @SuppressWarnings("deprecation")
                 String log4jXml = FileUtils.readFileToString(file);
                 spec.withLog4jXml(log4jXml);
             } catch (IOException exception) {

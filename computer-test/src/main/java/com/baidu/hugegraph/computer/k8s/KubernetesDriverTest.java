@@ -28,10 +28,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -72,6 +74,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     public KubernetesServer server = new KubernetesServer(true, true);
 
     @Before
+    @Override
     public void setup() throws IOException {
         this.initConfig();
         Config configuration = this.server.getClient().getConfiguration();
@@ -102,8 +105,9 @@ public class KubernetesDriverTest extends AbstractK8sTest {
             KubeConfigUtils.persistKubeConfigIntoFile(config, absolutePath);
             System.setProperty(Config.KUBERNETES_KUBECONFIG_FILE, absolutePath);
 
-            this.kubeClient = new DefaultKubernetesClient()
-                                  .inNamespace(this.namespace);
+            @SuppressWarnings("resource")
+            DefaultKubernetesClient client = new DefaultKubernetesClient();
+            this.kubeClient = client.inNamespace(this.namespace);
 
             this.initPullSecret();
             this.initKubernetesDriver();
@@ -111,6 +115,12 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         } finally {
             FileUtils.deleteQuietly(tempFile);
         }
+    }
+
+    @After
+    @Override
+    public void teardown() throws InterruptedException, ExecutionException {
+        super.teardown();
     }
 
     @Test
