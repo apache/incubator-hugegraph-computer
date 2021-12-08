@@ -40,12 +40,12 @@ public class MessageRecvBuffers {
     private long totalBytes;
 
     private final List<byte[]> buffers;
-    private final BarrierEvent event;
+    private final BarrierEvent sortFinished;
     private final long waitSortedTimeout;
 
     public MessageRecvBuffers(long bytesLimit, long waitSortedTimeout) {
         this.totalBytes = 0L;
-        this.event = new BarrierEvent();
+        this.sortFinished = new BarrierEvent();
         this.bytesLimit = bytesLimit;
         this.waitSortedTimeout = waitSortedTimeout;
         this.buffers = new ArrayList<>();
@@ -66,11 +66,10 @@ public class MessageRecvBuffers {
     }
 
     /**
-     * Prepare to sort the buffers, and reset event at the sort beginning
+     * Get all the buffers.
      */
-    public List<RandomAccessInput> prepareToSortBuffers() {
-        this.event.reset();
-
+    public List<RandomAccessInput> buffers() {
+        // Transfer byte[] list to BytesInput list
         List<RandomAccessInput> inputs = new ArrayList<>(this.buffers.size());
         for (byte[] buffer : this.buffers) {
             inputs.add(new UnsafeBytesInput(buffer));
@@ -79,36 +78,42 @@ public class MessageRecvBuffers {
     }
 
     /**
+     * Prepare to sort the buffers, and reset event at the sort beginning
+     */
+    public void prepareSort() {
+        // Reset buffers and totalBytes to prepare a new sorting
+        this.buffers.clear();
+        this.totalBytes = 0L;
+
+        // Reset event to prepare a new sorting
+        this.sortFinished.reset();
+    }
+
+    /**
      * Wait the buffers to be sorted.
      */
     public void waitSorted() {
         if (this.buffers.isEmpty()) {
-            /*
-             * Ensure buffers.clear() calling after event.signalAll() in the
-             * signalSorted() method, to avoid calling event.reset() before
-             * event.signalAll().
-             */
-            this.event.reset();
             return;
         }
         try {
-            boolean sorted = this.event.await(this.waitSortedTimeout);
+            boolean sorted = this.sortFinished.await(this.waitSortedTimeout);
             if (!sorted) {
                 throw new ComputerException(
                           "Buffers have not been sorted in %s ms",
                           this.waitSortedTimeout);
             }
-            this.event.reset();
         } catch (InterruptedException e) {
             throw new ComputerException(
                       "Interrupted while waiting buffers to be sorted", e);
         }
     }
 
+    /**
+     * Set event and signal all waiting threads
+     */
     public void signalSorted() {
-        this.event.signalAll();
-        this.buffers.clear();
-        this.totalBytes = 0L;
+        this.sortFinished.signalAll();
     }
 
     public long totalBytes() {

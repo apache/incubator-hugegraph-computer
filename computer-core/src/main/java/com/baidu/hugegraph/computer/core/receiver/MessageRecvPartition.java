@@ -91,9 +91,9 @@ public abstract class MessageRecvPartition {
         this.totalBytes += buffer.length();
         this.recvBuffers.addBuffer(buffer);
         if (this.recvBuffers.full()) {
-            // Wait for the previous sort
+            // Wait for the previous sorting
             this.sortBuffers.waitSorted();
-            // Transfer recvBuffers to sortBuffers, then sort and fluash
+            // Transfer recvBuffers to sortBuffers, then sort and flush
             this.swapReceiveAndSortBuffers();
             this.flushSortBuffersAsync();
         }
@@ -150,7 +150,7 @@ public abstract class MessageRecvPartition {
 
     private void mergeBuffersAsync(MessageRecvBuffers buffers, String path) {
         this.checkException();
-        this.sortManager.mergeBuffers(buffers.prepareToSortBuffers(), path,
+        this.sortManager.mergeBuffers(buffers.buffers(), path,
                                       this.withSubKv, this.outerSortFlusher())
                         .whenComplete((r , e) -> {
             if (e != null) {
@@ -165,10 +165,12 @@ public abstract class MessageRecvPartition {
 
     private void swapReceiveAndSortBuffers() {
         assert this.recvBuffers.totalBytes() > 0;
-        assert this.sortBuffers.totalBytes() == 0;
-        MessageRecvBuffers tmp = this.recvBuffers;
+        MessageRecvBuffers oldRecvBuffers = this.recvBuffers;
         this.recvBuffers = this.sortBuffers;
-        this.sortBuffers = tmp;
+        this.sortBuffers = oldRecvBuffers;
+
+        // Prepare for the next buffer-adding/sorting
+        this.recvBuffers.prepareSort();
     }
 
     /**
