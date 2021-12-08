@@ -65,7 +65,12 @@ public class MessageRecvBuffers {
         return this.totalBytes >= this.bytesLimit;
     }
 
-    public List<RandomAccessInput> buffers() {
+    /**
+     * Prepare to sort the buffers, and reset event at the sort beginning
+     */
+    public List<RandomAccessInput> prepareToSortBuffers() {
+        this.event.reset();
+
         List<RandomAccessInput> inputs = new ArrayList<>(this.buffers.size());
         for (byte[] buffer : this.buffers) {
             inputs.add(new UnsafeBytesInput(buffer));
@@ -77,7 +82,12 @@ public class MessageRecvBuffers {
      * Wait the buffers to be sorted.
      */
     public void waitSorted() {
-        if (this.buffers.size() == 0) {
+        if (this.buffers.isEmpty()) {
+            /*
+             * Ensure buffers.clear() calling after event.signalAll() in the
+             * signalSorted() method, to avoid calling event.reset() before
+             * event.signalAll().
+             */
             this.event.reset();
             return;
         }
@@ -96,9 +106,9 @@ public class MessageRecvBuffers {
     }
 
     public void signalSorted() {
+        this.event.signalAll();
         this.buffers.clear();
         this.totalBytes = 0L;
-        this.event.signalAll();
     }
 
     public long totalBytes() {

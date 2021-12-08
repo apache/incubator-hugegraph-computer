@@ -91,15 +91,15 @@ public abstract class MessageRecvPartition {
         this.totalBytes += buffer.length();
         this.recvBuffers.addBuffer(buffer);
         if (this.recvBuffers.full()) {
+            // Wait for the previous sort
             this.sortBuffers.waitSorted();
+            // Transfer recvBuffers to sortBuffers, then sort and fluash
             this.swapReceiveAndSortBuffers();
-            String path = this.fileGenerator.nextPath(this.type());
-            this.mergeBuffers(this.sortBuffers, path);
-            this.outputFiles.add(path);
+            this.flushSortBuffersAsync();
         }
     }
 
-    public PeekableIterator<KvEntry> iterator() {
+    public synchronized PeekableIterator<KvEntry> iterator() {
         /*
          * TODO: create iterator directly from buffers if there is no
          *       outputFiles.
@@ -112,11 +112,11 @@ public abstract class MessageRecvPartition {
         return this.sortManager.iterator(this.outputFiles, this.withSubKv);
     }
 
-    public long totalBytes() {
+    public synchronized long totalBytes() {
         return this.totalBytes;
     }
 
-    public MessageStat messageStat() {
+    public synchronized MessageStat messageStat() {
         // TODO: count the message received
         return new MessageStat(0L, this.totalBytes);
     }
@@ -134,18 +134,24 @@ public abstract class MessageRecvPartition {
     private void flushAllBuffersAndWaitSorted() {
         this.sortBuffers.waitSorted();
         if (this.recvBuffers.totalBytes() > 0) {
-            String path = this.fileGenerator.nextPath(this.type());
-            this.mergeBuffers(this.recvBuffers, path);
-            this.outputFiles.add(path);
+            // Transfer recvBuffers to sortBuffers, then sort and flush
+            this.swapReceiveAndSortBuffers();
+            this.flushSortBuffersAsync();
+            this.sortBuffers.waitSorted();
         }
-        this.recvBuffers.waitSorted();
         this.checkException();
     }
 
-    private void mergeBuffers(MessageRecvBuffers buffers, String path) {
+    private void flushSortBuffersAsync() {
+        String path = this.fileGenerator.nextPath(this.type());
+        this.mergeBuffersAsync(this.sortBuffers, path);
+        this.outputFiles.add(path);
+    }
+
+    private void mergeBuffersAsync(MessageRecvBuffers buffers, String path) {
         this.checkException();
-        this.sortManager.mergeBuffers(buffers.buffers(), path, this.withSubKv,
-                                      this.outerSortFlusher())
+        this.sortManager.mergeBuffers(buffers.prepareToSortBuffers(), path,
+                                      this.withSubKv, this.outerSortFlusher())
                         .whenComplete((r , e) -> {
             if (e != null) {
                 LOG.error("Failed to merge buffers", e);
@@ -158,6 +164,8 @@ public abstract class MessageRecvPartition {
     }
 
     private void swapReceiveAndSortBuffers() {
+        assert this.recvBuffers.totalBytes() > 0;
+        assert this.sortBuffers.totalBytes() == 0;
         MessageRecvBuffers tmp = this.recvBuffers;
         this.recvBuffers = this.sortBuffers;
         this.sortBuffers = tmp;

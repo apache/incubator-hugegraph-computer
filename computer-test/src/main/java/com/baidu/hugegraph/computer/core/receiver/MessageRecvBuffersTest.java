@@ -51,11 +51,12 @@ public class MessageRecvBuffersTest {
         addMockBufferToBuffers(buffers, size);
         Assert.assertTrue(buffers.full());
 
-        // Sort buffer
-        List<RandomAccessInput> list = buffers.buffers();
+        List<RandomAccessInput> list = buffers.prepareToSortBuffers();
         Assert.assertEquals(11, list.size());
 
         buffers.signalSorted();
+        List<RandomAccessInput> list2 = buffers.prepareToSortBuffers();
+        Assert.assertEquals(0, list2.size());
 
         for (int i = 0; i < 10; i++) {
             addMockBufferToBuffers(buffers, size);
@@ -68,9 +69,8 @@ public class MessageRecvBuffersTest {
 
         Assert.assertTrue(buffers.full());
 
-        // Sort buffer
-        List<RandomAccessInput> list2 = buffers.buffers();
-        Assert.assertEquals(11, list2.size());
+        List<RandomAccessInput> list3 = buffers.prepareToSortBuffers();
+        Assert.assertEquals(11, list3.size());
     }
 
     @Test
