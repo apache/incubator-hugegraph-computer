@@ -88,6 +88,10 @@ type ComputerJobSpec struct {
     // Volume mounts in the Job container.
     // More info: https://kubernetes.io/docs/concepts/storage/volumes/
     VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
+
+    SecretPaths map[string]string `json:"secretPaths,omitempty"`
+
+    ConfigMapPaths map[string]string `json:"configMapPaths,omitempty"`
 }
 
 type ComputerJobState struct {
