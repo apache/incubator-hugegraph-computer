@@ -21,12 +21,14 @@ package com.baidu.hugegraph.computer.core.output.hdfs;
 
 
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.net.URI;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -34,7 +36,6 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.ComputerOutput;
-import com.baidu.hugegraph.computer.core.util.HdfsUtil;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.util.Log;
 
@@ -56,14 +57,14 @@ public class HdfsOutput implements ComputerOutput {
             Short replication = config.get(
                                 ComputerOptions.OUTPUT_HDFS_REPLICATION);
             configuration.set(REPLICATION_KEY, String.valueOf(replication));
-            this.fs = HdfsUtil.openHDFS(config, configuration);
+            this.fs = HdfsOutput.openHDFS(config, configuration);
 
             this.delimiter = config.get(ComputerOptions.OUTPUT_HDFS_DELIMITER);
             String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
             String jobId = config.get(ComputerOptions.JOB_ID);
             Path hdfsPath = buildPath(dir, jobId, partition);
             this.fileOutputStream = this.fs.create(hdfsPath, true);
-        } catch (IOException | URISyntaxException | InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             throw new ComputerException("Failed to init hdfs output on " +
                                         "partition [%s]", e, partition);
         }
@@ -133,6 +134,42 @@ public class HdfsOutput implements ComputerOutput {
             }
         } catch (IOException e) {
             throw new ComputerException("Failed to close hdfs", e);
+        }
+    }
+
+    public static FileSystem openHDFS(Config config, Configuration conf)
+                                      throws IOException,
+                                             InterruptedException {
+        String url = config.get(ComputerOptions.OUTPUT_HDFS_URL);
+        Boolean enableKerberos = config.get(
+                ComputerOptions.OUTPUT_HDFS_KERBEROS_ENABLE);
+
+        String coreSite = config.get(ComputerOptions.OUTPUT_CORE_SITE_PATH);
+        if (StringUtils.isNotBlank(coreSite)) {
+            conf.addResource(new Path(coreSite));
+        }
+        String hdfsSite = config.get(ComputerOptions.OUTPUT_HDFS_SITE_PATH);
+        if (StringUtils.isNotBlank(hdfsSite)) {
+            conf.addResource(new Path(hdfsSite));
+        }
+
+        if (enableKerberos) {
+            String krb5Conf = config.get(ComputerOptions.OUTPUT_HDFS_KRB5_CONF);
+            System.setProperty("java.security.krb5.conf", krb5Conf);
+            String principal = config.get(
+                    ComputerOptions.OUTPUT_HDFS_KERBEROS_PRINCIPAL);
+            String keyTab = config.get(
+                            ComputerOptions.OUTPUT_HDFS_KERBEROS_KEYTAB);
+            conf.set("fs.defaultFS", url);
+            conf.set("hadoop.security.authentication", "kerberos");
+            conf.set("dfs.namenode.kerberos.principal", principal);
+
+            UserGroupInformation.setConfiguration(conf);
+            UserGroupInformation.loginUserFromKeytab(principal, keyTab);
+            return FileSystem.get(conf);
+        } else {
+            String user = config.get(ComputerOptions.OUTPUT_HDFS_USER);
+            return FileSystem.get(URI.create(url), conf, user);
         }
     }
 }

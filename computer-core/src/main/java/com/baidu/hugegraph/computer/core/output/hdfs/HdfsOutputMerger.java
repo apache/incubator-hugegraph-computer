@@ -30,7 +30,6 @@ import org.apache.hadoop.fs.Path;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.util.HdfsUtil;
 
 public class HdfsOutputMerger {
 
@@ -45,7 +44,7 @@ public class HdfsOutputMerger {
     protected void init(Config config) {
         try {
             Configuration configuration = new Configuration();
-            this.fs = HdfsUtil.openHDFS(config, configuration);
+            this.fs = HdfsOutput.openHDFS(config, configuration);
 
             String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
             String jobId = config.get(ComputerOptions.JOB_ID);

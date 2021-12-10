@@ -90,24 +90,25 @@ public class UnitTestSuite {
         Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_GRAPH_NAME,
                                   "defaultValue",
                                   "hugegraph");
-        Whitebox.setInternalState(ComputerOptions.HDFS_URL,
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_URL,
                                   "defaultValue",
                                   "hdfs://127.0.0.1:9000");
-        Whitebox.setInternalState(ComputerOptions.HDFS_USER,
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_USER,
                                   "defaultValue",
                                   System.getProperty("user.name"));
-        Whitebox.setInternalState(ComputerOptions.HDFS_KERBEROS_ENABLE,
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KERBEROS_ENABLE,
                                   "defaultValue",
                                   false);
-        Whitebox.setInternalState(ComputerOptions.HDFS_KRB5_CONF,
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KRB5_CONF,
                                   "defaultValue",
                                   "/etc/krb5.conf");
-        Whitebox.setInternalState(ComputerOptions.HDFS_KERBEROS_KEYTAB,
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KERBEROS_KEYTAB,
                                   "defaultValue",
                                   "");
-        Whitebox.setInternalState(ComputerOptions.HDFS_KERBEROS_PRINCIPAL,
-                                  "defaultValue",
-                                  "");
+        Whitebox.setInternalState(
+                 ComputerOptions.OUTPUT_HDFS_KERBEROS_PRINCIPAL,
+                 "defaultValue",
+                 "");
     }
 
     @BeforeClass
