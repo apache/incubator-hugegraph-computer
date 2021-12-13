@@ -17,31 +17,28 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.graph.value;
+package com.baidu.hugegraph.computer.algorithm.centrality.closeness;
 
-import java.io.IOException;
+import java.util.Map;
 
-import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
+import com.baidu.hugegraph.computer.core.graph.value.MapValue;
 
-public class IdListList extends ListValue<IdList> {
+public class ClosenessValue extends MapValue<DoubleValue> {
 
-    public IdListList() {
-        super(ValueType.ID_LIST);
+    @Override
+    public Object value() {
+        // Cumulative distance
+        double centrality = 0;
+        for (Map.Entry<Id, DoubleValue> entry : this.entrySet()) {
+            centrality += 1.0D / entry.getValue().value();
+        }
+        return centrality;
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.ID_LIST_LIST;
-    }
-
-    @Override
-    public void read(RandomAccessInput in) throws IOException {
-        this.read(in, false);
-    }
-
-    @Override
-    public void write(RandomAccessOutput out) throws IOException {
-        this.write(out, false);
+    public String string() {
+        return this.value().toString();
     }
 }

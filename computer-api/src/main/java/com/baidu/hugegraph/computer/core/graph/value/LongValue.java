@@ -90,6 +90,11 @@ public class LongValue extends Number implements Tvalue<Long> {
     }
 
     @Override
+    public boolean isNumber() {
+        return true;
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readLong();
     }

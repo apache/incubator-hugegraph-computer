@@ -46,11 +46,11 @@ public class BytesIdTest extends UnitTestBase {
         Id longId8 = BytesId.of(0L);
 
         Assert.assertEquals(IdType.LONG, longId1.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, longId1.valueType());
+        Assert.assertEquals(ValueType.ID, longId1.valueType());
         Assert.assertEquals(1, longId1.length());
 
         Assert.assertEquals(IdType.LONG, longId2.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, longId2.valueType());
+        Assert.assertEquals(ValueType.ID, longId2.valueType());
         Assert.assertEquals(2, longId2.length());
 
         Assert.assertEquals(new Long(123L), longId1.asObject());
@@ -90,19 +90,18 @@ public class BytesIdTest extends UnitTestBase {
         Id utf8Id7 = new BytesId();
 
         Assert.assertEquals(IdType.UTF8, utf8Id1.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, utf8Id1.valueType());
+        Assert.assertEquals(ValueType.ID, utf8Id1.valueType());
         Assert.assertEquals(0, utf8Id1.length());
 
         Assert.assertEquals(IdType.UTF8, utf8Id2.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, utf8Id2.valueType());
-        Assert.assertEquals(3, utf8Id2.length());
+        Assert.assertEquals(ValueType.ID, utf8Id2.valueType());
 
         Assert.assertEquals(IdType.UTF8, utf8Id3.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, utf8Id3.valueType());
+        Assert.assertEquals(ValueType.ID, utf8Id3.valueType());
         Assert.assertEquals(4, utf8Id3.length());
 
         Assert.assertEquals(IdType.UTF8, utf8Id7.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, utf8Id7.valueType());
+        Assert.assertEquals(ValueType.ID, utf8Id7.valueType());
         Assert.assertEquals(0, utf8Id7.length());
 
         Assert.assertEquals("", utf8Id1.asObject());
@@ -134,11 +133,11 @@ public class BytesIdTest extends UnitTestBase {
         Id uuidId3 = BytesId.of(uuid1);
 
         Assert.assertEquals(IdType.UUID, uuidId1.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, uuidId1.valueType());
+        Assert.assertEquals(ValueType.ID, uuidId1.valueType());
         Assert.assertEquals(19, uuidId1.length());
 
         Assert.assertEquals(IdType.UUID, uuidId2.idType());
-        Assert.assertEquals(ValueType.ID_VALUE, uuidId2.valueType());
+        Assert.assertEquals(ValueType.ID, uuidId2.valueType());
         Assert.assertEquals(19, uuidId2.length());
 
         Assert.assertEquals(uuid1, uuidId1.asObject());

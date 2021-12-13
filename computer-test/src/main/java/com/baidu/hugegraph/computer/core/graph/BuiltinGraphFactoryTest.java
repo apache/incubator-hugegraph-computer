@@ -71,15 +71,15 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
         Assert.assertEquals(ValueType.DOUBLE,
                             factory.createValue(ValueType.DOUBLE.code())
                                    .valueType());
-        Assert.assertEquals(ValueType.ID_VALUE,
-                            factory.createValue(ValueType.ID_VALUE.code())
+        Assert.assertEquals(ValueType.ID,
+                            factory.createValue(ValueType.ID.code())
                                    .valueType());
-        Assert.assertEquals(ValueType.ID_VALUE_LIST,
-                            factory.createValue(ValueType.ID_VALUE_LIST.code())
+        Assert.assertEquals(ValueType.ID_LIST,
+                            factory.createValue(ValueType.ID_LIST.code())
                                    .valueType());
-        Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
+        Assert.assertEquals(ValueType.ID_LIST_LIST,
                             factory.createValue(
-                                    ValueType.ID_VALUE_LIST_LIST.code())
+                                    ValueType.ID_LIST_LIST.code())
                                    .valueType());
 
         Assert.assertEquals(ValueType.NULL,
@@ -88,14 +88,14 @@ public class BuiltinGraphFactoryTest extends UnitTestBase {
                             factory.createValue(ValueType.LONG).valueType());
         Assert.assertEquals(ValueType.DOUBLE,
                             factory.createValue(ValueType.DOUBLE).valueType());
-        Assert.assertEquals(ValueType.ID_VALUE,
-                            factory.createValue(ValueType.ID_VALUE)
+        Assert.assertEquals(ValueType.ID,
+                            factory.createValue(ValueType.ID)
                                    .valueType());
-        Assert.assertEquals(ValueType.ID_VALUE_LIST,
-                            factory.createValue(ValueType.ID_VALUE_LIST)
+        Assert.assertEquals(ValueType.ID_LIST,
+                            factory.createValue(ValueType.ID_LIST)
                                    .valueType());
-        Assert.assertEquals(ValueType.ID_VALUE_LIST_LIST,
-                            factory.createValue(ValueType.ID_VALUE_LIST_LIST)
+        Assert.assertEquals(ValueType.ID_LIST_LIST,
+                            factory.createValue(ValueType.ID_LIST_LIST)
                                    .valueType());
 
         Assert.assertThrows(NullPointerException.class, () -> {

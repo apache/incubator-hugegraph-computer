@@ -95,7 +95,7 @@ public class BytesId implements Id {
 
     @Override
     public ValueType valueType() {
-        return ValueType.ID_VALUE;
+        return ValueType.ID;
     }
 
     @Override

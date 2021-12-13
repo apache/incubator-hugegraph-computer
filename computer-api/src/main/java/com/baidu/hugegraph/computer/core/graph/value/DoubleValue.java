@@ -90,6 +90,11 @@ public class DoubleValue extends Number implements Tvalue<Double> {
     }
 
     @Override
+    public boolean isNumber() {
+        return true;
+    }
+
+    @Override
     public void read(RandomAccessInput in) throws IOException {
         this.value = in.readDouble();
     }
