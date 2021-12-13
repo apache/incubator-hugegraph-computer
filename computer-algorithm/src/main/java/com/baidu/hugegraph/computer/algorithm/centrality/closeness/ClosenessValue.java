@@ -21,29 +21,24 @@ package com.baidu.hugegraph.computer.algorithm.centrality.closeness;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.MapValue;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
-import com.baidu.hugegraph.util.Log;
 
-public class ClosenessCentralityLogOutput extends LimitedLogOutput {
-
-    private static final Logger LOG =
-            Log.logger(ClosenessCentralityLogOutput.class);
+public class ClosenessValue extends MapValue<DoubleValue> {
 
     @Override
-    public void write(Vertex vertex) {
-        MapValue<DoubleValue> localValue = vertex.value();
+    public Object value() {
         // Cumulative distance
         double centrality = 0;
-        for (Map.Entry<Id, DoubleValue> entry : localValue.entrySet()) {
+        for (Map.Entry<Id, DoubleValue> entry : this.entrySet()) {
             centrality += 1.0D / entry.getValue().value();
         }
-        LOG.info("The closeness centrality of vertex {} is {}",
-                 centrality, vertex);
+        return centrality;
+    }
+
+    @Override
+    public String string() {
+        return this.value().toString();
     }
 }

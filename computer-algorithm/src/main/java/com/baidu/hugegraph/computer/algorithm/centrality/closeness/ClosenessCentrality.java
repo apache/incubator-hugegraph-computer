@@ -28,7 +28,6 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.value.MapValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
@@ -77,7 +76,7 @@ public class ClosenessCentrality implements Computation<ClosenessMessage> {
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
         // Set empty map as initial value
-        vertex.value(new MapValue<>());
+        vertex.value(new ClosenessValue());
 
         // Send messages to adjacent edges
         for (Edge edge : vertex.edges()) {
@@ -96,7 +95,7 @@ public class ClosenessCentrality implements Computation<ClosenessMessage> {
                         Iterator<ClosenessMessage> messages) {
         Id selfId = vertex.id();
         // Save the distance from other vertices to self
-        MapValue<DoubleValue> localValue = vertex.value();
+        ClosenessValue localValue = vertex.value();
         boolean active = false;
         while (messages.hasNext()) {
             active = true;
@@ -154,7 +153,7 @@ public class ClosenessCentrality implements Computation<ClosenessMessage> {
         return Math.random() <= this.sampleRate;
     }
 
-    private double weightValue(Value<?> rawValue) {
+    private double weightValue(Value rawValue) {
         if (rawValue == null) {
             return 1.0D;
         }

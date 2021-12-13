@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class MapValue<T extends Value<?>> implements Value<MapValue<T>> {
+public class MapValue<T extends Value> implements Value {
 
     private final GraphFactory graphFactory;
 
@@ -83,12 +83,9 @@ public class MapValue<T extends Value<?>> implements Value<MapValue<T>> {
         return ValueType.MAP_VALUE;
     }
 
-    public ValueType elemType() {
-        return this.elemType;
-    }
-
     @Override
-    public void assign(Value<MapValue<T>> other) {
+    @SuppressWarnings("unchecked")
+    public void assign(Value other) {
         this.checkAssign(other);
         ValueType elemType = ((MapValue<T>) other).elemType();
         E.checkArgument(elemType == this.elemType(),
@@ -98,9 +95,13 @@ public class MapValue<T extends Value<?>> implements Value<MapValue<T>> {
         this.map = ((MapValue<T>) other).map;
     }
 
+    public ValueType elemType() {
+        return this.elemType;
+    }
+
     @Override
     @SuppressWarnings("unchecked")
-    public Value<MapValue<T>> copy() {
+    public Value copy() {
         Map<Id, T> map = new HashMap<>();
         for (Map.Entry<Id, T> entry : this.map.entrySet()) {
             map.put(entry.getKey(), (T) entry.getValue().copy());
@@ -156,7 +157,7 @@ public class MapValue<T extends Value<?>> implements Value<MapValue<T>> {
     }
 
     @Override
-    public int compareTo(MapValue<T> obj) {
+    public int compareTo(Value obj) {
         throw new UnsupportedOperationException("MapValue.compareTo()");
     }
 

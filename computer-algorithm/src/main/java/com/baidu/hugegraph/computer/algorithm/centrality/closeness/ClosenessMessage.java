@@ -26,12 +26,12 @@ import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class ClosenessMessage implements Value<ClosenessMessage> {
+public class ClosenessMessage implements CustomizeValue<ClosenessMessage> {
 
     private final GraphFactory graphFactory;
 
@@ -63,22 +63,7 @@ public class ClosenessMessage implements Value<ClosenessMessage> {
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.UNKNOWN;
-    }
-
-    @Override
-    public void assign(Value<ClosenessMessage> value) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Value<ClosenessMessage> copy() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Object value() {
+    public ClosenessMessage value() {
         throw new UnsupportedOperationException();
     }
 
@@ -100,10 +85,5 @@ public class ClosenessMessage implements Value<ClosenessMessage> {
         this.senderId.write(out);
         this.startId.write(out);
         this.distance.write(out);
-    }
-
-    @Override
-    public int compareTo(ClosenessMessage o) {
-        throw new UnsupportedOperationException();
     }
 }

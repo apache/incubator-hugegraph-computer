@@ -118,12 +118,14 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
                             .put("F", 1.45)
                             .build();
 
-        public Vertex constructHugeVertex(
-               com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            Vertex result = super.constructHugeVertex(vertex);
-            Double expect = expectResults.get(result.id());
+        @Override
+        protected Object value(
+                  com.baidu.hugegraph.computer.core.graph.vertex.Vertex
+                  vertex) {
+            Object result = super.value(vertex);
+            Double expect = expectResults.get(vertex.id().string());
             Assert.assertNotNull(expect);
-            assertEquals(expect, (double) result.property(super.name()));
+            assertEquals(expect, (double) result);
             return result;
         }
     }
@@ -150,12 +152,14 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
                             .put("F", 3.333333333333333)
                             .build();
 
-        public Vertex constructHugeVertex(
-               com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            Vertex result = super.constructHugeVertex(vertex);
-            Double expect = expectResults.get(result.id());
+        @Override
+        protected Object value(
+                  com.baidu.hugegraph.computer.core.graph.vertex.Vertex
+                  vertex) {
+            Object result = super.value(vertex);
+            Double expect = expectResults.get(vertex.id().string());
             Assert.assertNotNull(expect);
-            assertEquals(expect, (double) result.property(super.name()));
+            assertEquals(expect, (double) result);
             return result;
         }
     }
