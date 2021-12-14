@@ -717,7 +717,6 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static final Set<String> K8S_REQUIRED_USER_OPTIONS = ImmutableSet.of(
-            HUGEGRAPH_URL.name(),
             ALGORITHM_PARAMS_CLASS.name()
     );
 }

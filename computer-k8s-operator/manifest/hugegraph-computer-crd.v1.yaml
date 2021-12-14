@@ -56,6 +56,10 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              configMapPaths:
+                additionalProperties:
+                  type: string
+                type: object
               envFrom:
                 description: Environment variables injected from a source, shared by all Master and Worker.
                 items:
@@ -216,6 +220,10 @@ spec:
               remoteJarUri:
                 pattern: ^(http|https):\/\/([\w.]+\/?)\S*$
                 type: string
+              secretPaths:
+                additionalProperties:
+                  type: string
+                type: object
               volumeMounts:
                 description: 'Volume mounts in the Job container. More info: https://kubernetes.io/docs/concepts/storage/volumes/'
                 items:
