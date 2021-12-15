@@ -35,6 +35,7 @@ public enum ValueType implements SerialEnum {
     ID(20, -1, "id"),
     ID_LIST(21, -1, "idList"),
     ID_LIST_LIST(22, -1, "idListList"),
+    ID_SET(23, -1, "idSet"),
     LIST_VALUE(30, -1, "list"),
     MAP_VALUE(31, -1, "map"),
     CUSTOMIZE_VALUE(100, -1, "customize");

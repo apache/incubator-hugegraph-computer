@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.graph.value.MapValue;
 public class ClosenessValue extends MapValue<DoubleValue> {
 
     @Override
-    public Object value() {
+    public Double value() {
         // Cumulative distance
         double centrality = 0;
         for (Map.Entry<Id, DoubleValue> entry : this.entrySet()) {

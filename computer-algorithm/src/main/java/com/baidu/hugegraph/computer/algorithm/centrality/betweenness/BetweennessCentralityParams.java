@@ -17,29 +17,30 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.centrality.closeness;
+package com.baidu.hugegraph.computer.algorithm.centrality.betweenness;
 
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
+import com.baidu.hugegraph.computer.algorithm.centrality.closeness.ClosenessCentrality;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 
-public class ClosenessCentralityParams implements AlgorithmParams {
+public class BetweennessCentralityParams implements AlgorithmParams {
 
     @Override
     public void setAlgorithmParameters(Map<String, String> params) {
         this.setIfAbsent(params, ComputerOptions.MASTER_COMPUTATION_CLASS,
                          DefaultMasterComputation.class.getName());
         this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
-                         ClosenessCentrality.class.getName());
+                         BetweennessCentrality.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                         ClosenessValue.class.getName());
+                         BetweennessValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                         ClosenessMessage.class.getName());
+                         BetweennessMessage.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         ClosenessCentralityOutput.class.getName());
+                         BetweennessCentralityOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,
                          ExtractAllPropertyInputFilter.class.getName());
         this.setIfAbsent(params, ClosenessCentrality.OPTION_SAMPLE_RATE,
