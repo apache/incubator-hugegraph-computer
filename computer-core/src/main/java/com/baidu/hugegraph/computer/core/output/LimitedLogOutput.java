@@ -48,7 +48,8 @@ public class LimitedLogOutput implements ComputerOutput {
     @Override
     public void write(Vertex vertex) {
         if (this.logged < this.limit) {
-            LOG.info("id='{}', result='{}'", vertex.id(), vertex.value());
+            LOG.info("id='{}', result='{}'", vertex.id(),
+                     vertex.value().string());
             this.logged++;
         }
     }

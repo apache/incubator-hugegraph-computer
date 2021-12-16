@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.algorithm.path.links;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +26,7 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.baidu.hugegraph.computer.algorithm.ExpressionUtil;
 import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
@@ -103,8 +103,8 @@ public class LinksSpreadFilter {
 
         Map<String, Map<String, Value<?>>> param =
                     ImmutableMap.of(ELEMENT, vertex.properties().get());
-        return this.expressionExecute(param,
-                                      this.endVertexCondition.getValue());
+        return ExpressionUtil.expressionExecute(
+                              param, this.endEdgeCondition.getValue());
     }
 
     public boolean isEndEdge(Edge edge) {
@@ -115,7 +115,8 @@ public class LinksSpreadFilter {
 
         Map<String, Map<String, Value<?>>> param =
                     ImmutableMap.of(OUT, edge.properties().get());
-        return this.expressionExecute(param, this.endEdgeCondition.getValue());
+        return ExpressionUtil.expressionExecute(
+                              param, this.endEdgeCondition.getValue());
     }
 
     public boolean isEdgeCanSpread0(Edge edge) {
@@ -131,27 +132,7 @@ public class LinksSpreadFilter {
         Map<String, Map<String, Value<?>>> param =
                     ImmutableMap.of(OUT, edge.properties().get(),
                                     IN, lastEdgeProperties.get());
-        return this.expressionExecute(param,
-                                      this.edgeSpreadCondition.getValue());
-    }
-
-    private boolean expressionExecute(Map<String, Map<String, Value<?>>> param,
-                                      Expression expression) {
-        return (boolean) expression.execute(convertParamsValueToObject(param));
-    }
-
-    private static Map<String, Object> convertParamsValueToObject(
-                   Map<String, Map<String, Value<?>>> params) {
-        Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, Map<String, Value<?>>> entry :
-                params.entrySet()) {
-            Map<String, Object> subKv = new HashMap<>();
-            Map<String, Value<?>> param = entry.getValue();
-            for (Map.Entry<String, Value<?>> paramItem : param.entrySet()) {
-                subKv.put(paramItem.getKey(), paramItem.getValue().value());
-            }
-            result.put(entry.getKey(), subKv);
-        }
-        return result;
+        return ExpressionUtil.expressionExecute(
+                              param, this.edgeSpreadCondition.getValue());
     }
 }

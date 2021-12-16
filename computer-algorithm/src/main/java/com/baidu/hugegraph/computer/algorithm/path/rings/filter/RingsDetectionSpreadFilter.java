@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.baidu.hugegraph.computer.algorithm.ExpressionUtil;
 import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -114,7 +115,8 @@ public class RingsDetectionSpreadFilter {
 
     private static boolean filter(Map<String, Map<String, Value<?>>> params,
                                   List<Expression> expressions) {
-        Map<String, Object> map = convertParamsValueToObject(params);
+        Map<String, Object> map =
+                            ExpressionUtil.convertParamsValueToObject(params);
         return expressions.stream()
                           .allMatch(expression -> {
                               return (Boolean) expression.execute(map);
@@ -135,20 +137,5 @@ public class RingsDetectionSpreadFilter {
         }
 
         return expressions;
-    }
-
-    private static Map<String, Object> convertParamsValueToObject(
-                   Map<String, Map<String, Value<?>>> params) {
-        Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, Map<String, Value<?>>> entry :
-                                                      params.entrySet()) {
-            Map<String, Object> subKv = new HashMap<>();
-            Map<String, Value<?>> param = entry.getValue();
-            for (Map.Entry<String, Value<?>> paramItem : param.entrySet()) {
-                subKv.put(paramItem.getKey(), paramItem.getValue().value());
-            }
-            result.put(entry.getKey(), subKv);
-        }
-        return result;
     }
 }

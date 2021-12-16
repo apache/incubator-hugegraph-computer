@@ -35,6 +35,7 @@ import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
 import com.baidu.hugegraph.computer.algorithm.community.cc.ClusteringCoefficientTest;
 import com.baidu.hugegraph.computer.algorithm.path.sssp.SsspTest;
+import com.baidu.hugegraph.computer.algorithm.path.subgraph.SubGraphMatchTest;
 import com.baidu.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
@@ -50,7 +51,8 @@ import com.baidu.hugegraph.config.OptionSpace;
     ClosenessCentralityTest.class,
     BetweennessCentralityTest.class,
     LinksTest.class,
-    SsspTest.class
+    SsspTest.class,
+    SubGraphMatchTest.class
 })
 public class AlgorithmTestSuite {
 

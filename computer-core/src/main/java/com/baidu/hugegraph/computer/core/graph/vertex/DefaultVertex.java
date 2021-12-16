@@ -35,7 +35,6 @@ public class DefaultVertex implements Vertex {
     private Id id;
     private Value<?> value;
     private Edges edges;
-    private Edges edgesbothdir;
     private Properties properties;
     private boolean active;
 

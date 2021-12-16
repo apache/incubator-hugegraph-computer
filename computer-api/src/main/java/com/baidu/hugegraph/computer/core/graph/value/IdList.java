@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.Comparator;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -53,5 +54,9 @@ public class IdList extends ListValue<Id> {
             values.add((Id) value.copy());
         }
         return values;
+    }
+
+    public void sort() {
+        this.sort(Comparator.naturalOrder());
     }
 }
