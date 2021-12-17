@@ -257,51 +257,6 @@ rules:
   - patch
   - update
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/name: hugegraph-computer-operator
-    app.kubernetes.io/version: v1
-  name: hugegraph-computer-operator-etcd-operator-role
-rules:
-- apiGroups:
-  - etcd.database.coreos.com
-  resources:
-  - etcdclusters
-  - etcdbackups
-  - etcdrestores
-  verbs:
-  - '*'
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - '*'
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
-  - events
-  verbs:
-  - '*'
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - '*'
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
----
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -335,21 +290,34 @@ subjects:
   name: hugegraph-computer-operator-controller-manager
   namespace: hugegraph-computer-operator-system
 ---
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
+apiVersion: v1
+kind: Service
 metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   labels:
-    app.kubernetes.io/name: hugegraph-computer-operator
+    app.kubernetes.io/name: hugegraph-computer-operator-etcd
     app.kubernetes.io/version: v1
-  name: hugegraph-computer-operator-etcd-operator-rolebinding
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: hugegraph-computer-operator-etcd-operator-role
-subjects:
-- kind: ServiceAccount
-  name: hugegraph-computer-operator-etcd-operator
+    service.app: hugegraph-computer-operator-etcd
+  name: hugegraph-computer-operator-etcd
   namespace: hugegraph-computer-operator-system
+spec:
+  clusterIP: None
+  ports:
+  - name: client
+    port: 2379
+    protocol: TCP
+    targetPort: 2379
+  - name: peer
+    port: 2380
+    protocol: TCP
+    targetPort: 2380
+  selector:
+    app.kubernetes.io/name: hugegraph-computer-operator-etcd
+    app.kubernetes.io/version: v1
+    service.app: hugegraph-computer-operator-etcd
+  sessionAffinity: None
+  type: ClusterIP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -423,7 +391,7 @@ metadata:
   labels:
     app.kubernetes.io/name: hugegraph-computer-operator-etcd
     app.kubernetes.io/version: v1
-  name: hugegraph-computer-operator-etcd-operator
+  name: hugegraph-computer-operator-etcd
   namespace: hugegraph-computer-operator-system
 spec:
   replicas: 1
@@ -431,38 +399,56 @@ spec:
     matchLabels:
       app.kubernetes.io/name: hugegraph-computer-operator-etcd
       app.kubernetes.io/version: v1
+      service.app: hugegraph-computer-operator-etcd
   template:
     metadata:
       labels:
         app.kubernetes.io/name: hugegraph-computer-operator-etcd
         app.kubernetes.io/version: v1
-        name: etcd-operator
+        service.app: hugegraph-computer-operator-etcd
     spec:
       containers:
       - command:
-        - etcd-operator
-        env:
-        - name: MY_POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        - name: MY_POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        image: quay.io/coreos/etcd-operator:v0.9.4
-        name: etcd-operator
-      serviceAccountName: hugegraph-computer-operator-etcd-operator
----
-apiVersion: etcd.database.coreos.com/v1beta2
-kind: EtcdCluster
-metadata:
-  labels:
-    app.kubernetes.io/name: hugegraph-computer-operator-etcd
-    app.kubernetes.io/version: v1
-  name: hugegraph-computer-operator-etcd
-  namespace: hugegraph-computer-operator-system
-spec:
-  repository: quay.io/coreos/etcd
-  size: 3
-  version: 3.5.0
+        - /bin/sh
+        - -ec
+        - |
+          HOSTNAME=$(hostname)
+          etcd --name ${HOSTNAME} \
+          --data-dir /var/etcd/data \
+          --initial-advertise-peer-urls http://${HOSTNAME}.hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2380 \
+          --listen-peer-urls http://0.0.0.0:2380 \
+          --listen-client-urls http://0.0.0.0:2379 \
+          --advertise-client-urls http://${HOSTNAME}.hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2379 \
+          --initial-cluster ${HOSTNAME}=http://${HOSTNAME}.hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2380 \
+          --initial-cluster-state new
+        image: quay.io/coreos/etcd:v3.5.0
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -ec
+            - ETCDCTL_API=3 etcdctl endpoint status
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: hugegraph-computer-operator-etcd
+        ports:
+        - containerPort: 2379
+          name: client
+        - containerPort: 2380
+          name: peer
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -ec
+            - ETCDCTL_API=3 etcdctl endpoint status
+          failureThreshold: 3
+          initialDelaySeconds: 1
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 5
+      hostname: hugegraph-computer-operator-etcd-0
+      subdomain: hugegraph-computer-operator-etcd
