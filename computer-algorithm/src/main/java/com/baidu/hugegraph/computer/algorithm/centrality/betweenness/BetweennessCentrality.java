@@ -35,7 +35,6 @@ import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
-import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 import com.baidu.hugegraph.util.Log;
 
 public class BetweennessCentrality implements Computation<BetweennessMessage> {
@@ -147,8 +146,8 @@ public class BetweennessCentrality implements Computation<BetweennessMessage> {
             // Accumulate the number of shortest paths for intermediate vertices
             for (int i = 1; i < sequence.size(); i++) {
                 Id id = sequence.get(i);
-                Map<Id, Integer> idCount = seqCount.idCount;
-                idCount.put(id, idCount.getOrDefault(id, 0) + 1);
+                Map<Id, Integer> idCounts = seqCount.idCount;
+                idCounts.put(id, idCounts.getOrDefault(id, 0) + 1);
             }
 
             Id selfId = vertex.id();
@@ -174,14 +173,6 @@ public class BetweennessCentrality implements Computation<BetweennessMessage> {
                 context.sendMessage(entry.getKey(), voteMessage);
             }
         }
-    }
-
-    @Override
-    public void beforeSuperstep(WorkerContext context) {
-    }
-
-    @Override
-    public void afterSuperstep(WorkerContext context) {
     }
 
     private boolean sample(Id sourceId, Id targetId, Edge edge) {
