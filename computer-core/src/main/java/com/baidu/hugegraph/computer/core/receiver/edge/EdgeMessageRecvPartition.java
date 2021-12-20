@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.receiver.edge;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -33,7 +32,6 @@ import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlush
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class EdgeMessageRecvPartition extends MessageRecvPartition {
 
@@ -56,16 +54,13 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
          * second, no need to deserialize the properties and then serialize
          * the second properties.
          */
-        Combiner<Pointer> combiner;
-        if (propCombiner instanceof OverwriteCombiner) {
-            combiner = new OverwriteCombiner<>();
-        } else {
-            GraphFactory graphFactory = context.graphFactory();
-            Properties v1 = graphFactory.createProperties();
-            Properties v2 = graphFactory.createProperties();
-
-            combiner = new PointerCombiner<>(v1, v2, propCombiner);
-        }
+        GraphFactory graphFactory = context.graphFactory();
+        Properties v1 = graphFactory.createProperties();
+        Properties v2 = graphFactory.createProperties();
+        Properties result = graphFactory.createProperties();
+        PointerCombiner<Properties> combiner = new PointerCombiner<>(
+                                                   v1, v2, result,
+                                                   propCombiner);
         this.flusher = new CombineSubKvOuterSortFlusher(combiner,
                                                         flushThreshold);
     }

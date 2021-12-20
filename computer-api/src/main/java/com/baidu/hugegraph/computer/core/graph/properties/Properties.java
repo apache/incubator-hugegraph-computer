@@ -36,4 +36,6 @@ public interface Properties extends Readable, Writable {
     void putIfAbsent(String key, Value value);
 
     int size();
+
+    void clear();
 }

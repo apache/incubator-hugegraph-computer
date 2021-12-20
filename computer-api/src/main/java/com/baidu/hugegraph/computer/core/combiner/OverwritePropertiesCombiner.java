@@ -19,37 +19,24 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import java.util.Iterator;
+import java.util.Map;
 
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
+import com.baidu.hugegraph.util.E;
 
-public interface Combiner<T> {
+public class OverwritePropertiesCombiner implements PropertiesCombiner {
 
-    /**
-     * @return The name of the combiner.
-     * @return class name by default.
-     */
-    default String name() {
-        return this.getClass().getName();
-    }
-
-    /**
-     * Combine v1 and v2 to result. The combined value may
-     * take use v1 or v2. The value of v1 and v2 may be updated. Should not
-     * use v1 and v2 after combine them.
-     */
-    void combine(T v1, T v2, T result);
-
-    @SuppressWarnings("unchecked")
-    static <T extends Value> T combineAll(Combiner<T> combiner,
-                                          Iterator<T> values) {
-        if (!values.hasNext()) {
-            return null;
+    @Override
+    public void combine(Properties v1, Properties v2, Properties result) {
+        E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
+        E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
+        E.checkArgumentNotNull(result,
+                               "The combine parameter result can't be null");
+        result.clear();
+        Map<String, Value> v2Map = v2.get();
+        for (Map.Entry<String, Value> entry : v2Map.entrySet()) {
+            result.put(entry.getKey(), entry.getValue());
         }
-        T result = (T) values.next().copy();
-        while (values.hasNext()) {
-            combiner.combine(result, values.next(), result);
-        }
-        return result;
     }
 }

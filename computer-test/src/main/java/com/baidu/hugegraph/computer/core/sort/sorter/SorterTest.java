@@ -30,10 +30,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -41,7 +42,6 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
-import com.baidu.hugegraph.computer.core.sort.combiner.MockIntSumCombiner;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
@@ -53,7 +53,6 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
@@ -103,7 +102,8 @@ public class SorterTest {
                              Constants.SMALL_BUF_SIZE);
 
         SorterImpl sorter = new SorterImpl(CONFIG);
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         sorter.sortBuffer(input,
                           new CombineKvInnerSortFlusher(output, combiner),
                           false);
@@ -138,7 +138,8 @@ public class SorterTest {
                                 SorterTestUtil.inputFromKvMap(map1),
                                 SorterTestUtil.inputFromKvMap(map2));
         SorterImpl sorter = new SorterImpl(CONFIG);
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         sorter.mergeBuffers(inputs, new CombineKvOuterSortFlusher(combiner),
                             path, false);
 
@@ -199,7 +200,8 @@ public class SorterTest {
 
         // Merge file
         Sorter sorter = new SorterImpl(CONFIG);
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         sorter.mergeInputs(inputs, new CombineKvOuterSortFlusher(combiner),
                            outputs, false);
 
@@ -258,7 +260,8 @@ public class SorterTest {
         BytesInput input = SorterTestUtil.inputFromSubKvMap(data);
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
         InnerSortFlusher flusher = new CombineSubKvInnerSortFlusher(
@@ -308,7 +311,8 @@ public class SorterTest {
         List<RandomAccessInput> buffers = ImmutableList.of(i1, i2, i3);
 
         Sorter sorter = new SorterImpl(config);
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         OuterSortFlusher flusher = new CombineSubKvOuterSortFlusher(
                                    combiner, flushThreshold);
         flusher.sources(buffers.size());
@@ -383,7 +387,8 @@ public class SorterTest {
         StoreTestUtil.hgkvDirFromSubKvMap(config, data3, input3);
 
         Sorter sorter = new SorterImpl(config);
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         OuterSortFlusher flusher = new CombineSubKvOuterSortFlusher(
                                        combiner, flushThreshold);
         flusher.sources(inputs.size());

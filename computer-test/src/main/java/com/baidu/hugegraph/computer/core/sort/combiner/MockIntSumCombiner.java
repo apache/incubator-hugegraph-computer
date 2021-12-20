@@ -19,25 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.sort.combiner;
 
-import java.io.IOException;
-
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 
-public class MockIntSumCombiner implements Combiner<Pointer> {
+public class MockIntSumCombiner implements Combiner<IntValue> {
 
     @Override
-    public Pointer combine(Pointer v1, Pointer v2) {
-        try {
-            Integer d1 = StoreTestUtil.dataFromPointer(v1);
-            Integer d2 = StoreTestUtil.dataFromPointer(v2);
-
-            return new InlinePointer(StoreTestUtil.intToByteArray(d1 + d2));
-        } catch (IOException e) {
-            throw new ComputerException(e.getMessage(), e);
-        }
+    public void combine(IntValue v1, IntValue v2, IntValue result) {
+        result.value(v1.intValue() + v2.intValue());
     }
 }

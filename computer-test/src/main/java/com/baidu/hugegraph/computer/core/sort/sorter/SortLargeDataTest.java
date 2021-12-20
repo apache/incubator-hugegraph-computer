@@ -33,10 +33,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -44,7 +45,6 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
 import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
-import com.baidu.hugegraph.computer.core.sort.combiner.MockIntSumCombiner;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
@@ -265,7 +265,8 @@ public class SortLargeDataTest {
                                                 throws Exception {
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
         sorter.sortBuffer(input, flusher, false);
@@ -275,14 +276,16 @@ public class SortLargeDataTest {
     private static void mergeBuffers(Sorter sorter,
                                      List<RandomAccessInput> buffers,
                                      String output) throws Exception {
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         OuterSortFlusher flusher = new CombineKvOuterSortFlusher(combiner);
         sorter.mergeBuffers(buffers, flusher, output, false);
     }
 
     private static void mergeFiles(Sorter sorter, List<String> files,
                                    List<String> outputs) throws Exception {
-        Combiner<Pointer> combiner = new MockIntSumCombiner();
+        PointerCombiner<IntValue> combiner =
+                        SorterTestUtil.newIntValueSumPointerCombiner();
         OuterSortFlusher flusher = new CombineKvOuterSortFlusher(combiner);
         sorter.mergeInputs(files, flusher, outputs, false);
     }
@@ -296,28 +299,22 @@ public class SortLargeDataTest {
         }
         LOG.info("Finally kvEntry size: {}", entrySize);
 
-        PeekableIterator<KvEntry> iterator = null;
-        try {
-            iterator = sorter.iterator(files, false);
+        try (PeekableIterator<KvEntry> iterator = sorter.iterator(files,
+                                                                  false)) {
             long result = 0;
             while (iterator.hasNext()) {
                 KvEntry next = iterator.next();
                 result += StoreTestUtil.dataFromPointer(next.value());
             }
             return result;
-        } finally {
-            if (iterator != null) {
-                iterator.close();
-            }
         }
     }
 
     private static void assertFileOrder(Sorter sorter, List<String> files)
                                         throws Exception {
-        PeekableIterator<KvEntry> iterator = null;
         KvEntry last = null;
-        try {
-            iterator = sorter.iterator(files, false);
+        try (PeekableIterator<KvEntry> iterator = sorter
+                .iterator(files, false)) {
             while (iterator.hasNext()) {
                 KvEntry next = iterator.next();
                 if (last == null) {
@@ -325,10 +322,6 @@ public class SortLargeDataTest {
                     continue;
                 }
                 Assert.assertLte(0, last.key().compareTo(next.key()));
-            }
-        } finally {
-            if (iterator != null) {
-                iterator.close();
             }
         }
     }

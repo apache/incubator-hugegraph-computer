@@ -29,6 +29,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -36,6 +37,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
+import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
@@ -52,10 +54,8 @@ public class PointerCombinerTest extends UnitTestBase {
         Combiner<DoubleValue> combiner = config.createObject(
                               ComputerOptions.WORKER_COMBINER_CLASS);
 
-        PointerCombiner<DoubleValue> pointerCombiner = new PointerCombiner<>(
-                                                       new DoubleValue(),
-                                                       new DoubleValue(),
-                                                       combiner);
+        PointerCombiner<DoubleValue> pointerCombiner =
+        SorterTestUtil.newValuePointerCombiner(DoubleValue::new, combiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
                                         Constants.SMALL_BUF_SIZE);
@@ -94,10 +94,10 @@ public class PointerCombinerTest extends UnitTestBase {
         ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
 
         GraphFactory graphFactory = graphFactory();
-        PointerCombiner<Properties> pointerCombiner = new PointerCombiner<>(
-                                    graphFactory.createProperties(),
-                                    graphFactory.createProperties(),
-                                    combiner);
+        PointerCombiner<Properties> pointerCombiner =
+                        SorterTestUtil.newValuePointerCombiner(() -> {
+                            return new DefaultProperties(graphFactory);
+                        }, combiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
                                         Constants.SMALL_BUF_SIZE);
@@ -142,15 +142,15 @@ public class PointerCombinerTest extends UnitTestBase {
 
         GraphFactory graphFactory = graphFactory();
 
-        PointerCombiner<Properties> pointerCombiner = new PointerCombiner<>(
-                                    graphFactory.createProperties(),
-                                    graphFactory.createProperties(),
-                                    combiner);
+        PointerCombiner<Properties> pointerCombiner =
+                        SorterTestUtil.newValuePointerCombiner(() -> {
+                            return new DefaultProperties(graphFactory);
+                        }, combiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
                                         Constants.SMALL_BUF_SIZE);
              BytesOutput bytesOutput2 = IOFactory.createBytesOutput(
-                                        Constants.SMALL_BUF_SIZE);) {
+                                        Constants.SMALL_BUF_SIZE)) {
             Properties value1 = graphFactory.createProperties();
             value1.put("p1", new LongValue(1L));
             Properties value2 = graphFactory.createProperties();

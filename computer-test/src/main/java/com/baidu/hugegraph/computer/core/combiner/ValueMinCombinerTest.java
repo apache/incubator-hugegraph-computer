@@ -31,9 +31,9 @@ public class ValueMinCombinerTest {
         LongValue min = new LongValue(0L);
         ValueMinCombiner<LongValue> combiner = new ValueMinCombiner<>();
         LongValue value1 = new LongValue(1L);
-        min = combiner.combine(min, value1);
+        combiner.combine(min, value1, min);
         LongValue value2 = new LongValue(2L);
-        min = combiner.combine(value2, min);
+        combiner.combine(value2, min, min);
         Assert.assertEquals(new LongValue(0L), min);
     }
 
@@ -43,14 +43,14 @@ public class ValueMinCombinerTest {
         LongValue value2 = new LongValue(2L);
         ValueMinCombiner<LongValue> combiner = new ValueMinCombiner<>();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(null, value2);
+            combiner.combine(null, value2, value2);
         }, e -> {
             Assert.assertEquals("The combine parameter v1 can't be null",
                                 e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(value1, null);
+            combiner.combine(value1, null, value1);
         }, e -> {
             Assert.assertEquals("The combine parameter v2 can't be null",
                                 e.getMessage());

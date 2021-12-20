@@ -25,10 +25,11 @@ import com.baidu.hugegraph.util.E;
 public class FloatValueSumCombiner implements Combiner<FloatValue> {
 
     @Override
-    public FloatValue combine(FloatValue v1, FloatValue v2) {
+    public void combine(FloatValue v1, FloatValue v2, FloatValue result) {
         E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
-        v2.value(v1.value() + v2.value());
-        return v2;
+        E.checkArgumentNotNull(result,
+                               "The combine parameter result can't be null");
+        result.value(v1.value() + v2.value());
     }
 }

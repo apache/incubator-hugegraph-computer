@@ -29,23 +29,23 @@ import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
-public class PointerCombiner<V extends Readable & Writable>
-       implements Combiner<Pointer> {
+public class PointerCombiner<V extends Readable & Writable> {
 
     private final V v1;
     private final V v2;
+    private final V result;
     private final Combiner<V> combiner;
     private final BytesOutput bytesOutput;
 
-    public PointerCombiner(V v1, V v2, Combiner<V> combiner) {
+    public PointerCombiner(V v1, V v2, V result, Combiner<V> combiner) {
         this.v1 = v1;
         this.v2 = v2;
+        this.result = result;
         this.combiner = combiner;
         this.bytesOutput = IOFactory.createBytesOutput(
                            Constants.SMALL_BUF_SIZE);
     }
 
-    @Override
     public Pointer combine(Pointer v1, Pointer v2) {
         try {
             RandomAccessInput input1 = v1.input();
@@ -54,9 +54,9 @@ public class PointerCombiner<V extends Readable & Writable>
             input2.seek(v2.offset());
             this.v1.read(input1);
             this.v2.read(input2);
-            V combinedValue = this.combiner.combine(this.v1, this.v2);
+            this.combiner.combine(this.v1, this.v2, this.result);
             this.bytesOutput.seek(0L);
-            combinedValue.write(this.bytesOutput);
+            this.result.write(this.bytesOutput);
             return new InlinePointer(this.bytesOutput.buffer(),
                                      this.bytesOutput.position());
         } catch (Exception e) {
