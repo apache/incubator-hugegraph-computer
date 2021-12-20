@@ -23,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.algorithm.centrality.betweenness.BetweennessCentralityTest;
 import com.baidu.hugegraph.computer.algorithm.centrality.closeness.ClosenessCentralityTest;
 import com.baidu.hugegraph.computer.algorithm.centrality.degree.DegreeCentralityTest;
 import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankTest;
@@ -45,6 +46,7 @@ import com.baidu.hugegraph.config.OptionSpace;
     RingsDetectionTest.class,
     RingsDetectionWithFilterTest.class,
     ClosenessCentralityTest.class,
+    BetweennessCentralityTest.class
 })
 public class AlgorithmTestSuite {
 

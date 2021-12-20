@@ -119,13 +119,13 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
                             .build();
 
         @Override
-        protected Object value(
+        protected Double value(
                   com.baidu.hugegraph.computer.core.graph.vertex.Vertex
                   vertex) {
-            Object result = super.value(vertex);
+            Double result = super.value(vertex);
             Double expect = expectResults.get(vertex.id().string());
             Assert.assertNotNull(expect);
-            assertEquals(expect, (double) result);
+            assertEquals(expect, result);
             return result;
         }
     }
@@ -153,13 +153,13 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
                             .build();
 
         @Override
-        protected Object value(
+        protected Double value(
                   com.baidu.hugegraph.computer.core.graph.vertex.Vertex
                   vertex) {
-            Object result = super.value(vertex);
+            Double result = super.value(vertex);
             Double expect = expectResults.get(vertex.id().string());
             Assert.assertNotNull(expect);
-            assertEquals(expect, (double) result);
+            assertEquals(expect, result);
             return result;
         }
     }
