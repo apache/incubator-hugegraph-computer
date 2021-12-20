@@ -20,10 +20,9 @@
 package com.baidu.hugegraph.computer.algorithm.path.rings;
 
 import java.util.Map;
-import java.util.Set;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
@@ -41,17 +40,18 @@ import com.google.common.collect.ImmutableSet;
 
 public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
 
-    private static final Map<String, Set<String>> EXPECT_RINGS =
-            ImmutableMap.of(
-                    "A", ImmutableSet.of("ACA", "ADCA", "ABCA"),
-                    "B", ImmutableSet.of("BCB"),
-                    "C", ImmutableSet.of("CDC")
-            );
-
-    @BeforeClass
-    public static void setup() {
+    @Before
+    public void init() {
         clearAll();
+    }
 
+    @After
+    public void teardown() {
+        clearAll();
+    }
+
+    @Test
+    public void testWithPropertyFilter() throws InterruptedException {
         HugeClient client = client();
         SchemaManager schema = client.schema();
 
@@ -91,16 +91,6 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
         vD.addEdge("know", vE, "weight", 1);
         vE.addEdge("know", vC, "weight", 1);
 
-        RingsDetectionTestOutput.EXPECT_RINGS = EXPECT_RINGS;
-    }
-
-    @AfterClass
-    public static void clear() {
-        clearAll();
-    }
-
-    @Test
-    public void testRunAlgorithm() throws InterruptedException {
         String filter = "{" +
                         "    \"vertex_filter\": [" +
                         "        {" +
@@ -117,7 +107,75 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
                         "        }" +
                         "    ]" +
                         "}";
-        
+
+        RingsDetectionTestOutput.EXPECT_RINGS = ImmutableMap.of(
+                "A", ImmutableSet.of("ACA", "ADCA", "ABCA"),
+                "B", ImmutableSet.of("BCB"),
+                "C", ImmutableSet.of("CDC")
+        );
+
+        runAlgorithm(RingsDetectionsTestParams.class.getName(),
+                     RingsDetectionWithFilter.OPTION_FILTER, filter);
+    }
+
+    @Test
+    public void testNoPropertyFilter() throws InterruptedException {
+        HugeClient client = client();
+        SchemaManager schema = client.schema();
+
+        schema.vertexLabel("letter")
+              .useCustomizeStringId()
+              .ifNotExist()
+              .create();
+        schema.vertexLabel("number")
+              .useCustomizeStringId()
+              .ifNotExist()
+              .create();
+        schema.edgeLabel("letter-to-letter")
+              .sourceLabel("letter")
+              .targetLabel("letter")
+              .ifNotExist()
+              .create();
+        schema.edgeLabel("number-to-number")
+              .sourceLabel("number")
+              .targetLabel("number")
+              .ifNotExist()
+              .create();
+
+        GraphManager graph = client.graph();
+        Vertex vA = graph.addVertex(T.label, "letter", T.id, "A");
+        Vertex vB = graph.addVertex(T.label, "letter", T.id, "B");
+        Vertex vC = graph.addVertex(T.label, "letter", T.id, "C");
+        Vertex v1 = graph.addVertex(T.label, "number", T.id, "1");
+        Vertex v2 = graph.addVertex(T.label, "number", T.id, "2");
+        Vertex v3 = graph.addVertex(T.label, "number", T.id, "3");
+
+        vA.addEdge("letter-to-letter", vB);
+        vA.addEdge("letter-to-letter", vC);
+        vB.addEdge("letter-to-letter", vA);
+        vC.addEdge("letter-to-letter", vB);
+        v1.addEdge("number-to-number", v2);
+        v2.addEdge("number-to-number", v3);
+        v3.addEdge("number-to-number", v1);
+
+        String filter = "{" +
+                        "    \"vertex_filter\": [" +
+                        "        {" +
+                        "            \"label\": \"letter\"" +
+                        "        }" +
+                        "    ]" +
+                        "}";
+        RingsDetectionTestOutput.EXPECT_RINGS = ImmutableMap.of(
+                "A", ImmutableSet.of("ABCA", "ABA")
+        );
+        runAlgorithm(RingsDetectionsTestParams.class.getName(),
+                     RingsDetectionWithFilter.OPTION_FILTER, filter);
+
+        filter = "{}";
+        RingsDetectionTestOutput.EXPECT_RINGS = ImmutableMap.of(
+                "A", ImmutableSet.of("ABCA", "ABA"),
+                "1", ImmutableSet.of("1231")
+        );
         runAlgorithm(RingsDetectionsTestParams.class.getName(),
                      RingsDetectionWithFilter.OPTION_FILTER, filter);
     }

@@ -31,8 +31,7 @@ public class PropertyFilterDescribe {
     public PropertyFilterDescribe(@JsonProperty(value = "label",
                                                 required = true)
                                   String label,
-                                  @JsonProperty(value = "property_filter",
-                                                required = true)
+                                  @JsonProperty(value = "property_filter")
                                   String propertyFilter) {
         this.label = label;
         this.propertyFilter = propertyFilter;

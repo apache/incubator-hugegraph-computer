@@ -23,14 +23,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import com.baidu.hugegraph.computer.algorithm.ExpressionUtil;
 import com.baidu.hugegraph.computer.algorithm.path.filter.PropertyFilterDescribe;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
@@ -40,7 +43,6 @@ public class RingsDetectionSpreadFilter {
     private static final String ALL = "*";
     private static final String MESSAGE = "$message";
     private static final String ELEMENT = "$element";
-    private static final List<Expression> PASS = ImmutableList.of();
 
     private final Map<String, Expression> vertexFilter;
     private final Map<String, Expression> edgeFilter;
@@ -58,19 +60,30 @@ public class RingsDetectionSpreadFilter {
 
     private void init(Map<String, Expression> filter,
                       List<PropertyFilterDescribe> describes) {
+        if (CollectionUtils.isEmpty(describes)) {
+            filter.put(ALL, null);
+            return;
+        }
         for (PropertyFilterDescribe describe : describes) {
             String labelName = describe.label();
-            Expression expression = AviatorEvaluator.compile(
-                                                     describe.propertyFilter());
+            Expression expression = null;
+            if (describe.propertyFilter() != null) {
+                expression = AviatorEvaluator.compile(
+                                              describe.propertyFilter());
+            }
             filter.put(labelName, expression);
         }
     }
 
     public boolean filter(Vertex vertex) {
-        String label = vertex.label();
-        List<Expression> expressions = expressions(this.vertexFilter, label);
+        if (isLabelCannotSpread(this.vertexFilter, vertex.label())) {
+            return false;
+        }
 
-        if (expressions == PASS) {
+        List<Expression> expressions = expressions(this.vertexFilter,
+                                                   vertex.label(),
+                                                   expression -> true);
+        if (CollectionUtils.isEmpty(expressions)) {
             return true;
         }
 
@@ -80,19 +93,20 @@ public class RingsDetectionSpreadFilter {
     }
 
     public boolean filter(Edge edge) {
-        String label = edge.label();
-        List<Expression> expressions = expressions(this.edgeFilter, label);
-
-        if (expressions == PASS) {
-            return true;
+        if (isLabelCannotSpread(this.edgeFilter, edge.label())) {
+            return false;
         }
 
-        expressions = expressions.stream()
-                                 .filter(expression -> {
-                                     return !expression.getVariableNames()
-                                                       .contains(MESSAGE);
-                                 })
-                                 .collect(Collectors.toList());
+        List<Expression> expressions =
+                         expressions(this.edgeFilter,
+                                     edge.label(),
+                                     expression -> {
+                                         return !expression.getVariableNames()
+                                                           .contains(MESSAGE);
+                                     });
+        if (CollectionUtils.isEmpty(expressions)) {
+            return true;
+        }
 
         Map<String, Map<String, Value<?>>> params =
                     ImmutableMap.of(ELEMENT, edge.properties().get());
@@ -100,10 +114,14 @@ public class RingsDetectionSpreadFilter {
     }
 
     public boolean filter(Edge edge, RingsDetectionMessage message) {
-        String label = edge.label();
-        List<Expression> expressions = expressions(this.edgeFilter, label);
+        if (isLabelCannotSpread(this.edgeFilter, edge.label())) {
+            return false;
+        }
 
-        if (expressions == PASS) {
+        List<Expression> expressions = expressions(this.edgeFilter,
+                                                   edge.label(),
+                                                   expression -> true);
+        if (CollectionUtils.isEmpty(expressions)) {
             return true;
         }
 
@@ -123,11 +141,9 @@ public class RingsDetectionSpreadFilter {
                           });
     }
 
-    private static List<Expression> expressions(Map<String, Expression> filter,
-                                                String label) {
-        if (filter.size() == 0) {
-            return PASS;
-        }
+    private static List<Expression> expressions(
+                   Map<String, Expression> filter, String label,
+                   Predicate<? super Expression> expressionFilter) {
         List<Expression> expressions = new ArrayList<>();
         if (filter.containsKey(ALL)) {
             expressions.add(filter.get(ALL));
@@ -136,6 +152,14 @@ public class RingsDetectionSpreadFilter {
             expressions.add(filter.get(label));
         }
 
-        return expressions;
+        return expressions.stream()
+                          .filter(Objects::nonNull)
+                          .filter(expressionFilter)
+                          .collect(Collectors.toList());
+    }
+
+    private static boolean isLabelCannotSpread(Map<String, Expression> filter,
+                                               String label) {
+        return !filter.containsKey(ALL) && !filter.containsKey(label);
     }
 }
