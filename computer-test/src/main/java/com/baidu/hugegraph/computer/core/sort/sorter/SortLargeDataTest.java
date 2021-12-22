@@ -313,8 +313,8 @@ public class SortLargeDataTest {
     private static void assertFileOrder(Sorter sorter, List<String> files)
                                         throws Exception {
         KvEntry last = null;
-        try (PeekableIterator<KvEntry> iterator = sorter
-                .iterator(files, false)) {
+        try (PeekableIterator<KvEntry> iterator =
+                                       sorter.iterator(files, false)) {
             while (iterator.hasNext()) {
                 KvEntry next = iterator.next();
                 if (last == null) {

@@ -30,6 +30,6 @@ public class LongValueSumCombiner implements Combiner<LongValue> {
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
         E.checkArgumentNotNull(result,
                                "The combine parameter result can't be null");
-        result.value(v1.value() + v2.value());
+        result.value(v1.longValue() + v2.longValue());
     }
 }

@@ -95,9 +95,9 @@ public class PointerCombinerTest extends UnitTestBase {
 
         GraphFactory graphFactory = graphFactory();
         PointerCombiner<Properties> pointerCombiner =
-                        SorterTestUtil.newValuePointerCombiner(() -> {
-                            return new DefaultProperties(graphFactory);
-                        }, combiner);
+                        SorterTestUtil.newValuePointerCombiner(
+                                       graphFactory::createProperties,
+                                       combiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
                                         Constants.SMALL_BUF_SIZE);

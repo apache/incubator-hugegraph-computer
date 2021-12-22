@@ -50,9 +50,8 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
                 ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
 
         /*
-         * If propertiesCombiner is OverwriteCombiner, just remain the
-         * second, no need to deserialize the properties and then serialize
-         * the second properties.
+         * If propCombiner is OverwritePropertiesCombiner, also need to
+         * deserialize the properties now.
          */
         GraphFactory graphFactory = context.graphFactory();
         Properties v1 = graphFactory.createProperties();

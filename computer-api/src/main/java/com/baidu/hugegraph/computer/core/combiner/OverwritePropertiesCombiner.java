@@ -19,10 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import java.util.Map;
-
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.util.E;
 
 public class OverwritePropertiesCombiner implements PropertiesCombiner {
@@ -33,10 +30,10 @@ public class OverwritePropertiesCombiner implements PropertiesCombiner {
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
         E.checkArgumentNotNull(result,
                                "The combine parameter result can't be null");
+        E.checkState(v1 != result && v2 != result,
+                     "The combine parameter result can't same with v1 or v2");
+
         result.clear();
-        Map<String, Value> v2Map = v2.get();
-        for (Map.Entry<String, Value> entry : v2Map.entrySet()) {
-            result.put(entry.getKey(), entry.getValue());
-        }
+        result.putAll(v2.get());
     }
 }

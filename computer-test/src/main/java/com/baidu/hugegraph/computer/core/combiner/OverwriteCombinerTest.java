@@ -64,37 +64,4 @@ public class OverwriteCombinerTest extends UnitTestBase {
                                 e.getMessage());
         });
     }
-
-    //@Test
-    //public void testCombineVertex() {
-    //    GraphFactory factory = graphFactory();
-    //    Id longId1 = BytesId.of(1L);
-    //    DoubleValue value1 = new DoubleValue(0.1D);
-    //    Vertex vertex1 = factory.createVertex(longId1, value1);
-    //    vertex1.addEdge(factory.createEdge(BytesId.of(2L)));
-    //    vertex1.addEdge(factory.createEdge(BytesId.of(3L)));
-    //
-    //    Id longId2 = BytesId.of(1L);
-    //    DoubleValue value2 = new DoubleValue(0.2D);
-    //    Vertex vertex2 = factory.createVertex(longId2, value2);
-    //    vertex2.addEdge(factory.createEdge(BytesId.of(1L)));
-    //
-    //    OverwriteCombiner<Vertex> combiner = new OverwriteCombiner<>();
-    //    Vertex vertex = combiner.combine(vertex1, vertex2);
-    //    Assert.assertEquals(vertex2, vertex);
-    //}
-    //
-    //@Test
-    //public void testCombineProperties() {
-    //    Properties properties1 = graphFactory().createProperties();
-    //    properties1.put("name", BytesId.of("marko"));
-    //    properties1.put("city", BytesId.of("Beijing"));
-    //
-    //    Properties properties2 = graphFactory().createProperties();
-    //    properties1.put("name", BytesId.of("josh"));
-    //
-    //    OverwriteCombiner<Properties> combiner = new OverwriteCombiner<>();
-    //    Properties properties = combiner.combine(properties1, properties2);
-    //    Assert.assertEquals(properties2, properties);
-    //}
 }
