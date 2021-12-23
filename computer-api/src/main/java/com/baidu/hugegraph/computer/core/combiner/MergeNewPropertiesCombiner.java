@@ -37,8 +37,9 @@ public class MergeNewPropertiesCombiner implements PropertiesCombiner {
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
         E.checkArgumentNotNull(result,
                                "The combine parameter result can't be null");
-        E.checkState(v1 != result && v2 != result,
-                     "The combine parameter result can't same with v1 or v2");
+        E.checkArgument(v1 != result && v2 != result,
+                        "The combine parameter result " +
+                        "can't same with v1 or v2");
 
         result.clear();
 
