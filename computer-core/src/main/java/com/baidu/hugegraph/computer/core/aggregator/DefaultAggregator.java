@@ -103,7 +103,7 @@ public class DefaultAggregator<V extends Value> implements Aggregator<V> {
 
     private void combineAndSwapIfNeeded(V localValue, V thisValue) {
         this.combiner.combine(localValue, thisValue, thisValue);
-        this.localValue.set(thisValue);
+        localValue.assign(thisValue);
     }
 
     @Override
