@@ -15,6 +15,7 @@ LOCAL_DRIVE="local"
 ROLE=
 ROLE_MASTER="master"
 ROLE_WORKER="worker"
+JOB_ID="null"
 
 usage() {
     echo "Usage:"
@@ -22,6 +23,7 @@ usage() {
     echo "        <-a|--algorithm algorithm_jar_path>"
     echo "        [-l|--log4 log4_conf_path]"
     echo "        <-d|--drive drive_type(local|k8s|yarn)>"
+    echo "        <-j|--jobid optional jobid>"
 }
 
 if [ $# -lt 4 ]; then
@@ -70,6 +72,9 @@ parse_opts() {
                 check_empty "algorithm jar file not be empty" $2
                 check_file_readable "file $2 not be read permission" $2
                 JAR_FILE_PATH=$2
+                shift 2 ;;
+            -j|--jobid)
+                JOB_ID=$2
                 shift 2 ;;
             -d|--drive)
                 check_empty "drive not be empty" $1
@@ -186,8 +191,8 @@ MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputer
 
 if [ "${LOG4j_CONF}" != "" ]; then
     exec ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${JVM_OPTIONS} \
-        -cp "${CP}" ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
+        -cp "${CP}" ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE} ${JOB_ID}
 else
     exec ${JAVA} -Dname="hugegraph-computer" ${JVM_OPTIONS} -cp "${CP}" \
-        ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
+        ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE} ${JOB_ID}
 fi

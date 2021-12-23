@@ -24,9 +24,6 @@ import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
 import static com.baidu.hugegraph.config.OptionChecker.nonNegativeInt;
 import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.input.filter.DefaultInputFilter;
@@ -42,6 +39,9 @@ import com.baidu.hugegraph.structure.constant.Direction;
 import com.baidu.hugegraph.util.Bytes;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 
 public class ComputerOptions extends OptionHolder {
 
@@ -587,7 +587,7 @@ public class ComputerOptions extends OptionHolder {
                     "hugegraph.url",
                     "The hugegraph url to load data and write results back.",
                     disallowEmpty(),
-                    "http://127.0.0.1:8080"
+                    "http://yq02-sys-rpm765.yq02:8080"
             );
 
     public static final ConfigOption<String> HUGEGRAPH_GRAPH_NAME =
@@ -595,7 +595,7 @@ public class ComputerOptions extends OptionHolder {
                     "hugegraph.name",
                     "The graph name to load data and write results back.",
                     disallowEmpty(),
-                    "hugegraph"
+                    "system"
             );
 
     public static final ConfigOption<String> TRANSPORT_SERVER_HOST =

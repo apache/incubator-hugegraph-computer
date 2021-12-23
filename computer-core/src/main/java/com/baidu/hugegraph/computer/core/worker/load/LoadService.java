@@ -104,16 +104,19 @@ public class LoadService {
         @Override
         public boolean hasNext() {
             VertexFetcher vertexFetcher = fetcher.vertexFetcher();
-            while (this.currentSplit == null || !vertexFetcher.hasNext()) {
-                /*
-                 * The first time or the current split is complete,
-                 * need to fetch next input split meta
-                 */
-                this.currentSplit = fetcher.nextVertexInputSplit();
-                if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
-                    return false;
+            try {
+                while (this.currentSplit == null || !vertexFetcher.hasNext()) {
+                    /*
+                     * The first time or the current split is complete,
+                     * need to fetch next input split meta
+                     */
+                    this.currentSplit = fetcher.nextVertexInputSplit();
+                    if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
+                        return false;
+                    }
+                    vertexFetcher.prepareLoadInputSplit(this.currentSplit);
                 }
-                vertexFetcher.prepareLoadInputSplit(this.currentSplit);
+            } catch (Exception e) {
             }
             return true;
         }
@@ -168,16 +171,19 @@ public class LoadService {
                 return this.currentVertex != null;
             }
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
-            while (this.currentSplit == null || !edgeFetcher.hasNext()) {
-                /*
-                 * The first time or the current split is complete,
-                 * need to fetch next input split meta
-                 */
-                this.currentSplit = fetcher.nextEdgeInputSplit();
-                if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
-                    return this.currentVertex != null;
+            try {
+                while (this.currentSplit == null || !edgeFetcher.hasNext()) {
+                    /*
+                    * The first time or the current split is complete,
+                    * need to fetch next input split meta
+                    */
+                    this.currentSplit = fetcher.nextEdgeInputSplit();
+                    if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
+                        return this.currentVertex != null;
+                    } 
+                    edgeFetcher.prepareLoadInputSplit(this.currentSplit);
                 }
-                edgeFetcher.prepareLoadInputSplit(this.currentSplit);
+            } catch (Exception e) {
             }
             return true;
         }
@@ -190,42 +196,46 @@ public class LoadService {
 
             com.baidu.hugegraph.structure.graph.Edge hugeEdge;
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
-            while (edgeFetcher.hasNext()) {
-                hugeEdge = edgeFetcher.next();
-                /*
-                 * TODO: Restore the code after huge-server fix a problem
-                 *       where id may not be a four-part problem
-                 */
-                Edge edge;
-                try {
-                    edge = this.convert(hugeEdge);
-                } catch (Exception e) {
-                    LOG.error("Fail to convert edge: {}", hugeEdge, e);
-                    continue;
-                }
-                Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
-                if (this.currentVertex == null) {
-                    this.currentVertex = new DefaultVertex(graphFactory,
+            try {
+                while (edgeFetcher.hasNext()) {
+                    hugeEdge = edgeFetcher.next();
+                    /*
+                     * TODO: Restore the code after huge-server fix a problem
+                     *       where id may not be a four-part problem
+                    */
+                    Edge edge;
+                    try {
+                        edge = this.convert(hugeEdge);
+                    } catch (Exception e) {
+                        LOG.error("Fail to convert edge: {}", hugeEdge, e);
+                        continue;
+                    }
+                    Id sourceId = HugeConverter.convertId(hugeEdge.sourceId());
+                    if (this.currentVertex == null) {
+                        this.currentVertex = new DefaultVertex(graphFactory,
                                                            sourceId, null);
-                    this.currentVertex.addEdge(edge);
-                } else if (this.currentVertex.id().equals(sourceId) &&
+                        this.currentVertex.addEdge(edge);
+                    } else if (this.currentVertex.id().equals(sourceId) &&
                            this.currentVertex.numEdges() < this.maxEdges) {
-                    /*
-                     * Current edge is the adjacent edge of previous vertex and
-                     * not reached the threshold of one vertex can hold
-                     */
-                    this.currentVertex.addEdge(edge);
-                } else {
-                    /*
-                     * Current edge isn't the adjacent edge of previous vertex
-                     * or reached the threshold of one vertex can hold
-                     */
-                    Vertex vertex = this.currentVertex;
-                    this.currentVertex = new DefaultVertex(graphFactory,
+                        /*
+                         * Current edge is the adjacent edge of previous vertex
+                         * and not reached the threshold of one vertex can hold
+                         */
+                        this.currentVertex.addEdge(edge);
+                    } else {
+                        /*
+                        * Current edge isn't the adjacent edge of previous 
+                        * or reached the threshold of one vertex can hold
+                        */
+                        Vertex vertex = this.currentVertex;
+                        this.currentVertex = new DefaultVertex(graphFactory,
                                                            sourceId, null);
-                    this.currentVertex.addEdge(edge);
-                    return vertex;
+                        this.currentVertex.addEdge(edge);
+                        return vertex;
+                    }
                 }
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
             }
             assert this.currentVertex != null;
             Vertex vertex = this.currentVertex;

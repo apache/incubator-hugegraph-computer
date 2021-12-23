@@ -18,16 +18,8 @@
 
 package com.baidu.hugegraph.computer.dist;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Properties;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.master.MasterService;
@@ -37,6 +29,16 @@ import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Properties;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+
 
 public class HugeGraphComputer {
 
@@ -56,20 +58,25 @@ public class HugeGraphComputer {
 
     public static void main(String[] args) throws IOException,
                                                   ClassNotFoundException {
-        E.checkArgument(ArrayUtils.getLength(args) == 3,
+        E.checkArgument(ArrayUtils.getLength(args) == 4,
                         "Argument count must be three, " +
                         "the first is conf path;" +
                         "the second is role type;" +
-                        "the third is drive type.");
+                        "the third is drive type;" + 
+                        "the forth is job id");
+                        
         String role = args[1];
         E.checkArgument(!StringUtils.isEmpty(role),
                         "The role can't be null or emtpy, " +
                         "it must be either '%s' or '%s'",
                         ROLE_MASTER, ROLE_WORKER);
+
+        String jobId = args[3];
+
         setUncaughtExceptionHandler();
         loadClass();
         registerOptions();
-        ComputerContext context = parseContext(args[0]);
+        ComputerContext context = parseContext(args[0], jobId);
         switch (role) {
             case ROLE_MASTER:
                 executeMasterService(context);
@@ -124,13 +131,22 @@ public class HugeGraphComputer {
         }
     }
 
-    private static ComputerContext parseContext(String conf)
+    private static ComputerContext parseContext(String conf, String jobid)
                                                 throws IOException {
         Properties properties = new Properties();
         BufferedReader bufferedReader = new BufferedReader(
                                             new FileReader(conf));
         properties.load(bufferedReader);
-        ComputerContextUtil.initContext(properties);
+        if (!jobid.equals("null")) {
+            Map<String, String> params = ComputerContextUtil.
+                                       convertToMap(properties);
+            params.put(ComputerOptions.JOB_ID.
+                                    name(), jobid);
+            ComputerContextUtil.initContext(params);
+        }
+        else {
+            ComputerContextUtil.initContext(properties);
+        }
         return ComputerContext.instance();
     }
 
