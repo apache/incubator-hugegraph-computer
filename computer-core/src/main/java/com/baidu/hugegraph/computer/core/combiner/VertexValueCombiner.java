@@ -45,7 +45,7 @@ public class VertexValueCombiner extends AbstractPointerCombiner<Properties> {
             input1.seek(v1.offset());
             input2.seek(v2.offset());
             String label1 = StreamGraphInput.readLabel(input1);
-            String label2 = StreamGraphInput.readLabel(input1);
+            String label2 = StreamGraphInput.readLabel(input2);
             assert label1.equals(label2);
 
             this.v1.read(input1);
