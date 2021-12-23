@@ -17,28 +17,20 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
+package com.baidu.hugegraph.computer.core.combiner;
 
-import java.io.IOException;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 
-import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+public class MessageValueCombiner extends AbstractPointerCombiner<Value> {
 
-public class CombineKvInnerSortFlusher extends CombinableSorterFlusher
-                                       implements InnerSortFlusher {
-
-    private final RandomAccessOutput output;
-
-    public CombineKvInnerSortFlusher(RandomAccessOutput output,
-                                     PointerCombiner combiner) {
-        super(combiner);
-        this.output = output;
-    }
-
-    @Override
-    protected void writeKvEntry(KvEntry entry) throws IOException {
-        entry.key().write(this.output);
-        entry.value().write(this.output);
+    public MessageValueCombiner(ComputerContext context) {
+        super(() -> {
+            return context.config()
+                          .createObject(
+                           ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+        }, context.config().createObject(
+                            ComputerOptions.WORKER_COMBINER_CLASS));
     }
 }

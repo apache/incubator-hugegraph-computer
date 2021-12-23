@@ -26,13 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import com.baidu.hugegraph.computer.core.combiner.AbstractPointerCombiner;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.combiner.IntValueSumCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
-import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -162,21 +160,9 @@ public class SorterTestUtil {
         }
     }
 
-    public static PointerCombiner<IntValue> newIntValueSumPointerCombiner() {
-        return newValuePointerCombiner(IntValue::new,
-                                       new IntValueSumCombiner());
-    }
-
-    public static <T extends Readable & Writable> PointerCombiner<T>
-           newValuePointerCombiner(Supplier<T> supplier, Combiner<T> combiner) {
-        try {
-            T v1 = supplier.get();
-            T v2 = supplier.get();
-            T v3 = supplier.get();
-            return new PointerCombiner<>(v1, v2, v3, combiner);
-        } catch (Exception e) {
-           throw new ComputerException("Failed to create PointerCombiner for " +
-                                       "class:");
-        }
+    public static <T extends Readable & Writable> PointerCombiner
+                  createPointerCombiner(Supplier<T> supplier,
+                                        Combiner<T> combiner) {
+        return new AbstractPointerCombiner<T>(supplier, combiner) { };
     }
 }

@@ -29,7 +29,6 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
@@ -46,16 +45,17 @@ import com.baidu.hugegraph.testutil.Assert;
 public class PointerCombinerTest extends UnitTestBase {
 
     @Test
-    public void testValueCombiner() throws IOException {
+    public void testMessageCombiner() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
             ComputerOptions.WORKER_COMBINER_CLASS,
             DoubleValueSumCombiner.class.getName()
         );
-        Combiner<DoubleValue> combiner = config.createObject(
+        Combiner<DoubleValue> valueCombiner = config.createObject(
                               ComputerOptions.WORKER_COMBINER_CLASS);
 
-        PointerCombiner<DoubleValue> pointerCombiner =
-        SorterTestUtil.newValuePointerCombiner(DoubleValue::new, combiner);
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  DoubleValue::new,
+                                                  new DoubleValueSumCombiner());
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
                                         Constants.SMALL_BUF_SIZE);
@@ -72,7 +72,7 @@ public class PointerCombinerTest extends UnitTestBase {
             Pointer pointer2 = new InlinePointer(bytesOutput2.buffer(),
                                                  bytesOutput2.position());
 
-            Pointer pointer = pointerCombiner.combine(pointer1, pointer2);
+            Pointer pointer = combiner.combine(pointer1, pointer2);
 
             BytesInput input = IOFactory.createBytesInput(pointer.bytes());
 
@@ -90,14 +90,14 @@ public class PointerCombinerTest extends UnitTestBase {
             ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS,
             MergeOldPropertiesCombiner.class.getName()
         );
-        Combiner<Properties> combiner = config.createObject(
+        Combiner<Properties> valueCombiner = config.createObject(
         ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
 
         GraphFactory graphFactory = graphFactory();
-        PointerCombiner<Properties> pointerCombiner =
-                        SorterTestUtil.newValuePointerCombiner(
+        PointerCombiner combiner =
+                        SorterTestUtil.createPointerCombiner(
                                        graphFactory::createProperties,
-                                       combiner);
+                                       valueCombiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
                                         Constants.SMALL_BUF_SIZE);
@@ -116,7 +116,7 @@ public class PointerCombinerTest extends UnitTestBase {
             Pointer pointer2 = new InlinePointer(bytesOutput2.buffer(),
                                                  bytesOutput2.position());
 
-            Pointer pointer = pointerCombiner.combine(pointer1, pointer2);
+            Pointer pointer = combiner.combine(pointer1, pointer2);
 
             BytesInput input = IOFactory.createBytesInput(pointer.bytes());
 
@@ -137,15 +137,15 @@ public class PointerCombinerTest extends UnitTestBase {
             ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS,
             MergeOldPropertiesCombiner.class.getName()
         );
-        Combiner<Properties> combiner = config.createObject(
+        Combiner<Properties> valueCombiner = config.createObject(
         ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
 
         GraphFactory graphFactory = graphFactory();
 
-        PointerCombiner<Properties> pointerCombiner =
-                        SorterTestUtil.newValuePointerCombiner(() -> {
-                            return new DefaultProperties(graphFactory);
-                        }, combiner);
+        PointerCombiner combiner =
+                        SorterTestUtil.createPointerCombiner(
+                                       graphFactory::createProperties,
+                                       valueCombiner);
 
         try (BytesOutput bytesOutput1 = IOFactory.createBytesOutput(
                                         Constants.SMALL_BUF_SIZE);
@@ -166,7 +166,7 @@ public class PointerCombinerTest extends UnitTestBase {
                                                  bytesOutput2.position());
 
             Assert.assertThrows(ComputerException.class, () -> {
-                pointerCombiner.combine(pointer1, pointer2);
+                combiner.combine(pointer1, pointer2);
             }, e -> {
                 Assert.assertContains("Failed to combine pointer",
                                       e.getMessage());

@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.combiner.IntValueSumCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -102,8 +103,9 @@ public class SorterTest {
                              Constants.SMALL_BUF_SIZE);
 
         SorterImpl sorter = new SorterImpl(CONFIG);
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         sorter.sortBuffer(input,
                           new CombineKvInnerSortFlusher(output, combiner),
                           false);
@@ -138,8 +140,9 @@ public class SorterTest {
                                 SorterTestUtil.inputFromKvMap(map1),
                                 SorterTestUtil.inputFromKvMap(map2));
         SorterImpl sorter = new SorterImpl(CONFIG);
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         sorter.mergeBuffers(inputs, new CombineKvOuterSortFlusher(combiner),
                             path, false);
 
@@ -200,8 +203,9 @@ public class SorterTest {
 
         // Merge file
         Sorter sorter = new SorterImpl(CONFIG);
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         sorter.mergeInputs(inputs, new CombineKvOuterSortFlusher(combiner),
                            outputs, false);
 
@@ -260,8 +264,9 @@ public class SorterTest {
         BytesInput input = SorterTestUtil.inputFromSubKvMap(data);
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
         InnerSortFlusher flusher = new CombineSubKvInnerSortFlusher(
@@ -311,14 +316,14 @@ public class SorterTest {
         List<RandomAccessInput> buffers = ImmutableList.of(i1, i2, i3);
 
         Sorter sorter = new SorterImpl(config);
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         OuterSortFlusher flusher = new CombineSubKvOuterSortFlusher(
-                                   combiner, flushThreshold);
+                                       combiner, flushThreshold);
         flusher.sources(buffers.size());
 
         String outputFile = StoreTestUtil.availablePathById("1");
-        // 这里输出的时候就是subEntries = 5了
         sorter.mergeBuffers(buffers, flusher, outputFile, true);
 
         /*
@@ -387,8 +392,9 @@ public class SorterTest {
         StoreTestUtil.hgkvDirFromSubKvMap(config, data3, input3);
 
         Sorter sorter = new SorterImpl(config);
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         OuterSortFlusher flusher = new CombineSubKvOuterSortFlusher(
                                        combiner, flushThreshold);
         flusher.sources(inputs.size());

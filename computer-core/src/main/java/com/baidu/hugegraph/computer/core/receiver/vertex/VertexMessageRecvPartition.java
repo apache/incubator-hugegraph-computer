@@ -19,12 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.receiver.vertex;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.AbstractPointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.VertexValueCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
@@ -43,22 +40,10 @@ public class VertexMessageRecvPartition extends MessageRecvPartition {
                                       SuperstepFileGenerator fileGenerator,
                                       SortManager sortManager) {
         super(context.config(), fileGenerator, sortManager, false);
-        Config config = context.config();
-        /*
-         * TODO: need improve because properties need to deserialize even if
-         *  properties combiner is OverwritePropertiesCombiner
-         */
-        Combiner<Properties> propertiesCombiner = config.createObject(
-                ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
 
-        GraphFactory graphFactory = context.graphFactory();
-        Properties v1 = graphFactory.createProperties();
-        Properties v2 = graphFactory.createProperties();
-        Properties result = graphFactory.createProperties();
+        AbstractPointerCombiner<Properties>
+                combiner = new VertexValueCombiner(context);
 
-        PointerCombiner<Properties> combiner = new PointerCombiner<>(
-                                                   v1, v2, result,
-                                                   propertiesCombiner);
         this.flusher = new CombineKvOuterSortFlusher(combiner);
     }
 

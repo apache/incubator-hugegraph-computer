@@ -40,7 +40,7 @@ public interface InnerSortFlusher {
     /**
      * Combine entries with the same key.
      */
-    default PointerCombiner<?> combiner() {
+    default PointerCombiner combiner() {
         throw new NotImplementedException();
     }
 

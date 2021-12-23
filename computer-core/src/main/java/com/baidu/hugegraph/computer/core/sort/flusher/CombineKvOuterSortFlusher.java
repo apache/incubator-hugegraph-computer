@@ -31,7 +31,7 @@ public class CombineKvOuterSortFlusher extends CombinableSorterFlusher
 
     private HgkvDirBuilder writer;
 
-    public CombineKvOuterSortFlusher(PointerCombiner<?> combiner) {
+    public CombineKvOuterSortFlusher(PointerCombiner combiner) {
         super(combiner);
     }
 

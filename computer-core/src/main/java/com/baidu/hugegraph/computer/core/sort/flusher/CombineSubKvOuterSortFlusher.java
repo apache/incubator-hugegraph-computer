@@ -36,12 +36,12 @@ import com.baidu.hugegraph.util.E;
 
 public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
 
-    private final PointerCombiner<?> combiner;
+    private final PointerCombiner combiner;
     private final BytesOutput output;
     private final int subKvFlushThreshold;
     private int sources;
 
-    public CombineSubKvOuterSortFlusher(PointerCombiner<?> combiner,
+    public CombineSubKvOuterSortFlusher(PointerCombiner combiner,
                                         int subKvFlushThreshold) {
         this.combiner = combiner;
         this.output = IOFactory.createBytesOutput(

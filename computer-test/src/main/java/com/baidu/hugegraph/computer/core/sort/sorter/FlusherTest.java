@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -130,8 +131,9 @@ public class FlusherTest {
 
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new OverwriteCombiner<>());
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
         Sorter sorter = new SorterImpl(CONFIG);

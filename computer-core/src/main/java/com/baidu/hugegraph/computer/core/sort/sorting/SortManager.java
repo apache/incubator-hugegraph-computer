@@ -29,14 +29,15 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.EdgeValueCombiner;
+import com.baidu.hugegraph.computer.core.combiner.MessageValueCombiner;
+import com.baidu.hugegraph.computer.core.combiner.AbstractPointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.VertexValueCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -170,16 +171,16 @@ public abstract class SortManager implements Manager {
     private InnerSortFlusher createSortFlusher(MessageType type,
                                                RandomAccessOutput output,
                                                int flushThreshold) {
-        PointerCombiner<?> combiner;
+        AbstractPointerCombiner combiner;
         boolean needSortSubKv;
 
         switch (type) {
             case VERTEX:
-                combiner = this.createVertexCombiner();
+                combiner = new VertexValueCombiner(this.context);
                 needSortSubKv = false;
                 break;
             case EDGE:
-                combiner = this.createEdgeCombiner();
+                combiner = new EdgeValueCombiner(this.context);
                 needSortSubKv = true;
                 break;
             case MSG:
@@ -206,51 +207,14 @@ public abstract class SortManager implements Manager {
         return flusher;
     }
 
-    private PointerCombiner<Properties> createVertexCombiner() {
-        Config config = this.context.config();
-        Combiner<Properties> propCombiner = config.createObject(
-                ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
-
-        return this.createPropertiesCombiner(propCombiner);
-    }
-
-    private PointerCombiner<Properties> createEdgeCombiner() {
-        Config config = this.context.config();
-        Combiner<Properties> propCombiner = config.createObject(
-                ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
-
-        return this.createPropertiesCombiner(propCombiner);
-    }
-
-    private PointerCombiner<? extends Value> createMessageCombiner() {
+    private AbstractPointerCombiner createMessageCombiner() {
         Config config = this.context.config();
         Combiner<Value> valueCombiner = config.createObject(
                                         ComputerOptions.WORKER_COMBINER_CLASS,
                                         false);
-
         if (valueCombiner == null) {
             return null;
         }
-
-        Value v1 = config.createObject(
-                   ComputerOptions.ALGORITHM_MESSAGE_CLASS);
-        Value v2 = v1.copy();
-        Value result = v1.copy();
-        return new PointerCombiner<>(v1, v2, result, valueCombiner);
-    }
-
-    private PointerCombiner<Properties> createPropertiesCombiner(
-                                        Combiner<Properties> propCombiner) {
-        /*
-         * If propertiesCombiner is OverwriteCombiner, just remain the
-         * second, no need to deserialize the properties and then serialize
-         * the second properties.
-         */
-        GraphFactory graphFactory = this.context.graphFactory();
-        Properties v1 = graphFactory.createProperties();
-        Properties v2 = graphFactory.createProperties();
-        Properties result = graphFactory.createProperties();
-
-        return new PointerCombiner<>(v1, v2, result, propCombiner);
+        return new MessageValueCombiner(this.context);
     }
 }

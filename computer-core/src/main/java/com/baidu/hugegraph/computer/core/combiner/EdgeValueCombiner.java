@@ -17,28 +17,18 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.core.sort.flusher;
+package com.baidu.hugegraph.computer.core.combiner;
 
-import java.io.IOException;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 
-import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
-import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+public class EdgeValueCombiner extends AbstractPointerCombiner<Properties> {
 
-public class CombineKvInnerSortFlusher extends CombinableSorterFlusher
-                                       implements InnerSortFlusher {
-
-    private final RandomAccessOutput output;
-
-    public CombineKvInnerSortFlusher(RandomAccessOutput output,
-                                     PointerCombiner combiner) {
-        super(combiner);
-        this.output = output;
-    }
-
-    @Override
-    protected void writeKvEntry(KvEntry entry) throws IOException {
-        entry.key().write(this.output);
-        entry.value().write(this.output);
+    public EdgeValueCombiner(ComputerContext context) {
+        super(() -> {
+            return context.graphFactory().createProperties();
+        }, context.config().createObject(
+                   ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS));
     }
 }

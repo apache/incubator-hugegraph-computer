@@ -37,11 +37,11 @@ import com.baidu.hugegraph.util.E;
 public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
 
     private final RandomAccessOutput output;
-    private final PointerCombiner<?> combiner;
+    private final PointerCombiner combiner;
     private final int subKvFlushThreshold;
 
     public CombineSubKvInnerSortFlusher(RandomAccessOutput output,
-                                        PointerCombiner<?> combiner,
+                                        PointerCombiner combiner,
                                         int subKvFlushThreshold) {
         this.output = output;
         this.combiner = combiner;
@@ -54,7 +54,7 @@ public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
     }
 
     @Override
-    public PointerCombiner<?> combiner() {
+    public PointerCombiner combiner() {
         return this.combiner;
     }
 

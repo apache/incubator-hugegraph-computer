@@ -33,6 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.combiner.IntValueSumCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -265,8 +266,9 @@ public class SortLargeDataTest {
                                                 throws Exception {
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
         sorter.sortBuffer(input, flusher, false);
@@ -276,16 +278,18 @@ public class SortLargeDataTest {
     private static void mergeBuffers(Sorter sorter,
                                      List<RandomAccessInput> buffers,
                                      String output) throws Exception {
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         OuterSortFlusher flusher = new CombineKvOuterSortFlusher(combiner);
         sorter.mergeBuffers(buffers, flusher, output, false);
     }
 
     private static void mergeFiles(Sorter sorter, List<String> files,
                                    List<String> outputs) throws Exception {
-        PointerCombiner<IntValue> combiner =
-                        SorterTestUtil.newIntValueSumPointerCombiner();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new IntValueSumCombiner());
         OuterSortFlusher flusher = new CombineKvOuterSortFlusher(combiner);
         sorter.mergeInputs(files, flusher, outputs, false);
     }

@@ -30,9 +30,9 @@ import com.baidu.hugegraph.util.E;
 
 public abstract class CombinableSorterFlusher {
 
-    private final PointerCombiner<?> combiner;
+    private final PointerCombiner combiner;
 
-    public CombinableSorterFlusher(PointerCombiner<?> combiner) {
+    public CombinableSorterFlusher(PointerCombiner combiner) {
         this.combiner = combiner;
     }
 

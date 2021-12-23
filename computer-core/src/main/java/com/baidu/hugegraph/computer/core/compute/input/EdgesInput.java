@@ -218,7 +218,6 @@ public class EdgesInput {
                     // Only use targetId as subKey, use props as subValue
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
-                    edge.label(StreamGraphInput.readLabel(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
