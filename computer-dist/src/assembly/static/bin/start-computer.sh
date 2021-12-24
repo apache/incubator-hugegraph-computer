@@ -168,7 +168,7 @@ fi
 # avoid `Runtime.getRuntime().availableProcessors()` always return 1
 if [ "${DRIVE}" = "${K8S_DRIVE}" && -z "${CPU_LIMIT}"]; then
     CPU_COUNT="$(cat /proc/cpuinfo| grep "processor"| wc -l)"
-    JAVA="${JAVA} -XX:ActiveProcessorCount=${CPU_COUNT}"
+    JAVA_OPTS="${JAVA_OPTS} -XX:ActiveProcessorCount=${CPU_COUNT}"
 
 if [ ! -a "${CONF_DIR}" ];then
     mkdir -p "${CONF_DIR}"

@@ -474,17 +474,17 @@ public class ComputerJobDeployer {
 
         if (cpu != null) {
             EnvVar cpuLimit = new EnvVarBuilder()
-                    .withName(Constants.ENV_CPU_LIMIT)
-                    .withValue(cpu.toString())
-                    .build();
+                             .withName(Constants.ENV_CPU_LIMIT)
+                             .withValue(cpu.toString())
+                             .build();
             envVars.add(cpuLimit);
         }
 
         if (memory != null) {
             EnvVar memoryLimit = new EnvVarBuilder()
-                    .withName(Constants.ENV_MEMORY_LIMIT)
-                    .withValue(memory.toString())
-                    .build();
+                                 .withName(Constants.ENV_MEMORY_LIMIT)
+                                 .withValue(memory.toString())
+                                 .build();
             envVars.add(memoryLimit);
         }
 
