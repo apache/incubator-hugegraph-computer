@@ -67,8 +67,18 @@ public class DefaultProperties implements Properties {
         this.keyValues.putIfAbsent(key, value);
     }
 
+    @Override
+    public void putAll(Map<String, Value> kvs) {
+        this.keyValues.putAll(kvs);
+    }
+
     public int size() {
         return this.keyValues.size();
+    }
+
+    @Override
+    public void clear() {
+        this.keyValues.clear();
     }
 
     @Override

@@ -19,21 +19,15 @@
 
 package com.baidu.hugegraph.computer.core.receiver.vertex;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.VertexValueCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class VertexMessageRecvPartition extends MessageRecvPartition {
 
@@ -45,25 +39,9 @@ public class VertexMessageRecvPartition extends MessageRecvPartition {
                                       SuperstepFileGenerator fileGenerator,
                                       SortManager sortManager) {
         super(context.config(), fileGenerator, sortManager, false);
-        Config config = context.config();
-        Combiner<Properties> propertiesCombiner = config.createObject(
-                ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
 
-        /*
-         * If propertiesCombiner is OverwriteCombiner, just remain the
-         * second, no need to deserialize the properties and then serialize
-         * the second properties.
-         */
-        Combiner<Pointer> combiner;
-        if (propertiesCombiner instanceof OverwriteCombiner) {
-            combiner = new OverwriteCombiner<>();
-        } else {
-            GraphFactory graphFactory = context.graphFactory();
-            Properties v1 = graphFactory.createProperties();
-            Properties v2 = graphFactory.createProperties();
+        PointerCombiner combiner = new VertexValueCombiner(context);
 
-            combiner = new PointerCombiner<>(v1, v2, propertiesCombiner);
-        }
         this.flusher = new CombineKvOuterSortFlusher(combiner);
     }
 

@@ -32,7 +32,7 @@ public class LongValueSumCombinerTest {
         LongValueSumCombiner combiner = new LongValueSumCombiner();
         for (int i = 1; i <= 10; i++) {
             LongValue value = new LongValue(i);
-            sum = combiner.combine(sum, value);
+            combiner.combine(sum, value, sum);
         }
         Assert.assertEquals(55L, sum.value());
     }
@@ -43,16 +43,23 @@ public class LongValueSumCombinerTest {
         LongValue value2 = new LongValue(2L);
         LongValueSumCombiner combiner = new LongValueSumCombiner();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(null, value2);
+            combiner.combine(null, value2, value2);
         }, e -> {
             Assert.assertEquals("The combine parameter v1 can't be null",
                                 e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(value1, null);
+            combiner.combine(value1, null, value2);
         }, e -> {
             Assert.assertEquals("The combine parameter v2 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(value1, value2, null);
+        }, e -> {
+            Assert.assertEquals("The combine parameter result can't be null",
                                 e.getMessage());
         });
     }

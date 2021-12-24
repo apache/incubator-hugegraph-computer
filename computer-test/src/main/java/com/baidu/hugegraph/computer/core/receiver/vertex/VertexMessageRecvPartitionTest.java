@@ -40,6 +40,8 @@ import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
@@ -50,6 +52,7 @@ import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -225,6 +228,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         entryOutput.writeEntry(out -> {
             vertex.id().write(out);
         }, out -> {
+            out.writeUTF(vertex.label());
             vertex.properties().write(out);
         });
 
@@ -235,13 +239,23 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
                         PeekableIterator<KvEntry> it)
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
+            // Assert key
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
             Id id = ReceiverUtil.readId(entry.key());
             Assert.assertEquals(BytesId.of(i), id);
-            Properties properties = graphFactory().createProperties();
 
-            ReceiverUtil.readValue(entry.value(), properties);
+            // Assert value
+            Pointer value = entry.value();
+            RandomAccessInput input = value.input();
+            long position = input.position();
+            input.seek(value.offset());
+            String label = StreamGraphInput.readLabel(input);
+            Assert.assertEquals("", label);
+            Properties properties = graphFactory().createProperties();
+            properties.read(input);
+            input.seek(position);
+
             Assert.assertEquals(2, properties.size());
             LongValue v1 = properties.get("p1");
             Assert.assertEquals(new LongValue(i), v1);

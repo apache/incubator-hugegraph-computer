@@ -27,7 +27,7 @@ import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
+import com.baidu.hugegraph.computer.core.combiner.OverwritePropertiesCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.input.filter.DefaultInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
@@ -442,7 +442,7 @@ public class ComputerOptions extends OptionHolder {
                     "The combiner can combine several properties of the same " +
                     "vertex into one properties at inputstep.",
                     disallowEmpty(),
-                    OverwriteCombiner.class
+                    OverwritePropertiesCombiner.class
             );
 
     public static final ConfigOption<Class<?>>
@@ -452,7 +452,7 @@ public class ComputerOptions extends OptionHolder {
                     "The combiner can combine several properties of the same " +
                     "edge into one properties at inputstep.",
                     disallowEmpty(),
-                    OverwriteCombiner.class
+                    OverwritePropertiesCombiner.class
             );
 
     public static final ConfigOption<Long> WORKER_RECEIVED_BUFFERS_BYTES_LIMIT =

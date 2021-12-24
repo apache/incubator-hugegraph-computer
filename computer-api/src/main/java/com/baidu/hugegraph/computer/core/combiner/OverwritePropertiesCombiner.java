@@ -19,17 +19,23 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.util.E;
 
-public class FloatValueSumCombiner implements Combiner<FloatValue> {
+public class OverwritePropertiesCombiner implements PropertiesCombiner {
 
     @Override
-    public void combine(FloatValue v1, FloatValue v2, FloatValue result) {
+    public void combine(Properties v1, Properties v2, Properties result) {
         E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
         E.checkArgumentNotNull(result,
                                "The combine parameter result can't be null");
-        result.value(v1.floatValue() + v2.floatValue());
+
+        E.checkArgument(v1 != result && v2 != result,
+                        "The combine parameter result " +
+                        "can't same with v1 or v2");
+
+        result.clear();
+        result.putAll(v2.get());
     }
 }

@@ -19,21 +19,17 @@
 
 package com.baidu.hugegraph.computer.core.receiver.edge;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
+import com.baidu.hugegraph.computer.core.combiner.EdgeValueCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class EdgeMessageRecvPartition extends MessageRecvPartition {
 
@@ -45,27 +41,12 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
                                     SuperstepFileGenerator fileGenerator,
                                     SortManager sortManager) {
         super(context.config(), fileGenerator, sortManager, true);
+
         Config config = context.config();
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
-        Combiner<Properties> propCombiner = config.createObject(
-                ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
+        PointerCombiner combiner = new EdgeValueCombiner(context);
 
-        /*
-         * If propertiesCombiner is OverwriteCombiner, just remain the
-         * second, no need to deserialize the properties and then serialize
-         * the second properties.
-         */
-        Combiner<Pointer> combiner;
-        if (propCombiner instanceof OverwriteCombiner) {
-            combiner = new OverwriteCombiner<>();
-        } else {
-            GraphFactory graphFactory = context.graphFactory();
-            Properties v1 = graphFactory.createProperties();
-            Properties v2 = graphFactory.createProperties();
-
-            combiner = new PointerCombiner<>(v1, v2, propCombiner);
-        }
         this.flusher = new CombineSubKvOuterSortFlusher(combiner,
                                                         flushThreshold);
     }

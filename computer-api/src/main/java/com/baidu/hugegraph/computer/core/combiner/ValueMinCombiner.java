@@ -25,13 +25,15 @@ import com.baidu.hugegraph.util.E;
 public class ValueMinCombiner<T extends Value> implements Combiner<T> {
 
     @Override
-    public T combine(T v1, T v2) {
+    public void combine(T v1, T v2, T result) {
         E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
+        E.checkArgumentNotNull(result,
+                               "The combine parameter result can't be null");
         if (v1.compareTo(v2) <= 0) {
-            return v1;
+            result.assign(v1);
         } else {
-            return v2;
+            result.assign(v2);
         }
     }
 }

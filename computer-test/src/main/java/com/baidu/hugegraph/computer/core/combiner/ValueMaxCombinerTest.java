@@ -31,9 +31,9 @@ public class ValueMaxCombinerTest {
         LongValue max = new LongValue(0L);
         ValueMaxCombiner<LongValue> combiner = new ValueMaxCombiner<>();
         LongValue value1 = new LongValue(1L);
-        max = combiner.combine(max, value1);
+        combiner.combine(max, value1, max);
         LongValue value2 = new LongValue(2L);
-        max = combiner.combine(value2, max);
+        combiner.combine(value2, max, max);
         Assert.assertEquals(new LongValue(2L), max);
     }
 
@@ -43,16 +43,23 @@ public class ValueMaxCombinerTest {
         LongValue value2 = new LongValue(2L);
         ValueMaxCombiner<LongValue> combiner = new ValueMaxCombiner<>();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(null, value2);
+            combiner.combine(null, value2, value2);
         }, e -> {
             Assert.assertEquals("The combine parameter v1 can't be null",
                                 e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(value1, null);
+            combiner.combine(value1, null, value2);
         }, e -> {
             Assert.assertEquals("The combine parameter v2 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(value1, value2, null);
+        }, e -> {
+            Assert.assertEquals("The combine parameter result can't be null",
                                 e.getMessage());
         });
     }

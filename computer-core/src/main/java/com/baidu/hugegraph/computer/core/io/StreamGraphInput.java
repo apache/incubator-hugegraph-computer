@@ -78,7 +78,6 @@ public class StreamGraphInput implements GraphComputeInput {
                 reader.readSubKv(in -> {
                     edge.targetId(readId(in));
                 }, in -> {
-                    edge.label(readLabel(in));
                     edge.properties(readProperties(in));
                 });
                 vertex.addEdge(edge);

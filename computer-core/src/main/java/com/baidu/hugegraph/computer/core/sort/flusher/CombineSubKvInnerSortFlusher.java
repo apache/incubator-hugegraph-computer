@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortingFactory;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
@@ -37,11 +37,11 @@ import com.baidu.hugegraph.util.E;
 public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
 
     private final RandomAccessOutput output;
-    private final Combiner<Pointer> combiner;
+    private final PointerCombiner combiner;
     private final int subKvFlushThreshold;
 
     public CombineSubKvInnerSortFlusher(RandomAccessOutput output,
-                                        Combiner<Pointer> combiner,
+                                        PointerCombiner combiner,
                                         int subKvFlushThreshold) {
         this.output = output;
         this.combiner = combiner;
@@ -54,7 +54,7 @@ public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {
     }
 
     @Override
-    public Combiner<Pointer> combiner() {
+    public PointerCombiner combiner() {
         return this.combiner;
     }
 

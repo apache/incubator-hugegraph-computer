@@ -19,17 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.combiner;
 
-import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
-import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 
-public class FloatValueSumCombiner implements Combiner<FloatValue> {
+public class EdgeValueCombiner extends AbstractPointerCombiner<Properties> {
 
-    @Override
-    public void combine(FloatValue v1, FloatValue v2, FloatValue result) {
-        E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
-        E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
-        E.checkArgumentNotNull(result,
-                               "The combine parameter result can't be null");
-        result.value(v1.floatValue() + v2.floatValue());
+    public EdgeValueCombiner(ComputerContext context) {
+        super(() -> {
+            return context.graphFactory().createProperties();
+        }, context.config().createObject(
+                   ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS));
     }
 }

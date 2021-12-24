@@ -24,10 +24,9 @@ import java.util.Iterator;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public interface InnerSortFlusher {
 
@@ -41,7 +40,7 @@ public interface InnerSortFlusher {
     /**
      * Combine entries with the same key.
      */
-    default Combiner<Pointer> combiner() {
+    default PointerCombiner combiner() {
         throw new NotImplementedException();
     }
 

@@ -25,10 +25,11 @@ import com.baidu.hugegraph.util.E;
 public class IntValueSumCombiner implements Combiner<IntValue> {
 
     @Override
-    public IntValue combine(IntValue v1, IntValue v2) {
+    public void combine(IntValue v1, IntValue v2, IntValue result) {
         E.checkArgumentNotNull(v1, "The combine parameter v1 can't be null");
         E.checkArgumentNotNull(v2, "The combine parameter v2 can't be null");
-        v2.value(v1.value() + v2.value());
-        return v2;
+        E.checkArgumentNotNull(result,
+                               "The combine parameter result can't be null");
+        result.value(v1.intValue() + v2.intValue());
     }
 }

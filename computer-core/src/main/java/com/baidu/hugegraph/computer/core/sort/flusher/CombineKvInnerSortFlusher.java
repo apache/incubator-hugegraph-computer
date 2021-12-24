@@ -21,10 +21,9 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 
 public class CombineKvInnerSortFlusher extends CombinableSorterFlusher
                                        implements InnerSortFlusher {
@@ -32,7 +31,7 @@ public class CombineKvInnerSortFlusher extends CombinableSorterFlusher
     private final RandomAccessOutput output;
 
     public CombineKvInnerSortFlusher(RandomAccessOutput output,
-                                     Combiner<Pointer> combiner) {
+                                     PointerCombiner combiner) {
         super(combiner);
         this.output = output;
     }

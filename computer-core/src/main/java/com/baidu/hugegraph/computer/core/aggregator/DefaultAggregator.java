@@ -66,7 +66,7 @@ public class DefaultAggregator<V extends Value> implements Aggregator<V> {
     @Override
     public void aggregateValue(V value) {
         this.checkValue(value);
-        this.value = this.combiner.combine(value, this.value);
+        this.combiner.combine(value, this.value, this.value);
     }
 
     @Override
@@ -102,14 +102,8 @@ public class DefaultAggregator<V extends Value> implements Aggregator<V> {
     }
 
     private void combineAndSwapIfNeeded(V localValue, V thisValue) {
-        // TODO: call combine(localValue, thisValue, <output>thisValue)
-        V tmp = this.combiner.combine(localValue, thisValue);
-        if (tmp == localValue) {
-            this.localValue.set(thisValue);
-            this.value = tmp;
-        } else {
-            assert tmp == thisValue;
-        }
+        this.combiner.combine(localValue, thisValue, thisValue);
+        localValue.assign(thisValue);
     }
 
     @Override

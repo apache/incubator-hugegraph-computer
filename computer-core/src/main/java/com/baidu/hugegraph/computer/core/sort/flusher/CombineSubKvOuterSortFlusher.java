@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -36,12 +36,12 @@ import com.baidu.hugegraph.util.E;
 
 public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
 
-    private final Combiner<Pointer> combiner;
+    private final PointerCombiner combiner;
     private final BytesOutput output;
     private final int subKvFlushThreshold;
     private int sources;
 
-    public CombineSubKvOuterSortFlusher(Combiner<Pointer> combiner,
+    public CombineSubKvOuterSortFlusher(PointerCombiner combiner,
                                         int subKvFlushThreshold) {
         this.combiner = combiner;
         this.output = IOFactory.createBytesOutput(

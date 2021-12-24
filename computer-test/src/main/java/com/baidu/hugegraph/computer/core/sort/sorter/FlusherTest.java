@@ -25,11 +25,12 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -46,7 +47,6 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
@@ -131,7 +131,9 @@ public class FlusherTest {
 
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        Combiner<Pointer> combiner = new OverwriteCombiner<>();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new OverwriteCombiner<>());
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
         Sorter sorter = new SorterImpl(CONFIG);
