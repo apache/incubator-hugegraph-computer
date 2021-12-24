@@ -42,6 +42,8 @@ public class Constants {
     public static final String ENV_JAR_FILE_PATH = "JAR_FILE_PATH";
     public static final String ENV_JOB_JAR_URI = "JOB_JAR_URI";
     public static final String ENV_JVM_OPTIONS = "JVM_OPTIONS";
+    public static final String ENV_CPU_LIMIT = "CPU_LIMIT";
+    public static final String ENV_MEMORY_LIMIT = "MEMORY_LIMIT";
 
     public static final String CONFIG_DIR =  "/opt/hugegraph-computer/conf";
     public static final String COMPUTER_CONF_FILE = "computer.properties";

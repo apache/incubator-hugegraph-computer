@@ -89,6 +89,7 @@ public class ComputerJobDeployer {
     private static final String COMPUTER_CONFIG_MAP_VOLUME =
             "computer-config-map-volume";
 
+    private static final String CONTAINER_CPU_LIMIT_KEY = "limits.cpu";
     private static final String POD_IP_KEY = "status.podIP";
     private static final String POD_NAMESPACE_KEY = "metadata.namespace";
     private static final String POD_NAME_KEY = "metadata.name";
@@ -469,6 +470,22 @@ public class ComputerJobDeployer {
         } else {
             cpu = spec.getWorkerCpu();
             memory = spec.getWorkerMemory();
+        }
+
+        if (cpu != null) {
+            EnvVar cpuLimit = new EnvVarBuilder()
+                    .withName(Constants.ENV_CPU_LIMIT)
+                    .withValue(cpu.toString())
+                    .build();
+            envVars.add(cpuLimit);
+        }
+
+        if (memory != null) {
+            EnvVar memoryLimit = new EnvVarBuilder()
+                    .withName(Constants.ENV_MEMORY_LIMIT)
+                    .withValue(memory.toString())
+                    .build();
+            envVars.add(memoryLimit);
         }
 
         List<VolumeMount> volumeMounts = spec.getVolumeMounts();
