@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.combiner.EdgeValueCombiner;
 import com.baidu.hugegraph.computer.core.combiner.MessageValueCombiner;
-import com.baidu.hugegraph.computer.core.combiner.AbstractPointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.combiner.VertexValueCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
@@ -171,7 +171,7 @@ public abstract class SortManager implements Manager {
     private InnerSortFlusher createSortFlusher(MessageType type,
                                                RandomAccessOutput output,
                                                int flushThreshold) {
-        AbstractPointerCombiner combiner;
+        PointerCombiner combiner;
         boolean needSortSubKv;
 
         switch (type) {
@@ -207,7 +207,7 @@ public abstract class SortManager implements Manager {
         return flusher;
     }
 
-    private AbstractPointerCombiner createMessageCombiner() {
+    private PointerCombiner createMessageCombiner() {
         Config config = this.context.config();
         Combiner<Value> valueCombiner = config.createObject(
                                         ComputerOptions.WORKER_COMBINER_CLASS,

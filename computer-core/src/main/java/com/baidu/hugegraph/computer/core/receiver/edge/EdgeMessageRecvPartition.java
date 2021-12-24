@@ -20,11 +20,10 @@
 package com.baidu.hugegraph.computer.core.receiver.edge;
 
 import com.baidu.hugegraph.computer.core.combiner.EdgeValueCombiner;
-import com.baidu.hugegraph.computer.core.combiner.AbstractPointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
@@ -46,8 +45,7 @@ public class EdgeMessageRecvPartition extends MessageRecvPartition {
         Config config = context.config();
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
-        AbstractPointerCombiner<Properties>
-                combiner = new EdgeValueCombiner(context);
+        PointerCombiner combiner = new EdgeValueCombiner(context);
 
         this.flusher = new CombineSubKvOuterSortFlusher(combiner,
                                                         flushThreshold);

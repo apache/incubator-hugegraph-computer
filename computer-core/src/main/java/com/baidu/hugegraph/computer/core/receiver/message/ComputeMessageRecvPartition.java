@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.receiver.message;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.combiner.MessageValueCombiner;
-import com.baidu.hugegraph.computer.core.combiner.AbstractPointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -51,8 +51,7 @@ public class ComputeMessageRecvPartition extends MessageRecvPartition {
         if (combiner == null) {
             this.flusher = new KvOuterSortFlusher();
         } else {
-            AbstractPointerCombiner<Value> pointerCombiner =
-                                   new MessageValueCombiner(context);
+            PointerCombiner pointerCombiner = new MessageValueCombiner(context);
             this.flusher = new CombineKvOuterSortFlusher(pointerCombiner);
         }
     }

@@ -19,10 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.receiver.vertex;
 
-import com.baidu.hugegraph.computer.core.combiner.AbstractPointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.combiner.VertexValueCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvPartition;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
@@ -41,8 +40,7 @@ public class VertexMessageRecvPartition extends MessageRecvPartition {
                                       SortManager sortManager) {
         super(context.config(), fileGenerator, sortManager, false);
 
-        AbstractPointerCombiner<Properties>
-                combiner = new VertexValueCombiner(context);
+        PointerCombiner combiner = new VertexValueCombiner(context);
 
         this.flusher = new CombineKvOuterSortFlusher(combiner);
     }
