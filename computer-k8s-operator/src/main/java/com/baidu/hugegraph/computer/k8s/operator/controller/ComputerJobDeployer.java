@@ -474,9 +474,9 @@ public class ComputerJobDeployer {
 
         if (cpu != null) {
             EnvVar cpuLimit = new EnvVarBuilder()
-                             .withName(Constants.ENV_CPU_LIMIT)
-                             .withValue(cpu.toString())
-                             .build();
+                              .withName(Constants.ENV_CPU_LIMIT)
+                              .withValue(cpu.toString())
+                              .build();
             envVars.add(cpuLimit);
         }
 
