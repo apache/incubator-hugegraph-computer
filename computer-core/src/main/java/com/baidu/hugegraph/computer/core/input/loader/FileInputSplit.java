@@ -79,8 +79,8 @@ public class FileInputSplit extends InputSplit {
     @Override
     public String toString() {
         return new ToStringBuilder(this).append("type", this.type)
-                                               .append("path", this.path)
-                                               .append("struct", this.struct)
-                                               .toString();
+                                        .append("path", this.path)
+                                        .append("struct", this.struct)
+                                        .toString();
     }
 }
