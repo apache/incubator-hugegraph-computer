@@ -55,7 +55,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
             params.put(ComputerOptions.OUTPUT_CLASS.name(),
                        DegreeCentralityTestOutput.class.getName());
             params.put(ComputerOptions.INPUT_SOURCE_TYPE.name(),
-                       "hdfs");
+                       "loader");
             super.setAlgorithmParameters(params);
         }
     }

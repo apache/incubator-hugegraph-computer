@@ -59,9 +59,9 @@ public class IdUtil {
 
     public static String assignEdgeId(Edge edge, EdgeLabel edgeLabel) {
         return SplicingIdGenerator.concat(
-                writeString(edge.sourceId()),
-                String.valueOf(edgeLabel.id()),
-                SplicingIdGenerator.concatValues(sortValues(edge, edgeLabel)),
-                writeString(edge.targetId()));
+               writeString(edge.sourceId()),
+               String.valueOf(edgeLabel.id()),
+               SplicingIdGenerator.concatValues(sortValues(edge, edgeLabel)),
+               writeString(edge.targetId()));
     }
 }

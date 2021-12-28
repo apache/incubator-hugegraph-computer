@@ -110,11 +110,11 @@ public class UnitTestSuite {
                  "defaultValue",
                  "");
         Whitebox.setInternalState(
-                 ComputerOptions.INPUT_SCHEMA_PATH,
+                 ComputerOptions.INPUT_LOADER_SCHEMA_PATH,
                  "defaultValue",
                  "src/main/resources/hdfs_input_test/schema.json");
         Whitebox.setInternalState(
-                 ComputerOptions.INPUT_STRUCT_PATH,
+                 ComputerOptions.INPUT_LOADER_STRUCT_PATH,
                  "defaultValue",
                  "src/main/resources/hdfs_input_test/struct.json");
     }

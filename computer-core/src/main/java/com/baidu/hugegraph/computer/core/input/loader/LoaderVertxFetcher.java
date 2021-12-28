@@ -23,47 +23,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.input.EdgeFetcher;
-import com.baidu.hugegraph.computer.core.input.IdUtil;
-import com.baidu.hugegraph.loader.builder.EdgeBuilder;
+import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.loader.builder.ElementBuilder;
+import com.baidu.hugegraph.loader.builder.VertexBuilder;
 import com.baidu.hugegraph.loader.executor.LoadContext;
-import com.baidu.hugegraph.loader.mapping.EdgeMapping;
 import com.baidu.hugegraph.loader.mapping.InputStruct;
-import com.baidu.hugegraph.loader.reader.line.Line;
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.schema.EdgeLabel;
+import com.baidu.hugegraph.loader.mapping.VertexMapping;
+import com.baidu.hugegraph.structure.graph.Vertex;
 
-public class FileEdgeFetcher extends FileElementFetcher<Edge> implements
-                                                              EdgeFetcher {
+public class LoaderVertxFetcher extends LoaderElementFetcher<Vertex>
+                                implements VertexFetcher {
 
-    public FileEdgeFetcher(Config config) {
+    public LoaderVertxFetcher(Config config) {
         super(config);
     }
 
     @Override
-    protected List<ElementBuilder<Edge>> elementBuilders(LoadContext context,
-                                                         InputStruct struct) {
-        List<ElementBuilder<Edge>> builders = new ArrayList<>();
-        for (EdgeMapping mapping : struct.edges()) {
+    protected List<ElementBuilder<Vertex>> elementBuilders(LoadContext context,
+                                                           InputStruct struct) {
+        List<ElementBuilder<Vertex>> builders = new ArrayList<>();
+        for (VertexMapping mapping : struct.vertices()) {
             if (mapping.skip()) {
                 continue;
             }
-            builders.add(new EdgeBuilder(context, struct, mapping));
+            builders.add(new VertexBuilder(context, struct, mapping));
         }
         return builders;
-    }
-
-    @Override
-    protected List<Edge> buildElement(Line line, ElementBuilder<Edge> builder) {
-        List<Edge> edges = super.buildElement(line, builder);
-        for (Edge edge : edges) {
-            // generate edgeId
-            EdgeLabel edgeLabel = (EdgeLabel) builder.schemaLabel();
-            String edgeId = IdUtil.assignEdgeId(edge, edgeLabel);
-            edge.id(edgeId);
-        }
-        return edges;
     }
 
     @Override

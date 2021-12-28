@@ -90,7 +90,7 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "input.source_type",
                     "The source type to load input data",
-                    allowValues("hugegraph", "hdfs"),
+                    allowValues("hugegraph", "loader"),
                     "hugegraph"
             );
 
@@ -175,28 +175,20 @@ public class ComputerOptions extends OptionHolder {
                     200
             );
 
-    public static final ConfigOption<Integer> INPUT_LIMIT_EDGES_IN_ONE_VERTEX =
+    public static final ConfigOption<String> INPUT_LOADER_STRUCT_PATH =
             new ConfigOption<>(
-                    "input.limit_edges_in_one_vertex",
-                    "The maximum number of adjacent edges allowed to be " +
-                    "attached to a vertex, the adjacent edges will be " +
-                    "stored and transferred together as a batch unit.",
-                    disallowEmpty(),
-                    -1
-            );
-
-    public static final ConfigOption<String> INPUT_STRUCT_PATH =
-            new ConfigOption<>(
-                    "input.struct_path",
-                    "The struct path of input",
+                    "input.loader_struct_path",
+                    "The struct path of loader input, only takes effect when " +
+                    "the input.source_type=loader is enabled",
                     null,
                     ""
             );
 
-    public static final ConfigOption<String> INPUT_SCHEMA_PATH =
+    public static final ConfigOption<String> INPUT_LOADER_SCHEMA_PATH =
             new ConfigOption<>(
-                    "input.schema_path",
-                    "The schema path of input",
+                    "input.loader_schema_path",
+                    "The schema path of loader input, only takes effect when " +
+                    "the input.source_type=loader is enabled",
                     null,
                     ""
             );
@@ -326,9 +318,9 @@ public class ComputerOptions extends OptionHolder {
                     "hadoop"
             );
 
-    public static final ConfigOption<String> OUTPUT_CORE_SITE_PATH =
+    public static final ConfigOption<String> OUTPUT_HDFS_CORE_SITE_PATH =
             new ConfigOption<>(
-                    "output.core_site_path",
+                    "output.hdfs_core_site_path",
                     "The hdfs core site path.",
                     null,
                     ""

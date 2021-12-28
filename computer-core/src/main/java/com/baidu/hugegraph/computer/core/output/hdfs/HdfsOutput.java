@@ -146,7 +146,8 @@ public class HdfsOutput extends AbstractComputerOutput {
         Boolean enableKerberos = config.get(
                 ComputerOptions.OUTPUT_HDFS_KERBEROS_ENABLE);
 
-        String coreSite = config.get(ComputerOptions.OUTPUT_CORE_SITE_PATH);
+        String coreSite = config.get(
+                          ComputerOptions.OUTPUT_HDFS_CORE_SITE_PATH);
         if (StringUtils.isNotBlank(coreSite)) {
             conf.addResource(new Path(coreSite));
         }
