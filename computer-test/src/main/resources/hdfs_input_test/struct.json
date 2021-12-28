@@ -54,9 +54,8 @@
       "id": "2",
       "skip": false,
       "input": {
-        "type": "HDFS",
-        "path": "hdfs://127.0.0.1:9000/dataset/ml-latest-small/movies.csv",
-        "core_site_path": "src/main/resources/hdfs_input_test/core-site.xml",
+        "type": "FILE",
+        "path": "../computer-dist/src/assembly/dataset/ml-latest-small/movies.csv",
         "file_filter": {
           "extensions": [
             "*"
