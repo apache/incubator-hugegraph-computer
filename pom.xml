@@ -119,7 +119,7 @@
             <dependency>
                 <groupId>com.baidu.hugegraph</groupId>
                 <artifactId>hugegraph-loader</artifactId>
-                <version>0.11.3</version>
+                <version>0.12.0</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>hive-exec</artifactId>
@@ -131,10 +131,6 @@
                     </exclusion>
                     <exclusion>
                         <artifactId>hugegraph-client</artifactId>
-                        <groupId>com.baidu.hugegraph</groupId>
-                    </exclusion>
-                    <exclusion>
-                        <artifactId>hugegraph-common</artifactId>
                         <groupId>com.baidu.hugegraph</groupId>
                     </exclusion>
                     <exclusion>
