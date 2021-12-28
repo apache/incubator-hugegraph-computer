@@ -47,7 +47,7 @@ import com.baidu.hugegraph.loader.source.file.FileSource;
 import com.baidu.hugegraph.loader.util.JsonUtil;
 import com.baidu.hugegraph.structure.GraphElement;
 
-public abstract class LoaderElementFetcher<T extends GraphElement>
+public abstract class FileElementFetcher<T extends GraphElement>
        implements ElementFetcher<T>  {
 
     private final Config config;
@@ -57,7 +57,7 @@ public abstract class LoaderElementFetcher<T extends GraphElement>
     private List<ElementBuilder<T>> builders;
     private T next;
 
-    public LoaderElementFetcher(Config config) {
+    public FileElementFetcher(Config config) {
         this.config = config;
         String schemaPath = this.config.get(
                             ComputerOptions.INPUT_LOADER_SCHEMA_PATH);

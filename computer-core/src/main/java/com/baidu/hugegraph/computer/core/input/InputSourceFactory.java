@@ -24,8 +24,8 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.hg.HugeGraphFetcher;
 import com.baidu.hugegraph.computer.core.input.hg.HugeInputSplitFetcher;
-import com.baidu.hugegraph.computer.core.input.loader.LoaderFileInputSplitFetcher;
-import com.baidu.hugegraph.computer.core.input.loader.LoaderGraphFetcher;
+import com.baidu.hugegraph.computer.core.input.loader.FileInputSplitFetcher;
+import com.baidu.hugegraph.computer.core.input.loader.LoaderFileGraphFetcher;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 
 public class InputSourceFactory {
@@ -36,7 +36,7 @@ public class InputSourceFactory {
             case "hugegraph":
                 return new HugeInputSplitFetcher(config);
             case "loader":
-                return new LoaderFileInputSplitFetcher(config);
+                return new FileInputSplitFetcher(config);
             default:
                 throw new ComputerException("Unexpected source type %s", type);
         }
@@ -49,7 +49,7 @@ public class InputSourceFactory {
             case "hugegraph":
                 return new HugeGraphFetcher(config, srv);
             case "loader":
-                return new LoaderGraphFetcher(config, srv);
+                return new LoaderFileGraphFetcher(config, srv);
             default:
                 throw new ComputerException("Unexpected source type %s", type);
         }

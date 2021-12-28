@@ -48,13 +48,13 @@ import com.baidu.hugegraph.loader.source.file.FileSource;
 import com.baidu.hugegraph.loader.source.hdfs.HDFSSource;
 import com.baidu.hugegraph.loader.source.hdfs.KerberosConfig;
 
-public class LoaderFileInputSplitFetcher implements InputSplitFetcher {
+public class FileInputSplitFetcher implements InputSplitFetcher {
 
     private final Config config;
     private final List<InputStruct> vertexInputStructs;
     private final List<InputStruct> edgeInputStructs;
 
-    public LoaderFileInputSplitFetcher(Config config) {
+    public FileInputSplitFetcher(Config config) {
         this.config = config;
         String inputStructFile = this.config.get(
                                       ComputerOptions.INPUT_LOADER_STRUCT_PATH);
