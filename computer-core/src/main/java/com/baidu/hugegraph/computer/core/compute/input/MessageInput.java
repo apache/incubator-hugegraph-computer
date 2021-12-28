@@ -43,6 +43,7 @@ public class MessageInput<T extends Value<?>> {
     private final Config config;
     private final PeekableIterator<KvEntry> messages;
     private T value;
+    private boolean inCompute;
 
     public MessageInput(ComputerContext context,
                         PeekableIterator<KvEntry> messages,
@@ -53,6 +54,7 @@ public class MessageInput<T extends Value<?>> {
             this.messages = messages;
         }
         this.config = context.config();
+        this.inCompute = inCompute;
 
         if (!inCompute) {
             this.value = (T)(new IdList());
@@ -99,7 +101,6 @@ public class MessageInput<T extends Value<?>> {
         while (this.messages.hasNext()) {
             KvEntry entry = this.messages.peek();
             Pointer key = entry.key();
-            Pointer value = entry.value();
             int status = vidPointer.compareTo(key);
             if (status < 0) {
                 return Collections.emptyIterator();
@@ -143,6 +144,15 @@ public class MessageInput<T extends Value<?>> {
                     try {
                         BytesInput in = IOFactory.createBytesInput(
                                         entry.value().bytes());
+                        /*
+                         * TODO: solve the problem of combine shared objects
+                         *  in another way
+                         */
+                        if (MessageInput.this.inCompute) {
+                            MessageInput.this.value =
+                            MessageInput.this.config.createObject(
+                            ComputerOptions.ALGORITHM_MESSAGE_CLASS);
+                        }
                         MessageInput.this.value.read(in);
                     } catch (IOException e) {
                         throw new ComputerException("Can't read value", e);

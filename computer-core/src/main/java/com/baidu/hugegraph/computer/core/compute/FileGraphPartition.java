@@ -161,6 +161,7 @@ public class FileGraphPartition<M extends Value<M>> {
             Vertex vertex = this.vertexInput.next();
             Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
             vertex.edges(edges);
+            vertex.reactivate();
             computation.compute0(context, vertex);
             if (vertex.active()) {
                 activeVertexCount++;
