@@ -24,9 +24,9 @@ public class IntHugeGraphOutput extends HugeGraphOutput<Integer> {
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-            .asInt()
-            .writeType(this.writeType())
-            .ifNotExist()
-            .create();
+                     .asInt()
+                     .writeType(this.writeType())
+                     .ifNotExist()
+                     .create();
     }
 }

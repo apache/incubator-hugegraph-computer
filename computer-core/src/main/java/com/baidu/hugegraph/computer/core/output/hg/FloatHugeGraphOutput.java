@@ -24,9 +24,9 @@ public class FloatHugeGraphOutput extends HugeGraphOutput<Float> {
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-            .asFloat()
-            .writeType(this.writeType())
-            .ifNotExist()
-            .create();
+                     .asFloat()
+                     .writeType(this.writeType())
+                     .ifNotExist()
+                     .create();
     }
 }

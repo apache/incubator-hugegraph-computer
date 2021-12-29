@@ -24,9 +24,9 @@ public class LongHugeGraphOutput extends HugeGraphOutput<Long> {
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-            .asLong()
-            .writeType(this.writeType())
-            .ifNotExist()
-            .create();
+                     .asLong()
+                     .writeType(this.writeType())
+                     .ifNotExist()
+                     .create();
     }
 }

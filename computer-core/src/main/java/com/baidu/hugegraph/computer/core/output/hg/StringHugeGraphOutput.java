@@ -24,9 +24,9 @@ public class StringHugeGraphOutput extends HugeGraphOutput<String> {
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-            .asText()
-            .writeType(this.writeType())
-            .ifNotExist()
-            .create();
+                     .asText()
+                     .writeType(this.writeType())
+                     .ifNotExist()
+                     .create();
     }
 }

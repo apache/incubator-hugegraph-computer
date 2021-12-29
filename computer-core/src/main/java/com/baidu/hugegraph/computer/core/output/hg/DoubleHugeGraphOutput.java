@@ -24,9 +24,9 @@ public class DoubleHugeGraphOutput extends HugeGraphOutput<Double> {
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-            .asDouble()
-            .writeType(this.writeType())
-            .ifNotExist()
-            .create();
+                     .asDouble()
+                     .writeType(this.writeType())
+                     .ifNotExist()
+                     .create();
     }
 }
