@@ -65,5 +65,4 @@ public class FileInputSplitTest {
                                                    "/tmp/test");
         Assert.assertEquals(split1.hashCode(), split2.hashCode());
     }
-
 }
