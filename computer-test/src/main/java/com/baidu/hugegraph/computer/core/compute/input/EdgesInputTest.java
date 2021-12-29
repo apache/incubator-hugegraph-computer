@@ -143,8 +143,8 @@ public class EdgesInputTest extends UnitTestBase {
         ConnectionId connectionId = new ConnectionId(new InetSocketAddress(
                                                      "localhost", 8081),
                                                      0);
-        FileGraphPartition<?> partition = new FileGraphPartition<>(
-                                          context(), this.managers, 0);
+        FileGraphPartition partition = new FileGraphPartition(
+                                           context(), this.managers, 0);
         receiveManager.onStarted(connectionId);
         add200VertexBuffer((ManagedBuffer buffer) -> {
             receiveManager.handle(MessageType.VERTEX, 0, buffer);
