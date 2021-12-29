@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
@@ -106,7 +107,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
     }
 
     public static class ClosenessWithWeightPropertyTestOutput
-           extends ClosenessCentralityOutput {
+           extends HugeGraphOutput<Double> {
 
         private final Map<String, Double> expectResults =
                 ImmutableMap.<String, Double>builder()
@@ -140,7 +141,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
     }
 
     public static class ClosenessWithoutWeightPropertyTestOutput
-           extends ClosenessCentralityOutput {
+           extends HugeGraphOutput<Double> {
 
         private final Map<String, Double> expectResults =
                 ImmutableMap.<String, Double>builder()

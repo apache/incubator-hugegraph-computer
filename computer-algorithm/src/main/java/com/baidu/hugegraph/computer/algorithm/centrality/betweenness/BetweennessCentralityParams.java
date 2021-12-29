@@ -26,6 +26,8 @@ import com.baidu.hugegraph.computer.algorithm.centrality.closeness.ClosenessCent
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
+import com.baidu.hugegraph.structure.constant.WriteType;
 
 public class BetweennessCentralityParams implements AlgorithmParams {
 
@@ -40,7 +42,10 @@ public class BetweennessCentralityParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          BetweennessMessage.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         BetweennessCentralityOutput.class.getName());
+                         HugeGraphOutput.class.getName());
+        this.setIfAbsent(params,
+                         ComputerOptions.OUTPUT_DEFAULT_RESULT_WRITE_TYPE,
+                         WriteType.OLAP_RANGE.name());
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,
                          ExtractAllPropertyInputFilter.class.getName());
         this.setIfAbsent(params, ClosenessCentrality.OPTION_SAMPLE_RATE,
