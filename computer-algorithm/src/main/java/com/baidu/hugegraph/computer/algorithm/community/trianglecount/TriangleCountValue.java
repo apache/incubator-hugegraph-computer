@@ -24,19 +24,19 @@ import java.io.IOException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class TriangleCountValue implements CustomizeValue<Long> {
+public class TriangleCountValue implements CustomizeValue<Integer> {
 
     private IdList idList;
-    private LongValue count;
+    private IntValue count;
 
     public TriangleCountValue() {
         this.idList = new IdList();
-        this.count = new LongValue();
+        this.count = new IntValue();
     }
 
     public IdList idList() {
@@ -47,7 +47,7 @@ public class TriangleCountValue implements CustomizeValue<Long> {
         return this.count.longValue();
     }
 
-    public void count(long count) {
+    public void count(int count) {
         this.count.value(count);
     }
 
@@ -80,7 +80,7 @@ public class TriangleCountValue implements CustomizeValue<Long> {
     }
 
     @Override
-    public Long value() {
+    public Integer value() {
         return this.count.value();
     }
 }
