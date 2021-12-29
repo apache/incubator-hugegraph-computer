@@ -53,6 +53,6 @@ public class FileVertxFetcher extends FileElementFetcher<Vertex>
 
     @Override
     public void close() {
-        // pass
+        super.close();
     }
 }

@@ -68,6 +68,6 @@ public class FileEdgeFetcher extends FileElementFetcher<Edge>
 
     @Override
     public void close() {
-        // pass
+        super.close();
     }
 }

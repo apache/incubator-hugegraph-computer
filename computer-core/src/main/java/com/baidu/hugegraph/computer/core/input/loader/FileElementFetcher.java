@@ -53,7 +53,7 @@ public abstract class FileElementFetcher<T extends GraphElement>
     private final Config config;
     private final LoadContext context;
     private Iterator<T> localBatch;
-    private Iterator<Line> localLineBatch;
+    private InputReader inputReader;
     private List<ElementBuilder<T>> builders;
     private T next;
 
@@ -78,7 +78,10 @@ public abstract class FileElementFetcher<T extends GraphElement>
     @Override
     public void prepareLoadInputSplit(InputSplit split) {
         FileInputSplit fileInputSplit = (FileInputSplit) split;
-        this.localLineBatch = this.fetch(fileInputSplit);
+        if (this.inputReader != null) {
+            this.inputReader.close();
+        }
+        this.inputReader = this.fetch(fileInputSplit);
         this.builders = this.elementBuilders(this.context,
                                              fileInputSplit.struct());
     }
@@ -95,15 +98,13 @@ public abstract class FileElementFetcher<T extends GraphElement>
         } else {
             this.localBatch = null;
 
-            if (this.localLineBatch != null) {
-                while (this.localLineBatch.hasNext()) {
-                    Line line = this.localLineBatch.next();
+            if (this.inputReader != null) {
+                while (this.inputReader.hasNext()) {
+                    Line line = this.inputReader.next();
                     List<T> allElements = new ArrayList<>();
                     for (ElementBuilder<T> builder : this.builders) {
                         List<T> elements = this.buildElement(line, builder);
-                        if (CollectionUtils.isNotEmpty(elements)) {
-                            allElements.addAll(elements);
-                        }
+                        allElements.addAll(elements);
                     }
                     if (CollectionUtils.isNotEmpty(allElements)) {
                         this.localBatch = allElements.iterator();
@@ -111,7 +112,7 @@ public abstract class FileElementFetcher<T extends GraphElement>
                         return true;
                     }
                 }
-                this.localLineBatch = null;
+                this.inputReader = null;
             }
             return false;
         }
@@ -127,7 +128,7 @@ public abstract class FileElementFetcher<T extends GraphElement>
         return current;
     }
 
-    public Iterator<Line> fetch(FileInputSplit split) {
+    private InputReader fetch(FileInputSplit split) {
         String path = split.path();
         InputStruct struct = split.struct();
         FileSource source = (FileSource) struct.input();
@@ -144,4 +145,10 @@ public abstract class FileElementFetcher<T extends GraphElement>
     protected abstract List<ElementBuilder<T>> elementBuilders(
                                                LoadContext context,
                                                InputStruct struct);
+
+    public void close() {
+        if (this.inputReader != null) {
+            this.inputReader.close();
+        }
+    }
 }

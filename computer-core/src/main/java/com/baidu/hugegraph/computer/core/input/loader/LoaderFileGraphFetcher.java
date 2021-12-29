@@ -61,6 +61,7 @@ public class LoaderFileGraphFetcher implements GraphFetcher {
 
     @Override
     public void close() {
-        // pass
+        this.vertexFetcher.close();
+        this.edgeFetcher.close();
     }
 }
