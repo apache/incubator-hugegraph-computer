@@ -71,7 +71,7 @@ public class WorkerService implements Closeable {
     private volatile boolean closed;
     private Config config;
     private Bsp4Worker bsp4Worker;
-    private ComputeManager<?> computeManager;
+    private ComputeManager computeManager;
     private ContainerInfo workerInfo;
 
     private Computation<Value> computation;
@@ -141,11 +141,7 @@ public class WorkerService implements Closeable {
             dm.connect(worker.id(), worker.hostname(), worker.dataPort());
         }
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        ComputeManager<?> computeManager = new ComputeManager(this.context,
-                                                              this.managers,
-                                                              this.computation);
-        this.computeManager = computeManager;
+        this.computeManager = new ComputeManager(this.context, this.managers);
 
         this.managers.initedAll(this.config);
         LOG.info("{} WorkerService initialized", this);
