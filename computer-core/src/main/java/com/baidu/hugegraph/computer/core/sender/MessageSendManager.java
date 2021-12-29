@@ -96,41 +96,55 @@ public class MessageSendManager implements Manager {
     public void sendVertex(Vertex vertex) {
         this.checkException();
 
-        WriteBuffers buffer = this.sortIfTargetBufferIsFull(vertex.id(),
-                                                            MessageType.VERTEX);
-        try {
-            // Write vertex to buffer
-            buffer.writeVertex(vertex);
-        } catch (IOException e) {
-            throw new ComputerException("Failed to write vertex '%s'",
-                                        e, vertex.id());
+        int partitionId = this.partitioner.partitionId(vertex.id());
+        WriteBuffers buffer = this.buffers.get(partitionId);
+
+        synchronized (buffer) {
+            this.sortIfTargetBufferIsFull(buffer, partitionId,
+                                          MessageType.VERTEX);
+            try {
+                // Write vertex to buffer
+                buffer.writeVertex(vertex);
+            } catch (IOException e) {
+                throw new ComputerException("Failed to write vertex '%s'",
+                                            e, vertex.id());
+            }
         }
     }
 
     public void sendEdge(Vertex vertex) {
         this.checkException();
 
-        WriteBuffers buffer = this.sortIfTargetBufferIsFull(vertex.id(),
-                                                            MessageType.EDGE);
-        try {
-            // Write edge to buffer
-            buffer.writeEdges(vertex);
-        } catch (IOException e) {
-            throw new ComputerException("Failed to write edges of vertex '%s'",
-                                        e, vertex.id());
+        int partitionId = this.partitioner.partitionId(vertex.id());
+        WriteBuffers buffer = this.buffers.get(partitionId);
+
+        synchronized (buffer) {
+            this.sortIfTargetBufferIsFull(buffer, partitionId,
+                                          MessageType.EDGE);
+            try {
+                // Write edge to buffer
+                buffer.writeEdges(vertex);
+            } catch (IOException e) {
+                throw new ComputerException("Failed to write edges of " +
+                                            "vertex '%s'", e, vertex.id());
+            }
         }
     }
 
     public void sendMessage(Id targetId, Value value) {
         this.checkException();
 
-        WriteBuffers buffer = this.sortIfTargetBufferIsFull(targetId,
-                                                            MessageType.MSG);
-        try {
-            // Write message to buffer
-            buffer.writeMessage(targetId, value);
-        } catch (IOException e) {
-            throw new ComputerException("Failed to write message", e);
+        int partitionId = this.partitioner.partitionId(targetId);
+        WriteBuffers buffer = this.buffers.get(partitionId);
+
+        synchronized (buffer) {
+            this.sortIfTargetBufferIsFull(buffer, partitionId, MessageType.MSG);
+            try {
+                // Write message to buffer
+                buffer.writeMessage(targetId, value);
+            } catch (IOException e) {
+                throw new ComputerException("Failed to write message", e);
+            }
         }
     }
 
@@ -169,9 +183,9 @@ public class MessageSendManager implements Manager {
         return this.buffers.get(partitionId).messageWritten();
     }
 
-    private WriteBuffers sortIfTargetBufferIsFull(Id id, MessageType type) {
-        int partitionId = this.partitioner.partitionId(id);
-        WriteBuffers buffer = this.buffers.get(partitionId);
+    private void sortIfTargetBufferIsFull(WriteBuffers buffer,
+                                          int partitionId,
+                                          MessageType type) {
         if (buffer.reachThreshold()) {
             /*
              * Switch buffers if writing buffer is full,
@@ -180,7 +194,6 @@ public class MessageSendManager implements Manager {
             buffer.switchForSorting();
             this.sortThenSend(partitionId, type, buffer);
         }
-        return buffer;
     }
 
     private Future<?> sortThenSend(int partitionId, MessageType type,
