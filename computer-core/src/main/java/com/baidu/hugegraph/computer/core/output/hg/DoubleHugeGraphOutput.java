@@ -19,15 +19,13 @@
 
 package com.baidu.hugegraph.computer.core.output.hg;
 
-import com.baidu.hugegraph.structure.constant.WriteType;
-
 public class DoubleHugeGraphOutput extends HugeGraphOutput<Double> {
 
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
             .asDouble()
-            .writeType(WriteType.OLAP_RANGE)
+            .writeType(this.writeType())
             .ifNotExist()
             .create();
     }

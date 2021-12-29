@@ -225,6 +225,14 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
+    public static final ConfigOption<String> OUTPUT_RESULT_WRITE_TYPE =
+            new ConfigOption<>(
+                    "output.result_write_type",
+                    "The value is write-type of result output to hugegraph.",
+                    allowValues("OLAP_COMMON", "OLAP_SECONDARY", "OLAP_RANGE"),
+                    "OLAP_COMMON"
+            );
+
     public static final ConfigOption<Integer> OUTPUT_BATCH_SIZE =
             new ConfigOption<>(
                     "output.batch_size",

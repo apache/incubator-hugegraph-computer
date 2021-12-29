@@ -25,7 +25,6 @@ import java.util.List;
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
-import com.baidu.hugegraph.structure.constant.WriteType;
 
 public class RingsDetectionOutput extends HugeGraphOutput<List<String>> {
 
@@ -33,7 +32,7 @@ public class RingsDetectionOutput extends HugeGraphOutput<List<String>> {
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asText()
-                     .writeType(WriteType.OLAP_COMMON)
+                     .writeType(this.writeType())
                      .valueList()
                      .ifNotExist()
                      .create();

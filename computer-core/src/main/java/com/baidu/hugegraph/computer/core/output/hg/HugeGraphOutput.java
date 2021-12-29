@@ -30,6 +30,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.AbstractComputerOutput;
 import com.baidu.hugegraph.computer.core.output.hg.task.TaskManager;
 import com.baidu.hugegraph.driver.HugeClient;
+import com.baidu.hugegraph.structure.constant.WriteType;
 import com.baidu.hugegraph.util.Log;
 
 public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
@@ -39,6 +40,7 @@ public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
     private TaskManager taskManager;
     private List<com.baidu.hugegraph.structure.graph.Vertex> localVertices;
     private int batchSize;
+    private WriteType writeType;
 
     @Override
     public void init(Config config, int partition) {
@@ -47,6 +49,8 @@ public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
         this.taskManager = new TaskManager(config);
         this.batchSize = config.get(ComputerOptions.OUTPUT_BATCH_SIZE);
         this.localVertices = new ArrayList<>(this.batchSize);
+        this.writeType = WriteType.valueOf(
+                         config.get(ComputerOptions.OUTPUT_RESULT_WRITE_TYPE));
 
         this.prepareSchema();
     }
@@ -93,6 +97,10 @@ public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
         @SuppressWarnings("unchecked")
         T value = (T) vertex.value().value();
         return value;
+    }
+
+    public WriteType writeType() {
+        return this.writeType;
     }
 
     protected abstract void prepareSchema();
