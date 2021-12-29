@@ -17,18 +17,17 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.centrality.betweenness;
+package com.baidu.hugegraph.computer.core.output.hg;
 
-import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class BetweennessCentralityOutput extends HugeGraphOutput<Double> {
+public class StringHugeGraphOutput extends HugeGraphOutput<String> {
 
     @Override
-    public void prepareSchema() {
+    protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-            .asDouble()
-            .writeType(WriteType.OLAP_RANGE)
+            .asText()
+            .writeType(WriteType.OLAP_COMMON)
             .ifNotExist()
             .create();
     }

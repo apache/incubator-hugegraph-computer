@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.output.hg.LongHugeGraphOutput;
 
 public class TriangleCountParams implements AlgorithmParams {
 
@@ -37,7 +38,7 @@ public class TriangleCountParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
                          TriangleCountValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         TriangleCountOutput.class.getName());
+                         LongHugeGraphOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_EDGE_FREQ.name(),
                          EdgeFrequency.SINGLE.name());
     }

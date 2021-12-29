@@ -17,19 +17,24 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
+package com.baidu.hugegraph.computer.core.output.hg;
 
-import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class TriangleCountOutput extends HugeGraphOutput<Long> {
+public class IdHugeGraphOutput extends HugeGraphOutput<String> {
 
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                     .asLong()
-                     .writeType(WriteType.OLAP_RANGE)
-                     .ifNotExist()
-                     .create();
+            .asText()
+            .writeType(WriteType.OLAP_COMMON)
+            .ifNotExist()
+            .create();
+    }
+
+    @Override
+    protected String value(Vertex vertex) {
+        return vertex.value().string();
     }
 }

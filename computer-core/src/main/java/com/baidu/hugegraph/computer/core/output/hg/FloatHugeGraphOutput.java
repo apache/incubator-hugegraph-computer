@@ -17,19 +17,18 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.centrality.degree;
+package com.baidu.hugegraph.computer.core.output.hg;
 
-import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
-public class DegreeCentralityOutput extends HugeGraphOutput<Double> {
+public class FloatHugeGraphOutput extends HugeGraphOutput<Long> {
 
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                     .asDouble()
-                     .writeType(WriteType.OLAP_RANGE)
-                     .ifNotExist()
-                     .create();
+            .asFloat()
+            .writeType(WriteType.OLAP_RANGE)
+            .ifNotExist()
+            .create();
     }
 }

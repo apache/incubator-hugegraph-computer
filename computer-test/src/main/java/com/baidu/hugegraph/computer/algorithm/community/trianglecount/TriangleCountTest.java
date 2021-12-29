@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.output.hg.LongHugeGraphOutput;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.SchemaManager;
 import com.baidu.hugegraph.structure.constant.T;
@@ -117,12 +118,12 @@ public class TriangleCountTest extends AlgorithmTestBase {
         Assert.assertContains("10", value.toString());
     }
 
-    public static class TriangleCountOutputTest extends TriangleCountOutput {
+    public static class TriangleCountOutputTest extends LongHugeGraphOutput {
 
         @Override
         public Long value(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            Long value = (Long) super.value(vertex);
+            Long value = super.value(vertex);
             Long expected = EXPECTED_RESULTS.get(vertex.id());
             if (expected != null) {
                 Assert.assertEquals(expected, value);
