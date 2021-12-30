@@ -10,11 +10,6 @@ import java.util.List;
 public class LinksHugeOutput extends HugeOutput {
 
     @Override
-    public String name() {
-        return "links";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asText()

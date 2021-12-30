@@ -30,11 +30,6 @@ import java.util.List;
 public class RingsDetectionOutput extends HugeOutput {
 
     @Override
-    public String name() {
-        return "rings";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asText()

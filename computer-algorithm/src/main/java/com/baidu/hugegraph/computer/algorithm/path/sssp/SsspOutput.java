@@ -27,11 +27,6 @@ import com.baidu.hugegraph.structure.constant.WriteType;
 public class SsspOutput extends HugeOutput {
 
     @Override
-    public String name() {
-        return "sssp";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asText()

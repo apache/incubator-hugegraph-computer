@@ -31,11 +31,6 @@ public class ClusteringCoefficientOutput extends HugeOutput {
     private static final int SINGLE_NODE_DEGREE = 1;
 
     @Override
-    public String name() {
-        return "clustering_coefficient";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asFloat()

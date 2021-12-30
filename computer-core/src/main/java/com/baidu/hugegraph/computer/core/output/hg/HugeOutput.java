@@ -27,25 +27,24 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.ComputerOutput;
+import com.baidu.hugegraph.computer.core.output.AbstractComputerOutput;
 import com.baidu.hugegraph.computer.core.output.hg.task.TaskManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.util.Log;
 
-public abstract class HugeOutput implements ComputerOutput {
+public abstract class HugeOutput extends AbstractComputerOutput {
 
     private static final Logger LOG = Log.logger(HugeOutput.class);
 
-    private int partition;
     private TaskManager taskManager;
     private List<com.baidu.hugegraph.structure.graph.Vertex> vertexBatch;
     private int batchSize;
 
     @Override
     public void init(Config config, int partition) {
-        LOG.info("Start write back partition {}", this.partition);
+        super.init(config, partition);
 
-        this.partition = partition;
+        LOG.info("Start write back partition {}", this.partition());
 
         this.taskManager = new TaskManager(config);
         this.vertexBatch = new ArrayList<>();
@@ -57,8 +56,6 @@ public abstract class HugeOutput implements ComputerOutput {
     public HugeClient client() {
         return this.taskManager.client();
     }
-
-    public abstract String name();
 
     public abstract void prepareSchema();
 
@@ -80,7 +77,7 @@ public abstract class HugeOutput implements ComputerOutput {
         }
         this.taskManager.waitFinished();
         this.taskManager.shutdown();
-        LOG.info("End write back partition {}", this.partition);
+        LOG.info("End write back partition {}", this.partition());
     }
 
     private void commit() {

@@ -93,7 +93,9 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
     @Test
     public void testRunAlgorithm() throws InterruptedException {
-        runAlgorithm(RingsDetectionTestParams.class.getName());
+        runAlgorithm(RingsDetectionTestParams.class.getName(),
+                     ComputerOptions.OUTPUT_PROPERTY_NAME.name(),
+                     "custom-rings");
     }
 
     public static class RingsDetectionTestParams extends RingsDetectionParams {

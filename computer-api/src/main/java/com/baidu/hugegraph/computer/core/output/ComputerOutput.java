@@ -51,4 +51,9 @@ public interface ComputerOutput {
      * required.
      */
     void close();
+
+    /**
+     * The name of output property.
+     */
+    String name();
 }

@@ -32,11 +32,6 @@ public class BetweennessCentralityOutput extends HugeOutput {
             Log.logger(BetweennessCentralityOutput.class);
 
     @Override
-    public String name() {
-        return "betweenness_centrality";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asDouble()

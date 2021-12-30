@@ -19,38 +19,44 @@
 
 package com.baidu.hugegraph.computer.core.output;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.util.Log;
 
-/**
- * LogOutput print the computation result to log file.
- * It can't be used on production environment.
- * Be used for test or development only.
- */
-public class LogOutput extends AbstractComputerOutput {
+public abstract class AbstractComputerOutput implements ComputerOutput {
 
-    private static final Logger LOG = Log.logger(LogOutput.class);
+    private static final Logger LOG = Log.logger(ComputerOutput.class);
 
+    private String name;
     private int partition;
 
     @Override
     public void init(Config config, int partition) {
+        String name = config.get(ComputerOptions.OUTPUT_PROPERTY_NAME);
+        if (StringUtils.isNotEmpty(name)) {
+            this.name = name;
+        } else {
+            Computation<?> computation = config.createObject(
+                           ComputerOptions.WORKER_COMPUTATION_CLASS);
+            this.name = computation.name();
+        }
+
         this.partition = partition;
-        LOG.info("Start write back partition {}", this.partition);
+
+        LOG.info("Start write back partition {} for {}",
+                 this.partition(), this.name());
     }
 
     @Override
-    public void write(Vertex vertex) {
-        LOG.info("id='{}', result='{}'",
-                 vertex.id().toString(),
-                 vertex.value().toString());
+    public final String name() {
+        return this.name;
     }
 
-    @Override
-    public void close() {
-        LOG.info("End write back partition {}", this.partition);
+    public int partition() {
+        return this.partition;
     }
 }

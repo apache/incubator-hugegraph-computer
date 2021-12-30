@@ -30,11 +30,6 @@ import com.baidu.hugegraph.structure.graph.Vertex;
 public class SubGraphMatchHugeOutput extends HugeOutput {
 
     @Override
-    public String name() {
-        return "subgraph_match";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
             .asText()

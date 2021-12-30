@@ -27,11 +27,6 @@ import com.baidu.hugegraph.structure.constant.WriteType;
 public class DegreeCentralityOutput extends HugeOutput {
 
     @Override
-    public String name() {
-        return "degree_centrality";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asDouble()

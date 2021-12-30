@@ -26,11 +26,6 @@ import com.baidu.hugegraph.structure.constant.WriteType;
 public class WccOutput extends HugeOutput {
 
     @Override
-    public String name() {
-        return "wcc";
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asText()

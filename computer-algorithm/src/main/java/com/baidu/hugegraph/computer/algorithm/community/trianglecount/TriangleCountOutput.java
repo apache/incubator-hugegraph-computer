@@ -26,11 +26,6 @@ import com.baidu.hugegraph.structure.constant.WriteType;
 public class TriangleCountOutput extends HugeOutput {
 
     @Override
-    public String name() {
-        return TriangleCount.ALGORITHM_NAME;
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asInt()
