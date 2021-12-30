@@ -1,4 +1,4 @@
-name: Package hugegraph-computer image
+name: Package gh-hugegraph-computer image
 
 on:
   workflow_dispatch:
