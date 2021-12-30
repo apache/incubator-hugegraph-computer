@@ -116,6 +116,57 @@
                 <artifactId>hadoop-hdfs-client</artifactId>
                 <version>${hadoop-version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.baidu.hugegraph</groupId>
+                <artifactId>hugegraph-loader</artifactId>
+                <version>0.11.3</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>hive-exec</artifactId>
+                        <groupId>org.apache.hive</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>httpclient</artifactId>
+                        <groupId>org.apache.httpcomponents</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>hugegraph-client</artifactId>
+                        <groupId>com.baidu.hugegraph</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>hugegraph-common</artifactId>
+                        <groupId>com.baidu.hugegraph</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>mssql-jdbc</artifactId>
+                        <groupId>com.microsoft.sqlserver</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <groupId>mysql</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>ojdbc8</artifactId>
+                        <groupId>com.oracle</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>postgresql</artifactId>
+                        <groupId>org.postgresql</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>hadoop-hdfs-client</artifactId>
+                        <groupId>org.apache.hadoop</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>hadoop-common</artifactId>
+                        <groupId>org.apache.hadoop</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>guava</artifactId>
+                        <groupId>com.google.guava</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

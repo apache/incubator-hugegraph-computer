@@ -52,6 +52,7 @@ jobs:
         run: |
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-client-1.9.7.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-client -Dversion=1.9.7 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/client-pom.xml
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-common-1.8.9.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-common -Dversion=1.8.9 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/common-pom.xml
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-loader-0.11.3.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-loader -Dversion=0.11.3 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/hugegraph-loader-0.11.3-pom.xml
 
       - name: Build Project
         run: bash computer-dist/builddocker.sh

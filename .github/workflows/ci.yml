@@ -65,6 +65,7 @@ jobs:
           md5sum /home/runner/.m2/repository/com/baidu/hugegraph/hugegraph-client/1.9.7/hugegraph-client-1.9.7.jar
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-common-1.8.9.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-common -Dversion=1.8.9 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/common-pom.xml
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-loader-0.12.0.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-loader -Dversion=0.12.0 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/loader-pom.xml
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-loader-0.11.3.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-loader -Dversion=0.11.3 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/hugegraph-loader-0.11.3-pom.xml
           mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Download" | grep -v "Progress"
 
       - name: Prepare env and service
