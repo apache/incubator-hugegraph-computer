@@ -316,7 +316,7 @@ public class ComputerJobDeployer {
 
         // Pod topology spread constraints by node
         TopologySpreadConstraint spreadConstraint =
-                new TopologySpreadConstraint(null, 1, "node", "ScheduleAnyway");
+                new TopologySpreadConstraint(null, 1, "kubernetes.io/hostname", "ScheduleAnyway");
         PodSpec podSpec = new PodSpecBuilder()
                 .withContainers(containers)
                 .withImagePullSecrets(spec.getPullSecrets())
