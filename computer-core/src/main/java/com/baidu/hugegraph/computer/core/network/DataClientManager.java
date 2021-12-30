@@ -87,7 +87,7 @@ public class DataClientManager implements Manager {
             this.sender.addWorkerClient(workerId, client);
         } catch (TransportException e) {
             throw new ComputerException(
-                      "Failed to connect to worker: {}({}:{})",
+                      "Failed to connect to worker: %s(%s:%s)",
                       workerId, hostname, dataPort);
         }
     }

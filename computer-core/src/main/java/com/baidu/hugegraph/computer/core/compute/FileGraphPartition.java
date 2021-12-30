@@ -49,6 +49,7 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
+import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -131,7 +132,7 @@ public class FileGraphPartition {
                                  this.edgeCount, 0L);
     }
 
-    protected PartitionStat compute(ComputationContext context,
+    protected PartitionStat compute(WorkerContext context,
                                     int superstep) {
         LOG.info("Partition {} begin compute in superstep {}",
                  this.partition, superstep);
@@ -145,9 +146,11 @@ public class FileGraphPartition {
 
         long activeVertexCount;
         try {
+            this.computation.beforeSuperstep(context);
             activeVertexCount = superstep == 0 ?
                                 this.compute0(context, this.computation) :
                                 this.compute1(context, this.computation);
+            this.computation.afterSuperstep(context);
         } catch (Exception e) {
             throw new ComputerException(
                       "Error occurred when compute at superstep %s",

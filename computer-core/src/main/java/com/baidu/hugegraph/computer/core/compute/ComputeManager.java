@@ -41,7 +41,7 @@ import com.baidu.hugegraph.computer.core.receiver.MessageStat;
 import com.baidu.hugegraph.computer.core.sender.MessageSendManager;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.worker.ComputationContext;
+import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
@@ -65,11 +65,15 @@ public class ComputeManager {
         this.partitions = new HashMap<>();
         this.recvManager = this.managers.get(MessageRecvManager.NAME);
         this.sendManager = this.managers.get(MessageSendManager.NAME);
+
+        int computeThreadNum = this.partitionComputeThreadNum(context.config());
         this.computeExecutor = ExecutorUtil.newFixedThreadPool(
-                               this.threadNum(context.config()), PREFIX);
+                               computeThreadNum, PREFIX);
+        LOG.info("Created partition compute thread poll, thread num:{}",
+                 computeThreadNum);
     }
 
-    private Integer threadNum(Config config) {
+    private Integer partitionComputeThreadNum(Config config) {
         return config.get(ComputerOptions.PARTITIONS_COMPUTE_THREAD_NUMS);
     }
 
@@ -139,7 +143,7 @@ public class ComputeManager {
         }
     }
 
-    public WorkerStat compute(ComputationContext context, int superstep) {
+    public WorkerStat compute(WorkerContext context, int superstep) {
         this.sendManager.startSend(MessageType.MSG);
 
         WorkerStat workerStat = new WorkerStat();
@@ -200,5 +204,9 @@ public class ComputeManager {
             LOG.info("Output partition {} complete, stat='{}'",
                      partition.partition(), stat);
         }
+    }
+
+    public void close() {
+        this.computeExecutor.shutdown();
     }
 }
