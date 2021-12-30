@@ -18,15 +18,6 @@
 
 package com.baidu.hugegraph.computer.dist;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Properties;
-
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
@@ -37,6 +28,15 @@ import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+
 
 public class HugeGraphComputer {
 
@@ -60,12 +60,14 @@ public class HugeGraphComputer {
                         "Argument count must be three, " +
                         "the first is conf path;" +
                         "the second is role type;" +
-                        "the third is drive type.");
+                        "the third is drive type");
+                        
         String role = args[1];
         E.checkArgument(!StringUtils.isEmpty(role),
                         "The role can't be null or emtpy, " +
                         "it must be either '%s' or '%s'",
                         ROLE_MASTER, ROLE_WORKER);
+
         setUncaughtExceptionHandler();
         loadClass();
         registerOptions();
@@ -131,6 +133,7 @@ public class HugeGraphComputer {
                                             new FileReader(conf));
         properties.load(bufferedReader);
         ComputerContextUtil.initContext(properties);
+        
         return ComputerContext.instance();
     }
 

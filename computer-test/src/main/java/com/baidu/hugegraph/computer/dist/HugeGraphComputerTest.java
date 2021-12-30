@@ -1,16 +1,16 @@
 package com.baidu.hugegraph.computer.dist;
 
+import com.baidu.hugegraph.testutil.Assert;
+import com.baidu.hugegraph.util.Log;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
+
 
 public class HugeGraphComputerTest {
 
