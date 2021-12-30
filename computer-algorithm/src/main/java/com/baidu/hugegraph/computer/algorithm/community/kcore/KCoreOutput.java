@@ -26,11 +26,6 @@ import com.baidu.hugegraph.structure.graph.Vertex;
 public class KCoreOutput extends HugeOutput {
 
     @Override
-    public String name() {
-        return KCore.ALGORITHM_NAME;
-    }
-
-    @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
             .asInt()
