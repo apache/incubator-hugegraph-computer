@@ -66,7 +66,13 @@ jobs:
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-common-1.8.9.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-common -Dversion=1.8.9 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/common-pom.xml
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-loader-0.12.0.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-loader -Dversion=0.12.0 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/loader-pom.xml
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-loader-0.11.3.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-loader -Dversion=0.11.3 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/hugegraph-loader-0.11.3-pom.xml
-          mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Download" | grep -v "Progress"
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hadoop/hadoop-annotations-2.7.2.jar -DgroupId=org.apache.hadoop -DartifactId=hadoop-annotations -Dversion=2.7.2 -Dpackaging=jar
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hadoop/hadoop-auth-2.7.2.jar -DgroupId=org.apache.hadoop -DartifactId=hadoop-auth -Dversion=2.7.2 -Dpackaging=jar
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hadoop/hadoop-client-2.7.2.jar -DgroupId=org.apache.hadoop -DartifactId=hadoop-client -Dversion=2.7.2 -Dpackaging=jar
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hadoop/hadoop-common-2.7.2.jar -DgroupId=org.apache.hadoop -DartifactId=hadoop-common -Dversion=2.7.2 -Dpackaging=jar
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hadoop/hadoop-hdfs-2.7.2.jar -DgroupId=org.apache.hadoop -DartifactId=hadoop-hdfs -Dversion=2.7.2 -Dpackaging=jar
+          mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hadoop/hadoop-hdfs-client-2.7.2.jar -DgroupId=org.apache.hadoop -DartifactId=hadoop-hdfs-client -Dversion=2.7.2 -Dpackaging=jar
+          mvn clean compile -Dmaven.javadoc.skip=true -Dhadoop-version=2.7.2 | grep -v "Download" | grep -v "Progress"
 
       - name: Prepare env and service
         env:

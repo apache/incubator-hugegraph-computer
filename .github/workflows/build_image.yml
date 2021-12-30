@@ -15,9 +15,6 @@ on:
       operator_image_url:
         required: true
         default: 'hugegraph-computer-operator:0.1.0'
-      build_operator:
-        required: true
-        default: 'false'
       release_tag:
         required: true
 
@@ -54,25 +51,10 @@ jobs:
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-common-1.8.9.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-common -Dversion=1.8.9 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/common-pom.xml
           mvn install:install-file -Dfile=$TRAVIS_DIR/lib/hugegraph-loader-0.11.3.jar -DgroupId=com.baidu.hugegraph -DartifactId=hugegraph-loader -Dversion=0.11.3 -Dpackaging=jar -DpomFile=$TRAVIS_DIR/lib/hugegraph-loader-0.11.3-pom.xml
 
-      - name: Build Project
-        run: bash computer-dist/builddocker.sh
-
-      - name: Docker build
-        run: |
-          PROJECT_VERSION=$(mvn -f "./pom.xml" -q -N \
-          org.codehaus.mojo:exec-maven-plugin:1.3.1:exec \
-          -Dexec.executable='echo' -Dexec.args='${project.version}')
-
-          docker tag hugegraph/hugegraph-computer-framework:${PROJECT_VERSION} ${{ github.event.inputs.framework_image_url }}
-          echo "FROM ${{ github.event.inputs.framework_image_url }}
-          LABEL maintainer='HugeGraph Docker Maintainers <hugegraph@googlegroups.com>'
-          COPY target/computer-algorithm-*.jar /opt/jars/computer-algorithm-based.jar
-          ENV JAR_FILE_PATH=/opt/jars/computer-algorithm-based.jar" | \
-          docker build -t ${{ github.event.inputs.algorithm_image_url }} -f - ./computer-algorithm
-
-      - name: Docker build operator
-        if: github.event.inputs.build_operator == 'true'
-        run: docker build -t ${{ github.event.inputs.operator_image_url }} -f computer-k8s-operator/Dockerfile ./computer-k8s-operator
+      - name: Build images
+        env:
+          TRAVIS_DIR: computer-dist/src/assembly/travis
+        run: $TRAVIS_DIR/build-images.sh ${{ github.event.inputs.framework_image_url }} ${{ github.event.inputs.algorithm_image_url }} ${{ github.event.inputs.operator_image_url }}
 
       - name: Docker images
         run: docker images
@@ -83,10 +65,7 @@ jobs:
           chmod -R 777 ./artifacts
           docker save -o ./artifacts/hugegraph-computer-framework.tar ${{ github.event.inputs.framework_image_url }}
           docker save -o ./artifacts/hugegraph-computer-algorithm.tar ${{ github.event.inputs.algorithm_image_url }}
-          
-      - name: Save operator image
-        if: github.event.inputs.build_operator == 'true'
-        run: docker save -o ./artifacts/hugegraph-computer-operator.tar ${{ github.event.inputs.operator_image_url }}
+          docker save -o ./artifacts/hugegraph-computer-algorithm.tar ${{ github.event.inputs.operator_image_url }}
 
       - name: Upload github release
         uses: xresloader/upload-to-github-release@v1
