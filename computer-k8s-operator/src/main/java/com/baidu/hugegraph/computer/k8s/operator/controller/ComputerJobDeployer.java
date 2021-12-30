@@ -60,6 +60,7 @@ import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.TopologySpreadConstraint;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
@@ -313,12 +314,16 @@ public class ComputerJobDeployer {
         Volume configVolume = this.getComputerConfigVolume(configMapName);
         volumes.add(configVolume);
 
+        // Pod topology spread constraints by node
+        TopologySpreadConstraint spreadConstraint =
+                new TopologySpreadConstraint(null, 1, "node", "ScheduleAnyway");
         PodSpec podSpec = new PodSpecBuilder()
                 .withContainers(containers)
                 .withImagePullSecrets(spec.getPullSecrets())
                 .withRestartPolicy(JOB_RESTART_POLICY)
                 .withTerminationGracePeriodSeconds(TERMINATION_GRACE_PERIOD)
                 .withVolumes(volumes)
+                .withTopologySpreadConstraints(spreadConstraint)
                 .build();
 
         return new JobBuilder().withMetadata(meta)
