@@ -19,12 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.output.hg;
 
-public class IntHugeGraphOutput extends HugeGraphOutput<Integer> {
+public class HugeGraphLongOutput extends HugeGraphOutput<Long> {
 
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                     .asInt()
+                     .asLong()
                      .writeType(this.writeType())
                      .ifNotExist()
                      .create();

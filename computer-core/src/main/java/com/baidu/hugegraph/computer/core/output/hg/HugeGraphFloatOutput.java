@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.output.hg;
 
-public class FloatHugeGraphOutput extends HugeGraphOutput<Float> {
+public class HugeGraphFloatOutput extends HugeGraphOutput<Float> {
 
     @Override
     protected void prepareSchema() {

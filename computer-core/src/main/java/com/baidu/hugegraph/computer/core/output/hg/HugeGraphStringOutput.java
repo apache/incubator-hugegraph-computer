@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.output.hg;
 
-public class StringHugeGraphOutput extends HugeGraphOutput<String> {
+public class HugeGraphStringOutput extends HugeGraphOutput<String> {
 
     @Override
     protected void prepareSchema() {

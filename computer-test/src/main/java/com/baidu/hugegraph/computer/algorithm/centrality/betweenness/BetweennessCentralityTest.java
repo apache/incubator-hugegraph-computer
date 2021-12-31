@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.output.hg.DoubleHugeGraphOutput;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphDoubleOutput;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
@@ -131,7 +131,7 @@ public class BetweennessCentralityTest extends AlgorithmTestBase {
     }
 
     public static class BetweennessCentralityTestOutput
-           extends DoubleHugeGraphOutput {
+            extends HugeGraphDoubleOutput {
 
         @Override
         protected Double value(

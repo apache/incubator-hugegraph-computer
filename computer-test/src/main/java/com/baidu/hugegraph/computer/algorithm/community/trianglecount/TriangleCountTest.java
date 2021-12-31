@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.output.hg.IntHugeGraphOutput;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphIntOutput;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.SchemaManager;
 import com.baidu.hugegraph.structure.constant.T;
@@ -99,7 +99,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
     public void testRunAlgorithm() throws InterruptedException {
         runAlgorithm(TriangleCountParams.class.getName(),
                      ComputerOptions.OUTPUT_CLASS.name(),
-                     TriangleCountOutputTest.class.getName());
+                     TriangleCountIntOutputTest.class.getName());
     }
 
     @Test
@@ -118,7 +118,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
         Assert.assertContains("10", value.toString());
     }
 
-    public static class TriangleCountOutputTest extends IntHugeGraphOutput {
+    public static class TriangleCountIntOutputTest extends HugeGraphIntOutput {
 
         @Override
         public Integer value(

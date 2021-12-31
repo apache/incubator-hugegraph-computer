@@ -99,7 +99,7 @@ public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
         return value;
     }
 
-    public WriteType writeType() {
+    protected WriteType writeType() {
         return this.writeType;
     }
 

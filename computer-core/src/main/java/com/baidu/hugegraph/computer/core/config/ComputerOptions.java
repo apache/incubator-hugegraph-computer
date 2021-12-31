@@ -228,7 +228,9 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> OUTPUT_RESULT_WRITE_TYPE =
             new ConfigOption<>(
                     "output.result_write_type",
-                    "The value is write-type of result output to hugegraph.",
+                    "The result write-type to output to hugegraph, " +
+                    "allowed values are: " +
+                    "[OLAP_COMMON, OLAP_SECONDARY, OLAP_RANGE].",
                     allowValues("OLAP_COMMON", "OLAP_SECONDARY", "OLAP_RANGE"),
                     "OLAP_COMMON"
             );

@@ -24,7 +24,7 @@ import java.util.Map;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
-import com.baidu.hugegraph.computer.core.output.hg.IdHugeGraphOutput;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphIdOutput;
 
 public class LpaParams implements AlgorithmParams {
 
@@ -37,6 +37,6 @@ public class LpaParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          BytesId.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         IdHugeGraphOutput.class.getName());
+                         HugeGraphIdOutput.class.getName());
     }
 }

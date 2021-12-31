@@ -19,14 +19,21 @@
 
 package com.baidu.hugegraph.computer.core.output.hg;
 
-public class LongHugeGraphOutput extends HugeGraphOutput<Long> {
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+
+public class HugeGraphIdOutput extends HugeGraphOutput<String> {
 
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                     .asLong()
+                     .asText()
                      .writeType(this.writeType())
                      .ifNotExist()
                      .create();
+    }
+
+    @Override
+    protected String value(Vertex vertex) {
+        return vertex.value().string();
     }
 }
