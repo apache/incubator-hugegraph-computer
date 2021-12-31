@@ -53,6 +53,7 @@ import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.OwnerReference;
@@ -315,9 +316,12 @@ public class ComputerJobDeployer {
         volumes.add(configVolume);
 
         // Pod topology spread constraints by node
+        LabelSelector labelSelector = new LabelSelector();
+        labelSelector.setMatchLabels(meta.getLabels());
         TopologySpreadConstraint spreadConstraint =
-                new TopologySpreadConstraint(null, 1,
-                 "kubernetes.io/hostname", "ScheduleAnyway");
+                new TopologySpreadConstraint(
+                        labelSelector, 1,
+                        "kubernetes.io/hostname", "ScheduleAnyway");
         PodSpec podSpec = new PodSpecBuilder()
                 .withContainers(containers)
                 .withImagePullSecrets(spec.getPullSecrets())
