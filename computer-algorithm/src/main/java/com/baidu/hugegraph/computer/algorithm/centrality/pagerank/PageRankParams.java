@@ -42,8 +42,5 @@ public class PageRankParams implements AlgorithmParams {
                          DoubleValueSumCombiner.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          PageRankOutput.class.getName());
-        this.setIfAbsent(params,
-                         ComputerOptions.USE_ID_FIXLENGTH.name(),
-                         Boolean.TRUE.toString());
     }
 }
