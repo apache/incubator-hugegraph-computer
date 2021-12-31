@@ -71,7 +71,7 @@ jobs:
           chmod -R 777 ./artifacts
           docker save -o ./artifacts/hugegraph-computer-framework.tar ${{ github.event.inputs.framework_image_url }}
           docker save -o ./artifacts/hugegraph-computer-algorithm.tar ${{ github.event.inputs.algorithm_image_url }}
-          docker save -o ./artifacts/hugegraph-computer-algorithm.tar ${{ github.event.inputs.operator_image_url }}
+          docker save -o ./artifacts/hugegraph-computer-operator.tar ${{ github.event.inputs.operator_image_url }}
 
       - name: Upload github release
         uses: xresloader/upload-to-github-release@v1
