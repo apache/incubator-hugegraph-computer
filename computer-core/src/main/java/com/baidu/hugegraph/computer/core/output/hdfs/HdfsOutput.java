@@ -161,7 +161,9 @@ public class HdfsOutput extends AbstractComputerOutput {
                     ComputerOptions.OUTPUT_HDFS_KERBEROS_PRINCIPAL);
             String keyTab = config.get(
                             ComputerOptions.OUTPUT_HDFS_KERBEROS_KEYTAB);
-            conf.set("fs.defaultFS", url);
+            if (StringUtils.isBlank(hdfsSite)) {
+                conf.set("fs.defaultFS", url);
+            }
             conf.set("hadoop.security.authentication", "kerberos");
             conf.set("dfs.namenode.kerberos.principal", principal);
 
@@ -170,6 +172,9 @@ public class HdfsOutput extends AbstractComputerOutput {
             return FileSystem.get(conf);
         } else {
             String user = config.get(ComputerOptions.OUTPUT_HDFS_USER);
+            if (StringUtils.isNotBlank(hdfsSite)) {
+                return FileSystem.get(conf);
+            }
             return FileSystem.get(URI.create(url), conf, user);
         }
     }
