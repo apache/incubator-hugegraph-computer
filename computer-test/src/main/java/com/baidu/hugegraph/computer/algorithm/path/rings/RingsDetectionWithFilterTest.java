@@ -102,8 +102,8 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
                         "    \"edge_filter\": [" +
                         "        {" +
                         "            \"label\": \"know\"," +
-                        "            \"property_filter\": \"$message" +
-                        ".weight==$element.weight\"" +
+                        "            \"property_filter\": \"$in" +
+                        ".weight==$out.weight\"" +
                         "        }" +
                         "    ]" +
                         "}";

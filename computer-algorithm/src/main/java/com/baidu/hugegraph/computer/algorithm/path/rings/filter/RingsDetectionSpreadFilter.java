@@ -41,8 +41,9 @@ import com.googlecode.aviator.Expression;
 public class RingsDetectionSpreadFilter {
 
     private static final String ALL = "*";
-    private static final String MESSAGE = "$message";
     private static final String ELEMENT = "$element";
+    private static final String IN = "$in";
+    private static final String OUT = "$out";
 
     private final Map<String, Expression> vertexFilter;
     private final Map<String, Expression> edgeFilter;
@@ -102,7 +103,7 @@ public class RingsDetectionSpreadFilter {
                                      edge.label(),
                                      expression -> {
                                          return !expression.getVariableNames()
-                                                           .contains(MESSAGE);
+                                                           .contains(IN);
                                      });
         if (CollectionUtils.isEmpty(expressions)) {
             return true;
@@ -113,7 +114,7 @@ public class RingsDetectionSpreadFilter {
         return filter(params, expressions);
     }
 
-    public boolean filter(Edge edge, RingsDetectionMessage message) {
+    public boolean filter(Edge edge, RingsDetectionMessage inEdge) {
         if (isLabelCannotSpread(this.edgeFilter, edge.label())) {
             return false;
         }
@@ -126,8 +127,8 @@ public class RingsDetectionSpreadFilter {
         }
 
         Map<String, Map<String, Value<?>>> params =
-                    ImmutableMap.of(ELEMENT, edge.properties().get(),
-                                    MESSAGE, message.walkEdgeProp().get());
+                    ImmutableMap.of(OUT, edge.properties().get(),
+                                    IN, inEdge.walkEdgeProp().get());
         return filter(params, expressions);
     }
 
