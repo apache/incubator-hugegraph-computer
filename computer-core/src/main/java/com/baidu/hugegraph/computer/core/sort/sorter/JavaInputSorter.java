@@ -28,12 +28,10 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public class JavaInputSorter implements InputSorter {
 
-    private static final int DEFAULT_CAPACITY = 100000;
-
     @Override
     public Iterator<KvEntry> sort(Iterator<KvEntry> entries)
                                   throws IOException {
-        List<KvEntry> kvEntries = new ArrayList<>(DEFAULT_CAPACITY);
+        List<KvEntry> kvEntries = new ArrayList<>();
         while (entries.hasNext()) {
             kvEntries.add(entries.next());
         }
