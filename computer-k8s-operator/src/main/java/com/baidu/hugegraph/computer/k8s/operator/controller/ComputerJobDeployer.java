@@ -199,19 +199,6 @@ public class ComputerJobDeployer {
             config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
         }
 
-        /*
-        Set a default number of transport threads,
-        if the number of CPU quantity of the worker is not specified
-         */
-        if (spec.getWorkerCpu() == null) {
-            String defaultThreads = String.valueOf(DEFAULT_TRANSPORT_THREADS);
-
-            config.putIfAbsent(ComputerOptions.TRANSPORT_CLIENT_THREADS.name(),
-                               defaultThreads);
-            config.putIfAbsent(ComputerOptions.TRANSPORT_SERVER_THREADS.name(),
-                               defaultThreads);
-        }
-
         ContainerPort transportContainerPort = new ContainerPortBuilder()
                 .withName(TRANSPORT_PORT_NAME)
                 .withContainerPort(Integer.valueOf(transportPort))
