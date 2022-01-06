@@ -70,7 +70,8 @@ public class HdfsOutputMerger {
         List<Path> pathList = new ArrayList<>();
         for (int i = 0; i < partitions; i++) {
             Path path = HdfsOutput.buildPath(dir, jobId, i);
-            if (this.fs.exists(path)) {
+            if (this.fs.exists(path) &&
+                this.fs.getFileStatus(path).getLen() > 0) {
                 pathList.add(path);
             }
         }
