@@ -66,7 +66,7 @@ public class ComputerOptions extends OptionHolder {
     public static final DriverConfigOption<String> INPUT_SOURCE_TYPE =
             new DriverConfigOption<>(
                     "input.source_type",
-                    allowValues("hugegraph"),
+                    allowValues("hugegraph", "loader"),
                     String.class
             );
 
@@ -431,7 +431,7 @@ public class ComputerOptions extends OptionHolder {
     public static final DriverConfigOption<String> TRANSPORT_IO_MODE =
             new DriverConfigOption<>(
                     "transport.io_mode",
-                    allowValues("NIO", "EPOLL", "AUTO"),
+                    disallowEmpty(),
                     String.class
             );
 
@@ -702,7 +702,6 @@ public class ComputerOptions extends OptionHolder {
             );
 
     public static final Set<String> REQUIRED_INIT_OPTIONS = ImmutableSet.of(
-            HUGEGRAPH_URL.name()
     );
 
     public static final Set<String> K8S_PROHIBIT_USER_SETTINGS =
