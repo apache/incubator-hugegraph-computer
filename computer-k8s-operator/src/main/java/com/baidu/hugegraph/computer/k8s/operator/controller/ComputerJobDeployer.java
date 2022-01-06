@@ -85,11 +85,9 @@ public class ComputerJobDeployer {
     private static final String RPC_PORT_NAME = "rpc-port";
     private static final int DEFAULT_TRANSPORT_PORT = 8099;
     private static final int DEFAULT_RPC_PORT = 8090;
-    private static final int DEFAULT_TRANSPORT_THREADS = 8;
     private static final String COMPUTER_CONFIG_MAP_VOLUME =
             "computer-config-map-volume";
 
-    private static final String CONTAINER_CPU_LIMIT_KEY = "limits.cpu";
     private static final String POD_IP_KEY = "status.podIP";
     private static final String POD_NAMESPACE_KEY = "metadata.namespace";
     private static final String POD_NAME_KEY = "metadata.name";

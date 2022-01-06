@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/java/jre:11-zulu-ubuntu
+FROM openjdk:11-jre
 LABEL maintainer="HugeGraph Docker Maintainers <hugegraph@googlegroups.com>"
 WORKDIR /opt/app
 COPY target/hugegraph-computer-operator-*.jar hugegraph-computer-operator.jar

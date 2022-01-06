@@ -70,11 +70,7 @@ public class TransportConf {
     }
 
     private int maxTransportThreads() {
-        Integer workerCount = this.config
-                                  .get(ComputerOptions.JOB_WORKERS_COUNT);
-        Integer partitions = this.config
-                                 .get(ComputerOptions.JOB_PARTITIONS_COUNT);
-        return partitions / workerCount + 1;
+        return this.config.get(ComputerOptions.JOB_WORKERS_COUNT);
     }
 
     public TransportProvider transportProvider() {
