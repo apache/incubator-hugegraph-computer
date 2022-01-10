@@ -154,7 +154,7 @@ public class MessageSendManager implements Manager {
      */
     public void startSend(MessageType type) {
         Map<Integer, WriteBuffers> all = this.buffers.all();
-        all.values().stream().forEach(WriteBuffers::resetMessageWritten);
+        all.values().forEach(WriteBuffers::resetMessageWritten);
         Set<Integer> workerIds = all.keySet().stream()
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());

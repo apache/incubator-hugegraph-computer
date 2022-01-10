@@ -148,8 +148,8 @@ public class FileGraphPartition {
         try {
             this.computation.beforeSuperstep(context);
             activeVertexCount = superstep == 0 ?
-                                this.compute0(context, this.computation) :
-                                this.compute1(context, this.computation);
+                                this.compute0(context) :
+                                this.compute1(context);
             this.computation.afterSuperstep(context);
         } catch (Exception e) {
             throw new ComputerException(
@@ -174,8 +174,7 @@ public class FileGraphPartition {
     }
 
 
-    private long compute0(ComputationContext context,
-                          Computation<Value> computation) {
+    private long compute0(ComputationContext context) {
         long activeVertexCount = 0L;
         while (this.vertexInput.hasNext()) {
             Vertex vertex = this.vertexInput.next();
@@ -184,7 +183,7 @@ public class FileGraphPartition {
             Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
             vertex.edges(edges);
 
-            computation.compute0(context, vertex);
+            this.computation.compute0(context, vertex);
 
             if (vertex.active()) {
                 activeVertexCount++;
@@ -200,8 +199,7 @@ public class FileGraphPartition {
         return activeVertexCount;
     }
 
-    private long compute1(ComputationContext context,
-                          Computation<Value> computation) {
+    private long compute1(ComputationContext context) {
         Value result = this.context.config().createObject(
                        ComputerOptions.ALGORITHM_RESULT_CLASS);
         long activeVertexCount = 0L;
@@ -223,7 +221,7 @@ public class FileGraphPartition {
                 Edges edges = this.edgesInput.edges(
                               this.vertexInput.idPointer());
                 vertex.edges(edges);
-                computation.compute(context, vertex, messageIter);
+                this.computation.compute(context, vertex, messageIter);
             }
 
             // The vertex status may be changed after computation

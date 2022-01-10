@@ -312,7 +312,6 @@ public class WorkerService implements Closeable {
         DataServerManager serverManager = new DataServerManager(connManager,
                                                                 recvManager);
         this.managers.add(serverManager);
-        this.managers.add(serverManager);
 
         DataClientManager clientManager = new DataClientManager(connManager,
                                                                 this.context);
