@@ -107,7 +107,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
     }
 
     public static class ClosenessWithWeightPropertyTestOutput
-            extends HugeGraphDoubleOutput {
+           extends HugeGraphDoubleOutput {
 
         private final Map<String, Double> expectResults =
                 ImmutableMap.<String, Double>builder()
