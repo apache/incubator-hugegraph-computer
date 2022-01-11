@@ -28,11 +28,19 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public class JavaInputSorter implements InputSorter {
 
+    private static final ThreadLocal<List<KvEntry>> SORT_LOCAL =
+            ThreadLocal.withInitial(ArrayList::new);
+
+    private static List<KvEntry> threadSortList() {
+        List<KvEntry> list = SORT_LOCAL.get();
+        list.clear();
+        return list;
+    }
+
     @Override
     public Iterator<KvEntry> sort(Iterator<KvEntry> entries)
-                                  throws IOException {
-        // TODO: Set initial capacity
-        List<KvEntry> kvEntries = new ArrayList<>();
+                             throws IOException {
+        List<KvEntry> kvEntries = threadSortList();
         while (entries.hasNext()) {
             kvEntries.add(entries.next());
         }
