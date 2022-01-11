@@ -153,6 +153,9 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
 
     protected abstract OperatorResult reconcile(OperatorRequest request);
 
+    protected abstract void handleFailOverLimit(OperatorRequest request,
+                                                Exception e);
+
     private void startWorker() {
         while (!this.executor.isShutdown() &&
                !this.workQueue.isShutdown() &&
@@ -172,12 +175,18 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
             }
             OperatorResult result;
             try {
+                LOG.debug("start reconcile request: {}", request);
                 result = this.reconcile(request);
             } catch (Exception e) {
                 LOG.error("Reconcile occur error, requeue request: ", e);
                 int maxReconcileRetry = this.config.get(
                                         OperatorOptions.MAX_RECONCILE_RETRY);
                 if (request.retryIncrGet() > maxReconcileRetry) {
+                    try {
+                        this.handleFailOverLimit(request, e);
+                    } catch (Exception e2) {
+                        LOG.error("Handle fail over limit occur error:", e2);
+                    }
                     result = OperatorResult.NO_REQUEUE;
                 } else {
                     result = OperatorResult.REQUEUE;
@@ -189,6 +198,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                     this.enqueueRequest(request);
                 }
             } finally {
+                LOG.debug("end reconcile request: {}", request);
                 this.workQueue.done(request);
             }
         }
@@ -202,18 +212,21 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         crInformer.addEventHandler(new ResourceEventHandler<T>() {
             @Override
             public void onAdd(T cr) {
+                LOG.info("received a CR add request: {}", cr.getMetadata());
                 OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
 
             @Override
             public void onUpdate(T oldCR, T cr) {
+                LOG.info("received a CR update request: {}", cr.getMetadata());
                 OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
 
             @Override
             public void onDelete(T cr, boolean deletedStateUnknown) {
+                LOG.info("received a CR delete request: {}", cr.getMetadata());
                 OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }

@@ -51,6 +51,7 @@ import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.util.Log;
+import com.google.common.base.Throwables;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ContainerState;
@@ -103,8 +104,8 @@ public class ComputerJobController
     protected OperatorResult reconcile(OperatorRequest request) {
         HugeGraphComputerJob computerJob = this.getCR(request);
         if (computerJob == null) {
-            LOG.debug("Unable to fetch HugeGraphComputerJob {}, " +
-                      "it may have been deleted", request.name());
+            LOG.info("Unable to fetch HugeGraphComputerJob {}, " +
+                     "it may have been deleted", request.name());
             return OperatorResult.NO_REQUEUE;
         }
 
@@ -115,7 +116,7 @@ public class ComputerJobController
         }
 
         ComputerJobComponent observed = this.observeComponent(computerJob);
-        if (!this.updateStatus(observed)) {
+        if (!this.updateStatus(observed) && request.retryTimes() == 0) {
             LOG.debug("Wait status to be stable before taking further actions");
             return OperatorResult.NO_REQUEUE;
         }
@@ -132,6 +133,26 @@ public class ComputerJobController
         deployer.deploy(observed);
 
         return OperatorResult.NO_REQUEUE;
+    }
+
+    @Override
+    protected void handleFailOverLimit(OperatorRequest request, Exception e) {
+        HugeGraphComputerJob computerJob = this.getCR(request);
+        if (computerJob == null) {
+            LOG.info("Unable to fetch HugeGraphComputerJob {}, " +
+                     "it may have been deleted", request.name());
+            return;
+        }
+
+        String crName = computerJob.getMetadata().getName();
+        this.recordEvent(computerJob, EventType.WARNING,
+                         KubeUtil.failedEventName(crName),
+                         String.format("ComputerJob %s reconcile failed\n",
+                                       crName),
+                         Throwables.getStackTraceAsString(e));
+
+        computerJob.getStatus().setJobStatus(JobStatus.FAILED.name());
+        this.updateStatus(computerJob);
     }
 
     @Override

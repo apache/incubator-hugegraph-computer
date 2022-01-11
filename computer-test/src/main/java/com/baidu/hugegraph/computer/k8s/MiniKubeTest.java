@@ -379,12 +379,14 @@ public class MiniKubeTest extends AbstractK8sTest {
                         .endMetadata()
                         .withType("Opaque")
                         .addToData("2.txt", dataBase64)
+                        .addToData("3.txt", dataBase64)
                         .build();
         this.kubeClient.secrets().createOrReplace(secret);
 
         ArrayList<String> args = Lists.newArrayList(
                                  "cat /opt/configmap123/1.txt && " +
-                                 "cat /opt/secret123/2.txt");
+                                 "cat /opt/secret123/2.txt &&" +
+                                 "cat /opt/secret123/3.txt");
         super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(), args);
         super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(), args);
         Object defaultSpec = Whitebox.invoke(KubernetesDriver.class,
