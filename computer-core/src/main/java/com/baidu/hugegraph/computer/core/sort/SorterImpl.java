@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
@@ -36,6 +37,8 @@ import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
+import com.baidu.hugegraph.computer.core.store.bufferfile.BufferFileEntryReader;
+import com.baidu.hugegraph.computer.core.store.bufferfile.BufferFileSubEntryReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesWithFirstSubKvInput;
@@ -53,9 +56,11 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.SelectedFile
 public class SorterImpl implements Sorter {
 
     private final Config config;
+    private final boolean useZeroCopy;
 
     public SorterImpl(Config config) {
         this.config = config;
+        this.useZeroCopy = config.get(ComputerOptions.TRANSPORT_ZERO_COPY_MODE);
     }
 
     @Override
@@ -91,9 +96,19 @@ public class SorterImpl implements Sorter {
                             throws Exception {
         InputToEntries inputToEntries;
         if (withSubKv) {
-            inputToEntries = o -> new HgkvDir4SubKvReaderImpl(o).iterator();
+            if (this.useZeroCopy) {
+                inputToEntries = o -> new BufferFileEntryReader(o).iterator();
+            } else {
+                inputToEntries = o -> new HgkvDir4SubKvReaderImpl(o).iterator();
+            }
         } else {
-            inputToEntries = o -> new HgkvDirReaderImpl(o).iterator();
+            if (this.useZeroCopy) {
+                inputToEntries = o -> {
+                    return new BufferFileSubEntryReader(o).iterator();
+                };
+            } else {
+                inputToEntries = o -> new HgkvDirReaderImpl(o).iterator();
+            }
         }
         this.mergeInputs(inputs, inputToEntries, flusher, outputs);
     }
