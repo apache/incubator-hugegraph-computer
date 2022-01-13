@@ -20,58 +20,57 @@
 package com.baidu.hugegraph.computer.core.network.buffer;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 
-public class NettyManagedBuffer implements ManagedBuffer {
+public class NioBuffer implements NetworkBuffer {
 
-    private final ByteBuf buf;
+    private final ByteBuffer buffer;
+    private final AtomicInteger referenceCount;
 
-    public NettyManagedBuffer(ByteBuf buf) {
-        this.buf = buf;
+    public NioBuffer(ByteBuffer buffer) {
+        this.buffer = buffer;
+        this.referenceCount = new AtomicInteger(1);
     }
 
     @Override
     public int length() {
-        return this.buf.readableBytes();
+        return this.buffer.remaining();
     }
 
     @Override
-    public ManagedBuffer retain() {
-        this.buf.retain();
+    public NetworkBuffer retain() {
+        this.referenceCount.incrementAndGet();
         return this;
     }
 
     @Override
-    public ManagedBuffer release() {
-        this.buf.release();
+    public NetworkBuffer release() {
+        this.referenceCount.decrementAndGet();
         return this;
     }
 
     @Override
     public int referenceCount() {
-        return this.buf.refCnt();
+        return this.referenceCount.get();
     }
 
-    /**
-     * NOTE: It will trigger copy when this.buf.nioBufferCount > 1
-     */
     @Override
     public ByteBuffer nioByteBuffer() {
-        return this.buf.nioBuffer();
+        return this.buffer.duplicate();
     }
 
     @Override
     public ByteBuf nettyByteBuf() {
-        return this.buf.duplicate();
+        return Unpooled.wrappedBuffer(this.buffer);
     }
 
     @Override
     public byte[] copyToByteArray() {
-        return ByteBufUtil.getBytes(this.buf,
-                                    this.buf.readerIndex(),
-                                    this.buf.readableBytes(),
-                                    true);
+        byte[] bytes = new byte[this.buffer.remaining()];
+        this.buffer.duplicate().get(bytes);
+        return bytes;
     }
 }

@@ -29,10 +29,11 @@ import io.netty.buffer.ByteBuf;
  *
  * The implementation should specify how the data is provided:
  *
- * - {@link NioManagedBuffer}: data backed by a NIO ByteBuffer
- * - {@link NettyManagedBuffer}: data backed by a Netty ByteBuf
+ * - {@link NioBuffer}: data backed by a NIO ByteBuffer
+ * - {@link NettyBuffer}: data backed by a Netty ByteBuf
+ * - {@link FileRegionBuffer}: data backed by a File Region
  */
-public interface ManagedBuffer {
+public interface NetworkBuffer {
 
     /**
      * Number of bytes of the data.
@@ -42,13 +43,13 @@ public interface ManagedBuffer {
     /**
      * Increase the reference count by one if applicable.
      */
-    ManagedBuffer retain();
+    NetworkBuffer retain();
 
     /**
      * If applicable, decrease the reference count by one and deallocates
      * the buffer if the reference count reaches zero.
      */
-    ManagedBuffer release();
+    NetworkBuffer release();
 
     /**
      * Returns the reference count.

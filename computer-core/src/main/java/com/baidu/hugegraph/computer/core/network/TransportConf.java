@@ -80,6 +80,10 @@ public class TransportConf {
                    .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
     }
 
+    public boolean zeroCopyMode() {
+        return this.config.get(ComputerOptions.TRANSPORT_ZERO_COPY_MODE);
+    }
+
     /**
      * IO mode: nio or epoll
      */

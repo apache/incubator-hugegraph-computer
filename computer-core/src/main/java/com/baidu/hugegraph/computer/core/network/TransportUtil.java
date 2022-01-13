@@ -37,6 +37,7 @@ import com.baidu.hugegraph.util.Log;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.DefaultMaxBytesRecvByteBufAllocator;
 
 public class TransportUtil {
 
@@ -156,5 +157,14 @@ public class TransportUtil {
         byte[] encoded = StringEncoding.encode(value);
         buf.writeInt(encoded.length);
         buf.writeBytes(encoded);
+    }
+
+    public static void setMaxBytesPreRead(Channel channel, int length) {
+        DefaultMaxBytesRecvByteBufAllocator recvByteBufAllocator =
+                                            channel.config()
+                                                   .getRecvByteBufAllocator();
+        if (recvByteBufAllocator.maxBytesPerIndividualRead() != length) {
+            recvByteBufAllocator.maxBytesPerReadPair(length, length);
+        }
     }
 }

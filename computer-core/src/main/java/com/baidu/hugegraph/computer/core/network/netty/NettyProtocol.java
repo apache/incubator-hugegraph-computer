@@ -26,6 +26,7 @@ import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.codec.FrameDecoder;
 import com.baidu.hugegraph.computer.core.network.netty.codec.MessageDecoder;
 import com.baidu.hugegraph.computer.core.network.netty.codec.MessageEncoder;
+import com.baidu.hugegraph.computer.core.network.netty.codec.PreciseFrameDecoder;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
 
 import io.netty.channel.Channel;
@@ -42,8 +43,6 @@ public class NettyProtocol {
     private static final ChannelHandler SLOT_HANDLER = new SLOT_HANDLER();
     private static final int DISABLE_IDLE_TIME = 0;
 
-    private static final MessageEncoder ENCODER = MessageEncoder.INSTANCE;
-    private static final MessageDecoder DECODER = MessageDecoder.INSTANCE;
     private static final ServerIdleHandler SERVER_IDLE_HANDLER =
                                            new ServerIdleHandler();
     private static final HeartbeatHandler HEART_BEAT_HANDLER =
@@ -63,14 +62,14 @@ public class NettyProtocol {
      *
      * <pre>
      *     +----------------------+
-     *     | LocalBuffer          |
+     *     | Local File           |
      *     +-----------+----------+
-     *                /|\ (2)handle message
+     *                /|\ (2) zero-copy
      * +---------------+---------------------------------------------------+
      * |               |        SERVER CHANNEL PIPELINE                    |
      * |               |                                                   |
      * |    +----------+----------+ (3)write ack +----------------------+  |
-     * |    | ServerHandler       +------------->+ MessageEncoder       |  |
+     * |    | ServerHandler       |------------->| MessageEncoder       |  |
      * |    +----------+----------+              +-----------+----------+  |
      * |              /|\                                 \|/              |
      * |               |                                   |               |
@@ -80,7 +79,7 @@ public class NettyProtocol {
      * |              /|\                                  |               |
      * |               |                                   |               |
      * |   +-----------+-----------+                       |               |
-     * |   | FrameDecoder          |                       |               |
+     * |   | PreciseFrameDecoder   |                       |               |
      * |   +-----------+-----------+                       |               |
      * |              /|\                                  |               |
      * +---------------+-----------------------------------+---------------+
@@ -97,11 +96,15 @@ public class NettyProtocol {
                                             MessageHandler handler) {
         ChannelPipeline pipeline = channel.pipeline();
 
-        pipeline.addLast("encoder", ENCODER);
+        pipeline.addLast("encoder", MessageEncoder.INSTANCE);
 
-        pipeline.addLast("frameDecoder", new FrameDecoder());
-
-        pipeline.addLast("decoder", DECODER);
+        if (this.conf.zeroCopyMode()) {
+            pipeline.addLast("frameDecoder", new PreciseFrameDecoder());
+            pipeline.addLast("decoder", MessageDecoder.INSTANCE_FILE_REGION);
+        } else {
+            pipeline.addLast("frameDecoder", new FrameDecoder());
+            pipeline.addLast("decoder", MessageDecoder.INSTANCE_MEMORY_BUFFER);
+        }
 
         pipeline.addLast("serverIdleStateHandler",
                          this.newServerIdleStateHandler());
@@ -151,11 +154,11 @@ public class NettyProtocol {
     protected void initializeClientPipeline(Channel channel) {
         ChannelPipeline pipeline = channel.pipeline();
 
-        pipeline.addLast("encoder", ENCODER);
+        pipeline.addLast("encoder", MessageEncoder.INSTANCE);
 
         pipeline.addLast("frameDecoder", new FrameDecoder());
 
-        pipeline.addLast("decoder", DECODER);
+        pipeline.addLast("decoder", MessageDecoder.INSTANCE_MEMORY_BUFFER);
 
         pipeline.addLast("clientIdleStateHandler",
                          this.newClientIdleStateHandler());

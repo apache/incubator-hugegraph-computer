@@ -30,8 +30,8 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.Writable;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NettyBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
@@ -42,11 +42,11 @@ import io.netty.buffer.Unpooled;
 public class ReceiverUtil {
 
     public static void consumeBuffer(byte[] bytes,
-                                     Consumer<ManagedBuffer> consumer) {
+                                     Consumer<NetworkBuffer> consumer) {
         ByteBuf buf = Unpooled.directBuffer(bytes.length);
         try {
             buf = buf.writeBytes(bytes);
-            NettyManagedBuffer buff = new NettyManagedBuffer(buf);
+            NettyBuffer buff = new NettyBuffer(buf);
             consumer.accept(buff);
         } finally {
             buf.release();

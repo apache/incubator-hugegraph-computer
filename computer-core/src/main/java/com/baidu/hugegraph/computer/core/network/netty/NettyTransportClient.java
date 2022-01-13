@@ -50,7 +50,7 @@ public class NettyTransportClient implements TransportClient {
     private final ClientSession session;
     private final long timeoutSyncRequest;
     private final long timeoutFinishSession;
-    private volatile boolean preSendAvailable;
+    private boolean preSendAvailable;
 
     protected NettyTransportClient(Channel channel, ConnectionId connectionId,
                                    NettyClientFactory clientFactory,

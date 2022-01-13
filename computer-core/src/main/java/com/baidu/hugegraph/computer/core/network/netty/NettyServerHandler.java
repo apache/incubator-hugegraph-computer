@@ -25,17 +25,21 @@ import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
+import com.baidu.hugegraph.computer.core.network.buffer.FileRegionBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
-import com.google.common.base.Throwables;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoop;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.ScheduledFuture;
 
 public class NettyServerHandler extends AbstractNettyHandler {
@@ -77,17 +81,54 @@ public class NettyServerHandler extends AbstractNettyHandler {
     protected void processDataMessage(ChannelHandlerContext ctx,
                                       Channel channel,
                                       DataMessage dataMessage) {
+        NetworkBuffer body = dataMessage.body();
         try {
-            int requestId = dataMessage.requestId();
+            if (body instanceof FileRegionBuffer) {
+                this.serverSession.onRecvData(dataMessage.requestId());
+                /*
+                    submit zero-copy task to EventLoop,
+                    it will be executed next time network data is received.
+                 */
+                FileRegionBuffer buffer = ((FileRegionBuffer) body);
+                // optimize MaxBytes PreRead
+                TransportUtil.setMaxBytesPreRead(channel, body.length());
+                String outputPath = this.handler.genOutputPath(
+                                    dataMessage.type(),
+                                    dataMessage.partition());
+                ChannelFuture channelFuture = buffer.transformFromChannel(
+                                              (SocketChannel) channel,
+                                              outputPath);
 
-            this.serverSession.onRecvData(requestId);
-
-            this.handler.handle(dataMessage.type(), dataMessage.partition(),
-                                dataMessage.body());
-
-            this.serverSession.onHandledData(requestId);
+                channelFuture.addListener((ChannelFutureListener) future -> {
+                    try {
+                        if (future.isSuccess()) {
+                            this.handler.handle(dataMessage.type(),
+                                                dataMessage.partition(),
+                                                dataMessage.body());
+                            this.serverSession.onHandledData(
+                                               dataMessage.requestId());
+                        } else {
+                            this.exceptionCaught(ctx, future.cause());
+                        }
+                        // reset max bytes next read to length of frame
+                        TransportUtil.setMaxBytesPreRead(future.channel(),
+                                      AbstractMessage.HEADER_LENGTH);
+                        future.channel().unsafe().recvBufAllocHandle().reset(
+                                         future.channel().config());
+                        dataMessage.release();
+                    } catch (Throwable throwable) {
+                        this.exceptionCaught(ctx, throwable);
+                    }
+                });
+            } else {
+                int requestId = dataMessage.requestId();
+                this.serverSession.onRecvData(requestId);
+                this.handler.handle(dataMessage.type(), dataMessage.partition(),
+                                    dataMessage.body());
+                this.serverSession.onHandledData(requestId);
+            }
         } finally {
-            dataMessage.release();
+            body.release();
         }
     }
 
@@ -139,17 +180,6 @@ public class NettyServerHandler extends AbstractNettyHandler {
         this.serverSession.onDataAckSent(ackId);
     }
 
-    @Override
-    protected void ackFailMessage(ChannelHandlerContext ctx, int failId,
-                                  int errorCode, String message) {
-        super.ackFailMessage(ctx, failId, errorCode, message);
-
-        if (failId > AbstractMessage.START_SEQ) {
-            this.serverSession.onHandledData(failId);
-            this.serverSession.onDataAckSent(failId);
-        }
-    }
-
     private void checkAndRespondAck(ChannelHandlerContext ctx) {
         if (this.serverSession.needAckFinish()) {
             this.ackFinishMessage(ctx, this.serverSession.finishId());
@@ -186,11 +216,6 @@ public class NettyServerHandler extends AbstractNettyHandler {
                         cause, cause.getMessage(),
                         TransportUtil.remoteAddress(channel));
         }
-
-        // Respond fail message to requester
-        this.ackFailMessage(ctx, AbstractMessage.UNKNOWN_SEQ,
-                            exception.errorCode(),
-                            Throwables.getStackTraceAsString(exception));
 
         ConnectionId connectionId = TransportUtil.remoteConnectionId(channel);
         this.handler.exceptionCaught(exception, connectionId);

@@ -24,57 +24,37 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.algorithm.AlgorithmTestSuite;
-import com.baidu.hugegraph.computer.core.allocator.AllocatorTestSuite;
-import com.baidu.hugegraph.computer.core.bsp.BspTestSuite;
-import com.baidu.hugegraph.computer.core.combiner.CombinerTestSuite;
-import com.baidu.hugegraph.computer.core.common.CommonTestSuite;
-import com.baidu.hugegraph.computer.core.compute.ComputeTestSuite;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.ConfigTestSuite;
-import com.baidu.hugegraph.computer.core.graph.GraphTestSuite;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.core.input.InputTestSuite;
-import com.baidu.hugegraph.computer.core.io.IOTestSuite;
 import com.baidu.hugegraph.computer.core.network.NetworkTestSuite;
-import com.baidu.hugegraph.computer.core.receiver.ReceiverTestSuite;
-import com.baidu.hugegraph.computer.core.sender.SenderTestSuite;
-import com.baidu.hugegraph.computer.core.sort.sorter.SorterTestSuite;
-import com.baidu.hugegraph.computer.core.sort.sorting.SortingTestSuite;
-import com.baidu.hugegraph.computer.core.store.StoreTestSuite;
-import com.baidu.hugegraph.computer.core.util.UtilTestSuite;
-import com.baidu.hugegraph.computer.core.worker.WorkerTestSuite;
-import com.baidu.hugegraph.computer.dist.ComputerDistTestSuite;
-import com.baidu.hugegraph.computer.driver.DriverTestSuite;
-import com.baidu.hugegraph.computer.k8s.K8sTestSuite;
 import com.baidu.hugegraph.config.OptionSpace;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    AllocatorTestSuite.class,
-    CommonTestSuite.class,
-    ConfigTestSuite.class,
-    UtilTestSuite.class,
-    BspTestSuite.class,
-    CombinerTestSuite.class,
-    GraphTestSuite.class,
-    IOTestSuite.class,
-    InputTestSuite.class,
-    WorkerTestSuite.class,
+    //AllocatorTestSuite.class,
+    //CommonTestSuite.class,
+    //ConfigTestSuite.class,
+    //UtilTestSuite.class,
+    //BspTestSuite.class,
+    //CombinerTestSuite.class,
+    //GraphTestSuite.class,
+    //IOTestSuite.class,
+    //InputTestSuite.class,
+    //WorkerTestSuite.class,
     NetworkTestSuite.class,
-    StoreTestSuite.class,
-    SorterTestSuite.class,
-    SortingTestSuite.class,
-    SenderTestSuite.class,
-    ReceiverTestSuite.class,
-    ComputeTestSuite.class,
-    ComputerDistTestSuite.class,
-    DriverTestSuite.class,
-    K8sTestSuite.class,
-    AlgorithmTestSuite.class,
+    //StoreTestSuite.class,
+    //SorterTestSuite.class,
+    //SortingTestSuite.class,
+    //SenderTestSuite.class,
+    //ReceiverTestSuite.class,
+    //ComputeTestSuite.class,
+    //ComputerDistTestSuite.class,
+    //DriverTestSuite.class,
+    //K8sTestSuite.class,
+    //AlgorithmTestSuite.class,
 })
 public class UnitTestSuite {
 

@@ -20,57 +20,58 @@
 package com.baidu.hugegraph.computer.core.network.buffer;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.netty.buffer.ByteBufUtil;
 
-public class NioManagedBuffer implements ManagedBuffer {
+public class NettyBuffer implements NetworkBuffer {
 
-    private final ByteBuffer buffer;
-    private final AtomicInteger referenceCount;
+    private final ByteBuf buf;
 
-    public NioManagedBuffer(ByteBuffer buffer) {
-        this.buffer = buffer;
-        this.referenceCount = new AtomicInteger(1);
+    public NettyBuffer(ByteBuf buf) {
+        this.buf = buf;
     }
 
     @Override
     public int length() {
-        return this.buffer.remaining();
+        return this.buf.readableBytes();
     }
 
     @Override
-    public ManagedBuffer retain() {
-        this.referenceCount.incrementAndGet();
+    public NetworkBuffer retain() {
+        this.buf.retain();
         return this;
     }
 
     @Override
-    public ManagedBuffer release() {
-        this.referenceCount.decrementAndGet();
+    public NetworkBuffer release() {
+        this.buf.release();
         return this;
     }
 
     @Override
     public int referenceCount() {
-        return this.referenceCount.get();
+        return this.buf.refCnt();
     }
 
+    /**
+     * NOTE: It will trigger copy when this.buf.nioBufferCount > 1
+     */
     @Override
     public ByteBuffer nioByteBuffer() {
-        return this.buffer.duplicate();
+        return this.buf.nioBuffer();
     }
 
     @Override
     public ByteBuf nettyByteBuf() {
-        return Unpooled.wrappedBuffer(this.buffer);
+        return this.buf.duplicate();
     }
 
     @Override
     public byte[] copyToByteArray() {
-        byte[] bytes = new byte[this.buffer.remaining()];
-        this.buffer.duplicate().get(bytes);
-        return bytes;
+        return ByteBufUtil.getBytes(this.buf,
+                                    this.buf.readerIndex(),
+                                    this.buf.readableBytes(),
+                                    true);
     }
 }

@@ -19,8 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.network.message;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.FileRegionBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NettyBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.util.E;
 
 import io.netty.buffer.ByteBuf;
@@ -30,7 +31,7 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
     private final MessageType type;
 
     public DataMessage(MessageType type, int requestId,
-                       int partition, ManagedBuffer data) {
+                       int partition, NetworkBuffer data) {
         super(requestId, partition, data);
         E.checkArgument(requestId > 0,
                         "The data requestId must be > 0, but got %s",
@@ -44,7 +45,7 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
     }
 
     /**
-     * Decoding uses the given ByteBuf as our data, and will zero-copy it.
+     * Decoding uses the given ByteBuf as our data.
      */
     public static DataMessage parseFrom(MessageType type, ByteBuf buf) {
         int requestId = buf.readInt();
@@ -53,7 +54,17 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
         int bodyLength = buf.readInt();
         // Slice body and retain it, the readIndex of buf will auto to body end
         ByteBuf bodySlice = buf.readRetainedSlice(bodyLength);
-        ManagedBuffer managedBuffer = new NettyManagedBuffer(bodySlice);
-        return new DataMessage(type, requestId, partition, managedBuffer);
+        NetworkBuffer networkBuffer = new NettyBuffer(bodySlice);
+        return new DataMessage(type, requestId, partition, networkBuffer);
+    }
+
+    public static DataMessage parseWithFileRegion(MessageType type,
+                                                  ByteBuf buf) {
+        int requestId = buf.readInt();
+        int partition = buf.readInt();
+
+        int bodyLength = buf.readInt();
+        return new DataMessage(type, requestId, partition,
+                               new FileRegionBuffer(bodyLength));
     }
 }

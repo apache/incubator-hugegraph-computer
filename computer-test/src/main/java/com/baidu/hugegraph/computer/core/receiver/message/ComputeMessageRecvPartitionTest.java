@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
@@ -116,7 +116,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
     }
 
     public static void addTwentyCombineMessageBuffer(
-                       Consumer<ManagedBuffer> consumer)
+                       Consumer<NetworkBuffer> consumer)
                        throws IOException {
         for (long i = 0L; i < 10L; i++) {
             for (int j = 0; j < 2; j++) {
@@ -153,7 +153,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
     }
 
     private static void addTwentyDuplicateIdValueListMessageBuffer
-                        (Consumer<ManagedBuffer> consumer)
+                        (Consumer<NetworkBuffer> consumer)
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             for (int j = 0; j < 2; j++) {

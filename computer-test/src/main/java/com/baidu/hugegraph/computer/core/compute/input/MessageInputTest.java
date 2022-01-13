@@ -43,7 +43,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
@@ -112,7 +112,7 @@ public class MessageInputTest extends UnitTestBase {
         // Superstep 0
         receiveManager.beforeSuperstep(this.config, 0);
         receiveManager.onStarted(this.connectionId);
-        addMessages((ManagedBuffer buffer) -> {
+        addMessages((NetworkBuffer buffer) -> {
                     receiveManager.handle(MessageType.MSG, 0, buffer);
         });
         receiveManager.onFinished(this.connectionId);
@@ -141,7 +141,7 @@ public class MessageInputTest extends UnitTestBase {
         }
     }
 
-    private static void addMessages(Consumer<ManagedBuffer> consumer)
+    private static void addMessages(Consumer<NetworkBuffer> consumer)
                                     throws IOException {
         Random random = new Random(1);
         for (long i = 0L; i < 200L; i++) {

@@ -29,74 +29,74 @@ import com.baidu.hugegraph.testutil.Assert;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-public class ManagedBufferTest {
+public class NetworkBufferTest {
 
     @Test
     public void testRetain() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(10);
-        ManagedBuffer nioManagedBuffer = new NioManagedBuffer(byteBuffer);
-        nioManagedBuffer.retain();
-        nioManagedBuffer.release();
-        Assert.assertSame(nioManagedBuffer.nioByteBuffer().array(),
+        NetworkBuffer nioNetworkBuffer = new NioBuffer(byteBuffer);
+        nioNetworkBuffer.retain();
+        nioNetworkBuffer.release();
+        Assert.assertSame(nioNetworkBuffer.nioByteBuffer().array(),
                           byteBuffer.array());
-        nioManagedBuffer.release();
+        nioNetworkBuffer.release();
 
         ByteBuf byteBuf = Unpooled.buffer(10);
         int cnt = byteBuf.refCnt();
-        ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
-        nettyManagedBuffer.retain();
+        NetworkBuffer nettyNetworkBuffer = new NettyBuffer(byteBuf);
+        nettyNetworkBuffer.retain();
         Assert.assertSame(cnt + 1, byteBuf.refCnt());
-        Assert.assertSame(cnt + 1, nettyManagedBuffer.referenceCount());
-        ByteBuf buf = nettyManagedBuffer.nettyByteBuf();
-        nettyManagedBuffer.retain();
+        Assert.assertSame(cnt + 1, nettyNetworkBuffer.referenceCount());
+        ByteBuf buf = nettyNetworkBuffer.nettyByteBuf();
+        nettyNetworkBuffer.retain();
         Assert.assertSame(cnt + 2, buf.refCnt());
-        Assert.assertSame(cnt + 2, nettyManagedBuffer.referenceCount());
-        nettyManagedBuffer.release();
-        nettyManagedBuffer.release();
-        nettyManagedBuffer.release();
+        Assert.assertSame(cnt + 2, nettyNetworkBuffer.referenceCount());
+        nettyNetworkBuffer.release();
+        nettyNetworkBuffer.release();
+        nettyNetworkBuffer.release();
     }
 
     @Test
     public void testRelease() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(10);
-        ManagedBuffer nioManagedBuffer = new NioManagedBuffer(byteBuffer);
-        Assert.assertSame(nioManagedBuffer.nioByteBuffer().array(),
+        NetworkBuffer nioNetworkBuffer = new NioBuffer(byteBuffer);
+        Assert.assertSame(nioNetworkBuffer.nioByteBuffer().array(),
                           byteBuffer.array());
-        nioManagedBuffer.release();
+        nioNetworkBuffer.release();
 
         ByteBuf byteBuf = Unpooled.buffer(10);
         int cnt = byteBuf.refCnt();
-        ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
-        nettyManagedBuffer.release();
-        Assert.assertSame(cnt - 1, nettyManagedBuffer.referenceCount());
+        NetworkBuffer nettyNetworkBuffer = new NettyBuffer(byteBuf);
+        nettyNetworkBuffer.release();
+        Assert.assertSame(cnt - 1, nettyNetworkBuffer.referenceCount());
     }
 
     @Test
     public void testNioByteBuffer() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(10);
-        ManagedBuffer nioManagedBuffer = new NioManagedBuffer(byteBuffer);
-        Assert.assertSame(nioManagedBuffer.nioByteBuffer().array(),
+        NetworkBuffer nioNetworkBuffer = new NioBuffer(byteBuffer);
+        Assert.assertSame(nioNetworkBuffer.nioByteBuffer().array(),
                           byteBuffer.array());
-        nioManagedBuffer.release();
+        nioNetworkBuffer.release();
 
         ByteBuf byteBuf = Unpooled.buffer(10);
-        ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
-        ByteBuffer buffer = nettyManagedBuffer.nioByteBuffer();
+        NetworkBuffer nettyNetworkBuffer = new NettyBuffer(byteBuf);
+        ByteBuffer buffer = nettyNetworkBuffer.nioByteBuffer();
         Assert.assertSame(buffer.array(), byteBuf.array());
     }
 
     @Test
     public void testNettyByteBuffer() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(10);
-        ManagedBuffer nioManagedBuffer = new NioManagedBuffer(byteBuffer);
-        Assert.assertSame(nioManagedBuffer.nettyByteBuf().array(),
+        NetworkBuffer nioNetworkBuffer = new NioBuffer(byteBuffer);
+        Assert.assertSame(nioNetworkBuffer.nettyByteBuf().array(),
                           byteBuffer.array());
-        nioManagedBuffer.release();
-        Assert.assertEquals(0, nioManagedBuffer.referenceCount());
+        nioNetworkBuffer.release();
+        Assert.assertEquals(0, nioNetworkBuffer.referenceCount());
 
         ByteBuf byteBuf = Unpooled.buffer(10);
-        ManagedBuffer nettyManagedBuffer = new NettyManagedBuffer(byteBuf);
-        ByteBuf buf = nettyManagedBuffer.nettyByteBuf();
+        NetworkBuffer nettyNetworkBuffer = new NettyBuffer(byteBuf);
+        ByteBuf buf = nettyNetworkBuffer.nettyByteBuf();
         Assert.assertSame(buf.array(), byteBuf.array());
     }
 
@@ -108,7 +108,7 @@ public class ManagedBufferTest {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bytesSource.length);
         byteBuffer = byteBuffer.put(bytesSource);
         byteBuffer.flip();
-        NioManagedBuffer nioManagedBuffer = new NioManagedBuffer(byteBuffer);
+        NioBuffer nioManagedBuffer = new NioBuffer(byteBuffer);
         byte[] bytes = nioManagedBuffer.copyToByteArray();
         Assert.assertArrayEquals(bytesSource, bytes);
         Assert.assertNotSame(bytesSource, bytes);
@@ -119,7 +119,7 @@ public class ManagedBufferTest {
 
         int position = byteBuffer2.position();
         int remaining = byteBuffer2.remaining();
-        NioManagedBuffer nioManagedBuffer2 = new NioManagedBuffer(byteBuffer2);
+        NioBuffer nioManagedBuffer2 = new NioBuffer(byteBuffer2);
         byte[] bytes2 = nioManagedBuffer2.copyToByteArray();
         Assert.assertArrayEquals(bytesSource, bytes2);
         Assert.assertNotSame(bytesSource, bytes2);
@@ -131,8 +131,8 @@ public class ManagedBufferTest {
             buf3 = buf3.writeBytes(bytesSource);
             int readerIndex = buf3.readerIndex();
             int readableBytes = buf3.readableBytes();
-            NettyManagedBuffer nettyManagedBuffer3 =
-                               new NettyManagedBuffer(buf3);
+            NettyBuffer nettyManagedBuffer3 =
+                               new NettyBuffer(buf3);
             byte[] bytes3 = nettyManagedBuffer3.copyToByteArray();
             Assert.assertArrayEquals(bytesSource, bytes3);
             Assert.assertNotSame(bytesSource, bytes3);
@@ -145,8 +145,8 @@ public class ManagedBufferTest {
         ByteBuf buf4 = Unpooled.buffer(bytesSource.length);
         try {
             buf4 = buf4.writeBytes(bytesSource);
-            NettyManagedBuffer nettyManagedBuffer4 =
-                               new NettyManagedBuffer(buf4);
+            NettyBuffer nettyManagedBuffer4 =
+                               new NettyBuffer(buf4);
             byte[] bytes4 = nettyManagedBuffer4.copyToByteArray();
             Assert.assertArrayEquals(bytesSource, bytes4);
             Assert.assertNotSame(bytesSource, bytes4);

@@ -128,9 +128,13 @@ public class NettyTransportServer implements TransportServer, Closeable {
         this.bootstrap.childOption(ChannelOption.SO_KEEPALIVE,
                                    this.conf.tcpKeepAlive());
 
+        boolean enableLt = this.conf.epollLevelTriggered();
+        // use zero-copy mode
+        if (this.conf.zeroCopyMode()) {
+            enableLt = true;
+        }
         // Enable trigger mode for epoll if need
-        NettyEventLoopUtil.enableTriggeredMode(ioMode,
-                                               this.conf.epollLevelTriggered(),
+        NettyEventLoopUtil.enableTriggeredMode(ioMode, enableLt,
                                                this.bootstrap);
 
         if (this.conf.maxSynBacklog() > 0) {

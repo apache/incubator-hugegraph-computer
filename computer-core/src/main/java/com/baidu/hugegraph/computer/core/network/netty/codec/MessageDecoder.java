@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.core.network.netty.codec;
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
-import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
@@ -42,38 +41,61 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 @ChannelHandler.Sharable
 public class MessageDecoder extends ChannelInboundHandlerAdapter {
 
-    public static final MessageDecoder INSTANCE = new MessageDecoder();
+    public static final MessageDecoder INSTANCE_FILE_REGION =
+                        new MessageDecoder(true);
+    public static final MessageDecoder INSTANCE_MEMORY_BUFFER =
+                        new MessageDecoder(false);
 
-    private MessageDecoder() {
+    private final boolean fileRegionMode;
+
+    private MessageDecoder(boolean fileRegionMode) {
+        this.fileRegionMode = fileRegionMode;
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (!(msg instanceof ByteBuf)) {
-            ctx.fireChannelRead(msg);
-            return;
-        }
-
         ByteBuf buf = (ByteBuf) msg;
+        Message message;
         try {
             MessageType msgType = MessageType.decode(buf);
-            Message decoded = this.decode(msgType, buf);
-            ctx.fireChannelRead(decoded);
+            message = this.decode(ctx, msgType, buf);
+            if (message == null) {
+                return;
+            }
         } finally {
             buf.release();
         }
+
+        ctx.fireChannelRead(message);
     }
 
-    private Message decode(MessageType msgType, ByteBuf in) {
+    private Message decode(ChannelHandlerContext ctx,
+                           MessageType msgType,
+                           ByteBuf in) {
         if (msgType.category() == MessageType.Category.DATA) {
             // Decode data message
-            return DataMessage.parseFrom(msgType, in);
+            if (this.fileRegionMode) {
+                return DataMessage.parseWithFileRegion(msgType, in);
+            } else {
+                return DataMessage.parseFrom(msgType, in);
+            }
         }
         switch (msgType) {
             case START:
                 return StartMessage.parseFrom(in);
-            case FAIL:
-                return FailMessage.parseFrom(in);
+            //case FAIL:
+            //    int remainingBytes = FailMessage.remainingBytes(in);
+            //    if (remainingBytes < 0) {
+            //        System.out.println(remainingBytes);
+            //    }
+            //    assert remainingBytes >= 0;
+            //    if (remainingBytes == 0) {
+            //        return FailMessage.parseFrom(in);
+            //    }
+            //    TransportUtil.setMaxBytesPreRead(ctx.channel(),
+            //                                     remainingBytes);
+            //    in.retain();
+            //    return null;
             case ACK:
                 return AckMessage.parseFrom(in);
             case FINISH:

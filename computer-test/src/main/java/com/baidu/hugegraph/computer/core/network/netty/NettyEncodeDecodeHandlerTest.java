@@ -25,16 +25,16 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.computer.core.network.MockUnDecodeMessage;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.buffer.NettyManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NettyBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NioBuffer;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.netty.codec.FrameDecoder;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
 import io.netty.buffer.ByteBuf;
@@ -57,7 +57,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         int partition = 1;
         byte[] bytes = StringEncoding.encode("mock msg");
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
-        ManagedBuffer body = new NioManagedBuffer(buffer);
+        NetworkBuffer body = new NioBuffer(buffer);
         DataMessage dataMessage = new DataMessage(null, requestId,
                                                   partition, body);
         ChannelFutureListenerOnWrite listener =
@@ -89,7 +89,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     public void testSendMsgWithFrameDecode() {
         FrameDecoder frameDecoder = new FrameDecoder();
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(frameDecoder);
-        ManagedBuffer buffer = new NettyManagedBuffer(Unpooled.buffer());
+        NetworkBuffer buffer = new NettyBuffer(Unpooled.buffer());
         ByteBuf buf = buffer.nettyByteBuf();
         StartMessage.INSTANCE.encode(buf);
         boolean writeInbound = embeddedChannel.writeInbound(buf);
@@ -102,7 +102,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     public void testSendMsgWithFrameDecodeMagicError() {
         FrameDecoder frameDecoder = new FrameDecoder();
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(frameDecoder);
-        ManagedBuffer buffer = new NettyManagedBuffer(Unpooled.buffer());
+        NetworkBuffer buffer = new NettyBuffer(Unpooled.buffer());
         short magicError = 10;
         ByteBuf buf = buffer.nettyByteBuf();
         StartMessage.INSTANCE.encode(buf);
@@ -117,7 +117,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     public void testSendMsgWithFrameDecodeVersionError() {
         FrameDecoder frameDecoder = new FrameDecoder();
         EmbeddedChannel embeddedChannel = new EmbeddedChannel(frameDecoder);
-        ManagedBuffer buffer = new NettyManagedBuffer(Unpooled.buffer());
+        NetworkBuffer buffer = new NettyBuffer(Unpooled.buffer());
         byte versionError = 10;
         ByteBuf buf = buffer.nettyByteBuf();
         StartMessage.INSTANCE.encode(buf);
@@ -152,7 +152,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
         byte[] bytes = StringEncoding.encode("mock msg");
         ByteBuf buf = Unpooled.directBuffer().writeBytes(bytes);
         try {
-            NettyManagedBuffer managedBuffer = new NettyManagedBuffer(buf);
+            NettyBuffer managedBuffer = new NettyBuffer(buf);
             DataMessage dataMessage = new DataMessage(MessageType.MSG,
                                                       requestId, partition,
                                                       managedBuffer);
