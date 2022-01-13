@@ -131,7 +131,7 @@ public class BetweennessCentralityTest extends AlgorithmTestBase {
     }
 
     public static class BetweennessCentralityTestOutput
-            extends HugeGraphDoubleOutput {
+                  extends HugeGraphDoubleOutput {
 
         @Override
         protected Double value(

@@ -26,7 +26,6 @@ import com.baidu.hugegraph.computer.core.combiner.DoubleValueSumCombiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphDoubleOutput;
-import com.baidu.hugegraph.structure.constant.WriteType;
 
 public class PageRankParams implements AlgorithmParams {
 
@@ -44,7 +43,5 @@ public class PageRankParams implements AlgorithmParams {
                          DoubleValueSumCombiner.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          HugeGraphDoubleOutput.class.getName());
-        this.setIfAbsent(params, ComputerOptions.OUTPUT_RESULT_WRITE_TYPE,
-                         WriteType.OLAP_RANGE.name());
     }
 }
