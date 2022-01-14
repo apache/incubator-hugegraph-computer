@@ -61,7 +61,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.PodSpecBuilder;
+import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.TopologySpreadConstraint;
@@ -311,32 +311,52 @@ public class ComputerJobDeployer {
         Volume configVolume = this.getComputerConfigVolume(configMapName);
         volumes.add(configVolume);
 
-        // Pod topology spread constraints by node
-        LabelSelector labelSelector = new LabelSelector();
-        labelSelector.setMatchLabels(meta.getLabels());
-        TopologySpreadConstraint spreadConstraint =
-                new TopologySpreadConstraint(labelSelector, MAX_SKEW,
-                                             TOPOLOGY_KEY, SCHEDULE_ANYWAY);
-        PodSpec podSpec = new PodSpecBuilder()
-                .withContainers(containers)
-                .withImagePullSecrets(spec.getPullSecrets())
-                .withRestartPolicy(JOB_RESTART_POLICY)
-                .withTerminationGracePeriodSeconds(TERMINATION_GRACE_PERIOD)
-                .withVolumes(volumes)
-                .withTopologySpreadConstraints(spreadConstraint)
-                .build();
+        // Support PodSpec template
+        PodTemplateSpec podTemplateSpec = spec.getPodTemplateSpec();
+        if (podTemplateSpec == null) {
+            podTemplateSpec = new PodTemplateSpec();
+        }
+        ObjectMeta metadata = podTemplateSpec.getMetadata();
+        if (metadata == null) {
+            metadata = new ObjectMeta();
+        }
+        metadata = new ObjectMetaBuilder(metadata)
+                       .addToLabels(meta.getLabels())
+                       .addToAnnotations(meta.getAnnotations())
+                       .build();
+        podTemplateSpec.setMetadata(metadata);
+
+        PodSpec podSpec = podTemplateSpec.getSpec();
+        if (podSpec == null) {
+            podSpec = new PodSpec();
+        }
+        podSpec.setContainers(containers);
+        podSpec.setRestartPolicy(JOB_RESTART_POLICY);
+        podSpec.setTerminationGracePeriodSeconds(TERMINATION_GRACE_PERIOD);
+        podSpec.setVolumes(volumes);
+        if (CollectionUtils.isEmpty(podSpec.getImagePullSecrets())) {
+            podSpec.setImagePullSecrets(spec.getPullSecrets());
+        }
+
+        if (CollectionUtils.isEmpty(podSpec.getTopologySpreadConstraints())) {
+            // Pod topology spread constraints default by node
+            LabelSelector labelSelector = new LabelSelector();
+            labelSelector.setMatchLabels(meta.getLabels());
+            TopologySpreadConstraint spreadConstraint =
+                    new TopologySpreadConstraint(labelSelector, MAX_SKEW,
+                                                 TOPOLOGY_KEY, SCHEDULE_ANYWAY);
+            podSpec.setTopologySpreadConstraints(
+                    Lists.newArrayList(spreadConstraint)
+            );
+        }
+        podTemplateSpec.setSpec(podSpec);
 
         return new JobBuilder().withMetadata(meta)
                                .withNewSpec()
                                .withParallelism(instances)
                                .withCompletions(instances)
                                .withBackoffLimit(JOB_BACKOFF_LIMIT)
-                               .withNewTemplate()
-                                    .withNewMetadata()
-                                        .withLabels(meta.getLabels())
-                                    .endMetadata()
-                                    .withSpec(podSpec)
-                               .endTemplate()
+                               .withTemplate(podTemplateSpec)
                                .endSpec()
                                .build();
     }

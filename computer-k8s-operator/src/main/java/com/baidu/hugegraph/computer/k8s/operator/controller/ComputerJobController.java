@@ -145,6 +145,10 @@ public class ComputerJobController
         }
 
         String crName = computerJob.getMetadata().getName();
+
+        LOG.warn("ComputerJob {} reconcile failed reach {} times",
+                 crName, request.retryTimes());
+
         this.recordEvent(computerJob, EventType.WARNING,
                          KubeUtil.failedEventName(crName),
                          String.format("ComputerJob %s reconcile failed\n",
@@ -536,13 +540,13 @@ public class ComputerJobController
                 }
 
                 String log;
-                // Fix the pod deleted when job failed
                 try {
                     log = client.pods().withName(name)
                                        .tailingLines(ERROR_LOG_TAILING_LINES)
                                        .getLog(true);
                 } catch (KubernetesClientException e) {
                     if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                       // Fix the pod deleted when job failed
                        continue;
                     } else {
                         throw e;

@@ -113,6 +113,9 @@
         "masterMemory": {
           "existingJavaType": "io.fabric8.kubernetes.api.model.Quantity"
         },
+        "podTemplateSpec": {
+          "existingJavaType": "io.fabric8.kubernetes.api.model.PodTemplateSpec"
+        },
         "pullPolicy": {
           "type": "string"
         },

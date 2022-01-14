@@ -92,6 +92,8 @@ type ComputerJobSpec struct {
     SecretPaths map[string]string `json:"secretPaths,omitempty"`
 
     ConfigMapPaths map[string]string `json:"configMapPaths,omitempty"`
+
+    PodTemplateSpec corev1.PodTemplateSpec `json:"podTemplateSpec,omitempty"`
 }
 
 type ComputerJobState struct {

@@ -185,7 +185,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                     try {
                         this.handleFailOverLimit(request, e);
                     } catch (Exception e2) {
-                        LOG.error("Handle fail over limit occur error:", e2);
+                        LOG.error("Reconcile fail over limit occur error:", e2);
                     }
                     result = OperatorResult.NO_REQUEUE;
                 } else {
