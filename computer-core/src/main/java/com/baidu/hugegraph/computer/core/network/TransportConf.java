@@ -37,6 +37,8 @@ public class TransportConf {
                                "transport-netty-client";
     private final Config config;
 
+    public static final int DEFAULT_THREADS = 4;
+
     public static TransportConf wrapConfig(Config config) {
         return new TransportConf(config);
     }
