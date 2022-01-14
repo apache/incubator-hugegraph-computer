@@ -26,14 +26,13 @@ import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
 
-public class LoaderFileGraphFetcher implements GraphFetcher {
+public class LoaderGraphFetcher implements GraphFetcher {
 
     private final InputSplitRpcService rpcService;
     private final VertexFetcher vertexFetcher;
     private final EdgeFetcher edgeFetcher;
 
-    public LoaderFileGraphFetcher(Config config,
-                                  InputSplitRpcService rpcService) {
+    public LoaderGraphFetcher(Config config, InputSplitRpcService rpcService) {
         this.vertexFetcher = new FileVertxFetcher(config);
         this.edgeFetcher = new FileEdgeFetcher(config);
         this.rpcService = rpcService;

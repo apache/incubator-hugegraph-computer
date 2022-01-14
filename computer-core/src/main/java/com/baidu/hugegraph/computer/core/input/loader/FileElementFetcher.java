@@ -47,7 +47,7 @@ import com.baidu.hugegraph.loader.util.JsonUtil;
 import com.baidu.hugegraph.structure.GraphElement;
 
 public abstract class FileElementFetcher<T extends GraphElement>
-       implements ElementFetcher<T>  {
+                implements ElementFetcher<T>  {
 
     private final LoadContext context;
     private List<ElementBuilder<T>> builders;

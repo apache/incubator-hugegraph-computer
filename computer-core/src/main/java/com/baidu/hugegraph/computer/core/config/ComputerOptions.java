@@ -90,8 +90,8 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "input.source_type",
                     "The source type to load input data",
-                    allowValues("hugegraph", "loader"),
-                    "hugegraph"
+                    allowValues("hugegraph-server", "hugegraph-loader"),
+                    "hugegraph-server"
             );
 
     public static final ConfigOption<Integer> INPUT_SPLIT_FETCH_TIMEOUT =

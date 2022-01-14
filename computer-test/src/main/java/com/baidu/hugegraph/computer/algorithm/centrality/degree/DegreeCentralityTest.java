@@ -53,7 +53,7 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
                      ComputerOptions.OUTPUT_CLASS.name(),
                      HdfsOutput.class.getName(),
                      ComputerOptions.INPUT_SOURCE_TYPE.name(),
-                     "loader");
+                     "hugegraph-loader");
     }
 
     public static class DegreeCentralityTestOutput
