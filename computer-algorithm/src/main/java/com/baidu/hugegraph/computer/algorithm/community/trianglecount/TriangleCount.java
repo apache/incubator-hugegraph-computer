@@ -34,11 +34,9 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
 public class TriangleCount implements Computation<IdList> {
 
-    public static final String ALGORITHM_NAME = "triangle_count";
-
     @Override
     public String name() {
-        return ALGORITHM_NAME;
+        return "triangle_count";
     }
 
     @Override
@@ -60,15 +58,15 @@ public class TriangleCount implements Computation<IdList> {
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<IdList> messages) {
-        Long count = this.triangleCount(context, vertex, messages);
+        Integer count = this.triangleCount(context, vertex, messages);
         if (count != null) {
             ((TriangleCountValue) vertex.value()).count(count);
             vertex.inactivate();
         }
     }
 
-    private Long triangleCount(ComputationContext context, Vertex vertex,
-                               Iterator<IdList> messages) {
+    private Integer triangleCount(ComputationContext context, Vertex vertex,
+                                  Iterator<IdList> messages) {
         IdList neighbors = ((TriangleCountValue) vertex.value()).idList();
 
         if (context.superstep() == 1) {
@@ -91,7 +89,7 @@ public class TriangleCount implements Computation<IdList> {
                 context.sendMessage(targetId, neighbors);
             }
         } else if (context.superstep() == 2) {
-            long count = 0L;
+            int count = 0;
 
             Set<Id> allNeighbors = new HashSet<>(neighbors.values());
             while (messages.hasNext()) {

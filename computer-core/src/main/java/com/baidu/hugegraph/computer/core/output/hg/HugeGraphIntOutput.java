@@ -17,18 +17,15 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.centrality.pagerank;
+package com.baidu.hugegraph.computer.core.output.hg;
 
-import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
-import com.baidu.hugegraph.structure.constant.WriteType;
-
-public class PageRankOutput extends HugeGraphOutput<Double> {
+public class HugeGraphIntOutput extends HugeGraphOutput<Integer> {
 
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                     .asDouble()
-                     .writeType(WriteType.OLAP_RANGE)
+                     .asInt()
+                     .writeType(this.writeType())
                      .ifNotExist()
                      .create();
     }

@@ -25,6 +25,7 @@ import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.input.filter.ExtractAllPropertyInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphDoubleOutput;
 
 public class ClosenessCentralityParams implements AlgorithmParams {
 
@@ -39,7 +40,7 @@ public class ClosenessCentralityParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          ClosenessMessage.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         ClosenessCentralityOutput.class.getName());
+                         HugeGraphDoubleOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,
                          ExtractAllPropertyInputFilter.class.getName());
         this.setIfAbsent(params, ClosenessCentrality.OPTION_SAMPLE_RATE,

@@ -17,34 +17,16 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.path.rings;
+package com.baidu.hugegraph.computer.core.output.hg;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.baidu.hugegraph.computer.core.graph.value.IdListList;
-import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
-
-public class RingsDetectionOutput extends HugeGraphOutput<List<String>> {
+public class HugeGraphFloatOutput extends HugeGraphOutput<Float> {
 
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                     .asText()
+                     .asFloat()
                      .writeType(this.writeType())
-                     .valueList()
                      .ifNotExist()
                      .create();
-    }
-
-    @Override
-    protected List<String> value(Vertex vertex) {
-        IdListList value = vertex.value();
-        List<String> propValues = new ArrayList<>();
-        for (int i = 0; i < value.size(); i++) {
-            propValues.add(value.get(i).toString());
-        }
-        return propValues;
     }
 }
