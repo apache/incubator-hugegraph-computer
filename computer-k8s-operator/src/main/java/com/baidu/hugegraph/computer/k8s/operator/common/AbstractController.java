@@ -175,7 +175,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
             }
             OperatorResult result;
             try {
-                LOG.debug("start reconcile request: {}", request);
+                LOG.debug("Start reconcile request: {}", request);
                 result = this.reconcile(request);
             } catch (Exception e) {
                 LOG.error("Reconcile occur error, requeue request: ", e);
@@ -198,7 +198,7 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
                     this.enqueueRequest(request);
                 }
             } finally {
-                LOG.debug("end reconcile request: {}", request);
+                LOG.debug("End reconcile request: {}", request);
                 this.workQueue.done(request);
             }
         }
@@ -212,21 +212,21 @@ public abstract class AbstractController<T extends CustomResource<?, ?>> {
         crInformer.addEventHandler(new ResourceEventHandler<T>() {
             @Override
             public void onAdd(T cr) {
-                LOG.info("received a CR add request: {}", cr.getMetadata());
+                LOG.info("Received a CR add request: {}", cr.getMetadata());
                 OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
 
             @Override
             public void onUpdate(T oldCR, T cr) {
-                LOG.info("received a CR update request: {}", cr.getMetadata());
+                LOG.info("Received a CR update request: {}", cr.getMetadata());
                 OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
 
             @Override
             public void onDelete(T cr, boolean deletedStateUnknown) {
-                LOG.info("received a CR delete request: {}", cr.getMetadata());
+                LOG.info("Received a CR delete request: {}", cr.getMetadata());
                 OperatorRequest request = OperatorRequest.parseRequestByCR(cr);
                 AbstractController.this.enqueueRequest(request);
             }
