@@ -546,7 +546,7 @@ public class ComputerJobController
                                        .getLog(true);
                 } catch (KubernetesClientException e) {
                     if (e.getCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                       // Fix the pod deleted when job failed
+                       // Fixed the pod deleted when job failed
                        continue;
                     } else {
                         throw e;

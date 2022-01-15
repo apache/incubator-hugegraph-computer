@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service.app: hugegraph-computer-operator-etcd
+  name: etcd
+  namespace: system
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
+spec:
+  ports:
+    - name: client
+      port: 2379
+      protocol: TCP
+      targetPort: 2379
+    - name: peer
+      port: 2380
+      protocol: TCP
+      targetPort: 2380
+  selector:
+    service.app: hugegraph-computer-operator-etcd
+  clusterIP: None
+  type: ClusterIP
+  sessionAffinity: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: etcd
+  namespace: system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service.app: hugegraph-computer-operator-etcd
+  template:
+    metadata:
+      labels:
+        service.app: hugegraph-computer-operator-etcd
+    spec:
+      hostname: hugegraph-computer-operator-etcd-0
+      subdomain: hugegraph-computer-operator-etcd
+      containers:
+        - name: hugegraph-computer-operator-etcd
+          image: etcd:latest
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              HOSTNAME=$(hostname)
+              etcd --name ${HOSTNAME} \
+              --data-dir /var/etcd/data \
+              --initial-advertise-peer-urls http://${HOSTNAME}.hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2380 \
+              --listen-peer-urls http://0.0.0.0:2380 \
+              --listen-client-urls http://0.0.0.0:2379 \
+              --advertise-client-urls http://${HOSTNAME}.hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2379 \
+              --initial-cluster ${HOSTNAME}=http://${HOSTNAME}.hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2380 \
+              --initial-cluster-state new
+          ports:
+            - name: client
+              containerPort: 2379
+            - name: peer
+              containerPort: 2380
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-ec'
+                - ETCDCTL_API=3 etcdctl endpoint status
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 60
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - '-ec'
+                - ETCDCTL_API=3 etcdctl endpoint status
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
