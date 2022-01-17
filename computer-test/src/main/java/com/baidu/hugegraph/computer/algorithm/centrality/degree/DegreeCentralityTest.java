@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
@@ -32,6 +31,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.output.hdfs.HdfsOutput;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphDoubleOutput;
 import com.google.common.collect.Streams;
 
@@ -39,23 +39,21 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
 
     @Test
     public void testRunAlgorithm() throws InterruptedException {
-        runAlgorithm(DegreeCentralityTestParams.class.getName(),
-                     DegreeCentrality.OPTION_WEIGHT_PROPERTY, "rate");
-        DegreeCentralityTestOutput.assertResult();
-
-        runAlgorithm(DegreeCentralityTestParams.class.getName());
+        runAlgorithm(DegreeCentralityParams.class.getName(),
+                     DegreeCentrality.OPTION_WEIGHT_PROPERTY,
+                     "rate",
+                     ComputerOptions.OUTPUT_CLASS.name(),
+                     DegreeCentralityTestOutput.class.getName());
         DegreeCentralityTestOutput.assertResult();
     }
 
-    public static class DegreeCentralityTestParams
-                  extends DegreeCentralityParams {
-
-        @Override
-        public void setAlgorithmParameters(Map<String, String> params) {
-            params.put(ComputerOptions.OUTPUT_CLASS.name(),
-                       DegreeCentralityTestOutput.class.getName());
-            super.setAlgorithmParameters(params);
-        }
+    @Test
+    public void testRunAlgorithmFromHdfs() throws InterruptedException {
+        runAlgorithm(DegreeCentralityParams.class.getName(),
+                     ComputerOptions.OUTPUT_CLASS.name(),
+                     HdfsOutput.class.getName(),
+                     ComputerOptions.INPUT_SOURCE_TYPE.name(),
+                     "hugegraph-loader");
     }
 
     public static class DegreeCentralityTestOutput

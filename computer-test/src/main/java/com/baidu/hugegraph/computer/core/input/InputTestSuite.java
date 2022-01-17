@@ -25,6 +25,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     InputSplitTest.class,
+    FileInputSplitTest.class,
     InputSplitDataTest.class,
     HugeConverterTest.class
 })

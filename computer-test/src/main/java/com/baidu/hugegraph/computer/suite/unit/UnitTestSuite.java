@@ -96,6 +96,27 @@ public class UnitTestSuite {
         Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_USER,
                                   "defaultValue",
                                   System.getProperty("user.name"));
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KERBEROS_ENABLE,
+                                  "defaultValue",
+                                  false);
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KRB5_CONF,
+                                  "defaultValue",
+                                  "/etc/krb5.conf");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KERBEROS_KEYTAB,
+                                  "defaultValue",
+                                  "");
+        Whitebox.setInternalState(
+                 ComputerOptions.OUTPUT_HDFS_KERBEROS_PRINCIPAL,
+                 "defaultValue",
+                 "");
+        Whitebox.setInternalState(
+                 ComputerOptions.INPUT_LOADER_SCHEMA_PATH,
+                 "defaultValue",
+                 "src/main/resources/hdfs_input_test/schema.json");
+        Whitebox.setInternalState(
+                 ComputerOptions.INPUT_LOADER_STRUCT_PATH,
+                 "defaultValue",
+                 "src/main/resources/hdfs_input_test/struct.json");
     }
 
     @BeforeClass

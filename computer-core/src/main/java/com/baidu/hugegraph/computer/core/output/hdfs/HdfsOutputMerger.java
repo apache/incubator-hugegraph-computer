@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.output.hdfs;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +44,7 @@ public class HdfsOutputMerger {
     protected void init(Config config) {
         try {
             Configuration configuration = new Configuration();
-            String url = config.get(ComputerOptions.OUTPUT_HDFS_URL);
-            String user = config.get(ComputerOptions.OUTPUT_HDFS_USER);
-            this.fs = FileSystem.get(new URI(url), configuration, user);
+            this.fs = HdfsOutput.openHDFS(config, configuration);
 
             String dir = config.get(ComputerOptions.OUTPUT_HDFS_DIR);
             String jobId = config.get(ComputerOptions.JOB_ID);
@@ -73,7 +70,8 @@ public class HdfsOutputMerger {
         List<Path> pathList = new ArrayList<>();
         for (int i = 0; i < partitions; i++) {
             Path path = HdfsOutput.buildPath(dir, jobId, i);
-            if (this.fs.exists(path)) {
+            if (this.fs.exists(path) &&
+                this.fs.getFileStatus(path).getLen() > 0) {
                 pathList.add(path);
             }
         }

@@ -374,6 +374,7 @@ public class WorkerService implements Closeable {
                                        workerStat);
         SuperstepStat superstepStat = this.bsp4Worker.waitMasterStepDone(
                                       Constants.INPUT_SUPERSTEP);
+        manager.close(this.config);
         LOG.info("{} WorkerService inputstep finished", this);
         return superstepStat;
     }
