@@ -73,6 +73,7 @@ import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.utils.Serialization;
 
 public class ComputerJobDeployer {
 
@@ -315,6 +316,8 @@ public class ComputerJobDeployer {
         PodTemplateSpec podTemplateSpec = spec.getPodTemplateSpec();
         if (podTemplateSpec == null) {
             podTemplateSpec = new PodTemplateSpec();
+        } else {
+            podTemplateSpec = Serialization.clone(podTemplateSpec);
         }
         ObjectMeta metadata = podTemplateSpec.getMetadata();
         if (metadata == null) {
@@ -330,10 +333,14 @@ public class ComputerJobDeployer {
         if (podSpec == null) {
             podSpec = new PodSpec();
         }
+        podSpec.setVolumes(volumes);
         podSpec.setContainers(containers);
         podSpec.setRestartPolicy(JOB_RESTART_POLICY);
-        podSpec.setTerminationGracePeriodSeconds(TERMINATION_GRACE_PERIOD);
-        podSpec.setVolumes(volumes);
+
+        if (podSpec.getTerminationGracePeriodSeconds() == null) {
+            podSpec.setTerminationGracePeriodSeconds(TERMINATION_GRACE_PERIOD);
+        }
+
         if (CollectionUtils.isEmpty(podSpec.getImagePullSecrets())) {
             podSpec.setImagePullSecrets(spec.getPullSecrets());
         }
@@ -559,21 +566,27 @@ public class ComputerJobDeployer {
         VolumeMount configMount = this.getComputerConfigMount();
         volumeMounts.add(configMount);
 
-        return new ContainerBuilder()
-                .withName(KubeUtil.containerName(name))
-                .withImage(spec.getImage())
-                .withImagePullPolicy(spec.getPullPolicy())
-                .withEnv(spec.getEnvVars())
-                .withEnvFrom(spec.getEnvFrom())
-                .withVolumeMounts(volumeMounts)
-                .addAllToCommand(command)
-                .addAllToArgs(args)
-                .addAllToPorts(ports)
-                .withNewResources()
-                    .addToLimits(ResourceName.CPU.value(), cpu)
-                    .addToLimits(ResourceName.MEMORY.value(), memory)
-                .endResources()
-                .build();
+        Container container = new ContainerBuilder()
+                              .withName(KubeUtil.containerName(name))
+                              .withImage(spec.getImage())
+                              .withImagePullPolicy(spec.getPullPolicy())
+                              .withEnv(spec.getEnvVars())
+                              .withEnvFrom(spec.getEnvFrom())
+                              .withVolumeMounts(volumeMounts)
+                              .addAllToCommand(command)
+                              .addAllToArgs(args)
+                              .addAllToPorts(ports)
+                              .withNewResources()
+                              .addToLimits(ResourceName.CPU.value(), cpu)
+                              .addToLimits(ResourceName.MEMORY.value(), memory)
+                              .endResources()
+                              .build();
+
+        // Add security context
+        if (spec.getSecurityContext() != null) {
+            container.setSecurityContext(spec.getSecurityContext());
+        }
+        return container;
     }
 
     private void mountConfigMapOrSecret(List<VolumeMount> volumeMounts,

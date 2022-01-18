@@ -97,6 +97,9 @@ type ComputerJobSpec struct {
     //+kubebuilder:pruning:PreserveUnknownFields
     // More info: https://kubernetes.io/docs/concepts/workloads/pods/#pod-templates
     PodTemplateSpec corev1.PodTemplateSpec `json:"podTemplateSpec,omitempty"`
+
+    // More info: https://kubernetes.io/zh/docs/tasks/configure-pod-container/security-context/
+    SecurityContext corev1.SecurityContext `json:"securityContext,omitempty"`
 }
 
 type ComputerJobState struct {

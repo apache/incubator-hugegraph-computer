@@ -134,6 +134,9 @@
           "type": "object",
           "existingJavaType": "java.util.Map\u003cString,String\u003e"
         },
+        "securityContext": {
+          "existingJavaType": "io.fabric8.kubernetes.api.model.SecurityContext"
+        },
         "volumeMounts": {
           "type": "array",
           "javaOmitEmpty": true,
