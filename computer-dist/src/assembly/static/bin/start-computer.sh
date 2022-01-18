@@ -164,6 +164,17 @@ else
     JAVA="$JAVA_HOME/bin/java -server"
 fi
 
+# Set up count of cpu if it unspecified from k8s drive,
+# avoid `Runtime.getRuntime().availableProcessors()` always return 1
+if [[ "${DRIVE}" = "${K8S_DRIVE}" && -z "${CPU_LIMIT}" ]]; then
+    PROCESSOR_COUNT="$(cat /proc/cpuinfo | grep "processor" | wc -l)"
+    let MAX_PROCESSOR_COUNT=8
+    if [[ ${PROCESSOR_COUNT} -gt ${MAX_PROCESSOR_COUNT} ]]; then
+      PROCESSOR_COUNT="$MAX_PROCESSOR_COUNT"
+    fi
+    JAVA_OPTS="${JAVA_OPTS} -XX:ActiveProcessorCount=${PROCESSOR_COUNT}"
+fi
+
 if [ ! -a "${CONF_DIR}" ];then
     mkdir -p "${CONF_DIR}"
 fi
@@ -185,9 +196,9 @@ fi
 MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputer
 
 if [ "${LOG4j_CONF}" != "" ]; then
-    exec ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${JVM_OPTIONS} \
+    exec ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${JAVA_OPTS} ${JVM_OPTIONS} \
         -cp "${CP}" ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
 else
-    exec ${JAVA} -Dname="hugegraph-computer" ${JVM_OPTIONS} -cp "${CP}" \
+    exec ${JAVA} -Dname="hugegraph-computer" ${JAVA_OPTS} ${JVM_OPTIONS} -cp "${CP}" \
         ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
 fi

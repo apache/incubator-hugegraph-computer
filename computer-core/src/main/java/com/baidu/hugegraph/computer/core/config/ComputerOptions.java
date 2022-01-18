@@ -638,7 +638,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.server_threads",
                     "The number of transport threads for server.",
                     positiveInt(),
-                    TransportConf.NUMBER_CPU_CORES
+                    TransportConf.DEFAULT_THREADS
             );
 
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
@@ -646,7 +646,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.client_threads",
                     "The number of transport threads for client.",
                     positiveInt(),
-                    TransportConf.NUMBER_CPU_CORES
+                    TransportConf.DEFAULT_THREADS
             );
 
     public static final ConfigOption<Class<?>> TRANSPORT_PROVIDER_CLASS =

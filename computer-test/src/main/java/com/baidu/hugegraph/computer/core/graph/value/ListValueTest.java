@@ -130,14 +130,10 @@ public class ListValueTest extends UnitTestBase {
 
         Assert.assertThrows(IndexOutOfBoundsException.class, () -> {
             value1.get(3);
-        }, e -> {
-            Assert.assertContains("Index: 3, Size: 3", e.getMessage());
         });
 
         Assert.assertThrows(IndexOutOfBoundsException.class, () -> {
             value2.get(3);
-        }, e -> {
-            Assert.assertContains("Index: 3, Size: 2", e.getMessage());
         });
     }
 

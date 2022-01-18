@@ -42,8 +42,8 @@
         <top.level.dir>${project.basedir}/..</top.level.dir>
         <release.name>hugegraph-computer</release.name>
         <final.name>${release.name}-${project.version}</final.name>
-        <compiler.source>1.8</compiler.source>
-        <compiler.target>1.8</compiler.target>
+        <compiler.source>11</compiler.source>
+        <compiler.target>11</compiler.target>
         <shell-executable>bash</shell-executable>
         <etcd.version>0.5.4</etcd.version>
         <hadoop-version>3.1.2</hadoop-version>

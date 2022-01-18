@@ -36,11 +36,11 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Install JDK 8
+      - name: Install JDK 11
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
-          distribution: 'adopt'
+          java-version: '11'
+          distribution: 'zulu'
 
       - name: Cache Maven packages
         uses: actions/cache@v2

@@ -52,12 +52,14 @@ spec:
   image: hugegraph/hugegraph-builtin-algorithms:latest # algorithm image url
   jarFile: /opt/jars/hugegraph-builtin-algorithms.jar
   pullPolicy: Always
-  workerInstances: 50
+  workerCpu: "4"
+  workerMemory: "4Gi"
+  workerInstances: 5
   computerConf:
+    job.partitions_count: "20"
     algorithm.params_class: com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams
     hugegraph.url: http://${hugegraph-server-host}:${hugegraph-server-port} # hugegraph server url
-    job.partitions_count: "200"
-    hugegraph.name: "hugegraph"
+    hugegraph.name: hugegraph
 EOF
 ```
 

@@ -85,7 +85,6 @@ public class ComputerJobDeployer {
     private static final String RPC_PORT_NAME = "rpc-port";
     private static final int DEFAULT_TRANSPORT_PORT = 8099;
     private static final int DEFAULT_RPC_PORT = 8090;
-    private static final int DEFAULT_TRANSPORT_THREADS = 8;
     private static final String COMPUTER_CONFIG_MAP_VOLUME =
             "computer-config-map-volume";
 
@@ -196,19 +195,6 @@ public class ComputerJobDeployer {
         if (StringUtils.isBlank(rpcPort) || RANDOM_PORT.equals(rpcPort)) {
             rpcPort = String.valueOf(DEFAULT_RPC_PORT);
             config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
-        }
-
-        /*
-        Set a default number of transport threads,
-        if the number of CPU quantity of the worker is not specified
-         */
-        if (spec.getWorkerCpu() == null) {
-            String defaultThreads = String.valueOf(DEFAULT_TRANSPORT_THREADS);
-
-            config.putIfAbsent(ComputerOptions.TRANSPORT_CLIENT_THREADS.name(),
-                               defaultThreads);
-            config.putIfAbsent(ComputerOptions.TRANSPORT_SERVER_THREADS.name(),
-                               defaultThreads);
         }
 
         ContainerPort transportContainerPort = new ContainerPortBuilder()
@@ -469,6 +455,22 @@ public class ComputerJobDeployer {
         } else {
             cpu = spec.getWorkerCpu();
             memory = spec.getWorkerMemory();
+        }
+
+        if (cpu != null) {
+            EnvVar cpuLimit = new EnvVarBuilder()
+                              .withName(Constants.ENV_CPU_LIMIT)
+                              .withValue(cpu.toString())
+                              .build();
+            envVars.add(cpuLimit);
+        }
+
+        if (memory != null) {
+            EnvVar memoryLimit = new EnvVarBuilder()
+                                 .withName(Constants.ENV_MEMORY_LIMIT)
+                                 .withValue(memory.toString())
+                                 .build();
+            envVars.add(memoryLimit);
         }
 
         List<VolumeMount> volumeMounts = spec.getVolumeMounts();
