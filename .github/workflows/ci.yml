@@ -60,7 +60,7 @@ jobs:
       - name: Prepare env and service
         env:
           TRAVIS_DIR: computer-dist/src/assembly/travis
-          COMMIT_ID: e65641517361d7da7ef1801489c15e3af7863a39
+          COMMIT_ID: 848b8fb17804ddc561af832dff0bdc3f6221c904
         run: |
           $TRAVIS_DIR/install-env.sh
           $TRAVIS_DIR/install-hugegraph-from-source.sh $COMMIT_ID | grep -v "Downloading\|Downloaded"
