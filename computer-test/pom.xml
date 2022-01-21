@@ -40,6 +40,10 @@
         </dependency>
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>hugegraph-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
             <artifactId>computer-api</artifactId>
             <version>${project.version}</version>
         </dependency>

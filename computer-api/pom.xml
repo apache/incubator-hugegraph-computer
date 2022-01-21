@@ -17,5 +17,4 @@
             <artifactId>hugegraph-client</artifactId>
         </dependency>
     </dependencies>
-
 </project>
