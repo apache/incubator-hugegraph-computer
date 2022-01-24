@@ -5,17 +5,10 @@
     <parent>
         <artifactId>hugegraph-computer</artifactId>
         <groupId>com.baidu.hugegraph</groupId>
-        <version>0.1.3</version>
+        <version>0.1.4</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
-    <version>0.1.3</version>
 
     <artifactId>computer-driver</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
-            <artifactId>hugegraph-common</artifactId>
-        </dependency>
-    </dependencies>
 </project>

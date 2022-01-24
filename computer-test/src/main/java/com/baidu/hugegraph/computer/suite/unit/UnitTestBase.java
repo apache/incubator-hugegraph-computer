@@ -70,7 +70,7 @@ public class UnitTestBase {
     private static HugeClient CLIENT = null;
 
     protected static void clearAll() {
-        client().graphs().clear(GRAPH, "I'm sure to delete all data");
+        client().graphs().clearGraph(GRAPH, "I'm sure to delete all data");
     }
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
