@@ -34,7 +34,7 @@ public class MessageSendBuffers {
      * Add a MessageSendPartition class when find that we really need it
      * to encapsulate more objects.
      */
-    private final WriteBuffers[] buffers;
+    private final MessageSendPartition[] buffers;
 
     public MessageSendBuffers(ComputerContext context) {
         Config config = context.config();
@@ -43,13 +43,14 @@ public class MessageSendBuffers {
                         ComputerOptions.WORKER_WRITE_BUFFER_THRESHOLD);
         int capacity = config.get(
                        ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
-        this.buffers = new WriteBuffers[partitionCount];
+        this.buffers = new MessageSendPartition[partitionCount];
         for (int i = 0; i < partitionCount; i++) {
             /*
              * It depends on the concrete implementation of the
              * partition algorithm, which is not elegant.
              */
-            this.buffers[i] = new WriteBuffers(context, threshold, capacity);
+            this.buffers[i] = new MessageSendPartition(context, threshold,
+                                                       capacity);
         }
     }
 
@@ -57,14 +58,20 @@ public class MessageSendBuffers {
         if (partitionId < 0 || partitionId >= this.buffers.length)  {
             throw new ComputerException("Invalid partition id %s", partitionId);
         }
-        return this.buffers[partitionId];
+        return this.buffers[partitionId].get();
     }
 
-    public Map<Integer, WriteBuffers> all() {
-        Map<Integer, WriteBuffers> all = InsertionOrderUtil.newMap();
+    public Map<Integer, MessageSendPartition> all() {
+        Map<Integer, MessageSendPartition> all = InsertionOrderUtil.newMap();
         for (int i = 0; i < this.buffers.length; i++) {
             all.put(i, this.buffers[i]);
         }
         return all;
+    }
+
+    public void clear() {
+        for (MessageSendPartition partition : this.buffers) {
+            partition.clear();
+        }
     }
 }
