@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.k8s.operator.controller;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,6 +41,7 @@ import com.baidu.hugegraph.computer.k8s.crd.model.ResourceName;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.config.HugeConfig;
+import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -53,13 +55,16 @@ import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.PodSpecBuilder;
+import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.TopologySpreadConstraint;
 import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
@@ -68,6 +73,7 @@ import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
+import io.fabric8.kubernetes.client.utils.Serialization;
 
 public class ComputerJobDeployer {
 
@@ -78,6 +84,9 @@ public class ComputerJobDeployer {
     // NO BACKOFF
     private static final int JOB_BACKOFF_LIMIT = 0;
     private static final String JOB_RESTART_POLICY = "Never";
+    private static final String TOPOLOGY_KEY = "kubernetes.io/hostname";
+    private static final String SCHEDULE_ANYWAY = "ScheduleAnyway";
+    private static final Integer MAX_SKEW = 1;
 
     private static final String RANDOM_PORT = "0";
     private static final String PROTOCOL = "TCP";
@@ -236,6 +245,7 @@ public class ComputerJobDeployer {
     public Job desiredMasterJob(HugeGraphComputerJob computerJob,
                                 Set<ContainerPort> ports) {
         String crName = computerJob.getMetadata().getName();
+        String namespace = computerJob.getMetadata().getNamespace();
         ComputerJobSpec spec = computerJob.getSpec();
 
         List<String> command = spec.getMasterCommand();
@@ -251,7 +261,8 @@ public class ComputerJobDeployer {
 
         ObjectMeta metadata = this.getMetadata(computerJob, name);
 
-        Container container = this.getContainer(name, spec, ports,
+        Container container = this.getContainer(name, namespace,
+                                                spec, ports,
                                                 command, args);
         List<Container> containers = Lists.newArrayList(container);
 
@@ -262,6 +273,7 @@ public class ComputerJobDeployer {
     public Job desiredWorkerJob(HugeGraphComputerJob computerJob,
                                 Set<ContainerPort> ports) {
         String crName = computerJob.getMetadata().getName();
+        String namespace = computerJob.getMetadata().getNamespace();
         ComputerJobSpec spec = computerJob.getSpec();
 
         List<String> command = spec.getWorkerCommand();
@@ -277,7 +289,8 @@ public class ComputerJobDeployer {
 
         ObjectMeta metadata = this.getMetadata(computerJob, name);
 
-        Container container = this.getContainer(name, spec, ports,
+        Container container = this.getContainer(name, namespace,
+                                                spec, ports,
                                                 command, args);
         List<Container> containers = Lists.newArrayList(container);
 
@@ -299,25 +312,58 @@ public class ComputerJobDeployer {
         Volume configVolume = this.getComputerConfigVolume(configMapName);
         volumes.add(configVolume);
 
-        PodSpec podSpec = new PodSpecBuilder()
-                .withContainers(containers)
-                .withImagePullSecrets(spec.getPullSecrets())
-                .withRestartPolicy(JOB_RESTART_POLICY)
-                .withTerminationGracePeriodSeconds(TERMINATION_GRACE_PERIOD)
-                .withVolumes(volumes)
-                .build();
+        // Support PodSpec template
+        PodTemplateSpec podTemplateSpec = spec.getPodTemplateSpec();
+        if (podTemplateSpec == null) {
+            podTemplateSpec = new PodTemplateSpec();
+        } else {
+            podTemplateSpec = Serialization.clone(podTemplateSpec);
+        }
+        ObjectMeta metadata = podTemplateSpec.getMetadata();
+        if (metadata == null) {
+            metadata = new ObjectMeta();
+        }
+        metadata = new ObjectMetaBuilder(metadata)
+                       .addToLabels(meta.getLabels())
+                       .addToAnnotations(meta.getAnnotations())
+                       .build();
+        podTemplateSpec.setMetadata(metadata);
+
+        PodSpec podSpec = podTemplateSpec.getSpec();
+        if (podSpec == null) {
+            podSpec = new PodSpec();
+        }
+        podSpec.setVolumes(volumes);
+        podSpec.setContainers(containers);
+        podSpec.setRestartPolicy(JOB_RESTART_POLICY);
+
+        if (podSpec.getTerminationGracePeriodSeconds() == null) {
+            podSpec.setTerminationGracePeriodSeconds(TERMINATION_GRACE_PERIOD);
+        }
+
+        if (CollectionUtils.isEmpty(podSpec.getImagePullSecrets())) {
+            podSpec.setImagePullSecrets(spec.getPullSecrets());
+        }
+
+        if (CollectionUtils.isEmpty(podSpec.getTopologySpreadConstraints())) {
+            // Pod topology spread constraints default by node
+            LabelSelector labelSelector = new LabelSelector();
+            labelSelector.setMatchLabels(meta.getLabels());
+            TopologySpreadConstraint spreadConstraint =
+                    new TopologySpreadConstraint(labelSelector, MAX_SKEW,
+                                                 TOPOLOGY_KEY, SCHEDULE_ANYWAY);
+            podSpec.setTopologySpreadConstraints(
+                    Lists.newArrayList(spreadConstraint)
+            );
+        }
+        podTemplateSpec.setSpec(podSpec);
 
         return new JobBuilder().withMetadata(meta)
                                .withNewSpec()
                                .withParallelism(instances)
                                .withCompletions(instances)
                                .withBackoffLimit(JOB_BACKOFF_LIMIT)
-                               .withNewTemplate()
-                                    .withNewMetadata()
-                                        .withLabels(meta.getLabels())
-                                    .endMetadata()
-                                    .withSpec(podSpec)
-                               .endTemplate()
+                               .withTemplate(podTemplateSpec)
                                .endSpec()
                                .build();
     }
@@ -356,7 +402,8 @@ public class ComputerJobDeployer {
         return volumes;
     }
 
-    private Container getContainer(String name, ComputerJobSpec spec,
+    private Container getContainer(String name, String namespace,
+                                   ComputerJobSpec spec,
                                    Set<ContainerPort> ports,
                                    Collection<String> command,
                                    Collection<String> args) {
@@ -480,44 +527,82 @@ public class ComputerJobDeployer {
             volumeMounts = Lists.newArrayList(volumeMounts);
         }
 
+        final KubernetesClient client;
+        if (!Objects.equals(this.kubeClient.getNamespace(), namespace)) {
+            client = this.kubeClient.inNamespace(namespace);
+        } else {
+            client = this.kubeClient;
+        }
+
         // Mount configmap and secret files
-        Map<String, String> paths = new HashMap<>();
         Map<String, String> configMapPaths = spec.getConfigMapPaths();
         if (MapUtils.isNotEmpty(configMapPaths)) {
-            paths.putAll(configMapPaths);
+            for (String key : configMapPaths.keySet()) {
+                ConfigMap configMap = client.configMaps().withName(key).get();
+                E.checkArgument(configMap != null &&
+                                configMap.getData().size() > 0,
+                                "The configMap '%s' don't exist", key);
+
+                this.mountConfigMapOrSecret(volumeMounts, key,
+                                            configMapPaths.get(key),
+                                            configMap.getData());
+            }
         }
+
         Map<String, String> secretPaths = spec.getSecretPaths();
         if (MapUtils.isNotEmpty(secretPaths)) {
-            paths.putAll(secretPaths);
-        }
-        Set<Map.Entry<String, String>> entries = paths.entrySet();
-        for (Map.Entry<String, String> entry : entries) {
-            VolumeMount volumeMount = new VolumeMountBuilder()
-                    .withName(this.volumeName(entry.getKey()))
-                    .withMountPath(entry.getValue())
-                    .withReadOnly(true)
-                    .build();
-            volumeMounts.add(volumeMount);
+            for (String key : secretPaths.keySet()) {
+                Secret secret = client.secrets().withName(key).get();
+                E.checkArgument(secret != null &&
+                                secret.getData().size() > 0,
+                                "The secret '%s' don't exist", key);
+
+                this.mountConfigMapOrSecret(volumeMounts, key,
+                                            secretPaths.get(key),
+                                            secret.getData());
+            }
         }
 
         VolumeMount configMount = this.getComputerConfigMount();
         volumeMounts.add(configMount);
 
-        return new ContainerBuilder()
-                .withName(KubeUtil.containerName(name))
-                .withImage(spec.getImage())
-                .withImagePullPolicy(spec.getPullPolicy())
-                .withEnv(spec.getEnvVars())
-                .withEnvFrom(spec.getEnvFrom())
-                .withVolumeMounts(volumeMounts)
-                .addAllToCommand(command)
-                .addAllToArgs(args)
-                .addAllToPorts(ports)
-                .withNewResources()
-                    .addToLimits(ResourceName.CPU.value(), cpu)
-                    .addToLimits(ResourceName.MEMORY.value(), memory)
-                .endResources()
-                .build();
+        Container container = new ContainerBuilder()
+                              .withName(KubeUtil.containerName(name))
+                              .withImage(spec.getImage())
+                              .withImagePullPolicy(spec.getPullPolicy())
+                              .withEnv(spec.getEnvVars())
+                              .withEnvFrom(spec.getEnvFrom())
+                              .withVolumeMounts(volumeMounts)
+                              .addAllToCommand(command)
+                              .addAllToArgs(args)
+                              .addAllToPorts(ports)
+                              .withNewResources()
+                              .addToLimits(ResourceName.CPU.value(), cpu)
+                              .addToLimits(ResourceName.MEMORY.value(), memory)
+                              .endResources()
+                              .build();
+
+        // Add security context
+        if (spec.getSecurityContext() != null) {
+            container.setSecurityContext(spec.getSecurityContext());
+        }
+        return container;
+    }
+
+    private void mountConfigMapOrSecret(List<VolumeMount> volumeMounts,
+                                        String key, String volumePath,
+                                        Map<String, String> data) {
+        VolumeMountBuilder volumeMountBuilder = new VolumeMountBuilder()
+                                                .withName(this.volumeName(key))
+                                                .withMountPath(volumePath);
+        // mount subPath if data only have one, otherwise mount the directory
+        if (data.size() == 1) {
+            String fileName = data.keySet().stream().findFirst().orElse("");
+            volumeMountBuilder.withMountPath(Paths.get(volumePath, fileName)
+                                                  .toString());
+            volumeMountBuilder.withSubPath(fileName);
+        }
+        volumeMounts.add(volumeMountBuilder.build());
     }
 
     private VolumeMount getComputerConfigMount() {

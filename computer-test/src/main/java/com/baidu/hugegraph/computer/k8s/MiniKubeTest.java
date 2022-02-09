@@ -50,7 +50,6 @@ import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
-import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -79,8 +78,7 @@ public class MiniKubeTest extends AbstractK8sTest {
             Assert.assertTrue(file.exists());
 
             this.namespace = "minikube";
-            System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
-                               Constants.ALL_NAMESPACE);
+            System.setProperty("WATCH_NAMESPACE", Constants.ALL_NAMESPACE);
             super.setup();
         } catch (Throwable throwable) {
             LOG.error("Failed to setup MiniKubeTest ", throwable);
@@ -379,12 +377,14 @@ public class MiniKubeTest extends AbstractK8sTest {
                         .endMetadata()
                         .withType("Opaque")
                         .addToData("2.txt", dataBase64)
+                        .addToData("3.txt", dataBase64)
                         .build();
         this.kubeClient.secrets().createOrReplace(secret);
 
         ArrayList<String> args = Lists.newArrayList(
                                  "cat /opt/configmap123/1.txt && " +
-                                 "cat /opt/secret123/2.txt");
+                                 "cat /opt/secret123/2.txt &&" +
+                                 "cat /opt/secret123/3.txt");
         super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(), args);
         super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(), args);
         Object defaultSpec = Whitebox.invoke(KubernetesDriver.class,
@@ -415,6 +415,32 @@ public class MiniKubeTest extends AbstractK8sTest {
         Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
 
+        future.cancel(true);
+    }
+
+    @Test
+    public void testMountConfigMapWithFailed() {
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.CONFIG_MAP_PATHS.name(),
+                   "[test-config:/opt/configmap123]");
+
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.INITIALIZING);
+        Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+
+        DefaultJobState jobState2 = new DefaultJobState();
+        jobState2.jobStatus(JobStatus.FAILED);
+        Mockito.verify(jobObserver, Mockito.timeout(250000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState2));
         future.cancel(true);
     }
 }
