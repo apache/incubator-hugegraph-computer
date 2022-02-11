@@ -75,7 +75,7 @@ public class PreciseFrameDecoder extends ByteToMessageDecoder {
         TransportUtil.setMaxBytesPreRead(ctx.channel(),
                                          AbstractMessage.HEADER_LENGTH);
 
-        //assert in.readableBytes() <= AbstractMessage.HEADER_LENGTH;
+        assert in.readableBytes() <= AbstractMessage.HEADER_LENGTH;
 
         ByteBuf buf = in.readRetainedSlice(AbstractMessage.HEADER_LENGTH);
 

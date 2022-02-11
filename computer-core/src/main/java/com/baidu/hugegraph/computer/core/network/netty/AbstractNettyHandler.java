@@ -115,6 +115,7 @@ public abstract class AbstractNettyHandler
         this.transportHandler().exceptionCaught(exception, connectionId);
     }
 
+    @Deprecated
     protected void ackFailMessage(ChannelHandlerContext ctx, int failId,
                                   int errorCode, String message) {
         long timeout = this.session().conf().writeSocketTimeout();

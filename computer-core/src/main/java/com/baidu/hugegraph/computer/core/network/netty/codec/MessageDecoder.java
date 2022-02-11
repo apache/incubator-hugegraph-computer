@@ -83,19 +83,6 @@ public class MessageDecoder extends ChannelInboundHandlerAdapter {
         switch (msgType) {
             case START:
                 return StartMessage.parseFrom(in);
-            //case FAIL:
-            //    int remainingBytes = FailMessage.remainingBytes(in);
-            //    if (remainingBytes < 0) {
-            //        System.out.println(remainingBytes);
-            //    }
-            //    assert remainingBytes >= 0;
-            //    if (remainingBytes == 0) {
-            //        return FailMessage.parseFrom(in);
-            //    }
-            //    TransportUtil.setMaxBytesPreRead(ctx.channel(),
-            //                                     remainingBytes);
-            //    in.retain();
-            //    return null;
             case ACK:
                 return AckMessage.parseFrom(in);
             case FINISH:
