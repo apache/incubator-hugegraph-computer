@@ -25,13 +25,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
+import com.baidu.hugegraph.computer.core.store.IterableEntryFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 
-public class HgkvDirReaderImpl implements HgkvDirReader {
+public class HgkvDirReaderImpl implements IterableEntryFile {
 
     private final HgkvDir hgkvDir;
     private final boolean useInlinePointer;
@@ -122,9 +123,9 @@ public class HgkvDirReaderImpl implements HgkvDirReader {
 
         private EntryIterator nextKeyIter() throws Exception {
             HgkvFile segment = this.segments.get(this.segmentIndex++);
-            HgkvFileReader reader = new HgkvFileReaderImpl(
-                                    segment.path(), this.useInlinePointer,
-                                    this.withSubKv);
+            IterableEntryFile reader = new HgkvFileReaderImpl(
+                                       segment.path(), this.useInlinePointer,
+                                       this.withSubKv);
             EntryIterator iterator = reader.iterator();
             this.segmentsIters.add(iterator);
             return iterator;

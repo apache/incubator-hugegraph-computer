@@ -23,15 +23,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
+import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.store.IterableEntryFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
 
-public class HgkvFileReaderImpl implements HgkvFileReader {
+public class HgkvFileReaderImpl implements IterableEntryFile {
 
     private final HgkvFile hgkvFile;
     private final boolean useInlinePointer;
@@ -51,7 +53,7 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
     }
 
     @Override
-    public EntryIterator iterator() throws IOException {
+    public EntryIterator iterator() {
         return new EntryIter(this.hgkvFile, this.useInlinePointer,
                              this.withSubKv);
     }
@@ -66,13 +68,16 @@ public class HgkvFileReaderImpl implements HgkvFileReader {
         private final boolean withSubKv;
 
         public EntryIter(HgkvFile hgkvFile, boolean useInlinePointer,
-                         boolean withSubKv)
-                         throws IOException {
+                         boolean withSubKv) {
             this.file = hgkvFile;
             this.numEntries = this.file.numEntries();
             File file = new File(this.file.path());
-            this.input = IOFactory.createFileInput(file);
-            this.userAccessInput = this.input.duplicate();
+            try {
+                this.input = IOFactory.createFileInput(file);
+                this.userAccessInput = this.input.duplicate();
+            } catch (IOException e) {
+                throw new ComputerException(e.getMessage(), e);
+            }
             this.useInlinePointer = useInlinePointer;
             this.withSubKv = withSubKv;
         }

@@ -37,6 +37,7 @@ import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
+import com.baidu.hugegraph.computer.core.store.IterableEntryFile;
 import com.baidu.hugegraph.computer.core.store.bufferfile.BufferFileEntryReader;
 import com.baidu.hugegraph.computer.core.store.bufferfile.BufferFileSubEntryReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
@@ -47,7 +48,6 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDir4SubKvReaderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.DisperseEvenlySelector;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.InputFilesSelector;
@@ -120,8 +120,8 @@ public class SorterImpl implements Sorter {
         InputsSorterImpl sorter = new InputsSorterImpl();
         List<EntryIterator> entries = new ArrayList<>();
         for (String input : inputs) {
-            HgkvDirReader reader = new HgkvDirReaderImpl(input, false,
-                                                         withSubKv);
+            IterableEntryFile reader = new HgkvDirReaderImpl(input, false,
+                                                             withSubKv);
             entries.add(reader.iterator());
         }
         return PeekableIteratorAdaptor.of(sorter.sort(entries));

@@ -39,7 +39,6 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -111,7 +110,7 @@ public class HgkvDirTest {
                                               6, 2);
         String path = StoreTestUtil.availablePathById("1");
         StoreTestUtil.hgkvDirFromKvMap(CONFIG, data, path);
-        HgkvDirReader reader = new HgkvDirReaderImpl(path, false);
+        IterableEntryFile reader = new HgkvDirReaderImpl(path, false);
         try (EntryIterator iterator = reader.iterator()) {
             int i = 0;
             while (iterator.hasNext()) {

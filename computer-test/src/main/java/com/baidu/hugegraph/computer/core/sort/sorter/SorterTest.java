@@ -49,6 +49,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlush
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.store.IterableEntryFile;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
@@ -56,7 +57,6 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.DisperseEvenlySelector;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.InputFilesSelector;
@@ -147,7 +147,7 @@ public class SorterTest {
                             path, false);
 
         // Assert merge result from target hgkvDir
-        HgkvDirReader reader = new HgkvDirReaderImpl(path, false);
+        IterableEntryFile reader = new HgkvDirReaderImpl(path, false);
         EntryIterator iter = reader.iterator();
         SorterTestUtil.assertKvEntry(iter.next(), 1, 8);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 8);

@@ -38,7 +38,6 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilder;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvFileReader;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvFileReaderImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -135,7 +134,8 @@ public class HgkvFileTest {
         String filePath = StoreTestUtil.availablePathById("1");
         File file = StoreTestUtil.mapToHgkvFile(CONFIG, data, filePath);
 
-        HgkvFileReader reader = new HgkvFileReaderImpl(file.getPath(), false);
+        IterableEntryFile reader = new HgkvFileReaderImpl(file.getPath(),
+                                                          false);
         try (EntryIterator iterator = reader.iterator()) {
             int index = 0;
             while (iterator.hasNext()) {

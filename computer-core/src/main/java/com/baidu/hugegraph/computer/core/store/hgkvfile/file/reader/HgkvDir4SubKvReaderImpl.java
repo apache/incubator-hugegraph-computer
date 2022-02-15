@@ -19,15 +19,16 @@
 
 package com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader;
 
+import com.baidu.hugegraph.computer.core.store.IterableEntryFile;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
 import com.baidu.hugegraph.iterator.CIter;
 import com.baidu.hugegraph.iterator.MapperIterator;
 
-public class HgkvDir4SubKvReaderImpl implements HgkvDirReader {
+public class HgkvDir4SubKvReaderImpl implements IterableEntryFile {
 
-    private final HgkvDirReader reader;
+    private final IterableEntryFile reader;
 
     public HgkvDir4SubKvReaderImpl(String path, boolean useInlinePointer) {
         this.reader = new HgkvDirReaderImpl(path, useInlinePointer, true);
@@ -46,7 +47,7 @@ public class HgkvDir4SubKvReaderImpl implements HgkvDirReader {
 
         private final CIter<KvEntry> entries;
 
-        public KvEntryWithFirstSubKvIter(HgkvDirReader reader) {
+        public KvEntryWithFirstSubKvIter(IterableEntryFile reader) {
             this.entries = new MapperIterator<>(reader.iterator(), entry -> {
                 return EntriesUtil.kvEntryWithFirstSubKv(entry);
             });
