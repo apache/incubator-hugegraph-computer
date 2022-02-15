@@ -692,7 +692,7 @@ public class ComputerOptions extends OptionHolder {
 
     public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
             new ConfigOption<>(
-                    "transport.transport_tcp_keep_alive",
+                    "transport.tcp_keep_alive",
                     "Whether enable TCP keep-alive.",
                     allowValues(true, false),
                     true

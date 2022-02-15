@@ -45,14 +45,14 @@ public class FileRegionBuffer implements NetworkBuffer {
         this.length = length;
     }
 
-    // use zero-copy transform from socket channel to file
+    // Use zero-copy transform from socket channel to file
     public ChannelFuture transformFromChannel(SocketChannel channel,
                                               String targetPath) {
         assert channel.eventLoop().inEventLoop();
         ChannelPromise channelPromise = channel.newPromise();
         try {
             if (channel instanceof EpollSocketChannel) {
-                // use splice zero-copy if io mode is epoll
+                // Use splice zero-copy if io mode is epoll
                 FileDescriptor fd = FileDescriptor.from(targetPath);
                 try {
                     ((EpollSocketChannel) channel).spliceTo(fd, 0,
@@ -64,7 +64,7 @@ public class FileRegionBuffer implements NetworkBuffer {
                     throw throwable;
                 }
             } else {
-                // use memory map zero-copy if io mode is not epoll
+                // Use memory map zero-copy if io mode is not epoll
                 try (RandomAccessFile file = new RandomAccessFile(targetPath,
                                              Constants.FILE_MODE_WRITE)) {
                     FileChannel fileChannel = file.getChannel();

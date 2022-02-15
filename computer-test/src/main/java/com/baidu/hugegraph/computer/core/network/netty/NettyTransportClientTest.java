@@ -57,9 +57,9 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Override
     protected void initOption() {
         super.updateOption(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS,
-                           8000);
+                           8);
         super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS,
-                           6000);
+                           6);
         super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK,
                            64 * (int) Bytes.MB);
         super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK,

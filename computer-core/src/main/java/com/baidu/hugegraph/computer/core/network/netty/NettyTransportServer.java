@@ -129,7 +129,7 @@ public class NettyTransportServer implements TransportServer, Closeable {
                                    this.conf.tcpKeepAlive());
 
         boolean enableLt = this.conf.epollLevelTriggered();
-        // use zero-copy mode
+        // Must be use level trigger mode on zero-copy mode
         if (this.conf.zeroCopyMode()) {
             enableLt = true;
         }

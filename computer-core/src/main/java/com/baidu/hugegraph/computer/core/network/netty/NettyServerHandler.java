@@ -86,11 +86,11 @@ public class NettyServerHandler extends AbstractNettyHandler {
             if (body instanceof FileRegionBuffer) {
                 this.serverSession.onRecvData(dataMessage.requestId());
                 /*
-                    submit zero-copy task to EventLoop,
+                    Submit zero-copy task to EventLoop,
                     it will be executed next time network data is received.
                  */
                 FileRegionBuffer buffer = ((FileRegionBuffer) body);
-                // optimize MaxBytes PreRead
+                // Optimize Value of max bytes of next read
                 TransportUtil.setMaxBytesPreRead(channel, body.length());
                 String outputPath = this.handler.genOutputPath(
                                     dataMessage.type(),
@@ -110,7 +110,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
                         } else {
                             this.exceptionCaught(ctx, future.cause());
                         }
-                        // reset max bytes next read to length of frame
+                        // Reset max bytes next read to length of frame
                         TransportUtil.setMaxBytesPreRead(future.channel(),
                                       AbstractMessage.HEADER_LENGTH);
                         future.channel().unsafe().recvBufAllocHandle().reset(
