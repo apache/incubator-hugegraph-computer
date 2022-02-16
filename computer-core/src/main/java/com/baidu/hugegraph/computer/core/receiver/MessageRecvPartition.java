@@ -150,7 +150,7 @@ public abstract class MessageRecvPartition {
 
     private void flushSortBuffersAsync() {
         String path = this.genOutputPath();
-        this.mergeBuffersAsync(this.sortBuffers, this.genOutputPath());
+        this.mergeBuffersAsync(this.sortBuffers, path);
         this.outputFiles.add(path);
     }
 

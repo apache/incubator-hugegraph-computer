@@ -63,7 +63,9 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
     public String genOutputPath(int partitionId) {
         P partition = this.partition(partitionId);
-        return partition.genOutputPath();
+        String path = partition.genOutputPath();
+        new File(path).getParentFile().mkdirs();
+        return path;
     }
 
     private P partition(int partitionId) {
