@@ -26,8 +26,8 @@ import java.util.NoSuchElementException;
 
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.LoserTreeInputsSorting;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.util.E;
 
 public class SubKvSorter implements Iterator<KvEntry> {

@@ -29,9 +29,9 @@ import java.util.stream.Collectors;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortingFactory;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.util.E;
 
 public class CombineSubKvInnerSortFlusher implements InnerSortFlusher {

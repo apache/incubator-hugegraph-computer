@@ -49,10 +49,10 @@ import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 

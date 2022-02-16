@@ -26,8 +26,8 @@ import java.io.OutputStream;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
 
 public final class IOFactory {
 

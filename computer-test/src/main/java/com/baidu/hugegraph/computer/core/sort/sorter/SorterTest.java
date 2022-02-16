@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.combiner.IntValueSumCombiner;
@@ -49,17 +48,18 @@ import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlush
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.IterableEntryFile;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileReader;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.DisperseEvenlySelector;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.InputFilesSelector;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDir;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.reader.HgkvDirReaderImpl;
+import com.baidu.hugegraph.computer.core.store.file.select.DisperseEvenlySelector;
+import com.baidu.hugegraph.computer.core.store.file.select.InputFilesSelector;
+import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.iterator.CIter;
 import com.baidu.hugegraph.testutil.Assert;
@@ -67,17 +67,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class SorterTest {
-
-    private static Config CONFIG;
-
-    @BeforeClass
-    public static void init() {
-        CONFIG = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
-                ComputerOptions.HGKV_DATABLOCK_SIZE, "16",
-                ComputerOptions.HGKV_MERGE_FILES_NUM, "3"
-        );
-    }
 
     @Before
     public void setup() throws IOException {
@@ -91,6 +80,11 @@ public class SorterTest {
 
     @Test
     public void testSortKvBuffer() throws Exception {
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
+                ComputerOptions.HGKV_DATABLOCK_SIZE, "16",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "3"
+        );
         List<Integer> map = ImmutableList.of(2, 3,
                                              1, 23,
                                              6, 2,
@@ -102,7 +96,7 @@ public class SorterTest {
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
 
-        SorterImpl sorter = new SorterImpl(CONFIG);
+        SorterImpl sorter = new SorterImpl(config);
         PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
                                                   IntValue::new,
                                                   new IntValueSumCombiner());
@@ -121,6 +115,11 @@ public class SorterTest {
 
     @Test
     public void testSortKvBuffers() throws Exception {
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
+                ComputerOptions.HGKV_DATABLOCK_SIZE, "16",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "3"
+        );
         List<Integer> map1 = ImmutableList.of(2, 3,
                                               2, 1,
                                               5, 2,
@@ -139,7 +138,7 @@ public class SorterTest {
                                 SorterTestUtil.inputFromKvMap(map2),
                                 SorterTestUtil.inputFromKvMap(map1),
                                 SorterTestUtil.inputFromKvMap(map2));
-        SorterImpl sorter = new SorterImpl(CONFIG);
+        SorterImpl sorter = new SorterImpl(config);
         PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
                                                   IntValue::new,
                                                   new IntValueSumCombiner());
@@ -147,7 +146,7 @@ public class SorterTest {
                             path, false);
 
         // Assert merge result from target hgkvDir
-        IterableEntryFile reader = new HgkvDirReaderImpl(path, false);
+        KvEntryFileReader reader = new HgkvDirReaderImpl(path, false);
         EntryIterator iter = reader.iterator();
         SorterTestUtil.assertKvEntry(iter.next(), 1, 8);
         SorterTestUtil.assertKvEntry(iter.next(), 2, 8);
@@ -160,6 +159,24 @@ public class SorterTest {
 
     @Test
     public void testMergeKvInputs() throws Exception {
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
+                ComputerOptions.HGKV_DATABLOCK_SIZE, "16",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "3",
+                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+        );
+        this.testMergeKvInputs(config);
+
+        config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
+                ComputerOptions.HGKV_DATABLOCK_SIZE, "16",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "3",
+                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "true"
+        );
+        this.testMergeKvInputs(config);
+    }
+
+    private void testMergeKvInputs(Config config) throws Exception {
         List<Integer> map1 = ImmutableList.of(2, 3,
                                               2, 1,
                                               5, 2,
@@ -198,11 +215,15 @@ public class SorterTest {
             } else {
                 map = map2;
             }
-            StoreTestUtil.hgkvDirFromKvMap(CONFIG, map, inputs.get(i));
+            if (config.get(ComputerOptions.TRANSPORT_ZERO_COPY_MODE)) {
+                StoreTestUtil.bufferFileFromKvMap(map, inputs.get(i));
+            } else {
+                StoreTestUtil.hgkvDirFromKvMap(config, map, inputs.get(i));
+            }
         }
 
         // Merge file
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = new SorterImpl(config);
         PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
                                                   IntValue::new,
                                                   new IntValueSumCombiner());
@@ -241,6 +262,9 @@ public class SorterTest {
             value = StoreTestUtil.dataFromPointer(last.value());
         }
         Assert.assertFalse(resultIter.hasNext());
+
+        FileUtil.deleteFilesQuietly(inputs);
+        FileUtil.deleteFilesQuietly(outputs);
     }
 
     private BytesInput sortedSubKvBuffer(Config config) throws Exception {
@@ -305,7 +329,8 @@ public class SorterTest {
     @Test
     public void testSortSubKvBuffers() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2"
+            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2",
+            ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
         );
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
@@ -351,10 +376,21 @@ public class SorterTest {
     @Test
     public void testMergeSubKvFiles() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2"
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2",
+                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
         );
+        this.testMergeSubKvFiles(config);
+
+        config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2",
+                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "true"
+        );
+        this.testMergeSubKvFiles(config);
+    }
+
+    private void testMergeSubKvFiles(Config config) throws Exception {
         int flushThreshold = config.get(
-                             ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
 
         List<Integer> kv1 = ImmutableList.of(1,
                                              2, 1,
@@ -378,6 +414,7 @@ public class SorterTest {
         List<List<Integer>> data1 = ImmutableList.of(kv1, kv2, kv3);
         List<List<Integer>> data2 = ImmutableList.of(kv4, kv5, kv6);
         List<List<Integer>> data3 = ImmutableList.of(kv4, kv1, kv3);
+        List<List<List<Integer>>> datas = ImmutableList.of(data1, data2, data3);
 
         String input1 = StoreTestUtil.availablePathById(1);
         String input2 = StoreTestUtil.availablePathById(2);
@@ -387,16 +424,24 @@ public class SorterTest {
         List<String> inputs = ImmutableList.of(input1, input2, input3);
         List<String> outputs = ImmutableList.of(output);
 
-        StoreTestUtil.hgkvDirFromSubKvMap(config, data1, input1);
-        StoreTestUtil.hgkvDirFromSubKvMap(config, data2, input2);
-        StoreTestUtil.hgkvDirFromSubKvMap(config, data3, input3);
+        boolean useBufferFile = config.get(
+                ComputerOptions.TRANSPORT_ZERO_COPY_MODE);
+        for (int i = 0; i < inputs.size(); i++) {
+            String input = inputs.get(i);
+            List<List<Integer>> data = datas.get(i);
+            if (useBufferFile) {
+                StoreTestUtil.bufferFileFromSubKvMap(data, input);
+            } else {
+                StoreTestUtil.hgkvDirFromSubKvMap(config, data, input);
+            }
+        }
 
         Sorter sorter = new SorterImpl(config);
         PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
-                                                  IntValue::new,
-                                                  new IntValueSumCombiner());
+                IntValue::new,
+                new IntValueSumCombiner());
         OuterSortFlusher flusher = new CombineSubKvOuterSortFlusher(
-                                       combiner, flushThreshold);
+                combiner, flushThreshold);
         flusher.sources(inputs.size());
         sorter.mergeInputs(inputs, flusher, outputs, true);
 
@@ -416,6 +461,9 @@ public class SorterTest {
             SorterTestUtil.assertSubKvByKv(kvIter.next(), 4, 2, 1, 3, 1);
             SorterTestUtil.assertSubKvByKv(kvIter.next(), 4, 6, 2, 8, 2);
         }
+
+        FileUtil.deleteFilesQuietly(inputs);
+        FileUtil.deleteFilesQuietly(outputs);
     }
 
     @Test
@@ -433,7 +481,7 @@ public class SorterTest {
         InputFilesSelector selector = new DisperseEvenlySelector();
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            selector.selectedOfOutputs(inputs, outputs);
+            selector.selectedByHgkvFile(inputs, outputs);
         }, e -> {
             String errorMsg = "inputs size of InputFilesSelector must be >= " +
                               "outputs size";

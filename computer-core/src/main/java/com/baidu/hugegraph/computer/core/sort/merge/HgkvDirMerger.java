@@ -20,9 +20,11 @@
 package com.baidu.hugegraph.computer.core.sort.merge;
 
 import java.util.List;
+import java.util.function.Function;
 
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InputToEntries;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 
 public interface HgkvDirMerger {
 
@@ -33,6 +35,8 @@ public interface HgkvDirMerger {
      * @param output write merge result to this file
      * @param flusher combiner entries of same key
      */
-    void merge(List<String> inputs, InputToEntries inputToEntries,
-               String output, OuterSortFlusher flusher) throws Exception;
+    void merge(List<String> inputs,
+               Function<String, EntryIterator> inputToEntries,
+               String output, Function<String, KvEntryFileWriter> fileToWriter,
+               OuterSortFlusher flusher) throws Exception;
 }

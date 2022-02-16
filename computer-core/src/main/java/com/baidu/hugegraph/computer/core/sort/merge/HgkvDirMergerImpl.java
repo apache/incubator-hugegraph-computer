@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -30,11 +31,9 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InputToEntries;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.util.E;
 
@@ -55,9 +54,11 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
     }
 
     @Override
-    public void merge(List<String> inputs, InputToEntries inputToEntries,
-                      String output, OuterSortFlusher flusher)
-                      throws Exception {
+    public void merge(List<String> inputs,
+                      Function<String, EntryIterator> inputToEntries,
+                      String output,
+                      Function<String, KvEntryFileWriter> fileToWriter,
+                      OuterSortFlusher flusher) throws Exception {
         List<String> subInputs = new ArrayList<>(this.mergePathNum);
         int round = 0;
         while (inputs.size() > this.mergePathNum) {
@@ -67,7 +68,8 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
                 if (subInputs.size() == this.mergePathNum ||
                     i == inputs.size() - 1) {
                     String subOutput = this.mergeInputsToRandomFile(
-                                            subInputs, inputToEntries, flusher);
+                            subInputs, inputToEntries,
+                            fileToWriter, flusher);
                     // Don't remove original file
                     if (round != 0) {
                         FileUtil.deleteFilesQuietly(subInputs);
@@ -81,36 +83,38 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
             round++;
         }
 
-        this.mergeInputs(inputs, inputToEntries, flusher, output);
+        this.mergeInputs(inputs, inputToEntries, flusher, output, fileToWriter);
     }
 
-    private String mergeInputsToRandomFile(List<String> inputs,
-                                           InputToEntries inputToEntries,
-                                           OuterSortFlusher flusher)
-                                           throws Exception {
+    private String mergeInputsToRandomFile(
+                   List<String> inputs,
+                   Function<String, EntryIterator> inputToIter,
+                   Function<String, KvEntryFileWriter> fileToWriter,
+                   OuterSortFlusher flusher) throws Exception {
         String output = this.randomPath();
-        this.mergeInputs(inputs, inputToEntries, flusher, output);
+        this.mergeInputs(inputs, inputToIter, flusher, output, fileToWriter);
         return output;
     }
 
-    private void mergeInputs(List<String> inputs, InputToEntries inputToEntries,
-                             OuterSortFlusher flusher, String output)
+    private void mergeInputs(List<String> inputs,
+                             Function<String, EntryIterator> inputToIter,
+                             OuterSortFlusher flusher, String output,
+                             Function<String, KvEntryFileWriter> fileToWriter)
                              throws Exception {
         /*
          * File value format is different, upper layer is required to
          * provide the file reading mode
          */
         List<EntryIterator> entries = inputs.stream()
-                                            .map(inputToEntries::inputToEntries)
+                                            .map(inputToIter)
                                             .collect(Collectors.toList());
 
         InputsSorter sorter = new InputsSorterImpl();
 
         // Merge inputs and write to output
         try (EntryIterator sortedKv = sorter.sort(entries);
-             HgkvDirBuilder builder = new HgkvDirBuilderImpl(this.config,
-                                                             output)) {
-            flusher.flush(sortedKv, builder);
+             KvEntryFileWriter builder = fileToWriter.apply(output)) {
+             flusher.flush(sortedKv, builder);
         }
     }
 

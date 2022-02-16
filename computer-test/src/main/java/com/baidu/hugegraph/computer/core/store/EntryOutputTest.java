@@ -34,13 +34,12 @@ import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
+import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntryWriter;
 import com.google.common.collect.ImmutableList;
 
 public class EntryOutputTest {

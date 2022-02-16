@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.DefaultKvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.util.E;
 
 public abstract class CombinableSorterFlusher {

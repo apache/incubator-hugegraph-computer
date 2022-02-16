@@ -23,12 +23,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
@@ -43,16 +44,24 @@ import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
 public class FlusherTest {
 
-    private static final Config CONFIG = ComputerContext.instance().config();
+    private static Config CONFIG;
+
+    @BeforeClass
+    public static void init() {
+        CONFIG = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+        );
+    }
 
     @Test
     public void testKvInnerSortFlusher() throws Exception {

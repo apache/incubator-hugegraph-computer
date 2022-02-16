@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.util.E;
 
 public class KvInnerSortFlusher implements InnerSortFlusher {

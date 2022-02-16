@@ -32,14 +32,12 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDir;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvFileImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.reader.HgkvDirReaderImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
@@ -77,7 +75,7 @@ public class HgkvDirTest {
         List<KvEntry> kvEntries = StoreTestUtil.kvEntriesFromMap(data);
 
         String path = StoreTestUtil.availablePathById("1");
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(CONFIG, path)) {
+        try (KvEntryFileWriter builder = new HgkvDirBuilderImpl(CONFIG, path)) {
             for (KvEntry entry : kvEntries) {
                 builder.write(entry);
             }
@@ -110,7 +108,7 @@ public class HgkvDirTest {
                                               6, 2);
         String path = StoreTestUtil.availablePathById("1");
         StoreTestUtil.hgkvDirFromKvMap(CONFIG, data, path);
-        IterableEntryFile reader = new HgkvDirReaderImpl(path, false);
+        KvEntryFileReader reader = new HgkvDirReaderImpl(path, false);
         try (EntryIterator iterator = reader.iterator()) {
             int i = 0;
             while (iterator.hasNext()) {

@@ -30,8 +30,8 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntryWriter;
 
 public class StreamGraphOutput implements GraphComputeOutput {
 

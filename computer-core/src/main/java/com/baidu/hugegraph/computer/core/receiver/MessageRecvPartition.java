@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.util.Log;
 

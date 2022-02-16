@@ -32,9 +32,9 @@ import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

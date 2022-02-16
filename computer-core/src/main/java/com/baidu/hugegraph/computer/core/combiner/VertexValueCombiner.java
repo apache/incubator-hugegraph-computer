@@ -25,8 +25,8 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.InlinePointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public class VertexValueCombiner extends AbstractPointerCombiner<Properties> {
 

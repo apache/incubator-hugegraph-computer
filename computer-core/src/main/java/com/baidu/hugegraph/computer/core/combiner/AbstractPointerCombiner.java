@@ -28,8 +28,8 @@ import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.InlinePointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
 public abstract class AbstractPointerCombiner<T extends Readable & Writable>
                 implements PointerCombiner {

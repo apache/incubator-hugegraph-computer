@@ -29,8 +29,8 @@ import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.GraphComputeOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
 
 /**
  * It's not a public class, need package access

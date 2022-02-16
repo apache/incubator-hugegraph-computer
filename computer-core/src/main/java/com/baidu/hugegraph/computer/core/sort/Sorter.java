@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
 public interface Sorter {
 

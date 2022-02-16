@@ -32,13 +32,12 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFile;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvFileImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvFileReaderImpl;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvFile;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvFileImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvFileBuilder;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvFileBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.reader.HgkvFileReaderImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
@@ -134,7 +133,7 @@ public class HgkvFileTest {
         String filePath = StoreTestUtil.availablePathById("1");
         File file = StoreTestUtil.mapToHgkvFile(CONFIG, data, filePath);
 
-        IterableEntryFile reader = new HgkvFileReaderImpl(file.getPath(),
+        KvEntryFileReader reader = new HgkvFileReaderImpl(file.getPath(),
                                                           false);
         try (EntryIterator iterator = reader.iterator()) {
             int index = 0;

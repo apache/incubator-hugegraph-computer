@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
 public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 

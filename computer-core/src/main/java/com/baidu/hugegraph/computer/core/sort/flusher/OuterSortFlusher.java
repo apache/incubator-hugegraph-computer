@@ -24,9 +24,9 @@ import java.io.IOException;
 import org.apache.commons.lang.NotImplementedException;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 
 public interface OuterSortFlusher {
 
@@ -51,6 +51,6 @@ public interface OuterSortFlusher {
      * The caller maybe needs to call the sources method before call this
      * method.
      */
-    void flush(EntryIterator entries, HgkvDirBuilder writer)
+    void flush(EntryIterator entries, KvEntryFileWriter writer)
                throws IOException;
 }

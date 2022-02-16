@@ -22,6 +22,7 @@ package com.baidu.hugegraph.computer.core.sort;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -37,21 +38,21 @@ import com.baidu.hugegraph.computer.core.sort.sorter.InputSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorter;
 import com.baidu.hugegraph.computer.core.sort.sorter.InputsSorterImpl;
 import com.baidu.hugegraph.computer.core.sort.sorter.JavaInputSorter;
-import com.baidu.hugegraph.computer.core.store.IterableEntryFile;
-import com.baidu.hugegraph.computer.core.store.bufferfile.BufferFileEntryReader;
-import com.baidu.hugegraph.computer.core.store.bufferfile.BufferFileSubEntryReader;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesWithFirstSubKvInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InputToEntries;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDir4SubKvReaderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.reader.HgkvDirReaderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.DisperseEvenlySelector;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.InputFilesSelector;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.select.SelectedFiles;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileReader;
+import com.baidu.hugegraph.computer.core.store.file.bufferfile.BufferFileEntryBuilder;
+import com.baidu.hugegraph.computer.core.store.file.bufferfile.BufferFileEntryReader;
+import com.baidu.hugegraph.computer.core.store.file.bufferfile.BufferFileSubEntryReader;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
+import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesWithFirstSubKvInput;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.reader.HgkvDir4SubKvReaderImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.reader.HgkvDirReaderImpl;
+import com.baidu.hugegraph.computer.core.store.file.select.DisperseEvenlySelector;
+import com.baidu.hugegraph.computer.core.store.file.select.InputFilesSelector;
+import com.baidu.hugegraph.computer.core.store.file.select.SelectedFiles;
 
 public class SorterImpl implements Sorter {
 
@@ -94,23 +95,28 @@ public class SorterImpl implements Sorter {
     public void mergeInputs(List<String> inputs, OuterSortFlusher flusher,
                             List<String> outputs, boolean withSubKv)
                             throws Exception {
-        InputToEntries inputToEntries;
-        if (withSubKv) {
-            if (this.useZeroCopy) {
-                inputToEntries = o -> new BufferFileEntryReader(o).iterator();
-            } else {
-                inputToEntries = o -> new HgkvDir4SubKvReaderImpl(o).iterator();
-            }
-        } else {
-            if (this.useZeroCopy) {
-                inputToEntries = o -> {
+        Function<String, EntryIterator> fileToInput;
+        Function<String, KvEntryFileWriter> fileToWriter;
+
+        if (this.useZeroCopy) {
+            if (withSubKv) {
+                fileToInput = o -> {
                     return new BufferFileSubEntryReader(o).iterator();
                 };
             } else {
-                inputToEntries = o -> new HgkvDirReaderImpl(o).iterator();
+                fileToInput = o -> new BufferFileEntryReader(o).iterator();
             }
+            fileToWriter = BufferFileEntryBuilder::new;
+        } else {
+            if (withSubKv) {
+                fileToInput = o -> new HgkvDir4SubKvReaderImpl(o).iterator();
+            } else {
+                fileToInput = o -> new HgkvDirReaderImpl(o).iterator();
+            }
+            fileToWriter = path -> new HgkvDirBuilderImpl(this.config, path);
         }
-        this.mergeInputs(inputs, inputToEntries, flusher, outputs);
+
+        this.mergeInputs(inputs, fileToInput, flusher, outputs, fileToWriter);
     }
 
     @Override
@@ -120,8 +126,12 @@ public class SorterImpl implements Sorter {
         InputsSorterImpl sorter = new InputsSorterImpl();
         List<EntryIterator> entries = new ArrayList<>();
         for (String input : inputs) {
-            IterableEntryFile reader = new HgkvDirReaderImpl(input, false,
-                                                             withSubKv);
+            KvEntryFileReader reader;
+            if (this.useZeroCopy) {
+                reader = new BufferFileEntryReader(input);
+            } else {
+                reader = new HgkvDirReaderImpl(input, false, withSubKv);
+            }
             entries.add(reader.iterator());
         }
         return PeekableIteratorAdaptor.of(sorter.sort(entries));
@@ -131,25 +141,31 @@ public class SorterImpl implements Sorter {
                              OuterSortFlusher flusher, String output)
                              throws IOException {
         InputsSorter sorter = new InputsSorterImpl();
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(this.config,
-                                                             output)) {
+        try (KvEntryFileWriter builder = new HgkvDirBuilderImpl(this.config,
+                                                                output)) {
             EntryIterator result = sorter.sort(entries);
             flusher.flush(result, builder);
         }
     }
 
-    private void mergeInputs(List<String> inputs, InputToEntries inputToEntries,
-                             OuterSortFlusher flusher, List<String> outputs)
+    private void mergeInputs(List<String> inputs,
+                             Function<String, EntryIterator> inputToEntries,
+                             OuterSortFlusher flusher, List<String> outputs,
+                             Function<String, KvEntryFileWriter> fileToWriter)
                              throws Exception {
         InputFilesSelector selector = new DisperseEvenlySelector();
         // Each SelectedFiles include some input files per output.
-        List<SelectedFiles> results = selector.selectedOfOutputs(inputs,
-                                                                 outputs);
+        List<SelectedFiles> results;
+        if (this.useZeroCopy) {
+            results = selector.selectedByBufferFile(inputs, outputs);
+        } else {
+            results = selector.selectedByHgkvFile(inputs, outputs);
+        }
 
         HgkvDirMerger merger = new HgkvDirMergerImpl(this.config);
         for (SelectedFiles result : results) {
             merger.merge(result.inputs(), inputToEntries,
-                         result.output(), flusher);
+                         result.output(), fileToWriter, flusher);
         }
     }
 }

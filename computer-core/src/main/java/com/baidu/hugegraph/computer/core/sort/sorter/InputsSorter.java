@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.sort.sorter;
 import java.io.IOException;
 import java.util.List;
 
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
 
 public interface InputsSorter {
 
