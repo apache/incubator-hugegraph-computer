@@ -47,9 +47,9 @@ import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
@@ -73,7 +73,8 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
             ComputerOptions.JOB_PARTITIONS_COUNT, "1",
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
-            ComputerOptions.HGKV_MERGE_FILES_NUM, "2"
+            ComputerOptions.HGKV_MERGE_FILES_NUM, "2",
+            ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));

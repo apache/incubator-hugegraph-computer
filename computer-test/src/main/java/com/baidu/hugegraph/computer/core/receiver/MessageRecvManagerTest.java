@@ -65,7 +65,9 @@ public class MessageRecvManagerTest extends UnitTestBase {
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
             ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "100",
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS, DoubleValue.class.getName()
+            ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+            DoubleValue.class.getName(),
+            ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
         );
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);

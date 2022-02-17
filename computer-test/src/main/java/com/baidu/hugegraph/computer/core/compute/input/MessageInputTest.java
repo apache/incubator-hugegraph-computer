@@ -79,7 +79,8 @@ public class MessageInputTest extends UnitTestBase {
             ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
             ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "10",
             ComputerOptions.WORKER_COMPUTATION_CLASS,
-            MockComputation.class.getName()
+            MockComputation.class.getName(),
+            ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
         );
 
         this.managers = new Managers();

@@ -123,7 +123,8 @@ public class EdgesInputTest extends UnitTestBase {
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
             ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
             ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "10",
-            ComputerOptions.INPUT_EDGE_FREQ, freq.name()
+            ComputerOptions.INPUT_EDGE_FREQ, freq.name(),
+            ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
         );
         this.managers = new Managers();
         FileManager fileManager = new FileManager();
