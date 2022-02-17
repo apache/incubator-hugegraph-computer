@@ -63,7 +63,7 @@ public abstract class SortManager implements Manager {
     public static final Logger LOG = Log.logger(SortManager.class);
 
     private final ComputerContext context;
-    private final ExecutorService sortExecutor;
+    private ExecutorService sortExecutor;
     private final Sorter sorter;
     private final int capacity;
     private final int flushThreshold;
@@ -71,8 +71,10 @@ public abstract class SortManager implements Manager {
     public SortManager(ComputerContext context) {
         this.context = context;
         Config config = context.config();
-        this.sortExecutor = ExecutorUtil.newFixedThreadPool(
-                            this.threadNum(config), this.threadPrefix());
+        if (this.threadNum(config) != 0) {
+            this.sortExecutor = ExecutorUtil.newFixedThreadPool(
+                                this.threadNum(config), this.threadPrefix());
+        }
         this.sorter = new SorterImpl(config);
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);

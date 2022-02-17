@@ -76,8 +76,13 @@ public abstract class MessageRecvPartition {
         long waitSortTimeout = config.get(
                                ComputerOptions.WORKER_WAIT_SORT_TIMEOUT);
         this.mergeFileNum = config.get(ComputerOptions.HGKV_MERGE_FILES_NUM);
-        this.recvBuffers = new MessageRecvBuffers(buffersLimit,
-                                                  waitSortTimeout);
+        Boolean zeroCopyMode =
+                config.get(ComputerOptions.TRANSPORT_ZERO_COPY_MODE);
+        if (!zeroCopyMode) {
+            this.recvBuffers = new MessageRecvBuffers(buffersLimit,
+                                                      waitSortTimeout);
+        }
+
         this.sortBuffers = new MessageRecvBuffers(buffersLimit,
                                                   waitSortTimeout);
         this.outputFiles = new ArrayList<>();
