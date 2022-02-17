@@ -52,6 +52,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.entry.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
@@ -60,7 +61,6 @@ import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
@@ -79,7 +79,7 @@ public class SortLargeDataTest {
         CONFIG = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MERGE_FILES_NUM, "200",
                 ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB),
-                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
     }
 
@@ -224,8 +224,8 @@ public class SortLargeDataTest {
     @Test
     public void testDiffNumEntriesFileMerge() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.HGKV_MERGE_FILES_NUM, "3",
-            ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "3",
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         List<Integer> sizeList = ImmutableList.of(200, 500, 20, 50, 300,
                                                   250, 10, 33, 900, 89, 20);

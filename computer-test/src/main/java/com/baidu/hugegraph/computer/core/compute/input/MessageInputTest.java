@@ -64,23 +64,23 @@ public class MessageInputTest extends UnitTestBase {
     @Before
     public void setup() {
         this.config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "2",
-            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-            ComputerOptions.WORKER_COMBINER_CLASS,
-            Null.class.getName(), // Can't combine
-            ComputerOptions.ALGORITHM_RESULT_CLASS,
-            IdListList.class.getName(),
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-            IdList.class.getName(),
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
-            ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
-            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "10",
-            ComputerOptions.WORKER_COMPUTATION_CLASS,
-            MockComputation.class.getName(),
-            ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
+                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                ComputerOptions.WORKER_COMBINER_CLASS,
+                Null.class.getName(), // Can't combine
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                IdListList.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                IdList.class.getName(),
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
+                ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "10",
+                ComputerOptions.WORKER_COMPUTATION_CLASS,
+                MockComputation.class.getName(),
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
 
         this.managers = new Managers();

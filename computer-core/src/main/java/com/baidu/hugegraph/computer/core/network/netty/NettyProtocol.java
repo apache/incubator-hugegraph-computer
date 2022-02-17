@@ -98,7 +98,7 @@ public class NettyProtocol {
 
         pipeline.addLast("encoder", MessageEncoder.INSTANCE);
 
-        if (this.conf.zeroCopyMode()) {
+        if (this.conf.recvBufferFileMode()) {
             pipeline.addLast("frameDecoder", new PreciseFrameDecoder());
             pipeline.addLast("decoder", MessageDecoder.INSTANCE_FILE_REGION);
         } else {

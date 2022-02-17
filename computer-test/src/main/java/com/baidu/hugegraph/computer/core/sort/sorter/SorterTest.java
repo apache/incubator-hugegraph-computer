@@ -48,9 +48,9 @@ import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlush
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.KvEntryFileReader;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
@@ -163,7 +163,7 @@ public class SorterTest {
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16",
                 ComputerOptions.HGKV_MERGE_FILES_NUM, "3",
-                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         this.testMergeKvInputs(config);
 
@@ -171,7 +171,7 @@ public class SorterTest {
                 ComputerOptions.HGKV_MAX_FILE_SIZE, "32",
                 ComputerOptions.HGKV_DATABLOCK_SIZE, "16",
                 ComputerOptions.HGKV_MERGE_FILES_NUM, "3",
-                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "true"
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "true"
         );
         this.testMergeKvInputs(config);
     }
@@ -215,7 +215,7 @@ public class SorterTest {
             } else {
                 map = map2;
             }
-            if (config.get(ComputerOptions.TRANSPORT_ZERO_COPY_MODE)) {
+            if (config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE)) {
                 StoreTestUtil.bufferFileFromKvMap(map, inputs.get(i));
             } else {
                 StoreTestUtil.hgkvDirFromKvMap(config, map, inputs.get(i));
@@ -329,8 +329,8 @@ public class SorterTest {
     @Test
     public void testSortSubKvBuffers() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2",
-            ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2",
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         int flushThreshold = config.get(
                              ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
@@ -377,13 +377,13 @@ public class SorterTest {
     public void testMergeSubKvFiles() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2",
-                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         this.testMergeSubKvFiles(config);
 
         config = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "2",
-                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "true"
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "true"
         );
         this.testMergeSubKvFiles(config);
     }
@@ -425,7 +425,7 @@ public class SorterTest {
         List<String> outputs = ImmutableList.of(output);
 
         boolean useBufferFile = config.get(
-                ComputerOptions.TRANSPORT_ZERO_COPY_MODE);
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE);
         for (int i = 0; i < inputs.size(); i++) {
             String input = inputs.get(i);
             List<List<Integer>> data = datas.get(i);

@@ -586,7 +586,7 @@ public class ComputerOptions extends OptionHolder {
                     "trigger sorting, the write buffer is used to store " +
                     "vertex or message.",
                     positiveInt(),
-                    (int) (100 * Bytes.MB)
+                    (int) (50 * Bytes.MB)
             );
 
     public static final ConfigOption<Integer>
@@ -595,7 +595,7 @@ public class ComputerOptions extends OptionHolder {
                     "The initial size of write buffer that used to store " +
                     "vertex or message.",
                     positiveInt(),
-                    (int) (100 * Bytes.MB)
+                    (int) (50 * Bytes.MB)
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
@@ -682,10 +682,12 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
-    public static final ConfigOption<Boolean> TRANSPORT_ZERO_COPY_MODE =
+    public static final ConfigOption<Boolean> TRANSPORT_RECV_FILE_MODE =
             new ConfigOption<>(
-                    "transport.zero_copy_mode",
-                    "Whether enable zero-copy mode.",
+                    "transport.recv_file_mode",
+                    "Whether enable receive buffer-file mode, it will " +
+                    "receive buffer write file from socket by " +
+                    "zero-copy if enable.",
                     allowValues(true, false),
                     true
             );

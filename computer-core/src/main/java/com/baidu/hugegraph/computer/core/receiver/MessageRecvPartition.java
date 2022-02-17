@@ -60,6 +60,7 @@ public abstract class MessageRecvPartition {
     private final boolean withSubKv;
     private final int mergeFileNum;
     private long totalBytes;
+    private final boolean useFileBuffer;
 
     private final AtomicReference<Throwable> exception;
 
@@ -76,15 +77,15 @@ public abstract class MessageRecvPartition {
         long waitSortTimeout = config.get(
                                ComputerOptions.WORKER_WAIT_SORT_TIMEOUT);
         this.mergeFileNum = config.get(ComputerOptions.HGKV_MERGE_FILES_NUM);
-        Boolean zeroCopyMode =
-                config.get(ComputerOptions.TRANSPORT_ZERO_COPY_MODE);
-        if (!zeroCopyMode) {
+        this.useFileBuffer = config.get(
+                             ComputerOptions.TRANSPORT_RECV_FILE_MODE);
+        if (!this.useFileBuffer) {
             this.recvBuffers = new MessageRecvBuffers(buffersLimit,
+                                                      waitSortTimeout);
+            this.sortBuffers = new MessageRecvBuffers(buffersLimit,
                                                       waitSortTimeout);
         }
 
-        this.sortBuffers = new MessageRecvBuffers(buffersLimit,
-                                                  waitSortTimeout);
         this.outputFiles = new ArrayList<>();
         this.totalBytes = 0L;
         this.exception = new AtomicReference<>();
@@ -115,7 +116,9 @@ public abstract class MessageRecvPartition {
          * TODO: create iterator directly from buffers if there is no
          *       outputFiles.
          */
-        this.flushAllBuffersAndWaitSorted();
+        if (!this.useFileBuffer) {
+            this.flushAllBuffersAndWaitSorted();
+        }
         this.mergeOutputFilesIfNeeded();
         if (this.outputFiles.size() == 0) {
             return PeekableIterator.emptyIterator();

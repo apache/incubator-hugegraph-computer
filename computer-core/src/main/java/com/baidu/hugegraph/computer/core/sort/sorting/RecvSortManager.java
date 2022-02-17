@@ -44,9 +44,7 @@ public class RecvSortManager extends SortManager {
 
     @Override
     protected Integer threadNum(Config config) {
-        Boolean zeroCopyMode = config.get(
-                               ComputerOptions.TRANSPORT_ZERO_COPY_MODE);
-        if (zeroCopyMode) {
+        if (config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE)) {
             return 0;
         }
         return Math.min(super.threadNum(config),

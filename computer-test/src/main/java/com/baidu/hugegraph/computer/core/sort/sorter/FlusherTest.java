@@ -43,8 +43,8 @@ import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
-import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
 import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
@@ -59,7 +59,7 @@ public class FlusherTest {
     @BeforeClass
     public static void init() {
         CONFIG = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.TRANSPORT_ZERO_COPY_MODE, "false"
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
     }
 

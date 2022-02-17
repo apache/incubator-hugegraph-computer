@@ -80,8 +80,8 @@ public class TransportConf {
                    .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
     }
 
-    public boolean zeroCopyMode() {
-        return this.config.get(ComputerOptions.TRANSPORT_ZERO_COPY_MODE);
+    public boolean recvBufferFileMode() {
+        return this.config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE);
     }
 
     /**
