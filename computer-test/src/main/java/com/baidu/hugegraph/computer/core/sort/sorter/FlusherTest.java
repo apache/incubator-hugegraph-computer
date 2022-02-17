@@ -37,7 +37,6 @@ import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
@@ -73,7 +72,7 @@ public class FlusherTest {
 
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         sorter.sortBuffer(input, new KvInnerSortFlusher(output), false);
 
         BytesInput result = EntriesUtil.inputFromOutput(output);
@@ -99,7 +98,7 @@ public class FlusherTest {
         List<RandomAccessInput> inputs = ImmutableList.of(input1, input2);
 
         String resultFile = StoreTestUtil.availablePathById("1");
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         sorter.mergeBuffers(inputs, new KvOuterSortFlusher(), resultFile,
                             false);
 
@@ -145,7 +144,7 @@ public class FlusherTest {
                                                   new OverwriteCombiner<>());
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         sorter.sortBuffer(input, flusher, false);
 
         BytesInput result = EntriesUtil.inputFromOutput(output);

@@ -46,8 +46,9 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
+import com.baidu.hugegraph.computer.core.sort.BufferFileSorter;
+import com.baidu.hugegraph.computer.core.sort.HgkvFileSorter;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
@@ -77,7 +78,11 @@ public abstract class SortManager implements Manager {
         } else {
             this.sortExecutor = null;
         }
-        this.sorter = new SorterImpl(config);
+        if (config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE)) {
+            this.sorter = new BufferFileSorter(config);
+        } else {
+            this.sorter = new HgkvFileSorter(config);
+        }
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
         this.flushThreshold = config.get(

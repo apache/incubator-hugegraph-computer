@@ -26,11 +26,11 @@ import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 
-public interface HgkvDirMerger {
+public interface FileMerger {
 
     /**
-     * Merge inputs hgkvDirs to output hgkvDir
-     * @param inputs hgkv file that need to be merged
+     * Merge inputs file to output file
+     * @param inputs file that need to be merged
      * @param inputToEntries key value pair read mode
      * @param output write merge result to this file
      * @param flusher combiner entries of same key

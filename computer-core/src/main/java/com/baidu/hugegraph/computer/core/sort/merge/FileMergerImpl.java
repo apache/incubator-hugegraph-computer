@@ -37,14 +37,12 @@ import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.util.E;
 
-public class HgkvDirMergerImpl implements HgkvDirMerger {
+public class FileMergerImpl implements FileMerger {
 
-    private final Config config;
     private final int mergePathNum;
     private final String tempDir;
 
-    public HgkvDirMergerImpl(Config config) {
-        this.config = config;
+    public FileMergerImpl(Config config) {
         this.mergePathNum = config.get(ComputerOptions.HGKV_MERGE_FILES_NUM);
         this.tempDir = config.get(ComputerOptions.HGKV_TEMP_DIR) +
                        File.separator + UUID.randomUUID();
@@ -110,7 +108,6 @@ public class HgkvDirMergerImpl implements HgkvDirMerger {
                                             .collect(Collectors.toList());
 
         InputsSorter sorter = new InputsSorterImpl();
-
         // Merge inputs and write to output
         try (EntryIterator sortedKv = sorter.sort(entries);
              KvEntryFileWriter builder = fileToWriter.apply(output)) {

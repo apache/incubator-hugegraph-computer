@@ -44,7 +44,6 @@ import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
@@ -107,7 +106,7 @@ public class SortLargeDataTest {
         List<RandomAccessInput> buffers = new ArrayList<>(mergeBufferNum);
         List<String> mergeBufferFiles = new ArrayList<>();
         int fileNum = 10;
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
 
         watcher.start();
         for (int i = 0; i < dataSize; i++) {
@@ -169,7 +168,7 @@ public class SortLargeDataTest {
         }
 
         // Sort buffer
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         watcher.start();
         List<RandomAccessInput> sortedBuffers = new ArrayList<>();
         for (RandomAccessInput buffer : buffers) {
@@ -213,7 +212,7 @@ public class SortLargeDataTest {
         }
 
         String resultFile = StoreTestUtil.availablePathById("0");
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         mergeBuffers(sorter, buffers, resultFile);
 
         // Assert result
@@ -252,7 +251,7 @@ public class SortLargeDataTest {
                                StoreTestUtil.availablePathById(1),
                                StoreTestUtil.availablePathById(2),
                                StoreTestUtil.availablePathById(3));
-        Sorter sorter = new SorterImpl(config);
+        Sorter sorter = SorterTestUtil.createSorter(config);
         sorter.mergeInputs(inputs, new KvOuterSortFlusher(), outputs, false);
 
         int total = sizeList.stream().mapToInt(i -> i).sum();
