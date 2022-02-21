@@ -100,7 +100,7 @@ public class BufferFileSorter implements Sorter {
                                               boolean withSubKv)
                                               throws IOException {
         Function<String, EntryIterator> fileToEntries = input -> {
-            return new BufferFileEntryReader(input).iterator();
+            return new BufferFileEntryReader(input, withSubKv).iterator();
         };
         return this.sorter.iterator(inputs, fileToEntries);
     }

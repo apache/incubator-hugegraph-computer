@@ -94,7 +94,8 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             Null.class.getName(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10",
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS, IdList.class.getName()
+            ComputerOptions.ALGORITHM_MESSAGE_CLASS, IdList.class.getName(),
+            ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));

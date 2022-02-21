@@ -130,7 +130,8 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
             ComputerOptions.HGKV_MERGE_FILES_NUM, "5",
             ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS,
-            MergeNewPropertiesCombiner.class.getName()
+            MergeNewPropertiesCombiner.class.getName(),
+            ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));

@@ -33,9 +33,15 @@ import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 public class BufferFileEntryReader implements KvEntryFileReader {
 
     private final File file;
+    private final boolean withSubKv;
+
+    public BufferFileEntryReader(String path, boolean withSubKv) {
+        this.file = new File(path);
+        this.withSubKv = withSubKv;
+    }
 
     public BufferFileEntryReader(String path) {
-        this.file = new File(path);
+        this(path, false);
     }
 
     @Override
@@ -75,9 +81,9 @@ public class BufferFileEntryReader implements KvEntryFileReader {
 
         @Override
         public KvEntry next() {
-            return EntriesUtil.kvEntryFromInput(this.input,
-                                                this.userAccessInput,
-                                                true, false);
+            return EntriesUtil.kvEntryFromInput(
+                               this.input, this.userAccessInput, true,
+                               BufferFileEntryReader.this.withSubKv);
         }
     }
 }
