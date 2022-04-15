@@ -58,7 +58,7 @@ public class MessageSendBuffers {
         if (partitionId < 0 || partitionId >= this.buffers.length)  {
             throw new ComputerException("Invalid partition id %s", partitionId);
         }
-        return this.buffers[partitionId].get();
+        return this.buffers[partitionId].buffersForCurrentThread();
     }
 
     public Map<Integer, MessageSendPartition> all() {

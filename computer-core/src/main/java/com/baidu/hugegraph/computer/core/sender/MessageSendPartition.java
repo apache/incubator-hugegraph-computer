@@ -43,7 +43,7 @@ public class MessageSendPartition {
         this.buffers = new ConcurrentHashMap<>();
     }
 
-    public WriteBuffers get() {
+    public WriteBuffers buffersForCurrentThread() {
         Thread current = Thread.currentThread();
         WriteBuffers buffer = this.buffers.get(current);
         if (buffer == null) {
@@ -54,17 +54,17 @@ public class MessageSendPartition {
         return buffer;
     }
 
-    public void clear() {
+    public synchronized void clear() {
         this.buffers.clear();
     }
 
-    public void resetMessageWritten() {
+    public synchronized void resetMessageWritten() {
         for (WriteBuffers buffer : this.buffers.values()) {
             buffer.resetMessageWritten();
         }
     }
 
-    public MessageStat messageWritten() {
+    public synchronized MessageStat messageWritten() {
         MessageStat partitionStat = new MessageStat();
         for (WriteBuffers buffer : this.buffers.values()) {
             partitionStat.increase(buffer.messageWritten());
