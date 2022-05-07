@@ -77,7 +77,7 @@ public class MessageDecoder extends ChannelInboundHandlerAdapter {
             if (this.fileRegionMode) {
                 return DataMessage.parseWithFileRegion(msgType, in);
             } else {
-                return DataMessage.parseFrom(msgType, in);
+                return DataMessage.parseWithMemoryBuffer(msgType, in);
             }
         }
         switch (msgType) {

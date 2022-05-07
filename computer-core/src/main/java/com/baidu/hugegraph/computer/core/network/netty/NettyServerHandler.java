@@ -83,46 +83,12 @@ public class NettyServerHandler extends AbstractNettyHandler {
                                       DataMessage dataMessage) {
         NetworkBuffer body = dataMessage.body();
         try {
+            int requestId = dataMessage.requestId();
+            this.serverSession.onRecvData(requestId);
             if (body instanceof FileRegionBuffer) {
-                this.serverSession.onRecvData(dataMessage.requestId());
-                /*
-                    Submit zero-copy task to EventLoop,
-                    it will be executed next time network data is received.
-                 */
-                FileRegionBuffer buffer = ((FileRegionBuffer) body);
-                // Optimize Value of max bytes of next read
-                TransportUtil.setMaxBytesPreRead(channel, body.length());
-                String outputPath = this.handler.genOutputPath(
-                                    dataMessage.type(),
-                                    dataMessage.partition());
-                ChannelFuture channelFuture = buffer.transformFromChannel(
-                                              (SocketChannel) channel,
-                                              outputPath);
-
-                channelFuture.addListener((ChannelFutureListener) future -> {
-                    try {
-                        if (future.isSuccess()) {
-                            this.handler.handle(dataMessage.type(),
-                                                dataMessage.partition(),
-                                                dataMessage.body());
-                            this.serverSession.onHandledData(
-                                               dataMessage.requestId());
-                        } else {
-                            this.exceptionCaught(ctx, future.cause());
-                        }
-                        // Reset max bytes next read to length of frame
-                        TransportUtil.setMaxBytesPreRead(future.channel(),
-                                      AbstractMessage.HEADER_LENGTH);
-                        future.channel().unsafe().recvBufAllocHandle().reset(
-                                         future.channel().config());
-                        dataMessage.release();
-                    } catch (Throwable throwable) {
-                        this.exceptionCaught(ctx, throwable);
-                    }
-                });
+                this.processFileRegionBuffer(ctx, channel, dataMessage,
+                                             (FileRegionBuffer) body);
             } else {
-                int requestId = dataMessage.requestId();
-                this.serverSession.onRecvData(requestId);
                 this.handler.handle(dataMessage.type(), dataMessage.partition(),
                                     dataMessage.body());
                 this.serverSession.onHandledData(requestId);
@@ -130,6 +96,44 @@ public class NettyServerHandler extends AbstractNettyHandler {
         } finally {
             body.release();
         }
+    }
+
+    private void processFileRegionBuffer(ChannelHandlerContext ctx,
+                                         Channel channel,
+                                         DataMessage dataMessage,
+                                         FileRegionBuffer fileRegionBuffer) {
+        // Optimize Value of max bytes of next read
+        TransportUtil.setMaxBytesPreRead(channel, fileRegionBuffer.length());
+        String outputPath = this.handler.genOutputPath(dataMessage.type(),
+                                                       dataMessage.partition());
+        /*
+         * Submit zero-copy task to EventLoop, it will be executed next time
+         * network data is received.
+         */
+        ChannelFuture channelFuture = fileRegionBuffer.transformFromChannel(
+                                      (SocketChannel) channel, outputPath);
+
+        channelFuture.addListener((ChannelFutureListener) future -> {
+            try {
+                if (future.isSuccess()) {
+                    this.handler.handle(dataMessage.type(),
+                                        dataMessage.partition(),
+                                        dataMessage.body());
+                    this.serverSession.onHandledData(
+                            dataMessage.requestId());
+                } else {
+                    this.exceptionCaught(ctx, future.cause());
+                }
+                // Reset max bytes next read to length of frame
+                TransportUtil.setMaxBytesPreRead(future.channel(),
+                              AbstractMessage.HEADER_LENGTH);
+                future.channel().unsafe().recvBufAllocHandle().reset(
+                                 future.channel().config());
+                dataMessage.release();
+            } catch (Throwable throwable) {
+                this.exceptionCaught(ctx, throwable);
+            }
+        });
     }
 
     @Override

@@ -45,7 +45,12 @@ public class FileRegionBuffer implements NetworkBuffer {
         this.length = length;
     }
 
-    // Use zero-copy transform from socket channel to file
+    /**
+     * Use zero-copy transform from socket channel to file
+     * @param channel
+     * @param targetPath
+     * @return channelFuture
+     */
     public ChannelFuture transformFromChannel(SocketChannel channel,
                                               String targetPath) {
         assert channel.eventLoop().inEventLoop();

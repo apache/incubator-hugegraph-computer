@@ -47,7 +47,8 @@ public class DataMessage extends AbstractMessage implements RequestMessage {
     /**
      * Decoding uses the given ByteBuf as our data.
      */
-    public static DataMessage parseFrom(MessageType type, ByteBuf buf) {
+    public static DataMessage parseWithMemoryBuffer(MessageType type,
+                                                    ByteBuf buf) {
         int requestId = buf.readInt();
         int partition = buf.readInt();
 
