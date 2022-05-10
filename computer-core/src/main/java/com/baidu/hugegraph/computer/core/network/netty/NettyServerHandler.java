@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.core.network.netty;
 
 import java.util.concurrent.TimeUnit;
-
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
@@ -33,7 +32,6 @@ import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ServerSession;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -103,7 +101,7 @@ public class NettyServerHandler extends AbstractNettyHandler {
                                          DataMessage dataMessage,
                                          FileRegionBuffer fileRegionBuffer) {
         // Optimize Value of max bytes of next read
-        TransportUtil.setMaxBytesPreRead(channel, fileRegionBuffer.length());
+        TransportUtil.setMaxBytesPerRead(channel, fileRegionBuffer.length());
         String outputPath = this.handler.genOutputPath(dataMessage.type(),
                                                        dataMessage.partition());
         /*
@@ -125,8 +123,8 @@ public class NettyServerHandler extends AbstractNettyHandler {
                     this.exceptionCaught(ctx, future.cause());
                 }
                 // Reset max bytes next read to length of frame
-                TransportUtil.setMaxBytesPreRead(future.channel(),
-                              AbstractMessage.HEADER_LENGTH);
+                TransportUtil.setMaxBytesPerRead(future.channel(),
+                                                 AbstractMessage.HEADER_LENGTH);
                 future.channel().unsafe().recvBufAllocHandle().reset(
                                  future.channel().config());
                 dataMessage.release();

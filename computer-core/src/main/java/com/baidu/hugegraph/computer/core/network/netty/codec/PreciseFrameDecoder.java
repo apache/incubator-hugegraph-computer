@@ -20,13 +20,10 @@
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
 import java.util.List;
-
 import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.util.Log;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.DefaultMaxBytesRecvByteBufAllocator;
@@ -67,12 +64,12 @@ public class PreciseFrameDecoder extends ByteToMessageDecoder {
         if (in.readableBytes() < AbstractMessage.HEADER_LENGTH) {
             int nextMaxBytesRead =
                 AbstractMessage.HEADER_LENGTH - in.readableBytes();
-            TransportUtil.setMaxBytesPreRead(ctx.channel(), nextMaxBytesRead);
+            TransportUtil.setMaxBytesPerRead(ctx.channel(), nextMaxBytesRead);
             return null;
         }
 
         // reset max bytes next read to length of frame
-        TransportUtil.setMaxBytesPreRead(ctx.channel(),
+        TransportUtil.setMaxBytesPerRead(ctx.channel(),
                                          AbstractMessage.HEADER_LENGTH);
 
         assert in.readableBytes() <= AbstractMessage.HEADER_LENGTH;
