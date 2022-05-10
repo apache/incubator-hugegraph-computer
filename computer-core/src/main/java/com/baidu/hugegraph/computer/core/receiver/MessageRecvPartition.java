@@ -22,9 +22,7 @@ package com.baidu.hugegraph.computer.core.receiver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
@@ -60,7 +58,7 @@ public abstract class MessageRecvPartition {
     private final boolean withSubKv;
     private final int mergeFileNum;
     private long totalBytes;
-    private final boolean useFileBuffer;
+    private final boolean useFileRegion;
 
     private final AtomicReference<Throwable> exception;
 
@@ -77,9 +75,9 @@ public abstract class MessageRecvPartition {
         long waitSortTimeout = config.get(
                                ComputerOptions.WORKER_WAIT_SORT_TIMEOUT);
         this.mergeFileNum = config.get(ComputerOptions.HGKV_MERGE_FILES_NUM);
-        this.useFileBuffer = config.get(
+        this.useFileRegion = config.get(
                              ComputerOptions.TRANSPORT_RECV_FILE_MODE);
-        if (!this.useFileBuffer) {
+        if (!this.useFileRegion) {
             this.recvBuffers = new MessageRecvBuffers(buffersLimit,
                                                       waitSortTimeout);
             this.sortBuffers = new MessageRecvBuffers(buffersLimit,
@@ -116,7 +114,7 @@ public abstract class MessageRecvPartition {
          * TODO: create iterator directly from buffers if there is no
          *       outputFiles.
          */
-        if (!this.useFileBuffer) {
+        if (!this.useFileRegion) {
             this.flushAllBuffersAndWaitSorted();
         }
         this.mergeOutputFilesIfNeeded();
