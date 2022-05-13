@@ -18,6 +18,11 @@ jobs:
   computer-ci:
     runs-on: ubuntu-20.04
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
       - name: Install JDK 8
         uses: actions/setup-java@v2
         with:
@@ -28,34 +33,28 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-      - name: Setup Hdfs
-        uses: beyondstorage/setup-hdfs@master
-        with:
-          hdfs-version: '3.3.1'
+      - name: Setup HDFS
+        env:
+          TRAVIS_DIR: computer-dist/src/assembly/travis
+        run: $TRAVIS_DIR/install-hdfs.sh
 
       - name: Setup Minikube-Kubernetes
-        uses: manusa/actions-setup-minikube@v2.4.2
-        with:
-          minikube version: v1.21.0
-          kubernetes version: v1.20.1
+        env:
+          TRAVIS_DIR: computer-dist/src/assembly/travis
+          KUBERNETES_VERSION: 1.20.1
+        run: $TRAVIS_DIR/install-k8s.sh
 
       - name: Check Component
         run: |
           sleep 5
-          curl ${{ env.HDFS_NAMENODE_ADDR }}
+          curl localhost:9000
           kubectl get nodes
-
       - name: Cache Maven packages
         uses: actions/cache@v2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
 
       - name: Prepare env and service
         env:
@@ -65,7 +64,6 @@ jobs:
           $TRAVIS_DIR/install-env.sh
           $TRAVIS_DIR/install-hugegraph-from-source.sh $COMMIT_ID | grep -v "Downloading\|Downloaded"
           $TRAVIS_DIR/load-data-into-hugegraph.sh
-
       - name: Install JDK 11
         uses: actions/setup-java@v2
         with:
