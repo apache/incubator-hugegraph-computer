@@ -27,7 +27,7 @@ import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 
 public class ReusablePointer implements Pointer, Readable {

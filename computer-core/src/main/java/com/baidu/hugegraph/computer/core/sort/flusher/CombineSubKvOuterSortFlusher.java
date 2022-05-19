@@ -27,11 +27,11 @@ import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.sorter.SubKvSorter;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 import com.baidu.hugegraph.util.E;
 
 public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
@@ -55,7 +55,7 @@ public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
     }
 
     @Override
-    public void flush(EntryIterator entries, HgkvDirBuilder writer)
+    public void flush(EntryIterator entries, KvEntryFileWriter writer)
                       throws IOException {
         E.checkArgument(entries.hasNext(), "Parameter entries can't be empty");
 

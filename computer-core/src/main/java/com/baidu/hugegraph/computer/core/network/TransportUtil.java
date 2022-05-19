@@ -27,16 +27,14 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-
 import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.DefaultMaxBytesRecvByteBufAllocator;
 
 public class TransportUtil {
 
@@ -156,5 +154,14 @@ public class TransportUtil {
         byte[] encoded = StringEncoding.encode(value);
         buf.writeInt(encoded.length);
         buf.writeBytes(encoded);
+    }
+
+    public static void setMaxBytesPerRead(Channel channel, int length) {
+        DefaultMaxBytesRecvByteBufAllocator recvByteBufAllocator =
+                                            channel.config()
+                                                   .getRecvByteBufAllocator();
+        if (recvByteBufAllocator.maxBytesPerIndividualRead() != length) {
+            recvByteBufAllocator.maxBytesPerReadPair(length, length);
+        }
     }
 }

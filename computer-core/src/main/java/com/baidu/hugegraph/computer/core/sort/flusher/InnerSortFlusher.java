@@ -26,7 +26,7 @@ import org.apache.commons.lang.NotImplementedException;
 
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
 public interface InnerSortFlusher {
 

@@ -36,15 +36,15 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
+import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvFileBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvFileBuilder;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvFileBuilderImpl;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class StoreTestUtil {
@@ -90,7 +90,7 @@ public class StoreTestUtil {
     public static void hgkvDirFromKvMap(Config config, List<Integer> map,
                                         String path) throws IOException {
         File file = new File(path);
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config, path)) {
+        try (KvEntryFileWriter builder = new HgkvDirBuilderImpl(config, path)) {
             List<KvEntry> entries = StoreTestUtil.kvEntriesFromMap(map);
             for (KvEntry entry : entries) {
                 builder.write(entry);
@@ -107,12 +107,28 @@ public class StoreTestUtil {
                                            String path) throws IOException {
         BytesInput input = SorterTestUtil.inputFromSubKvMap(map);
         KvEntriesInput iter = new KvEntriesInput(input, true);
-        try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config, path)) {
+        try (KvEntryFileWriter builder = new HgkvDirBuilderImpl(config, path)) {
             while (iter.hasNext()) {
                 builder.write(iter.next());
             }
         }
         iter.close();
+    }
+
+    public static void bufferFileFromKvMap(List<Integer> map, String path)
+                                           throws IOException {
+        RandomAccessOutput output = IOFactory.createFileOutput(new File(path));
+        BytesInput buffer = SorterTestUtil.inputFromKvMap(map);
+        output.write(buffer.readBytes((int) buffer.available()));
+        output.close();
+    }
+
+    public static void bufferFileFromSubKvMap(List<List<Integer>> map,
+                                              String path) throws IOException {
+        RandomAccessOutput output = IOFactory.createFileOutput(new File(path));
+        BytesInput buffer = SorterTestUtil.inputFromSubKvMap(map);
+        output.write(buffer.readBytes((int) buffer.available()));
+        output.close();
     }
 
     public static File mapToHgkvFile(Config config, List<Integer> map,

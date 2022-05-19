@@ -46,15 +46,16 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
+import com.baidu.hugegraph.computer.core.sort.BufferFileSorter;
+import com.baidu.hugegraph.computer.core.sort.HgkvFileSorter;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 
@@ -71,9 +72,17 @@ public abstract class SortManager implements Manager {
     public SortManager(ComputerContext context) {
         this.context = context;
         Config config = context.config();
-        this.sortExecutor = ExecutorUtil.newFixedThreadPool(
-                            this.threadNum(config), this.threadPrefix());
-        this.sorter = new SorterImpl(config);
+        if (this.threadNum(config) != 0) {
+            this.sortExecutor = ExecutorUtil.newFixedThreadPool(
+                                this.threadNum(config), this.threadPrefix());
+        } else {
+            this.sortExecutor = null;
+        }
+        if (config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE)) {
+            this.sorter = new BufferFileSorter(config);
+        } else {
+            this.sorter = new HgkvFileSorter(config);
+        }
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
         this.flushThreshold = config.get(
@@ -96,6 +105,9 @@ public abstract class SortManager implements Manager {
 
     @Override
     public void close(Config config) {
+        if (this.sortExecutor == null) {
+            return;
+        }
         this.sortExecutor.shutdown();
         try {
             this.sortExecutor.awaitTermination(Constants.SHUTDOWN_TIMEOUT,

@@ -44,7 +44,6 @@ import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
@@ -52,16 +51,16 @@ import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.DefaultKvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.InlinePointer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDir;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.HgkvDirImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilderImpl;
+import com.baidu.hugegraph.computer.core.store.entry.DefaultKvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.InlinePointer;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDir;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
+import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Bytes;
@@ -78,7 +77,8 @@ public class SortLargeDataTest {
     public static void init() {
         CONFIG = UnitTestBase.updateWithRequiredOptions(
                 ComputerOptions.HGKV_MERGE_FILES_NUM, "200",
-                ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB)
+                ComputerOptions.HGKV_MAX_FILE_SIZE, String.valueOf(Bytes.GB),
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
     }
 
@@ -106,7 +106,7 @@ public class SortLargeDataTest {
         List<RandomAccessInput> buffers = new ArrayList<>(mergeBufferNum);
         List<String> mergeBufferFiles = new ArrayList<>();
         int fileNum = 10;
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
 
         watcher.start();
         for (int i = 0; i < dataSize; i++) {
@@ -168,7 +168,7 @@ public class SortLargeDataTest {
         }
 
         // Sort buffer
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         watcher.start();
         List<RandomAccessInput> sortedBuffers = new ArrayList<>();
         for (RandomAccessInput buffer : buffers) {
@@ -212,7 +212,7 @@ public class SortLargeDataTest {
         }
 
         String resultFile = StoreTestUtil.availablePathById("0");
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         mergeBuffers(sorter, buffers, resultFile);
 
         // Assert result
@@ -223,7 +223,8 @@ public class SortLargeDataTest {
     @Test
     public void testDiffNumEntriesFileMerge() throws Exception {
         Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.HGKV_MERGE_FILES_NUM, "3"
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "3",
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         List<Integer> sizeList = ImmutableList.of(200, 500, 20, 50, 300,
                                                   250, 10, 33, 900, 89, 20);
@@ -232,8 +233,8 @@ public class SortLargeDataTest {
         for (int j = 0; j < sizeList.size(); j++) {
             String file = StoreTestUtil.availablePathById(j + 10);
             inputs.add(file);
-            try (HgkvDirBuilder builder = new HgkvDirBuilderImpl(config,
-                                                                 file)) {
+            try (KvEntryFileWriter builder = new HgkvDirBuilderImpl(config,
+                                                                    file)) {
                 for (int i = 0; i < sizeList.get(j); i++) {
                     byte[] keyBytes = StoreTestUtil.intToByteArray(i);
                     byte[] valueBytes = StoreTestUtil.intToByteArray(1);
@@ -250,7 +251,7 @@ public class SortLargeDataTest {
                                StoreTestUtil.availablePathById(1),
                                StoreTestUtil.availablePathById(2),
                                StoreTestUtil.availablePathById(3));
-        Sorter sorter = new SorterImpl(config);
+        Sorter sorter = SorterTestUtil.createSorter(config);
         sorter.mergeInputs(inputs, new KvOuterSortFlusher(), outputs, false);
 
         int total = sizeList.stream().mapToInt(i -> i).sum();

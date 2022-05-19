@@ -35,8 +35,8 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportState;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.buffer.NioManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NioBuffer;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
@@ -181,9 +181,9 @@ public class ClientSession extends TransportSession {
                         "at sendAsync()", this.state);
         int requestId = this.nextRequestId();
 
-        ManagedBuffer managedBuffer = new NioManagedBuffer(buffer);
+        NetworkBuffer networkBuffer = new NioBuffer(buffer);
         DataMessage dataMessage = new DataMessage(messageType, requestId,
-                                                  partition, managedBuffer);
+                                                  partition, networkBuffer);
 
         this.sendFunction.apply(dataMessage);
 

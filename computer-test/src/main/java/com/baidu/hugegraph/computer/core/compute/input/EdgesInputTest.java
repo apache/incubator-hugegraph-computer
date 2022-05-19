@@ -51,7 +51,7 @@ import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
@@ -60,8 +60,8 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SendSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
@@ -110,20 +110,21 @@ public class EdgesInputTest extends UnitTestBase {
     private void testEdgeFreq(EdgeFrequency freq)
                               throws IOException {
         this.config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
-            ComputerOptions.WORKER_COMBINER_CLASS,
-            Null.class.getName(), // Can't combine
-            ComputerOptions.ALGORITHM_RESULT_CLASS,
-            IdListList.class.getName(),
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-            IdList.class.getName(),
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
-            ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
-            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "10",
-            ComputerOptions.INPUT_EDGE_FREQ, freq.name()
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                ComputerOptions.WORKER_COMBINER_CLASS,
+                Null.class.getName(), // Can't combine
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                IdListList.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                IdList.class.getName(),
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
+                ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "10",
+                ComputerOptions.INPUT_EDGE_FREQ, freq.name(),
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         this.managers = new Managers();
         FileManager fileManager = new FileManager();
@@ -146,12 +147,12 @@ public class EdgesInputTest extends UnitTestBase {
         FileGraphPartition partition = new FileGraphPartition(
                                            context(), this.managers, 0);
         receiveManager.onStarted(connectionId);
-        add200VertexBuffer((ManagedBuffer buffer) -> {
+        add200VertexBuffer((NetworkBuffer buffer) -> {
             receiveManager.handle(MessageType.VERTEX, 0, buffer);
         });
         receiveManager.onFinished(connectionId);
         receiveManager.onStarted(connectionId);
-        addEdgeBuffer((ManagedBuffer buffer) -> {
+        addEdgeBuffer((NetworkBuffer buffer) -> {
             receiveManager.handle(MessageType.EDGE, 0, buffer);
         }, freq);
 
@@ -168,7 +169,7 @@ public class EdgesInputTest extends UnitTestBase {
         edgesInput.close();
     }
 
-    private static void add200VertexBuffer(Consumer<ManagedBuffer> consumer)
+    private static void add200VertexBuffer(Consumer<NetworkBuffer> consumer)
                                            throws IOException {
         for (long i = 0L; i < 200L; i += 2) {
             Vertex vertex = graphFactory().createVertex();
@@ -188,7 +189,7 @@ public class EdgesInputTest extends UnitTestBase {
         return bytesOutput.toByteArray();
     }
 
-    private static void addEdgeBuffer(Consumer<ManagedBuffer> consumer,
+    private static void addEdgeBuffer(Consumer<NetworkBuffer> consumer,
                                       EdgeFrequency freq) throws IOException {
         for (long i = 0L; i < 200L; i++) {
             Vertex vertex = graphFactory().createVertex();

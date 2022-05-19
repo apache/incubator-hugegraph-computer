@@ -28,11 +28,11 @@ import org.apache.commons.io.FileUtils;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 
 public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
@@ -56,9 +56,16 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
     protected abstract P createPartition();
 
-    public void addBuffer(int partitionId, ManagedBuffer buffer) {
+    public void addBuffer(int partitionId, NetworkBuffer buffer) {
         P partition = this.partition(partitionId);
         partition.addBuffer(buffer);
+    }
+
+    public String genOutputPath(int partitionId) {
+        P partition = this.partition(partitionId);
+        String path = partition.genOutputPath();
+        new File(path).getParentFile().mkdirs();
+        return path;
     }
 
     private P partition(int partitionId) {

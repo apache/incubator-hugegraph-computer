@@ -22,14 +22,14 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.file.builder.HgkvDirBuilder;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 
 public class CombineKvOuterSortFlusher extends CombinableSorterFlusher
                                        implements OuterSortFlusher {
 
-    private HgkvDirBuilder writer;
+    private KvEntryFileWriter writer;
 
     public CombineKvOuterSortFlusher(PointerCombiner combiner) {
         super(combiner);
@@ -41,7 +41,7 @@ public class CombineKvOuterSortFlusher extends CombinableSorterFlusher
     }
 
     @Override
-    public void flush(EntryIterator entries, HgkvDirBuilder writer)
+    public void flush(EntryIterator entries, KvEntryFileWriter writer)
                       throws IOException {
         this.writer = writer;
         this.flush(entries);

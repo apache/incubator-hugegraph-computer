@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 
 public interface MessageHandler extends TransportHandler {
@@ -30,7 +30,12 @@ public interface MessageHandler extends TransportHandler {
      * caller if the receiving list reached threshold and the sorting list is
      * sorting in process.
      */
-    void handle(MessageType messageType, int partition, ManagedBuffer buffer);
+    void handle(MessageType messageType, int partition, NetworkBuffer buffer);
+
+    /**
+     * Build a output path.
+     */
+    String genOutputPath(MessageType messageType, int partition);
 
     /**
      * Notify start-session completed on server-side.

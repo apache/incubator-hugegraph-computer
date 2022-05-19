@@ -42,19 +42,19 @@ import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntryWriter;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -68,12 +68,13 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
     @Before
     public void setup() {
         this.config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
-            ComputerOptions.HGKV_MERGE_FILES_NUM, "2"
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "2",
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -98,7 +99,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
     public void testEdgeMessageRecvPartition() throws IOException {
         Assert.assertEquals("edge", this.partition.type());
 
-        addTenEdgeBuffer((ManagedBuffer buffer) -> {
+        addTenEdgeBuffer((NetworkBuffer buffer) -> {
             this.partition.addBuffer(buffer);
         });
 
@@ -129,7 +130,8 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
             ComputerOptions.HGKV_MERGE_FILES_NUM, "5",
             ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS,
-            MergeNewPropertiesCombiner.class.getName()
+            MergeNewPropertiesCombiner.class.getName(),
+            ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -147,7 +149,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
         checkTenEdgesWithCombinedProperties(this.partition.iterator());
     }
 
-    public static void addTenEdgeBuffer(Consumer<ManagedBuffer> consumer)
+    public static void addTenEdgeBuffer(Consumer<NetworkBuffer> consumer)
                                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
@@ -167,7 +169,7 @@ public class EdgeMessageRecvPartitionTest extends UnitTestBase {
     }
 
     private static void addTenDuplicateEdgeBuffer(
-                        Consumer<ManagedBuffer> consumer)
+                        Consumer<NetworkBuffer> consumer)
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();

@@ -43,7 +43,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.MessageRecvManager;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
@@ -51,7 +51,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -64,22 +64,23 @@ public class MessageInputTest extends UnitTestBase {
     @Before
     public void setup() {
         this.config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "2",
-            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-            ComputerOptions.WORKER_COMBINER_CLASS,
-            Null.class.getName(), // Can't combine
-            ComputerOptions.ALGORITHM_RESULT_CLASS,
-            IdListList.class.getName(),
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-            IdList.class.getName(),
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
-            ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
-            ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "10",
-            ComputerOptions.WORKER_COMPUTATION_CLASS,
-            MockComputation.class.getName()
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
+                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                ComputerOptions.WORKER_COMBINER_CLASS,
+                Null.class.getName(), // Can't combine
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                IdListList.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                IdList.class.getName(),
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
+                ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "1000",
+                ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX, "10",
+                ComputerOptions.WORKER_COMPUTATION_CLASS,
+                MockComputation.class.getName(),
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
 
         this.managers = new Managers();
@@ -112,7 +113,7 @@ public class MessageInputTest extends UnitTestBase {
         // Superstep 0
         receiveManager.beforeSuperstep(this.config, 0);
         receiveManager.onStarted(this.connectionId);
-        addMessages((ManagedBuffer buffer) -> {
+        addMessages((NetworkBuffer buffer) -> {
                     receiveManager.handle(MessageType.MSG, 0, buffer);
         });
         receiveManager.onFinished(this.connectionId);
@@ -141,7 +142,7 @@ public class MessageInputTest extends UnitTestBase {
         }
     }
 
-    private static void addMessages(Consumer<ManagedBuffer> consumer)
+    private static void addMessages(Consumer<NetworkBuffer> consumer)
                                     throws IOException {
         Random random = new Random(1);
         for (long i = 0L; i < 200L; i++) {

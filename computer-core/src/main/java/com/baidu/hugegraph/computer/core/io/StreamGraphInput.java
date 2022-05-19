@@ -35,8 +35,8 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryReader;
+import com.baidu.hugegraph.computer.core.store.entry.EntryInput;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntryReader;
 
 public class StreamGraphInput implements GraphComputeInput {
 

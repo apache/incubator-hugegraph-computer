@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class MessageRecvBuffersTest {
@@ -180,7 +180,7 @@ public class MessageRecvBuffersTest {
     public static void addMockBufferToBuffers(MessageRecvBuffers buffers,
                                               int mockBufferLength) {
         ReceiverUtil.consumeBuffer(new byte[mockBufferLength],
-                                   (ManagedBuffer buffer) -> {
+                                   (NetworkBuffer buffer) -> {
             buffers.addBuffer(buffer);
         });
     }

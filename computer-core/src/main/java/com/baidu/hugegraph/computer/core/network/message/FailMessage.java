@@ -20,11 +20,12 @@
 package com.baidu.hugegraph.computer.core.network.message;
 
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.util.E;
 
 import io.netty.buffer.ByteBuf;
 
+@Deprecated
 public class FailMessage extends AbstractMessage implements ResponseMessage {
 
     private final int errorCode;
@@ -43,7 +44,7 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
     }
 
     @Override
-    protected ManagedBuffer encodeBody(ByteBuf buf) {
+    protected NetworkBuffer encodeBody(ByteBuf buf) {
         buf.writeInt(this.errorCode);
         TransportUtil.writeString(buf, this.message);
         return null;
@@ -64,6 +65,17 @@ public class FailMessage extends AbstractMessage implements ResponseMessage {
         }
 
         return new FailMessage(failAckId, failCode, failMsg);
+    }
+
+    public static int remainingBytes(ByteBuf buf) {
+        buf.markReaderIndex();
+        // Skip ackId
+        buf.skipBytes(Integer.BYTES);
+        // Skip partition
+        buf.skipBytes(Integer.BYTES);
+        int bodyLength = buf.readInt();
+        buf.resetReaderIndex();
+        return bodyLength - buf.readableBytes();
     }
 
     public String message() {

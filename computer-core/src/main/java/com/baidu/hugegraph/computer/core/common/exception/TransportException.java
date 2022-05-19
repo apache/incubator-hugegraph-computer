@@ -29,6 +29,7 @@ public class TransportException extends IOException {
     private static final long serialVersionUID = -6538118382075299762L;
 
     public static final int DEFAULT_CODE = 0;
+    public static final int REMOTE_ERROR_CODE = 1;
 
     private final int errorCode;
 

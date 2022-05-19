@@ -19,10 +19,15 @@
 
 package com.baidu.hugegraph.computer.core.network;
 
+import java.io.File;
+import java.util.UUID;
+
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.FileRegionBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.util.Log;
 
@@ -32,14 +37,25 @@ public class MockMessageHandler implements MessageHandler {
 
     @Override
     public void handle(MessageType messageType, int partition,
-                       ManagedBuffer buffer) {
+                       NetworkBuffer buffer) {
         LOG.info("Receive data from remote, messageType: {}, partition: {}, " +
                  "buffer readable length: {}", messageType.name(), partition,
                  buffer != null ? buffer.length() : null);
 
         if (buffer != null) {
-            buffer.copyToByteArray();
+            if (buffer instanceof FileRegionBuffer) {
+                String path = ((FileRegionBuffer) buffer).path();
+                LOG.info("path: {}", path);
+                FileUtils.deleteQuietly(new File(path));
+            } else {
+                buffer.copyToByteArray();
+            }
         }
+    }
+
+    @Override
+    public String genOutputPath(MessageType messageType, int partition) {
+        return "./" + UUID.randomUUID().toString();
     }
 
     @Override
@@ -67,7 +83,7 @@ public class MockMessageHandler implements MessageHandler {
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionId connectionId) {
-        LOG.info("Server channel exception, connectionId: {}, cause: {}",
+        LOG.info("Server channel exception, connectionId: {}, cause:",
                  connectionId, cause);
     }
 }

@@ -80,6 +80,10 @@ public class TransportConf {
                    .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
     }
 
+    public boolean recvBufferFileMode() {
+        return this.config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE);
+    }
+
     /**
      * IO mode: nio or epoll
      */

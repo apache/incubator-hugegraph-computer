@@ -586,7 +586,7 @@ public class ComputerOptions extends OptionHolder {
                     "trigger sorting, the write buffer is used to store " +
                     "vertex or message.",
                     positiveInt(),
-                    (int) (50 * Bytes.KB)
+                    (int) (50 * Bytes.MB)
             );
 
     public static final ConfigOption<Integer>
@@ -595,7 +595,7 @@ public class ComputerOptions extends OptionHolder {
                     "The initial size of write buffer that used to store " +
                     "vertex or message.",
                     positiveInt(),
-                    (int) (60 * Bytes.KB)
+                    (int) (50 * Bytes.MB)
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
@@ -682,9 +682,19 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
+    public static final ConfigOption<Boolean> TRANSPORT_RECV_FILE_MODE =
+            new ConfigOption<>(
+                    "transport.recv_file_mode",
+                    "Whether enable receive buffer-file mode, it will " +
+                    "receive buffer write file from socket by " +
+                    "zero-copy if enable.",
+                    allowValues(true, false),
+                    true
+            );
+
     public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
             new ConfigOption<>(
-                    "transport.transport_tcp_keep_alive",
+                    "transport.tcp_keep_alive",
                     "Whether enable TCP keep-alive.",
                     allowValues(true, false),
                     true
@@ -740,7 +750,7 @@ public class ComputerOptions extends OptionHolder {
                     "The timeout(in ms) to wait response after " +
                     "sending sync-request.",
                     positiveInt(),
-                    5_000L
+                    10_000L
             );
 
     public static final ConfigOption<Long> TRANSPORT_FINISH_SESSION_TIMEOUT =
@@ -797,7 +807,7 @@ public class ComputerOptions extends OptionHolder {
                     "it will trigger the sending unavailable if the number " +
                     "of unreceived ack >= max_pending_requests.",
                     positiveInt(),
-                    8000
+                    8
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
@@ -807,7 +817,7 @@ public class ComputerOptions extends OptionHolder {
                     "it will trigger the sending available if the number of " +
                     "unreceived ack < min_pending_requests.",
                     positiveInt(),
-                    6000
+                    6
             );
 
     public static final ConfigOption<Long> TRANSPORT_MIN_ACK_INTERVAL =
@@ -823,7 +833,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.server_idle_timeout",
                     "The max timeout(in ms) of server idle.",
                     positiveInt(),
-                    120_000L
+                    360_000L
             );
 
     public static final ConfigOption<Long> TRANSPORT_HEARTBEAT_INTERVAL =

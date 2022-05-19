@@ -25,7 +25,7 @@ import java.util.List;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.concurrent.BarrierEvent;
 
 public class MessageRecvBuffers {
@@ -33,7 +33,7 @@ public class MessageRecvBuffers {
     /*
      * The bytesLimit is the limit of total bytes in buffers. The bytesLimit
      * is not hard limit. For performance, it checks whether totalBytes >=
-     * bytesLimit after {@link #addBuffer(ManagedBuffer)}.
+     * bytesLimit after {@link #addBuffer(NetworkBuffer)}.
      * If totalBytes >= bytesLimit, the buffers will be sorted into a file.
      */
     private final long bytesLimit;
@@ -51,10 +51,10 @@ public class MessageRecvBuffers {
         this.buffers = new ArrayList<>();
     }
 
-    public void addBuffer(ManagedBuffer data) {
+    public void addBuffer(NetworkBuffer data) {
         /*
          * TODO: don't not use copy, add a new class
-         *       RandomAccessInput(ManagedBuffer)
+         *       RandomAccessInput(NetworkBuffer)
          */
         byte[] bytes = data.copyToByteArray();
         this.buffers.add(bytes);

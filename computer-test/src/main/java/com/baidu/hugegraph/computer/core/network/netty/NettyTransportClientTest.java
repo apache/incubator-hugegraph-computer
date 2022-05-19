@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.network.netty;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -27,48 +28,38 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
-import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.FileRegionBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.concurrent.BarrierEvent;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
 import com.baidu.hugegraph.util.Bytes;
-import com.baidu.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 
 public class NettyTransportClientTest extends AbstractNetworkTest {
 
-    private static final Logger LOG =
-            Log.logger(NettyTransportClientTest.class);
-
-    public static final BarrierEvent BARRIER_EVENT = new BarrierEvent();
-
     @Override
     protected void initOption() {
         super.updateOption(ComputerOptions.TRANSPORT_MAX_PENDING_REQUESTS,
-                           8000);
+                           8);
         super.updateOption(ComputerOptions.TRANSPORT_MIN_PENDING_REQUESTS,
-                           6000);
+                           6);
         super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_HIGH_MARK,
                            64 * (int) Bytes.MB);
         super.updateOption(ComputerOptions.TRANSPORT_WRITE_BUFFER_LOW_MARK,
@@ -155,7 +146,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         Mockito.doAnswer(invocationOnMock -> {
             MessageType type = invocationOnMock.getArgument(0);
-            ManagedBuffer buffer = invocationOnMock.getArgument(2);
+            NetworkBuffer buffer = invocationOnMock.getArgument(2);
             byte[] sourceBytes = null;
             switch (type) {
                 case MSG:
@@ -169,13 +160,20 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
                     break;
                 default:
             }
-            byte[] bytes = buffer.copyToByteArray();
+
+            byte[] bytes;
+            if (buffer instanceof FileRegionBuffer) {
+                String path = ((FileRegionBuffer) buffer).path();
+                File file = new File(path);
+                bytes = FileUtils.readFileToByteArray(file);
+                FileUtils.deleteQuietly(file);
+            } else {
+                bytes = buffer.copyToByteArray();
+            }
+
             Assert.assertArrayEquals(sourceBytes, bytes);
             Assert.assertNotSame(sourceBytes, bytes);
 
-            byte[] bytes2 = buffer.copyToByteArray();
-            Assert.assertArrayEquals(sourceBytes, bytes2);
-            Assert.assertNotSame(sourceBytes, bytes2);
             return null;
         }).when(serverHandler).handle(Mockito.any(), Mockito.eq(1),
                                       Mockito.any());
@@ -270,7 +268,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testFlowControl() throws IOException {
         ByteBuffer buffer = ByteBuffer.wrap(
-                            StringEncoding.encode("test data"));
+                StringEncoding.encode("test data"));
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
         client.startSession();
@@ -318,12 +316,13 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         client.startSession();
 
-        Mockito.doThrow(new RuntimeException("test exception"))
-               .when(serverHandler)
-               .handle(Mockito.any(), Mockito.anyInt(), Mockito.any());
+        Mockito.doAnswer(invocationOnMock -> {
+            invocationOnMock.callRealMethod();
+            throw new RuntimeException("test exception");
+        }).when(serverHandler)
+          .handle(Mockito.any(), Mockito.anyInt(), Mockito.any());
 
-        ByteBuffer buffer = ByteBuffer.wrap(
-                            StringEncoding.encode("test data"));
+        ByteBuffer buffer = ByteBuffer.wrap(StringEncoding.encode("test data"));
         boolean send = client.send(MessageType.MSG, 1, buffer);
         Assert.assertTrue(send);
 
@@ -339,66 +338,6 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         Mockito.verify(serverHandler, Mockito.timeout(10_000L).times(1))
                .exceptionCaught(Mockito.any(), Mockito.any());
-
-        Mockito.verify(clientHandler, Mockito.timeout(10_000L).times(1))
-               .exceptionCaught(Mockito.any(), Mockito.any());
-    }
-
-    @Test
-    public void testTransportPerformance() throws IOException,
-                                                  InterruptedException {
-        Configurator.setAllLevels("com.baidu.hugegraph", Level.INFO);
-        Configurator.setAllLevels("com.baidu.hugegraph.computer.core.network",
-                                  Level.WARN);
-
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        ByteBuffer buffer = ByteBuffer.allocateDirect(50 * 1024);
-
-        AtomicInteger handledCnt = new AtomicInteger(0);
-
-        Mockito.doAnswer(invocationOnMock -> {
-            invocationOnMock.callRealMethod();
-            BARRIER_EVENT.signalAll();
-            return null;
-        }).when(clientHandler).sendAvailable(Mockito.any());
-
-        Mockito.doAnswer(invocationOnMock -> {
-            invocationOnMock.callRealMethod();
-            handledCnt.getAndIncrement();
-            return null;
-        }).when(serverHandler).handle(Mockito.any(), Mockito.anyInt(),
-                                      Mockito.any());
-
-        long preTransport = System.nanoTime();
-
-        client.startSession();
-
-        int dataNum = 209716;
-        long timout = 10_000L;
-        for (int i = 0; i < dataNum; i++) {
-            boolean send = client.send(MessageType.MSG, 1, buffer);
-            if (!send) {
-                LOG.info("Current send unavailable");
-                i--;
-                if (!BARRIER_EVENT.await(timout)) {
-                    throw new ComputerException("Timeout(%sms) to wait " +
-                                                "sendable", timout);
-                }
-                BARRIER_EVENT.reset();
-            }
-        }
-
-        client.finishSession();
-
-        long postTransport = System.nanoTime();
-
-        LOG.info("Transport {} data packets total 10GB, cost {}ms", dataNum,
-                 (postTransport - preTransport) / 1000_000L);
-
-        Assert.assertEquals(dataNum, handledCnt.get());
-
-        Configurator.setAllLevels("com.baidu.hugegraph.computer.core.network",
-                                  Level.INFO);
     }
 
     @Test

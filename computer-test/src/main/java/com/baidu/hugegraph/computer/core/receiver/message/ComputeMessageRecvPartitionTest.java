@@ -34,14 +34,14 @@ import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -50,16 +50,18 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
     @Test
     public void testCombineMessageRecvPartition() throws IOException {
         Config config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
-            // Make sure all buffers within this limit.
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
-            ComputerOptions.WORKER_COMBINER_CLASS,
-            DoubleValueSumCombiner.class.getName(),
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10",
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS, DoubleValue.class.getName()
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                // Make sure all buffers within this limit.
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
+                ComputerOptions.WORKER_COMBINER_CLASS,
+                DoubleValueSumCombiner.class.getName(),
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10",
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -92,7 +94,8 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
             Null.class.getName(),
             ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
             ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10",
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS, IdList.class.getName()
+            ComputerOptions.ALGORITHM_MESSAGE_CLASS, IdList.class.getName(),
+            ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -116,7 +119,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
     }
 
     public static void addTwentyCombineMessageBuffer(
-                       Consumer<ManagedBuffer> consumer)
+                       Consumer<NetworkBuffer> consumer)
                        throws IOException {
         for (long i = 0L; i < 10L; i++) {
             for (int j = 0; j < 2; j++) {
@@ -153,7 +156,7 @@ public class ComputeMessageRecvPartitionTest extends UnitTestBase {
     }
 
     private static void addTwentyDuplicateIdValueListMessageBuffer
-                        (Consumer<ManagedBuffer> consumer)
+                        (Consumer<NetworkBuffer> consumer)
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             for (int j = 0; j < 2; j++) {
