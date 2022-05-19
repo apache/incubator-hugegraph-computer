@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -47,9 +49,13 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
+import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 import com.baidu.hugegraph.util.E;
+import com.baidu.hugegraph.util.Log;
 
-public class FileGraphPartition<M extends Value> {
+public class FileGraphPartition {
+
+    private static final Logger LOG = Log.logger(FileGraphPartition.class);
 
     private static final String VERTEX = "vertex";
     private static final String EDGE = "edge";
@@ -57,6 +63,7 @@ public class FileGraphPartition<M extends Value> {
     private static final String VALUE = "value";
 
     private final ComputerContext context;
+    private final Computation<Value> computation;
     private final FileGenerator fileGenerator;
     private final int partition;
 
@@ -79,12 +86,16 @@ public class FileGraphPartition<M extends Value> {
 
     private VertexInput vertexInput;
     private EdgesInput edgesInput;
-    private MessageInput<M> messageInput;
+    private MessageInput<Value> messageInput;
 
     public FileGraphPartition(ComputerContext context,
                               Managers managers,
                               int partition) {
         this.context = context;
+        this.computation = context.config()
+                                  .createObject(
+                                   ComputerOptions.WORKER_COMPUTATION_CLASS);
+        this.computation.init(context.config());
         this.fileGenerator = managers.get(FileManager.NAME);
         this.partition = partition;
         this.vertexFile = new File(this.fileGenerator.randomDirectory(VERTEX));
@@ -121,9 +132,10 @@ public class FileGraphPartition<M extends Value> {
                                  this.edgeCount, 0L);
     }
 
-    protected PartitionStat compute(ComputationContext context,
-                                    Computation<M> computation,
+    protected PartitionStat compute(WorkerContext context,
                                     int superstep) {
+        LOG.info("Partition {} begin compute in superstep {}",
+                 this.partition, superstep);
         try {
             this.beforeCompute(superstep);
         } catch (IOException e) {
@@ -134,9 +146,11 @@ public class FileGraphPartition<M extends Value> {
 
         long activeVertexCount;
         try {
+            this.computation.beforeSuperstep(context);
             activeVertexCount = superstep == 0 ?
-                                this.compute0(context, computation) :
-                                this.compute1(context, computation, superstep);
+                                this.compute0(context) :
+                                this.compute1(context);
+            this.computation.afterSuperstep(context);
         } catch (Exception e) {
             throw new ComputerException(
                       "Error occurred when compute at superstep %s",
@@ -151,14 +165,16 @@ public class FileGraphPartition<M extends Value> {
                       e, superstep);
         }
 
+        LOG.info("Partition {} finish compute in superstep {}",
+                 this.partition, superstep);
+
         return new PartitionStat(this.partition, this.vertexCount,
                                  this.edgeCount,
                                  this.vertexCount - activeVertexCount);
     }
 
 
-    private long compute0(ComputationContext context,
-                          Computation<M> computation) {
+    private long compute0(ComputationContext context) {
         long activeVertexCount = 0L;
         while (this.vertexInput.hasNext()) {
             Vertex vertex = this.vertexInput.next();
@@ -167,7 +183,7 @@ public class FileGraphPartition<M extends Value> {
             Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
             vertex.edges(edges);
 
-            computation.compute0(context, vertex);
+            this.computation.compute0(context, vertex);
 
             if (vertex.active()) {
                 activeVertexCount++;
@@ -183,9 +199,7 @@ public class FileGraphPartition<M extends Value> {
         return activeVertexCount;
     }
 
-    private long compute1(ComputationContext context,
-                          Computation<M> computation,
-                          int superstep) {
+    private long compute1(ComputationContext context) {
         Value result = this.context.config().createObject(
                        ComputerOptions.ALGORITHM_RESULT_CLASS);
         long activeVertexCount = 0L;
@@ -193,8 +207,8 @@ public class FileGraphPartition<M extends Value> {
             Vertex vertex = this.vertexInput.next();
             this.readVertexStatusAndValue(vertex, result);
 
-            Iterator<M> messageIter = this.messageInput.iterator(
-                                      this.vertexInput.idPointer());
+            Iterator<Value> messageIter = this.messageInput.iterator(
+                                          this.vertexInput.idPointer());
             if (messageIter.hasNext()) {
                 vertex.reactivate();
             }
@@ -207,7 +221,7 @@ public class FileGraphPartition<M extends Value> {
                 Edges edges = this.edgesInput.edges(
                               this.vertexInput.idPointer());
                 vertex.edges(edges);
-                computation.compute(context, vertex, messageIter);
+                this.computation.compute(context, vertex, messageIter);
             }
 
             // The vertex status may be changed after computation

@@ -433,6 +433,14 @@ public class ComputerOptions extends OptionHolder {
                     1
             );
 
+    public static final ConfigOption<Integer> PARTITIONS_COMPUTE_THREAD_NUMS =
+            new ConfigOption<>(
+                    "job.partitions_thread_nums",
+                    "The number of threads for partition parallel compute.",
+                    positiveInt(),
+                    4
+            );
+
     public static final ConfigOption<Integer> BSP_MAX_SUPER_STEP =
             new ConfigOption<>(
                     "bsp.max_super_step",

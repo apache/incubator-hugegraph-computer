@@ -71,10 +71,9 @@ public class WorkerService implements Closeable {
     private volatile boolean closed;
     private Config config;
     private Bsp4Worker bsp4Worker;
-    private ComputeManager<?> computeManager;
+    private ComputeManager computeManager;
     private ContainerInfo workerInfo;
 
-    private Computation<Value> computation;
     private Combiner<Value> combiner;
 
     private ContainerInfo masterInfo;
@@ -116,20 +115,19 @@ public class WorkerService implements Closeable {
         InetSocketAddress address = this.initManagers(this.masterInfo);
         this.workerInfo.updateAddress(address);
 
-        this.computation = this.config.createObject(
-                           ComputerOptions.WORKER_COMPUTATION_CLASS);
-        this.computation.init(this.config);
+        Computation<?> computation = this.config.createObject(
+                                     ComputerOptions.WORKER_COMPUTATION_CLASS);
         LOG.info("Loading computation '{}' in category '{}'",
-                 this.computation.name(), this.computation.category());
+                 computation.name(), computation.category());
 
         this.combiner = this.config.createObject(
                         ComputerOptions.WORKER_COMBINER_CLASS, false);
         if (this.combiner == null) {
             LOG.info("None combiner is provided for computation '{}'",
-                     this.computation.name());
+                     computation.name());
         } else {
             LOG.info("Combiner '{}' is provided for computation '{}'",
-                     this.combiner.name(), this.computation.name());
+                     this.combiner.name(), computation.name());
         }
 
         LOG.info("{} register WorkerService", this);
@@ -141,11 +139,7 @@ public class WorkerService implements Closeable {
             dm.connect(worker.id(), worker.hostname(), worker.dataPort());
         }
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        ComputeManager<?> computeManager = new ComputeManager(this.context,
-                                                              this.managers,
-                                                              this.computation);
-        this.computeManager = computeManager;
+        this.computeManager = new ComputeManager(this.context, this.managers);
 
         this.managers.initedAll(this.config);
         LOG.info("{} WorkerService initialized", this);
@@ -171,8 +165,7 @@ public class WorkerService implements Closeable {
             return;
         }
 
-        this.computation.close(this.config);
-
+        this.computeManager.close();
         /*
          * Seems managers.closeAll() would do the following actions:
          * TODO: close the connection to other workers.
@@ -245,11 +238,10 @@ public class WorkerService implements Closeable {
             /*
              * Call beforeSuperstep() before all workers compute() called.
              *
-             * NOTE: keep computation.beforeSuperstep() called after
+             * NOTE: keep computeManager.compute() called after
              * managers.beforeSuperstep().
              */
             this.managers.beforeSuperstep(this.config, superstep);
-            this.computation.beforeSuperstep(context);
 
             /*
              * Notify master by each worker, when the master received all
@@ -267,11 +259,10 @@ public class WorkerService implements Closeable {
              * Call afterSuperstep() after all workers compute() is done.
              *
              * NOTE: keep managers.afterSuperstep() called after
-             * computation.afterSuperstep(), because managers may rely on
+             * computeManager.compute(), because managers may rely on
              * computation, like WorkerAggrManager send aggregators to master
              * after called aggregateValue(String name, V value) in computation.
              */
-            this.computation.afterSuperstep(context);
             this.managers.afterSuperstep(this.config, superstep);
 
             this.bsp4Worker.workerStepDone(superstep, workerStat);
@@ -320,7 +311,6 @@ public class WorkerService implements Closeable {
         ConnectionManager connManager = new TransportConnectionManager();
         DataServerManager serverManager = new DataServerManager(connManager,
                                                                 recvManager);
-        this.managers.add(serverManager);
         this.managers.add(serverManager);
 
         DataClientManager clientManager = new DataClientManager(connManager,

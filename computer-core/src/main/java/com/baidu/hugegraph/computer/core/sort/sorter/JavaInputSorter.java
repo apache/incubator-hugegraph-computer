@@ -28,13 +28,19 @@ import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
 
 public class JavaInputSorter implements InputSorter {
 
-    // TODO improve it by reuse list object
-    private static final int DEFAULT_CAPACITY = 10;
+    private static final ThreadLocal<List<KvEntry>> SORT_LOCAL =
+                         ThreadLocal.withInitial(ArrayList::new);
+
+    private static List<KvEntry> threadLocalSortList() {
+        List<KvEntry> list = SORT_LOCAL.get();
+        list.clear();
+        return list;
+    }
 
     @Override
     public Iterator<KvEntry> sort(Iterator<KvEntry> entries)
-                                  throws IOException {
-        List<KvEntry> kvEntries = new ArrayList<>(DEFAULT_CAPACITY);
+                             throws IOException {
+        List<KvEntry> kvEntries = threadLocalSortList();
         while (entries.hasNext()) {
             kvEntries.add(entries.next());
         }
