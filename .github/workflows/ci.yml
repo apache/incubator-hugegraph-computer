@@ -5,14 +5,9 @@ on:
     branches:
       - master
       - /^release-.*$/
-      - /^test-.*$/
       - /^v[0-9]\..*$/
   pull_request:
     branches:
-      - master
-      - /^release-.*$/
-      - /^test-.*$/
-      - /^v[0-9]\..*$/
 
 jobs:
   computer-ci:
@@ -24,18 +19,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
       - name: Install JDK 8
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '8'
           distribution: 'zulu'
 
       - name: Setup Python3
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8'
       - name: Setup HDFS
@@ -50,7 +45,7 @@ jobs:
           curl localhost:9000
           kubectl get nodes
       - name: Cache Maven packages
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -62,7 +57,7 @@ jobs:
           $TRAVIS_DIR/install-hugegraph-from-source.sh $HUGEGRAPH_SERVER_COMMIT_ID | grep -v "Downloading\|Downloaded"
           $TRAVIS_DIR/load-data-into-hugegraph.sh
       - name: Install JDK 11
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: 'zulu'
