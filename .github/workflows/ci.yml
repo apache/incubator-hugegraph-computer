@@ -7,7 +7,6 @@ on:
       - /^release-.*$/
       - /^v[0-9]\..*$/
   pull_request:
-    branches:
 
 jobs:
   computer-ci:
@@ -72,6 +71,6 @@ jobs:
         run: mvn test -P unit-test
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3.0.0
         with:
           file: target/site/jacoco/jacoco.xml
