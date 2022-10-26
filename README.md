@@ -1,8 +1,8 @@
 # hugegraph-computer
 
 [![License](https://img.shields.io/badge/license-Apache%202-0E78BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![Build Status](https://github.com/hugegraph/hugegraph-computer/actions/workflows/ci.yml/badge.svg)](https://github.com/hugegraph/hugegraph-computer/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/hugegraph/hugegraph-computer/branch/master/graph/badge.svg)](https://codecov.io/gh/hugegraph/hugegraph-computer)
+[![Build Status](https://github.com/apache/hugegraph-computer/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/hugegraph-computer/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/apache/hugegraph-computer/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/hugegraph-computer)
 [![Docker Pulls](https://img.shields.io/docker/pulls/hugegraph/hugegraph-builtin-algorithms)](https://hub.docker.com/repository/docker/hugegraph/hugegraph-builtin-algorithms)
 
 hugegraph-computer is a distributed graph processing system for hugegraph. It is an implementation of [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf). It runs on Kubernetes or YARN framework.
@@ -20,14 +20,14 @@ hugegraph-computer is a distributed graph processing system for hugegraph. It is
 The [project homepage](https://hugegraph.apache.org/docs/) contains more information about hugegraph-computer.
 
 And here are links of other repositories:
-1. [hugegraph-server](https://github.com/apache/incubator-hugegraph) (graph's core component - OLTP server)
-2. [hugegraph-toolchain](https://github.com/apache/incubator-hugegraph-toolchain) (include loader/dashboard/tool/client)
-3. [hugegraph-commons](https://github.com/apache/incubator-hugegraph-commons) (include common & rpc module)
-4. [hugegraph-website](https://github.com/apache/incubator-hugegraph-doc) (include doc & website code)
+1. [hugegraph-server](https://github.com/apache/hugegraph) (graph's core component - OLTP server)
+2. [hugegraph-toolchain](https://github.com/apache/hugegraph-toolchain) (include loader/dashboard/tool/client)
+3. [hugegraph-commons](https://github.com/apache/hugegraph-commons) (include common & rpc module)
+4. [hugegraph-website](https://github.com/apache/hugegraph-doc) (include doc & website code)
 
 ## Contributing
 
-Welcome to contribute, please see [`How to Contribute`](https://github.com/apache/incubator-hugegraph/blob/master/CONTRIBUTING.md) for more information
+Welcome to contribute, please see [`How to Contribute`](https://github.com/apache/hugegraph/blob/master/CONTRIBUTING.md) for more information
 
 Note: It's recommended to use [GitHub Desktop](https://desktop.github.com/) to **greatly simplify** the PR and commit process.
 
