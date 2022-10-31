@@ -226,7 +226,6 @@
                         <exclude>dist/**/*</exclude>
                         <exclude>**/assembly/static/bin/hugegraph.service</exclude>
                         <exclude>scripts/dev/reviewers</exclude>
-                        <exclude>scripts/dev/reviewers</exclude>
                         <exclude>**/*.md</exclude>
                         <exclude>**/dependency-reduced-pom.xml</exclude>
                         <exclude>**/logs/*.log</exclude>
