@@ -36,7 +36,7 @@ public class ClusteringCoefficientParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          IdList.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
-                         TriangleCountValue.class.getName());
+                         ClusteringCoefficientValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          ClusteringCoefficientOutput.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_EDGE_FREQ.name(),

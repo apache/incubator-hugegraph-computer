@@ -21,13 +21,13 @@ package com.baidu.hugegraph.computer.algorithm.community.cc;
 
 import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 import com.baidu.hugegraph.structure.constant.WriteType;
 
 /**
- * Offer 2 ways to output: writeback + hdfs-file(TODO)
+ * Offer 2 ways to output: write-back + hdfs-file(TODO)
  */
-public class ClusteringCoefficientOutput extends HugeOutput {
+public class ClusteringCoefficientOutput extends HugeGraphOutput<Float> {
 
     @Override
     public String name() {
@@ -44,14 +44,21 @@ public class ClusteringCoefficientOutput extends HugeOutput {
     }
 
     @Override
-    public com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(
-                                                      Vertex vertex) {
+    protected com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(Vertex vertex) {
         com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                new com.baidu.hugegraph.structure.graph.Vertex(null);
+                  new com.baidu.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
         float triangle = ((TriangleCountValue) vertex.value()).count();
         int degree = ((TriangleCountValue) vertex.value()).idList().size();
         hugeVertex.property(this.name(), 2 * triangle / degree / (degree - 1));
         return hugeVertex;
     }
+
+    /* TODO: enhance it
+    @Override
+    protected Float value(Vertex vertex) {
+        float triangle = ((TriangleCountValue) vertex.value()).count();
+        int degree = ((TriangleCountValue) vertex.value()).idList().size();
+        return 2 * triangle / degree / (degree - 1);
+    }*/
 }

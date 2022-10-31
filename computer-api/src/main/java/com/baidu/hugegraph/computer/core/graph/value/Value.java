@@ -81,7 +81,7 @@ public interface Value extends Writable, Readable, Comparable<Value> {
 
     /**
      * Value class with template parameter for composite subclass extension,
-     * A customize Value class of the algorithm may need to extend this class.
+     * A customized Value class of the algorithm may need to extend this class.
      */
     interface CustomizeValue<T> extends Tvalue<T> {
 

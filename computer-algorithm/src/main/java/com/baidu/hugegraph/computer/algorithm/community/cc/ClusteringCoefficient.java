@@ -40,14 +40,14 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
  * 2. whole cc have 2 ways to get the result: (NOT SUPPORTED NOW)
  *    - sum all open & closed triangles in graph, and calculate the result
  *    - sum all local cc for each vertex, and use avg as the whole graph result
- *
+ * <p>
  * And we have 2 ways to count local cc:
  * 1. if we already saved the triangles in each vertex, we can calculate only
  *    in superstep0/compute0 to get the result
  * 2. if we want recount the triangles result, we can choose:
  *    - copy code from TriangleCount, then add extra logic
  *    - reuse code in TriangleCount (need solve compatible problem - TODO)
- *
+ * <p>
  *  The formula of local CC is: C(v) = 2T / Dv(Dv - 1)
  *  v represents one vertex, T represents the triangles of current vertex,
  *  D represents the degree of current vertex
@@ -83,14 +83,14 @@ public class ClusteringCoefficient implements Computation<IdList> {
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<IdList> messages) {
-        Long count = this.triangleCount(context, vertex, messages);
+        Integer count = this.triangleCount(context, vertex, messages);
         if (count != null) {
             ((TriangleCountValue) vertex.value()).count(count);
             vertex.inactivate();
         }
     }
 
-    private Long triangleCount(ComputationContext context, Vertex vertex,
+    private Integer triangleCount(ComputationContext context, Vertex vertex,
                                Iterator<IdList> messages) {
         IdList neighbors = ((TriangleCountValue) vertex.value()).idList();
 
@@ -115,7 +115,7 @@ public class ClusteringCoefficient implements Computation<IdList> {
                 context.sendMessage(targetId, neighbors);
             }
         } else if (context.superstep() == 2) {
-            long count = 0L;
+            int count = 0;
 
             Set<Id> allNeighbors = new HashSet<>(neighbors.values());
             while (messages.hasNext()) {

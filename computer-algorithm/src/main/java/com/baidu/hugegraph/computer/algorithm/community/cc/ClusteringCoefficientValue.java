@@ -36,14 +36,14 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 /**
  * We should reuse triangle
  */
-public class ClusteringCoefficientValue implements Value<ClusteringCoefficientValue> {
+public class ClusteringCoefficientValue implements Value.CustomizeValue<Integer> {
     private IdList idList;
-    private LongValue count;
-    private IntValue degree;
+    private IntValue count;
+    private final IntValue degree;
 
     public ClusteringCoefficientValue() {
         this.idList = new IdList();
-        this.count = new LongValue();
+        this.count = new IntValue();
         this.degree = new IntValue();
     }
 
@@ -55,7 +55,7 @@ public class ClusteringCoefficientValue implements Value<ClusteringCoefficientVa
         return this.count.value();
     }
 
-    public void count(Long count) {
+    public void count(Integer count) {
         this.count.value(count);
     }
 
@@ -68,21 +68,16 @@ public class ClusteringCoefficientValue implements Value<ClusteringCoefficientVa
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.UNKNOWN;
-    }
-
-    @Override
-    public void assign(Value<ClusteringCoefficientValue> other) {
-        throw new NotSupportedException();
-    }
-
-    @Override
-    public Value<ClusteringCoefficientValue> copy() {
+    public ClusteringCoefficientValue copy() {
         ClusteringCoefficientValue ccValue = new ClusteringCoefficientValue();
         ccValue.idList = this.idList.copy();
         ccValue.count = this.count.copy();
         return ccValue;
+    }
+
+    @Override
+    public Integer value() {
+        return this.count.value();
     }
 
     @Override
@@ -98,20 +93,7 @@ public class ClusteringCoefficientValue implements Value<ClusteringCoefficientVa
     }
 
     @Override
-    public int compareTo(ClusteringCoefficientValue other) {
-        throw new NotSupportedException();
-    }
-
-    @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                   .append("idList", this.idList)
-                   .append("count", this.count)
-                   .toString();
-    }
-
-    @Override
-    public Object object() {
-        throw new NotSupportedException();
+        return "count" + this.count;
     }
 }

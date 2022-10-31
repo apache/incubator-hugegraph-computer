@@ -100,13 +100,13 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
     @Test
     public void testClusteringCoefficientValue() {
         TriangleCountValue value = new TriangleCountValue();
-        value.count(10L);
+        value.count(10);
         Assert.assertThrows(NotSupportedException.class,
                             () -> value.assign(null));
         Assert.assertThrows(NotSupportedException.class,
                             () -> value.compareTo(new TriangleCountValue()));
 
-        TriangleCountValue copy = (TriangleCountValue) value.copy();
+        TriangleCountValue copy = value.copy();
         Assert.assertEquals(10L, copy.count());
         Assert.assertNotSame(value.idList(), copy.idList());
 
