@@ -36,8 +36,7 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 /**
  * We should reuse triangle
  */
-public class ClusteringCoefficientValue implements
-                                        Value<ClusteringCoefficientValue> {
+public class ClusteringCoefficientValue implements Value<ClusteringCoefficientValue> {
     private IdList idList;
     private LongValue count;
     private IntValue degree;
@@ -64,7 +63,7 @@ public class ClusteringCoefficientValue implements
         return this.degree.value();
     }
 
-    public void setDegree(Integer degree) {
+    public void degree(Integer degree) {
         this.degree.value(degree);
     }
 

@@ -19,7 +19,7 @@
     <module name="TreeWalker">
         <!--检查行长度-->
         <module name="LineLength">
-            <property name="max" value="80"/>
+            <property name="max" value="100"/>
             <!--可以忽略的行-->
             <property name="ignorePattern"
                       value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
@@ -64,7 +64,7 @@
         <module name="OperatorWrap">
             <property name="option" value="eol"/>
         </module>
-        <!--检查指定标记的周围是否有空格，比如：if、for、while、synchoronized 等-->
+        <!--检查指定标记的周围是否有空格，比如：if、for、while、synchronized 等-->
         <module name="WhitespaceAround"/>
         <!--左圆括号之后和右圆括号之前是否需要有一个空格，不需要-->
         <module name="ParenPad"/>
