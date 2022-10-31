@@ -21,11 +21,12 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class NullValue implements Value<NullValue> {
+public class NullValue implements Tvalue<Void> {
 
     private static final NullValue INSTANCE = new NullValue();
 
@@ -40,12 +41,22 @@ public class NullValue implements Value<NullValue> {
     }
 
     @Override
+    public Void value() {
+        return null;
+    }
+
+    @Override
+    public String string() {
+        return "";
+    }
+
+    @Override
     public ValueType valueType() {
         return ValueType.NULL;
     }
 
     @Override
-    public void assign(Value<NullValue> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
     }
 
@@ -65,8 +76,13 @@ public class NullValue implements Value<NullValue> {
     }
 
     @Override
-    public int compareTo(NullValue obj) {
+    public int compareTo(Value obj) {
         E.checkArgumentNotNull(obj, "The compare argument can't be null");
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        assert obj instanceof NullValue;
         return 0;
     }
 
@@ -83,10 +99,5 @@ public class NullValue implements Value<NullValue> {
     @Override
     public String toString() {
         return "<null>";
-    }
-
-    @Override
-    public Object object() {
-        return null;
     }
 }

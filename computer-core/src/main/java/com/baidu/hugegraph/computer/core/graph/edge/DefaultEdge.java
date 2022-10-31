@@ -87,7 +87,7 @@ public class DefaultEdge implements Edge {
     }
 
     @Override
-    public <T extends Value<T>> T property(String key) {
+    public <T extends Value> T property(String key) {
         return this.properties.get(key);
     }
 

@@ -21,18 +21,23 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class LongValue extends Number implements Value<LongValue> {
+public class LongValue extends Number implements Tvalue<Long> {
 
     private static final long serialVersionUID = 8332327679205404212L;
 
     private long value;
 
     public LongValue() {
-        this.value = 0L;
+        this(0L);
+    }
+
+    public LongValue(long value) {
+        this.value = value;
     }
 
     @Override
@@ -55,11 +60,8 @@ public class LongValue extends Number implements Value<LongValue> {
         return this.value;
     }
 
-    public LongValue(long value) {
-        this.value = value;
-    }
-
-    public long value() {
+    @Override
+    public Long value() {
         return this.value;
     }
 
@@ -77,7 +79,7 @@ public class LongValue extends Number implements Value<LongValue> {
     }
 
     @Override
-    public void assign(Value<LongValue> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
         this.value = ((LongValue) other).value;
     }
@@ -85,6 +87,11 @@ public class LongValue extends Number implements Value<LongValue> {
     @Override
     public LongValue copy() {
         return new LongValue(this.value);
+    }
+
+    @Override
+    public boolean isNumber() {
+        return true;
     }
 
     @Override
@@ -98,9 +105,13 @@ public class LongValue extends Number implements Value<LongValue> {
     }
 
     @Override
-    public int compareTo(LongValue obj) {
+    public int compareTo(Value obj) {
         E.checkArgumentNotNull(obj, "The compare argument can't be null");
-        return Long.compare(this.value, obj.value);
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        return Long.compare(this.value, ((LongValue) obj).value);
     }
 
     @Override
@@ -119,10 +130,5 @@ public class LongValue extends Number implements Value<LongValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }

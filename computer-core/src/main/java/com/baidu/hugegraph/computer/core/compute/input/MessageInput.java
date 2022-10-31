@@ -32,14 +32,14 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 
-public class MessageInput<T extends Value<?>> {
+public class MessageInput<T extends Value> {
 
     private final Config config;
     private final PeekableIterator<KvEntry> messages;
-    private T value;
+    private final T value;
 
     public MessageInput(ComputerContext context,
                         PeekableIterator<KvEntry> messages) {
@@ -69,6 +69,10 @@ public class MessageInput<T extends Value<?>> {
         }
 
         return new MessageIterator(vidPointer);
+    }
+
+    public void close() throws Exception {
+        this.messages.close();
     }
 
     private class MessageIterator implements Iterator<T> {

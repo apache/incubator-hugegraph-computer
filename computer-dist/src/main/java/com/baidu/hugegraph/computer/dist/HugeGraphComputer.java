@@ -125,14 +125,13 @@ public class HugeGraphComputer {
     }
 
     private static ComputerContext parseContext(String conf)
-                                   throws IOException {
+                                                throws IOException {
         Properties properties = new Properties();
         BufferedReader bufferedReader = new BufferedReader(
                                             new FileReader(conf));
         properties.load(bufferedReader);
         ComputerContextUtil.initContext(properties);
-        ComputerContext context = ComputerContext.instance();
-        return context;
+        return ComputerContext.instance();
     }
 
     private static void registerOptions() {

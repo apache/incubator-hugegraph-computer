@@ -32,7 +32,7 @@ public class FloatValueSumCombinerTest {
         FloatValueSumCombiner combiner = new FloatValueSumCombiner();
         for (int i = 1; i <= 10; i++) {
             FloatValue value = new FloatValue(i);
-            sum = combiner.combine(sum, value);
+            combiner.combine(sum, value, sum);
         }
         Assert.assertEquals(55.0D, sum.value(), 0.0D);
     }
@@ -43,16 +43,23 @@ public class FloatValueSumCombinerTest {
         FloatValue value2 = new FloatValue(0.0f);
         FloatValueSumCombiner combiner = new FloatValueSumCombiner();
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(null, value2);
+            combiner.combine(null, value2, value2);
         }, e -> {
             Assert.assertEquals("The combine parameter v1 can't be null",
                                 e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(value1, null);
+            combiner.combine(value1, null, value2);
         }, e -> {
             Assert.assertEquals("The combine parameter v2 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(value1, value2, null);
+        }, e -> {
+            Assert.assertEquals("The combine parameter result can't be null",
                                 e.getMessage());
         });
     }

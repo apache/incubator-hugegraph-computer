@@ -25,38 +25,38 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
-import com.baidu.hugegraph.computer.core.receiver.RecvMessageStat;
+import com.baidu.hugegraph.computer.core.receiver.MessageStat;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
 
 public class PartitionStat implements Readable, Writable {
 
     private int partitionId;
+
     private long vertexCount;
     private long edgeCount;
     private long finishedVertexCount;
-    private long messageCount;
-    private long messageBytes;
 
-    // For reflexion
+    private long messageSendCount;
+    private long messageSendBytes;
+
+    private long messageRecvCount;
+    private long messageRecvBytes;
+
     public PartitionStat() {
-    }
-
-    // For data load phase
-    public PartitionStat(int partitionId, long vertexCount, long edgeCount) {
-        this.partitionId = partitionId;
-        this.vertexCount = vertexCount;
-        this.edgeCount = edgeCount;
+        // For reflexion
+        this(0, 0L, 0L, 0L);
     }
 
     public PartitionStat(int partitionId, long vertexCount, long edgeCount,
-                         long finishedVertexCount, long messageCount,
-                         long messageBytes) {
+                         long finishedVertexCount) {
         this.partitionId = partitionId;
         this.vertexCount = vertexCount;
         this.edgeCount = edgeCount;
         this.finishedVertexCount = finishedVertexCount;
-        this.messageCount = messageCount;
-        this.messageBytes = messageBytes;
+        this.messageSendCount = 0L;
+        this.messageSendBytes = 0L;
+        this.messageRecvCount = 0L;
+        this.messageRecvBytes = 0L;
     }
 
     public int partitionId() {
@@ -75,12 +75,20 @@ public class PartitionStat implements Readable, Writable {
         return this.finishedVertexCount;
     }
 
-    public long messageCount() {
-        return this.messageCount;
+    public long messageSendCount() {
+        return this.messageSendCount;
     }
 
-    public long messageBytes() {
-        return this.messageBytes;
+    public long messageSendBytes() {
+        return this.messageSendBytes;
+    }
+
+    public long messageRecvCount() {
+        return this.messageRecvCount;
+    }
+
+    public long messageRecvBytes() {
+        return this.messageRecvBytes;
     }
 
     @Override
@@ -89,8 +97,10 @@ public class PartitionStat implements Readable, Writable {
         this.vertexCount = in.readLong();
         this.edgeCount = in.readLong();
         this.finishedVertexCount = in.readLong();
-        this.messageCount = in.readLong();
-        this.messageBytes = in.readLong();
+        this.messageSendCount = in.readLong();
+        this.messageSendBytes = in.readLong();
+        this.messageRecvCount = in.readLong();
+        this.messageRecvBytes = in.readLong();
     }
 
     @Override
@@ -99,15 +109,20 @@ public class PartitionStat implements Readable, Writable {
         out.writeLong(this.vertexCount);
         out.writeLong(this.edgeCount);
         out.writeLong(this.finishedVertexCount);
-        out.writeLong(this.messageCount);
-        out.writeLong(this.messageBytes);
+        out.writeLong(this.messageSendCount);
+        out.writeLong(this.messageSendBytes);
+        out.writeLong(this.messageRecvCount);
+        out.writeLong(this.messageRecvBytes);
     }
 
-    public void merge(RecvMessageStat recvMessageStat) {
-        if (recvMessageStat != null) {
-            this.messageCount += recvMessageStat.messageCount();
-            this.messageBytes += recvMessageStat.messageBytes();
-        }
+    public void mergeSendMessageStat(MessageStat messageStat) {
+        this.messageSendCount += messageStat.messageCount();
+        this.messageSendBytes += messageStat.messageBytes();
+    }
+
+    public void mergeRecvMessageStat(MessageStat messageStat) {
+        this.messageRecvCount += messageStat.messageCount();
+        this.messageRecvBytes += messageStat.messageBytes();
     }
 
     @Override
@@ -120,8 +135,10 @@ public class PartitionStat implements Readable, Writable {
                this.vertexCount == other.vertexCount &&
                this.finishedVertexCount == other.finishedVertexCount &&
                this.edgeCount == other.edgeCount &&
-               this.messageCount == other.messageCount &&
-               this.messageBytes == other.messageBytes;
+               this.messageSendCount == other.messageSendCount &&
+               this.messageSendBytes == other.messageSendBytes &&
+               this.messageRecvCount == other.messageRecvCount &&
+               this.messageRecvBytes == other.messageRecvBytes;
     }
 
     @Override

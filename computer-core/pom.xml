@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hugegraph-computer</artifactId>
         <groupId>com.baidu.hugegraph</groupId>
-        <version>0.1.0</version>
+        <version>0.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -19,15 +19,7 @@
         </dependency>
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
-            <artifactId>hugegraph-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-rpc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
-            <artifactId>hugegraph-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -41,6 +33,18 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-hdfs-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>hugegraph-loader</artifactId>
         </dependency>
     </dependencies>
 </project>

@@ -35,8 +35,8 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.EntryInput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
@@ -118,7 +118,7 @@ public class WriteBuffersTest extends UnitTestBase {
         Properties properties = graphFactory.createProperties();
         properties.put("name", BytesId.of("marko"));
         properties.put("age", new IntValue(18));
-        properties.put("city", new ListValue<>(ValueType.ID_VALUE,
+        properties.put("city", new ListValue<>(ValueType.ID,
                                ImmutableList.of(BytesId.of("wuhan"),
                                                 BytesId.of("xian"))));
         vertex.properties(properties);

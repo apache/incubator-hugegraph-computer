@@ -20,7 +20,6 @@
 package com.baidu.hugegraph.computer.algorithm.centrality.degree;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
@@ -32,58 +31,54 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
+import com.baidu.hugegraph.computer.core.output.hdfs.HdfsOutput;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphDoubleOutput;
 import com.google.common.collect.Streams;
 
 public class DegreeCentralityTest extends AlgorithmTestBase {
 
     @Test
-    public void testServiceWith1Worker() throws InterruptedException {
-        runAlgorithm(DegreeCentralityTestParams.class.getName(),
+    public void testRunAlgorithm() throws InterruptedException {
+        runAlgorithm(DegreeCentralityParams.class.getName(),
                      DegreeCentrality.OPTION_WEIGHT_PROPERTY,
-                     "rate");
-        DegreeCentralityTestOutput.assertResult();
-        runAlgorithm(DegreeCentralityTestParams.class.getName());
+                     "rate",
+                     ComputerOptions.OUTPUT_CLASS.name(),
+                     DegreeCentralityTestOutput.class.getName());
         DegreeCentralityTestOutput.assertResult();
     }
 
-    public static class DegreeCentralityTestParams
-                  extends DegreeCentralityParams {
-
-        @Override
-        public void setAlgorithmParameters(Map<String, String> params) {
-            params.put(ComputerOptions.OUTPUT_CLASS.name(),
-                       DegreeCentralityTestOutput.class.getName());
-            super.setAlgorithmParameters(params);
-        }
+    @Test
+    public void testRunAlgorithmFromHdfs() throws InterruptedException {
+        runAlgorithm(DegreeCentralityParams.class.getName(),
+                     ComputerOptions.OUTPUT_CLASS.name(),
+                     HdfsOutput.class.getName(),
+                     ComputerOptions.INPUT_SOURCE_TYPE.name(),
+                     "hugegraph-loader");
     }
 
-    public static class DegreeCentralityTestOutput extends LimitedLogOutput {
+    public static class DegreeCentralityTestOutput
+                  extends HugeGraphDoubleOutput {
 
         private String weight;
-
-        public static boolean isRun;
+        private static boolean isRun;
 
         public DegreeCentralityTestOutput() {
-            isRun = false;
         }
 
         @Override
         public void init(Config config, int partition) {
             super.init(config, partition);
             this.weight = config.getString(
-            DegreeCentrality.OPTION_WEIGHT_PROPERTY, "");
+                          DegreeCentrality.OPTION_WEIGHT_PROPERTY, "");
             isRun = false;
         }
 
         @Override
-        public void write(Vertex vertex) {
-            super.write(vertex);
+        public Double value(Vertex vertex) {
+            Double value = super.value(vertex);
             isRun = true;
-            DoubleValue value = vertex.value();
             if (StringUtils.isEmpty(this.weight)) {
-                Assert.assertEquals(vertex.numEdges(),
-                                    value.value(), 0.000001);
+                Assert.assertEquals(vertex.numEdges(), value, 0.000001);
             } else {
                 Iterator<Edge> edges = vertex.edges().iterator();
                 double totalValue = Streams.stream(edges).map(
@@ -96,13 +91,9 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
                                             return weightValue.value();
                                         }
                                     }).reduce(Double::sum).orElse(0.0);
-                Assert.assertEquals(totalValue, value.value(), 0.000001);
+                Assert.assertEquals(totalValue, value, 0.000001);
             }
-        }
-
-        @Override
-        public void close() {
-            super.close();
+            return value;
         }
 
         public static void assertResult() {

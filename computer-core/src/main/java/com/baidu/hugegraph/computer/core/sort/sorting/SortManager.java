@@ -29,15 +29,15 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
-import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
+import com.baidu.hugegraph.computer.core.combiner.EdgeValueCombiner;
+import com.baidu.hugegraph.computer.core.combiner.MessageValueCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.VertexValueCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
@@ -46,25 +46,22 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.sender.WriteBuffers;
+import com.baidu.hugegraph.computer.core.sort.BufferFileSorter;
+import com.baidu.hugegraph.computer.core.sort.HgkvFileSorter;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 
-public class SortManager implements Manager {
+public abstract class SortManager implements Manager {
 
     public static final Logger LOG = Log.logger(SortManager.class);
-
-    private static final String NAME = "sort";
-    private static final String PREFIX = "sort-executor-%s";
 
     private final ComputerContext context;
     private final ExecutorService sortExecutor;
@@ -75,9 +72,17 @@ public class SortManager implements Manager {
     public SortManager(ComputerContext context) {
         this.context = context;
         Config config = context.config();
-        int threadNum = config.get(ComputerOptions.SORT_THREAD_NUMS);
-        this.sortExecutor = ExecutorUtil.newFixedThreadPool(threadNum, PREFIX);
-        this.sorter = new SorterImpl(config);
+        if (this.threadNum(config) != 0) {
+            this.sortExecutor = ExecutorUtil.newFixedThreadPool(
+                                this.threadNum(config), this.threadPrefix());
+        } else {
+            this.sortExecutor = null;
+        }
+        if (config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE)) {
+            this.sorter = new BufferFileSorter(config);
+        } else {
+            this.sorter = new HgkvFileSorter(config);
+        }
         this.capacity = config.get(
                         ComputerOptions.WORKER_WRITE_BUFFER_INIT_CAPACITY);
         this.flushThreshold = config.get(
@@ -85,8 +90,12 @@ public class SortManager implements Manager {
     }
 
     @Override
-    public String name() {
-        return NAME;
+    public abstract String name();
+
+    protected abstract String threadPrefix();
+
+    protected Integer threadNum(Config config) {
+        return config.get(ComputerOptions.SORT_THREAD_NUMS);
     }
 
     @Override
@@ -96,6 +105,9 @@ public class SortManager implements Manager {
 
     @Override
     public void close(Config config) {
+        if (this.sortExecutor == null) {
+            return;
+        }
         this.sortExecutor.shutdown();
         try {
             this.sortExecutor.awaitTermination(Constants.SHUTDOWN_TIMEOUT,
@@ -171,16 +183,16 @@ public class SortManager implements Manager {
     private InnerSortFlusher createSortFlusher(MessageType type,
                                                RandomAccessOutput output,
                                                int flushThreshold) {
-        Combiner<Pointer> combiner;
+        PointerCombiner combiner;
         boolean needSortSubKv;
 
         switch (type) {
             case VERTEX:
-                combiner = this.createVertexCombiner();
+                combiner = new VertexValueCombiner(this.context);
                 needSortSubKv = false;
                 break;
             case EDGE:
-                combiner = this.createEdgeCombiner();
+                combiner = new EdgeValueCombiner(this.context);
                 needSortSubKv = true;
                 break;
             case MSG:
@@ -207,54 +219,14 @@ public class SortManager implements Manager {
         return flusher;
     }
 
-    private Combiner<Pointer> createVertexCombiner() {
+    private PointerCombiner createMessageCombiner() {
         Config config = this.context.config();
-        Combiner<Properties> propCombiner = config.createObject(
-                ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS);
-
-        return this.createPropertiesCombiner(propCombiner);
-    }
-
-    private Combiner<Pointer> createEdgeCombiner() {
-        Config config = this.context.config();
-        Combiner<Properties> propCombiner = config.createObject(
-                ComputerOptions.WORKER_EDGE_PROPERTIES_COMBINER_CLASS);
-
-        return this.createPropertiesCombiner(propCombiner);
-    }
-
-    private Combiner<Pointer> createMessageCombiner() {
-        Config config = this.context.config();
-        Combiner<?> valueCombiner = config.createObject(
-                    ComputerOptions.WORKER_COMBINER_CLASS, false);
-
+        Combiner<Value> valueCombiner = config.createObject(
+                                        ComputerOptions.WORKER_COMBINER_CLASS,
+                                        false);
         if (valueCombiner == null) {
             return null;
         }
-
-        Value<?> v1 = config.createObject(
-                      ComputerOptions.ALGORITHM_MESSAGE_CLASS);
-        Value<?> v2 = v1.copy();
-        return new PointerCombiner(v1, v2, valueCombiner);
-    }
-
-    private Combiner<Pointer> createPropertiesCombiner(
-                              Combiner<Properties> propCombiner) {
-        /*
-         * If propertiesCombiner is OverwriteCombiner, just remain the
-         * second, no need to deserialize the properties and then serialize
-         * the second properties.
-         */
-        Combiner<Pointer> combiner;
-        if (propCombiner instanceof OverwriteCombiner) {
-            combiner = new OverwriteCombiner<>();
-        } else {
-            GraphFactory graphFactory = this.context.graphFactory();
-            Properties v1 = graphFactory.createProperties();
-            Properties v2 = graphFactory.createProperties();
-
-            combiner = new PointerCombiner<>(v1, v2, propCombiner);
-        }
-        return combiner;
+        return new MessageValueCombiner(this.context);
     }
 }

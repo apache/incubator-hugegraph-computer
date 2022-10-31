@@ -45,8 +45,8 @@ import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
 import com.baidu.hugegraph.computer.core.io.Writable;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryInputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.EntryInput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
 import com.baidu.hugegraph.config.TypedOption;
@@ -67,11 +67,10 @@ public class UnitTestBase {
                                                      .defaultValue();
     private static final String GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME
                                                        .defaultValue();
-    private static final HugeClient CLIENT = HugeClient.builder(URL, GRAPH)
-                                                       .build();
+    private static HugeClient CLIENT = null;
 
     protected static void clearAll() {
-        CLIENT.graphs().clear(GRAPH, "I'm sure to delete all data");
+        client().graphs().clearGraph(GRAPH, "I'm sure to delete all data");
     }
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)
@@ -90,7 +89,7 @@ public class UnitTestBase {
         }
     }
 
-    public static void assertValueEqualAfterWriteAndRead(Value<?> oldValue)
+    public static void assertValueEqualAfterWriteAndRead(Value oldValue)
                                                          throws IOException {
         byte[] bytes;
         try (BytesOutput bao = IOFactory.createBytesOutput(
@@ -99,11 +98,15 @@ public class UnitTestBase {
             bytes = bao.toByteArray();
         }
 
-        Value<?> newValue = graphFactory().createValue(oldValue.valueType());
+        Value newValue = graphFactory().createValue(oldValue.valueType());
         try (BytesInput bai = IOFactory.createBytesInput(bytes)) {
             newValue.read(bai);
             Assert.assertEquals(oldValue, newValue);
         }
+    }
+
+    public static void assertEquals(double v1, double v2) {
+        Assert.assertEquals(v1, v2, 1E-6);
     }
 
     public static void updateOptions(Object... optionKeyValues) {
@@ -208,7 +211,10 @@ public class UnitTestBase {
                                                                output);
     }
 
-    protected static HugeClient client() {
+    protected static synchronized HugeClient client() {
+        if (CLIENT == null) {
+            CLIENT = HugeClient.builder(URL, GRAPH).build();
+        }
         return CLIENT;
     }
 

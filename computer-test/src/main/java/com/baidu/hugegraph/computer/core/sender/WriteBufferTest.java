@@ -118,7 +118,7 @@ public class WriteBufferTest extends UnitTestBase {
         Properties properties = graphFactory.createProperties();
         properties.put("name", BytesId.of("marko"));
         properties.put("age", new IntValue(18));
-        properties.put("city", new ListValue<>(ValueType.ID_VALUE,
+        properties.put("city", new ListValue<>(ValueType.ID,
                                ImmutableList.of(BytesId.of("wuhan"),
                                                 BytesId.of("xian"))));
         vertex.properties(properties);
@@ -141,7 +141,6 @@ public class WriteBufferTest extends UnitTestBase {
     public void testWriteVertexWithEdgeFreq() throws IOException {
         GraphFactory graphFactory = context.graphFactory();
 
-        WriteBuffer buffer = new WriteBuffer(context, 100, 110);
         Vertex vertex = graphFactory.createVertex(BytesId.of(1L),
                                                   new DoubleValue(0.5d));
         vertex.addEdge(graphFactory.createEdge(BytesId.of(2L)));
@@ -152,9 +151,11 @@ public class WriteBufferTest extends UnitTestBase {
         vertex.addEdge(graphFactory.createEdge("watch", "2222",
                                                BytesId.of(4L)));
 
+        WriteBuffer buffer;
         UnitTestBase.updateOptions(
             ComputerOptions.INPUT_EDGE_FREQ, "SINGLE"
         );
+        buffer = new WriteBuffer(ComputerContext.instance(), 100, 110);
         buffer.writeEdges(vertex);
         long position1 = buffer.output().position();
         Assert.assertGt(0L, position1);

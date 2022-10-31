@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.network.message;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 
 import io.netty.buffer.ByteBuf;
 
@@ -30,9 +30,9 @@ public interface Message {
      *
      * @param buf {@link ByteBuf} the header buffer, if use zero-copy.
      * Otherwise it will contain header and body.
-     * @return {@link ManagedBuffer} body buffer, if use zero-copy
+     * @return {@link NetworkBuffer} body buffer, if use zero-copy
      */
-    ManagedBuffer encode(ByteBuf buf);
+    NetworkBuffer encode(ByteBuf buf);
 
     /**
      * Used to identify this message type.
@@ -48,7 +48,7 @@ public interface Message {
     /**
      * An optional body for the message.
      */
-    ManagedBuffer body();
+    NetworkBuffer body();
 
     /**
      * The message sequence number

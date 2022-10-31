@@ -33,7 +33,7 @@ public interface GraphComputeInput extends GraphInput {
 
     Vertex readEdges() throws IOException;
 
-    Pair<Id, Value<?>> readMessage() throws IOException;
+    Pair<Id, Value> readMessage() throws IOException;
 
-    Value<?> readValue(RandomAccessInput in) throws IOException;
+    Value readValue(RandomAccessInput in) throws IOException;
 }

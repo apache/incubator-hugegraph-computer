@@ -21,18 +21,23 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class FloatValue extends Number implements Value<FloatValue> {
+public class FloatValue extends Number implements Tvalue<Float> {
 
     private static final long serialVersionUID = 6098857579782490901L;
 
     private float value;
 
     public FloatValue() {
-        this.value = 0.0F;
+        this(0.0F);
+    }
+
+    public FloatValue(float value) {
+        this.value = value;
     }
 
     @Override
@@ -55,11 +60,8 @@ public class FloatValue extends Number implements Value<FloatValue> {
         return this.value;
     }
 
-    public FloatValue(float value) {
-        this.value = value;
-    }
-
-    public float value() {
+    @Override
+    public Float value() {
         return this.value;
     }
 
@@ -77,7 +79,7 @@ public class FloatValue extends Number implements Value<FloatValue> {
     }
 
     @Override
-    public void assign(Value<FloatValue> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
         this.value = ((FloatValue) other).value;
     }
@@ -85,6 +87,11 @@ public class FloatValue extends Number implements Value<FloatValue> {
     @Override
     public FloatValue copy() {
         return new FloatValue(this.value);
+    }
+
+    @Override
+    public boolean isNumber() {
+        return true;
     }
 
     @Override
@@ -98,9 +105,13 @@ public class FloatValue extends Number implements Value<FloatValue> {
     }
 
     @Override
-    public int compareTo(FloatValue obj) {
+    public int compareTo(Value obj) {
         E.checkArgumentNotNull(obj, "The compare argument can't be null");
-        return Float.compare(this.value, obj.value);
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        return Float.compare(this.value, ((FloatValue) obj).value);
     }
 
     @Override
@@ -119,10 +130,5 @@ public class FloatValue extends Number implements Value<FloatValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }

@@ -80,6 +80,45 @@ public class UnitTestSuite {
 
     private static final Logger LOG = Log.logger(UnitTestSuite.class);
 
+    static {
+        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
+                                  "defaultValue",
+                                  "http://localhost:2579");
+        Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_URL,
+                                  "defaultValue",
+                                  "http://127.0.0.1:8080");
+        Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_GRAPH_NAME,
+                                  "defaultValue",
+                                  "hugegraph");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_URL,
+                                  "defaultValue",
+                                  "hdfs://127.0.0.1:9000");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_USER,
+                                  "defaultValue",
+                                  System.getProperty("user.name"));
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KERBEROS_ENABLE,
+                                  "defaultValue",
+                                  false);
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KRB5_CONF,
+                                  "defaultValue",
+                                  "/etc/krb5.conf");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KERBEROS_KEYTAB,
+                                  "defaultValue",
+                                  "");
+        Whitebox.setInternalState(
+                 ComputerOptions.OUTPUT_HDFS_KERBEROS_PRINCIPAL,
+                 "defaultValue",
+                 "");
+        Whitebox.setInternalState(
+                 ComputerOptions.INPUT_LOADER_SCHEMA_PATH,
+                 "defaultValue",
+                 "src/main/resources/hdfs_input_test/schema.json");
+        Whitebox.setInternalState(
+                 ComputerOptions.INPUT_LOADER_STRUCT_PATH,
+                 "defaultValue",
+                 "src/main/resources/hdfs_input_test/struct.json");
+    }
+
     @BeforeClass
     public static void setup() throws ClassNotFoundException {
         LOG.info("Setup for UnitTestSuite of hugegraph-computer");
@@ -91,8 +130,6 @@ public class UnitTestSuite {
         OptionSpace.register("computer-rpc",
                              "com.baidu.hugegraph.config.RpcOptions");
 
-        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                                  "defaultValue", "http://localhost:2579");
         UnitTestBase.updateOptions(
             ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()
         );

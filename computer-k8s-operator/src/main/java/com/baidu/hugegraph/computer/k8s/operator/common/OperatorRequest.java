@@ -83,6 +83,10 @@ public class OperatorRequest {
         return this.retryTimes.incrementAndGet();
     }
 
+    public int retryTimes() {
+        return this.retryTimes.get();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

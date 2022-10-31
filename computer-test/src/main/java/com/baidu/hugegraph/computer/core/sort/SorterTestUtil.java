@@ -24,15 +24,23 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
+import com.baidu.hugegraph.computer.core.combiner.AbstractPointerCombiner;
+import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
+import com.baidu.hugegraph.computer.core.io.Readable;
+import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class SorterTestUtil {
@@ -151,6 +159,20 @@ public class SorterTestUtil {
                                 StoreTestUtil.dataFromPointer(subKv.key()));
             Assert.assertEquals(expect[index++],
                                 StoreTestUtil.dataFromPointer(subKv.value()));
+        }
+    }
+
+    public static <T extends Readable & Writable> PointerCombiner
+                  createPointerCombiner(Supplier<T> supplier,
+                                        Combiner<T> combiner) {
+        return new AbstractPointerCombiner<T>(supplier, combiner) { };
+    }
+
+    public static Sorter createSorter(Config config) {
+        if (config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE)) {
+            return new BufferFileSorter(config);
+        } else {
+            return new HgkvFileSorter(config);
         }
     }
 }

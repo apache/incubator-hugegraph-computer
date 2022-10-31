@@ -17,21 +17,38 @@ on:
 jobs:
   computer-ci:
     runs-on: ubuntu-20.04
+    env:
+      TRAVIS_DIR: computer-dist/src/assembly/travis
+      KUBERNETES_VERSION: 1.20.1
+      HUGEGRAPH_SERVER_COMMIT_ID: 848b8fb17804ddc561af832dff0bdc3f6221c904
+
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
       - name: Install JDK 8
         uses: actions/setup-java@v2
         with:
           java-version: '8'
-          distribution: 'adopt'
+          distribution: 'zulu'
+
+      - name: Setup Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Setup HDFS
+        run: $TRAVIS_DIR/install-hdfs.sh
 
       - name: Setup Minikube-Kubernetes
-        uses: manusa/actions-setup-minikube@v2.4.2
-        with:
-          minikube version: v1.21.0
-          kubernetes version: v1.20.1
-      - name: Interact with the cluster
-        run: kubectl get nodes
+        run: $TRAVIS_DIR/install-k8s.sh
 
+      - name: Check Component
+        run: |
+          sleep 5
+          curl localhost:9000
+          kubectl get nodes
       - name: Cache Maven packages
         uses: actions/cache@v2
         with:
@@ -39,22 +56,19 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Prepare env and service
+        run: |
+          $TRAVIS_DIR/install-env.sh
+          $TRAVIS_DIR/install-hugegraph-from-source.sh $HUGEGRAPH_SERVER_COMMIT_ID | grep -v "Downloading\|Downloaded"
+          $TRAVIS_DIR/load-data-into-hugegraph.sh
+      - name: Install JDK 11
+        uses: actions/setup-java@v2
         with:
-          fetch-depth: 2
+          java-version: '11'
+          distribution: 'zulu'
 
       - name: Compile
         run: mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
-
-      - name: Prepare env and service
-        env:
-          TRAVIS_DIR: computer-dist/src/assembly/travis
-          COMMIT_ID: e65641517361d7da7ef1801489c15e3af7863a39
-        run: |
-          $TRAVIS_DIR/install-env.sh
-          $TRAVIS_DIR/install-hugegraph-from-source.sh $COMMIT_ID | grep -v "Downloading\|Downloaded"
-          $TRAVIS_DIR/load-data-into-hugegraph.sh
 
       - name: Integrate test
         run: mvn test -P integrate-test

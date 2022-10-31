@@ -30,8 +30,8 @@ import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntryWriter;
 
 public class StreamGraphOutput implements GraphComputeOutput {
 
@@ -68,7 +68,6 @@ public class StreamGraphOutput implements GraphComputeOutput {
                 writer.writeSubKv(out -> {
                     this.writeId(out, edge.targetId());
                 }, out -> {
-                    this.writeLabel(out, edge.label());
                     this.writeProperties(out, edge.properties());
                 });
             }
@@ -76,7 +75,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
             for (Edge edge : vertex.edges()) {
                 // Use label + targetId as subKey, use properties as subValue
                 writer.writeSubKv(out -> {
-                    out.writeUTF(edge.label());
+                    this.writeLabel(out, edge.label());
                     this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
@@ -90,8 +89,8 @@ public class StreamGraphOutput implements GraphComputeOutput {
                  * use properties as subValue
                  */
                 writer.writeSubKv(out -> {
-                    out.writeUTF(edge.label());
-                    out.writeUTF(edge.name());
+                    this.writeLabel(out, edge.label());
+                    this.writeLabel(out, edge.name());
                     this.writeId(out, edge.targetId());
                 }, out -> {
                     this.writeProperties(out, edge.properties());
@@ -102,7 +101,7 @@ public class StreamGraphOutput implements GraphComputeOutput {
     }
 
     @Override
-    public void writeMessage(Id id, Value<?> value) throws IOException {
+    public void writeMessage(Id id, Value value) throws IOException {
         this.out.writeEntry(out -> {
             // Write id
             this.writeId(out, id);
@@ -117,22 +116,22 @@ public class StreamGraphOutput implements GraphComputeOutput {
     }
 
     @Override
-    public void writeValue(RandomAccessOutput out, Value<?> value)
+    public void writeValue(RandomAccessOutput out, Value value)
                            throws IOException {
         out.writeByte(value.valueType().code());
         value.write(out);
     }
 
-    private void writeMessage(RandomAccessOutput out, Value<?> value)
+    private void writeMessage(RandomAccessOutput out, Value value)
                               throws IOException {
         value.write(out);
     }
 
     private void writeProperties(RandomAccessOutput out, Properties properties)
                                  throws IOException {
-        Map<String, Value<?>> keyValues = properties.get();
+        Map<String, Value> keyValues = properties.get();
         out.writeInt(keyValues.size());
-        for (Map.Entry<String, Value<?>> entry : keyValues.entrySet()) {
+        for (Map.Entry<String, Value> entry : keyValues.entrySet()) {
             out.writeUTF(entry.getKey());
             this.writeValue(out, entry.getValue());
         }

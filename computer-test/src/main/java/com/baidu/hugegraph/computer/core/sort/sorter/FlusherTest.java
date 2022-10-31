@@ -23,36 +23,44 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.baidu.hugegraph.computer.core.combiner.Combiner;
 import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
+import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.Constants;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.sort.Sorter;
-import com.baidu.hugegraph.computer.core.sort.SorterImpl;
 import com.baidu.hugegraph.computer.core.sort.SorterTestUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvInnerSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.KvOuterSortFlusher;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.StoreTestUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.KvEntriesInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.Pointer;
+import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
 public class FlusherTest {
 
-    private static final Config CONFIG = ComputerContext.instance().config();
+    private static Config CONFIG;
+
+    @BeforeClass
+    public static void init() {
+        CONFIG = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
+        );
+    }
 
     @Test
     public void testKvInnerSortFlusher() throws Exception {
@@ -64,7 +72,7 @@ public class FlusherTest {
 
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         sorter.sortBuffer(input, new KvInnerSortFlusher(output), false);
 
         BytesInput result = EntriesUtil.inputFromOutput(output);
@@ -90,7 +98,7 @@ public class FlusherTest {
         List<RandomAccessInput> inputs = ImmutableList.of(input1, input2);
 
         String resultFile = StoreTestUtil.availablePathById("1");
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         sorter.mergeBuffers(inputs, new KvOuterSortFlusher(), resultFile,
                             false);
 
@@ -131,10 +139,12 @@ public class FlusherTest {
 
         BytesOutput output = IOFactory.createBytesOutput(
                              Constants.SMALL_BUF_SIZE);
-        Combiner<Pointer> combiner = new OverwriteCombiner<>();
+        PointerCombiner combiner = SorterTestUtil.createPointerCombiner(
+                                                  IntValue::new,
+                                                  new OverwriteCombiner<>());
         InnerSortFlusher flusher = new CombineKvInnerSortFlusher(output,
                                                                  combiner);
-        Sorter sorter = new SorterImpl(CONFIG);
+        Sorter sorter = SorterTestUtil.createSorter(CONFIG);
         sorter.sortBuffer(input, flusher, false);
 
         BytesInput result = EntriesUtil.inputFromOutput(output);

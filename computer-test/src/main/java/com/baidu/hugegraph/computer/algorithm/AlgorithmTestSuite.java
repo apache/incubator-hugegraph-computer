@@ -23,13 +23,16 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import com.baidu.hugegraph.computer.algorithm.centrality.betweenness.BetweennessCentralityTest;
+import com.baidu.hugegraph.computer.algorithm.centrality.closeness.ClosenessCentralityTest;
 import com.baidu.hugegraph.computer.algorithm.centrality.degree.DegreeCentralityTest;
+import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankTest;
+import com.baidu.hugegraph.computer.algorithm.community.kcore.KcoreTest;
+import com.baidu.hugegraph.computer.algorithm.community.lpa.LpaTest;
 import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountTest;
+import com.baidu.hugegraph.computer.algorithm.community.wcc.WccTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
-import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankTest;
-import com.baidu.hugegraph.computer.algorithm.community.wcc.WccTest;
-import com.baidu.hugegraph.computer.algorithm.community.cc.ClusteringCoefficientTest;
 import com.baidu.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
@@ -37,10 +40,14 @@ import com.baidu.hugegraph.config.OptionSpace;
     PageRankTest.class,
     DegreeCentralityTest.class,
     WccTest.class,
+    LpaTest.class,
+    KcoreTest.class,
     TriangleCountTest.class,
     RingsDetectionTest.class,
     RingsDetectionWithFilterTest.class,
-    ClusteringCoefficientTest.class
+    ClusteringCoefficientTest.class,
+    ClosenessCentralityTest.class,
+    BetweennessCentralityTest.class
 })
 public class AlgorithmTestSuite {
 
@@ -50,5 +57,7 @@ public class AlgorithmTestSuite {
         OptionSpace.register("computer",
                              "com.baidu.hugegraph.computer.core.config." +
                              "ComputerOptions");
+        OptionSpace.register("computer-rpc",
+                             "com.baidu.hugegraph.config.RpcOptions");
     }
 }

@@ -33,7 +33,7 @@ public class DefaultVertex implements Vertex {
 
     private String label;
     private Id id;
-    private Value<?> value;
+    private Value value;
     private Edges edges;
     private Properties properties;
     private boolean active;
@@ -42,12 +42,12 @@ public class DefaultVertex implements Vertex {
         this(graphFactory, null, null);
     }
 
-    public DefaultVertex(GraphFactory graphFactory, Id id, Value<?> value) {
+    public DefaultVertex(GraphFactory graphFactory, Id id, Value value) {
         this(graphFactory, Constants.EMPTY_STR, id, value);
     }
 
     public DefaultVertex(GraphFactory graphFactory, String label, Id id,
-                         Value<?> value) {
+                         Value value) {
         this.label = label;
         this.id = id;
         this.value = value;
@@ -78,12 +78,12 @@ public class DefaultVertex implements Vertex {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends Value<?>> V value() {
+    public <V extends Value> V value() {
         return (V) this.value;
     }
 
     @Override
-    public <V extends Value<?>> void value(V value) {
+    public <V extends Value> void value(V value) {
         this.value = value;
     }
 
@@ -118,7 +118,7 @@ public class DefaultVertex implements Vertex {
     }
 
     @Override
-    public <T extends Value<T>> T property(String key) {
+    public <T extends Value> T property(String key) {
         return this.properties.get(key);
     }
 

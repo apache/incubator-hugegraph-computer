@@ -49,12 +49,27 @@ public class BooleanValueTest extends UnitTestBase {
         Assert.assertEquals(true, value2.value());
         Assert.assertEquals(false, value3.value());
 
+        Assert.assertEquals(false, value1.boolValue());
+        Assert.assertEquals(true, value2.boolValue());
+        Assert.assertEquals(false, value3.boolValue());
+
         value2.value(false);
         Assert.assertEquals(false, value2.value());
         Assert.assertEquals(value3, value2);
 
         BooleanValue value5 = new BooleanValue(value2.value());
         Assert.assertEquals(value2, value5);
+    }
+
+    @Test
+    public void testString() {
+        BooleanValue value1 = new BooleanValue();
+        BooleanValue value2 = new BooleanValue(true);
+        BooleanValue value3 = new BooleanValue(false);
+
+        Assert.assertEquals("false", value1.string());
+        Assert.assertEquals("true", value2.string());
+        Assert.assertEquals("false", value3.string());
     }
 
     @Test
@@ -74,8 +89,7 @@ public class BooleanValueTest extends UnitTestBase {
         Assert.assertEquals(false, value3.value());
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<BooleanValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to BooleanValue",
@@ -83,8 +97,7 @@ public class BooleanValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<BooleanValue> v = (Value) new LongValue();
+            Value v = new LongValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(LongValue) to BooleanValue",
@@ -138,6 +151,10 @@ public class BooleanValueTest extends UnitTestBase {
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+
+        Assert.assertGt(0, value3.compareTo(NullValue.get()));
+        Assert.assertLt(0, value3.compareTo(new IntValue(1)));
+        Assert.assertLt(0, value3.compareTo(new StringValue("true")));
     }
 
     @Test

@@ -35,9 +35,9 @@ public class TransportConf {
                                "transport-netty-server";
     public static final String CLIENT_THREAD_GROUP_NAME =
                                "transport-netty-client";
-    public static final int NUMBER_CPU_CORES =
-                            Runtime.getRuntime().availableProcessors();
     private final Config config;
+
+    public static final int DEFAULT_THREADS = 4;
 
     public static TransportConf wrapConfig(Config config) {
         return new TransportConf(config);
@@ -72,16 +72,16 @@ public class TransportConf {
     }
 
     private int maxTransportThreads() {
-        Integer workerCount = this.config
-                                  .get(ComputerOptions.JOB_WORKERS_COUNT);
-        Integer partitions = this.config
-                                 .get(ComputerOptions.JOB_PARTITIONS_COUNT);
-        return partitions / workerCount + 1;
+        return this.config.get(ComputerOptions.JOB_WORKERS_COUNT);
     }
 
     public TransportProvider transportProvider() {
         return this.config
                    .createObject(ComputerOptions.TRANSPORT_PROVIDER_CLASS);
+    }
+
+    public boolean recvBufferFileMode() {
+        return this.config.get(ComputerOptions.TRANSPORT_RECV_FILE_MODE);
     }
 
     /**

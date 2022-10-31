@@ -33,42 +33,52 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public class DefaultProperties implements Properties {
 
-    private final Map<String, Value<?>> keyValues;
+    private final Map<String, Value> keyValues;
     private final GraphFactory graphFactory;
 
     public DefaultProperties(GraphFactory graphFactory) {
         this(graphFactory.createMap(), graphFactory);
     }
 
-    public DefaultProperties(Map<String, Value<?>> keyValues,
+    public DefaultProperties(Map<String, Value> keyValues,
                              GraphFactory graphFactory) {
         this.keyValues = keyValues;
         this.graphFactory = graphFactory;
     }
 
     @Override
-    public Map<String, Value<?>> get() {
+    public Map<String, Value> get() {
         return Collections.unmodifiableMap(this.keyValues);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Value<T>> T get(String key) {
+    public <T extends Value> T get(String key) {
         return (T) this.keyValues.get(key);
     }
 
     @Override
-    public void put(String key, Value<?> value) {
+    public void put(String key, Value value) {
         this.keyValues.put(key, value);
     }
 
     @Override
-    public void putIfAbsent(String key, Value<?> value) {
+    public void putIfAbsent(String key, Value value) {
         this.keyValues.putIfAbsent(key, value);
+    }
+
+    @Override
+    public void putAll(Map<String, Value> kvs) {
+        this.keyValues.putAll(kvs);
     }
 
     public int size() {
         return this.keyValues.size();
+    }
+
+    @Override
+    public void clear() {
+        this.keyValues.clear();
     }
 
     @Override
@@ -79,7 +89,7 @@ public class DefaultProperties implements Properties {
             String key = in.readUTF();
             ValueType valueType = SerialEnum.fromCode(ValueType.class,
                                                       in.readByte());
-            Value<?> value = this.graphFactory.createValue(valueType);
+            Value value = this.graphFactory.createValue(valueType);
             value.read(in);
             this.keyValues.put(key, value);
         }
@@ -88,9 +98,9 @@ public class DefaultProperties implements Properties {
     @Override
     public void write(RandomAccessOutput out) throws IOException {
         out.writeInt(this.keyValues.size());
-        for (Map.Entry<String, Value<?>> entry : this.keyValues.entrySet()) {
+        for (Map.Entry<String, Value> entry : this.keyValues.entrySet()) {
             out.writeUTF(entry.getKey());
-            Value<?> value = entry.getValue();
+            Value value = entry.getValue();
             out.writeByte(value.valueType().code());
             value.write(out);
         }

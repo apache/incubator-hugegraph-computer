@@ -1,0 +1,224 @@
+{
+  "version": "2.0",
+  "structs": [
+    {
+      "id": "1",
+      "skip": false,
+      "input": {
+        "type": "HDFS",
+        "path": "hdfs://127.0.0.1:9000/dataset/ml-latest-small/user_id.csv",
+        "core_site_path": "src/main/resources/hdfs_input_test/core-site.xml",
+        "file_filter": {
+          "extensions": [
+            "*"
+          ]
+        },
+        "format": "CSV",
+        "delimiter": ",",
+        "date_format": "yyyy-MM-dd HH:mm:ss",
+        "time_zone": "GMT+8",
+        "skipped_line": {
+          "regex": "(^#|^//).*|"
+        },
+        "compression": "NONE",
+        "batch_size": 500,
+        "header": [
+          "userId"
+        ],
+        "charset": "UTF-8",
+        "list_format": null
+      },
+      "vertices": [
+        {
+          "label": "user",
+          "skip": false,
+          "id": "userId",
+          "unfold": false,
+          "field_mapping": {
+            "userId": "id"
+          },
+          "value_mapping": {},
+          "selected": [
+            "userId"
+          ],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
+        }
+      ],
+      "edges": []
+    },
+    {
+      "id": "2",
+      "skip": false,
+      "input": {
+        "type": "FILE",
+        "path": "../computer-dist/src/assembly/dataset/ml-latest-small/movies.csv",
+        "file_filter": {
+          "extensions": [
+            "*"
+          ]
+        },
+        "format": "CSV",
+        "delimiter": ",",
+        "date_format": "yyyy-MM-dd HH:mm:ss",
+        "time_zone": "GMT+8",
+        "skipped_line": {
+          "regex": "(^#|^//).*|"
+        },
+        "compression": "NONE",
+        "batch_size": 500,
+        "header": [
+          "movieId",
+          "title",
+          "genres"
+        ],
+        "charset": "UTF-8",
+        "list_format": {
+          "start_symbol": "",
+          "elem_delimiter": "|",
+          "end_symbol": ""
+        }
+      },
+      "vertices": [
+        {
+          "label": "movie",
+          "skip": false,
+          "id": null,
+          "unfold": false,
+          "field_mapping": {
+            "movieId": "id"
+          },
+          "value_mapping": {},
+          "selected": [],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
+        }
+      ],
+      "edges": []
+    },
+    {
+      "id": "3",
+      "skip": false,
+      "input": {
+        "type": "HDFS",
+        "path": "hdfs://127.0.0.1:9000/dataset/ml-latest-small/ratings.csv",
+        "core_site_path": "src/main/resources/hdfs_input_test/core-site.xml",
+        "file_filter": {
+          "extensions": [
+            "*"
+          ]
+        },
+        "format": "CSV",
+        "delimiter": ",",
+        "date_format": "yyyy-MM-dd HH:mm:ss",
+        "time_zone": "GMT+8",
+        "skipped_line": {
+          "regex": "(^#|^//).*|"
+        },
+        "compression": "NONE",
+        "batch_size": 500,
+        "header": [
+          "userId",
+          "movieId",
+          "rating",
+          "timestamp"
+        ],
+        "charset": "UTF-8",
+        "list_format": null
+      },
+      "vertices": [],
+      "edges": [
+        {
+          "label": "rating",
+          "skip": false,
+          "source": [
+            "userId"
+          ],
+          "unfold_source": false,
+          "target": [
+            "movieId"
+          ],
+          "unfold_target": false,
+          "field_mapping": {
+            "userId": "id",
+            "movieId": "id",
+            "rating": "rate",
+            "timestamp": "timestamp"
+          },
+          "value_mapping": {},
+          "selected": [],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
+        }
+      ]
+    },
+    {
+      "id": "4",
+      "skip": false,
+      "input": {
+        "type": "HDFS",
+        "path": "hdfs://127.0.0.1:9000/dataset/ml-latest-small/tags.csv",
+        "core_site_path": "src/main/resources/hdfs_input_test/core-site.xml",
+        "file_filter": {
+          "extensions": [
+            "*"
+          ]
+        },
+        "format": "CSV",
+        "delimiter": ",",
+        "date_format": "yyyy-MM-dd HH:mm:ss",
+        "time_zone": "GMT+8",
+        "skipped_line": {
+          "regex": "(^#|^//).*|"
+        },
+        "compression": "NONE",
+        "batch_size": 500,
+        "header": [
+          "userId",
+          "movieId",
+          "tag",
+          "timestamp"
+        ],
+        "charset": "UTF-8",
+        "list_format": null
+      },
+      "vertices": [],
+      "edges": [
+        {
+          "label": "taged",
+          "skip": false,
+          "source": [
+            "userId"
+          ],
+          "unfold_source": false,
+          "target": [
+            "movieId"
+          ],
+          "unfold_target": false,
+          "field_mapping": {
+            "userId": "id",
+            "movieId": "id",
+            "tag": "tag",
+            "timestamp": "timestamp"
+          },
+          "value_mapping": {},
+          "selected": [],
+          "ignored": [],
+          "null_values": [
+            ""
+          ],
+          "update_strategies": {}
+        }
+      ]
+    }
+  ]
+}

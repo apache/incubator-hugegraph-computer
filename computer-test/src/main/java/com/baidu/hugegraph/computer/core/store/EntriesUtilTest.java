@@ -19,6 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.store;
 
+import java.io.IOException;
 import java.util.NoSuchElementException;
 
 import org.junit.Test;
@@ -28,13 +29,12 @@ import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.SubKvEntriesInput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntryWriter;
+import com.baidu.hugegraph.computer.core.store.buffer.SubKvEntriesInput;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntryWriter;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class EntriesUtilTest {
@@ -91,5 +91,26 @@ public class EntriesUtilTest {
                                 StoreTestUtil.idFromPointer(iter.next().key()));
             Assert.assertThrows(NoSuchElementException.class, iter::next);
         }
+    }
+
+    @Test
+    public void testKvEntryWithFirstSubKv() throws IOException {
+        BytesOutput output = IOFactory.createBytesOutput(
+                                       Constants.SMALL_BUF_SIZE);
+        EntryOutput entryOutput = new EntryOutputImpl(output);
+        KvEntryWriter subKvWriter = entryOutput.writeEntry(BytesId.of(100));
+        subKvWriter.writeSubKv(BytesId.of(1), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(1), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(1), BytesId.of(1));
+        subKvWriter.writeSubKv(BytesId.of(1), BytesId.of(1));
+        subKvWriter.writeFinish();
+
+        BytesInput input = EntriesUtil.inputFromOutput(output);
+
+        // Read entry from buffer
+        KvEntry entry = EntriesUtil.kvEntryFromInput(input, true, true);
+        entry = EntriesUtil.kvEntryWithFirstSubKv(entry);
+        // Assert subKvEntry size
+        Assert.assertEquals(4, entry.numSubEntries());
     }
 }

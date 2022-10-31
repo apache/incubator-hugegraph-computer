@@ -42,8 +42,9 @@ public class MergeNewPropertiesCombinerTest extends UnitTestBase {
         expect.put("age", BytesId.of("18"));
         expect.put("city", BytesId.of("Beijing"));
 
+        Properties properties = graphFactory().createProperties();
         PropertiesCombiner combiner = new MergeNewPropertiesCombiner();
-        Properties properties = combiner.combine(properties1, properties2);
+        combiner.combine(properties1, properties2, properties);
         Assert.assertEquals(expect, properties);
     }
 
@@ -61,16 +62,23 @@ public class MergeNewPropertiesCombinerTest extends UnitTestBase {
         PropertiesCombiner combiner = new MergeNewPropertiesCombiner();
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(null, properties2);
+            combiner.combine(null, properties2, properties2);
         }, e -> {
             Assert.assertEquals("The combine parameter v1 can't be null",
                                 e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            combiner.combine(properties1, null);
+            combiner.combine(properties1, null, properties2);
         }, e -> {
             Assert.assertEquals("The combine parameter v2 can't be null",
+                                e.getMessage());
+        });
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            combiner.combine(properties1, properties2, null);
+        }, e -> {
+            Assert.assertEquals("The combine parameter result can't be null",
                                 e.getMessage());
         });
     }

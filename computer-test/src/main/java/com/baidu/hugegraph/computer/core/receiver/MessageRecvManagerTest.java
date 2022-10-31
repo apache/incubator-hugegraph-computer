@@ -33,15 +33,16 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitionTest;
 import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitionTest;
 import com.baidu.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitionTest;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -56,19 +57,21 @@ public class MessageRecvManagerTest extends UnitTestBase {
     @Before
     public void setup() {
         this.config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.BSP_MAX_SUPER_STEP, "1",
-            ComputerOptions.WORKER_COMBINER_CLASS,
-            DoubleValueSumCombiner.class.getName(),
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
-            ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "100",
-            ComputerOptions.ALGORITHM_MESSAGE_CLASS, DoubleValue.class.getName()
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.BSP_MAX_SUPER_STEP, "1",
+                ComputerOptions.WORKER_COMBINER_CLASS,
+                DoubleValueSumCombiner.class.getName(),
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "100",
+                ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT, "100",
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
-        this.sortManager = new SortManager(context());
+        this.sortManager = new RecvSortManager(context());
         this.sortManager.init(this.config);
         this.receiveManager = new MessageRecvManager(context(),
                                                      this.fileManager,
@@ -92,12 +95,12 @@ public class MessageRecvManagerTest extends UnitTestBase {
         this.receiveManager.onStarted(this.connectionId);
         this.receiveManager.onFinished(this.connectionId);
         VertexMessageRecvPartitionTest.addTenVertexBuffer(
-                                       (ManagedBuffer buffer) -> {
+                                       (NetworkBuffer buffer) -> {
             this.receiveManager.handle(MessageType.VERTEX, 0, buffer);
         });
 
         EdgeMessageRecvPartitionTest.addTenEdgeBuffer(
-                                     (ManagedBuffer buffer) -> {
+                                     (NetworkBuffer buffer) -> {
             this.receiveManager.handle(MessageType.EDGE, 0, buffer);
         });
         // Send edge message
@@ -121,7 +124,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
         // Superstep 0
         this.receiveManager.beforeSuperstep(this.config, 0);
         ComputeMessageRecvPartitionTest.addTwentyCombineMessageBuffer(
-                                        (ManagedBuffer buffer) -> {
+                                        (NetworkBuffer buffer) -> {
              this.receiveManager.handle(MessageType.MSG, 0, buffer);
         });
         this.receiveManager.onFinished(this.connectionId);
@@ -140,11 +143,11 @@ public class MessageRecvManagerTest extends UnitTestBase {
     public void testOtherMessageType() {
         Assert.assertThrows(ComputerException.class, () -> {
             ReceiverUtil.consumeBuffer(new byte[100],
-                                       (ManagedBuffer buffer) -> {
+                                       (NetworkBuffer buffer) -> {
                 this.receiveManager.handle(MessageType.ACK, 0, buffer);
             });
         }, e -> {
-            Assert.assertEquals("Unable handle ManagedBuffer with type 'ACK'",
+            Assert.assertEquals("Unable handle NetworkBuffer with type 'ACK'",
                                 e.getMessage());
         });
     }

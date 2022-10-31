@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.algorithm.path.rings;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,11 +30,13 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.HugeClient;
 import com.baidu.hugegraph.driver.SchemaManager;
 import com.baidu.hugegraph.structure.constant.T;
 import com.baidu.hugegraph.structure.graph.Vertex;
+import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -40,9 +44,13 @@ public class RingsDetectionTest extends AlgorithmTestBase {
 
     private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
-                    "A", ImmutableSet.of("ABCA", "ACA", "ABCDEA", "ADA",
-                                             "ADCA", "ACEDA"),
-                    "C", ImmutableSet.of("CEDC")
+                    "A", ImmutableSet.of("[A, B, C, A]",
+                                         "[A, C, A]",
+                                         "[A, B, C, E, D, A]",
+                                         "[A, D, A]",
+                                         "[A, D, C, A]",
+                                         "[A, C, E, D, A]"),
+                    "C", ImmutableSet.of("[C, E, D, C]")
             );
 
     @BeforeClass
@@ -88,7 +96,7 @@ public class RingsDetectionTest extends AlgorithmTestBase {
     }
 
     @Test
-    public void test() throws InterruptedException {
+    public void testRunAlgorithm() throws InterruptedException {
         runAlgorithm(RingsDetectionTestParams.class.getName());
     }
 
@@ -99,6 +107,30 @@ public class RingsDetectionTest extends AlgorithmTestBase {
             this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                              RingsDetectionTestOutput.class.getName());
             super.setAlgorithmParameters(params);
+        }
+    }
+
+    public static class RingsDetectionTestOutput extends RingsDetectionOutput {
+
+        protected static Map<String, Set<String>> EXPECT_RINGS;
+
+        @Override
+        public List<String> value(
+               com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+            List<String> rings = super.value(vertex);
+            this.assertResult(vertex.id(), rings);
+            return rings;
+        }
+
+        private void assertResult(Id id, List<String> rings) {
+            Set<String> expect = EXPECT_RINGS.getOrDefault(id.toString(),
+                                                           new HashSet<>());
+
+            Assert.assertEquals(expect.size(), rings.size());
+            for (String ring : rings) {
+                String error = "Expect: '" + ring + "' in " + expect;
+                Assert.assertTrue(error, expect.contains(ring));
+            }
         }
     }
 }

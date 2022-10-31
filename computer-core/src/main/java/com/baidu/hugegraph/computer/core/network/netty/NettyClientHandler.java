@@ -25,12 +25,10 @@ import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.AckMessage;
 import com.baidu.hugegraph.computer.core.network.message.DataMessage;
-import com.baidu.hugegraph.computer.core.network.message.FailMessage;
 import com.baidu.hugegraph.computer.core.network.message.FinishMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.StartMessage;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
-import com.google.common.base.Throwables;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -82,20 +80,7 @@ public class NettyClientHandler extends AbstractNettyHandler {
         int ackId = ackMessage.ackId();
         assert ackId > AbstractMessage.UNKNOWN_SEQ;
         this.session().onRecvAck(ackId);
-        this.client.checkAndNoticeSendAvailable();
-    }
-
-    @Override
-    protected void processFailMessage(ChannelHandlerContext ctx,
-                                      Channel channel,
-                                      FailMessage failMessage) {
-        int failId = failMessage.ackId();
-        if (failId > AbstractMessage.START_SEQ) {
-            this.session().onRecvAck(failId);
-            this.client.checkAndNoticeSendAvailable();
-        }
-
-        super.processFailMessage(ctx, channel, failMessage);
+        this.client.checkAndNotifySendAvailable();
     }
 
     @Override
@@ -116,11 +101,6 @@ public class NettyClientHandler extends AbstractNettyHandler {
                         cause, cause.getMessage(),
                         TransportUtil.remoteAddress(ctx.channel()));
         }
-
-        // Respond fail message to requester
-        this.ackFailMessage(ctx, AbstractMessage.UNKNOWN_SEQ,
-                            exception.errorCode(),
-                            Throwables.getStackTraceAsString(exception));
 
         this.client.clientHandler().exceptionCaught(exception,
                                                     this.client.connectionId());

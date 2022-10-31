@@ -21,14 +21,13 @@ package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
 import java.util.Map;
 
-import javax.ws.rs.NotSupportedException;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphIntOutput;
 import com.baidu.hugegraph.driver.GraphManager;
 import com.baidu.hugegraph.driver.SchemaManager;
 import com.baidu.hugegraph.structure.constant.T;
@@ -38,15 +37,15 @@ import com.baidu.hugegraph.testutil.Assert;
 import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 public class TriangleCountTest extends AlgorithmTestBase {
-    
+
     private static final String VERTX_LABEL = "tc_user";
     private static final String EDGE_LABEL = "tc_know";
     private static final String PROPERTY_KEY = "tc_weight";
 
-    protected static final Map<Object, Long> EXPECTED_RESULTS =
-              ImmutableMap.of("tc_A", 2L, "tc_B", 1L,
-                              "tc_C", 3L, "tc_D", 2L,
-                              "tc_E", 1L);
+    protected static final Map<Object, Integer> EXPECTED_RESULTS =
+              ImmutableMap.of("tc_A", 2, "tc_B", 1,
+                              "tc_C", 3, "tc_D", 2,
+                              "tc_E", 1);
 
     @BeforeClass
     public static void setup() {
@@ -97,40 +96,39 @@ public class TriangleCountTest extends AlgorithmTestBase {
     }
 
     @Test
+    public void testRunAlgorithm() throws InterruptedException {
+        runAlgorithm(TriangleCountParams.class.getName(),
+                     ComputerOptions.OUTPUT_CLASS.name(),
+                     TriangleCountIntOutputTest.class.getName());
+    }
+
+    @Test
     public void testTriangleCountValue() {
         TriangleCountValue value = new TriangleCountValue();
-        value.count(10L);
-        Assert.assertThrows(NotSupportedException.class,
+        value.count(10);
+        Assert.assertThrows(UnsupportedOperationException.class,
                             () -> value.assign(null));
-        Assert.assertThrows(NotSupportedException.class,
+        Assert.assertThrows(UnsupportedOperationException.class,
                             () -> value.compareTo(new TriangleCountValue()));
 
-        TriangleCountValue copy = (TriangleCountValue) value.copy();
-        Assert.assertEquals(10L, copy.count());
+        TriangleCountValue copy = value.copy();
+        Assert.assertEquals(10, copy.count());
         Assert.assertNotSame(value.idList(), copy.idList());
 
         Assert.assertContains("10", value.toString());
     }
 
-    @Test
-    public void testTriangleCount() throws InterruptedException {
-        runAlgorithm(TriangleCountParams.class.getName(),
-                     ComputerOptions.OUTPUT_CLASS.name(),
-                     TriangleCountOutputTest.class.getName());
-    }
-
-    public static class TriangleCountOutputTest extends TriangleCountOutput {
+    public static class TriangleCountIntOutputTest extends HugeGraphIntOutput {
 
         @Override
-        public Vertex constructHugeVertex(
-               com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            Vertex result = super.constructHugeVertex(vertex);
-            Long expected = EXPECTED_RESULTS.get(result.id());
+        public Integer value(com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+            Integer value = super.value(vertex);
+            Integer expected = EXPECTED_RESULTS.get(vertex.id());
             if (expected != null) {
-                Assert.assertEquals(expected, result.property(super.name()));
+                Assert.assertEquals(expected, value);
             }
 
-            return result;
+            return value;
         }
     }
 }

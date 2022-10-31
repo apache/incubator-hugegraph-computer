@@ -21,6 +21,8 @@ package com.baidu.hugegraph.computer.core.combiner;
 
 import java.util.Iterator;
 
+import com.baidu.hugegraph.computer.core.graph.value.Value;
+
 public interface Combiner<T> {
 
     /**
@@ -32,20 +34,21 @@ public interface Combiner<T> {
     }
 
     /**
-     * Combine v1 and v2, return the combined value. The combined value may
+     * Combine v1 and v2 to result. The combined value may
      * take use v1 or v2. The value of v1 and v2 may be updated. Should not
      * use v1 and v2 after combine them.
      */
-    T combine(T v1, T v2);
+    void combine(T v1, T v2, T result);
 
-
-    static <T> T combineAll(Combiner<T> combiner, Iterator<T> values) {
+    @SuppressWarnings("unchecked")
+    static <T extends Value> T combineAll(Combiner<T> combiner,
+                                          Iterator<T> values) {
         if (!values.hasNext()) {
             return null;
         }
-        T result = values.next();
+        T result = (T) values.next().copy();
         while (values.hasNext()) {
-            result = combiner.combine(result, values.next());
+            combiner.combine(result, values.next(), result);
         }
         return result;
     }

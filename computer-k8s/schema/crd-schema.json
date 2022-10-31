@@ -55,6 +55,10 @@
           "type": "object",
           "existingJavaType": "java.util.Map\u003cString,String\u003e"
         },
+        "configMapPaths": {
+          "type": "object",
+          "existingJavaType": "java.util.Map\u003cString,String\u003e"
+        },
         "envFrom": {
           "type": "array",
           "javaOmitEmpty": true,
@@ -109,6 +113,9 @@
         "masterMemory": {
           "existingJavaType": "io.fabric8.kubernetes.api.model.Quantity"
         },
+        "podTemplateSpec": {
+          "existingJavaType": "io.fabric8.kubernetes.api.model.PodTemplateSpec"
+        },
         "pullPolicy": {
           "type": "string"
         },
@@ -122,6 +129,13 @@
         "remoteJarUri": {
           "type": "string",
           "existingJavaType": "String"
+        },
+        "secretPaths": {
+          "type": "object",
+          "existingJavaType": "java.util.Map\u003cString,String\u003e"
+        },
+        "securityContext": {
+          "existingJavaType": "io.fabric8.kubernetes.api.model.SecurityContext"
         },
         "volumeMounts": {
           "type": "array",

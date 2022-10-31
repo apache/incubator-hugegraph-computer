@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.util.E;
 
-public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
+public class DefaultAggregator<V extends Value> implements Aggregator<V> {
 
     private final ValueType type;
     private final Class<? extends Combiner<V>> combinerClass;
@@ -66,7 +66,7 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     @Override
     public void aggregateValue(V value) {
         this.checkValue(value);
-        this.value = this.combiner.combine(value, this.value);
+        this.combiner.combine(value, this.value, this.value);
     }
 
     @Override
@@ -102,14 +102,8 @@ public class DefaultAggregator<V extends Value<?>> implements Aggregator<V> {
     }
 
     private void combineAndSwapIfNeeded(V localValue, V thisValue) {
-        // TODO: call combine(localValue, thisValue, <output>thisValue)
-        V tmp = this.combiner.combine(localValue, thisValue);
-        if (tmp == localValue) {
-            this.localValue.set(thisValue);
-            this.value = tmp;
-        } else {
-            assert tmp == thisValue;
-        }
+        this.combiner.combine(localValue, thisValue, thisValue);
+        localValue.assign(thisValue);
     }
 
     @Override

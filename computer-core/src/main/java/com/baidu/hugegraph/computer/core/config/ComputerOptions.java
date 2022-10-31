@@ -27,7 +27,7 @@ import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.baidu.hugegraph.computer.core.combiner.OverwriteCombiner;
+import com.baidu.hugegraph.computer.core.combiner.OverwritePropertiesCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.input.filter.DefaultInputFilter;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
@@ -90,8 +90,16 @@ public class ComputerOptions extends OptionHolder {
             new ConfigOption<>(
                     "input.source_type",
                     "The source type to load input data",
-                    allowValues("hugegraph"),
-                    "hugegraph"
+                    allowValues("hugegraph-server", "hugegraph-loader"),
+                    "hugegraph-server"
+            );
+
+    public static final ConfigOption<Integer> INPUT_SPLIT_FETCH_TIMEOUT =
+            new ConfigOption<>(
+                    "input.split_fetch_timeout",
+                    "The timeout in seconds to fetch input splits",
+                    positiveInt(),
+                    300
             );
 
     public static final ConfigOption<Long> INPUT_SPLITS_SIZE =
@@ -154,7 +162,7 @@ public class ComputerOptions extends OptionHolder {
                     "targetId to identify it.",
                     allowValues("SINGLE", "SINGLE_PER_LABEL", "MULTIPLE"),
                     EdgeFrequency::valueOf,
-                    "SINGLE"
+                    "MULTIPLE"
             );
 
     public static final ConfigOption<Integer> INPUT_MAX_EDGES_IN_ONE_VERTEX =
@@ -165,6 +173,24 @@ public class ComputerOptions extends OptionHolder {
                     "stored and transferred together as a batch unit.",
                     positiveInt(),
                     200
+            );
+
+    public static final ConfigOption<String> INPUT_LOADER_STRUCT_PATH =
+            new ConfigOption<>(
+                    "input.loader_struct_path",
+                    "The struct path of loader input, only takes effect when " +
+                    "the input.source_type=loader is enabled",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> INPUT_LOADER_SCHEMA_PATH =
+            new ConfigOption<>(
+                    "input.loader_schema_path",
+                    "The schema path of loader input, only takes effect when " +
+                    "the input.source_type=loader is enabled",
+                    null,
+                    ""
             );
 
     public static final ConfigOption<Integer> SORT_THREAD_NUMS =
@@ -217,6 +243,16 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
+    public static final ConfigOption<String> OUTPUT_RESULT_WRITE_TYPE =
+            new ConfigOption<>(
+                    "output.result_write_type",
+                    "The result write-type to output to hugegraph, " +
+                    "allowed values are: " +
+                    "[OLAP_COMMON, OLAP_SECONDARY, OLAP_RANGE].",
+                    allowValues("OLAP_COMMON", "OLAP_SECONDARY", "OLAP_RANGE"),
+                    "OLAP_COMMON"
+            );
+
     public static final ConfigOption<Integer> OUTPUT_BATCH_SIZE =
             new ConfigOption<>(
                     "output.batch_size",
@@ -266,13 +302,100 @@ public class ComputerOptions extends OptionHolder {
                     10
             );
 
-    public static final ConfigOption<Integer> VERTEX_AVERAGE_DEGREE =
+    public static final ConfigOption<String> OUTPUT_HDFS_URL =
             new ConfigOption<>(
-                    "computer.vertex_average_degree",
-                    "The average degree of a vertex, it represents the " +
-                    "average number of adjacent edges per vertex",
+                    "output.hdfs_url",
+                    "The hdfs url of output.",
+                    disallowEmpty(),
+                    "hdfs://127.0.0.1:9000"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_USER =
+            new ConfigOption<>(
+                    "output.hdfs_user",
+                    "The hdfs user of output.",
+                    disallowEmpty(),
+                    "hadoop"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_CORE_SITE_PATH =
+            new ConfigOption<>(
+                    "output.hdfs_core_site_path",
+                    "The hdfs core site path.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_SITE_PATH =
+            new ConfigOption<>(
+                    "output.hdfs_site_path",
+                    "The hdfs site path.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<Short> OUTPUT_HDFS_REPLICATION =
+            new ConfigOption<>(
+                    "output.hdfs_replication",
+                    "The replication number of hdfs.",
                     positiveInt(),
-                    10
+                    (short) 3
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_DIR =
+            new ConfigOption<>(
+                    "output.hdfs_path_prefix",
+                    "The directory of hdfs output result.",
+                    disallowEmpty(),
+                    "/hugegraph-computer/results"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_DELIMITER =
+            new ConfigOption<>(
+                    "output.hdfs_delimiter",
+                    "The delimiter of hdfs output.",
+                    disallowEmpty(),
+                    ","
+            );
+
+    public static final ConfigOption<Boolean> OUTPUT_HDFS_MERGE =
+            new ConfigOption<>(
+                    "output.hdfs_merge_partitions",
+                    "Whether merge output files of multiple partitions.",
+                    allowValues(true, false),
+                    true
+            );
+
+    public static final ConfigOption<Boolean> OUTPUT_HDFS_KERBEROS_ENABLE =
+            new ConfigOption<>(
+                    "output.hdfs_kerberos_enable",
+                    "Is Kerberos authentication enabled for Hdfs.",
+                    allowValues(true, false),
+                    false
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_KRB5_CONF =
+            new ConfigOption<>(
+                    "output.hdfs_krb5_conf",
+                    "Kerberos configuration file.",
+                    disallowEmpty(),
+                    "/etc/krb5.conf"
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_KERBEROS_PRINCIPAL =
+            new ConfigOption<>(
+                    "output.hdfs_kerberos_principal",
+                    "The Hdfs's principal for kerberos authentication.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> OUTPUT_HDFS_KERBEROS_KEYTAB =
+            new ConfigOption<>(
+                    "output.hdfs_kerberos_keytab",
+                    "The Hdfs's key tab file for kerberos authentication.",
+                    null,
+                    ""
             );
 
     public static final ConfigOption<Integer>
@@ -283,9 +406,6 @@ public class ComputerOptions extends OptionHolder {
                     positiveInt(),
                     10000
             );
-
-    public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
-    );
 
     public static final ConfigOption<String> JOB_ID =
             new ConfigOption<>(
@@ -311,6 +431,14 @@ public class ComputerOptions extends OptionHolder {
                     "algorithm job.",
                     positiveInt(),
                     1
+            );
+
+    public static final ConfigOption<Integer> PARTITIONS_COMPUTE_THREAD_NUMS =
+            new ConfigOption<>(
+                    "job.partitions_thread_nums",
+                    "The number of threads for partition parallel compute.",
+                    positiveInt(),
+                    4
             );
 
     public static final ConfigOption<Integer> BSP_MAX_SUPER_STEP =
@@ -398,7 +526,7 @@ public class ComputerOptions extends OptionHolder {
                     "The combiner can combine several properties of the same " +
                     "vertex into one properties at inputstep.",
                     disallowEmpty(),
-                    OverwriteCombiner.class
+                    OverwritePropertiesCombiner.class
             );
 
     public static final ConfigOption<Class<?>>
@@ -408,7 +536,7 @@ public class ComputerOptions extends OptionHolder {
                     "The combiner can combine several properties of the same " +
                     "edge into one properties at inputstep.",
                     disallowEmpty(),
-                    OverwriteCombiner.class
+                    OverwritePropertiesCombiner.class
             );
 
     public static final ConfigOption<Long> WORKER_RECEIVED_BUFFERS_BYTES_LIMIT =
@@ -458,7 +586,7 @@ public class ComputerOptions extends OptionHolder {
                     "trigger sorting, the write buffer is used to store " +
                     "vertex or message.",
                     positiveInt(),
-                    (int) (50 * Bytes.KB)
+                    (int) (50 * Bytes.MB)
             );
 
     public static final ConfigOption<Integer>
@@ -467,7 +595,7 @@ public class ComputerOptions extends OptionHolder {
                     "The initial size of write buffer that used to store " +
                     "vertex or message.",
                     positiveInt(),
-                    (int) (60 * Bytes.KB)
+                    (int) (50 * Bytes.MB)
             );
 
     public static final ConfigOption<Class<?>> MASTER_COMPUTATION_CLASS =
@@ -518,7 +646,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.server_threads",
                     "The number of transport threads for server.",
                     positiveInt(),
-                    TransportConf.NUMBER_CPU_CORES
+                    TransportConf.DEFAULT_THREADS
             );
 
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
@@ -526,7 +654,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.client_threads",
                     "The number of transport threads for client.",
                     positiveInt(),
-                    TransportConf.NUMBER_CPU_CORES
+                    TransportConf.DEFAULT_THREADS
             );
 
     public static final ConfigOption<Class<?>> TRANSPORT_PROVIDER_CLASS =
@@ -554,9 +682,19 @@ public class ComputerOptions extends OptionHolder {
                     false
             );
 
+    public static final ConfigOption<Boolean> TRANSPORT_RECV_FILE_MODE =
+            new ConfigOption<>(
+                    "transport.recv_file_mode",
+                    "Whether enable receive buffer-file mode, it will " +
+                    "receive buffer write file from socket by " +
+                    "zero-copy if enable.",
+                    allowValues(true, false),
+                    true
+            );
+
     public static final ConfigOption<Boolean> TRANSPORT_TCP_KEEP_ALIVE =
             new ConfigOption<>(
-                    "transport.transport_tcp_keep_alive",
+                    "transport.tcp_keep_alive",
                     "Whether enable TCP keep-alive.",
                     allowValues(true, false),
                     true
@@ -612,7 +750,7 @@ public class ComputerOptions extends OptionHolder {
                     "The timeout(in ms) to wait response after " +
                     "sending sync-request.",
                     positiveInt(),
-                    5_000L
+                    10_000L
             );
 
     public static final ConfigOption<Long> TRANSPORT_FINISH_SESSION_TIMEOUT =
@@ -669,7 +807,7 @@ public class ComputerOptions extends OptionHolder {
                     "it will trigger the sending unavailable if the number " +
                     "of unreceived ack >= max_pending_requests.",
                     positiveInt(),
-                    8000
+                    8
             );
 
     public static final ConfigOption<Integer> TRANSPORT_MIN_PENDING_REQUESTS =
@@ -679,7 +817,7 @@ public class ComputerOptions extends OptionHolder {
                     "it will trigger the sending available if the number of " +
                     "unreceived ack < min_pending_requests.",
                     positiveInt(),
-                    6000
+                    6
             );
 
     public static final ConfigOption<Long> TRANSPORT_MIN_ACK_INTERVAL =
@@ -695,7 +833,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.server_idle_timeout",
                     "The max timeout(in ms) of server idle.",
                     positiveInt(),
-                    120_000L
+                    360_000L
             );
 
     public static final ConfigOption<Long> TRANSPORT_HEARTBEAT_INTERVAL =
@@ -760,4 +898,7 @@ public class ComputerOptions extends OptionHolder {
                     positiveInt(),
                     Bytes.GB
             );
+
+    public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
+    );
 }

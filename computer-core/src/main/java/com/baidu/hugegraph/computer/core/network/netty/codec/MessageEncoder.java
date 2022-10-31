@@ -20,7 +20,7 @@
 package com.baidu.hugegraph.computer.core.network.netty.codec;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 
@@ -64,7 +64,7 @@ public class MessageEncoder extends ChannelOutboundHandlerAdapter {
         try {
             PromiseCombiner combiner = new PromiseCombiner(ctx.executor());
             bufHeader = allocator.directBuffer(AbstractMessage.HEADER_LENGTH);
-            ManagedBuffer bodyBuffer = message.encode(bufHeader);
+            NetworkBuffer bodyBuffer = message.encode(bufHeader);
             ChannelFuture headerWriteFuture = ctx.write(bufHeader);
             /*
              * Released bufHeader after in ctx.write(), set bufHeader = null

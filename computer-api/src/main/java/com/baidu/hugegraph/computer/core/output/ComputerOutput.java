@@ -40,8 +40,20 @@ public interface ComputerOutput {
     void write(Vertex vertex);
 
     /**
+     * Merge output files of multiple partitions if applicable.
+     */
+    default void mergePartitions(Config config) {
+        // pass
+    }
+
+    /**
      * Close the connection to target output system. Commit if target output
      * required.
      */
     void close();
+
+    /**
+     * The name of output property.
+     */
+    String name();
 }

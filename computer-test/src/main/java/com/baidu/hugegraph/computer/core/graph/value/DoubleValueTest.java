@@ -58,6 +58,47 @@ public class DoubleValueTest extends UnitTestBase {
     }
 
     @Test
+    public void testNumber() {
+        DoubleValue value1 = new DoubleValue();
+        DoubleValue value2 = new DoubleValue(1234.56d);
+        DoubleValue value3 = new DoubleValue(Double.MIN_VALUE);
+        DoubleValue value4 = new DoubleValue(Double.MAX_VALUE);
+
+        Assert.assertEquals(0, value1.intValue());
+        Assert.assertEquals(0L, value1.longValue());
+        Assert.assertEquals(0.0f, value1.floatValue(), 0.0f);
+        Assert.assertEquals(0.0d, value1.doubleValue(), 0.0d);
+
+        Assert.assertEquals(1234, value2.intValue());
+        Assert.assertEquals(1234L, value2.longValue());
+        Assert.assertEquals(1234.56f, value2.floatValue(), 0.0f);
+        Assert.assertEquals(1234.56d, value2.doubleValue(), 0.0d);
+
+        Assert.assertEquals(0, value3.intValue());
+        Assert.assertEquals(0L, value3.longValue());
+        Assert.assertEquals(0.0f, value3.floatValue(), 0.0f);
+        Assert.assertEquals(4.9E-324d, value3.doubleValue(), 0.0d);
+
+        Assert.assertEquals(2147483647, value4.intValue());
+        Assert.assertEquals(9223372036854775807L, value4.longValue());
+        Assert.assertEquals(Float.POSITIVE_INFINITY, value4.floatValue(), 0.0f);
+        Assert.assertEquals(1.7976931348623157E308d, value4.doubleValue(), 0d);
+    }
+
+    @Test
+    public void testString() {
+        DoubleValue value1 = new DoubleValue();
+        DoubleValue value2 = new DoubleValue(1234.56d);
+        DoubleValue value3 = new DoubleValue(Double.MIN_VALUE);
+        DoubleValue value4 = new DoubleValue(Double.MAX_VALUE);
+
+        Assert.assertEquals("0.0", value1.string());
+        Assert.assertEquals("1234.56", value2.string());
+        Assert.assertEquals("4.9E-324", value3.string());
+        Assert.assertEquals("1.7976931348623157E308", value4.string());
+    }
+
+    @Test
     public void testAssign() {
         DoubleValue value1 = new DoubleValue();
         DoubleValue value2 = new DoubleValue(1234.56d);
@@ -80,8 +121,7 @@ public class DoubleValueTest extends UnitTestBase {
         Assert.assertEquals(Double.MAX_VALUE, value4.value(), 0d);
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<DoubleValue> v = (Value) new IntValue();
+            Value v = new IntValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to DoubleValue",
@@ -89,8 +129,7 @@ public class DoubleValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<DoubleValue> v = (Value) new FloatValue();
+            Value v = new FloatValue();
             value2.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0.0'(FloatValue) to " +
@@ -163,6 +202,11 @@ public class DoubleValueTest extends UnitTestBase {
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+
+        Assert.assertGt(0, value1.compareTo(NullValue.get()));
+        Assert.assertGt(0, value1.compareTo(new IntValue(123)));
+        Assert.assertGt(0, value1.compareTo(new FloatValue(123)));
+        Assert.assertLt(0, value1.compareTo(new StringValue("123")));
     }
 
     @Test

@@ -31,10 +31,10 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.store.seqfile.BitsFileReader;
-import com.baidu.hugegraph.computer.core.store.seqfile.BitsFileReaderImpl;
-import com.baidu.hugegraph.computer.core.store.seqfile.BitsFileWriter;
-import com.baidu.hugegraph.computer.core.store.seqfile.BitsFileWriterImpl;
+import com.baidu.hugegraph.computer.core.store.file.seqfile.BitsFileReader;
+import com.baidu.hugegraph.computer.core.store.file.seqfile.BitsFileReaderImpl;
+import com.baidu.hugegraph.computer.core.store.file.seqfile.BitsFileWriter;
+import com.baidu.hugegraph.computer.core.store.file.seqfile.BitsFileWriterImpl;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class BitFileTest {

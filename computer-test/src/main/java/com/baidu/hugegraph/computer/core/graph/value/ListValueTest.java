@@ -24,6 +24,8 @@ import java.util.NoSuchElementException;
 
 import org.junit.Test;
 
+import com.baidu.hugegraph.computer.core.graph.id.BytesId;
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
@@ -64,7 +66,7 @@ public class ListValueTest extends UnitTestBase {
         value2.add(new FloatValue(202f));
         Assert.assertEquals(2, value2.size());
 
-        ListValue<Value<?>> value3 = new ListValue<>(ValueType.FLOAT);
+        ListValue<Tvalue<?>> value3 = new ListValue<>(ValueType.FLOAT);
         value3.add(new FloatValue(301f));
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
@@ -83,7 +85,7 @@ public class ListValueTest extends UnitTestBase {
                                   e.getMessage());
         });
 
-        ListValue<Value<?>> value4 = new ListValue<>(ValueType.UNKNOWN);
+        ListValue<Tvalue<?>> value4 = new ListValue<>(ValueType.UNKNOWN);
         Assert.assertEquals(ValueType.UNKNOWN, value4.elemType());
         value4.add(new IntValue(303));
         Assert.assertEquals(ValueType.INT, value4.elemType());
@@ -128,14 +130,10 @@ public class ListValueTest extends UnitTestBase {
 
         Assert.assertThrows(IndexOutOfBoundsException.class, () -> {
             value1.get(3);
-        }, e -> {
-            Assert.assertContains("Index: 3, Size: 3", e.getMessage());
         });
 
         Assert.assertThrows(IndexOutOfBoundsException.class, () -> {
             value2.get(3);
-        }, e -> {
-            Assert.assertContains("Index: 3, Size: 2", e.getMessage());
         });
     }
 
@@ -209,6 +207,38 @@ public class ListValueTest extends UnitTestBase {
     }
 
     @Test
+    public void testValue() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+
+        Assert.assertEquals(ImmutableList.of(101, 102, 103), value1.value());
+        Assert.assertEquals(ImmutableList.of(201.0f, 202.0f), value2.value());
+    }
+
+    @Test
+    public void testString() {
+        ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
+        ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
+
+        value1.add(new IntValue(101));
+        value1.add(new IntValue(102));
+        value1.add(new IntValue(103));
+
+        value2.add(new FloatValue(201f));
+        value2.add(new FloatValue(202f));
+
+        Assert.assertEquals("[101, 102, 103]", value1.string());
+        Assert.assertEquals("[201.0, 202.0]", value2.string());
+    }
+
+    @Test
     public void testAssign() {
         ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
         ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
@@ -247,26 +277,21 @@ public class ListValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<ListValue<IntValue>> v = (Value) value2;
-            value3.assign(v);
+            value3.assign(value2);
         }, e -> {
             Assert.assertContains("Can't assign list<float> to list<int>",
                                   e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<ListValue<FloatValue>> v = (Value) value1;
-            value4.assign(v);
+            value4.assign(value1);
         }, e -> {
             Assert.assertContains("Can't assign list<int> to list<float>",
                                   e.getMessage());
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<ListValue<IntValue>> v = (Value) new IntValue();
+            Value v = new IntValue();
             value3.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(IntValue) to ListValue",
@@ -274,8 +299,7 @@ public class ListValueTest extends UnitTestBase {
         });
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
-            @SuppressWarnings({ "unchecked", "rawtypes" })
-            Value<ListValue<FloatValue>> v = (Value) new LongValue();
+            Value v = new LongValue();
             value4.assign(v);
         }, e -> {
             Assert.assertContains("Can't assign '0'(LongValue) to ListValue",
@@ -333,6 +357,14 @@ public class ListValueTest extends UnitTestBase {
         Assert.assertEquals(0, value1.compareTo(value2));
         Assert.assertLt(0, value1.compareTo(value3));
         Assert.assertGt(0, value3.compareTo(value1));
+
+        Assert.assertGt(0, value1.compareTo(NullValue.get()));
+        Assert.assertGt(0, value1.compareTo(new BooleanValue()));
+        Assert.assertGt(0, value1.compareTo(new IntValue(123)));
+        Assert.assertGt(0, value1.compareTo(new FloatValue(123)));
+        Assert.assertGt(0, value1.compareTo(new DoubleValue(123)));
+        Assert.assertGt(0, value1.compareTo(new StringValue("123")));
+        Assert.assertGt(0, value1.compareTo(BytesId.of("123")));
     }
 
     @Test

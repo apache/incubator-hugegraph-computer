@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.MessageHandler;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitions;
 import com.baidu.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitions;
@@ -43,7 +43,7 @@ import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.util.E;
 import com.baidu.hugegraph.util.Log;
 
@@ -109,10 +109,23 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.finishMessagesLatch = new CountDownLatch(
                                    this.expectedFinishMessages);
         this.superstep = superstep;
+
+        if (this.superstep == Constants.INPUT_SUPERSTEP + 1) {
+            assert this.vertexPartitions != null;
+            this.vertexPartitions.clearOldFiles(Constants.INPUT_SUPERSTEP);
+            this.vertexPartitions = null;
+
+            assert this.edgePartitions != null;
+            this.edgePartitions.clearOldFiles(Constants.INPUT_SUPERSTEP);
+            this.edgePartitions = null;
+        }
     }
 
     @Override
     public void afterSuperstep(Config config, int superstep) {
+        if (superstep > Constants.INPUT_SUPERSTEP + 1) {
+            this.messagePartitions.clearOldFiles(superstep - 1);
+        }
     }
 
     @Override
@@ -129,7 +142,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
     public void exceptionCaught(TransportException cause,
                                 ConnectionId connectionId) {
         // TODO: implement failover
-        LOG.warn("Exception caught for connection:{}, root cause:{}",
+        LOG.warn("Exception caught for connection:{}, root cause:",
                  connectionId, cause);
     }
 
@@ -162,7 +175,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     @Override
     public void handle(MessageType messageType, int partition,
-                       ManagedBuffer buffer) {
+                       NetworkBuffer buffer) {
         switch (messageType) {
             case VERTEX:
                 this.vertexPartitions.addBuffer(partition, buffer);
@@ -175,8 +188,24 @@ public class MessageRecvManager implements Manager, MessageHandler {
                 break;
             default:
                 throw new ComputerException(
-                          "Unable handle ManagedBuffer with type '%s'",
+                          "Unable handle NetworkBuffer with type '%s'",
                           messageType.name());
+        }
+    }
+
+    @Override
+    public String genOutputPath(MessageType messageType, int partition) {
+        switch (messageType) {
+            case VERTEX:
+                return this.vertexPartitions.genOutputPath(partition);
+            case EDGE:
+                return this.edgePartitions.genOutputPath(partition);
+            case MSG:
+                return this.messagePartitions.genOutputPath(partition);
+            default:
+                throw new ComputerException(
+                      "Unable generator output path with type '%s'",
+                      messageType.name());
         }
     }
 
@@ -198,7 +227,6 @@ public class MessageRecvManager implements Manager, MessageHandler {
         E.checkState(this.vertexPartitions != null,
                      "The vertexPartitions can't be null");
         VertexMessageRecvPartitions partitions = this.vertexPartitions;
-        this.vertexPartitions = null;
         return partitions.iterators();
     }
 
@@ -206,7 +234,6 @@ public class MessageRecvManager implements Manager, MessageHandler {
         E.checkState(this.edgePartitions != null,
                      "The edgePartitions can't be null");
         EdgeMessageRecvPartitions partitions = this.edgePartitions;
-        this.edgePartitions = null;
         return partitions.iterators();
     }
 
@@ -218,10 +245,10 @@ public class MessageRecvManager implements Manager, MessageHandler {
         return partitions.iterators();
     }
 
-    public Map<Integer, RecvMessageStat> recvMessageStats() {
+    public Map<Integer, MessageStat> messageStats() {
         this.waitReceivedAllMessages();
         E.checkState(this.messagePartitions != null,
                      "The messagePartitions can't be null");
-        return this.messagePartitions.recvMessageStats();
+        return this.messagePartitions.messageStats();
     }
 }

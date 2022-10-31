@@ -21,18 +21,23 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class IntValue extends Number implements Value<IntValue> {
+public class IntValue extends Number implements Tvalue<Integer> {
 
     private static final long serialVersionUID = -2014388310992178979L;
 
     private int value;
 
     public IntValue() {
-        this.value = 0;
+        this(0);
+    }
+
+    public IntValue(int value) {
+        this.value = value;
     }
 
     @Override
@@ -55,11 +60,8 @@ public class IntValue extends Number implements Value<IntValue> {
         return this.value;
     }
 
-    public IntValue(int value) {
-        this.value = value;
-    }
-
-    public int value() {
+    @Override
+    public Integer value() {
         return this.value;
     }
 
@@ -77,7 +79,7 @@ public class IntValue extends Number implements Value<IntValue> {
     }
 
     @Override
-    public void assign(Value<IntValue> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
         this.value = ((IntValue) other).value;
     }
@@ -85,6 +87,11 @@ public class IntValue extends Number implements Value<IntValue> {
     @Override
     public IntValue copy() {
         return new IntValue(this.value);
+    }
+
+    @Override
+    public boolean isNumber() {
+        return true;
     }
 
     @Override
@@ -98,9 +105,13 @@ public class IntValue extends Number implements Value<IntValue> {
     }
 
     @Override
-    public int compareTo(IntValue obj) {
+    public int compareTo(Value obj) {
         E.checkArgumentNotNull(obj, "The compare argument can't be null");
-        return Integer.compare(this.value, obj.value);
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        return Integer.compare(this.value, ((IntValue) obj).value);
     }
 
     @Override
@@ -119,10 +130,5 @@ public class IntValue extends Number implements Value<IntValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }

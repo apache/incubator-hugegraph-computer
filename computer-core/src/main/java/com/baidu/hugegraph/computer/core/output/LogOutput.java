@@ -21,7 +21,6 @@ package com.baidu.hugegraph.computer.core.output;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.util.Log;
 
@@ -30,27 +29,17 @@ import com.baidu.hugegraph.util.Log;
  * It can't be used on production environment.
  * Be used for test or development only.
  */
-public class LogOutput implements ComputerOutput {
+public class LogOutput extends AbstractComputerOutput {
 
     private static final Logger LOG = Log.logger(LogOutput.class);
 
-    private int partition;
-
-    @Override
-    public void init(Config config, int partition) {
-        this.partition = partition;
-        LOG.info("Start write back partition {}", this.partition);
-    }
-
     @Override
     public void write(Vertex vertex) {
-        LOG.info("id='{}', result='{}'",
-                 vertex.id().toString(),
-                 vertex.value().toString());
+        LOG.info("'{}': '{}'", vertex.id(), vertex.value().string());
     }
 
     @Override
     public void close() {
-        LOG.info("End write back partition {}", this.partition);
+        LOG.info("End write back partition {}", this.partition());
     }
 }

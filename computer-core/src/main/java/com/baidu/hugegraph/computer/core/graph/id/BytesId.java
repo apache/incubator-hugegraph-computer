@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -38,15 +39,16 @@ import com.baidu.hugegraph.util.E;
 
 public class BytesId implements Id {
 
+    public static final BytesId EMPTY = BytesId.of(Constants.EMPTY_STR);
+
     private IdType idType;
     private byte[] bytes;
     private int length;
 
     public BytesId() {
-        BytesId id = BytesId.of(0L);
-        this.idType = id.idType;
-        this.bytes = id.bytes;
-        this.length = id.length;
+        this.idType = EMPTY.idType;
+        this.bytes = EMPTY.bytes;
+        this.length = EMPTY.length;
     }
 
     public BytesId(IdType idType, byte[] bytes) {
@@ -80,7 +82,7 @@ public class BytesId implements Id {
         E.checkArgument(value != null, "The value can't be null");
         long high = value.getMostSignificantBits();
         long low = value.getLeastSignificantBits();
-        BytesOutput output = IOFactory.createBytesOutput(18);
+        BytesOutput output = IOFactory.createBytesOutput(16);
         try {
             output.writeLong(high);
             output.writeLong(low);
@@ -92,17 +94,17 @@ public class BytesId implements Id {
     }
 
     @Override
+    public ValueType valueType() {
+        return ValueType.ID;
+    }
+
+    @Override
     public IdType idType() {
         return this.idType;
     }
 
     @Override
-    public ValueType valueType() {
-        return ValueType.ID_VALUE;
-    }
-
-    @Override
-    public void assign(Value<Id> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
         this.idType = ((BytesId) other).idType;
         this.bytes = ((BytesId) other).bytes;
@@ -111,13 +113,18 @@ public class BytesId implements Id {
 
     @Override
     public Id copy() {
-        byte[] bytes = Arrays.copyOf(this.bytes, this.length);
-        return new BytesId(this.idType, bytes, this.length);
+        byte[] copyBytes = Arrays.copyOf(this.bytes, this.length);
+        return new BytesId(this.idType, copyBytes, this.length);
     }
 
     @Override
     public int length() {
         return this.length;
+    }
+
+    @Override
+    public Object value() {
+        return this.asObject();
     }
 
     @Override
@@ -152,6 +159,7 @@ public class BytesId implements Id {
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
+        assert this != EMPTY : "can't read to EMPTY id";
         this.idType = SerialEnum.fromCode(IdType.class, in.readByte());
         int len = in.readInt();
         this.bytes = BytesUtil.ensureCapacityWithoutCopy(this.bytes, len);
@@ -167,10 +175,14 @@ public class BytesId implements Id {
     }
 
     @Override
-    public int compareTo(Id obj) {
-        int cmp = this.idType().code() - obj.idType().code();
-        if (cmp != 0) {
-            return cmp;
+    public int compareTo(Value obj) {
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        typeDiff = this.idType().code() - ((Id) obj).idType().code();
+        if (typeDiff != 0) {
+            return typeDiff;
         }
         BytesId other = (BytesId) obj;
         return BytesUtil.compare(this.bytes, this.length,
@@ -198,10 +210,5 @@ public class BytesId implements Id {
     @Override
     public String toString() {
         return this.asObject().toString();
-    }
-
-    @Override
-    public Object object() {
-        return this.bytes;
     }
 }

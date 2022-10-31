@@ -23,41 +23,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
-import com.baidu.hugegraph.computer.core.output.hg.HugeOutput;
-import com.baidu.hugegraph.structure.constant.WriteType;
-import com.baidu.hugegraph.structure.graph.Vertex;
+import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
+import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
 
-public class RingsDetectionOutput extends HugeOutput {
-
-    @Override
-    public String name() {
-        return "rings";
-    }
+public class RingsDetectionOutput extends HugeGraphOutput<List<String>> {
 
     @Override
-    public void prepareSchema() {
+    protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
                      .asText()
-                     .writeType(WriteType.OLAP_COMMON)
+                     .writeType(this.writeType())
                      .valueList()
                      .ifNotExist()
                      .create();
     }
 
     @Override
-    public Vertex constructHugeVertex(
-           com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-        com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                new com.baidu.hugegraph.structure.graph.Vertex(null);
-        hugeVertex.id(vertex.id().asObject());
-
+    protected List<String> value(Vertex vertex) {
         IdListList value = vertex.value();
-        List<String> propValue = new ArrayList<>();
+        List<String> propValues = new ArrayList<>();
         for (int i = 0; i < value.size(); i++) {
-            propValue.add(value.get(i).toString());
+            propValues.add(value.get(i).toString());
         }
-
-        hugeVertex.property(this.name(), propValue);
-        return hugeVertex;
+        return propValues;
     }
 }

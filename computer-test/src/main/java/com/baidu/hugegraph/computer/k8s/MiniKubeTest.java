@@ -24,20 +24,19 @@ import static io.fabric8.kubernetes.client.Config.getKubeconfigFilename;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -51,34 +50,25 @@ import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
-import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.ExecutorUtil;
 import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretBuilder;
 
 public class MiniKubeTest extends AbstractK8sTest {
 
     private static final Logger LOG = Log.logger(MiniKubeTest.class);
 
     private static final String ALGORITHM_NAME = "PageRank";
-    private static ExecutorService POOL;
-
-    @BeforeClass
-    public static void init() {
-        POOL = ExecutorUtil.newFixedThreadPool(1, "minikube-test-pool");
-    }
-
-    @AfterClass
-    public static void clear() {
-        POOL.shutdown();
-    }
 
     @Before
     public void setup() throws IOException {
@@ -88,8 +78,7 @@ public class MiniKubeTest extends AbstractK8sTest {
             Assert.assertTrue(file.exists());
 
             this.namespace = "minikube";
-            System.setProperty(OperatorOptions.WATCH_NAMESPACE.name(),
-                               Constants.ALL_NAMESPACE);
+            System.setProperty("WATCH_NAMESPACE", Constants.ALL_NAMESPACE);
             super.setup();
         } catch (Throwable throwable) {
             LOG.error("Failed to setup MiniKubeTest ", throwable);
@@ -125,9 +114,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -139,7 +127,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -157,9 +145,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -171,7 +158,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -191,9 +178,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -210,7 +196,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         String diagnostics = this.driver.diagnostics(jobId, params);
         Assert.assertContains("No such file or directory", diagnostics);
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -223,9 +209,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.FAILED);
@@ -235,7 +220,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         String diagnostics = this.driver.diagnostics(jobId, params);
         Assert.assertContains("Unschedulable", diagnostics);
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -255,9 +240,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -271,7 +255,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState2));
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -291,9 +275,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.RUNNING);
@@ -312,7 +295,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         UnitTestBase.sleep(1000L);
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -324,9 +307,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.FAILED);
@@ -336,7 +318,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         String diagnostics = this.driver.diagnostics(jobId, params);
         Assert.assertContains("ImagePullBackOff", diagnostics);
 
-        future.getNow(null);
+        future.cancel(true);
     }
 
     @Test
@@ -349,9 +331,8 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-            this.driver.waitJob(jobId, params, jobObserver);
-        }, POOL);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
         jobState.jobStatus(JobStatus.INITIALIZING);
@@ -371,6 +352,95 @@ public class MiniKubeTest extends AbstractK8sTest {
                                          new HashMap<String, String>());
         Assert.assertNotEquals(0, pods.size());
 
-        future.getNow(null);
+        future.cancel(true);
+    }
+
+    @Test
+    public void testMountConfigMapAndSecret() {
+        String dataBase64 = Base64.getEncoder()
+                                  .encodeToString("test123\ntest".getBytes());
+
+        String configMapName = "config-map-test";
+        ConfigMap configMap = new ConfigMapBuilder()
+                              .withNewMetadata()
+                              .withNamespace(this.namespace)
+                              .withName(configMapName)
+                              .endMetadata()
+                              .addToData("1.txt", "test123\ntest")
+                              .build();
+        this.kubeClient.configMaps().createOrReplace(configMap);
+
+        String secretName = "secret-test";
+        Secret secret = new SecretBuilder().withNewMetadata()
+                        .withNamespace(this.namespace)
+                        .withName(secretName)
+                        .endMetadata()
+                        .withType("Opaque")
+                        .addToData("2.txt", dataBase64)
+                        .addToData("3.txt", dataBase64)
+                        .build();
+        this.kubeClient.secrets().createOrReplace(secret);
+
+        ArrayList<String> args = Lists.newArrayList(
+                                 "cat /opt/configmap123/1.txt && " +
+                                 "cat /opt/secret123/2.txt &&" +
+                                 "cat /opt/secret123/3.txt");
+        super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(), args);
+        super.updateOptions(KubeSpecOptions.WORKER_ARGS.name(), args);
+        Object defaultSpec = Whitebox.invoke(KubernetesDriver.class,
+                                             "defaultSpec", this.driver);
+        Whitebox.setInternalState(this.driver, "defaultSpec", defaultSpec);
+
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.CONFIG_MAP_PATHS.name(),
+                   String.format("[%s:/opt/configmap123]",
+                                 configMapName));
+        params.put(KubeSpecOptions.SECRET_PATHS.name(),
+                   String.format("[%s:/opt/secret123]", secretName));
+
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.INITIALIZING);
+        Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+        DefaultJobState jobState2 = new DefaultJobState();
+        jobState2.jobStatus(JobStatus.SUCCEEDED);
+        Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState2));
+
+        future.cancel(true);
+    }
+
+    @Test
+    public void testMountConfigMapWithFailed() {
+        Map<String, String> params = new HashMap<>();
+        params.put(KubeSpecOptions.CONFIG_MAP_PATHS.name(),
+                   "[test-config:/opt/configmap123]");
+
+        String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
+
+        JobObserver jobObserver = Mockito.mock(JobObserver.class);
+
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params,
+                                                                  jobObserver);
+
+        DefaultJobState jobState = new DefaultJobState();
+        jobState.jobStatus(JobStatus.INITIALIZING);
+        Mockito.verify(jobObserver, Mockito.timeout(150000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState));
+
+
+        DefaultJobState jobState2 = new DefaultJobState();
+        jobState2.jobStatus(JobStatus.FAILED);
+        Mockito.verify(jobObserver, Mockito.timeout(250000L).atLeast(1))
+               .onJobStateChanged(Mockito.eq(jobState2));
+        future.cancel(true);
     }
 }

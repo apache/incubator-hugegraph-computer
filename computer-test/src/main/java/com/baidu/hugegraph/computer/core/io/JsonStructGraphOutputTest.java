@@ -56,7 +56,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
         GraphFactory factory = context.graphFactory();
 
         Id longId = BytesId.of(100L);
-        Value<Id> value = BytesId.of(999L);
+        Value value = BytesId.of(999L);
         Vertex vertex = factory.createVertex(longId, value);
 
         String fileName = "output.json";
@@ -69,6 +69,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             output.writeVertex(vertex);
             dos.close();
 
+            @SuppressWarnings("deprecation")
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":999}" +
                                 System.lineSeparator(), json);
@@ -106,6 +107,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             output.writeVertex(vertex);
             dos.close();
 
+            @SuppressWarnings("deprecation")
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[998,999]," +
                                 "\"adjacent_edges\":[{\"target_id\":200," +
@@ -159,6 +161,7 @@ public class JsonStructGraphOutputTest extends UnitTestBase {
             output.writeVertex(vertex);
             dos.close();
 
+            @SuppressWarnings("deprecation")
             String json = FileUtils.readFileToString(file);
             Assert.assertEquals("{\"id\":100,\"rank\":[[66],[998,999]]," +
                                 "\"properties\":{\"boolean\":true," +

@@ -29,18 +29,22 @@ import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.testutil.Assert;
 
 public class MessageRecvBuffersTest {
+
+    private static final long WAIT_TIMEOUT = 100L; //ms
 
     @Test
     public void testBufferToBuffers() {
         long threshold = 1024L;
         int size = 100;
-        long maxWaitTime = 1000L;
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
-                                                            maxWaitTime);
+                                                            WAIT_TIMEOUT);
+        // It's ok to wait for empty buffers
+        buffers.waitSorted();
+
         for (int i = 0; i < 10; i++) {
             addMockBufferToBuffers(buffers, size);
         }
@@ -48,14 +52,35 @@ public class MessageRecvBuffersTest {
         Assert.assertFalse(buffers.full());
         Assert.assertEquals(1000L, buffers.totalBytes());
 
+        Assert.assertThrows(ComputerException.class, () -> {
+            buffers.waitSorted();
+        }, e -> {
+            Assert.assertContains("Buffers have not been sorted in 100 ms",
+                                  e.getMessage());
+        });
+
         addMockBufferToBuffers(buffers, size);
         Assert.assertTrue(buffers.full());
 
-        // Sort buffer
         List<RandomAccessInput> list = buffers.buffers();
         Assert.assertEquals(11, list.size());
 
         buffers.signalSorted();
+        List<RandomAccessInput> list2 = buffers.buffers();
+        Assert.assertEquals(11, list2.size());
+        Assert.assertEquals(1100L, buffers.totalBytes());
+
+        // It's ok to call waitSorted multi-times
+        buffers.waitSorted();
+        buffers.waitSorted();
+
+        // Next time again
+        buffers.prepareSort();
+        List<RandomAccessInput> list3 = buffers.buffers();
+        Assert.assertEquals(0, list3.size());
+        Assert.assertEquals(0L, buffers.totalBytes());
+
+        buffers.waitSorted();
 
         for (int i = 0; i < 10; i++) {
             addMockBufferToBuffers(buffers, size);
@@ -64,22 +89,27 @@ public class MessageRecvBuffersTest {
         Assert.assertEquals(1000L, buffers.totalBytes());
         Assert.assertFalse(buffers.full());
 
+        Assert.assertThrows(ComputerException.class, () -> {
+            buffers.waitSorted();
+        }, e -> {
+            Assert.assertContains("Buffers have not been sorted in 100 ms",
+                                  e.getMessage());
+        });
+
         addMockBufferToBuffers(buffers, size);
 
         Assert.assertTrue(buffers.full());
 
-        // Sort buffer
-        List<RandomAccessInput> list2 = buffers.buffers();
-        Assert.assertEquals(11, list2.size());
+        List<RandomAccessInput> list4 = buffers.buffers();
+        Assert.assertEquals(11, list4.size());
     }
 
     @Test
     public void testSortBuffer() throws InterruptedException {
         long threshold = 1024L;
         int size = 100;
-        long maxWaitTime = 1000L;
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
-                                                            maxWaitTime);
+                                                            WAIT_TIMEOUT);
         for (int i = 0; i < 10; i++) {
             addMockBufferToBuffers(buffers, size);
         }
@@ -104,9 +134,8 @@ public class MessageRecvBuffersTest {
     public void testWaitSortTimeout() {
         long threshold = 1024L;
         int size = 100;
-        long maxWaitTime = 1000L;
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
-                                                            maxWaitTime);
+                                                            WAIT_TIMEOUT);
         for (int i = 0; i < 10; i++) {
             addMockBufferToBuffers(buffers, size);
         }
@@ -114,7 +143,7 @@ public class MessageRecvBuffersTest {
         Assert.assertThrows(ComputerException.class, () -> {
             buffers.waitSorted();
         }, e -> {
-            Assert.assertContains("Buffers have not been sorted in 1000 ms",
+            Assert.assertContains("Buffers have not been sorted in 100 ms",
                                   e.getMessage());
         });
     }
@@ -123,9 +152,8 @@ public class MessageRecvBuffersTest {
     public void testSortInterrupt() throws InterruptedException {
         long threshold = 1024L;
         int size = 100;
-        long maxWaitTime = 1000L;
         MessageRecvBuffers buffers = new MessageRecvBuffers(threshold,
-                                                            maxWaitTime);
+                                                            WAIT_TIMEOUT);
         for (int i = 0; i < 10; i++) {
             addMockBufferToBuffers(buffers, size);
         }
@@ -152,7 +180,7 @@ public class MessageRecvBuffersTest {
     public static void addMockBufferToBuffers(MessageRecvBuffers buffers,
                                               int mockBufferLength) {
         ReceiverUtil.consumeBuffer(new byte[mockBufferLength],
-                                   (ManagedBuffer buffer) -> {
+                                   (NetworkBuffer buffer) -> {
             buffers.addBuffer(buffer);
         });
     }

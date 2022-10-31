@@ -88,6 +88,18 @@ type ComputerJobSpec struct {
     // Volume mounts in the Job container.
     // More info: https://kubernetes.io/docs/concepts/storage/volumes/
     VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
+
+    SecretPaths map[string]string `json:"secretPaths,omitempty"`
+
+    ConfigMapPaths map[string]string `json:"configMapPaths,omitempty"`
+
+    //+kubebuilder:validation:Schemaless
+    //+kubebuilder:pruning:PreserveUnknownFields
+    // More info: https://kubernetes.io/docs/concepts/workloads/pods/#pod-templates
+    PodTemplateSpec corev1.PodTemplateSpec `json:"podTemplateSpec,omitempty"`
+
+    // More info: https://kubernetes.io/zh/docs/tasks/configure-pod-container/security-context/
+    SecurityContext corev1.SecurityContext `json:"securityContext,omitempty"`
 }
 
 type ComputerJobState struct {

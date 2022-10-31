@@ -24,6 +24,7 @@ import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
 import static com.baidu.hugegraph.config.OptionChecker.rangeInt;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
 import com.baidu.hugegraph.computer.k8s.Constants;
@@ -31,6 +32,7 @@ import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.ConfigOption;
 import com.baidu.hugegraph.config.OptionHolder;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import io.fabric8.kubernetes.api.model.Quantity;
 
@@ -176,6 +178,22 @@ public class KubeSpecOptions extends OptionHolder {
                     String.class
             );
 
+    public static final ConfigListOption<String> CONFIG_MAP_PATHS =
+            new ConfigListOption<>(
+                    "k8s.config_map_paths",
+                    "The map of k8s-configmap' name and mount path.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigListOption<String> SECRET_PATHS =
+            new ConfigListOption<>(
+                    "k8s.secret_paths",
+                    "The map of k8s-secret' name and mount path.",
+                    null,
+                    ""
+            );
+
     public static final Map<String, ConfigOption<?>> ALLOW_USER_SETTINGS =
             new ImmutableMap.Builder<String, ConfigOption<?>>()
                     .put(MASTER_CPU.name(), MASTER_CPU)
@@ -185,5 +203,12 @@ public class KubeSpecOptions extends OptionHolder {
                     .put(WORKER_INSTANCES.name(), WORKER_INSTANCES)
                     .put(JVM_OPTIONS.name(), JVM_OPTIONS)
                     .put(REMOTE_JAR_URI.name(), REMOTE_JAR_URI)
+                    .put(CONFIG_MAP_PATHS.name(), CONFIG_MAP_PATHS)
+                    .put(SECRET_PATHS.name(), SECRET_PATHS)
                     .build();
+
+    public static final Set<ConfigOption<?>> MAP_TYPE_CONFIGS = ImmutableSet.of(
+            CONFIG_MAP_PATHS,
+            SECRET_PATHS
+    );
 }

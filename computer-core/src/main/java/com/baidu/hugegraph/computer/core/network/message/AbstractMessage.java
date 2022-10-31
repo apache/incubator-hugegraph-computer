@@ -20,7 +20,7 @@ package com.baidu.hugegraph.computer.core.network.message;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 
 import io.netty.buffer.ByteBuf;
 
@@ -65,7 +65,7 @@ public abstract class AbstractMessage implements Message {
     private final int sequenceNumber;
     private final int partition;
     private final int bodyLength;
-    private final ManagedBuffer body;
+    private final NetworkBuffer body;
 
     protected AbstractMessage() {
         this(UNKNOWN_SEQ);
@@ -79,16 +79,16 @@ public abstract class AbstractMessage implements Message {
         this(sequenceNumber, partition, null);
     }
 
-    protected AbstractMessage(int sequenceNumber, ManagedBuffer body) {
+    protected AbstractMessage(int sequenceNumber, NetworkBuffer body) {
         this(sequenceNumber, 0, body);
     }
 
-    protected AbstractMessage(ManagedBuffer body) {
+    protected AbstractMessage(NetworkBuffer body) {
         this(UNKNOWN_SEQ, 0, body);
     }
 
     protected AbstractMessage(int sequenceNumber, int partition,
-                              ManagedBuffer body) {
+                              NetworkBuffer body) {
         this.sequenceNumber = sequenceNumber;
         this.partition = partition;
         if (body != null) {
@@ -101,17 +101,17 @@ public abstract class AbstractMessage implements Message {
     }
 
     @Override
-    public ManagedBuffer encode(ByteBuf buf) {
+    public NetworkBuffer encode(ByteBuf buf) {
         this.encodeHeader(buf);
 
         int bodyStart = buf.writerIndex();
-        ManagedBuffer managedBuffer = this.encodeBody(buf);
+        NetworkBuffer networkBuffer = this.encodeBody(buf);
         int bodyEnd = buf.writerIndex();
 
         int bodyLength;
-        if (managedBuffer != null) {
+        if (networkBuffer != null) {
             assert bodyStart == bodyEnd;
-            bodyLength = managedBuffer.length();
+            bodyLength = networkBuffer.length();
         } else {
             bodyLength = bodyEnd - bodyStart;
         }
@@ -123,7 +123,7 @@ public abstract class AbstractMessage implements Message {
         } finally {
             buf.writerIndex(lastWriteIndex);
         }
-        return managedBuffer;
+        return networkBuffer;
     }
 
     /**
@@ -145,7 +145,7 @@ public abstract class AbstractMessage implements Message {
      * Only serializes the body of this message by writing
      * into the given ByteBuf or return the body buffer.
      */
-    protected ManagedBuffer encodeBody(ByteBuf buf) {
+    protected NetworkBuffer encodeBody(ByteBuf buf) {
         return this.body();
     }
 
@@ -165,7 +165,7 @@ public abstract class AbstractMessage implements Message {
     }
 
     @Override
-    public ManagedBuffer body() {
+    public NetworkBuffer body() {
         return this.hasBody() ? this.body : null;
     }
 

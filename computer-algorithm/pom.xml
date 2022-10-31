@@ -5,27 +5,23 @@
     <parent>
         <artifactId>hugegraph-computer</artifactId>
         <groupId>com.baidu.hugegraph</groupId>
-        <version>0.1.0</version>
+        <version>0.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>computer-algorithm</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
-            <artifactId>computer-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!-- TODO improve structure to only import computer-api -->
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>computer-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.aviator</groupId>
-            <artifactId>aviator</artifactId>
-            <version>3.0.1</version>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>
+            <version>2.4.13.Final</version>
         </dependency>
     </dependencies>
 

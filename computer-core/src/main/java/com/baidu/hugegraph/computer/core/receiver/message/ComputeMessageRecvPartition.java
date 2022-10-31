@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.receiver.message;
 
 import com.baidu.hugegraph.computer.core.combiner.Combiner;
+import com.baidu.hugegraph.computer.core.combiner.MessageValueCombiner;
 import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -35,7 +36,7 @@ import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 
 public class ComputeMessageRecvPartition extends MessageRecvPartition {
 
-    private static final String TYPE = MessageType.MSG.name();
+    private static final String TYPE = MessageType.MSG.name().toLowerCase();
 
     private final OuterSortFlusher flusher;
 
@@ -44,17 +45,13 @@ public class ComputeMessageRecvPartition extends MessageRecvPartition {
                                        SortManager sortManager) {
         super(context.config(), fileGenerator, sortManager, false);
         Config config = context.config();
-        Combiner<Value<?>> combiner = config.createObject(
-                                      ComputerOptions.WORKER_COMBINER_CLASS,
-                                      false);
+        Combiner<Value> combiner = config.createObject(
+                                   ComputerOptions.WORKER_COMBINER_CLASS,
+                                   false);
         if (combiner == null) {
             this.flusher = new KvOuterSortFlusher();
         } else {
-            Value<?> v1 = config.createObject(
-                          ComputerOptions.ALGORITHM_MESSAGE_CLASS);
-            Value<?> v2 = v1.copy();
-            PointerCombiner<Value<?>> pointerCombiner = new PointerCombiner<>(
-                                                        v1, v2, combiner);
+            PointerCombiner pointerCombiner = new MessageValueCombiner(context);
             this.flusher = new CombineKvOuterSortFlusher(pointerCombiner);
         }
     }

@@ -20,8 +20,8 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -33,11 +33,12 @@ import org.apache.commons.collections.ListUtils;
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
+public class ListValue<T extends Tvalue<?>> implements Tvalue<List<Object>> {
 
     private final GraphFactory graphFactory;
     private ValueType elemType;
@@ -113,6 +114,15 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
+    public List<Object> value() {
+        List<Object> list = new ArrayList<>(this.values.size());
+        for (T value : this.values) {
+            list.add(value.value());
+        }
+        return list;
+    }
+
+    @Override
     public ValueType valueType() {
         return ValueType.LIST_VALUE;
     }
@@ -122,7 +132,8 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
-    public void assign(Value<ListValue<T>> other) {
+    @SuppressWarnings("unchecked")
+    public void assign(Value other) {
         this.checkAssign(other);
         ValueType elemType = ((ListValue<T>) other).elemType();
         E.checkArgument(elemType == this.elemType(),
@@ -184,16 +195,21 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     }
 
     @Override
-    public int compareTo(ListValue<T> obj) {
+    public int compareTo(Value obj) {
         E.checkArgumentNotNull(obj, "The compare argument can't be null");
-        int cmp = this.size() - obj.size();
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        @SuppressWarnings("unchecked")
+        ListValue<T> other = (ListValue<T>) obj;
+        int cmp = this.size() - other.size();
         if (cmp != 0) {
             return cmp;
         }
         for (int i = 0; i < this.size(); i++) {
-            @SuppressWarnings("unchecked")
-            Value<Object> self = (Value<Object>) this.values.get(i);
-            cmp = self.compareTo(obj.values.get(i));
+            Tvalue<?> self = this.values.get(i);
+            cmp = self.compareTo(other.values.get(i));
             if (cmp != 0) {
                 return cmp;
             }
@@ -222,10 +238,5 @@ public class ListValue<T extends Value<?>> implements Value<ListValue<T>> {
     @Override
     public String toString() {
         return this.values.toString();
-    }
-
-    @Override
-    public Object object() {
-        return this.values;
     }
 }

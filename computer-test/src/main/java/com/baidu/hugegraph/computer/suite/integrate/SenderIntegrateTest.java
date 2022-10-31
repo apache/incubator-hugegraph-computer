@@ -27,11 +27,12 @@ import java.util.function.Function;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams;
-import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.manager.Managers;
 import com.baidu.hugegraph.computer.core.master.MasterService;
@@ -45,8 +46,11 @@ import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.config.RpcOptions;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.testutil.Whitebox;
+import com.baidu.hugegraph.util.Log;
 
 public class SenderIntegrateTest {
+
+    public static final Logger LOG = Log.logger(SenderIntegrateTest.class);
 
     private static final Class<?> COMPUTATION = MockComputation.class;
 
@@ -114,7 +118,7 @@ public class SenderIntegrateTest {
     @Test
     public void testMultiWorkers() throws InterruptedException {
         int workerCount = 3;
-        int partitionCount = 5;
+        int partitionCount = 3;
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_003")
@@ -198,6 +202,7 @@ public class SenderIntegrateTest {
             try (MasterService service = initMaster(args)) {
                 service.execute();
             } catch (Exception e) {
+                LOG.error("Failed to execute master service", e);
                 Assert.fail(e.getMessage());
             }
         });
@@ -221,6 +226,7 @@ public class SenderIntegrateTest {
                 this.slowSendFunc(service);
                 service.execute();
             } catch (Exception e) {
+                LOG.error("Failed to execute worker service", e);
                 Assert.fail(e.getMessage());
             }
         });
@@ -257,18 +263,18 @@ public class SenderIntegrateTest {
     }
 
     private MasterService initMaster(String[] args) {
-        ComputerContextUtil.initContext(args);
-        ComputerContext context = ComputerContext.instance();
+        Config config = ComputerContextUtil.initContext(
+                        ComputerContextUtil.convertToMap(args));
         MasterService service = new MasterService();
-        service.init(context.config());
+        service.init(config);
         return service;
     }
 
     private WorkerService initWorker(String[] args) {
-        ComputerContextUtil.initContext(args);
-        ComputerContext context = ComputerContext.instance();
+        Config config = ComputerContextUtil.initContext(
+                        ComputerContextUtil.convertToMap(args));
         WorkerService service = new WorkerService();
-        service.init(context.config());
+        service.init(config);
         return service;
     }
 

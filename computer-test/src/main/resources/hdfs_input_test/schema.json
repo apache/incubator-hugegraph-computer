@@ -1,0 +1,132 @@
+{
+  "propertykeys": [
+    {
+      "id": 6,
+      "name": "timestamp",
+      "data_type": "TEXT",
+      "cardinality": "SINGLE",
+      "aggregate_type": "NONE",
+      "properties": [
+        
+      ]
+    },
+    {
+      "id": 3,
+      "name": "title",
+      "data_type": "TEXT",
+      "cardinality": "SINGLE",
+      "aggregate_type": "NONE",
+      "properties": [
+        
+      ]
+    },
+    {
+      "id": 2,
+      "name": "rate",
+      "data_type": "DOUBLE",
+      "cardinality": "SINGLE",
+      "aggregate_type": "NONE",
+      "properties": [
+        
+      ]
+    },
+    {
+      "id": 5,
+      "name": "genres",
+      "data_type": "TEXT",
+      "cardinality": "SET",
+      "aggregate_type": "NONE",
+      "properties": [
+        
+      ]
+    },
+    {
+      "id": 4,
+      "name": "tag",
+      "data_type": "TEXT",
+      "cardinality": "SINGLE",
+      "aggregate_type": "NONE",
+      "properties": [
+        
+      ]
+    },
+    {
+      "id": 1,
+      "name": "id",
+      "data_type": "INT",
+      "cardinality": "SINGLE",
+      "aggregate_type": "NONE",
+      "properties": [
+        
+      ]
+    }
+  ],
+  "vertexlabels": [
+    {
+      "id": 1,
+      "name": "user",
+      "id_strategy": "CUSTOMIZE_NUMBER",
+      "primary_keys": [
+
+      ],
+      "nullable_keys": [
+        
+      ],
+      "properties": [
+        "id"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "movie",
+      "id_strategy": "PRIMARY_KEY",
+      "primary_keys": [
+        "id"
+      ],
+      "nullable_keys": [
+        
+      ],
+      "properties": [
+        "id",
+        "title",
+        "genres"
+      ]
+    }
+  ],
+  "edgelabels": [
+    {
+      "id": 1,
+      "name": "rating",
+      "source_label": "user",
+      "target_label": "movie",
+      "frequency": "SINGLE",
+      "sort_keys": [
+        
+      ],
+      "nullable_keys": [
+        
+      ],
+      "properties": [
+        "rate",
+        "timestamp"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "taged",
+      "source_label": "user",
+      "target_label": "movie",
+      "frequency": "SINGLE",
+      "sort_keys": [
+        
+      ],
+      "nullable_keys": [
+        
+      ],
+      "properties": [
+        "tag",
+        "timestamp"
+      ]
+    }
+  ]
+}

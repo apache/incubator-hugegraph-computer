@@ -41,7 +41,7 @@ public class MessageSendBuffersTest extends UnitTestBase {
 
         MessageSendBuffers buffers = new MessageSendBuffers(
                                      ComputerContext.instance());
-        Map<Integer, WriteBuffers> innerBuffers = buffers.all();
+        Map<Integer, MessageSendPartition> innerBuffers = buffers.all();
         Assert.assertEquals(3, innerBuffers.size());
     }
 

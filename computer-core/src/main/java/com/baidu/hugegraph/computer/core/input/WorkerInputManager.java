@@ -92,5 +92,6 @@ public class WorkerInputManager implements Manager {
             this.sendManager.sendEdge(vertex);
         }
         this.sendManager.finishSend(MessageType.EDGE);
+        this.sendManager.clearBuffer();
     }
 }

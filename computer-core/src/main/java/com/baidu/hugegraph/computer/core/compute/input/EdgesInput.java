@@ -123,12 +123,12 @@ public class EdgesInput {
         @Override
         public int size() {
             if (this.size == 0) {
-                this.computeSize();
+                this.calculateSize();
             }
             return this.size;
         }
 
-        private void computeSize() {
+        private void calculateSize() {
             long currentPosition = EdgesInput.this.input.position();
             try {
                 EdgesInput.this.input.seek(this.startPosition);
@@ -178,26 +178,24 @@ public class EdgesInput {
             public boolean hasNext() {
                 if (currentEdgesIter.hasNext()) {
                     return true;
-                } else {
-                    long currentPosition = input.position();
-                    try {
-                        if (input.available() > 0) {
-                            idPointer.read(input);
-                            if (idPointer.compareTo(vid) == 0) {
-                                valuePointer.read(EdgesInput.this.input);
-                                currentEdgesIter = readEdges(
-                                                   valuePointer.input())
-                                                   .iterator();
-                            } else {
-                                input.seek(currentPosition);
-                            }
+                }
+                long currentPosition = input.position();
+                try {
+                    if (input.available() > 0) {
+                        idPointer.read(input);
+                        if (idPointer.compareTo(vid) == 0) {
+                            valuePointer.read(input);
+                            currentEdgesIter = readEdges(valuePointer.input())
+                                               .iterator();
+                        } else {
+                            input.seek(currentPosition);
                         }
-                    } catch (IOException e) {
-                        throw new ComputerException(
-                                  "Error occurred when read edges from edges " +
-                                  "input '%s' at position %s", e,
-                                  edgeFile.getAbsoluteFile(), currentPosition);
                     }
+                } catch (IOException e) {
+                    throw new ComputerException(
+                              "Error occurred when read edges from edges " +
+                              "input '%s' at position %s", e,
+                              edgeFile.getAbsoluteFile(), currentPosition);
                 }
                 return currentEdgesIter.hasNext();
             }
@@ -220,7 +218,6 @@ public class EdgesInput {
                     // Only use targetId as subKey, use props as subValue
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
-                    edge.label(StreamGraphInput.readLabel(in));
                     Properties props = this.graphFactory.createProperties();
                     props.read(in);
                     edge.properties(props);
@@ -230,7 +227,7 @@ public class EdgesInput {
                 for (int i = 0; i < count; i++) {
                     Edge edge = this.graphFactory.createEdge();
                     // Use label + targetId as subKey, use props as subValue
-                    edge.label(in.readUTF());
+                    edge.label(StreamGraphInput.readLabel(in));
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
                     Properties props = this.graphFactory.createProperties();
@@ -246,8 +243,8 @@ public class EdgesInput {
                      * Use label + sortValues + targetId as subKey,
                      * use properties as subValue
                      */
-                    edge.label(in.readUTF());
-                    edge.name(in.readUTF());
+                    edge.label(StreamGraphInput.readLabel(in));
+                    edge.name(StreamGraphInput.readLabel(in));
                     edge.targetId(StreamGraphInput.readId(in));
                     // Read subValue
                     Properties props = this.graphFactory.createProperties();

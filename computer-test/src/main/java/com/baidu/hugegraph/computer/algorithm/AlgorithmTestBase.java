@@ -41,8 +41,10 @@ import com.baidu.hugegraph.util.Log;
 
 public class AlgorithmTestBase extends UnitTestBase {
 
+    public static final Logger LOG = Log.logger(AlgorithmTestBase.class);
+
     public static void runAlgorithm(String algorithmParams, String ... options)
-                       throws InterruptedException {
+                                    throws InterruptedException {
         final Logger log = Log.logger(AlgorithmTestBase.class);
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch countDownLatch = new CountDownLatch(2);
@@ -55,7 +57,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 params.put(RpcOptions.RPC_REMOTE_URL.name(),
                            "127.0.0.1:8090");
                 params.put(ComputerOptions.JOB_ID.name(),
-                           "local_002");
+                           "algo_test_job1");
                 params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
                            "1");
                 params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(),
@@ -79,7 +81,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
-                log.error("Failed to start worker", e);
+                LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
                 // If worker failed, the master also should quit
                 while (countDownLatch.getCount() > 0) {
@@ -102,7 +104,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 params.put(RpcOptions.RPC_SERVER_PORT.name(),
                            "8090");
                 params.put(ComputerOptions.JOB_ID.name(),
-                           "local_002");
+                           "algo_test_job1");
                 params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
                            "1");
                 params.put(ComputerOptions.BSP_REGISTER_TIMEOUT.name(),
@@ -126,7 +128,7 @@ public class AlgorithmTestBase extends UnitTestBase {
                 masterService.init(config);
                 masterService.execute();
             } catch (Throwable e) {
-                log.error("Failed to start master", e);
+                LOG.error("Failed to start master", e);
                 exceptions[1] = e;
                 // If master failed, the worker also should quit
                 while (countDownLatch.getCount() > 0) {

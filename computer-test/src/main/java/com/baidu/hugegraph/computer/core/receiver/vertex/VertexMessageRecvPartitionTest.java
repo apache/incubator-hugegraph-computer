@@ -40,16 +40,19 @@ import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
-import com.baidu.hugegraph.computer.core.network.message.MessageType;
+import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
+import com.baidu.hugegraph.computer.core.io.StreamGraphInput;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.receiver.ReceiverUtil;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
+import com.baidu.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 
@@ -63,18 +66,19 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
     @Before
     public void setup() {
         this.config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "20",
-            ComputerOptions.HGKV_MERGE_FILES_NUM, "5"
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "20",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "5",
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
         this.fileManager = new FileManager();
         this.fileManager.init(this.config);
-        this.sortManager = new SortManager(context());
+        this.sortManager = new RecvSortManager(context());
         this.sortManager.init(this.config);
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
@@ -92,7 +96,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
 
     @Test
     public void testVertexMessageRecvPartition() throws IOException {
-        Assert.assertEquals(MessageType.VERTEX.name(), this.partition.type());
+        Assert.assertEquals("vertex", this.partition.type());
         Assert.assertEquals(0L, this.partition.totalBytes());
         addTenVertexBuffer(this.partition::addBuffer);
 
@@ -104,12 +108,13 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
     @Test
     public void testOverwriteCombiner() throws IOException {
         this.config = UnitTestBase.updateWithRequiredOptions(
-            ComputerOptions.JOB_ID, "local_001",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.JOB_PARTITIONS_COUNT, "1",
-            ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
-            ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
-            ComputerOptions.HGKV_MERGE_FILES_NUM, "5"
+                ComputerOptions.JOB_ID, "local_001",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.JOB_PARTITIONS_COUNT, "1",
+                ComputerOptions.WORKER_DATA_DIRS, "[data_dir1, data_dir2]",
+                ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "1000",
+                ComputerOptions.HGKV_MERGE_FILES_NUM, "5",
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -139,7 +144,8 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
                 ComputerOptions.WORKER_RECEIVED_BUFFERS_BYTES_LIMIT, "10000",
                 ComputerOptions.HGKV_MERGE_FILES_NUM, "5",
                 ComputerOptions.WORKER_VERTEX_PROPERTIES_COMBINER_CLASS,
-                MergeNewPropertiesCombiner.class.getName()
+                MergeNewPropertiesCombiner.class.getName(),
+                ComputerOptions.TRANSPORT_RECV_FILE_MODE, "false"
         );
         FileUtils.deleteQuietly(new File("data_dir1"));
         FileUtils.deleteQuietly(new File("data_dir2"));
@@ -177,7 +183,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         Assert.assertFalse(it.hasNext());
     }
 
-    public static void addTenVertexBuffer(Consumer<ManagedBuffer> consumer)
+    public static void addTenVertexBuffer(Consumer<NetworkBuffer> consumer)
                                           throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
@@ -188,7 +194,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
     }
 
     private static void addTwentyDuplicateVertexBuffer(
-                        Consumer<ManagedBuffer> consumer)
+                        Consumer<NetworkBuffer> consumer)
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
             Vertex vertex = graphFactory().createVertex();
@@ -211,7 +217,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         }
     }
 
-    private static void addTwoEmptyBuffer(Consumer<ManagedBuffer> consumer) {
+    private static void addTwoEmptyBuffer(Consumer<NetworkBuffer> consumer) {
         for (int i = 0; i < 2; i++) {
             ReceiverUtil.consumeBuffer(new byte[2], consumer);
         }
@@ -225,6 +231,7 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
         entryOutput.writeEntry(out -> {
             vertex.id().write(out);
         }, out -> {
+            out.writeUTF(vertex.label());
             vertex.properties().write(out);
         });
 
@@ -235,13 +242,23 @@ public class VertexMessageRecvPartitionTest extends UnitTestBase {
                         PeekableIterator<KvEntry> it)
                         throws IOException {
         for (long i = 0L; i < 10L; i++) {
+            // Assert key
             Assert.assertTrue(it.hasNext());
             KvEntry entry = it.next();
             Id id = ReceiverUtil.readId(entry.key());
             Assert.assertEquals(BytesId.of(i), id);
-            Properties properties = graphFactory().createProperties();
 
-            ReceiverUtil.readValue(entry.value(), properties);
+            // Assert value
+            Pointer value = entry.value();
+            RandomAccessInput input = value.input();
+            long position = input.position();
+            input.seek(value.offset());
+            String label = StreamGraphInput.readLabel(input);
+            Assert.assertEquals("", label);
+            Properties properties = graphFactory().createProperties();
+            properties.read(input);
+            input.seek(position);
+
             Assert.assertEquals(2, properties.size());
             LongValue v1 = properties.get("p1");
             Assert.assertEquals(new LongValue(i), v1);

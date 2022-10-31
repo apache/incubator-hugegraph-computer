@@ -30,8 +30,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -61,6 +63,7 @@ import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
+import com.baidu.hugegraph.config.ConfigListOption;
 import com.baidu.hugegraph.config.HugeConfig;
 import com.baidu.hugegraph.config.TypedOption;
 import com.baidu.hugegraph.util.E;
@@ -72,7 +75,6 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
@@ -153,6 +155,7 @@ public class KubernetesDriver implements ComputerDriver {
         Config config;
         try {
             File file = new File(kubeConfig);
+            @SuppressWarnings("deprecation")
             String kubeConfigContents = FileUtils.readFileToString(file);
             config = Config.fromKubeconfig(kubeConfigContents);
         } catch (IOException e) {
@@ -280,20 +283,19 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     @Override
-    public void cancelJob(String jobId, Map<String, String> params) {
-        Boolean delete = this.operation.withName(KubeUtil.crName(jobId))
-                                       .delete();
-        E.checkState(delete, "Failed to cancel Job, jobId: ", jobId);
+    public boolean cancelJob(String jobId, Map<String, String> params) {
+        return this.operation.withName(KubeUtil.crName(jobId)).delete();
     }
 
     @Override
-    public void waitJob(String jobId, Map<String, String> params,
-                        JobObserver observer) {
+    public CompletableFuture<Void> waitJobAsync(String jobId,
+                                                Map<String, String> params,
+                                                JobObserver observer) {
         JobState jobState = this.jobState(jobId, params);
         if (jobState == null) {
             LOG.warn("Unable to fetch state of job '{}', it may have been " +
                      "deleted", jobId);
-            return;
+            return null;
         } else {
             observer.onJobStateChanged(jobState);
         }
@@ -309,14 +311,7 @@ public class KubernetesDriver implements ComputerDriver {
             }
         }
 
-        try {
-            if (future != null) {
-                future.get();
-            }
-        } catch (Throwable e) {
-            this.cancelWait(jobId);
-            throw KubernetesClientException.launderThrowable(e);
-        }
+        return future;
     }
 
     private Watch initWatch() {
@@ -344,6 +339,7 @@ public class KubernetesDriver implements ComputerDriver {
                     CompletableFuture<?> future = pair.getLeft();
                     JobObserver observer = pair.getRight();
 
+                    @SuppressWarnings("resource")
                     KubernetesDriver driver = KubernetesDriver.this;
                     JobState jobState = driver.buildJobState(computerJob);
 
@@ -426,6 +422,14 @@ public class KubernetesDriver implements ComputerDriver {
 
     @Override
     public void close() {
+        Iterator<Pair<CompletableFuture<Void>, JobObserver>> iterator =
+        this.waits.values().iterator();
+        while (iterator.hasNext()) {
+            CompletableFuture<Void> future = iterator.next().getLeft();
+            future.cancel(true);
+            iterator.remove();
+        }
+
         if (this.watch != null) {
             this.watch.close();
             this.watchActive.setFalse();
@@ -503,9 +507,23 @@ public class KubernetesDriver implements ComputerDriver {
         KubeSpecOptions.ALLOW_USER_SETTINGS.forEach((key, typeOption) -> {
             String value = params.get(key);
             if (StringUtils.isNotBlank(value)) {
-                Object parsed = typeOption.parseConvert(value);
                 String specKey = KubeUtil.covertSpecKey(key);
-                specMap.put(specKey, parsed);
+                if (KubeSpecOptions.MAP_TYPE_CONFIGS.contains(typeOption)) {
+                    if (StringUtils.isNotBlank(value)) {
+                        Map<String, String> result = new HashMap<>();
+                        List<String> values = (List<String>)
+                                              typeOption.parseConvert(value);
+                        for (String str : values) {
+                            String[] pair = str.split(":", 2);
+                            assert pair.length == 2;
+                            result.put(pair[0], pair[1]);
+                        }
+                        specMap.put(specKey, result);
+                    }
+                } else {
+                    Object parsed = typeOption.parseConvert(value);
+                    specMap.put(specKey, parsed);
+                }
             }
         });
         return HugeGraphComputerJob.mapToSpec(specMap);
@@ -517,11 +535,19 @@ public class KubernetesDriver implements ComputerDriver {
         Collection<TypedOption<?, ?>> options = KubeSpecOptions.instance()
                                                                .options()
                                                                .values();
-        for (TypedOption<?, ?> typedOption : options) {
-            Object value = this.conf.get(typedOption);
+        for (TypedOption<?, ?> typeOption : options) {
+            Object value = this.conf.get(typeOption);
             if (value != null) {
-                String specKey = KubeUtil.covertSpecKey(typedOption.name());
-                defaultSpec.put(specKey, value);
+                String specKey = KubeUtil.covertSpecKey(typeOption.name());
+                if (KubeSpecOptions.MAP_TYPE_CONFIGS.contains(typeOption)) {
+                    if (!Objects.equals(String.valueOf(value), "[]")) {
+                        value = this.conf
+                                .getMap((ConfigListOption<String>) typeOption);
+                        defaultSpec.put(specKey, value);
+                    }
+                } else {
+                    defaultSpec.put(specKey, value);
+                }
             }
         }
         ComputerJobSpec spec = HugeGraphComputerJob.mapToSpec(defaultSpec);
@@ -547,6 +573,7 @@ public class KubernetesDriver implements ComputerDriver {
         if (StringUtils.isNotBlank(log4jXmlPath)) {
             try {
                 File file = new File(log4jXmlPath);
+                @SuppressWarnings("deprecation")
                 String log4jXml = FileUtils.readFileToString(file);
                 spec.withLog4jXml(log4jXml);
             } catch (IOException exception) {

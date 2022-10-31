@@ -27,6 +27,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
+import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest.RingsDetectionTestOutput;
 import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilter;
 import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilterParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -42,9 +43,11 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
 
     private static final Map<String, Set<String>> EXPECT_RINGS =
             ImmutableMap.of(
-                    "A", ImmutableSet.of("ACA", "ADCA", "ABCA"),
-                    "B", ImmutableSet.of("BCB"),
-                    "C", ImmutableSet.of("CDC")
+                    "A", ImmutableSet.of("[A, C, A]",
+                                         "[A, D, C, A]",
+                                         "[A, B, C, A]"),
+                    "B", ImmutableSet.of("[B, C, B]"),
+                    "C", ImmutableSet.of("[C, D, C]")
             );
 
     @BeforeClass
@@ -99,7 +102,7 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
     }
 
     @Test
-    public void test() throws InterruptedException {
+    public void testRunAlgorithm() throws InterruptedException {
         String filter = "{" +
                         "    \"vertex_filter\": [" +
                         "        {" +

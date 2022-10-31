@@ -21,15 +21,15 @@ package com.baidu.hugegraph.computer.core.graph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdge;
 import com.baidu.hugegraph.computer.core.graph.edge.DefaultEdges;
 import com.baidu.hugegraph.computer.core.graph.edge.Edge;
@@ -43,9 +43,11 @@ import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IdListList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.ListValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.computer.core.graph.value.MapValue;
 import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.value.StringValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
@@ -55,10 +57,11 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 
 public final class BuiltinGraphFactory implements GraphFactory {
 
-    private final Config config;
+    private static final int AVERAGE_DEGREE = 10;
 
-    public BuiltinGraphFactory(Config config) {
-        this.config = config;
+    @Override
+    public Id createId() {
+        return new BytesId();
     }
 
     @Override
@@ -82,21 +85,18 @@ public final class BuiltinGraphFactory implements GraphFactory {
     }
 
     @Override
-    public <V extends Value<?>> Vertex createVertex(Id id, V value) {
+    public <V extends Value> Vertex createVertex(Id id, V value) {
         return new DefaultVertex(this, id, value);
     }
 
     @Override
-    public <V extends Value<?>> Vertex createVertex(String label, Id id,
-                                                    V value) {
+    public <V extends Value> Vertex createVertex(String label, Id id, V value) {
         return new DefaultVertex(this, label, id, value);
     }
 
     @Override
     public Edges createEdges() {
-        int averageDegree = this.config.get(
-                            ComputerOptions.VERTEX_AVERAGE_DEGREE);
-        return createEdges(averageDegree);
+        return this.createEdges(AVERAGE_DEGREE);
     }
 
     @Override
@@ -136,6 +136,16 @@ public final class BuiltinGraphFactory implements GraphFactory {
     }
 
     @Override
+    public <V> Set<V> createSet() {
+        return new HashSet<>();
+    }
+
+    @Override
+    public <V> Set<V> createSet(int capacity) {
+        return new HashSet<>(capacity);
+    }
+
+    @Override
     public <K, V> Map<K, V> createMap() {
         return new HashMap<>();
     }
@@ -145,7 +155,8 @@ public final class BuiltinGraphFactory implements GraphFactory {
         return new DefaultProperties(this);
     }
 
-    public Value<?> createValue(byte code) {
+    @Override
+    public Value createValue(byte code) {
         ValueType type = SerialEnum.fromCode(ValueType.class, code);
         return createValue(type);
     }
@@ -153,7 +164,8 @@ public final class BuiltinGraphFactory implements GraphFactory {
     /**
      * Create property value by type.
      */
-    public Value<?> createValue(ValueType type) {
+    @Override
+    public Value createValue(ValueType type) {
         switch (type) {
             case NULL:
                 return NullValue.get();
@@ -167,14 +179,18 @@ public final class BuiltinGraphFactory implements GraphFactory {
                 return new FloatValue();
             case DOUBLE:
                 return new DoubleValue();
-            case ID_VALUE:
+            case ID:
                 return new BytesId();
-            case ID_VALUE_LIST:
+            case ID_LIST:
                 return new IdList();
-            case ID_VALUE_LIST_LIST:
+            case ID_LIST_LIST:
                 return new IdListList();
+            case ID_SET:
+                return new IdSet();
             case LIST_VALUE:
                 return new ListValue<>();
+            case MAP_VALUE:
+                return new MapValue<>();
             case STRING:
                 return new StringValue();
             default:

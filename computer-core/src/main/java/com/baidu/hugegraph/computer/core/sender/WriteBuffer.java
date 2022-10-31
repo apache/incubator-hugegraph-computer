@@ -29,8 +29,8 @@ import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.GraphComputeOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.StreamGraphOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutput;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntryOutputImpl;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
+import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
 
 /**
  * It's not a public class, need package access
@@ -44,6 +44,7 @@ class WriteBuffer {
     private final int threshold;
     private final BytesOutput bytesOutput;
     private final GraphComputeOutput graphOutput;
+    private long writeCount;
 
     public WriteBuffer(ComputerContext context, int threshold, int capacity) {
         assert threshold > 0 && capacity > 0 && threshold <= capacity;
@@ -51,6 +52,7 @@ class WriteBuffer {
         this.bytesOutput = IOFactory.createBytesOutput(capacity);
         EntryOutput entryOutput = new EntryOutputImpl(this.bytesOutput);
         this.graphOutput = new StreamGraphOutput(context, entryOutput);
+        this.writeCount = 0L;
     }
 
     public boolean reachThreshold() {
@@ -61,7 +63,16 @@ class WriteBuffer {
         return this.bytesOutput.position() == 0L;
     }
 
+    public long numBytes() {
+        return this.bytesOutput.position();
+    }
+
+    public long writeCount() {
+        return this.writeCount;
+    }
+
     public void clear() throws IOException {
+        this.writeCount = 0L;
         this.bytesOutput.seek(0L);
     }
 
@@ -70,14 +81,17 @@ class WriteBuffer {
     }
 
     public void writeVertex(Vertex vertex) throws IOException {
+        this.writeCount++;
         this.graphOutput.writeVertex(vertex);
     }
 
     public void writeEdges(Vertex vertex) throws IOException {
+        this.writeCount++;
         this.graphOutput.writeEdges(vertex);
     }
 
-    public void writeMessage(Id targetId, Value<?> value) throws IOException {
+    public void writeMessage(Id targetId, Value value) throws IOException {
+        this.writeCount++;
         this.graphOutput.writeMessage(targetId, value);
     }
 }

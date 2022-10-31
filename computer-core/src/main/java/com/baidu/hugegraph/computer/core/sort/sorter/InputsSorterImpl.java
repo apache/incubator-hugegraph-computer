@@ -24,8 +24,8 @@ import java.util.List;
 
 import com.baidu.hugegraph.computer.core.sort.sorting.InputsSorting;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortingFactory;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.buffer.EntryIterator;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.EntryIterator;
 
 public class InputsSorterImpl implements InputsSorter {
 

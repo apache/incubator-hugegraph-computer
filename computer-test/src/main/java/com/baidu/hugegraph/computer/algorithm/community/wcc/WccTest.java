@@ -27,9 +27,9 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 public class WccTest extends AlgorithmTestBase {
 
     @Test
-    public void testServiceWith1Worker() throws InterruptedException {
+    public void testRunAlgorithm() throws InterruptedException {
         runAlgorithm(WccParams.class.getName(),
-                     ComputerOptions.JOB_ID.name(), "local_002",
+                     ComputerOptions.JOB_ID.name(), "local_wcc",
                      ComputerOptions.JOB_WORKERS_COUNT.name(), "1",
                      ComputerOptions.BSP_REGISTER_TIMEOUT.name(), "100000",
                      ComputerOptions.BSP_LOG_INTERVAL.name(), "30000",

@@ -21,18 +21,23 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 
+import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.util.E;
 
-public class DoubleValue extends Number implements Value<DoubleValue> {
+public class DoubleValue extends Number implements Tvalue<Double> {
 
     private static final long serialVersionUID = -524902178200973565L;
 
     private double value;
 
     public DoubleValue() {
-        this.value = 0.0D;
+        this(0.0D);
+    }
+
+    public DoubleValue(double value) {
+        this.value = value;
     }
 
     @Override
@@ -55,11 +60,8 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
         return this.value;
     }
 
-    public DoubleValue(double value) {
-        this.value = value;
-    }
-
-    public double value() {
+    @Override
+    public Double value() {
         return this.value;
     }
 
@@ -77,7 +79,7 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
     }
 
     @Override
-    public void assign(Value<DoubleValue> other) {
+    public void assign(Value other) {
         this.checkAssign(other);
         this.value = ((DoubleValue) other).value;
     }
@@ -85,6 +87,11 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
     @Override
     public DoubleValue copy() {
         return new DoubleValue(this.value);
+    }
+
+    @Override
+    public boolean isNumber() {
+        return true;
     }
 
     @Override
@@ -98,9 +105,13 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
     }
 
     @Override
-    public int compareTo(DoubleValue obj) {
+    public int compareTo(Value obj) {
         E.checkArgumentNotNull(obj, "The compare argument can't be null");
-        return Double.compare(this.value, obj.value);
+        int typeDiff = this.valueType().compareTo(obj.valueType());
+        if (typeDiff != 0) {
+            return typeDiff;
+        }
+        return Double.compare(this.value, ((DoubleValue) obj).value);
     }
 
     @Override
@@ -119,10 +130,5 @@ public class DoubleValue extends Number implements Value<DoubleValue> {
     @Override
     public String toString() {
         return String.valueOf(this.value);
-    }
-
-    @Override
-    public Object object() {
-        return this.value;
     }
 }

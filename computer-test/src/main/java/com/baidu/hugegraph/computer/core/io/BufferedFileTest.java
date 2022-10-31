@@ -38,7 +38,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.EntriesUtil;
+import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 import com.baidu.hugegraph.testutil.Assert;
 import com.baidu.hugegraph.util.Log;

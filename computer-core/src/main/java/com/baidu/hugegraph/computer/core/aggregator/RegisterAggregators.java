@@ -29,13 +29,13 @@ import com.baidu.hugegraph.util.E;
 
 public class RegisterAggregators {
 
-    private final Map<String, Aggregator<? extends Value<?>>> aggregators;
+    private final Map<String, Aggregator<? extends Value>> aggregators;
 
     public RegisterAggregators() {
         this.aggregators = new ConcurrentHashMap<>();
     }
 
-    public void put(String name, Aggregator<? extends Value<?>> aggregator) {
+    public void put(String name, Aggregator<? extends Value> aggregator) {
         E.checkArgument(name != null,
                         "The registered aggregator name can't be null");
         E.checkArgument(!name.isEmpty(),
@@ -45,18 +45,18 @@ public class RegisterAggregators {
         this.aggregators.put(name, aggregator);
     }
 
-    public Aggregator<? extends Value<?>> copy(String name) {
-        Aggregator<? extends Value<?>> aggregator = this.aggregators.get(name);
+    public Aggregator<? extends Value> copy(String name) {
+        Aggregator<? extends Value> aggregator = this.aggregators.get(name);
         E.checkArgument(aggregator != null,
                         "Can't get unregistered aggregator with name '%s'",
                         name);
         return aggregator.copy();
     }
 
-    public Map<String, Aggregator<? extends Value<?>>> copyAll() {
-        Map<String, Aggregator<? extends Value<?>>> copy =
-                                                    new ConcurrentHashMap<>();
-        for (Entry<String, Aggregator<? extends Value<?>>> aggr :
+    public Map<String, Aggregator<? extends Value>> copyAll() {
+        Map<String, Aggregator<? extends Value>> copy =
+                                                 new ConcurrentHashMap<>();
+        for (Entry<String, Aggregator<? extends Value>> aggr :
              this.aggregators.entrySet()) {
             copy.put(aggr.getKey(), aggr.getValue().copy());
         }
@@ -68,7 +68,7 @@ public class RegisterAggregators {
     }
 
     public void repair(ComputerContext context) {
-        for (Aggregator<? extends Value<?>> aggr : this.aggregators.values()) {
+        for (Aggregator<? extends Value> aggr : this.aggregators.values()) {
             aggr.repair(context);
         }
     }

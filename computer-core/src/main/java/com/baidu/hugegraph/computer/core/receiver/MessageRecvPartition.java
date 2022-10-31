@@ -22,18 +22,18 @@ package com.baidu.hugegraph.computer.core.receiver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.slf4j.Logger;
-
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.network.buffer.ManagedBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.FileRegionBuffer;
+import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import com.baidu.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
-import com.baidu.hugegraph.computer.core.store.hgkvfile.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
+import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.util.Log;
 
 /**
@@ -58,6 +58,7 @@ public abstract class MessageRecvPartition {
     private final boolean withSubKv;
     private final int mergeFileNum;
     private long totalBytes;
+    private final boolean useFileRegion;
 
     private final AtomicReference<Throwable> exception;
 
@@ -74,10 +75,15 @@ public abstract class MessageRecvPartition {
         long waitSortTimeout = config.get(
                                ComputerOptions.WORKER_WAIT_SORT_TIMEOUT);
         this.mergeFileNum = config.get(ComputerOptions.HGKV_MERGE_FILES_NUM);
-        this.recvBuffers = new MessageRecvBuffers(buffersLimit,
-                                                  waitSortTimeout);
-        this.sortBuffers = new MessageRecvBuffers(buffersLimit,
-                                                  waitSortTimeout);
+        this.useFileRegion = config.get(
+                             ComputerOptions.TRANSPORT_RECV_FILE_MODE);
+        if (!this.useFileRegion) {
+            this.recvBuffers = new MessageRecvBuffers(buffersLimit,
+                                                      waitSortTimeout);
+            this.sortBuffers = new MessageRecvBuffers(buffersLimit,
+                                                      waitSortTimeout);
+        }
+
         this.outputFiles = new ArrayList<>();
         this.totalBytes = 0L;
         this.exception = new AtomicReference<>();
@@ -86,24 +92,31 @@ public abstract class MessageRecvPartition {
     /**
      * Only one thread can call this method.
      */
-    public synchronized void addBuffer(ManagedBuffer buffer) {
+    public synchronized void addBuffer(NetworkBuffer buffer) {
         this.totalBytes += buffer.length();
+        if (buffer instanceof FileRegionBuffer) {
+            String path = ((FileRegionBuffer) buffer).path();
+            this.outputFiles.add(path);
+            return;
+        }
         this.recvBuffers.addBuffer(buffer);
         if (this.recvBuffers.full()) {
+            // Wait for the previous sorting
             this.sortBuffers.waitSorted();
+            // Transfer recvBuffers to sortBuffers, then sort and flush
             this.swapReceiveAndSortBuffers();
-            String path = this.fileGenerator.nextPath(this.type());
-            this.mergeBuffers(this.sortBuffers, path);
-            this.outputFiles.add(path);
+            this.flushSortBuffersAsync();
         }
     }
 
-    public PeekableIterator<KvEntry> iterator() {
+    public synchronized PeekableIterator<KvEntry> iterator() {
         /*
          * TODO: create iterator directly from buffers if there is no
          *       outputFiles.
          */
-        this.flushAllBuffersAndWaitSorted();
+        if (!this.useFileRegion) {
+            this.flushAllBuffersAndWaitSorted();
+        }
         this.mergeOutputFilesIfNeeded();
         if (this.outputFiles.size() == 0) {
             return PeekableIterator.emptyIterator();
@@ -111,12 +124,13 @@ public abstract class MessageRecvPartition {
         return this.sortManager.iterator(this.outputFiles, this.withSubKv);
     }
 
-    public long totalBytes() {
+    public synchronized long totalBytes() {
         return this.totalBytes;
     }
 
-    public RecvMessageStat recvMessageStat() {
-        return new RecvMessageStat(0L, this.totalBytes);
+    public synchronized MessageStat messageStat() {
+        // TODO: count the message received
+        return new MessageStat(0L, this.totalBytes);
     }
 
     protected abstract OuterSortFlusher outerSortFlusher();
@@ -127,23 +141,29 @@ public abstract class MessageRecvPartition {
      * Flush the receive buffers to file, and wait both recvBuffers and
      * sortBuffers to finish sorting.
      * After this method be called, can not call
-     * {@link #addBuffer(ManagedBuffer)} any more.
+     * {@link #addBuffer(NetworkBuffer)} any more.
      */
     private void flushAllBuffersAndWaitSorted() {
         this.sortBuffers.waitSorted();
         if (this.recvBuffers.totalBytes() > 0) {
-            String path = this.fileGenerator.nextPath(this.type());
-            this.mergeBuffers(this.recvBuffers, path);
-            this.outputFiles.add(path);
+            // Transfer recvBuffers to sortBuffers, then sort and flush
+            this.swapReceiveAndSortBuffers();
+            this.flushSortBuffersAsync();
+            this.sortBuffers.waitSorted();
         }
-        this.recvBuffers.waitSorted();
         this.checkException();
     }
 
-    private void mergeBuffers(MessageRecvBuffers buffers, String path) {
+    private void flushSortBuffersAsync() {
+        String path = this.genOutputPath();
+        this.mergeBuffersAsync(this.sortBuffers, path);
+        this.outputFiles.add(path);
+    }
+
+    private void mergeBuffersAsync(MessageRecvBuffers buffers, String path) {
         this.checkException();
-        this.sortManager.mergeBuffers(buffers.buffers(), path, this.withSubKv,
-                                      this.outerSortFlusher())
+        this.sortManager.mergeBuffers(buffers.buffers(), path,
+                                      this.withSubKv, this.outerSortFlusher())
                         .whenComplete((r , e) -> {
             if (e != null) {
                 LOG.error("Failed to merge buffers", e);
@@ -156,9 +176,13 @@ public abstract class MessageRecvPartition {
     }
 
     private void swapReceiveAndSortBuffers() {
-        MessageRecvBuffers tmp = this.recvBuffers;
+        assert this.recvBuffers.totalBytes() > 0;
+        MessageRecvBuffers oldRecvBuffers = this.recvBuffers;
         this.recvBuffers = this.sortBuffers;
-        this.sortBuffers = tmp;
+        this.sortBuffers = oldRecvBuffers;
+
+        // Prepare for the next buffer-adding/sorting
+        this.recvBuffers.prepareSort();
     }
 
     /**
@@ -173,16 +197,23 @@ public abstract class MessageRecvPartition {
          * TODO Restore genOutputFileNames(sqrt(outputFiles.size()))
          *  after add Sorter#iterator() of subkv
          */
-        List<String> newOutputs = this.genOutputFileNames(1);
+        int mergeFileNum = this.mergeFileNum;
+        mergeFileNum = 1;
+        List<String> newOutputs = this.genOutputFileNames(mergeFileNum);
         this.sortManager.mergeInputs(this.outputFiles, newOutputs,
                                      this.withSubKv, this.outerSortFlusher());
+        FileUtil.deleteFilesQuietly(this.outputFiles);
         this.outputFiles = newOutputs;
+    }
+
+    public String genOutputPath() {
+        return this.fileGenerator.nextPath(this.type());
     }
 
     private List<String> genOutputFileNames(int targetSize) {
         List<String> files = new ArrayList<>(targetSize);
         for (int i = 0; i < targetSize; i++) {
-            files.add(this.fileGenerator.nextPath(this.type()));
+            files.add(this.genOutputPath());
         }
         return files;
     }
