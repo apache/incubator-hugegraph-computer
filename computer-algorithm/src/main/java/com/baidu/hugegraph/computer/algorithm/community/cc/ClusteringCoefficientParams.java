@@ -22,7 +22,6 @@ package com.baidu.hugegraph.computer.algorithm.community.cc;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
-import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.EdgeFrequency;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;

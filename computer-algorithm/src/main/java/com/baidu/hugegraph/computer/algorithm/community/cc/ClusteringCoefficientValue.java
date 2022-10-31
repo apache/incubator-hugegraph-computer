@@ -21,15 +21,9 @@ package com.baidu.hugegraph.computer.algorithm.community.cc;
 
 import java.io.IOException;
 
-import javax.ws.rs.NotSupportedException;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
