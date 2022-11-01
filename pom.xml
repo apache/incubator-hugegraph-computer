@@ -224,8 +224,6 @@
                         <exclude>**/dependency-reduced-pom.xml</exclude>
                         <exclude>**/target/*</exclude>
                         <exclude>.github/**/*</exclude>
-                        <!-- Intellij -->
-                        <exclude>**/*.iml</exclude>
                     </excludes>
                     <consoleOutput>true</consoleOutput>
                 </configuration>
