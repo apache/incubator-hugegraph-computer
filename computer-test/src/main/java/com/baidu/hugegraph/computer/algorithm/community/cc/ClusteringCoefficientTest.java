@@ -101,13 +101,13 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
     public void testClusteringCoefficientValue() {
         TriangleCountValue value = new TriangleCountValue();
         value.count(10);
-        Assert.assertThrows(NotSupportedException.class,
+        Assert.assertThrows(UnsupportedOperationException.class,
                             () -> value.assign(null));
-        Assert.assertThrows(NotSupportedException.class,
+        Assert.assertThrows(UnsupportedOperationException.class,
                             () -> value.compareTo(new TriangleCountValue()));
 
         TriangleCountValue copy = value.copy();
-        Assert.assertEquals(10L, copy.count());
+        Assert.assertEquals(10, copy.count());
         Assert.assertNotSame(value.idList(), copy.idList());
 
         Assert.assertContains("10", value.toString());
@@ -120,8 +120,8 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
                      ClusteringCoefficientOutputTest.class.getName());
     }
 
-    public static class ClusteringCoefficientOutputTest
-                  extends ClusteringCoefficientOutput {
+    public static class ClusteringCoefficientOutputTest extends ClusteringCoefficientOutput {
+
         @Override
         public Vertex constructHugeVertex(
                com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
