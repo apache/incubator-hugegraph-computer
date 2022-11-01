@@ -29,7 +29,7 @@ body:
         - exception / error (运行异常)
         - data inconsistency (计算结果不合预期)
         - logic (逻辑设计问题)
-        - performence (性能下降)
+        - performance (性能下降)
         - others (please edit later)
   
   - type: checkboxes
