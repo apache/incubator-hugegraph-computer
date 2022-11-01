@@ -81,8 +81,7 @@ public class ClusteringCoefficient implements Computation<IdList> {
     }
 
     @Override
-    public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<IdList> messages) {
+    public void compute(ComputationContext context, Vertex vertex, Iterator<IdList> messages) {
         Integer count = this.triangleCount(context, vertex, messages);
         if (count != null) {
             ((TriangleCountValue) vertex.value()).count(count);
@@ -91,7 +90,7 @@ public class ClusteringCoefficient implements Computation<IdList> {
     }
 
     private Integer triangleCount(ComputationContext context, Vertex vertex,
-                               Iterator<IdList> messages) {
+                                  Iterator<IdList> messages) {
         IdList neighbors = ((TriangleCountValue) vertex.value()).idList();
 
         if (context.superstep() == 1) {
