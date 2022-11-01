@@ -4,8 +4,8 @@ blank_issues_enabled: false
 contact_links:
   - name: HugeGraph Computer Doc
     # TODO: fill it after release
-    url: https://hugegraph.github.io/hugegraph-doc/
+    url: https://hugegraph.apache.org/docs/
     about: Please search question here before opening a new issue
   - name: HugeGraph API Doc
-    url: https://hugegraph.github.io/hugegraph-doc/clients/hugegraph-api.html
+    url: https://hugegraph.apache.org/docs/clients/
     about: Please search usage here before opening a new issue
