@@ -28,7 +28,7 @@ body:
         - algorithm (算法相关问题)
         - configs (配置项 / 文档相关)
         - data inconsistency (计算结果不合预期)
-        - performence / logic (性能 / 逻辑优化)
+        - performance / logic (性能 / 逻辑优化)
         - others (please edit later)
   
   - type: checkboxes
