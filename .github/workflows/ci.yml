@@ -14,7 +14,7 @@ jobs:
     env:
       TRAVIS_DIR: computer-dist/src/assembly/travis
       KUBERNETES_VERSION: 1.20.1
-      HUGEGRAPH_SERVER_COMMIT_ID: 848b8fb17804ddc561af832dff0bdc3f6221c904
+      HUGEGRAPH_SERVER_COMMIT_ID: 19ef0ac203b06e2d5324927f970da133636be38f
 
     steps:
       - name: Checkout
