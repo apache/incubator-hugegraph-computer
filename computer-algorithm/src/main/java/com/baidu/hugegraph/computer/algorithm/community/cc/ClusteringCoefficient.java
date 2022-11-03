@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.algorithm.community.cc;
 
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -107,8 +106,7 @@ public class ClusteringCoefficient implements Computation<IdList> {
                     neighbors.add(inId);
                 }
             }
-            // Save degree to vertex value here (optional)
-
+            // TODO: Save degree to vertex value here (optional)
             // Send all neighbors to neighbors
             for (Id targetId : neighbors.values()) {
                 context.sendMessage(targetId, neighbors);

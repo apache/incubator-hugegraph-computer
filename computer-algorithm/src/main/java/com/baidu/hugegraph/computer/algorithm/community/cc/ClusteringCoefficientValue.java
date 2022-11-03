@@ -28,9 +28,10 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 /**
- * We should reuse triangle
+ * TODO: We could reuse triangle's result to simplify it (and avoid logical differences)
  */
 public class ClusteringCoefficientValue implements Value.CustomizeValue<Integer> {
+
     private IdList idList;
     private IntValue count;
     private final IntValue degree;
@@ -88,6 +89,6 @@ public class ClusteringCoefficientValue implements Value.CustomizeValue<Integer>
 
     @Override
     public String toString() {
-        return "count" + this.count;
+        return String.valueOf(count);
     }
 }
