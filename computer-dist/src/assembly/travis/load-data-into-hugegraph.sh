@@ -10,7 +10,6 @@ HUGEGRAPH_LOADER_GIT_URL="https://github.com/apache/hugegraph-toolchain.git"
 git clone --depth 10 ${HUGEGRAPH_LOADER_GIT_URL}
 
 cd hugegraph-toolchain
-mvn install:install-file -Dfile=./assembly/lib/ojdbc8-12.2.0.1.jar -DgroupId=com.oracle -DartifactId=ojdbc8 -Dversion=12.2.0.1 -Dpackaging=jar -ntp
 mvn install -pl hugegraph-client,hugegraph-loader -am -DskipTests -ntp
 
 cd hugegraph-loader
