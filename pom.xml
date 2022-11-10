@@ -81,9 +81,9 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>com.baidu.hugegraph</groupId>
+                <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-client</artifactId>
-                <version>2.0.1</version>
+                <version>1.0.0</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -402,4 +402,18 @@
             </build>
         </profile>
     </profiles>
+    <repositories>
+        <repository>
+            <id>staged-releases</id>
+            <name>staged-releases</name>
+            <url>https://repository.apache.org/content/groups/staging/</url>
+            <layout>default</layout>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

@@ -45,6 +45,12 @@
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>hugegraph-loader</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.baidu.hugegraph</groupId>
+                    <artifactId>hugegraph-client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>
