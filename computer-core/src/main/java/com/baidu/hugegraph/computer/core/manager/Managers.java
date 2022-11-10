@@ -24,8 +24,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.InsertionOrderUtil;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.InsertionOrderUtil;
 
 public class Managers implements Iterable<Manager> {
 

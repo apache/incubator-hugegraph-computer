@@ -27,7 +27,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 import io.netty.util.Recycler;
 

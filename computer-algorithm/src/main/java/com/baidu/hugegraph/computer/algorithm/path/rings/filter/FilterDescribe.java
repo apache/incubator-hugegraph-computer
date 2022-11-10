@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
-import com.baidu.hugegraph.util.JsonUtil;
+import org.apache.hugegraph.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;

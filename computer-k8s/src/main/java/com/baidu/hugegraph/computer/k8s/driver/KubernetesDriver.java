@@ -63,11 +63,11 @@ import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import com.baidu.hugegraph.config.ConfigListOption;
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.config.TypedOption;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.ConfigListOption;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.config.TypedOption;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;

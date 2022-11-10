@@ -49,11 +49,11 @@ import com.baidu.hugegraph.computer.core.store.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
-import com.baidu.hugegraph.config.TypedOption;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.TypedOption;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 
 public class UnitTestBase {
 

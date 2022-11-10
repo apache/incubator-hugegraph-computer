@@ -40,9 +40,9 @@ import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.ResourceName;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 

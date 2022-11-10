@@ -41,8 +41,8 @@ import com.baidu.hugegraph.computer.core.util.Consumers;
 import com.baidu.hugegraph.computer.core.worker.WorkerContext;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
-import com.baidu.hugegraph.util.ExecutorUtil;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.ExecutorUtil;
+import org.apache.hugegraph.util.Log;
 
 public class ComputeManager {
 

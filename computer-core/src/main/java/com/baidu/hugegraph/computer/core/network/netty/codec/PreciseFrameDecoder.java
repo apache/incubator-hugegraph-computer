@@ -23,7 +23,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.DefaultMaxBytesRecvByteBufAllocator;

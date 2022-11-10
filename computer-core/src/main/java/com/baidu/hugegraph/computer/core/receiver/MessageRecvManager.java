@@ -44,8 +44,8 @@ import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.store.SuperstepFileGenerator;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 
 public class MessageRecvManager implements Manager, MessageHandler {
 

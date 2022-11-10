@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.Log;
 
 public class HugeGraphComputerTest {
 

@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.sort.flusher;
 
 import java.util.NoSuchElementException;
 
-import com.baidu.hugegraph.iterator.CIter;
+import org.apache.hugegraph.iterator.CIter;
 
 public interface PeekableIterator<T> extends CIter<T> {
 

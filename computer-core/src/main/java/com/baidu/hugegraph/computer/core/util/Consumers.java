@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 public final class Consumers<V> {
 

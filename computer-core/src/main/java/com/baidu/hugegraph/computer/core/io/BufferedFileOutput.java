@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 /**
  * This class acted as new DataOutputStream(new BufferedOutputStream(new File

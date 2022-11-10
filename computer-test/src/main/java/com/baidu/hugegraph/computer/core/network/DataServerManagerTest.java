@@ -35,8 +35,8 @@ import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.worker.MockComputation;
 import com.baidu.hugegraph.computer.core.worker.MockMasterComputation;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.config.RpcOptions;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.testutil.Assert;
 
 public class DataServerManagerTest extends UnitTestBase {
 

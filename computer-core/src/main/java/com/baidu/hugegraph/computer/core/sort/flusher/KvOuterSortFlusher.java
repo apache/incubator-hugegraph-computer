@@ -24,7 +24,7 @@ import java.io.IOException;
 import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class KvOuterSortFlusher implements OuterSortFlusher {
 

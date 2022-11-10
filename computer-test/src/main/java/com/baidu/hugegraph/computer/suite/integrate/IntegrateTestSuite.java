@@ -25,9 +25,9 @@ import org.junit.runners.Suite;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.config.OptionSpace;
-import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -46,7 +46,7 @@ public class IntegrateTestSuite {
                              "com.baidu.hugegraph.computer.core.config." +
                              "ComputerOptions");
         OptionSpace.register("computer-rpc",
-                             "com.baidu.hugegraph.config.RpcOptions");
+                             "org.apache.hugegraph.config.RpcOptions");
 
         Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
                                   "defaultValue", "http://localhost:2579");

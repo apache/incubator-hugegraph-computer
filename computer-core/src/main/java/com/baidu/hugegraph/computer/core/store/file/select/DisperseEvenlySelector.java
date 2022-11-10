@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvFile;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 import com.google.common.collect.Lists;
 
 public class DisperseEvenlySelector implements InputFilesSelector {

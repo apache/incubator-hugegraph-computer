@@ -19,15 +19,15 @@
 
 package com.baidu.hugegraph.computer.driver.config;
 
-import static com.baidu.hugegraph.config.OptionChecker.allowValues;
-import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
-import static com.baidu.hugegraph.config.OptionChecker.nonNegativeInt;
-import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
-import static com.baidu.hugegraph.config.OptionChecker.rangeInt;
+import static org.apache.hugegraph.config.OptionChecker.allowValues;
+import static org.apache.hugegraph.config.OptionChecker.disallowEmpty;
+import static org.apache.hugegraph.config.OptionChecker.nonNegativeInt;
+import static org.apache.hugegraph.config.OptionChecker.positiveInt;
+import static org.apache.hugegraph.config.OptionChecker.rangeInt;
 
 import java.util.Set;
 
-import com.baidu.hugegraph.config.OptionHolder;
+import org.apache.hugegraph.config.OptionHolder;
 import com.google.common.collect.ImmutableSet;
 
 public class ComputerOptions extends OptionHolder {

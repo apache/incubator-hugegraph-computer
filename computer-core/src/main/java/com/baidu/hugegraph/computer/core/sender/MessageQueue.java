@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.sender;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 /**
  * It's not a public class, need package access

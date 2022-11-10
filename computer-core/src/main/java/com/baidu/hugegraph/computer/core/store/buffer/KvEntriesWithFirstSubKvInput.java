@@ -23,8 +23,8 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
-import com.baidu.hugegraph.iterator.CIter;
-import com.baidu.hugegraph.iterator.MapperIterator;
+import org.apache.hugegraph.iterator.CIter;
+import org.apache.hugegraph.iterator.MapperIterator;
 
 public class KvEntriesWithFirstSubKvInput implements EntryIterator {
 

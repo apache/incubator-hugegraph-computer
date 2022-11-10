@@ -48,9 +48,9 @@ import com.baidu.hugegraph.computer.core.worker.WorkerTestSuite;
 import com.baidu.hugegraph.computer.dist.ComputerDistTestSuite;
 import com.baidu.hugegraph.computer.driver.DriverTestSuite;
 import com.baidu.hugegraph.computer.k8s.K8sTestSuite;
-import com.baidu.hugegraph.config.OptionSpace;
-import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -128,7 +128,7 @@ public class UnitTestSuite {
                              "com.baidu.hugegraph.computer.core.config." +
                              "ComputerOptions");
         OptionSpace.register("computer-rpc",
-                             "com.baidu.hugegraph.config.RpcOptions");
+                             "org.apache.hugegraph.config.RpcOptions");
 
         UnitTestBase.updateOptions(
             ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()

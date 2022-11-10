@@ -25,7 +25,7 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class StringValue implements Tvalue<String> {
 

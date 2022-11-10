@@ -34,9 +34,9 @@ import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.config.RpcOptions;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.Log;
 
 public class WorkerServiceTest extends UnitTestBase {
 

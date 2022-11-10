@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.sort.flusher.PeekableIterator;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class EmptyFlusherTest {
 

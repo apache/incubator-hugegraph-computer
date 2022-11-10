@@ -35,9 +35,9 @@ import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.MockWorkerService;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.config.RpcOptions;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.Log;
 
 public class AlgorithmTestBase extends UnitTestBase {
 

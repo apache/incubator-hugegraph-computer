@@ -60,8 +60,8 @@ import com.baidu.hugegraph.computer.core.store.file.select.DisperseEvenlySelecto
 import com.baidu.hugegraph.computer.core.store.file.select.InputFilesSelector;
 import com.baidu.hugegraph.computer.core.util.FileUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.iterator.CIter;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.iterator.CIter;
+import org.apache.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 

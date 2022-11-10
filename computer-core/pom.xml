@@ -18,7 +18,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>hugegraph-rpc</artifactId>
         </dependency>
         <dependency>
@@ -43,14 +43,8 @@
             <artifactId>hadoop-hdfs-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>hugegraph-loader</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.baidu.hugegraph</groupId>
-                    <artifactId>hugegraph-client</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 </project>

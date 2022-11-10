@@ -30,9 +30,9 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.concurrent.BarrierEvent;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.concurrent.BarrierEvent;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 
 public class QueuedMessageSender implements MessageSender {
 

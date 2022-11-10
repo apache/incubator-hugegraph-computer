@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class ContainerInfo implements Readable, Writable {
 

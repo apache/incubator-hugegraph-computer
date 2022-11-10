@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.crd.model.EventType;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.EventBuilder;

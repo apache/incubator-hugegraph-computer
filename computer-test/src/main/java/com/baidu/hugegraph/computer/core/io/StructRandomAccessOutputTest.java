@@ -27,7 +27,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class StructRandomAccessOutputTest {
 
