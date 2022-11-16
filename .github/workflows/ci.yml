@@ -62,7 +62,7 @@ jobs:
           distribution: 'zulu'
 
       - name: Compile
-        run: mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
+        run: mvn clean compile -Dmaven.javadoc.skip=true
 
       - name: Integrate test
         run: mvn test -P integrate-test
