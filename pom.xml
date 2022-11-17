@@ -11,7 +11,7 @@
         <maven>3.3.9</maven>
     </prerequisites>
     <name>hugegraph-computer</name>
-    <url>https://github.com/hugegraph/hugegraph-computer</url>
+    <url>https://github.com/apache/hugegraph-computer</url>
     <description>
         hugegraph-computer is a fast-speed, highly-scalable, fault-tolerance graph processing system developed by baidu.
     </description>
@@ -26,15 +26,15 @@
     </licenses>
 
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>23</version>
     </parent>
 
     <scm>
-        <url>https://github.com/hugegraph/hugegraph-computer</url>
-        <connection>https://github.com/hugegraph/hugegraph-computer</connection>
-        <developerConnection>https://github.com/hugegraph/hugegraph-computer</developerConnection>
+        <url>https://github.com/apache/hugegraph-computer</url>
+        <connection>https://github.com/apache/hugegraph-computer</connection>
+        <developerConnection>https://github.com/apache/hugegraph-computer</developerConnection>
     </scm>
 
     <properties>

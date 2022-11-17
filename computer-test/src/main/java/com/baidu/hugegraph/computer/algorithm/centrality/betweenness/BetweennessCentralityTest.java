@@ -28,12 +28,14 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphDoubleOutput;
+
 import org.apache.hugegraph.driver.GraphManager;
 import org.apache.hugegraph.driver.HugeClient;
 import org.apache.hugegraph.driver.SchemaManager;
 import org.apache.hugegraph.structure.constant.T;
 import org.apache.hugegraph.structure.graph.Vertex;
 import org.apache.hugegraph.testutil.Assert;
+
 import com.google.common.collect.ImmutableMap;
 
 public class BetweennessCentralityTest extends AlgorithmTestBase {
@@ -130,13 +132,10 @@ public class BetweennessCentralityTest extends AlgorithmTestBase {
 
     }
 
-    public static class BetweennessCentralityTestOutput
-                  extends HugeGraphDoubleOutput {
+    public static class BetweennessCentralityTestOutput extends HugeGraphDoubleOutput {
 
         @Override
-        protected Double value(
-                  com.baidu.hugegraph.computer.core.graph.vertex.Vertex
-                  vertex) {
+        protected Double value(com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Double result = super.value(vertex);
             Double expect = EXPECT_RESULTS.get(vertex.id().string());
             Assert.assertNotNull(expect);

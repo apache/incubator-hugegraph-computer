@@ -21,6 +21,11 @@ package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
 import java.util.Map;
 
+import org.apache.hugegraph.driver.GraphManager;
+import org.apache.hugegraph.driver.SchemaManager;
+import org.apache.hugegraph.structure.constant.T;
+import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.testutil.Assert;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,13 +33,7 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphIntOutput;
-import org.apache.hugegraph.driver.GraphManager;
-import org.apache.hugegraph.driver.SchemaManager;
-import org.apache.hugegraph.structure.constant.T;
-import org.apache.hugegraph.structure.graph.Vertex;
-import org.apache.hugegraph.testutil.Assert;
-
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 
 public class TriangleCountTest extends AlgorithmTestBase {
 
@@ -42,10 +41,11 @@ public class TriangleCountTest extends AlgorithmTestBase {
     private static final String EDGE_LABEL = "tc_know";
     private static final String PROPERTY_KEY = "tc_weight";
 
-    protected static final Map<Object, Integer> EXPECTED_RESULTS =
-              ImmutableMap.of("tc_A", 2, "tc_B", 1,
-                              "tc_C", 3, "tc_D", 2,
-                              "tc_E", 1);
+    protected static final Map<Object, Integer> EXPECTED_RESULTS = ImmutableMap.of("tc_A", 2,
+                                                                                   "tc_B", 1,
+                                                                                   "tc_C", 3,
+                                                                                   "tc_D", 2,
+                                                                                   "tc_E", 1);
 
     @BeforeClass
     public static void setup() {
@@ -121,8 +121,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
     public static class TriangleCountIntOutputTest extends HugeGraphIntOutput {
 
         @Override
-        public Integer value(
-               com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+        public Integer value(com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Integer value = super.value(vertex);
             Integer expected = EXPECTED_RESULTS.get(vertex.id());
             if (expected != null) {

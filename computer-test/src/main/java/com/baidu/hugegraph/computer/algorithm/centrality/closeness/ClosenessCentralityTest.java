@@ -154,9 +154,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
                             .build();
 
         @Override
-        protected Double value(
-                  com.baidu.hugegraph.computer.core.graph.vertex.Vertex
-                  vertex) {
+        protected Double value(com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Double result = super.value(vertex);
             Double expect = expectResults.get(vertex.id().string());
             Assert.assertNotNull(expect);
