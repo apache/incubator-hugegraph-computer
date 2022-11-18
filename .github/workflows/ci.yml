@@ -43,12 +43,12 @@ jobs:
           sleep 5
           curl localhost:9000
           kubectl get nodes
-#      - name: Cache Maven packages
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.m2
-#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-#          restore-keys: ${{ runner.os }}-m2
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Prepare env and service
         run: |
@@ -62,13 +62,13 @@ jobs:
           distribution: 'zulu'
 
       - name: Compile
-        run: mvn clean compile -Dmaven.javadoc.skip=true
+        run: mvn clean compile -Dmaven.javadoc.skip=true -ntp
 
       - name: Integrate test
-        run: mvn test -P integrate-test
+        run: mvn test -P integrate-test -ntp
 
       - name: Unit test
-        run: mvn test -P unit-test
+        run: mvn test -P unit-test -ntp
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3.0.0
