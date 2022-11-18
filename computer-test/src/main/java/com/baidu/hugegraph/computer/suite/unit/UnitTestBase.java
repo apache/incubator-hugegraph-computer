@@ -66,10 +66,8 @@ public class UnitTestBase {
                                         "0123456789" +
                                         "abcdefghijklmnopqrstuvxyz";
 
-    private static final String URL = ComputerOptions.HUGEGRAPH_URL
-                                                     .defaultValue();
-    private static final String GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME
-                                                       .defaultValue();
+    private static String URL;
+    private static String GRAPH;
     private static HugeClient CLIENT = null;
 
     protected static void clearAll() {
@@ -116,6 +114,12 @@ public class UnitTestBase {
                 ComputerOptions.INPUT_LOADER_STRUCT_PATH,
                 "defaultValue",
                 "src/main/resources/hdfs_input_test/struct.json");
+
+        URL = ComputerOptions.HUGEGRAPH_URL
+                .defaultValue();
+
+        GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME
+                .defaultValue();
 
         Class.forName(IdType.class.getName());
         // Don't forget to register options
