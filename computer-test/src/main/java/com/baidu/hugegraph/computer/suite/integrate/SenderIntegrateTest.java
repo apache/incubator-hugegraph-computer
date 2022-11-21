@@ -90,6 +90,7 @@ public class SenderIntegrateTest {
                 masterFuture.completeExceptionally(e);
             }
         });
+        masterThread.setDaemon(true);
 
         CompletableFuture<Void> workerFuture = new CompletableFuture<>();
         Thread workerThread = new Thread(() -> {
@@ -115,6 +116,7 @@ public class SenderIntegrateTest {
                 workerFuture.completeExceptionally(e);
             }
         });
+        workerThread.setDaemon(true);
         masterThread.start();
         workerThread.start();
 
@@ -151,6 +153,7 @@ public class SenderIntegrateTest {
                 masterFuture.completeExceptionally(e);
             }
         });
+        masterThread.setDaemon(true);
 
         Map<Thread, CompletableFuture<Void>> workers = new HashMap<>(workerCount);
         for (int i = 1; i <= workerCount; i++) {
@@ -183,7 +186,7 @@ public class SenderIntegrateTest {
                     workerFuture.completeExceptionally(e);
                 }
             });
-
+            thread.setDaemon(true);
             workers.put(thread, workerFuture);
         }
 
@@ -223,6 +226,8 @@ public class SenderIntegrateTest {
                 masterFuture.completeExceptionally(e);
             }
         });
+        masterThread.setDaemon(true);
+
         CompletableFuture<Void> workerFuture = new CompletableFuture<>();
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
@@ -248,6 +253,7 @@ public class SenderIntegrateTest {
                 workerFuture.completeExceptionally(e);
             }
         });
+        workerThread.setDaemon(true);
         masterThread.start();
         workerThread.start();
 
