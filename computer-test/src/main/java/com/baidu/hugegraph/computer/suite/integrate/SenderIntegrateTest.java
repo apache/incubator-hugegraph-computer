@@ -80,10 +80,11 @@ public class SenderIntegrateTest {
                                           .withBufferThreshold(50)
                                           .withBufferCapacity(60)
                                           .withRpcServerHost("127.0.0.1")
-                                          .withRpcServerPort(8077)
+                                          .withRpcServerPort(0)
                                           .build();
             try (MasterService service = initMaster(args)) {
                 service.execute();
+                service.close();
                 masterFuture.complete(null);
             } catch (Exception e) {
                 LOG.error("Failed to execute master service", e);
@@ -106,10 +107,10 @@ public class SenderIntegrateTest {
                                           .withBufferThreshold(50)
                                           .withBufferCapacity(60)
                                           .withTransoprtServerPort(8091)
-                                          .withRpcServerRemote("127.0.0.1:8077")
                                           .build();
             try (WorkerService service = initWorker(args)) {
                 service.execute();
+                service.close();
                 workerFuture.complete(null);
             } catch (Throwable e) {
                 LOG.error("Failed to execute worker service", e);
@@ -120,8 +121,7 @@ public class SenderIntegrateTest {
         masterThread.start();
         workerThread.start();
 
-        workerFuture.join();
-        masterFuture.join();
+        CompletableFuture.allOf(workerFuture, masterFuture).join();
     }
 
     @Test
@@ -194,10 +194,10 @@ public class SenderIntegrateTest {
         for (Thread worker : workers.keySet()) {
             worker.start();
         }
-        for (Thread worker : workers.keySet()) {
-            workers.get(worker).join();
-        }
-        masterFuture.join();
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>(workers.values());
+        futures.add(masterFuture);
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
     }
 
     @Test
@@ -220,6 +220,7 @@ public class SenderIntegrateTest {
                                           .build();
             try (MasterService service = initMaster(args)) {
                 service.execute();
+                service.close();
                 masterFuture.complete(null);
             } catch (Throwable e) {
                 LOG.error("Failed to execute master service", e);
@@ -247,6 +248,7 @@ public class SenderIntegrateTest {
                 // Let send rate slowly
                 this.slowSendFunc(service);
                 service.execute();
+                service.close();
                 workerFuture.complete(null);
             } catch (Throwable e) {
                 LOG.error("Failed to execute worker service", e);
@@ -257,8 +259,7 @@ public class SenderIntegrateTest {
         masterThread.start();
         workerThread.start();
 
-        workerFuture.join();
-        masterFuture.join();
+        CompletableFuture.allOf(workerFuture, masterFuture).join();
     }
 
     private void slowSendFunc(WorkerService service) throws TransportException {
