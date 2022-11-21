@@ -19,6 +19,22 @@
 
 package com.baidu.hugegraph.computer.suite.integrate;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.function.Function;
+
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.Log;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams;
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -33,20 +49,6 @@ import com.baidu.hugegraph.computer.core.network.netty.NettyTransportClient;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
-import java.util.function.Function;
-import org.apache.hugegraph.config.RpcOptions;
-import org.apache.hugegraph.testutil.Whitebox;
-import org.apache.hugegraph.util.Log;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.slf4j.Logger;
 
 public class SenderIntegrateTest {
 
@@ -80,6 +82,7 @@ public class SenderIntegrateTest {
                                           .withBufferThreshold(50)
                                           .withBufferCapacity(60)
                                           .withRpcServerHost("127.0.0.1")
+                                          .withRpcServerPort(8611)
                                           .withRpcServerPort(0)
                                           .build();
             try (MasterService service = initMaster(args)) {
@@ -106,7 +109,7 @@ public class SenderIntegrateTest {
                                           .withWorkerCount(1)
                                           .withBufferThreshold(50)
                                           .withBufferCapacity(60)
-                                          .withTransoprtServerPort(8091)
+                                          .withTransoprtServerPort(0)
                                           .build();
             try (WorkerService service = initWorker(args)) {
                 service.execute();
@@ -157,7 +160,6 @@ public class SenderIntegrateTest {
 
         Map<Thread, CompletableFuture<Void>> workers = new HashMap<>(workerCount);
         for (int i = 1; i <= workerCount; i++) {
-            int port = 8090 + i;
             String dir = "[jobs-" + i + "]";
 
             CompletableFuture<Void> workerFuture = new CompletableFuture<>();
@@ -173,7 +175,7 @@ public class SenderIntegrateTest {
                         .withComputationClass(COMPUTATION)
                         .withWorkerCount(workerCount)
                         .withPartitionCount(partitionCount)
-                        .withTransoprtServerPort(port)
+                        .withTransoprtServerPort(0)
                         .withDataDirs(dir)
                         .build();
                 try {
@@ -230,6 +232,7 @@ public class SenderIntegrateTest {
         masterThread.setDaemon(true);
 
         CompletableFuture<Void> workerFuture = new CompletableFuture<>();
+        int transoprtServerPort = 8998;
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
@@ -240,13 +243,13 @@ public class SenderIntegrateTest {
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
-                                          .withTransoprtServerPort(8091)
                                           .withWriteBufferHighMark(20)
                                           .withWriteBufferLowMark(10)
+                                          .withTransoprtServerPort(transoprtServerPort)
                                           .build();
             try (WorkerService service = initWorker(args)) {
                 // Let send rate slowly
-                this.slowSendFunc(service);
+                this.slowSendFunc(service, transoprtServerPort);
                 service.execute();
                 service.close();
                 workerFuture.complete(null);
@@ -262,7 +265,7 @@ public class SenderIntegrateTest {
         CompletableFuture.allOf(workerFuture, masterFuture).join();
     }
 
-    private void slowSendFunc(WorkerService service) throws TransportException {
+    private void slowSendFunc(WorkerService service, int port) throws TransportException {
         Managers managers = Whitebox.getInternalState(service, "managers");
         DataClientManager clientManager = managers.get(
                                           DataClientManager.NAME);
@@ -270,7 +273,7 @@ public class SenderIntegrateTest {
                                         clientManager, "connManager");
         NettyTransportClient client = (NettyTransportClient)
                                       connManager.getOrCreateClient(
-                                      "127.0.0.1", 8091);
+                                      "127.0.0.1", port);
         ClientSession clientSession = Whitebox.invoke(client.getClass(),
                                                       "clientSession", client);
         Function<Message, Future<Void>> sendFuncBak = Whitebox.getInternalState(
@@ -416,12 +419,6 @@ public class SenderIntegrateTest {
         public OptionsBuilder withRpcServerPort(int port) {
             this.options.add(RpcOptions.RPC_SERVER_PORT.name());
             this.options.add(String.valueOf(port));
-            return this;
-        }
-
-        public OptionsBuilder withRpcServerRemote(String remoteUrl) {
-            this.options.add(RpcOptions.RPC_REMOTE_URL.name());
-            this.options.add(remoteUrl);
             return this;
         }
 
