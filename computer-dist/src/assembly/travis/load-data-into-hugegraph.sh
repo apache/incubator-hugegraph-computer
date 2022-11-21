@@ -10,6 +10,7 @@ HUGEGRAPH_LOADER_GIT_URL="https://github.com/apache/hugegraph-toolchain.git"
 git clone --depth 10 ${HUGEGRAPH_LOADER_GIT_URL}
 
 cd hugegraph-toolchain
+sed -i '95d' hugegraph-loader/pom.xml
 mvn install -pl hugegraph-client,hugegraph-loader -am -DskipTests -ntp
 
 cd hugegraph-loader
