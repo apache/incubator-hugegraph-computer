@@ -37,13 +37,13 @@ jobs:
         uses: actions/cache@v3
         id: hdfs-cache
         with:
-          path: /opt/hadoop-3.3.2.tar.gz
+          path: ~/hadoop-3.3.2.tar.gz
           key: ${{ runner.os }}--hadoop
           restore-keys: ${{ runner.os }}-hadoop
 
       - name: Download HDFS
         if: steps.hdfs-cache.outputs.cache-hit != 'true'
-        run: wget http://archive.apache.org/dist/hadoop/common/hadoop-3.3.2/hadoop-3.3.2.tar.gz -O /opt/hadoop-3.3.2.tar.gz
+        run: wget http://archive.apache.org/dist/hadoop/common/hadoop-3.3.2/hadoop-3.3.2.tar.gz -O ~/hadoop-3.3.2.tar.gz
 
       - name: Setup HDFS
         run: $TRAVIS_DIR/install-hdfs.sh
