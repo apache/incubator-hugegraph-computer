@@ -10,10 +10,8 @@ chmod 0600 ~/.ssh/known_hosts
 eval `ssh-agent`
 ssh-add ~/.ssh/id_rsa
 
-sudo wget http://archive.apache.org/dist/hadoop/common/hadoop-3.3.2/hadoop-3.3.2.tar.gz
-
-tar -zxf hadoop-3.3.2.tar.gz -C /opt
 cd /opt
+tar -zxf hadoop-3.3.2.tar.gz
 mv hadoop-3.3.2 hadoop
 cd hadoop
 pwd
