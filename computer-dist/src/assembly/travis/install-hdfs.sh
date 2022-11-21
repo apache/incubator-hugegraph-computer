@@ -46,5 +46,6 @@ tee etc/hadoop/hdfs-site.xml <<EOF
 EOF
 
 bin/hdfs namenode -format
-sbin/start-dfs.sh
+sbin/hadoop-daemon.sh start namenode
+sbin/hadoop-daemon.sh start datanode
 jps
