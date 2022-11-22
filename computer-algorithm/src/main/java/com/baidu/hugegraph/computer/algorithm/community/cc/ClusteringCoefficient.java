@@ -76,21 +76,21 @@ public class ClusteringCoefficient implements Computation<IdList> {
         context.sendMessageToAllEdgesIf(vertex, selfId, (ids, targetId) -> {
             return !ids.get(0).equals(targetId);
         });
-        vertex.value(new TriangleCountValue());
+        vertex.value(new ClusteringCoefficientValue());
     }
 
     @Override
     public void compute(ComputationContext context, Vertex vertex, Iterator<IdList> messages) {
         Integer count = this.triangleCount(context, vertex, messages);
         if (count != null) {
-            ((TriangleCountValue) vertex.value()).count(count);
+            ((ClusteringCoefficientValue) vertex.value()).count(count);
             vertex.inactivate();
         }
     }
 
     private Integer triangleCount(ComputationContext context, Vertex vertex,
                                   Iterator<IdList> messages) {
-        IdList neighbors = ((TriangleCountValue) vertex.value()).idList();
+        IdList neighbors = ((ClusteringCoefficientValue) vertex.value()).idList();
 
         if (context.superstep() == 1) {
             // Collect outgoing neighbors

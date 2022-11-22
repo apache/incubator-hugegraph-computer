@@ -21,20 +21,18 @@ package com.baidu.hugegraph.computer.algorithm.community.cc;
 
 import java.util.Map;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
-import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.google.common.collect.ImmutableMap;
-
 import org.apache.hugegraph.driver.GraphManager;
 import org.apache.hugegraph.driver.SchemaManager;
 import org.apache.hugegraph.structure.constant.T;
 import org.apache.hugegraph.structure.graph.Vertex;
 import org.apache.hugegraph.testutil.Assert;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.google.common.collect.ImmutableMap;
 
 
 public class ClusteringCoefficientTest extends AlgorithmTestBase {
@@ -98,14 +96,14 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
 
     @Test
     public void testClusteringCoefficientValue() {
-        TriangleCountValue value = new TriangleCountValue();
+        ClusteringCoefficientValue value = new ClusteringCoefficientValue();
         value.count(10);
         Assert.assertThrows(UnsupportedOperationException.class,
                             () -> value.assign(null));
         Assert.assertThrows(UnsupportedOperationException.class,
-                            () -> value.compareTo(new TriangleCountValue()));
+                            () -> value.compareTo(new ClusteringCoefficientValue()));
 
-        TriangleCountValue copy = value.copy();
+        ClusteringCoefficientValue copy = value.copy();
         Assert.assertEquals(10, copy.count());
         Assert.assertNotSame(value.idList(), copy.idList());
 
