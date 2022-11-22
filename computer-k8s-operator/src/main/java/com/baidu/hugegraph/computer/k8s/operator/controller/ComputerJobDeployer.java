@@ -93,9 +93,7 @@ public class ComputerJobDeployer {
     private static final String TRANSPORT_PORT_NAME = "transport-port";
     private static final String RPC_PORT_NAME = "rpc-port";
     private static final int DEFAULT_TRANSPORT_PORT = 8099;
-    private static final int DEFAULT_RPC_PORT = 8093;
-    private static final String COMPUTER_CONFIG_MAP_VOLUME =
-            "computer-config-map-volume";
+    private static final String COMPUTER_CONFIG_MAP_VOLUME = "computer-config-map-volume";
 
     private static final String POD_IP_KEY = "status.podIP";
     private static final String POD_NAMESPACE_KEY = "metadata.namespace";
@@ -199,18 +197,12 @@ public class ComputerJobDeployer {
                        transportPort);
         }
 
-        String rpcPort = config.get(
-                         ComputerOptions.RPC_SERVER_PORT.name());
-        if (StringUtils.isBlank(rpcPort) || RANDOM_PORT.equals(rpcPort)) {
-            rpcPort = String.valueOf(DEFAULT_RPC_PORT);
-            config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
-        }
-
         ContainerPort transportContainerPort = new ContainerPortBuilder()
                 .withName(TRANSPORT_PORT_NAME)
                 .withContainerPort(Integer.valueOf(transportPort))
                 .withProtocol(PROTOCOL)
                 .build();
+        String rpcPort = config.getOrDefault(ComputerOptions.RPC_SERVER_PORT.name(), RANDOM_PORT);
         ContainerPort rpcContainerPort = new ContainerPortBuilder()
                 .withName(RPC_PORT_NAME)
                 .withContainerPort(Integer.valueOf(rpcPort))
