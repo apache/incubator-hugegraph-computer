@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 /**
  * This is used to buffer and output the buffer to output stream when buffer

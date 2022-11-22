@@ -25,7 +25,7 @@ import com.baidu.hugegraph.computer.core.common.exception.TransportException;
 import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportHandler;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;

@@ -29,16 +29,16 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.AbstractComputerOutput;
 import com.baidu.hugegraph.computer.core.output.hg.task.TaskManager;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.structure.constant.WriteType;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.structure.constant.WriteType;
+import org.apache.hugegraph.util.Log;
 
 public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
 
     private static final Logger LOG = Log.logger(HugeGraphOutput.class);
 
     private TaskManager taskManager;
-    private List<com.baidu.hugegraph.structure.graph.Vertex> localVertices;
+    private List<org.apache.hugegraph.structure.graph.Vertex> localVertices;
     private int batchSize;
     private WriteType writeType;
 
@@ -84,10 +84,10 @@ public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
         this.localVertices = new ArrayList<>(this.batchSize);
     }
 
-    protected com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(
+    protected org.apache.hugegraph.structure.graph.Vertex constructHugeVertex(
                                                          Vertex vertex) {
-        com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                new com.baidu.hugegraph.structure.graph.Vertex(null);
+        org.apache.hugegraph.structure.graph.Vertex hugeVertex =
+                new org.apache.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
         hugeVertex.property(this.name(), this.value(vertex));
         return hugeVertex;

@@ -24,7 +24,7 @@ import java.util.concurrent.CountDownLatch;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableSet;
 
 public class MultiQueueTest {

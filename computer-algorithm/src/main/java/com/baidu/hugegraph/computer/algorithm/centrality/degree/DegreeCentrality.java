@@ -33,7 +33,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 import com.baidu.hugegraph.computer.core.worker.WorkerContext;
-import com.baidu.hugegraph.util.NumericUtil;
+import org.apache.hugegraph.util.NumericUtil;
 
 public class DegreeCentrality implements Computation<NullValue> {
 

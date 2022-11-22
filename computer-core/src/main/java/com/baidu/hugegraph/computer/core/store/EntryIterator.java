@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.store;
 import org.apache.commons.lang.NotImplementedException;
 
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
-import com.baidu.hugegraph.iterator.CIter;
+import org.apache.hugegraph.iterator.CIter;
 
 public interface EntryIterator extends CIter<KvEntry> {
 

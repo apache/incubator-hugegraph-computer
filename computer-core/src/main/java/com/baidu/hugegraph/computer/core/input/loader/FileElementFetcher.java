@@ -32,19 +32,19 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.ElementFetcher;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
-import com.baidu.hugegraph.iterator.FlatMapperIterator;
-import com.baidu.hugegraph.loader.builder.ElementBuilder;
-import com.baidu.hugegraph.loader.builder.SchemaCache;
-import com.baidu.hugegraph.loader.constant.Constants;
-import com.baidu.hugegraph.loader.executor.ComputerLoadOptions;
-import com.baidu.hugegraph.loader.executor.LoadContext;
-import com.baidu.hugegraph.loader.mapping.InputStruct;
-import com.baidu.hugegraph.loader.reader.InputReader;
-import com.baidu.hugegraph.loader.reader.file.FileReader;
-import com.baidu.hugegraph.loader.reader.line.Line;
-import com.baidu.hugegraph.loader.source.file.FileSource;
-import com.baidu.hugegraph.loader.util.JsonUtil;
-import com.baidu.hugegraph.structure.GraphElement;
+import org.apache.hugegraph.iterator.FlatMapperIterator;
+import org.apache.hugegraph.loader.builder.ElementBuilder;
+import org.apache.hugegraph.loader.builder.SchemaCache;
+import org.apache.hugegraph.loader.constant.Constants;
+import org.apache.hugegraph.loader.executor.ComputerLoadOptions;
+import org.apache.hugegraph.loader.executor.LoadContext;
+import org.apache.hugegraph.loader.mapping.InputStruct;
+import org.apache.hugegraph.loader.reader.InputReader;
+import org.apache.hugegraph.loader.reader.file.FileReader;
+import org.apache.hugegraph.loader.reader.line.Line;
+import org.apache.hugegraph.loader.source.file.FileSource;
+import org.apache.hugegraph.loader.util.JsonUtil;
+import org.apache.hugegraph.structure.GraphElement;
 
 public abstract class FileElementFetcher<T extends GraphElement>
                 implements ElementFetcher<T>  {

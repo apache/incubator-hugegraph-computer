@@ -48,7 +48,7 @@ import com.baidu.hugegraph.computer.core.store.buffer.KvEntriesInput;
 import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
 public class FlusherTest {

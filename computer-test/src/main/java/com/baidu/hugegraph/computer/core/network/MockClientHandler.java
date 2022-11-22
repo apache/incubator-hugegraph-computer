@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.network;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 public class MockClientHandler implements ClientHandler {
 

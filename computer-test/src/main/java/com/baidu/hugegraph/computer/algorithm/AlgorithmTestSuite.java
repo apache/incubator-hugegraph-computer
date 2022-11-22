@@ -34,7 +34,7 @@ import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCo
 import com.baidu.hugegraph.computer.algorithm.community.wcc.WccTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
-import com.baidu.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -59,6 +59,6 @@ public class AlgorithmTestSuite {
                              "com.baidu.hugegraph.computer.core.config." +
                              "ComputerOptions");
         OptionSpace.register("computer-rpc",
-                             "com.baidu.hugegraph.config.RpcOptions");
+                             "org.apache.hugegraph.config.RpcOptions");
     }
 }

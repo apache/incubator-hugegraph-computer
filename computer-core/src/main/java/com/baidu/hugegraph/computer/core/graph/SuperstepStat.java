@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
 import com.baidu.hugegraph.computer.core.util.JsonUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 /**
  * It is sent from master to workers.

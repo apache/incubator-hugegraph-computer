@@ -26,6 +26,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -35,9 +38,6 @@ import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.MockWorkerService;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.config.RpcOptions;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
 
 public class AlgorithmTestBase extends UnitTestBase {
 
@@ -54,8 +54,6 @@ public class AlgorithmTestBase extends UnitTestBase {
             WorkerService workerService = null;
             try {
                 Map<String, String> params = new HashMap<>();
-                params.put(RpcOptions.RPC_REMOTE_URL.name(),
-                           "127.0.0.1:8090");
                 params.put(ComputerOptions.JOB_ID.name(),
                            "algo_test_job1");
                 params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),
@@ -101,8 +99,6 @@ public class AlgorithmTestBase extends UnitTestBase {
                 Map<String, String> params = new HashMap<>();
                 params.put(RpcOptions.RPC_SERVER_HOST.name(),
                            "localhost");
-                params.put(RpcOptions.RPC_SERVER_PORT.name(),
-                           "8090");
                 params.put(ComputerOptions.JOB_ID.name(),
                            "algo_test_job1");
                 params.put(ComputerOptions.JOB_WORKERS_COUNT.name(),

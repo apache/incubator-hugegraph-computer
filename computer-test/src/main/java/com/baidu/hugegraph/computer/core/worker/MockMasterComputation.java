@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.master.MasterComputationContext;
 import com.baidu.hugegraph.computer.core.master.MasterContext;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class MockMasterComputation extends DefaultMasterComputation {
 

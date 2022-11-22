@@ -24,9 +24,9 @@ import java.util.Iterator;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.EdgeFetcher;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.graph.Shard;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.structure.graph.Edge;
+import org.apache.hugegraph.structure.graph.Shard;
 
 public class HugeEdgeFetcher extends HugeElementFetcher<Edge>
                              implements EdgeFetcher {

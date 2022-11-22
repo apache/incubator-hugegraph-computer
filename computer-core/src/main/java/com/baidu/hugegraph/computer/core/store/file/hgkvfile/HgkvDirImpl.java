@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
 
 import com.baidu.hugegraph.computer.core.io.BufferedFileOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
-import com.baidu.hugegraph.exception.NotSupportException;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.exception.NotSupportException;
+import org.apache.hugegraph.util.E;
 
 public class HgkvDirImpl extends AbstractHgkvFile implements HgkvDir {
 

@@ -21,6 +21,7 @@ package com.baidu.hugegraph.computer.core.network;
 
 import java.net.InetSocketAddress;
 
+import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.common.exception.TransportException;
@@ -35,15 +36,12 @@ import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.worker.MockComputation;
 import com.baidu.hugegraph.computer.core.worker.MockMasterComputation;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.config.RpcOptions;
-import com.baidu.hugegraph.testutil.Assert;
 
 public class DataServerManagerTest extends UnitTestBase {
 
     @Test
     public void test() {
         Config config = UnitTestBase.updateWithRequiredOptions(
-            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_001",
             ComputerOptions.JOB_WORKERS_COUNT, "1",
             ComputerOptions.BSP_LOG_INTERVAL, "30000",

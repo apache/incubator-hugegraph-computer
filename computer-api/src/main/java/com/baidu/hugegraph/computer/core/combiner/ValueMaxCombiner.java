@@ -20,7 +20,7 @@
 package com.baidu.hugegraph.computer.core.combiner;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class ValueMaxCombiner<T extends Value> implements Combiner<T> {
 

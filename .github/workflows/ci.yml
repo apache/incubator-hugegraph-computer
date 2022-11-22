@@ -14,7 +14,7 @@ jobs:
     env:
       TRAVIS_DIR: computer-dist/src/assembly/travis
       KUBERNETES_VERSION: 1.20.1
-      HUGEGRAPH_SERVER_COMMIT_ID: 848b8fb17804ddc561af832dff0bdc3f6221c904
+      HUGEGRAPH_SERVER_COMMIT_ID: b1b12098feb726e46c781a2f171c77558db05fc1
 
     steps:
       - name: Checkout
@@ -32,6 +32,19 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
+
+      - name: Cache HDFS packages
+        uses: actions/cache@v3
+        id: hdfs-cache
+        with:
+          path: ~/hadoop-3.3.2.tar.gz
+          key: ${{ runner.os }}--hadoop
+          restore-keys: ${{ runner.os }}-hadoop
+
+      - name: Download HDFS
+        if: steps.hdfs-cache.outputs.cache-hit != 'true'
+        run: wget http://archive.apache.org/dist/hadoop/common/hadoop-3.3.2/hadoop-3.3.2.tar.gz -O ~/hadoop-3.3.2.tar.gz
+
       - name: Setup HDFS
         run: $TRAVIS_DIR/install-hdfs.sh
 
@@ -62,13 +75,13 @@ jobs:
           distribution: 'zulu'
 
       - name: Compile
-        run: mvn clean compile -Dmaven.javadoc.skip=true | grep -v "Downloading\|Downloaded"
+        run: mvn clean compile -Dmaven.javadoc.skip=true -ntp
 
       - name: Integrate test
-        run: mvn test -P integrate-test
+        run: mvn test -P integrate-test -ntp
 
       - name: Unit test
-        run: mvn test -P unit-test
+        run: mvn test -P unit-test -ntp
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3.0.0

@@ -26,8 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Whitebox;
 
 public class MessageQueueTest {
 

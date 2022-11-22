@@ -34,11 +34,11 @@ import com.baidu.hugegraph.computer.core.output.hg.exceptions.WriteBackException
 
 import com.baidu.hugegraph.computer.core.output.hg.metrics.LoadSummary;
 import com.baidu.hugegraph.computer.core.output.hg.metrics.Printer;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.HugeClientBuilder;
-import com.baidu.hugegraph.structure.graph.Vertex;
-import com.baidu.hugegraph.util.ExecutorUtil;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.driver.HugeClientBuilder;
+import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.util.ExecutorUtil;
+import org.apache.hugegraph.util.Log;
 
 public final class TaskManager {
 

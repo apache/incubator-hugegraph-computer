@@ -25,7 +25,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 /**
  * A {@link ConnectionId} identifies a connection to a remote connection

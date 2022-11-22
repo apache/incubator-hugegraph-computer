@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.StringUtils;
 
 import com.baidu.hugegraph.computer.driver.util.JsonUtil;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.client.CustomResource;

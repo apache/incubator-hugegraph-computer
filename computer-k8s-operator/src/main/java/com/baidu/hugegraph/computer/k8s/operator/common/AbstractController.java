@@ -42,9 +42,9 @@ import org.slf4j.Logger;
 import com.baidu.hugegraph.computer.k8s.crd.model.EventType;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.util.ExecutorUtil;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.util.ExecutorUtil;
+import org.apache.hugegraph.util.Log;
 import com.google.common.collect.Sets;
 
 import io.fabric8.kubernetes.api.model.Event;

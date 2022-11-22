@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.output;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 /**
  * LogOutput print the computation result to log file.

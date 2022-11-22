@@ -39,7 +39,7 @@ import com.baidu.hugegraph.computer.core.input.InputSourceFactory;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class LoadService {
 
@@ -117,12 +117,12 @@ public class LoadService {
             if (!this.hasNext()) {
                 throw new NoSuchElementException();
             }
-            com.baidu.hugegraph.structure.graph.Vertex hugeVertex;
+            org.apache.hugegraph.structure.graph.Vertex hugeVertex;
             hugeVertex = fetcher.vertexFetcher().next();
             return this.convert(hugeVertex);
         }
 
-        private Vertex convert(com.baidu.hugegraph.structure.graph.Vertex
+        private Vertex convert(org.apache.hugegraph.structure.graph.Vertex
                                vertex) {
             vertex = inputFilter.filter(vertex);
             Id id = HugeConverter.convertId(vertex.id());
@@ -182,7 +182,7 @@ public class LoadService {
                 throw new NoSuchElementException();
             }
 
-            com.baidu.hugegraph.structure.graph.Edge hugeEdge;
+            org.apache.hugegraph.structure.graph.Edge hugeEdge;
             EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
             while (edgeFetcher.hasNext()) {
                 hugeEdge = edgeFetcher.next();
@@ -217,7 +217,7 @@ public class LoadService {
             return vertex;
         }
 
-        private Edge convert(com.baidu.hugegraph.structure.graph.Edge edge) {
+        private Edge convert(org.apache.hugegraph.structure.graph.Edge edge) {
             edge = inputFilter.filter(edge);
             Id targetId = HugeConverter.convertId(edge.targetId());
             Properties properties = HugeConverter.convertProperties(

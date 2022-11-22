@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.network.message;
 import com.baidu.hugegraph.computer.core.network.buffer.FileRegionBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NettyBuffer;
 import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 import io.netty.buffer.ByteBuf;
 

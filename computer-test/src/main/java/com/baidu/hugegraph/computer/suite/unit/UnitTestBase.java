@@ -24,6 +24,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.config.TypedOption;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
+import org.apache.logging.log4j.LogManager;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -34,6 +43,8 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
+import com.baidu.hugegraph.computer.core.graph.id.IdType;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.BytesInput;
 import com.baidu.hugegraph.computer.core.io.BytesOutput;
@@ -49,11 +60,6 @@ import com.baidu.hugegraph.computer.core.store.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
-import com.baidu.hugegraph.config.TypedOption;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
 
 public class UnitTestBase {
 
@@ -63,14 +69,74 @@ public class UnitTestBase {
                                         "0123456789" +
                                         "abcdefghijklmnopqrstuvxyz";
 
-    private static final String URL = ComputerOptions.HUGEGRAPH_URL
-                                                     .defaultValue();
-    private static final String GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME
-                                                       .defaultValue();
+    private static String URL;
+    private static String GRAPH;
     private static HugeClient CLIENT = null;
 
     protected static void clearAll() {
         client().graphs().clearGraph(GRAPH, "I'm sure to delete all data");
+    }
+
+    @BeforeClass
+    public static void step() throws ClassNotFoundException {
+        Runtime.getRuntime().addShutdownHook(new Thread(LogManager::shutdown));
+
+        LOG.info("Setup for UnitTestSuite of hugegraph-computer");
+
+        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
+                "defaultValue",
+                "http://localhost:2579");
+        Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_URL,
+                "defaultValue",
+                "http://127.0.0.1:8080");
+        Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_GRAPH_NAME,
+                "defaultValue",
+                "hugegraph");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_URL,
+                "defaultValue",
+                "hdfs://127.0.0.1:9000");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_USER,
+                "defaultValue",
+                System.getProperty("user.name"));
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KERBEROS_ENABLE,
+                "defaultValue",
+                false);
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KRB5_CONF,
+                "defaultValue",
+                "/etc/krb5.conf");
+        Whitebox.setInternalState(ComputerOptions.OUTPUT_HDFS_KERBEROS_KEYTAB,
+                "defaultValue",
+                "");
+        Whitebox.setInternalState(
+                ComputerOptions.OUTPUT_HDFS_KERBEROS_PRINCIPAL,
+                "defaultValue",
+                "");
+        Whitebox.setInternalState(
+                ComputerOptions.INPUT_LOADER_SCHEMA_PATH,
+                "defaultValue",
+                "src/main/resources/hdfs_input_test/schema.json");
+        Whitebox.setInternalState(
+                ComputerOptions.INPUT_LOADER_STRUCT_PATH,
+                "defaultValue",
+                "src/main/resources/hdfs_input_test/struct.json");
+
+        URL = ComputerOptions.HUGEGRAPH_URL
+                .defaultValue();
+
+        GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME
+                .defaultValue();
+
+        Class.forName(IdType.class.getName());
+        // Don't forget to register options
+        OptionSpace.register("computer",
+                "com.baidu.hugegraph.computer.core.config." +
+                        "ComputerOptions");
+        OptionSpace.register("computer-rpc",
+                "org.apache.hugegraph.config.RpcOptions");
+
+        UnitTestBase.updateOptions(
+                ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()
+        );
     }
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)

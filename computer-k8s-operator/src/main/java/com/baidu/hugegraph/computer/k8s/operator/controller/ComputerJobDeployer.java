@@ -31,6 +31,9 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
@@ -40,9 +43,6 @@ import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.ResourceName;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -93,9 +93,8 @@ public class ComputerJobDeployer {
     private static final String TRANSPORT_PORT_NAME = "transport-port";
     private static final String RPC_PORT_NAME = "rpc-port";
     private static final int DEFAULT_TRANSPORT_PORT = 8099;
-    private static final int DEFAULT_RPC_PORT = 8090;
-    private static final String COMPUTER_CONFIG_MAP_VOLUME =
-            "computer-config-map-volume";
+    private static final int DEFAULT_RPC_PORT = 8190;
+    private static final String COMPUTER_CONFIG_MAP_VOLUME = "computer-config-map-volume";
 
     private static final String POD_IP_KEY = "status.podIP";
     private static final String POD_NAMESPACE_KEY = "metadata.namespace";
@@ -198,19 +197,18 @@ public class ComputerJobDeployer {
             config.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(),
                        transportPort);
         }
-
-        String rpcPort = config.get(
-                         ComputerOptions.RPC_SERVER_PORT.name());
-        if (StringUtils.isBlank(rpcPort) || RANDOM_PORT.equals(rpcPort)) {
-            rpcPort = String.valueOf(DEFAULT_RPC_PORT);
-            config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
-        }
-
         ContainerPort transportContainerPort = new ContainerPortBuilder()
                 .withName(TRANSPORT_PORT_NAME)
                 .withContainerPort(Integer.valueOf(transportPort))
                 .withProtocol(PROTOCOL)
                 .build();
+
+        String rpcPort = config.get(
+                ComputerOptions.RPC_SERVER_PORT.name());
+        if (StringUtils.isBlank(rpcPort) || RANDOM_PORT.equals(rpcPort)) {
+            rpcPort = String.valueOf(DEFAULT_RPC_PORT);
+            config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
+        }
         ContainerPort rpcContainerPort = new ContainerPortBuilder()
                 .withName(RPC_PORT_NAME)
                 .withContainerPort(Integer.valueOf(rpcPort))

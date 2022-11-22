@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.core.combiner.PointerCombiner;
 import com.baidu.hugegraph.computer.core.store.entry.DefaultKvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public abstract class CombinableSorterFlusher {
 

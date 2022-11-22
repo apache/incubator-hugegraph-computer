@@ -28,12 +28,12 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphDoubleOutput;
-import com.baidu.hugegraph.driver.GraphManager;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.SchemaManager;
-import com.baidu.hugegraph.structure.constant.T;
-import com.baidu.hugegraph.structure.graph.Vertex;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.driver.GraphManager;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.driver.SchemaManager;
+import org.apache.hugegraph.structure.constant.T;
+import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableMap;
 
 public class ClosenessCentralityTest extends AlgorithmTestBase {
@@ -59,12 +59,12 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
               .create();
 
         GraphManager graph = client.graph();
-        Vertex vA = graph.addVertex(T.label, "user", T.id, "A");
-        Vertex vB = graph.addVertex(T.label, "user", T.id, "B");
-        Vertex vC = graph.addVertex(T.label, "user", T.id, "C");
-        Vertex vD = graph.addVertex(T.label, "user", T.id, "D");
-        Vertex vE = graph.addVertex(T.label, "user", T.id, "E");
-        Vertex vF = graph.addVertex(T.label, "user", T.id, "F");
+        Vertex vA = graph.addVertex(T.LABEL, "user", T.ID, "A");
+        Vertex vB = graph.addVertex(T.LABEL, "user", T.ID, "B");
+        Vertex vC = graph.addVertex(T.LABEL, "user", T.ID, "C");
+        Vertex vD = graph.addVertex(T.LABEL, "user", T.ID, "D");
+        Vertex vE = graph.addVertex(T.LABEL, "user", T.ID, "E");
+        Vertex vF = graph.addVertex(T.LABEL, "user", T.ID, "F");
 
         vA.addEdge("link", vB, "rate", 1);
         vB.addEdge("link", vA, "rate", 1);
@@ -154,9 +154,7 @@ public class ClosenessCentralityTest extends AlgorithmTestBase {
                             .build();
 
         @Override
-        protected Double value(
-                  com.baidu.hugegraph.computer.core.graph.vertex.Vertex
-                  vertex) {
+        protected Double value(com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Double result = super.value(vertex);
             Double expect = expectResults.get(vertex.id().string());
             Assert.assertNotNull(expect);

@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.combiner;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class ValueMaxCombinerTest {
 

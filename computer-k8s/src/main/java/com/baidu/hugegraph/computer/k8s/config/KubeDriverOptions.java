@@ -19,15 +19,15 @@
 
 package com.baidu.hugegraph.computer.k8s.config;
 
-import static com.baidu.hugegraph.config.OptionChecker.allowValues;
-import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
+import static org.apache.hugegraph.config.OptionChecker.allowValues;
+import static org.apache.hugegraph.config.OptionChecker.disallowEmpty;
 
 import org.apache.commons.io.FileUtils;
 
 import com.baidu.hugegraph.computer.k8s.Constants;
-import com.baidu.hugegraph.config.ConfigListOption;
-import com.baidu.hugegraph.config.ConfigOption;
-import com.baidu.hugegraph.config.OptionHolder;
+import org.apache.hugegraph.config.ConfigListOption;
+import org.apache.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.config.OptionHolder;
 
 public class KubeDriverOptions extends OptionHolder {
 

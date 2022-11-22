@@ -19,8 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.sort.flusher;
 
-import com.baidu.hugegraph.iterator.CIter;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.iterator.CIter;
+import org.apache.hugegraph.util.E;
 
 public class PeekableIteratorAdaptor<T> implements PeekableIterator<T> {
 
