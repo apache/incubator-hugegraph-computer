@@ -24,6 +24,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.Log;
 import org.junit.Test;
 import org.slf4j.Logger;
 
@@ -34,9 +37,6 @@ import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.computer.core.output.LimitedLogOutput;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import org.apache.hugegraph.config.RpcOptions;
-import org.apache.hugegraph.testutil.Assert;
-import org.apache.hugegraph.util.Log;
 
 public class WorkerServiceTest extends UnitTestBase {
 
@@ -50,7 +50,6 @@ public class WorkerServiceTest extends UnitTestBase {
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
-                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                 ComputerOptions.JOB_ID, "local_002",
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
@@ -87,7 +86,6 @@ public class WorkerServiceTest extends UnitTestBase {
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
                 RpcOptions.RPC_SERVER_HOST, "localhost",
-                RpcOptions.RPC_SERVER_PORT, "8090",
                 ComputerOptions.JOB_ID, "local_002",
                 ComputerOptions.JOB_WORKERS_COUNT, "1",
                 ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
@@ -138,7 +136,6 @@ public class WorkerServiceTest extends UnitTestBase {
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
-                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                 ComputerOptions.JOB_ID, "local_003",
                 ComputerOptions.JOB_WORKERS_COUNT, "2",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2",
@@ -169,7 +166,6 @@ public class WorkerServiceTest extends UnitTestBase {
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
-                RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
                 ComputerOptions.JOB_ID, "local_003",
                 ComputerOptions.JOB_WORKERS_COUNT, "2",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2",
@@ -201,7 +197,6 @@ public class WorkerServiceTest extends UnitTestBase {
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
                 RpcOptions.RPC_SERVER_HOST, "localhost",
-                RpcOptions.RPC_SERVER_PORT, "8090",
                 ComputerOptions.JOB_ID, "local_003",
                 ComputerOptions.JOB_WORKERS_COUNT, "2",
                 ComputerOptions.JOB_PARTITIONS_COUNT, "2",
@@ -238,7 +233,6 @@ public class WorkerServiceTest extends UnitTestBase {
     @Test
     public void testFailToConnectEtcd() {
         Config config = UnitTestBase.updateWithRequiredOptions(
-            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             // Unavailable etcd endpoints
             ComputerOptions.BSP_ETCD_ENDPOINTS, "http://abc:8098",
             ComputerOptions.JOB_ID, "local_004",

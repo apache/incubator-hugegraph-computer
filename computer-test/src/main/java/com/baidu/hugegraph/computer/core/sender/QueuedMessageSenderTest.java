@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.sender;
 
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Whitebox;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,19 +28,15 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.worker.MockComputation2;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import org.apache.hugegraph.config.RpcOptions;
-import org.apache.hugegraph.testutil.Assert;
-import org.apache.hugegraph.testutil.Whitebox;
 import com.google.common.collect.ImmutableSet;
 
-public class QueuedMessageSenderTest {
+public class QueuedMessageSenderTest extends UnitTestBase {
 
     private Config config;
 
     @Before
     public void setup() {
         this.config = UnitTestBase.updateWithRequiredOptions(
-            RpcOptions.RPC_REMOTE_URL, "127.0.0.1:8090",
             ComputerOptions.JOB_ID, "local_002",
             ComputerOptions.JOB_WORKERS_COUNT, "2",
             ComputerOptions.JOB_PARTITIONS_COUNT, "2",
