@@ -23,8 +23,8 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.config.ConfigOption;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.util.Log;
 
 public interface AlgorithmParams {
 

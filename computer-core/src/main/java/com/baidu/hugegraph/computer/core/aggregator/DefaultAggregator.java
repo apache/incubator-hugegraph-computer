@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class DefaultAggregator<V extends Value> implements Aggregator<V> {
 

@@ -19,14 +19,10 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
-import static com.baidu.hugegraph.config.OptionChecker.allowValues;
-import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
-import static com.baidu.hugegraph.config.OptionChecker.nonNegativeInt;
-import static com.baidu.hugegraph.config.OptionChecker.positiveInt;
-
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
+import static org.apache.hugegraph.config.OptionChecker.allowValues;
+import static org.apache.hugegraph.config.OptionChecker.disallowEmpty;
+import static org.apache.hugegraph.config.OptionChecker.nonNegativeInt;
+import static org.apache.hugegraph.config.OptionChecker.positiveInt;
 import com.baidu.hugegraph.computer.core.combiner.OverwritePropertiesCombiner;
 import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
 import com.baidu.hugegraph.computer.core.input.filter.DefaultInputFilter;
@@ -34,14 +30,16 @@ import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.netty.NettyTransportProvider;
 import com.baidu.hugegraph.computer.core.output.LogOutput;
-import com.baidu.hugegraph.config.ConfigConvOption;
-import com.baidu.hugegraph.config.ConfigListOption;
-import com.baidu.hugegraph.config.ConfigOption;
-import com.baidu.hugegraph.config.OptionHolder;
-import com.baidu.hugegraph.structure.constant.Direction;
-import com.baidu.hugegraph.util.Bytes;
+import org.apache.hugegraph.structure.constant.Direction;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.apache.hugegraph.config.ConfigConvOption;
+import org.apache.hugegraph.config.ConfigListOption;
+import org.apache.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.config.OptionHolder;
+import org.apache.hugegraph.util.Bytes;
 
 public class ComputerOptions extends OptionHolder {
 

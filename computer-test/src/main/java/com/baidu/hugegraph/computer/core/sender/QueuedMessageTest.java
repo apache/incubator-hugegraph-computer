@@ -24,7 +24,7 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class QueuedMessageTest {
 

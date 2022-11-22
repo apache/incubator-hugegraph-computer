@@ -28,12 +28,14 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphDoubleOutput;
-import com.baidu.hugegraph.driver.GraphManager;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.SchemaManager;
-import com.baidu.hugegraph.structure.constant.T;
-import com.baidu.hugegraph.structure.graph.Vertex;
-import com.baidu.hugegraph.testutil.Assert;
+
+import org.apache.hugegraph.driver.GraphManager;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.driver.SchemaManager;
+import org.apache.hugegraph.structure.constant.T;
+import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.testutil.Assert;
+
 import com.google.common.collect.ImmutableMap;
 
 public class BetweennessCentralityTest extends AlgorithmTestBase {
@@ -68,14 +70,14 @@ public class BetweennessCentralityTest extends AlgorithmTestBase {
               .create();
 
         GraphManager graph = client.graph();
-        Vertex v0 = graph.addVertex(T.label, "user", T.id, "0");
-        Vertex v1 = graph.addVertex(T.label, "user", T.id, "1");
-        Vertex v2 = graph.addVertex(T.label, "user", T.id, "2");
-        Vertex v3 = graph.addVertex(T.label, "user", T.id, "3");
-        Vertex v4 = graph.addVertex(T.label, "user", T.id, "4");
-        Vertex v5 = graph.addVertex(T.label, "user", T.id, "5");
-        Vertex v6 = graph.addVertex(T.label, "user", T.id, "6");
-        Vertex v7 = graph.addVertex(T.label, "user", T.id, "7");
+        Vertex v0 = graph.addVertex(T.LABEL, "user", T.ID, "0");
+        Vertex v1 = graph.addVertex(T.LABEL, "user", T.ID, "1");
+        Vertex v2 = graph.addVertex(T.LABEL, "user", T.ID, "2");
+        Vertex v3 = graph.addVertex(T.LABEL, "user", T.ID, "3");
+        Vertex v4 = graph.addVertex(T.LABEL, "user", T.ID, "4");
+        Vertex v5 = graph.addVertex(T.LABEL, "user", T.ID, "5");
+        Vertex v6 = graph.addVertex(T.LABEL, "user", T.ID, "6");
+        Vertex v7 = graph.addVertex(T.LABEL, "user", T.ID, "7");
 
         v0.addEdge("link", v1);
         v0.addEdge("link", v2);
@@ -130,13 +132,10 @@ public class BetweennessCentralityTest extends AlgorithmTestBase {
 
     }
 
-    public static class BetweennessCentralityTestOutput
-                  extends HugeGraphDoubleOutput {
+    public static class BetweennessCentralityTestOutput extends HugeGraphDoubleOutput {
 
         @Override
-        protected Double value(
-                  com.baidu.hugegraph.computer.core.graph.vertex.Vertex
-                  vertex) {
+        protected Double value(com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Double result = super.value(vertex);
             Double expect = EXPECT_RESULTS.get(vertex.id().string());
             Assert.assertNotNull(expect);

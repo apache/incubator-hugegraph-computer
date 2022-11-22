@@ -31,11 +31,11 @@ import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest.Ring
 import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilter;
 import com.baidu.hugegraph.computer.algorithm.path.rings.filter.RingsDetectionWithFilterParams;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.driver.GraphManager;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.SchemaManager;
-import com.baidu.hugegraph.structure.constant.T;
-import com.baidu.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.driver.GraphManager;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.driver.SchemaManager;
+import org.apache.hugegraph.structure.constant.T;
+import org.apache.hugegraph.structure.graph.Vertex;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -74,11 +74,11 @@ public class RingsDetectionWithFilterTest extends AlgorithmTestBase {
               .create();
 
         GraphManager graph = client.graph();
-        Vertex vA = graph.addVertex(T.label, "user", T.id, "A", "weight", 1);
-        Vertex vB = graph.addVertex(T.label, "user", T.id, "B", "weight", 1);
-        Vertex vC = graph.addVertex(T.label, "user", T.id, "C", "weight", 1);
-        Vertex vD = graph.addVertex(T.label, "user", T.id, "D", "weight", 1);
-        Vertex vE = graph.addVertex(T.label, "user", T.id, "E", "weight", 3);
+        Vertex vA = graph.addVertex(T.LABEL, "user", T.ID, "A", "weight", 1);
+        Vertex vB = graph.addVertex(T.LABEL, "user", T.ID, "B", "weight", 1);
+        Vertex vC = graph.addVertex(T.LABEL, "user", T.ID, "C", "weight", 1);
+        Vertex vD = graph.addVertex(T.LABEL, "user", T.ID, "D", "weight", 1);
+        Vertex vE = graph.addVertex(T.LABEL, "user", T.ID, "E", "weight", 3);
 
         vA.addEdge("know", vB, "weight", 1);
         vA.addEdge("know", vC, "weight", 1);

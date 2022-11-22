@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
-import com.baidu.hugegraph.structure.graph.Edge;
+import org.apache.hugegraph.structure.graph.Edge;
 
 /**
  * Streamed read the data of each input split, and return one HugeEdge object

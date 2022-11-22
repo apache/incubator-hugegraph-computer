@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.input;
 
 import org.junit.Test;
 
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class InputSplitTest {
 

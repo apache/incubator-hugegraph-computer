@@ -25,7 +25,7 @@ import java.util.Locale;
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 import io.netty.channel.epoll.Epoll;
 

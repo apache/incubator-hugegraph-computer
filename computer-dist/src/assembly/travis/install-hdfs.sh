@@ -25,8 +25,7 @@ chmod 0600 ~/.ssh/known_hosts
 eval `ssh-agent`
 ssh-add ~/.ssh/id_rsa
 
-sudo wget http://archive.apache.org/dist/hadoop/common/hadoop-3.3.2/hadoop-3.3.2.tar.gz
-
+cd ~/
 tar -zxf hadoop-3.3.2.tar.gz -C /opt
 cd /opt
 mv hadoop-3.3.2 hadoop
@@ -61,5 +60,6 @@ tee etc/hadoop/hdfs-site.xml <<EOF
 EOF
 
 bin/hdfs namenode -format
-sbin/start-dfs.sh
+sbin/hadoop-daemon.sh start namenode
+sbin/hadoop-daemon.sh start datanode
 jps

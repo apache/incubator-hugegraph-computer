@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 import com.google.common.collect.ImmutableMap;
 
 public class Aggregators {

@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class OptimizedBytesOutput implements BytesOutput {
 

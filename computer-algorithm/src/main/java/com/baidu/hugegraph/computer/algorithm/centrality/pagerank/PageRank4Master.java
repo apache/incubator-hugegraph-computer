@@ -29,7 +29,7 @@ import com.baidu.hugegraph.computer.core.graph.value.ValueType;
 import com.baidu.hugegraph.computer.core.master.MasterComputation;
 import com.baidu.hugegraph.computer.core.master.MasterComputationContext;
 import com.baidu.hugegraph.computer.core.master.MasterContext;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 public class PageRank4Master implements MasterComputation {
 

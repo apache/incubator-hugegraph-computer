@@ -24,7 +24,7 @@ import java.io.IOException;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
-import com.baidu.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.testutil.Whitebox;
 
 @SuppressWarnings("deprecation") // StringEscapeUtils
 public class StructRandomAccessOutput implements RandomAccessOutput {

@@ -20,7 +20,7 @@
 package com.baidu.hugegraph.computer.core.common;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.util.CollectionUtil;
+import org.apache.hugegraph.util.CollectionUtil;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 

@@ -20,7 +20,7 @@
 package com.baidu.hugegraph.computer.core.combiner;
 
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class OverwritePropertiesCombiner implements PropertiesCombiner {
 

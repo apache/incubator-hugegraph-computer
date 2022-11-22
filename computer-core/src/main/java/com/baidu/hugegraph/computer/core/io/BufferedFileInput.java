@@ -25,8 +25,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.E;
 
 public class BufferedFileInput extends AbstractBufferedFileInput {
 

@@ -24,8 +24,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.baidu.hugegraph.computer.core.input.InputSplit;
-import com.baidu.hugegraph.loader.constant.ElemType;
-import com.baidu.hugegraph.loader.mapping.InputStruct;
+import org.apache.hugegraph.loader.constant.ElemType;
+import org.apache.hugegraph.loader.mapping.InputStruct;
 import com.google.common.base.Objects;
 
 public class FileInputSplit extends InputSplit {

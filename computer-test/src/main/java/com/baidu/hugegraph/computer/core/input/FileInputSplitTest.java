@@ -23,9 +23,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.baidu.hugegraph.computer.core.input.loader.FileInputSplit;
-import com.baidu.hugegraph.loader.constant.ElemType;
-import com.baidu.hugegraph.loader.mapping.InputStruct;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.loader.constant.ElemType;
+import org.apache.hugegraph.loader.mapping.InputStruct;
+import org.apache.hugegraph.testutil.Assert;
 
 public class FileInputSplitTest {
 

@@ -26,8 +26,8 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.ElementFetcher;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.structure.graph.Shard;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.structure.graph.Shard;
 
 public abstract class HugeElementFetcher<T> implements ElementFetcher<T> {
 

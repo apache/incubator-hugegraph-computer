@@ -55,7 +55,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>hugegraph-common</artifactId>
         </dependency>
         <dependency>

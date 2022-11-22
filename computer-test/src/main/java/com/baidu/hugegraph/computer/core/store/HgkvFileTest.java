@@ -39,7 +39,7 @@ import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvFileBui
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvFileBuilderImpl;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.reader.HgkvFileReaderImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
 public class HgkvFileTest {

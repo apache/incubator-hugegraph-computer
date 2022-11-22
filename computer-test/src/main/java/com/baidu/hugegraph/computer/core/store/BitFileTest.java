@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.store.file.seqfile.BitsFileReader;
 import com.baidu.hugegraph.computer.core.store.file.seqfile.BitsFileReaderImpl;
 import com.baidu.hugegraph.computer.core.store.file.seqfile.BitsFileWriter;
 import com.baidu.hugegraph.computer.core.store.file.seqfile.BitsFileWriterImpl;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class BitFileTest {
 

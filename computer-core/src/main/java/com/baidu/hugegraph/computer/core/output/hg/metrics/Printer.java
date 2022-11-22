@@ -21,8 +21,8 @@ package com.baidu.hugegraph.computer.core.output.hg.metrics;
 
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.util.Log;
-import com.baidu.hugegraph.util.TimeUtil;
+import org.apache.hugegraph.util.Log;
+import org.apache.hugegraph.util.TimeUtil;
 
 public final class Printer {
 

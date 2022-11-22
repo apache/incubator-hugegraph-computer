@@ -27,4 +27,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>computer-driver</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.hugegraph</groupId>
+            <artifactId>hugegraph-client</artifactId>
+        </dependency>
+    </dependencies>
 </project>

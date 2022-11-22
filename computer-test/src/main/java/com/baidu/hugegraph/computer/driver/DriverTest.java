@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.driver;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.driver.util.JsonUtil;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class DriverTest {
 

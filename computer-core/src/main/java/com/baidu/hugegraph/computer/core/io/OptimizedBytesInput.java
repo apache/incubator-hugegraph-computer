@@ -22,8 +22,8 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
-import com.baidu.hugegraph.util.Bytes;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.Bytes;
+import org.apache.hugegraph.util.E;
 
 public class OptimizedBytesInput implements BytesInput {
 

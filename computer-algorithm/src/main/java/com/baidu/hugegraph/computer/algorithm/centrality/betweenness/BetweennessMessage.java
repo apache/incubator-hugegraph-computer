@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class BetweennessMessage implements CustomizeValue<BetweennessMessage> {
 
