@@ -24,9 +24,9 @@ import java.util.Iterator;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.structure.graph.Shard;
-import com.baidu.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.structure.graph.Shard;
+import org.apache.hugegraph.structure.graph.Vertex;
 
 public class HugeVertexFetcher extends HugeElementFetcher<Vertex>
                                implements VertexFetcher {

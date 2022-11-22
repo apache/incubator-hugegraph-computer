@@ -28,7 +28,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class HgkvFileImpl extends AbstractHgkvFile {
 

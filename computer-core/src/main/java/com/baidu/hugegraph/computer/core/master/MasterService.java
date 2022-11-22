@@ -47,9 +47,9 @@ import com.baidu.hugegraph.computer.core.output.ComputerOutput;
 import com.baidu.hugegraph.computer.core.rpc.MasterRpcManager;
 import com.baidu.hugegraph.computer.core.util.ShutdownHook;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
-import com.baidu.hugegraph.util.TimeUtil;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
+import org.apache.hugegraph.util.TimeUtil;
 
 /**
  * Master service is job's controller. It controls the superstep iteration of

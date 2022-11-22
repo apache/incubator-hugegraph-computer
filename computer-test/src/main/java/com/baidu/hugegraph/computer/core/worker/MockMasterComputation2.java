@@ -24,7 +24,7 @@ import com.baidu.hugegraph.computer.core.graph.value.FloatValue;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.core.master.MasterComputationContext;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class MockMasterComputation2 extends MockMasterComputation {
 

@@ -82,15 +82,14 @@ public class DegreeCentralityTest extends AlgorithmTestBase {
             } else {
                 Iterator<Edge> edges = vertex.edges().iterator();
                 double totalValue = Streams.stream(edges).map(
-                                    (edge) -> {
-                                        DoubleValue weightValue =
-                                                    edge.property(this.weight);
-                                        if (weightValue == null) {
-                                            return 1.0;
-                                        } else {
-                                            return weightValue.value();
-                                        }
-                                    }).reduce(Double::sum).orElse(0.0);
+                        (edge) -> {
+                            DoubleValue weightValue = edge.property(this.weight);
+                            if (weightValue == null) {
+                                return 1.0;
+                            } else {
+                                return weightValue.value();
+                            }
+                        }).reduce(Double::sum).orElse(0.0);
                 Assert.assertEquals(totalValue, value, 0.000001);
             }
             return value;

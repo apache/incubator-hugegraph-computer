@@ -62,9 +62,9 @@ import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvDirBuilderImpl;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Bytes;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.Bytes;
+import org.apache.hugegraph.util.Log;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 

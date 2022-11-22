@@ -24,9 +24,9 @@ import java.net.InetSocketAddress;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
-import com.baidu.hugegraph.rpc.RpcProviderConfig;
-import com.baidu.hugegraph.rpc.RpcServer;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.rpc.RpcProviderConfig;
+import org.apache.hugegraph.rpc.RpcServer;
+import org.apache.hugegraph.util.E;
 
 public class MasterRpcManager implements Manager {
 

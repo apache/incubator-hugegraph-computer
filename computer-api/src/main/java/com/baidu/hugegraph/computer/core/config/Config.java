@@ -19,9 +19,9 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
-import com.baidu.hugegraph.config.ConfigOption;
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.config.TypedOption;
+import org.apache.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.config.TypedOption;
 
 public interface Config {
 

@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.network.session;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportState;
 import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class ServerSession extends TransportSession {
 

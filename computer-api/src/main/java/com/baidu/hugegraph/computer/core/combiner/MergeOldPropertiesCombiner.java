@@ -23,7 +23,7 @@ import java.util.Map;
 
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class MergeOldPropertiesCombiner implements PropertiesCombiner {
 

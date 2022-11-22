@@ -29,7 +29,7 @@ import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.AbstractBufferedFileOutput;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class ValueFileOutput extends AbstractBufferedFileOutput {
 

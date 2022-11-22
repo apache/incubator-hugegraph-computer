@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.util.BytesUtil;
 import com.baidu.hugegraph.computer.core.util.CoderUtil;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class BytesId implements Id {
 

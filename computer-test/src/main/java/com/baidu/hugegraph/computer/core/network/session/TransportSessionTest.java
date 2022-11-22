@@ -35,10 +35,10 @@ import com.baidu.hugegraph.computer.core.network.message.AbstractMessage;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.netty.AbstractNetworkTest;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.ExecutorUtil;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.ExecutorUtil;
+import org.apache.hugegraph.util.Log;
 
 public class TransportSessionTest extends AbstractNetworkTest {
 

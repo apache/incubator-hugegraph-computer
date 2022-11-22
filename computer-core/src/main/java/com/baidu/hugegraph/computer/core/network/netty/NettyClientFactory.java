@@ -32,8 +32,8 @@ import com.baidu.hugegraph.computer.core.network.ConnectionId;
 import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBufAllocator;

@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
 import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 import com.baidu.hugegraph.computer.core.store.EntryIterator;
 import com.baidu.hugegraph.computer.core.util.FileUtil;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class FileMergerImpl implements FileMerger {
 

@@ -19,23 +19,23 @@
 
 package com.baidu.hugegraph.computer.driver;
 
-import static com.baidu.hugegraph.config.OptionChecker.disallowEmpty;
+import static org.apache.hugegraph.config.OptionChecker.disallowEmpty;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.configuration2.MapConfiguration;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
 import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
-import com.baidu.hugegraph.config.ConfigException;
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.config.TypedOption;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.config.ConfigException;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.config.TypedOption;
+import org.apache.hugegraph.testutil.Assert;
 
 public class ComputerOptionsTest {
     private static Map<String, String> options;

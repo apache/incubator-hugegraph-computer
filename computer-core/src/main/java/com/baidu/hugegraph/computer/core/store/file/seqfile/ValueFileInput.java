@@ -33,7 +33,7 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.io.AbstractBufferedFileInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class ValueFileInput extends AbstractBufferedFileInput {
 

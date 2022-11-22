@@ -26,8 +26,8 @@ import com.baidu.hugegraph.computer.core.input.GraphFetcher;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
 import com.baidu.hugegraph.computer.core.rpc.InputSplitRpcService;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.HugeClientBuilder;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.driver.HugeClientBuilder;
 
 public class HugeGraphFetcher implements GraphFetcher {
 

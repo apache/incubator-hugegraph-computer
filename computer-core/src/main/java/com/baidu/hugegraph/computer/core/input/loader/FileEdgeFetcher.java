@@ -25,14 +25,14 @@ import java.util.List;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.EdgeFetcher;
 import com.baidu.hugegraph.computer.core.input.IdUtil;
-import com.baidu.hugegraph.loader.builder.EdgeBuilder;
-import com.baidu.hugegraph.loader.builder.ElementBuilder;
-import com.baidu.hugegraph.loader.executor.LoadContext;
-import com.baidu.hugegraph.loader.mapping.EdgeMapping;
-import com.baidu.hugegraph.loader.mapping.InputStruct;
-import com.baidu.hugegraph.loader.reader.line.Line;
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.schema.EdgeLabel;
+import org.apache.hugegraph.loader.builder.EdgeBuilder;
+import org.apache.hugegraph.loader.builder.ElementBuilder;
+import org.apache.hugegraph.loader.executor.LoadContext;
+import org.apache.hugegraph.loader.mapping.EdgeMapping;
+import org.apache.hugegraph.loader.mapping.InputStruct;
+import org.apache.hugegraph.loader.reader.line.Line;
+import org.apache.hugegraph.structure.graph.Edge;
+import org.apache.hugegraph.structure.schema.EdgeLabel;
 
 public class FileEdgeFetcher extends FileElementFetcher<Edge>
                              implements EdgeFetcher {

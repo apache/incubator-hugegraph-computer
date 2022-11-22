@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import com.baidu.hugegraph.computer.core.io.Readable;
 import com.baidu.hugegraph.computer.core.io.Writable;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public interface Value extends Writable, Readable, Comparable<Value> {
 

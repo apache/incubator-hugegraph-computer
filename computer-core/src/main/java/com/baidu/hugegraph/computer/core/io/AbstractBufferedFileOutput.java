@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.io;
 import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public abstract class AbstractBufferedFileOutput extends UnsafeBytesOutput {
 

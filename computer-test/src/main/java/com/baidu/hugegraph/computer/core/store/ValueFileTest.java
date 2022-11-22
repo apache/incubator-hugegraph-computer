@@ -36,9 +36,9 @@ import com.baidu.hugegraph.computer.core.io.UnsafeBytesOutput;
 import com.baidu.hugegraph.computer.core.store.file.seqfile.ValueFileInput;
 import com.baidu.hugegraph.computer.core.store.file.seqfile.ValueFileOutput;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.E;
 
 public class ValueFileTest {
 

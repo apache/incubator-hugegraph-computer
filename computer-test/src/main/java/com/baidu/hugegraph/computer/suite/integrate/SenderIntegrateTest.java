@@ -20,10 +20,16 @@
 package com.baidu.hugegraph.computer.suite.integrate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.Log;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,10 +49,6 @@ import com.baidu.hugegraph.computer.core.network.netty.NettyTransportClient;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
-import com.baidu.hugegraph.config.RpcOptions;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.testutil.Whitebox;
-import com.baidu.hugegraph.util.Log;
 
 public class SenderIntegrateTest {
 
@@ -65,7 +67,8 @@ public class SenderIntegrateTest {
     }
 
     @Test
-    public void testOneWorker() throws InterruptedException {
+    public void testOneWorker() {
+        CompletableFuture<Void> masterFuture = new CompletableFuture<>();
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
@@ -79,14 +82,21 @@ public class SenderIntegrateTest {
                                           .withBufferThreshold(50)
                                           .withBufferCapacity(60)
                                           .withRpcServerHost("127.0.0.1")
-                                          .withRpcServerPort(8090)
+                                          .withRpcServerPort(8611)
+                                          .withRpcServerPort(0)
                                           .build();
             try (MasterService service = initMaster(args)) {
                 service.execute();
+                service.close();
+                masterFuture.complete(null);
             } catch (Exception e) {
-                Assert.fail(e.getMessage());
+                LOG.error("Failed to execute master service", e);
+                masterFuture.completeExceptionally(e);
             }
         });
+        masterThread.setDaemon(true);
+
+        CompletableFuture<Void> workerFuture = new CompletableFuture<>();
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
@@ -99,26 +109,29 @@ public class SenderIntegrateTest {
                                           .withWorkerCount(1)
                                           .withBufferThreshold(50)
                                           .withBufferCapacity(60)
-                                          .withTransoprtServerPort(8091)
-                                          .withRpcServerRemote("127.0.0.1:8090")
+                                          .withTransoprtServerPort(0)
                                           .build();
             try (WorkerService service = initWorker(args)) {
                 service.execute();
-            } catch (Exception e) {
-                Assert.fail(e.getMessage());
+                service.close();
+                workerFuture.complete(null);
+            } catch (Throwable e) {
+                LOG.error("Failed to execute worker service", e);
+                workerFuture.completeExceptionally(e);
             }
         });
+        workerThread.setDaemon(true);
         masterThread.start();
         workerThread.start();
 
-        workerThread.join();
-        masterThread.join();
+        CompletableFuture.allOf(workerFuture, masterFuture).join();
     }
 
     @Test
-    public void testMultiWorkers() throws InterruptedException {
+    public void testMultiWorkers() {
         int workerCount = 3;
         int partitionCount = 3;
+        CompletableFuture<Void> masterFuture = new CompletableFuture<>();
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_003")
@@ -131,59 +144,67 @@ public class SenderIntegrateTest {
                                           .withWorkerCount(workerCount)
                                           .withPartitionCount(partitionCount)
                                           .withRpcServerHost("127.0.0.1")
-                                          .withRpcServerPort(8090)
+                                          .withRpcServerPort(0)
                                           .build();
             try {
                 MasterService service = initMaster(args);
                 service.execute();
                 service.close();
-            } catch (Exception e) {
-                Assert.fail(e.getMessage());
+                masterFuture.complete(null);
+            } catch (Throwable e) {
+                LOG.error("Failed to execute master service", e);
+                masterFuture.completeExceptionally(e);
             }
         });
+        masterThread.setDaemon(true);
 
-        List<Thread> workers = new ArrayList<>(workerCount);
+        Map<Thread, CompletableFuture<Void>> workers = new HashMap<>(workerCount);
         for (int i = 1; i <= workerCount; i++) {
-            int port = 8090 + i;
             String dir = "[jobs-" + i + "]";
-            workers.add(new Thread(() -> {
+
+            CompletableFuture<Void> workerFuture = new CompletableFuture<>();
+            Thread thread = new Thread(() -> {
                 String[] args;
                 args = OptionsBuilder.newInstance()
-                                     .withJobId("local_003")
-                                     .withAlgorithm(PageRankParams.class)
-                                     .withResultName("rank")
-                                     .withResultClass(DoubleValue.class)
-                                     .withMessageClass(DoubleValue.class)
-                                     .withMaxSuperStep(3)
-                                     .withComputationClass(COMPUTATION)
-                                     .withWorkerCount(workerCount)
-                                     .withPartitionCount(partitionCount)
-                                     .withTransoprtServerPort(port)
-                                     .withRpcServerRemote("127.0.0.1:8090")
-                                     .withDataDirs(dir)
-                                     .build();
+                        .withJobId("local_003")
+                        .withAlgorithm(PageRankParams.class)
+                        .withResultName("rank")
+                        .withResultClass(DoubleValue.class)
+                        .withMessageClass(DoubleValue.class)
+                        .withMaxSuperStep(3)
+                        .withComputationClass(COMPUTATION)
+                        .withWorkerCount(workerCount)
+                        .withPartitionCount(partitionCount)
+                        .withTransoprtServerPort(0)
+                        .withDataDirs(dir)
+                        .build();
                 try {
                     WorkerService service = initWorker(args);
                     service.execute();
                     service.close();
-                } catch (Exception e) {
-                    Assert.fail(e.getMessage());
+                    workerFuture.complete(null);
+                } catch (Throwable e) {
+                    LOG.error("Failed to execute worker service", e);
+                    workerFuture.completeExceptionally(e);
                 }
-            }));
+            });
+            thread.setDaemon(true);
+            workers.put(thread, workerFuture);
         }
 
         masterThread.start();
-        for (Thread worker : workers) {
+        for (Thread worker : workers.keySet()) {
             worker.start();
         }
-        for (Thread worker : workers) {
-            worker.join();
-        }
-        masterThread.join();
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>(workers.values());
+        futures.add(masterFuture);
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
     }
 
     @Test
     public void testOneWorkerWithBusyClient() throws InterruptedException {
+        CompletableFuture<Void> masterFuture = new CompletableFuture<>();
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
@@ -197,15 +218,21 @@ public class SenderIntegrateTest {
                                           .withWriteBufferHighMark(10)
                                           .withWriteBufferLowMark(5)
                                           .withRpcServerHost("127.0.0.1")
-                                          .withRpcServerPort(8090)
+                                          .withRpcServerPort(0)
                                           .build();
             try (MasterService service = initMaster(args)) {
                 service.execute();
-            } catch (Exception e) {
+                service.close();
+                masterFuture.complete(null);
+            } catch (Throwable e) {
                 LOG.error("Failed to execute master service", e);
-                Assert.fail(e.getMessage());
+                masterFuture.completeExceptionally(e);
             }
         });
+        masterThread.setDaemon(true);
+
+        CompletableFuture<Void> workerFuture = new CompletableFuture<>();
+        int transoprtServerPort = 8998;
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
@@ -216,28 +243,29 @@ public class SenderIntegrateTest {
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
-                                          .withTransoprtServerPort(8091)
                                           .withWriteBufferHighMark(20)
                                           .withWriteBufferLowMark(10)
-                                          .withRpcServerRemote("127.0.0.1:8090")
+                                          .withTransoprtServerPort(transoprtServerPort)
                                           .build();
             try (WorkerService service = initWorker(args)) {
                 // Let send rate slowly
-                this.slowSendFunc(service);
+                this.slowSendFunc(service, transoprtServerPort);
                 service.execute();
-            } catch (Exception e) {
+                service.close();
+                workerFuture.complete(null);
+            } catch (Throwable e) {
                 LOG.error("Failed to execute worker service", e);
-                Assert.fail(e.getMessage());
+                workerFuture.completeExceptionally(e);
             }
         });
+        workerThread.setDaemon(true);
         masterThread.start();
         workerThread.start();
 
-        workerThread.join();
-        masterThread.join();
+        CompletableFuture.allOf(workerFuture, masterFuture).join();
     }
 
-    private void slowSendFunc(WorkerService service) throws TransportException {
+    private void slowSendFunc(WorkerService service, int port) throws TransportException {
         Managers managers = Whitebox.getInternalState(service, "managers");
         DataClientManager clientManager = managers.get(
                                           DataClientManager.NAME);
@@ -245,7 +273,7 @@ public class SenderIntegrateTest {
                                         clientManager, "connManager");
         NettyTransportClient client = (NettyTransportClient)
                                       connManager.getOrCreateClient(
-                                      "127.0.0.1", 8091);
+                                      "127.0.0.1", port);
         ClientSession clientSession = Whitebox.invoke(client.getClass(),
                                                       "clientSession", client);
         Function<Message, Future<Void>> sendFuncBak = Whitebox.getInternalState(
@@ -391,12 +419,6 @@ public class SenderIntegrateTest {
         public OptionsBuilder withRpcServerPort(int port) {
             this.options.add(RpcOptions.RPC_SERVER_PORT.name());
             this.options.add(String.valueOf(port));
-            return this;
-        }
-
-        public OptionsBuilder withRpcServerRemote(String remoteUrl) {
-            this.options.add(RpcOptions.RPC_REMOTE_URL.name());
-            this.options.add(remoteUrl);
             return this;
         }
 

@@ -29,7 +29,7 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvFile;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvFileImpl;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class HgkvFileBuilderImpl implements HgkvFileBuilder {
 

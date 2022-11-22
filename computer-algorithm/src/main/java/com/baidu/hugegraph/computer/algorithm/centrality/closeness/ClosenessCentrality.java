@@ -32,8 +32,8 @@ import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
-import com.baidu.hugegraph.util.Log;
-import com.baidu.hugegraph.util.NumericUtil;
+import org.apache.hugegraph.util.Log;
+import org.apache.hugegraph.util.NumericUtil;
 
 public class ClosenessCentrality implements Computation<ClosenessMessage> {
 

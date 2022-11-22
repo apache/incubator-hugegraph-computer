@@ -20,8 +20,8 @@
 package com.baidu.hugegraph.computer.core.input.filter;
 
 import com.baidu.hugegraph.computer.core.input.InputFilter;
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.structure.graph.Edge;
+import org.apache.hugegraph.structure.graph.Vertex;
 
 public class ExtractAllPropertyInputFilter implements InputFilter {
 

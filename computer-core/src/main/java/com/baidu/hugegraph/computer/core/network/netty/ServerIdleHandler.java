@@ -22,7 +22,7 @@ package com.baidu.hugegraph.computer.core.network.netty;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.network.TransportUtil;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;

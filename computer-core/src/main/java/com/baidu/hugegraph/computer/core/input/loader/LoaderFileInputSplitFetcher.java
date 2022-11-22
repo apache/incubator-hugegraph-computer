@@ -38,15 +38,15 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.InputSplitFetcher;
-import com.baidu.hugegraph.loader.constant.ElemType;
-import com.baidu.hugegraph.loader.exception.LoadException;
-import com.baidu.hugegraph.loader.mapping.InputStruct;
-import com.baidu.hugegraph.loader.mapping.LoadMapping;
-import com.baidu.hugegraph.loader.source.SourceType;
-import com.baidu.hugegraph.loader.source.file.FileFilter;
-import com.baidu.hugegraph.loader.source.file.FileSource;
-import com.baidu.hugegraph.loader.source.hdfs.HDFSSource;
-import com.baidu.hugegraph.loader.source.hdfs.KerberosConfig;
+import org.apache.hugegraph.loader.constant.ElemType;
+import org.apache.hugegraph.loader.exception.LoadException;
+import org.apache.hugegraph.loader.mapping.InputStruct;
+import org.apache.hugegraph.loader.mapping.LoadMapping;
+import org.apache.hugegraph.loader.source.SourceType;
+import org.apache.hugegraph.loader.source.file.FileFilter;
+import org.apache.hugegraph.loader.source.file.FileSource;
+import org.apache.hugegraph.loader.source.hdfs.HDFSSource;
+import org.apache.hugegraph.loader.source.hdfs.KerberosConfig;
 
 public class LoaderFileInputSplitFetcher implements InputSplitFetcher {
 

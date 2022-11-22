@@ -24,10 +24,10 @@ import java.util.List;
 
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.id.IdType;
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.schema.EdgeLabel;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.SplicingIdGenerator;
+import org.apache.hugegraph.structure.graph.Edge;
+import org.apache.hugegraph.structure.schema.EdgeLabel;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.SplicingIdGenerator;
 import com.google.common.collect.ImmutableList;
 
 public class IdUtil {
