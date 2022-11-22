@@ -37,19 +37,19 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
  * ClusteringCoefficient(CC) algorithm could calculate local & the whole graph:
  * 1. local cc: get triangles & degree for current vertex, calculate them
  * 2. whole cc have 2 ways to get the result: (NOT SUPPORTED NOW)
- *    - sum all open & closed triangles in graph, and calculate the result
- *    - sum all local cc for each vertex, and use avg as the whole graph result
+ * - sum all open & closed triangles in graph, and calculate the result
+ * - sum all local cc for each vertex, and use avg as the whole graph result
  * <p>
  * And we have 2 ways to count local cc:
  * 1. if we already saved the triangles in each vertex, we can calculate only
- *    in superstep0/compute0 to get the result
+ * in superstep0/compute0 to get the result
  * 2. if we want recount the triangles result, we can choose:
- *    - copy code from TriangleCount, then add extra logic
- *    - reuse code in TriangleCount (need solve compatible problem - TODO)
+ * - copy code from TriangleCount, then add extra logic
+ * - reuse code in TriangleCount (need solve compatible problem - TODO)
  * <p>
- *  The formula of local CC is: C(v) = 2T / Dv(Dv - 1)
- *  v represents one vertex, T represents the triangles of current vertex,
- *  D represents the degree of current vertex
+ * The formula of local CC is: C(v) = 2T / Dv(Dv - 1)
+ * v represents one vertex, T represents the triangles of current vertex,
+ * D represents the degree of current vertex
  */
 public class ClusteringCoefficient implements Computation<IdList> {
 

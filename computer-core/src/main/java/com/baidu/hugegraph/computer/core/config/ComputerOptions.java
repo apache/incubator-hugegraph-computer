@@ -61,7 +61,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Class<?>> ALGORITHM_PARAMS_CLASS =
             new ConfigOption<>(
                     "algorithm.params_class",
-                    "The class used to transfer algorithms's parameters " +
+                    "The class used to transfer algorithms' parameters " +
                     "before algorithm been run.",
                     disallowEmpty(),
                     Null.class

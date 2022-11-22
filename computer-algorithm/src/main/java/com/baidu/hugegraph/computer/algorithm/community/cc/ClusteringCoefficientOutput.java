@@ -22,7 +22,8 @@ package com.baidu.hugegraph.computer.algorithm.community.cc;
 import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.hg.HugeGraphOutput;
-import com.baidu.hugegraph.structure.constant.WriteType;
+
+import org.apache.hugegraph.structure.constant.WriteType;
 
 /**
  * Offer 2 ways to output: write-back + hdfs-file(TODO)
@@ -37,16 +38,16 @@ public class ClusteringCoefficientOutput extends HugeGraphOutput<Float> {
     @Override
     public void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                     .asFloat()
-                     .writeType(WriteType.OLAP_RANGE)
-                     .ifNotExist()
-                     .create();
+            .asFloat()
+            .writeType(WriteType.OLAP_RANGE)
+            .ifNotExist()
+            .create();
     }
 
     @Override
-    protected com.baidu.hugegraph.structure.graph.Vertex constructHugeVertex(Vertex vertex) {
-        com.baidu.hugegraph.structure.graph.Vertex hugeVertex =
-                  new com.baidu.hugegraph.structure.graph.Vertex(null);
+    protected org.apache.hugegraph.structure.graph.Vertex constructHugeVertex(Vertex vertex) {
+        org.apache.hugegraph.structure.graph.Vertex hugeVertex =
+                new org.apache.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
         float triangle = ((TriangleCountValue) vertex.value()).count();
         int degree = ((TriangleCountValue) vertex.value()).idList().size();

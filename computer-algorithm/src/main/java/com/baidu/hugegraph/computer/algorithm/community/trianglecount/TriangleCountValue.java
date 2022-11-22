@@ -73,10 +73,8 @@ public class TriangleCountValue implements CustomizeValue<Integer> {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                   .append("idList", this.idList)
-                   .append("count", this.count)
-                   .toString();
+        return new ToStringBuilder(this).append("idList", this.idList)
+                                        .append("count", this.count).toString();
     }
 
     @Override

@@ -21,8 +21,6 @@ package com.baidu.hugegraph.computer.algorithm.community.cc;
 
 import java.util.Map;
 
-import javax.ws.rs.NotSupportedException;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,16 +28,17 @@ import org.junit.Test;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCountValue;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.driver.GraphManager;
-import com.baidu.hugegraph.driver.SchemaManager;
-import com.baidu.hugegraph.structure.constant.T;
-import com.baidu.hugegraph.structure.graph.Vertex;
-import com.baidu.hugegraph.testutil.Assert;
+import com.google.common.collect.ImmutableMap;
 
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import org.apache.hugegraph.driver.GraphManager;
+import org.apache.hugegraph.driver.SchemaManager;
+import org.apache.hugegraph.structure.constant.T;
+import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.testutil.Assert;
+
 
 public class ClusteringCoefficientTest extends AlgorithmTestBase {
-    
+
     private static final String VERTX_LABEL = "tc_user";
     private static final String EDGE_LABEL = "tc_know";
     private static final String PROPERTY_KEY = "tc_weight";
@@ -71,15 +70,15 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
               .create();
 
         GraphManager graph = client().graph();
-        Vertex vA = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_A",
+        Vertex vA = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "tc_A",
                                     PROPERTY_KEY, 1);
-        Vertex vB = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_B",
+        Vertex vB = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "tc_B",
                                     PROPERTY_KEY, 1);
-        Vertex vC = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_C",
+        Vertex vC = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "tc_C",
                                     PROPERTY_KEY, 1);
-        Vertex vD = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_D",
+        Vertex vD = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "tc_D",
                                     PROPERTY_KEY, 1);
-        Vertex vE = graph.addVertex(T.label, VERTX_LABEL, T.id, "tc_E",
+        Vertex vE = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "tc_E",
                                     PROPERTY_KEY, 1);
 
         vA.addEdge(EDGE_LABEL, vB, PROPERTY_KEY, 1);
