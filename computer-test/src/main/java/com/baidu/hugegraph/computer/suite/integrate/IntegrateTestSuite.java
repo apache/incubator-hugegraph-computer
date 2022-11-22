@@ -19,15 +19,16 @@
 
 package com.baidu.hugegraph.computer.suite.integrate;
 
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.Log;
+import org.apache.logging.log4j.LogManager;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import org.apache.hugegraph.config.OptionSpace;
-import org.apache.hugegraph.testutil.Whitebox;
-import org.apache.hugegraph.util.Log;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -39,6 +40,8 @@ public class IntegrateTestSuite {
 
     @BeforeClass
     public static void setup() {
+        Runtime.getRuntime().addShutdownHook(new Thread(LogManager::shutdown));
+
         LOG.info("Setup for IntegrateTestSuite of hugegraph-computer");
 
         // Don't forget to register options

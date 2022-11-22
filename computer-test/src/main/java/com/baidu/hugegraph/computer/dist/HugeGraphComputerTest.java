@@ -6,13 +6,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.Log;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import org.apache.hugegraph.testutil.Assert;
-import org.apache.hugegraph.util.Log;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
 
-public class HugeGraphComputerTest {
+public class HugeGraphComputerTest extends UnitTestBase {
 
     private static final Logger LOG = Log.logger(HugeGraphComputerTest.class);
 
@@ -83,17 +84,5 @@ public class HugeGraphComputerTest {
         t.start();
         t.join();
         Assert.assertTrue(isRun.get());
-    }
-
-    private boolean existError(Throwable[] exceptions) {
-        boolean error = false;
-        for (Throwable e : exceptions) {
-            if (e != null) {
-                error = true;
-                LOG.warn("There exist error:", e);
-                break;
-            }
-        }
-        return error;
     }
 }

@@ -39,6 +39,11 @@ import java.util.concurrent.ExecutorService;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.util.ExecutorUtil;
+import org.apache.hugegraph.util.Log;
+import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.k8s.Constants;
@@ -46,10 +51,6 @@ import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.operator.controller.ComputerJobController;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import org.apache.hugegraph.config.HugeConfig;
-import org.apache.hugegraph.config.OptionSpace;
-import org.apache.hugegraph.util.ExecutorUtil;
-import org.apache.hugegraph.util.Log;
 import com.sun.net.httpserver.HttpServer;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -182,6 +183,8 @@ public class OperatorEntrypoint {
             this.httpServer.stop(0);
             this.httpServer = null;
         }
+
+        LogManager.shutdown();
     }
 
     private HugeConfig configFromSysPropsOrEnvVars() {

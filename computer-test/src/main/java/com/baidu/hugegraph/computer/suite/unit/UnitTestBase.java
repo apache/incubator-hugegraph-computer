@@ -19,6 +19,22 @@
 
 package com.baidu.hugegraph.computer.suite.unit;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.config.TypedOption;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
+import org.apache.logging.log4j.LogManager;
+import org.junit.BeforeClass;
+import org.slf4j.Logger;
+
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.Constants;
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
@@ -44,19 +60,6 @@ import com.baidu.hugegraph.computer.core.store.entry.EntryInput;
 import com.baidu.hugegraph.computer.core.store.entry.EntryInputImpl;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.MockComputationParams;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import org.apache.hugegraph.config.OptionSpace;
-import org.apache.hugegraph.config.TypedOption;
-import org.apache.hugegraph.driver.HugeClient;
-import org.apache.hugegraph.testutil.Assert;
-import org.apache.hugegraph.testutil.Whitebox;
-import org.apache.hugegraph.util.E;
-import org.apache.hugegraph.util.Log;
-import org.junit.BeforeClass;
-import org.slf4j.Logger;
 
 public class UnitTestBase {
 
@@ -76,6 +79,8 @@ public class UnitTestBase {
 
     @BeforeClass
     public static void step() throws ClassNotFoundException {
+        Runtime.getRuntime().addShutdownHook(new Thread(LogManager::shutdown));
+
         LOG.info("Setup for UnitTestSuite of hugegraph-computer");
 
         Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
