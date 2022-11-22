@@ -24,7 +24,7 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

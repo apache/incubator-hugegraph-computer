@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.baidu.hugegraph.computer.core.common.Constants;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class BufferedStreamInput extends UnsafeBytesInput {
 

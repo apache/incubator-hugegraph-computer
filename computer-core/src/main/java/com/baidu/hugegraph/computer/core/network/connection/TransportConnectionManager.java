@@ -33,7 +33,7 @@ import com.baidu.hugegraph.computer.core.network.TransportClient;
 import com.baidu.hugegraph.computer.core.network.TransportConf;
 import com.baidu.hugegraph.computer.core.network.TransportProvider;
 import com.baidu.hugegraph.computer.core.network.TransportServer;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class TransportConnectionManager implements ConnectionManager {
 

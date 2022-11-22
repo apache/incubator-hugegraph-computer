@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.driver.config;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.baidu.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.config.ConfigOption;
 import com.google.common.base.Predicate;
 
 /**

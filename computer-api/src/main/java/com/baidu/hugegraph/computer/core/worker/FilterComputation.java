@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.iterator.MapperIterator;
+import org.apache.hugegraph.iterator.MapperIterator;
 
 /**
  * FilterComputation is computation that can't combine the messages. When

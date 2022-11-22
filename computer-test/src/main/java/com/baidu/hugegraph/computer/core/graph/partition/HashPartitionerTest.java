@@ -31,8 +31,8 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import com.baidu.hugegraph.testutil.Assert;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.util.Log;
 
 public class HashPartitionerTest extends UnitTestBase {
 

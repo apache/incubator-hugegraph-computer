@@ -21,9 +21,9 @@ package com.baidu.hugegraph.computer.core.rpc;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.manager.Manager;
-import com.baidu.hugegraph.config.RpcOptions;
-import com.baidu.hugegraph.rpc.RpcClientProvider;
-import com.baidu.hugegraph.rpc.RpcConsumerConfig;
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.rpc.RpcClientProvider;
+import org.apache.hugegraph.rpc.RpcConsumerConfig;
 
 public class WorkerRpcManager implements Manager {
 

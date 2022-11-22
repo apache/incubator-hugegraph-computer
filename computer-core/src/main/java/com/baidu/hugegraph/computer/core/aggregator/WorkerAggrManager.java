@@ -27,7 +27,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.manager.Manager;
 import com.baidu.hugegraph.computer.core.rpc.AggregateRpcService;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 /**
  * Aggregator manager manages aggregators in worker.

@@ -32,7 +32,7 @@ import com.baidu.hugegraph.computer.core.store.entry.EntriesUtil;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.Pointer;
 import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class CombineSubKvOuterSortFlusher implements OuterSortFlusher {
 

@@ -20,7 +20,7 @@
 package com.baidu.hugegraph.computer.core.combiner;
 
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class IntValueSumCombiner implements Combiner<IntValue> {
 

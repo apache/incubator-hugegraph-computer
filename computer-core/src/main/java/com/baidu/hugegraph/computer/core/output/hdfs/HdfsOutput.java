@@ -37,7 +37,7 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.AbstractComputerOutput;
 import com.baidu.hugegraph.computer.core.util.StringEncoding;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 public class HdfsOutput extends AbstractComputerOutput {
 

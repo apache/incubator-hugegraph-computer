@@ -49,8 +49,8 @@ import com.baidu.hugegraph.computer.k8s.operator.common.OperatorRequest;
 import com.baidu.hugegraph.computer.k8s.operator.common.OperatorResult;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.util.Log;
 import com.google.common.base.Throwables;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;

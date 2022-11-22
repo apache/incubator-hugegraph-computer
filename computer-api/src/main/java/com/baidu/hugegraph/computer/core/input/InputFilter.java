@@ -19,8 +19,8 @@
 
 package com.baidu.hugegraph.computer.core.input;
 
-import com.baidu.hugegraph.structure.graph.Edge;
-import com.baidu.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.structure.graph.Edge;
+import org.apache.hugegraph.structure.graph.Vertex;
 
 /**
  * Filter vertices or edges, user can filter vertices, edges and their

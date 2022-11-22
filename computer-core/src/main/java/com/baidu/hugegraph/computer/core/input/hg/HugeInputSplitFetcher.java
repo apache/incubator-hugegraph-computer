@@ -26,10 +26,10 @@ import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.InputSplit;
 import com.baidu.hugegraph.computer.core.input.InputSplitFetcher;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.driver.HugeClientBuilder;
-import com.baidu.hugegraph.structure.graph.Shard;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.driver.HugeClientBuilder;
+import org.apache.hugegraph.structure.graph.Shard;
+import org.apache.hugegraph.util.E;
 
 public class HugeInputSplitFetcher implements InputSplitFetcher {
 

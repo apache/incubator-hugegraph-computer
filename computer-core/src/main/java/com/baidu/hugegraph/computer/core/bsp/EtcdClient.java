@@ -32,9 +32,9 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.concurrent.BarrierEvent;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.concurrent.BarrierEvent;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 import com.google.common.annotations.VisibleForTesting;
 
 import io.etcd.jetcd.ByteSequence;

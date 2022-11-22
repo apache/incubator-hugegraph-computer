@@ -24,12 +24,12 @@ import java.util.List;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.input.VertexFetcher;
-import com.baidu.hugegraph.loader.builder.ElementBuilder;
-import com.baidu.hugegraph.loader.builder.VertexBuilder;
-import com.baidu.hugegraph.loader.executor.LoadContext;
-import com.baidu.hugegraph.loader.mapping.InputStruct;
-import com.baidu.hugegraph.loader.mapping.VertexMapping;
-import com.baidu.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.loader.builder.ElementBuilder;
+import org.apache.hugegraph.loader.builder.VertexBuilder;
+import org.apache.hugegraph.loader.executor.LoadContext;
+import org.apache.hugegraph.loader.mapping.InputStruct;
+import org.apache.hugegraph.loader.mapping.VertexMapping;
+import org.apache.hugegraph.structure.graph.Vertex;
 
 public class FileVertxFetcher extends FileElementFetcher<Vertex>
                               implements VertexFetcher {

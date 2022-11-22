@@ -22,13 +22,13 @@ package com.baidu.hugegraph.computer.core.config;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.configuration.MapConfiguration;
+import org.apache.commons.configuration2.MapConfiguration;
 
 import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
-import com.baidu.hugegraph.config.ConfigOption;
-import com.baidu.hugegraph.config.HugeConfig;
-import com.baidu.hugegraph.config.TypedOption;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.config.TypedOption;
+import org.apache.hugegraph.util.E;
 
 public final class DefaultConfig implements Config {
 

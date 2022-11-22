@@ -25,9 +25,9 @@ import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.output.hg.metrics.LoadSummary;
-import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.structure.graph.Vertex;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.util.Log;
 import com.google.common.collect.ImmutableList;
 
 public class SingleInsertTask extends InsertTask {

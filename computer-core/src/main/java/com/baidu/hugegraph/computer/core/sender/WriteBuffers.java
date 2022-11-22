@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.io.BytesOutput;
 import com.baidu.hugegraph.computer.core.io.IOFactory;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.receiver.MessageStat;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class WriteBuffers {
 

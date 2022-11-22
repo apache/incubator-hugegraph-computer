@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
-import com.baidu.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.config.ConfigOption;
 
 /**
  * Null is used in ConfigOption<Class> to indicate a null class option.

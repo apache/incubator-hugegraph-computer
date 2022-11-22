@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.store.entry.EntryOutput;
 import com.baidu.hugegraph.computer.core.store.entry.EntryOutputImpl;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntryWriter;
-import com.baidu.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Assert;
 
 public class EntriesUtilTest {
 

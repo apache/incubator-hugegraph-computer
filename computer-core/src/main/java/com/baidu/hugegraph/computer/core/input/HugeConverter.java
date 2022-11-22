@@ -39,7 +39,7 @@ import com.baidu.hugegraph.computer.core.graph.value.NullValue;
 import com.baidu.hugegraph.computer.core.graph.value.StringValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public final class HugeConverter {
 

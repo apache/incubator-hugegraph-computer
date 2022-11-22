@@ -31,7 +31,7 @@ import com.baidu.hugegraph.computer.core.store.KvEntryFileWriter;
 import com.baidu.hugegraph.computer.core.store.entry.KvEntry;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDir;
 import com.baidu.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 public class HgkvDirBuilderImpl implements KvEntryFileWriter {
 

@@ -19,7 +19,7 @@
 
 package com.baidu.hugegraph.computer.core.common;
 
-import com.baidu.hugegraph.util.Bytes;
+import org.apache.hugegraph.util.Bytes;
 
 public final class Constants {
 

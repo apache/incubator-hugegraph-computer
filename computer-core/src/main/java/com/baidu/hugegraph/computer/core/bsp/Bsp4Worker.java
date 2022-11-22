@@ -30,7 +30,7 @@ import com.baidu.hugegraph.computer.core.graph.SuperstepStat;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.util.SerializeUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerStat;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.util.Log;
 
 public class Bsp4Worker extends BspBase {
 

@@ -26,7 +26,7 @@ import com.baidu.hugegraph.computer.core.common.exception.ComputerException;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.UnsafeBytesInput;
 import com.baidu.hugegraph.computer.core.network.buffer.NetworkBuffer;
-import com.baidu.hugegraph.concurrent.BarrierEvent;
+import org.apache.hugegraph.concurrent.BarrierEvent;
 
 public class MessageRecvBuffers {
 

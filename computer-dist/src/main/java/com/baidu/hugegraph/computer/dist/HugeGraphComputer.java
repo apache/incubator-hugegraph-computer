@@ -34,9 +34,9 @@ import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
-import com.baidu.hugegraph.config.OptionSpace;
-import com.baidu.hugegraph.util.E;
-import com.baidu.hugegraph.util.Log;
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 
 public class HugeGraphComputer {
 
@@ -139,6 +139,6 @@ public class HugeGraphComputer {
                              "com.baidu.hugegraph.computer.core.config." +
                              "ComputerOptions");
         OptionSpace.register("computer-rpc",
-                             "com.baidu.hugegraph.config.RpcOptions");
+                             "org.apache.hugegraph.config.RpcOptions");
     }
 }

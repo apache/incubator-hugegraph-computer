@@ -35,7 +35,7 @@ import com.baidu.hugegraph.computer.core.network.TransportState;
 import com.baidu.hugegraph.computer.core.network.message.Message;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.network.session.ClientSession;
-import com.baidu.hugegraph.util.E;
+import org.apache.hugegraph.util.E;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
