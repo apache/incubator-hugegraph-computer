@@ -48,7 +48,7 @@ public class ClusteringCoefficientOutput extends HugeGraphOutput<Float> {
         org.apache.hugegraph.structure.graph.Vertex hugeVertex =
                 new org.apache.hugegraph.structure.graph.Vertex(null);
         hugeVertex.id(vertex.id().asObject());
-        float triangle = ((ClusteringCoefficientValue) vertex.value()).count();
+        long triangle = ((ClusteringCoefficientValue) vertex.value()).count();
         int degree = ((ClusteringCoefficientValue) vertex.value()).idList().size();
         hugeVertex.property(this.name(), 2 * triangle / degree / (degree - 1));
         return hugeVertex;
@@ -57,7 +57,7 @@ public class ClusteringCoefficientOutput extends HugeGraphOutput<Float> {
     /* TODO: enhance it
     @Override
     protected Float value(Vertex vertex) {
-        float triangle = ((ClusteringCoefficientValue) vertex.value()).count();
+        long triangle = ((ClusteringCoefficientValue) vertex.value()).count();
         int degree = ((ClusteringCoefficientValue) vertex.value()).idList().size();
         return 2 * triangle / degree / (degree - 1);
     }*/
