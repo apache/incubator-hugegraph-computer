@@ -21,14 +21,36 @@ package com.baidu.hugegraph.computer.algorithm;
 
 import java.util.Map;
 
-import org.slf4j.Logger;
-
 import org.apache.hugegraph.config.ConfigOption;
 import org.apache.hugegraph.util.Log;
+import org.slf4j.Logger;
 
 public interface AlgorithmParams {
 
     Logger LOG = Log.logger(AlgorithmParams.class);
+
+    String BYTESID_CLASS_NAME = "com.baidu.hugegraph.computer.core.graph.id.BytesId";
+    String HUGEGRAPH_ID_OUTPUT_CLASS_NAME = "com.baidu.hugegraph.computer.core" +
+                                            ".output.hg.HugeGraphIdOutput";
+    String LOG_OUTPUT_CLASS_NAME = "com.baidu.hugegraph.computer.core.output.LogOutput";
+    String HUGEGRAPH_DOUBLE_OUTPUT_CLASS_NAME = "com.baidu.hugegraph.computer.core" +
+                                                ".output.hg.HugeGraphDoubleOutput";
+    String HUGEGRAPH_FLOAT_OUTPUT_CLASS_NAME = "com.baidu.hugegraph.computer.core" +
+                                               ".output.hg.HugeGraphFloatOutput";
+    String HUGEGRAPH_INT_OUTPUT_CLASS_NAME = "com.baidu.hugegraph.computer.core" +
+                                             ".output.hg.HugeGraphIntOutput";
+    String HUGEGRAPH_LONG_OUTPUT_CLASS_NAME = "com.baidu.hugegraph.computer.core" +
+                                              ".output.hg.HugeGraphLongOutput";
+    String HUGEGRAPH_STRING_OUTPUT_CLASS_NAME = "com.baidu.hugegraph.computer.core" +
+                                                ".output.hg.HugeGraphStringOutput";
+    String HUGEGRAPH_LIST_OUTPUT_CLASS_NAME = "com.baidu.hugegraph.computer.core" +
+                                                ".output.hg.HugeGraphListOutput";
+    String DEFAULTINPUTFILTER_CLASS_NAME = "com.baidu.hugegraph.computer" +
+                                           ".core.input.filter" +
+                                           ".DefaultInputFilter";
+    String EXTRACTALLPROPERTYINPUTFILTER_CLASS_NAME = "com.baidu.hugegraph.computer" +
+                                                      ".core.input.filter" +
+                                                      ".ExtractAllPropertyInputFilter";
 
     /**
      * set algorithm's specific configuration

@@ -22,11 +22,12 @@ package com.baidu.hugegraph.computer.core.output.hg.task;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.structure.graph.Vertex;
+
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.output.hg.metrics.LoadMetrics;
 import com.baidu.hugegraph.computer.core.output.hg.metrics.LoadSummary;
-import org.apache.hugegraph.driver.HugeClient;
-import org.apache.hugegraph.structure.graph.Vertex;
 import com.google.common.collect.ImmutableSet;
 
 public abstract class InsertTask implements Runnable {

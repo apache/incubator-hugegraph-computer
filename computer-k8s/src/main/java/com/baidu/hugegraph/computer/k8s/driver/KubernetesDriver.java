@@ -44,8 +44,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hugegraph.config.ConfigListOption;
+import org.apache.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.config.TypedOption;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.driver.ComputerDriver;
 import com.baidu.hugegraph.computer.driver.ComputerDriverException;
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
@@ -53,8 +60,6 @@ import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobState;
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.driver.SuperstepStat;
-import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
-import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
@@ -63,11 +68,7 @@ import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import org.apache.hugegraph.config.ConfigListOption;
-import org.apache.hugegraph.config.HugeConfig;
-import org.apache.hugegraph.config.TypedOption;
-import org.apache.hugegraph.util.E;
-import org.apache.hugegraph.util.Log;
+import com.google.common.collect.ImmutableSet;
 
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
@@ -265,10 +266,9 @@ public class KubernetesDriver implements ComputerDriver {
 
     private void checkComputerConf(Map<String, String> computerConf,
                                    ComputerJobSpec spec) {
-        Set<String> requiredOptions = ComputerOptions.K8S_REQUIRED_USER_OPTIONS;
         @SuppressWarnings("unchecked")
         Collection<String> unSetOptions = CollectionUtils.removeAll(
-                                          requiredOptions,
+                                          COMPUTER_REQUIRED_USER_OPTIONS,
                                           computerConf.keySet());
         E.checkArgument(unSetOptions.isEmpty(),
                         "The %s options can't be null", unSetOptions);
@@ -468,11 +468,12 @@ public class KubernetesDriver implements ComputerDriver {
         params.forEach((k, v) -> {
             if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
                 if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
-                    !ComputerOptions.K8S_PROHIBIT_USER_SETTINGS.contains(k)) {
-                    DriverConfigOption<?> typedOption = (DriverConfigOption<?>)
+                    !COMPUTER_PROHIBIT_USER_SETTINGS.contains(k)) {
+                    ConfigOption<?> typedOption = (ConfigOption<?>)
                                                         allOptions.get(k);
                     if (typedOption != null) {
-                        typedOption.checkVal(v);
+                        // check value
+                        typedOption.parseConvert(v);
                     }
                     computerConf.put(k, v);
                 }
@@ -493,7 +494,7 @@ public class KubernetesDriver implements ComputerDriver {
             if (value != null) {
                 defaultConf.put(key, String.valueOf(value));
             } else {
-                boolean required = ComputerOptions.REQUIRED_INIT_OPTIONS
+                boolean required = ComputerOptions.REQUIRED_OPTIONS
                                                   .contains(key);
                 E.checkArgument(!required, "The %s option can't be null", key);
             }
@@ -586,4 +587,20 @@ public class KubernetesDriver implements ComputerDriver {
         Map<String, Object> specMap = HugeGraphComputerJob.specToMap(spec);
         return Collections.unmodifiableMap(specMap);
     }
+
+    public static final Set<String> COMPUTER_PROHIBIT_USER_SETTINGS =
+            ImmutableSet.of(
+                    ComputerOptions.HUGEGRAPH_URL.name(),
+                    ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
+                    ComputerOptions.TRANSPORT_SERVER_HOST.name(),
+                    ComputerOptions.JOB_ID.name(),
+                    ComputerOptions.JOB_WORKERS_COUNT.name(),
+                    ComputerOptions.RPC_SERVER_HOST_NAME,
+                    ComputerOptions.RPC_SERVER_PORT_NAME,
+                    ComputerOptions.RPC_REMOTE_URL_NAME
+            );
+
+    public static final Set<String> COMPUTER_REQUIRED_USER_OPTIONS = ImmutableSet.of(
+            ComputerOptions.ALGORITHM_PARAMS_CLASS.name()
+    );
 }

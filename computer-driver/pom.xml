@@ -30,8 +30,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.hugegraph</groupId>
-            <artifactId>hugegraph-client</artifactId>
+            <groupId>com.baidu.hugegraph</groupId>
+            <artifactId>computer-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

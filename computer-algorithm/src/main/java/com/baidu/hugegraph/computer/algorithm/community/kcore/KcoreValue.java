@@ -22,13 +22,13 @@ package com.baidu.hugegraph.computer.algorithm.community.kcore;
 import java.io.IOException;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.hugegraph.util.E;
 
-import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import org.apache.hugegraph.util.E;
 
 public class KcoreValue implements CustomizeValue<Object> {
 
@@ -37,7 +37,7 @@ public class KcoreValue implements CustomizeValue<Object> {
 
     public KcoreValue() {
         this.degree = 0;
-        this.core = new BytesId();
+        this.core = IdFactory.createId();
     }
 
     public void degree(int degree) {
