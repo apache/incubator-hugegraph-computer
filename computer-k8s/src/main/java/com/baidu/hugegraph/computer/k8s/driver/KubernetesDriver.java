@@ -374,8 +374,7 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     private void cancelWait(String jobId) {
-        Pair<CompletableFuture<Void>, JobObserver> pair = this.waits
-                                                              .remove(jobId);
+        Pair<CompletableFuture<Void>, JobObserver> pair = this.waits.remove(jobId);
         if (pair != null) {
             CompletableFuture<Void> future = pair.getLeft();
             future.cancel(true);
@@ -385,8 +384,7 @@ public class KubernetesDriver implements ComputerDriver {
     @Override
     public JobState jobState(String jobId, Map<String, String> params) {
         String crName = KubeUtil.crName(jobId);
-        HugeGraphComputerJob computerJob = this.operation.withName(crName)
-                                                         .get();
+        HugeGraphComputerJob computerJob = this.operation.withName(crName).get();
         if (computerJob == null) {
             return null;
         }
@@ -394,8 +392,7 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     @Override
-    public List<SuperstepStat> superstepStats(String jobId,
-                                              Map<String, String> params) {
+    public List<SuperstepStat> superstepStats(String jobId, Map<String, String> params) {
         // TODO: implement
         return null;
     }
@@ -463,14 +460,12 @@ public class KubernetesDriver implements ComputerDriver {
     private Map<String, String> computerConf(Map<String, String> defaultConf,
                                              Map<String, String> params) {
         Map<String, String> computerConf = new HashMap<>(defaultConf);
-        Map<String, TypedOption<?, ?>> allOptions = ComputerOptions.instance()
-                                                                   .options();
+        Map<String, TypedOption<?, ?>> allOptions = ComputerOptions.instance().options();
         params.forEach((k, v) -> {
             if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
                 if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
                     !COMPUTER_PROHIBIT_USER_SETTINGS.contains(k)) {
-                    ConfigOption<?> typedOption = (ConfigOption<?>)
-                                                        allOptions.get(k);
+                    ConfigOption<?> typedOption = (ConfigOption<?>) allOptions.get(k);
                     if (typedOption != null) {
                         // check value
                         typedOption.parseConvert(v);
@@ -485,17 +480,14 @@ public class KubernetesDriver implements ComputerDriver {
     private Map<String, String> defaultComputerConf() {
         Map<String, String> defaultConf = new HashMap<>();
 
-        Collection<TypedOption<?, ?>> options = ComputerOptions.instance()
-                                                               .options()
-                                                               .values();
+        Collection<TypedOption<?, ?>> options = ComputerOptions.instance().options().values();
         for (TypedOption<?, ?> typedOption : options) {
             Object value = this.conf.get(typedOption);
             String key = typedOption.name();
             if (value != null) {
                 defaultConf.put(key, String.valueOf(value));
             } else {
-                boolean required = ComputerOptions.REQUIRED_OPTIONS
-                                                  .contains(key);
+                boolean required = ComputerOptions.REQUIRED_OPTIONS.contains(key);
                 E.checkArgument(!required, "The %s option can't be null", key);
             }
         }
@@ -512,8 +504,7 @@ public class KubernetesDriver implements ComputerDriver {
                 if (KubeSpecOptions.MAP_TYPE_CONFIGS.contains(typeOption)) {
                     if (StringUtils.isNotBlank(value)) {
                         Map<String, String> result = new HashMap<>();
-                        List<String> values = (List<String>)
-                                              typeOption.parseConvert(value);
+                        List<String> values = (List<String>) typeOption.parseConvert(value);
                         for (String str : values) {
                             String[] pair = str.split(":", 2);
                             assert pair.length == 2;
@@ -533,17 +524,14 @@ public class KubernetesDriver implements ComputerDriver {
     private Map<String, Object> defaultSpec() {
         Map<String, Object> defaultSpec = new HashMap<>();
 
-        Collection<TypedOption<?, ?>> options = KubeSpecOptions.instance()
-                                                               .options()
-                                                               .values();
+        Collection<TypedOption<?, ?>> options = KubeSpecOptions.instance().options().values();
         for (TypedOption<?, ?> typeOption : options) {
             Object value = this.conf.get(typeOption);
             if (value != null) {
                 String specKey = KubeUtil.covertSpecKey(typeOption.name());
                 if (KubeSpecOptions.MAP_TYPE_CONFIGS.contains(typeOption)) {
                     if (!Objects.equals(String.valueOf(value), "[]")) {
-                        value = this.conf
-                                .getMap((ConfigListOption<String>) typeOption);
+                        value = this.conf.getMap((ConfigListOption<String>) typeOption);
                         defaultSpec.put(specKey, value);
                     }
                 } else {
@@ -554,8 +542,7 @@ public class KubernetesDriver implements ComputerDriver {
         ComputerJobSpec spec = HugeGraphComputerJob.mapToSpec(defaultSpec);
 
         // Add pullSecrets
-        List<String> secretNames = this.conf.get(
-                                        KubeDriverOptions.PULL_SECRET_NAMES);
+        List<String> secretNames = this.conf.get(KubeDriverOptions.PULL_SECRET_NAMES);
         if (CollectionUtils.isNotEmpty(secretNames)) {
             List<LocalObjectReference> secrets = new ArrayList<>();
             for (String name : secretNames) {
