@@ -37,8 +37,7 @@ import org.apache.hugegraph.util.NumericUtil;
 
 public class DegreeCentrality implements Computation<NullValue> {
 
-    public static final String OPTION_WEIGHT_PROPERTY =
-                               "degree_centrality.weight_property";
+    public static final String OPTION_WEIGHT_PROPERTY = "degree_centrality.weight_property";
 
     private boolean calculateByWeightProperty;
     private String weightProperty;
@@ -64,16 +63,13 @@ public class DegreeCentrality implements Computation<NullValue> {
              *  int the future;
              */
             double totalWeight = 0.0;
-            Iterator<Edge> edges = vertex.edges().iterator();
-            while (edges.hasNext()) {
-                Edge edge = edges.next();
+            for (Edge edge : vertex.edges()) {
                 double weight = weightValue(edge.property(this.weightProperty));
                 totalWeight += weight;
                 if (Double.isInfinite(totalWeight)) {
-                    throw new ComputerException("Calculate weight overflow," +
+                    throw new ComputerException("Calculate weight overflow, " +
                                                 "current is %s, edge '%s' " +
-                                                "is %s",
-                                                totalWeight, edge, weight);
+                                                "is %s", totalWeight, edge, weight);
                 }
             }
             vertex.value(new DoubleValue(totalWeight));

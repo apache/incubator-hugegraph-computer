@@ -17,26 +17,29 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
+package com.baidu.hugegraph.computer.algorithm.community.cc;
 
 import java.io.IOException;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
-import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
+import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class TriangleCountValue implements CustomizeValue<Integer> {
+/**
+ * TODO: We could reuse triangle's result to simplify it (and avoid logical differences)
+ */
+public class ClusteringCoefficientValue implements Value.CustomizeValue<Integer> {
 
     private IdList idList;
     private IntValue count;
+    private final IntValue degree;
 
-    public TriangleCountValue() {
+    public ClusteringCoefficientValue() {
         this.idList = new IdList();
         this.count = new IntValue();
+        this.degree = new IntValue();
     }
 
     public IdList idList() {
@@ -44,19 +47,32 @@ public class TriangleCountValue implements CustomizeValue<Integer> {
     }
 
     public long count() {
-        return this.count.longValue();
+        return this.count.value();
     }
 
-    public void count(int count) {
+    public void count(Integer count) {
         this.count.value(count);
     }
 
+    public int degree() {
+        return this.degree.value();
+    }
+
+    public void degree(Integer degree) {
+        this.degree.value(degree);
+    }
+
     @Override
-    public TriangleCountValue copy() {
-        TriangleCountValue triangleCountValue = new TriangleCountValue();
-        triangleCountValue.idList = this.idList.copy();
-        triangleCountValue.count = this.count.copy();
-        return triangleCountValue;
+    public ClusteringCoefficientValue copy() {
+        ClusteringCoefficientValue ccValue = new ClusteringCoefficientValue();
+        ccValue.idList = this.idList.copy();
+        ccValue.count = this.count.copy();
+        return ccValue;
+    }
+
+    @Override
+    public Integer value() {
+        return this.count.value();
     }
 
     @Override
@@ -73,12 +89,6 @@ public class TriangleCountValue implements CustomizeValue<Integer> {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("idList", this.idList)
-                                        .append("count", this.count).toString();
-    }
-
-    @Override
-    public Integer value() {
-        return this.count.value();
+        return String.valueOf(count);
     }
 }
