@@ -5,15 +5,16 @@
 [![codecov](https://codecov.io/gh/apache/hugegraph-computer/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/hugegraph-computer)
 [![Docker Pulls](https://img.shields.io/docker/pulls/hugegraph/hugegraph-builtin-algorithms)](https://hub.docker.com/repository/docker/hugegraph/hugegraph-builtin-algorithms)
 
-hugegraph-computer is a distributed graph processing system for hugegraph. It is an implementation of [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf). It runs on Kubernetes or YARN framework.
+The hugegraph-computer is a distributed graph processing system for hugegraph. It is an implementation of [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf). It runs on Kubernetes or YARN framework.
 
 ## Features
 
-- Based on BSP(Bulk Synchronous Parallel) model, every iteration is a superstep.
-- Auto memory management. The framework will split some data to disk, the framework will never OOM(Out of Memory).
+- Support distributed MPP graph computing, and integrates with HugeGraph as graph input/output storage.
+- Based on BSP(Bulk Synchronous Parallel) model, an algorithm performs computing through multiple parallel iterations, every iteration is a superstep.
+- Auto memory management. The framework will never be OOM(Out of Memory) since it will split some data to disk if it doesn't have enough memory to hold all the data.
 - The part of edges or the messages of super node can be in memory, so you will never lose it.
-- You can output the result to HDFS or HugeGraph, or any other system.
-- Easy to develop a new algorithm. You need to focus on a vertex only, not to worry about messages transferring and memory.
+- You can output the results to HDFS or HugeGraph, or any other system.
+- Easy to develop a new algorithm. You just need to focus on a vertex only processing just like as in a single server, without worrying about message transfer and memory/storage management.
 
 ## Learn More
 
