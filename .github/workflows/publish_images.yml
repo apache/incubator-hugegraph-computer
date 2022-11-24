@@ -19,13 +19,11 @@ jobs:
           map: |
             {
               "push": {
-                "FRAMEWORK_IMAGE_URL": "hugegraph/hugegraph-computer-framework:latest",
-                "ALGORITHM_IMAGE_URL": "hugegraph/hugegraph-builtin-algorithms:latest",
+                "COMPUTER_IMAGE_URL": "hugegraph/hugegraph-computer:latest",
                 "OPERATOR_IMAGE_URL": "hugegraph/hugegraph-computer-operator:latest"
               },
               "release": {
-                "FRAMEWORK_IMAGE_URL": "hugegraph/hugegraph-computer-framework:${{ github.ref_name }}",
-                "ALGORITHM_IMAGE_URL": "hugegraph/hugegraph-builtin-algorithms:${{ github.ref_name }}",
+                "COMPUTER_IMAGE_URL": "hugegraph/hugegraph-computer:${{ github.ref_name }}",
                 "OPERATOR_IMAGE_URL": "hugegraph/hugegraph-computer-operator:${{ github.ref_name }}"
               }
             }
@@ -58,13 +56,12 @@ jobs:
       - name: Build images
         env:
           TRAVIS_DIR: computer-dist/src/assembly/travis
-        run: $TRAVIS_DIR/build-images.sh ${{ env.FRAMEWORK_IMAGE_URL }} ${{ env.ALGORITHM_IMAGE_URL }} ${{ env.OPERATOR_IMAGE_URL }}
+        run: $TRAVIS_DIR/build-images.sh ${{ env.COMPUTER_IMAGE_URL }} ${{ env.OPERATOR_IMAGE_URL }}
 
       - name: Docker images
         run: docker images
 
       - name: Publish
         run: |
-          docker push ${{ env.FRAMEWORK_IMAGE_URL }}
-          docker push ${{ env.ALGORITHM_IMAGE_URL }}
+          docker push ${{ env.COMPUTER_IMAGE_URL }}
           docker push ${{ env.OPERATOR_IMAGE_URL }}

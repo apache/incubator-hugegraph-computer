@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM hugegraph/hugegraph-computer-framework:latest
+FROM hugegraph/hugegraph-computer:latest
 
 LABEL maintainer="HugeGraph Docker Maintainers <dev@hugegraph.apache.org>"
 
