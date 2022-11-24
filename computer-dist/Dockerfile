@@ -21,5 +21,6 @@ ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseParallelGC -XX:+UseConta
 COPY ./bin /etc/local/hugegraph-computer/bin
 COPY ./lib /etc/local/hugegraph-computer/lib
 COPY ./algorithm /etc/local/hugegraph-computer/algorithm
+COPY ./conf /etc/local/hugegraph-computer/conf
 WORKDIR /etc/local/hugegraph-computer
 RUN apt-get update && apt-get -y install gettext-base && apt-get -y install wget
