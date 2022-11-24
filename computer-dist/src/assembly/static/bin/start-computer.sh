@@ -1,4 +1,4 @@
-!/usr/bin/env bash
+#!/usr/bin/env bash
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -20,6 +20,7 @@ BIN_DIR=$(cd "$(dirname "$0")" && pwd -P)
 BASE_DIR=$(cd "${BIN_DIR}/.." && pwd -P)
 LIB_DIR=${BASE_DIR}/lib
 CONF_DIR="${BASE_DIR}/conf"
+ALGORITHM_DIR="${BASE_DIR}/algorithm"
 
 COMPUTER_CONF_PATH="${COMPUTER_CONF_PATH}"
 LOG4J_CONF_PATH="${LOG4J_CONF_PATH}"
@@ -125,19 +126,6 @@ parse_opts() {
 
 parse_opts $*
 
-echo "************************************"
-echo "COMPUTER_CONF_PATH=${COMPUTER_CONF_PATH}"
-echo "LOG4J_CONF_PATH=${LOG4J_CONF_PATH}"
-echo "JAR_FILE_PATH=${JAR_FILE_PATH}"
-echo "DRIVE=${DRIVE}"
-echo "************************************"
-
-if [ "${JAR_FILE_PATH}" = "" ]; then
-    echo "graph algorithm jar file missed";
-    usage;
-    exit 1;
-fi
-
 if [ "${COMPUTER_CONF_PATH}" = "" ]; then
     if [ "$DRIVE" = "$K8S_DRIVE" ]; then
       echo "conf file missed";
@@ -158,6 +146,22 @@ if [ "${ROLE}" = "" ]; then
     usage;
     exit 1;
 fi
+
+if [ "${LOG4J_CONF_PATH}" = "" ];then
+    LOG4J_CONF_PATH=${CONF_DIR}/log4j2.xml
+fi
+
+if [ "${JAR_FILE_PATH}" = "" ]; then
+    JAR_FILE_PATH="${ALGORITHM_DIR}/*"
+fi
+
+echo "************************************"
+echo "COMPUTER_CONF_PATH=${COMPUTER_CONF_PATH}"
+echo "LOG4J_CONF_PATH=${LOG4J_CONF_PATH}"
+echo "ALGORITHM_JAR_FILE_PATH=${JAR_FILE_PATH}"
+echo "DRIVE=${DRIVE}"
+echo "ROLE=${ROLE}"
+echo "************************************"
 
 CP=$(find "${LIB_DIR}" -name "*.jar" | tr "\n" ":")
 
@@ -211,6 +215,8 @@ if [ "$DRIVE" = "$K8S_DRIVE" ]; then
     chmod 777 "${NEW_COMPUTER_CONF_PATH}"
     COMPUTER_CONF_PATH=${NEW_COMPUTER_CONF_PATH}
 fi
+
+LOG4j_CONF=-Dlog4j.configurationFile="${LOG4J_CONF_PATH}"
 
 MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputer
 

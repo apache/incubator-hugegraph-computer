@@ -45,8 +45,7 @@ public class ComputerContextUtil {
             algorithmParams = (AlgorithmParams) Class.forName(
                               algorithmParamsName).newInstance();
         } catch (Exception e) {
-            throw new ComputerException("Can't create algorithmParams, " +
-                                        "algorithmParamsName = {}",
+            throw new ComputerException("Can't create algorithmParams, algorithmParamsName = %s",
                                         algorithmParamsName);
         }
         algorithmParams.setAlgorithmParameters(params);
