@@ -20,7 +20,7 @@ BIN_DIR=$(cd "$(dirname "$0")" && pwd -P)
 BASE_DIR=$(cd "${BIN_DIR}/.." && pwd -P)
 LIB_DIR=${BASE_DIR}/lib
 CONF_DIR="${BASE_DIR}/conf"
-ALGORITHM_DIR="${BASE_DIR}/algorithm"
+DEFAULT_ALGORITHM_DIR="${BASE_DIR}/algorithm"
 
 COMPUTER_CONF_PATH="${COMPUTER_CONF_PATH}"
 LOG4J_CONF_PATH="${LOG4J_CONF_PATH}"
@@ -35,8 +35,9 @@ ROLE_WORKER="worker"
 
 usage() {
     echo "Usage:"
-    echo "    start-computer.sh <-c|--conf conf_file_path>"
-    echo "        <-a|--algorithm algorithm_jar_path>"
+    echo "    start-computer.sh"
+    echo "        [-c|--conf conf_file_path>"
+    echo "        [-a|--algorithm algorithm_jar_path>"
     echo "        [-l|--log4 log4_conf_path]"
     echo "        <-d|--drive drive_type(local|k8s|yarn)>"
     echo "        <-r|--role role(master|worker)>"
@@ -159,26 +160,25 @@ echo "DRIVE=${DRIVE}"
 echo "ROLE=${ROLE}"
 echo "************************************"
 
-if [ "${JAR_FILE_PATH}" != "" ]; then
-    echo "COPY JAR ${JAR_FILE_PATH} to ${ALGORITHM_DIR}/"
-    cp -rf ${JAR_FILE_PATH} "${ALGORITHM_DIR}/"
-fi
-
 CP=$(find "${LIB_DIR}" -name "*.jar" | tr "\n" ":")
 
-CP=${CP}:"${ALGORITHM_DIR}/*"
+CP=${CP}:"${DEFAULT_ALGORITHM_DIR}/*"
+
+if [ "${JAR_FILE_PATH}" != "" ]; then
+    CP=${CP}:${JAR_FILE_PATH}
+fi
 
 # Download remote job JAR file.
-if [[ "${JOB_JAR_URI}" == http://* || "${JOB_JAR_URI}" == https://* ]]; then
+if [[ "${REMOTE_JAR_URI}" == http://* || "${REMOTE_JAR_URI}" == https://* ]]; then
     mkdir -p "${BASE_DIR}/job"
-    echo "Downloading job JAR ${JOB_JAR_URI} to ${BASE_DIR}/job/"
-    wget -nv -P "${BASE_DIR}/job/" "${JOB_JAR_URI}"
+    echo "Downloading job JAR ${REMOTE_JAR_URI} to ${BASE_DIR}/job/"
+    wget -nv -P "${BASE_DIR}/job/" "${REMOTE_JAR_URI}"
     JOB_JAR=$(find "${BASE_DIR}/job" -name "*.jar" | tr "\n" ":")
     if [[ "$JOB_JAR" != "" ]]; then
         CP="${JOB_JAR}"$CP
     fi
-elif [[ "${JOB_JAR_URI}" != "" ]]; then
-    echo "Unsupported protocol for ${JOB_JAR_URI}"
+elif [[ "${REMOTE_JAR_URI}" != "" ]]; then
+    echo "Unsupported protocol for ${REMOTE_JAR_URI}"
     exit 1
 fi
 

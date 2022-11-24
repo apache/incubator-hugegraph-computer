@@ -473,7 +473,7 @@ public class ComputerJobDeployer {
         String remoteJarUri = spec.getRemoteJarUri();
         if (StringUtils.isNotBlank(remoteJarUri)) {
             EnvVar jobJarURI = new EnvVarBuilder()
-                    .withName(Constants.ENV_JOB_JAR_URI)
+                    .withName(Constants.ENV_REMOTE_JAR_URI)
                     .withValue(remoteJarUri)
                     .build();
             envVars.add(jobJarURI);
