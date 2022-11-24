@@ -24,8 +24,6 @@ import java.util.Map;
 import com.baidu.hugegraph.computer.algorithm.AlgorithmParams;
 import com.baidu.hugegraph.computer.core.combiner.ValueMinCombiner;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.graph.id.BytesId;
-import com.baidu.hugegraph.computer.core.output.hg.HugeGraphIdOutput;
 
 public class KcoreParams implements AlgorithmParams {
 
@@ -36,10 +34,10 @@ public class KcoreParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
                          KcoreValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                         BytesId.class.getName());
+                         BYTESID_CLASS_NAME);
         this.setIfAbsent(params, ComputerOptions.WORKER_COMBINER_CLASS,
                          ValueMinCombiner.class.getName());
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                         HugeGraphIdOutput.class.getName());
+                         HUGEGRAPH_ID_OUTPUT_CLASS_NAME);
     }
 }

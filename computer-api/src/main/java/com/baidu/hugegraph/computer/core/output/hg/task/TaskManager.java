@@ -25,20 +25,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-
-import com.baidu.hugegraph.computer.core.config.ComputerOptions;
-import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.output.hg.exceptions.WriteBackException;
-
-
-import com.baidu.hugegraph.computer.core.output.hg.metrics.LoadSummary;
-import com.baidu.hugegraph.computer.core.output.hg.metrics.Printer;
 import org.apache.hugegraph.driver.HugeClient;
 import org.apache.hugegraph.driver.HugeClientBuilder;
 import org.apache.hugegraph.structure.graph.Vertex;
 import org.apache.hugegraph.util.ExecutorUtil;
 import org.apache.hugegraph.util.Log;
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.Config;
+import com.baidu.hugegraph.computer.core.output.hg.exceptions.WriteBackException;
+import com.baidu.hugegraph.computer.core.output.hg.metrics.LoadSummary;
+import com.baidu.hugegraph.computer.core.output.hg.metrics.Printer;
 
 public final class TaskManager {
 

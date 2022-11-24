@@ -68,7 +68,6 @@ public class UnitTestBase {
     private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
                                         "0123456789" +
                                         "abcdefghijklmnopqrstuvxyz";
-
     private static String URL;
     private static String GRAPH;
     private static HugeClient CLIENT = null;
@@ -78,7 +77,7 @@ public class UnitTestBase {
     }
 
     @BeforeClass
-    public static void step() throws ClassNotFoundException {
+    public static void init() throws ClassNotFoundException {
         Runtime.getRuntime().addShutdownHook(new Thread(LogManager::shutdown));
 
         LOG.info("Setup for UnitTestSuite of hugegraph-computer");

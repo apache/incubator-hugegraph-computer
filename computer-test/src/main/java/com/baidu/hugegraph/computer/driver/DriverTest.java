@@ -19,10 +19,10 @@
 
 package com.baidu.hugegraph.computer.driver;
 
+import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.driver.util.JsonUtil;
-import org.apache.hugegraph.testutil.Assert;
 
 public class DriverTest {
 

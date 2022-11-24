@@ -19,12 +19,12 @@
 
 package com.baidu.hugegraph.computer.core.output;
 
+import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.worker.Computation;
-import org.apache.hugegraph.util.Log;
 
 public abstract class AbstractComputerOutput implements ComputerOutput {
 

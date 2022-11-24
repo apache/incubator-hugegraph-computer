@@ -36,15 +36,18 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.Log;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
 import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobStatus;
-import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
@@ -52,9 +55,6 @@ import com.baidu.hugegraph.computer.k8s.driver.KubernetesDriver;
 import com.baidu.hugegraph.computer.k8s.operator.common.AbstractController;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import org.apache.hugegraph.testutil.Assert;
-import org.apache.hugegraph.testutil.Whitebox;
-import org.apache.hugegraph.util.Log;
 import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -109,7 +109,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
         params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(), "0");
-        params.put(ComputerOptions.RPC_SERVER_PORT.name(), "0");
+        params.put(ComputerOptions.RPC_SERVER_PORT_NAME, "0");
         String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
@@ -140,7 +140,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
         params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(), "0");
-        params.put(ComputerOptions.RPC_SERVER_PORT.name(), "0");
+        params.put(ComputerOptions.RPC_SERVER_PORT_NAME, "0");
         String jobId = this.driver.submitJob("algorithm123", params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
@@ -326,7 +326,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
         params.put(ComputerOptions.TRANSPORT_SERVER_PORT.name(), "0");
-        params.put(ComputerOptions.RPC_SERVER_PORT.name(), "0");
+        params.put(ComputerOptions.RPC_SERVER_PORT_NAME, "0");
         String jobId = this.driver.submitJob(ALGORITHM_NAME, params);
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);

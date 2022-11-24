@@ -36,7 +36,7 @@ import org.apache.hugegraph.util.E;
 import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
-import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
@@ -185,7 +185,7 @@ public class ComputerJobDeployer {
 
         String ip = String.format("${%s}", Constants.ENV_POD_IP);
         config.put(ComputerOptions.TRANSPORT_SERVER_HOST.name(), ip);
-        config.put(ComputerOptions.RPC_SERVER_HOST.name(), ip);
+        config.put(ComputerOptions.RPC_SERVER_HOST_NAME, ip);
         config.putIfAbsent(ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
                            this.internalEtcdUrl);
 
@@ -203,11 +203,10 @@ public class ComputerJobDeployer {
                 .withProtocol(PROTOCOL)
                 .build();
 
-        String rpcPort = config.get(
-                ComputerOptions.RPC_SERVER_PORT.name());
+        String rpcPort = config.get(ComputerOptions.RPC_SERVER_PORT_NAME);
         if (StringUtils.isBlank(rpcPort) || RANDOM_PORT.equals(rpcPort)) {
             rpcPort = String.valueOf(DEFAULT_RPC_PORT);
-            config.put(ComputerOptions.RPC_SERVER_PORT.name(), rpcPort);
+            config.put(ComputerOptions.RPC_SERVER_PORT_NAME, rpcPort);
         }
         ContainerPort rpcContainerPort = new ContainerPortBuilder()
                 .withName(RPC_PORT_NAME)
