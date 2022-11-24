@@ -28,11 +28,10 @@
     <artifactId>computer-algorithm</artifactId>
 
     <dependencies>
-        <!-- TODO improve structure to only import computer-api -->
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>computer-api</artifactId>
-            <version>${project.version}</version>
+            <version>${version}</version>
         </dependency>
         <dependency>
             <groupId>org.mvel</groupId>

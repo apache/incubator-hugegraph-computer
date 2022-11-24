@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>computer-api</artifactId>
-            <version>${project.version}</version>
+            <version>${version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.hugegraph</groupId>

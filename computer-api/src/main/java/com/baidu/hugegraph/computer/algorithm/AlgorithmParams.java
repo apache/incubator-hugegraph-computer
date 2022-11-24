@@ -19,6 +19,8 @@
 
 package com.baidu.hugegraph.computer.algorithm;
 
+import static com.baidu.hugegraph.computer.core.config.ComputerOptions.COMPUTER_PROHIBIT_USER_OPTIONS;
+
 import java.util.Map;
 
 import org.apache.hugegraph.config.ConfigOption;
@@ -60,7 +62,7 @@ public interface AlgorithmParams {
 
     default void setIfAbsent(Map<String, String> params, String key,
                              String value) {
-        if (!params.keySet().contains(key)) {
+        if (!params.containsKey(key) && !COMPUTER_PROHIBIT_USER_OPTIONS.contains(key)) {
             LOG.debug("Put parameters key={}, value={}", key, value);
             params.put(key, value);
         }

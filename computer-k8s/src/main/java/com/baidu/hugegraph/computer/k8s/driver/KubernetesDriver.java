@@ -19,6 +19,9 @@
 
 package com.baidu.hugegraph.computer.k8s.driver;
 
+import static com.baidu.hugegraph.computer.core.config.ComputerOptions.COMPUTER_PROHIBIT_USER_OPTIONS;
+import static com.baidu.hugegraph.computer.core.config.ComputerOptions.COMPUTER_REQUIRED_USER_OPTIONS;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,7 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,7 +70,6 @@ import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import com.google.common.collect.ImmutableSet;
 
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
@@ -464,7 +465,7 @@ public class KubernetesDriver implements ComputerDriver {
         params.forEach((k, v) -> {
             if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
                 if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
-                    !COMPUTER_PROHIBIT_USER_SETTINGS.contains(k)) {
+                    !COMPUTER_PROHIBIT_USER_OPTIONS.contains(k)) {
                     ConfigOption<?> typedOption = (ConfigOption<?>) allOptions.get(k);
                     if (typedOption != null) {
                         // check value
@@ -574,20 +575,4 @@ public class KubernetesDriver implements ComputerDriver {
         Map<String, Object> specMap = HugeGraphComputerJob.specToMap(spec);
         return Collections.unmodifiableMap(specMap);
     }
-
-    public static final Set<String> COMPUTER_PROHIBIT_USER_SETTINGS =
-            ImmutableSet.of(
-                    ComputerOptions.HUGEGRAPH_URL.name(),
-                    ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
-                    ComputerOptions.TRANSPORT_SERVER_HOST.name(),
-                    ComputerOptions.JOB_ID.name(),
-                    ComputerOptions.JOB_WORKERS_COUNT.name(),
-                    ComputerOptions.RPC_SERVER_HOST_NAME,
-                    ComputerOptions.RPC_SERVER_PORT_NAME,
-                    ComputerOptions.RPC_REMOTE_URL_NAME
-            );
-
-    public static final Set<String> COMPUTER_REQUIRED_USER_OPTIONS = ImmutableSet.of(
-            ComputerOptions.ALGORITHM_PARAMS_CLASS.name()
-    );
 }

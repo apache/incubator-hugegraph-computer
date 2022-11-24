@@ -910,6 +910,22 @@ public class ComputerOptions extends OptionHolder {
     public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
     );
 
+    public static final Set<String> COMPUTER_PROHIBIT_USER_OPTIONS =
+            ImmutableSet.of(
+                    ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
+                    ComputerOptions.TRANSPORT_SERVER_HOST.name(),
+                    ComputerOptions.TRANSPORT_SERVER_PORT.name(),
+                    ComputerOptions.JOB_ID.name(),
+                    ComputerOptions.JOB_WORKERS_COUNT.name(),
+                    ComputerOptions.RPC_SERVER_HOST_NAME,
+                    ComputerOptions.RPC_SERVER_PORT_NAME,
+                    ComputerOptions.RPC_REMOTE_URL_NAME
+            );
+
+    public static final Set<String> COMPUTER_REQUIRED_USER_OPTIONS = ImmutableSet.of(
+            ComputerOptions.ALGORITHM_PARAMS_CLASS.name()
+    );
+
     private static Class<?> loadClass(String className) {
         try {
             return Class.forName(className);
