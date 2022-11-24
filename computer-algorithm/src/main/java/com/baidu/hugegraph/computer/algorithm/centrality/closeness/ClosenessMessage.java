@@ -23,8 +23,8 @@ import java.io.IOException;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
-import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
+import com.baidu.hugegraph.computer.core.graph.id.IdFactory;
 import com.baidu.hugegraph.computer.core.graph.value.DoubleValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.graph.value.ValueType;
@@ -40,7 +40,7 @@ public class ClosenessMessage implements CustomizeValue<ClosenessMessage> {
     private DoubleValue distance;
 
     public ClosenessMessage() {
-        this(new BytesId(), new BytesId(), new DoubleValue(0.0D));
+        this(IdFactory.createId(), IdFactory.createId(), new DoubleValue(0.0D));
     }
 
     public ClosenessMessage(Id senderId, Id startId, DoubleValue distance) {

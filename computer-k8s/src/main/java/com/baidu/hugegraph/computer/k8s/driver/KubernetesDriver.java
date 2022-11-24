@@ -19,6 +19,9 @@
 
 package com.baidu.hugegraph.computer.k8s.driver;
 
+import static com.baidu.hugegraph.computer.core.config.ComputerOptions.COMPUTER_PROHIBIT_USER_OPTIONS;
+import static com.baidu.hugegraph.computer.core.config.ComputerOptions.COMPUTER_REQUIRED_USER_OPTIONS;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,7 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,8 +46,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hugegraph.config.ConfigListOption;
+import org.apache.hugegraph.config.ConfigOption;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.config.TypedOption;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.driver.ComputerDriver;
 import com.baidu.hugegraph.computer.driver.ComputerDriverException;
 import com.baidu.hugegraph.computer.driver.DefaultJobState;
@@ -53,8 +62,6 @@ import com.baidu.hugegraph.computer.driver.JobObserver;
 import com.baidu.hugegraph.computer.driver.JobState;
 import com.baidu.hugegraph.computer.driver.JobStatus;
 import com.baidu.hugegraph.computer.driver.SuperstepStat;
-import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
-import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
 import com.baidu.hugegraph.computer.k8s.Constants;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
@@ -63,11 +70,6 @@ import com.baidu.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJobList;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
-import org.apache.hugegraph.config.ConfigListOption;
-import org.apache.hugegraph.config.HugeConfig;
-import org.apache.hugegraph.config.TypedOption;
-import org.apache.hugegraph.util.E;
-import org.apache.hugegraph.util.Log;
 
 import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
@@ -265,10 +267,9 @@ public class KubernetesDriver implements ComputerDriver {
 
     private void checkComputerConf(Map<String, String> computerConf,
                                    ComputerJobSpec spec) {
-        Set<String> requiredOptions = ComputerOptions.K8S_REQUIRED_USER_OPTIONS;
         @SuppressWarnings("unchecked")
         Collection<String> unSetOptions = CollectionUtils.removeAll(
-                                          requiredOptions,
+                                          COMPUTER_REQUIRED_USER_OPTIONS,
                                           computerConf.keySet());
         E.checkArgument(unSetOptions.isEmpty(),
                         "The %s options can't be null", unSetOptions);
@@ -374,8 +375,7 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     private void cancelWait(String jobId) {
-        Pair<CompletableFuture<Void>, JobObserver> pair = this.waits
-                                                              .remove(jobId);
+        Pair<CompletableFuture<Void>, JobObserver> pair = this.waits.remove(jobId);
         if (pair != null) {
             CompletableFuture<Void> future = pair.getLeft();
             future.cancel(true);
@@ -385,8 +385,7 @@ public class KubernetesDriver implements ComputerDriver {
     @Override
     public JobState jobState(String jobId, Map<String, String> params) {
         String crName = KubeUtil.crName(jobId);
-        HugeGraphComputerJob computerJob = this.operation.withName(crName)
-                                                         .get();
+        HugeGraphComputerJob computerJob = this.operation.withName(crName).get();
         if (computerJob == null) {
             return null;
         }
@@ -394,8 +393,7 @@ public class KubernetesDriver implements ComputerDriver {
     }
 
     @Override
-    public List<SuperstepStat> superstepStats(String jobId,
-                                              Map<String, String> params) {
+    public List<SuperstepStat> superstepStats(String jobId, Map<String, String> params) {
         // TODO: implement
         return null;
     }
@@ -463,16 +461,15 @@ public class KubernetesDriver implements ComputerDriver {
     private Map<String, String> computerConf(Map<String, String> defaultConf,
                                              Map<String, String> params) {
         Map<String, String> computerConf = new HashMap<>(defaultConf);
-        Map<String, TypedOption<?, ?>> allOptions = ComputerOptions.instance()
-                                                                   .options();
+        Map<String, TypedOption<?, ?>> allOptions = ComputerOptions.instance().options();
         params.forEach((k, v) -> {
             if (StringUtils.isNotBlank(k) && StringUtils.isNotBlank(v)) {
                 if (!k.startsWith(Constants.K8S_SPEC_PREFIX) &&
-                    !ComputerOptions.K8S_PROHIBIT_USER_SETTINGS.contains(k)) {
-                    DriverConfigOption<?> typedOption = (DriverConfigOption<?>)
-                                                        allOptions.get(k);
+                    !COMPUTER_PROHIBIT_USER_OPTIONS.contains(k)) {
+                    ConfigOption<?> typedOption = (ConfigOption<?>) allOptions.get(k);
                     if (typedOption != null) {
-                        typedOption.checkVal(v);
+                        // check value
+                        typedOption.parseConvert(v);
                     }
                     computerConf.put(k, v);
                 }
@@ -484,17 +481,14 @@ public class KubernetesDriver implements ComputerDriver {
     private Map<String, String> defaultComputerConf() {
         Map<String, String> defaultConf = new HashMap<>();
 
-        Collection<TypedOption<?, ?>> options = ComputerOptions.instance()
-                                                               .options()
-                                                               .values();
+        Collection<TypedOption<?, ?>> options = ComputerOptions.instance().options().values();
         for (TypedOption<?, ?> typedOption : options) {
             Object value = this.conf.get(typedOption);
             String key = typedOption.name();
             if (value != null) {
                 defaultConf.put(key, String.valueOf(value));
             } else {
-                boolean required = ComputerOptions.REQUIRED_INIT_OPTIONS
-                                                  .contains(key);
+                boolean required = ComputerOptions.REQUIRED_OPTIONS.contains(key);
                 E.checkArgument(!required, "The %s option can't be null", key);
             }
         }
@@ -511,8 +505,7 @@ public class KubernetesDriver implements ComputerDriver {
                 if (KubeSpecOptions.MAP_TYPE_CONFIGS.contains(typeOption)) {
                     if (StringUtils.isNotBlank(value)) {
                         Map<String, String> result = new HashMap<>();
-                        List<String> values = (List<String>)
-                                              typeOption.parseConvert(value);
+                        List<String> values = (List<String>) typeOption.parseConvert(value);
                         for (String str : values) {
                             String[] pair = str.split(":", 2);
                             assert pair.length == 2;
@@ -532,17 +525,14 @@ public class KubernetesDriver implements ComputerDriver {
     private Map<String, Object> defaultSpec() {
         Map<String, Object> defaultSpec = new HashMap<>();
 
-        Collection<TypedOption<?, ?>> options = KubeSpecOptions.instance()
-                                                               .options()
-                                                               .values();
+        Collection<TypedOption<?, ?>> options = KubeSpecOptions.instance().options().values();
         for (TypedOption<?, ?> typeOption : options) {
             Object value = this.conf.get(typeOption);
             if (value != null) {
                 String specKey = KubeUtil.covertSpecKey(typeOption.name());
                 if (KubeSpecOptions.MAP_TYPE_CONFIGS.contains(typeOption)) {
                     if (!Objects.equals(String.valueOf(value), "[]")) {
-                        value = this.conf
-                                .getMap((ConfigListOption<String>) typeOption);
+                        value = this.conf.getMap((ConfigListOption<String>) typeOption);
                         defaultSpec.put(specKey, value);
                     }
                 } else {
@@ -553,8 +543,7 @@ public class KubernetesDriver implements ComputerDriver {
         ComputerJobSpec spec = HugeGraphComputerJob.mapToSpec(defaultSpec);
 
         // Add pullSecrets
-        List<String> secretNames = this.conf.get(
-                                        KubeDriverOptions.PULL_SECRET_NAMES);
+        List<String> secretNames = this.conf.get(KubeDriverOptions.PULL_SECRET_NAMES);
         if (CollectionUtils.isNotEmpty(secretNames)) {
             List<LocalObjectReference> secrets = new ArrayList<>();
             for (String name : secretNames) {

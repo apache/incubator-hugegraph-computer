@@ -22,10 +22,11 @@ package com.baidu.hugegraph.computer.core.network;
 import java.net.InetAddress;
 import java.util.Locale;
 
+import org.apache.hugegraph.util.E;
+
 import com.baidu.hugegraph.computer.core.common.exception.IllegalArgException;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
-import org.apache.hugegraph.util.E;
 
 import io.netty.channel.epoll.Epoll;
 
@@ -36,8 +37,6 @@ public class TransportConf {
     public static final String CLIENT_THREAD_GROUP_NAME =
                                "transport-netty-client";
     private final Config config;
-
-    public static final int DEFAULT_THREADS = 4;
 
     public static TransportConf wrapConfig(Config config) {
         return new TransportConf(config);

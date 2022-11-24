@@ -23,11 +23,11 @@ import static org.apache.hugegraph.config.OptionChecker.allowValues;
 import static org.apache.hugegraph.config.OptionChecker.disallowEmpty;
 
 import org.apache.commons.io.FileUtils;
-
-import com.baidu.hugegraph.computer.k8s.Constants;
 import org.apache.hugegraph.config.ConfigListOption;
 import org.apache.hugegraph.config.ConfigOption;
 import org.apache.hugegraph.config.OptionHolder;
+
+import com.baidu.hugegraph.computer.k8s.Constants;
 
 public class KubeDriverOptions extends OptionHolder {
 

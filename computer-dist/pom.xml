@@ -56,7 +56,7 @@
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>computer-core</artifactId>
-            <version>${project.version}</version>
+            <version>${version}</version>
         </dependency>
     </dependencies>
 
