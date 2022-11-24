@@ -29,6 +29,7 @@ import org.apache.hugegraph.config.OptionSpace;
 import org.apache.hugegraph.config.RpcOptions;
 import org.apache.hugegraph.util.E;
 import org.apache.hugegraph.util.Log;
+import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -57,6 +58,8 @@ public class HugeGraphComputer {
 
     public static void main(String[] args) throws IOException,
                                                   ClassNotFoundException {
+        Runtime.getRuntime().addShutdownHook(new Thread(LogManager::shutdown));
+
         E.checkArgument(ArrayUtils.getLength(args) == 3,
                         "Argument count must be three, " +
                         "the first is conf path;" +

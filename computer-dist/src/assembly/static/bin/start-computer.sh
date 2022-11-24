@@ -219,12 +219,15 @@ fi
 
 LOG4j_CONF=-Dlog4j.configurationFile="${LOG4J_CONF_PATH}"
 
+if [ "${ROLE}" = "${ROLE_MASTER}" ]; then
+    LOG_NAME=-Dlog.name=hugegraph-computer-master
+fi
+
+if [ "${ROLE}" = "${ROLE_WORKER}" ]; then
+    LOG_NAME=-Dlog.name=hugegraph-computer-worker
+fi
+
 MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputer
 
-if [ "${LOG4j_CONF}" != "" ]; then
-    exec ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${JAVA_OPTS} ${JVM_OPTIONS} \
+exec ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${LOG_NAME} ${JAVA_OPTS} ${JVM_OPTIONS} \
         -cp "${CP}" ${MAIN_CLASS} "${COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
-else
-    exec ${JAVA} -Dname="hugegraph-computer" ${JAVA_OPTS} ${JVM_OPTIONS} -cp "${CP}" \
-        ${MAIN_CLASS} "${COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
-fi
