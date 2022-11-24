@@ -151,10 +151,6 @@ if [ "${LOG4J_CONF_PATH}" = "" ];then
     LOG4J_CONF_PATH=${CONF_DIR}/log4j2.xml
 fi
 
-if [ "${JAR_FILE_PATH}" = "" ]; then
-    JAR_FILE_PATH="${ALGORITHM_DIR}/*"
-fi
-
 echo "************************************"
 echo "COMPUTER_CONF_PATH=${COMPUTER_CONF_PATH}"
 echo "LOG4J_CONF_PATH=${LOG4J_CONF_PATH}"
@@ -163,9 +159,14 @@ echo "DRIVE=${DRIVE}"
 echo "ROLE=${ROLE}"
 echo "************************************"
 
+if [ "${JAR_FILE_PATH}" != "" ]; then
+    echo "COPY JAR ${JAR_FILE_PATH} to ${ALGORITHM_DIR}/"
+    cp -rf ${JAR_FILE_PATH} "${ALGORITHM_DIR}/"
+fi
+
 CP=$(find "${LIB_DIR}" -name "*.jar" | tr "\n" ":")
 
-CP="$JAR_FILE_PATH":${CP}
+CP=${CP}:"${ALGORITHM_DIR}/*"
 
 # Download remote job JAR file.
 if [[ "${JOB_JAR_URI}" == http://* || "${JOB_JAR_URI}" == https://* ]]; then
