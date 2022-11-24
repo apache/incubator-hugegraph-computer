@@ -1,3 +1,4 @@
+!/usr/bin/env bash
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -14,8 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#!/usr/bin/env bash
-set -e
+
 BIN_DIR=$(cd "$(dirname "$0")" && pwd -P)
 BASE_DIR=$(cd "${BIN_DIR}/.." && pwd -P)
 LIB_DIR=${BASE_DIR}/lib
@@ -38,6 +38,7 @@ usage() {
     echo "        <-a|--algorithm algorithm_jar_path>"
     echo "        [-l|--log4 log4_conf_path]"
     echo "        <-d|--drive drive_type(local|k8s|yarn)>"
+    echo "        <-r|--role role(master|worker)>"
 }
 
 if [ $# -lt 4 ]; then
@@ -138,9 +139,12 @@ if [ "${JAR_FILE_PATH}" = "" ]; then
 fi
 
 if [ "${COMPUTER_CONF_PATH}" = "" ]; then
-    echo "conf file missed";
-    usage;
-    exit 1;
+    if [ "$DRIVE" = "$K8S_DRIVE" ]; then
+      echo "conf file missed";
+      usage;
+      exit 1;
+    fi
+    COMPUTER_CONF_PATH=${CONF_DIR}/computer.properties
 fi
 
 if [ "${DRIVE}" = "" ]; then
@@ -195,26 +199,25 @@ if [ ! -a "${CONF_DIR}" ];then
     mkdir -p "${CONF_DIR}"
 fi
 
-COPY_CONF_DIR="${CONF_DIR}/copy"
-if [ ! -a "${COPY_CONF_DIR}" ]; then
-    mkdir -p "${COPY_CONF_DIR}"
-    chmod 777 "${COPY_CONF_DIR}"
-fi
+if [ "$DRIVE" = "$K8S_DRIVE" ]; then
+    COPY_CONF_DIR="${CONF_DIR}/copy"
+    if [ ! -a "${COPY_CONF_DIR}" ]; then
+        mkdir -p "${COPY_CONF_DIR}"
+        chmod 777 "${COPY_CONF_DIR}"
+    fi
 
-NEW_COMPUTER_CONF_PATH="${COPY_CONF_DIR}/$(basename "${COMPUTER_CONF_PATH}")"
-envsubst '${POD_IP},${HOSTNAME},${POD_NAME},${POD_NAMESPACE}' < "${COMPUTER_CONF_PATH}" > "${NEW_COMPUTER_CONF_PATH}"
-chmod 777 "${NEW_COMPUTER_CONF_PATH}"
-
-if [ "${LOG4J_CONF_PATH}" != "" ];then
-    LOG4j_CONF=-Dlog4j.configurationFile="${LOG4J_CONF_PATH}"
+    NEW_COMPUTER_CONF_PATH="${COPY_CONF_DIR}/$(basename "${COMPUTER_CONF_PATH}")"
+    envsubst '${POD_IP},${HOSTNAME},${POD_NAME},${POD_NAMESPACE}' < "${COMPUTER_CONF_PATH}" > "${NEW_COMPUTER_CONF_PATH}"
+    chmod 777 "${NEW_COMPUTER_CONF_PATH}"
+    COMPUTER_CONF_PATH=${NEW_COMPUTER_CONF_PATH}
 fi
 
 MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputer
 
 if [ "${LOG4j_CONF}" != "" ]; then
     exec ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${JAVA_OPTS} ${JVM_OPTIONS} \
-        -cp "${CP}" ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
+        -cp "${CP}" ${MAIN_CLASS} "${COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
 else
     exec ${JAVA} -Dname="hugegraph-computer" ${JAVA_OPTS} ${JVM_OPTIONS} -cp "${CP}" \
-        ${MAIN_CLASS} "${NEW_COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
+        ${MAIN_CLASS} "${COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}
 fi

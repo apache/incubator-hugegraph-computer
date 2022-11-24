@@ -16,7 +16,7 @@
 #
 FROM hugegraph/hugegraph-computer-framework:latest
 
-LABEL maintainer="HugeGraph Docker Maintainers <hugegraph@googlegroups.com>"
+LABEL maintainer="HugeGraph Docker Maintainers <dev@hugegraph.apache.org>"
 
 ARG jarFilePath="/opt/jars/hugegraph-builtin-algorithms.jar"
 COPY target/computer-algorithm-*.jar ${jarFilePath}

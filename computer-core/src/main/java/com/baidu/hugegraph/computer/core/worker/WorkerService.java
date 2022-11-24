@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.aggregator.Aggregator;
@@ -56,8 +58,6 @@ import com.baidu.hugegraph.computer.core.sort.sorting.SendSortManager;
 import com.baidu.hugegraph.computer.core.sort.sorting.SortManager;
 import com.baidu.hugegraph.computer.core.store.FileManager;
 import com.baidu.hugegraph.computer.core.util.ShutdownHook;
-import org.apache.hugegraph.util.E;
-import org.apache.hugegraph.util.Log;
 
 public class WorkerService implements Closeable {
 

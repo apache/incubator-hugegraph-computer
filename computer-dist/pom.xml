@@ -116,6 +116,11 @@
                         <configuration>
                             <tasks>
                                 <echo file="${top.level.dir}/dist.sh">
+                                    mkdir -p ${top.level.dir}/${final.name}/algorithm/
+                                    cp ${top.level.dir}/computer-algorithm/target/computer-algorithm-${project.version}.jar ${top.level.dir}/${final.name}/algorithm/
+                                    mkdir -p ${top.level.dir}/${final.name}/k8s-operator/
+                                    cp ${top.level.dir}/computer-k8s-operator/target/hugegraph-computer-operator-${project.version}.jar ${top.level.dir}/${final.name}/k8s-operator/
+
                                     tar -zcvf \
                                     ${top.level.dir}/${final.name}.tar.gz \
                                     ${final.name} || exit 1

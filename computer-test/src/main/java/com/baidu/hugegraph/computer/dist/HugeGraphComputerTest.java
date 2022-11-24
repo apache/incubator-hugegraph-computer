@@ -41,9 +41,9 @@ public class HugeGraphComputerTest extends UnitTestBase {
         CountDownLatch countDownLatch = new CountDownLatch(2);
         Throwable[] exceptions = new Throwable[2];
         String masterConfPath = HugeGraphComputerTest.class.getResource(
-                                "/computer-master.properties").getPath();
+                                "/computer.properties").getPath();
         String work1ConfPath = HugeGraphComputerTest.class.getResource(
-                               "/computer-worker1.properties").getPath();
+                               "/computer.properties").getPath();
         pool.submit(() -> {
             try {
                 Thread.sleep(2000L);
@@ -79,7 +79,7 @@ public class HugeGraphComputerTest extends UnitTestBase {
     @Test
     public void testServiceWithError() {
         String work1ConfPath = HugeGraphComputerTest.class.getResource(
-                               "/computer-worker1.properties").getPath();
+                               "/computer.properties").getPath();
         Assert.assertThrows(IllegalArgumentException.class,
                             () -> {
                                 String[] args1 = {work1ConfPath, "worker111",
