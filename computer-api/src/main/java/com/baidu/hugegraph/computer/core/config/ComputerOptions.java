@@ -19,29 +19,38 @@
 
 package com.baidu.hugegraph.computer.core.config;
 
+import static com.baidu.hugegraph.computer.algorithm.AlgorithmParams.DEFAULTINPUTFILTER_CLASS_NAME;
+import static com.baidu.hugegraph.computer.algorithm.AlgorithmParams.LOG_OUTPUT_CLASS_NAME;
 import static org.apache.hugegraph.config.OptionChecker.allowValues;
 import static org.apache.hugegraph.config.OptionChecker.disallowEmpty;
 import static org.apache.hugegraph.config.OptionChecker.nonNegativeInt;
 import static org.apache.hugegraph.config.OptionChecker.positiveInt;
-import com.baidu.hugegraph.computer.core.combiner.OverwritePropertiesCombiner;
-import com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner;
-import com.baidu.hugegraph.computer.core.input.filter.DefaultInputFilter;
-import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
-import com.baidu.hugegraph.computer.core.network.TransportConf;
-import com.baidu.hugegraph.computer.core.network.netty.NettyTransportProvider;
-import com.baidu.hugegraph.computer.core.output.LogOutput;
-import org.apache.hugegraph.structure.constant.Direction;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.hugegraph.config.ConfigConvOption;
 import org.apache.hugegraph.config.ConfigListOption;
 import org.apache.hugegraph.config.ConfigOption;
 import org.apache.hugegraph.config.OptionHolder;
+import org.apache.hugegraph.structure.constant.Direction;
 import org.apache.hugegraph.util.Bytes;
+import org.apache.hugegraph.util.Log;
+import org.slf4j.Logger;
+
+import com.baidu.hugegraph.computer.core.combiner.OverwritePropertiesCombiner;
+import com.baidu.hugegraph.computer.core.master.DefaultMasterComputation;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public class ComputerOptions extends OptionHolder {
+
+    private static final Logger LOG = Log.logger(ComputerOptions.class);
+
+    public static final int TRANSPORT_DEFAULT_THREADS = 4;
+    public static final String RPC_SERVER_HOST_NAME = "rpc.server_host";
+    public static final String RPC_SERVER_PORT_NAME = "rpc.server_port";
+    public static final String RPC_REMOTE_URL_NAME = "rpc.remote_url";
 
     private ComputerOptions() {
         super();
@@ -131,7 +140,7 @@ public class ComputerOptions extends OptionHolder {
                     "input-filter is used to Filter vertex edges " +
                     "according to user needs.",
                     disallowEmpty(),
-                    DefaultInputFilter.class
+                    loadClass(DEFAULTINPUTFILTER_CLASS_NAME)
             );
 
     public static final ConfigConvOption<String, Direction>
@@ -205,7 +214,7 @@ public class ComputerOptions extends OptionHolder {
                     "The class to output the computation result of each " +
                     "vertex. Be called after iteration computation.",
                     disallowEmpty(),
-                    LogOutput.class
+                    loadClass(LOG_OUTPUT_CLASS_NAME)
             );
 
     public static final ConfigOption<String> OUTPUT_RESULT_NAME =
@@ -494,7 +503,7 @@ public class ComputerOptions extends OptionHolder {
                     "The partitioner that decides which partition a vertex " +
                     "should be in, and which worker a partition should be in.",
                     disallowEmpty(),
-                    HashPartitioner.class
+                    loadClass("com.baidu.hugegraph.computer.core.graph.partition.HashPartitioner")
             );
 
     public static final ConfigOption<Class<?>> WORKER_COMPUTATION_CLASS =
@@ -644,7 +653,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.server_threads",
                     "The number of transport threads for server.",
                     positiveInt(),
-                    TransportConf.DEFAULT_THREADS
+                    TRANSPORT_DEFAULT_THREADS
             );
 
     public static final ConfigOption<Integer> TRANSPORT_CLIENT_THREADS =
@@ -652,7 +661,7 @@ public class ComputerOptions extends OptionHolder {
                     "transport.client_threads",
                     "The number of transport threads for client.",
                     positiveInt(),
-                    TransportConf.DEFAULT_THREADS
+                    TRANSPORT_DEFAULT_THREADS
             );
 
     public static final ConfigOption<Class<?>> TRANSPORT_PROVIDER_CLASS =
@@ -660,7 +669,8 @@ public class ComputerOptions extends OptionHolder {
                     "transport.provider_class",
                     "The transport provider, currently only supports Netty.",
                     disallowEmpty(),
-                    NettyTransportProvider.class
+                    loadClass("com.baidu.hugegraph.computer.core.network.netty" +
+                              ".NettyTransportProvider")
             );
 
     public static final ConfigOption<String> TRANSPORT_IO_MODE =
@@ -899,4 +909,29 @@ public class ComputerOptions extends OptionHolder {
 
     public static Set<String> REQUIRED_OPTIONS = ImmutableSet.of(
     );
+
+    public static final Set<String> COMPUTER_PROHIBIT_USER_OPTIONS =
+            ImmutableSet.of(
+                    ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
+                    ComputerOptions.TRANSPORT_SERVER_HOST.name(),
+                    ComputerOptions.TRANSPORT_SERVER_PORT.name(),
+                    ComputerOptions.JOB_ID.name(),
+                    ComputerOptions.JOB_WORKERS_COUNT.name(),
+                    ComputerOptions.RPC_SERVER_HOST_NAME,
+                    ComputerOptions.RPC_SERVER_PORT_NAME,
+                    ComputerOptions.RPC_REMOTE_URL_NAME
+            );
+
+    public static final Set<String> COMPUTER_REQUIRED_USER_OPTIONS = ImmutableSet.of(
+            ComputerOptions.ALGORITHM_PARAMS_CLASS.name()
+    );
+
+    private static Class<?> loadClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            LOG.warn("Load class {} failed, use Null.class", className);
+            return Null.class;
+        }
+    }
 }

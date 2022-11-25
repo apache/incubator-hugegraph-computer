@@ -42,7 +42,7 @@
         <dependency>
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>computer-driver</artifactId>
-            <version>${project.version}</version>
+            <version>${version}</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>

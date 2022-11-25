@@ -22,16 +22,16 @@ package com.baidu.hugegraph.computer.core.output.hg.task;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.exception.ServerException;
 import org.apache.hugegraph.rest.ClientException;
+import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.output.hg.metrics.LoadSummary;
-import org.apache.hugegraph.driver.HugeClient;
-import org.apache.hugegraph.exception.ServerException;
-import org.apache.hugegraph.structure.graph.Vertex;
-import org.apache.hugegraph.util.Log;
 
 public class BatchInsertTask extends InsertTask {
 

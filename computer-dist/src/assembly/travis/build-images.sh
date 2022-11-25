@@ -36,7 +36,7 @@ PROJECT_VERSION=$(mvn -f "${PROJECT_POM_PATH}" -q -N \
 docker build -t $1 $CONTEXT_PATH -f $PROJECT_PATH/computer-dist/Dockerfile
 
 echo "FROM $1
-LABEL maintainer='HugeGraph Docker Maintainers <hugegraph@googlegroups.com>'
+LABEL maintainer='HugeGraph Docker Maintainers <dev@hugegraph.apache.org>'
 COPY target/computer-algorithm-*.jar $JAR_FILE_PATH
 ENV JAR_FILE_PATH=$JAR_FILE_PATH" | \
 docker build -t $2 -f - $PROJECT_PATH/computer-algorithm

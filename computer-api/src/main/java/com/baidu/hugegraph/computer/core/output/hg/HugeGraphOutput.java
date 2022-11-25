@@ -22,6 +22,9 @@ package com.baidu.hugegraph.computer.core.output.hg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.structure.constant.WriteType;
+import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
@@ -29,9 +32,6 @@ import com.baidu.hugegraph.computer.core.config.Config;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.output.AbstractComputerOutput;
 import com.baidu.hugegraph.computer.core.output.hg.task.TaskManager;
-import org.apache.hugegraph.driver.HugeClient;
-import org.apache.hugegraph.structure.constant.WriteType;
-import org.apache.hugegraph.util.Log;
 
 public abstract class HugeGraphOutput<T> extends AbstractComputerOutput {
 

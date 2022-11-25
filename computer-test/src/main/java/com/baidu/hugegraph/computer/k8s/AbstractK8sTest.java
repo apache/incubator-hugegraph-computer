@@ -30,11 +30,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.configuration2.MapConfiguration;
+import org.apache.hugegraph.config.HugeConfig;
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.testutil.Assert;
+import org.apache.hugegraph.testutil.Whitebox;
+import org.apache.hugegraph.util.ExecutorUtil;
 import org.junit.After;
 import org.junit.Before;
 
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeDriverOptions;
 import com.baidu.hugegraph.computer.k8s.config.KubeSpecOptions;
 import com.baidu.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
@@ -44,11 +49,6 @@ import com.baidu.hugegraph.computer.k8s.operator.OperatorEntrypoint;
 import com.baidu.hugegraph.computer.k8s.operator.config.OperatorOptions;
 import com.baidu.hugegraph.computer.k8s.util.KubeUtil;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import org.apache.hugegraph.config.HugeConfig;
-import org.apache.hugegraph.config.OptionSpace;
-import org.apache.hugegraph.testutil.Assert;
-import org.apache.hugegraph.testutil.Whitebox;
-import org.apache.hugegraph.util.ExecutorUtil;
 import com.google.common.collect.Lists;
 
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
@@ -76,9 +76,9 @@ public abstract class AbstractK8sTest {
               "czcoder/hugegraph-computer-test";
 
     static {
-        OptionSpace.register("computer-driver",
-                             "com.baidu.hugegraph.computer.driver.config" +
-                             ".ComputerOptions");
+        OptionSpace.register("computer",
+                             "com.baidu.hugegraph.computer.core.config." +
+                             "ComputerOptions");
         OptionSpace.register("computer-k8s-driver",
                              "com.baidu.hugegraph.computer.k8s.config" +
                              ".KubeDriverOptions");

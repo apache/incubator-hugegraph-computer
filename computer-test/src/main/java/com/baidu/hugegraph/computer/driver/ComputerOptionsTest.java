@@ -26,18 +26,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.configuration2.MapConfiguration;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import com.baidu.hugegraph.computer.core.graph.value.LongValue;
-import com.baidu.hugegraph.computer.driver.config.ComputerOptions;
-import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
 import org.apache.hugegraph.config.ConfigException;
 import org.apache.hugegraph.config.HugeConfig;
 import org.apache.hugegraph.config.TypedOption;
 import org.apache.hugegraph.testutil.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-public class ComputerOptionsTest {
+import com.baidu.hugegraph.computer.core.config.ComputerOptions;
+import com.baidu.hugegraph.computer.core.graph.value.LongValue;
+import com.baidu.hugegraph.computer.driver.config.DriverConfigOption;
+import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
+
+public class ComputerOptionsTest extends UnitTestBase {
     private static Map<String, String> options;
 
     @BeforeClass
@@ -80,9 +81,10 @@ public class ComputerOptionsTest {
             Object value = config.get(typedOption);
             String key = typedOption.name();
             if (options.containsKey(key)) {
-                Assert.assertEquals(String.valueOf(value), options.get(key));
+                Assert.assertEquals(value instanceof Class ? ((Class<?>) value).getName() :
+                                    String.valueOf(value), options.get(key));
             } else {
-                Assert.assertNull(value);
+                Assert.assertEquals(value, typedOption.defaultValue());
             }
         }
     }

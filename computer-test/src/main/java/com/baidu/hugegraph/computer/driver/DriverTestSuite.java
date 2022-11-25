@@ -19,11 +19,8 @@
 
 package com.baidu.hugegraph.computer.driver;
 
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-
-import org.apache.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -31,11 +28,4 @@ import org.apache.hugegraph.config.OptionSpace;
     ComputerOptionsTest.class,
 })
 public class DriverTestSuite {
-
-    @BeforeClass
-    public static void setup() {
-        OptionSpace.register("computer-driver",
-                             "com.baidu.hugegraph.computer.driver.config" +
-                             ".ComputerOptions");
-    }
 }
