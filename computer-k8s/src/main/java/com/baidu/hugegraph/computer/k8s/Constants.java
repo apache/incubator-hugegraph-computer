@@ -40,7 +40,7 @@ public class Constants {
     public static final String ENV_COMPUTER_CONF_PATH = "COMPUTER_CONF_PATH";
     public static final String ENV_LOG4J_CONF_PATH = "LOG4J_CONF_PATH";
     public static final String ENV_JAR_FILE_PATH = "JAR_FILE_PATH";
-    public static final String ENV_JOB_JAR_URI = "JOB_JAR_URI";
+    public static final String ENV_REMOTE_JAR_URI = "REMOTE_JAR_URI";
     public static final String ENV_JVM_OPTIONS = "JVM_OPTIONS";
     public static final String ENV_CPU_LIMIT = "CPU_LIMIT";
     public static final String ENV_MEMORY_LIMIT = "MEMORY_LIMIT";

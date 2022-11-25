@@ -67,7 +67,7 @@ public class KubeDriverOptions extends OptionHolder {
                     "k8s.framework_image_url",
                     "The image url of computer framework.",
                     disallowEmpty(),
-                    "hugegraph/hugegraph-computer-framework:latest"
+                    "hugegraph/hugegraph-computer:latest"
             );
 
     public static final ConfigOption<String> BUILD_IMAGE_BASH_PATH =

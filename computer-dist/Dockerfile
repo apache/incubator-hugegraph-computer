@@ -15,9 +15,12 @@
 # limitations under the License.
 #
 FROM openjdk:11-jre
-LABEL maintainer="HugeGraph Docker Maintainers <hugegraph@googlegroups.com>"
+LABEL maintainer="HugeGraph Docker Maintainers <dev@hugegraph.apache.org>"
 # use ParallelGC which is more friendly to olap system
 ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseParallelGC -XX:+UseContainerSupport -XX:MaxRAMPercentage=50 -XshowSettings:vm"
-COPY . /etc/local/hugegraph-computer
+COPY ./bin /etc/local/hugegraph-computer/bin
+COPY ./lib /etc/local/hugegraph-computer/lib
+COPY ./algorithm /etc/local/hugegraph-computer/algorithm
+COPY ./conf /etc/local/hugegraph-computer/conf
 WORKDIR /etc/local/hugegraph-computer
 RUN apt-get update && apt-get -y install gettext-base && apt-get -y install wget

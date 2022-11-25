@@ -67,12 +67,6 @@
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>hugegraph-loader</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spark-core_2.12</artifactId>
-                    <groupId>org.apache.spark</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.hugegraph</groupId>

@@ -25,6 +25,11 @@ import java.util.Properties;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.hugegraph.config.OptionSpace;
+import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.util.E;
+import org.apache.hugegraph.util.Log;
+import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
@@ -34,9 +39,6 @@ import com.baidu.hugegraph.computer.core.master.MasterService;
 import com.baidu.hugegraph.computer.core.network.message.MessageType;
 import com.baidu.hugegraph.computer.core.util.ComputerContextUtil;
 import com.baidu.hugegraph.computer.core.worker.WorkerService;
-import org.apache.hugegraph.config.OptionSpace;
-import org.apache.hugegraph.util.E;
-import org.apache.hugegraph.util.Log;
 
 public class HugeGraphComputer {
 
@@ -56,6 +58,8 @@ public class HugeGraphComputer {
 
     public static void main(String[] args) throws IOException,
                                                   ClassNotFoundException {
+        Runtime.getRuntime().addShutdownHook(new Thread(LogManager::shutdown));
+
         E.checkArgument(ArrayUtils.getLength(args) == 3,
                         "Argument count must be three, " +
                         "the first is conf path;" +
@@ -69,7 +73,7 @@ public class HugeGraphComputer {
         setUncaughtExceptionHandler();
         loadClass();
         registerOptions();
-        ComputerContext context = parseContext(args[0]);
+        ComputerContext context = parseContext(args[0], role);
         switch (role) {
             case ROLE_MASTER:
                 executeMasterService(context);
@@ -124,12 +128,17 @@ public class HugeGraphComputer {
         }
     }
 
-    private static ComputerContext parseContext(String conf)
+    private static ComputerContext parseContext(String conf, String role)
                                                 throws IOException {
         Properties properties = new Properties();
         BufferedReader bufferedReader = new BufferedReader(
                                             new FileReader(conf));
         properties.load(bufferedReader);
+        properties.remove(RpcOptions.RPC_REMOTE_URL.name());
+        if (ROLE_WORKER.equals(role)) {
+            properties.remove(RpcOptions.RPC_SERVER_HOST.name());
+            properties.remove(RpcOptions.RPC_SERVER_PORT.name());
+        }
         ComputerContextUtil.initContext(properties);
         return ComputerContext.instance();
     }

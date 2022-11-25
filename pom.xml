@@ -13,7 +13,7 @@
     <name>hugegraph-computer</name>
     <url>https://github.com/apache/hugegraph-computer</url>
     <description>
-        hugegraph-computer is a fast-speed, highly-scalable, fault-tolerance graph processing system developed by baidu.
+        hugegraph-computer is a fast-speed, highly-scalable, fault-tolerance graph processing system developed by apache.
     </description>
 
     <inceptionYear>2020</inceptionYear>
@@ -139,6 +139,10 @@
                     <exclusion>
                         <groupId>commons-collections</groupId>
                         <artifactId>commons-collections</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>slf4j-log4j12</artifactId>
+                        <groupId>org.slf4j</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>

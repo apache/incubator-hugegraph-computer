@@ -32,6 +32,7 @@
             <groupId>com.baidu.hugegraph</groupId>
             <artifactId>computer-api</artifactId>
             <version>${version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.mvel</groupId>
