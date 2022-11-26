@@ -136,7 +136,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Whitebox.setInternalState(this.driver, "enableInternalAlgorithm",
                                   true);
         Whitebox.setInternalState(this.driver, "internalAlgorithms",
-                                  Lists.newArrayList(ALGORITHM_NAME, "algorithm123"));
+                                  Lists.newArrayList("algorithm123"));
 
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");

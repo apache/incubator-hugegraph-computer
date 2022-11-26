@@ -72,7 +72,7 @@ public abstract class AbstractK8sTest {
     protected MixedOperation<HugeGraphComputerJob, HugeGraphComputerJobList,
               Resource<HugeGraphComputerJob>> operation;
 
-    protected static final String IMAGE_REPOSITORY_URL = "busybox";
+    protected static final String IMAGE_REPOSITORY_URL = "hugegraph/busybox";
 
     static {
         OptionSpace.register("computer",
@@ -136,7 +136,7 @@ public abstract class AbstractK8sTest {
         options.put(KubeDriverOptions.LOG4J_XML_PATH.name(),
                     "conf/log4j2-test.xml");
         options.put(KubeDriverOptions.ENABLE_INTERNAL_ALGORITHM.name(),
-                    "true");
+                    "false");
         options.put(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
                     IMAGE_REPOSITORY_URL);
         options.put(KubeDriverOptions.IMAGE_REPOSITORY_USERNAME.name(),
@@ -144,7 +144,7 @@ public abstract class AbstractK8sTest {
         options.put(KubeDriverOptions.IMAGE_REPOSITORY_PASSWORD.name(),
                     "hugegraph");
         options.put(KubeDriverOptions.INTERNAL_ALGORITHM_IMAGE_URL.name(),
-                    IMAGE_REPOSITORY_URL + ":latest");
+                    IMAGE_REPOSITORY_URL + ":pageRank-latest");
         options.put(KubeSpecOptions.PULL_POLICY.name(), "IfNotPresent");
         options.put(KubeSpecOptions.JVM_OPTIONS.name(), "-Dlog4j2.debug=true");
         options.put(KubeSpecOptions.MASTER_COMMAND.name(), "[/bin/sh, -c]");
