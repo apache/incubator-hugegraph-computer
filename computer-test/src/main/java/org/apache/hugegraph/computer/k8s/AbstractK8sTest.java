@@ -136,7 +136,7 @@ public abstract class AbstractK8sTest {
         options.put(KubeDriverOptions.LOG4J_XML_PATH.name(),
                     "conf/log4j2-test.xml");
         options.put(KubeDriverOptions.ENABLE_INTERNAL_ALGORITHM.name(),
-                    "false");
+                    "true");
         options.put(KubeDriverOptions.IMAGE_REPOSITORY_URL.name(),
                     IMAGE_REPOSITORY_URL);
         options.put(KubeDriverOptions.IMAGE_REPOSITORY_USERNAME.name(),
