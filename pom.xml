@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.hugegraph</groupId>
     <artifactId>hugegraph-computer</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <prerequisites>
         <maven>3.3.9</maven>
@@ -38,6 +38,7 @@
     </scm>
 
     <properties>
+        <revision>1.0.0</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <top.level.dir>${project.basedir}/..</top.level.dir>
         <release.name>hugegraph-computer</release.name>
@@ -47,7 +48,12 @@
         <shell-executable>bash</shell-executable>
         <etcd.version>0.5.4</etcd.version>
         <hadoop-version>3.1.2</hadoop-version>
+        <netty-version>4.1.42.Final</netty-version>
         <commons-lang3-version>3.12.0</commons-lang3-version>
+        <hugegraph-common-version>1.0.0</hugegraph-common-version>
+        <hugegraph-client-version>1.0.0</hugegraph-client-version>
+        <hugegraph-rpc-version>1.0.0</hugegraph-rpc-version>
+        <hugegraph-loader-version>1.0.0</hugegraph-loader-version>
     </properties>
 
     <modules>
@@ -67,12 +73,12 @@
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-common</artifactId>
-                <version>1.0.0</version>
+                <version>${hugegraph-common-version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-rpc</artifactId>
-                <version>1.0.0</version>
+                <version>${hugegraph-rpc-version}</version>
                 <exclusions>
                     <!-- conflict with etcd -->
                     <exclusion>
@@ -88,12 +94,12 @@
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-client</artifactId>
-                <version>1.0.0</version>
+                <version>${hugegraph-client-version}</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>4.1.42.Final</version>
+                <version>${netty-version}</version>
             </dependency>
             <dependency>
                 <groupId>io.etcd</groupId>
@@ -160,7 +166,7 @@
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-loader</artifactId>
-                <version>1.0.0</version>
+                <version>${hugegraph-loader-version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.hive</groupId>
