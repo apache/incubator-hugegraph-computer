@@ -48,7 +48,7 @@ spec:
   jobId: *jobName
   algorithmName: page_rank
   image: hugegraph/hugegraph-computer:latest # algorithm image url
-  jarFile: /etc/local/hugegraph-computer/algorithm/builtin-algorithm.jar # algorithm jar path
+  jarFile: /hugegraph/hugegraph-computer/algorithm/builtin-algorithm.jar # algorithm jar path
   pullPolicy: Always
   workerCpu: "4"
   workerMemory: "4Gi"
