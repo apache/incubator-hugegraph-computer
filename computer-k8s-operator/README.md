@@ -47,15 +47,15 @@ metadata:
 spec:
   jobId: *jobName
   algorithmName: page_rank
-  image: hugegraph/hugegraph-builtin-algorithms:latest # algorithm image url
-  jarFile: /opt/jars/hugegraph-builtin-algorithms.jar
+  image: hugegraph/hugegraph-computer:latest # algorithm image url
+  jarFile: /etc/local/hugegraph-computer/algorithm/builtin-algorithm.jar # algorithm jar path
   pullPolicy: Always
   workerCpu: "4"
   workerMemory: "4Gi"
   workerInstances: 5
   computerConf:
     job.partitions_count: "20"
-    algorithm.params_class: pagerank.centrality.org.apache.hugegraph.computer.algorithm.PageRankParams
+    algorithm.params_class: org.apache.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams
     hugegraph.url: http://${hugegraph-server-host}:${hugegraph-server-port} # hugegraph server url
     hugegraph.name: hugegraph
 EOF
