@@ -21,13 +21,14 @@ package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
+import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
 
 import com.baidu.hugegraph.computer.core.graph.id.BytesId;
 import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.suite.unit.UnitTestBase;
-import org.apache.hugegraph.testutil.Assert;
 import com.google.common.collect.ImmutableList;
 
 public class ListValueTest extends UnitTestBase {
@@ -218,8 +219,12 @@ public class ListValueTest extends UnitTestBase {
         value2.add(new FloatValue(201f));
         value2.add(new FloatValue(202f));
 
-        Assert.assertEquals(ImmutableList.of(101, 102, 103), value1.value());
-        Assert.assertEquals(ImmutableList.of(201.0f, 202.0f), value2.value());
+        Assert.assertEquals(ImmutableList.of(101, 102, 103),
+                            value1.value().stream().map(IntValue::value)
+                                  .collect(Collectors.toList()));
+        Assert.assertEquals(ImmutableList.of(201.0f, 202.0f),
+                            value2.value().stream().map(FloatValue::value)
+                                  .collect(Collectors.toList()));
     }
 
     @Test

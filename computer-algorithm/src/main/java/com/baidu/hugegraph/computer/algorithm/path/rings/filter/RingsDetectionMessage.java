@@ -24,6 +24,7 @@ import java.util.List;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.graph.GraphFactory;
+import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.properties.DefaultProperties;
 import com.baidu.hugegraph.computer.core.graph.properties.Properties;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
@@ -32,7 +33,7 @@ import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class RingsDetectionMessage implements CustomizeValue<List<Object>> {
+public class RingsDetectionMessage implements CustomizeValue<List<Id>> {
 
     private final IdList path;
     private Properties walkEdgeProps;
@@ -72,7 +73,7 @@ public class RingsDetectionMessage implements CustomizeValue<List<Object>> {
     }
 
     @Override
-    public List<Object> value() {
+    public List<Id> value() {
         return this.path.value();
     }
 }
