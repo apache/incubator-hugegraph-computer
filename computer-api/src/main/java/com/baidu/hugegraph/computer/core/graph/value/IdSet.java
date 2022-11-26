@@ -20,6 +20,7 @@
 package com.baidu.hugegraph.computer.core.graph.value;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
@@ -46,6 +47,10 @@ public class IdSet implements Tvalue<Set<Id>> {
 
     public void addAll(IdSet other) {
         this.values.addAll(other.values);
+    }
+
+    public void addAll(Collection<Id> other) {
+        this.values.addAll(other);
     }
 
     public boolean contains(Id id) {

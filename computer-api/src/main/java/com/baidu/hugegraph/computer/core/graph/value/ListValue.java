@@ -29,6 +29,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
+import org.apache.hugegraph.util.E;
 
 import com.baidu.hugegraph.computer.core.common.ComputerContext;
 import com.baidu.hugegraph.computer.core.common.SerialEnum;
@@ -36,7 +37,6 @@ import com.baidu.hugegraph.computer.core.graph.GraphFactory;
 import com.baidu.hugegraph.computer.core.graph.value.Value.Tvalue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
 import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
-import org.apache.hugegraph.util.E;
 
 public class ListValue<T extends Tvalue<?>> implements Tvalue<List<Object>> {
 

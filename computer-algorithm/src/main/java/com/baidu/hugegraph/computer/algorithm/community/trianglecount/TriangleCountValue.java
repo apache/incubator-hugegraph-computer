@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value.CustomizeValue;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -31,20 +31,20 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
 
 public class TriangleCountValue implements CustomizeValue<Integer> {
 
-    private IdList idList;
+    private IdSet idSet;
     private IntValue count;
 
     public TriangleCountValue() {
-        this.idList = new IdList();
+        this.idSet = new IdSet();
         this.count = new IntValue();
     }
 
-    public IdList idList() {
-        return this.idList;
+    public IdSet idSet() {
+        return this.idSet;
     }
 
-    public long count() {
-        return this.count.longValue();
+    public int count() {
+        return this.count.intValue();
     }
 
     public void count(int count) {
@@ -54,26 +54,26 @@ public class TriangleCountValue implements CustomizeValue<Integer> {
     @Override
     public TriangleCountValue copy() {
         TriangleCountValue triangleCountValue = new TriangleCountValue();
-        triangleCountValue.idList = this.idList.copy();
+        triangleCountValue.idSet = this.idSet.copy();
         triangleCountValue.count = this.count.copy();
         return triangleCountValue;
     }
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        this.idList.read(in);
+        this.idSet.read(in);
         this.count.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
-        this.idList.write(out);
+        this.idSet.write(out);
         this.count.write(out);
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append("idList", this.idList)
+        return new ToStringBuilder(this).append("idSet", this.idSet)
                                         .append("count", this.count).toString();
     }
 

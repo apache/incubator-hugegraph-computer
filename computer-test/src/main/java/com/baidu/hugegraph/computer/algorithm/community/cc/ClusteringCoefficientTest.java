@@ -34,7 +34,6 @@ import com.baidu.hugegraph.computer.algorithm.AlgorithmTestBase;
 import com.baidu.hugegraph.computer.core.config.ComputerOptions;
 import com.google.common.collect.ImmutableMap;
 
-
 public class ClusteringCoefficientTest extends AlgorithmTestBase {
 
     private static final String VERTX_LABEL = "tc_user";
@@ -105,7 +104,7 @@ public class ClusteringCoefficientTest extends AlgorithmTestBase {
 
         ClusteringCoefficientValue copy = value.copy();
         Assert.assertEquals(10, copy.count());
-        Assert.assertNotSame(value.idList(), copy.idList());
+        Assert.assertNotSame(value.idSet(), copy.idSet());
 
         Assert.assertContains("10", value.toString());
     }

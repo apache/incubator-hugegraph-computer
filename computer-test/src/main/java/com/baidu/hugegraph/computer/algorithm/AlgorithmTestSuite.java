@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.algorithm;
 
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -34,7 +33,6 @@ import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCo
 import com.baidu.hugegraph.computer.algorithm.community.wcc.WccTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import com.baidu.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
-import org.apache.hugegraph.config.OptionSpace;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -51,14 +49,4 @@ import org.apache.hugegraph.config.OptionSpace;
     BetweennessCentralityTest.class
 })
 public class AlgorithmTestSuite {
-
-    @BeforeClass
-    public static void setup() throws ClassNotFoundException {
-        // Don't forget to register options
-        OptionSpace.register("computer",
-                             "com.baidu.hugegraph.computer.core.config." +
-                             "ComputerOptions");
-        OptionSpace.register("computer-rpc",
-                             "org.apache.hugegraph.config.RpcOptions");
-    }
 }
