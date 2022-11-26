@@ -39,7 +39,7 @@
      -->
     <parent>
         <artifactId>hugegraph-computer</artifactId>
-        <groupId>com.baidu.hugegraph</groupId>
+        <groupId>org.apache.hugegraph</groupId>
         <version>0.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -50,7 +50,7 @@
         <!-- Jacoco report-aggregate just statistics its directly dependent module,
              so must explicitly import each submodule -->
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-dist</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -59,12 +59,12 @@
             <artifactId>hugegraph-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-core</artifactId>
             <version>${project.version}</version>
             <exclusions>
@@ -75,27 +75,27 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-algorithm</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-driver</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-yarn</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-k8s</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-k8s-operator</artifactId>
             <version>${project.version}</version>
         </dependency>

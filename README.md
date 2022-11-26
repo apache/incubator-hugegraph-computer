@@ -1,4 +1,4 @@
-# hugegraph-computer
+# Apache HugeGraph Computer
 
 [![License](https://img.shields.io/badge/license-Apache%202-0E78BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![Build Status](https://github.com/apache/hugegraph-computer/actions/workflows/ci.yml/badge.svg)](https://github.com/apache/hugegraph-computer/actions/workflows/ci.yml)

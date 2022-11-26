@@ -20,7 +20,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>hugegraph-computer</artifactId>
-        <groupId>com.baidu.hugegraph</groupId>
+        <groupId>org.apache.hugegraph</groupId>
         <version>0.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -40,7 +40,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-driver</artifactId>
             <version>${version}</version>
         </dependency>
@@ -78,7 +78,7 @@
                 <version>${maven.jsonschema2pojo.plugin.version}</version>
                 <configuration>
                     <sourceDirectory>${project.basedir}/schema</sourceDirectory>
-                    <targetPackage>com.baidu.hugegraph.computer.k8s.crd.model</targetPackage>
+                    <targetPackage>org.apache.hugegraph.computer.k8s.crd.model</targetPackage>
                     <includeConstructors>true</includeConstructors>
                     <includeJsr303Annotations>false</includeJsr303Annotations>
                     <includeToString>false</includeToString>
@@ -116,16 +116,16 @@
                             <target>
                                 <!-- removing the generated Schema class -->
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/crdSchema.java"
+                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/crdSchema.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/EnumSchema.java"
+                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/EnumSchema.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/HugeGraphComputerJob.java"
+                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/HugeGraphComputerJob.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/com/baidu/hugegraph/computer/k8s/crd/model/HugeGraphComputerJobList.java"
+                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/HugeGraphComputerJobList.java"
                                         verbose="true" />
                             </target>
                         </configuration>

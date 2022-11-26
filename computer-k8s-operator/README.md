@@ -16,7 +16,7 @@ kubectl apply -f https://raw.githubusercontent.com/hugegraph/hugegraph-computer/
 kubectl get crd
 
 NAME                                        CREATED AT
-hugegraphcomputerjobs.hugegraph.baidu.com   2021-09-16T08:01:08Z
+hugegraphcomputerjobs.hugegraph.apache.org   2021-09-16T08:01:08Z
 ```
 
 ## Install hugegraph-computer-operator&etcd-server
@@ -39,7 +39,7 @@ hugegraph-computer-operator-etcd-28lm67jxk5                       1/1     Runnin
 
 ```yaml
 cat <<EOF | kubectl apply --filename -
-apiVersion: hugegraph.baidu.com/v1
+apiVersion: hugegraph.apache.org/v1
 kind: HugeGraphComputerJob
 metadata:
   namespace: hugegraph-computer-system
@@ -55,7 +55,7 @@ spec:
   workerInstances: 5
   computerConf:
     job.partitions_count: "20"
-    algorithm.params_class: com.baidu.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams
+    algorithm.params_class: pagerank.centrality.org.apache.hugegraph.computer.algorithm.PageRankParams
     hugegraph.url: http://${hugegraph-server-host}:${hugegraph-server-port} # hugegraph server url
     hugegraph.name: hugegraph
 EOF

@@ -178,7 +178,7 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - hugegraph.baidu.com
+  - hugegraph.apache.org
   resources:
   - hugegraphcomputerjobs
   verbs:
@@ -190,13 +190,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - hugegraph.baidu.com
+  - hugegraph.apache.org
   resources:
   - hugegraphcomputerjobs/finalizers
   verbs:
   - update
 - apiGroups:
-  - hugegraph.baidu.com
+  - hugegraph.apache.org
   resources:
   - hugegraphcomputerjobs/status
   verbs:

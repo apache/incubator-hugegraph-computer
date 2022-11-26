@@ -20,84 +20,84 @@ under the License.
 package main
 
 import (
-    "fmt"
-    "io/ioutil"
-    "os"
-    "reflect"
-    "strings"
-    
-    "github.com/fabric8io/kubernetes-client/generator/pkg/schemagen"
-    operatorv1 "hugegraph.baidu.com/operator/api/v1"
-    machinery "k8s.io/apimachinery/pkg/apis/meta/v1"
-    "k8s.io/apimachinery/pkg/runtime"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"reflect"
+	"strings"
+
+	"github.com/fabric8io/kubernetes-client/generator/pkg/schemagen"
+	operatorv1 "hugegraph.apache.org/operator/api/v1"
+	machinery "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 const (
-    packageToken   = "io.fabric8.xxxx"
-    javaPackage    = "com.baidu.hugegraph.computer.k8s.crd.model"
-    goPackage      = "hugegraph.baidu.com/operator/api/v1"
-    schemaFilePath = "../../computer-k8s/schema/crd-schema.json"
+	packageToken   = "io.fabric8.xxxx"
+	javaPackage    = "org.apache.hugegraph.computer.k8s.crd.model"
+	goPackage      = "hugegraph.apache.org/operator/api/v1"
+	schemaFilePath = "../../computer-k8s/schema/crd-schema.json"
 )
 
 func main() {
 
-    // the CRD List types for which the model should be generated
-    // no other types need to be defined as they are auto discovered
-    crdLists := map[reflect.Type]schemagen.CrdScope{
-        // v1
-        reflect.TypeOf(operatorv1.HugeGraphComputerJobList{}): schemagen.Namespaced,
-    }
+	// the CRD List types for which the model should be generated
+	// no other types need to be defined as they are auto discovered
+	crdLists := map[reflect.Type]schemagen.CrdScope{
+		// v1
+		reflect.TypeOf(operatorv1.HugeGraphComputerJobList{}): schemagen.Namespaced,
+	}
 
-    // constraints and patterns for fields
-    constraints := map[reflect.Type]map[string]*schemagen.Constraint{}
+	// constraints and patterns for fields
+	constraints := map[reflect.Type]map[string]*schemagen.Constraint{}
 
-    // types that are manually defined in the model
-    providedTypes := []schemagen.ProvidedType{}
+	// types that are manually defined in the model
+	providedTypes := []schemagen.ProvidedType{}
 
-    // go packages that are provided and where no
-    // generation is required and their corresponding java package
-    providedPackages := map[string]string{
-        // external
-        "k8s.io/api/core/v1":                   "io.fabric8.kubernetes.api.model",
-        "k8s.io/apimachinery/pkg/apis/meta/v1": "io.fabric8.kubernetes.api.model",
-        "k8s.io/apimachinery/pkg/api/resource": "io.fabric8.kubernetes.api.model",
-        "k8s.io/apimachinery/pkg/runtime":      "io.fabric8.kubernetes.api.model.runtime",
-    }
+	// go packages that are provided and where no
+	// generation is required and their corresponding java package
+	providedPackages := map[string]string{
+		// external
+		"k8s.io/api/core/v1":                   "io.fabric8.kubernetes.api.model",
+		"k8s.io/apimachinery/pkg/apis/meta/v1": "io.fabric8.kubernetes.api.model",
+		"k8s.io/apimachinery/pkg/api/resource": "io.fabric8.kubernetes.api.model",
+		"k8s.io/apimachinery/pkg/runtime":      "io.fabric8.kubernetes.api.model.runtime",
+	}
 
-    // mapping of go packages of this module to the resulting java package
-    // optional ApiGroup and ApiVersion for the go package
-    // (which is added to the generated java class)
-    packageMapping := map[string]schemagen.PackageInformation{
-        // v1
-        goPackage: {
-            JavaPackage: packageToken,
-            ApiGroup:    operatorv1.GroupVersion.Group,
-            ApiVersion:  operatorv1.GroupVersion.Version,
-        },
-    }
+	// mapping of go packages of this module to the resulting java package
+	// optional ApiGroup and ApiVersion for the go package
+	// (which is added to the generated java class)
+	packageMapping := map[string]schemagen.PackageInformation{
+		// v1
+		goPackage: {
+			JavaPackage: packageToken,
+			ApiGroup:    operatorv1.GroupVersion.Group,
+			ApiVersion:  operatorv1.GroupVersion.Version,
+		},
+	}
 
-    // converts all packages starting with <key> to
-    mappingSchema := map[string]string{}
+	// converts all packages starting with <key> to
+	mappingSchema := map[string]string{}
 
-    // overwriting some times
-    manualTypeMap := map[reflect.Type]string{
-        reflect.TypeOf(machinery.Time{}):       "java.lang.String",
-        reflect.TypeOf(runtime.RawExtension{}): "java.util.Map<String, Object>",
-        reflect.TypeOf([]byte{}):               "java.lang.String",
-    }
+	// overwriting some times
+	manualTypeMap := map[reflect.Type]string{
+		reflect.TypeOf(machinery.Time{}):       "java.lang.String",
+		reflect.TypeOf(runtime.RawExtension{}): "java.util.Map<String, Object>",
+		reflect.TypeOf([]byte{}):               "java.lang.String",
+	}
 
-    json := schemagen.GenerateSchema(
-        "http://fabric8.io/hugegraph-computer/ComputerSchema#",
-        crdLists, providedPackages, manualTypeMap, packageMapping,
-        mappingSchema, providedTypes, constraints,
-    )
+	json := schemagen.GenerateSchema(
+		"http://fabric8.io/hugegraph-computer/ComputerSchema#",
+		crdLists, providedPackages, manualTypeMap, packageMapping,
+		mappingSchema, providedTypes, constraints,
+	)
 
-    // fix must start with "io.fabric8."
-    json = strings.ReplaceAll(json, packageToken, javaPackage)
+	// fix must start with "io.fabric8."
+	json = strings.ReplaceAll(json, packageToken, javaPackage)
 
-    err := ioutil.WriteFile(schemaFilePath, []byte(json+"\n"), 0644)
-    if err != nil {
-        fmt.Println(err.Error())
-        os.Exit(1)
-    }
+	err := ioutil.WriteFile(schemaFilePath, []byte(json+"\n"), 0644)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 }

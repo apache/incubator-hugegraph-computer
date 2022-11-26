@@ -18,8 +18,8 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/hugegraph.baidu.com_hugegraphcomputerjobs.yaml
-- bases/hugegraph.baidu.com_hugegraphcomputerjobs.v1beta1.yaml
+- bases/hugegraph.apache.org_hugegraphcomputerjobs.yaml
+- bases/hugegraph.apache.org_hugegraphcomputerjobs.v1beta1.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
