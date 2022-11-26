@@ -20,6 +20,7 @@
 package org.apache.hugegraph.computer.k8s;
 
 import static io.fabric8.kubernetes.client.Config.getKubeconfigFilename;
+import static org.apache.hugegraph.computer.k8s.config.KubeDriverOptions.INTERNAL_ALGORITHMS;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +69,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     private static final Logger LOG = Log.logger(MiniKubeTest.class);
 
-    private static final String ALGORITHM_NAME = "PageRank";
+    private static final String ALGORITHM_NAME = INTERNAL_ALGORITHMS.defaultValue().get(0);
 
     @Before
     public void setup() throws IOException {
