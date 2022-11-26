@@ -69,7 +69,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
     private static final Logger LOG = Log.logger(MiniKubeTest.class);
 
-    private static final String ALGORITHM_NAME = INTERNAL_ALGORITHMS.defaultValue().get(0);
+    public static final String ALGORITHM_NAME = INTERNAL_ALGORITHMS.defaultValue().get(0);
 
     @Before
     public void setup() throws IOException {
@@ -136,7 +136,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         Whitebox.setInternalState(this.driver, "enableInternalAlgorithm",
                                   true);
         Whitebox.setInternalState(this.driver, "internalAlgorithms",
-                                  Lists.newArrayList("algorithm123"));
+                                  Lists.newArrayList(ALGORITHM_NAME, "algorithm123"));
 
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "1");
