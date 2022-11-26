@@ -19,7 +19,6 @@
 
 package com.baidu.hugegraph.computer.algorithm.community.trianglecount;
 
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -28,6 +27,7 @@ import com.baidu.hugegraph.computer.core.graph.edge.Edge;
 import com.baidu.hugegraph.computer.core.graph.edge.Edges;
 import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
 import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
@@ -46,11 +46,11 @@ public class TriangleCount implements Computation<IdList> {
 
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
-        IdList selfId = new IdList();
+        IdSet selfId = new IdSet();
         selfId.add(vertex.id());
 
         context.sendMessageToAllEdgesIf(vertex, selfId, (ids, targetId) -> {
-            return !ids.get(0).equals(targetId);
+            return !vertex.id().equals(targetId);
         });
         vertex.value(new TriangleCountValue());
     }
@@ -58,17 +58,16 @@ public class TriangleCount implements Computation<IdList> {
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<IdList> messages) {
-        Integer count = this.triangleCount(context, vertex, messages);
+        IdSet neighbors = ((TriangleCountValue) vertex.value()).idSet();
+        Integer count = this.triangleCount(context, vertex, messages, neighbors);
         if (count != null) {
             ((TriangleCountValue) vertex.value()).count(count);
             vertex.inactivate();
         }
     }
 
-    private Integer triangleCount(ComputationContext context, Vertex vertex,
-                                  Iterator<IdList> messages) {
-        IdList neighbors = ((TriangleCountValue) vertex.value()).idList();
-
+    protected Integer triangleCount(ComputationContext context, Vertex vertex,
+                                    Iterator<IdList> messages, IdSet neighbors) {
         if (context.superstep() == 1) {
             // Collect outgoing neighbors
             Set<Id> outNeighbors = getOutNeighbors(vertex);
@@ -85,17 +84,16 @@ public class TriangleCount implements Computation<IdList> {
             }
 
             // Send all neighbors to neighbors
-            for (Id targetId : neighbors.values()) {
+            for (Id targetId : neighbors.value()) {
                 context.sendMessage(targetId, neighbors);
             }
         } else if (context.superstep() == 2) {
             int count = 0;
 
-            Set<Id> allNeighbors = new HashSet<>(neighbors.values());
             while (messages.hasNext()) {
                 IdList twoDegreeNeighbors = messages.next();
                 for (Id twoDegreeNeighbor : twoDegreeNeighbors.values()) {
-                    if (allNeighbors.contains(twoDegreeNeighbor)) {
+                    if (neighbors.contains(twoDegreeNeighbor)) {
                         count++;
                     }
                 }

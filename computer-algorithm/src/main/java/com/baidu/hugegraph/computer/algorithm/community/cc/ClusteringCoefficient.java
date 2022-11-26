@@ -19,17 +19,13 @@
 
 package com.baidu.hugegraph.computer.algorithm.community.cc;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
+import com.baidu.hugegraph.computer.algorithm.community.trianglecount.TriangleCount;
 import com.baidu.hugegraph.computer.core.config.Config;
-import com.baidu.hugegraph.computer.core.graph.edge.Edge;
-import com.baidu.hugegraph.computer.core.graph.edge.Edges;
-import com.baidu.hugegraph.computer.core.graph.id.Id;
 import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.vertex.Vertex;
-import com.baidu.hugegraph.computer.core.worker.Computation;
 import com.baidu.hugegraph.computer.core.worker.ComputationContext;
 
 /**
@@ -42,15 +38,12 @@ import com.baidu.hugegraph.computer.core.worker.ComputationContext;
  * And we have 2 ways to count local cc:
  * 1. if we already saved the triangles in each vertex, we can calculate only
  * in superstep0/compute0 to get the result
- * 2. if we want recount the triangles result, we can choose:
- * - copy code from TriangleCount, then add extra logic
- * - reuse code in TriangleCount (need solve compatible problem - TODO)
  * <p>
  * The formula of local CC is: C(v) = 2T / Dv(Dv - 1)
  * v represents one vertex, T represents the triangles of current vertex,
  * D represents the degree of current vertex
  */
-public class ClusteringCoefficient implements Computation<IdList> {
+public class ClusteringCoefficient extends TriangleCount {
 
     @Override
     public String name() {
@@ -80,63 +73,11 @@ public class ClusteringCoefficient implements Computation<IdList> {
 
     @Override
     public void compute(ComputationContext context, Vertex vertex, Iterator<IdList> messages) {
-        Integer count = this.triangleCount(context, vertex, messages);
+        IdSet neighbors = ((ClusteringCoefficientValue) vertex.value()).idSet();
+        Integer count = super.triangleCount(context, vertex, messages, neighbors);
         if (count != null) {
             ((ClusteringCoefficientValue) vertex.value()).count(count);
             vertex.inactivate();
         }
-    }
-
-    private Integer triangleCount(ComputationContext context, Vertex vertex,
-                                  Iterator<IdList> messages) {
-        IdList neighbors = ((ClusteringCoefficientValue) vertex.value()).idList();
-
-        if (context.superstep() == 1) {
-            // Collect outgoing neighbors
-            Set<Id> outNeighbors = getOutNeighbors(vertex);
-            neighbors.addAll(outNeighbors);
-
-            // Collect incoming neighbors
-            while (messages.hasNext()) {
-                IdList idList = messages.next();
-                assert idList.size() == 1;
-                Id inId = idList.get(0);
-                if (!outNeighbors.contains(inId)) {
-                    neighbors.add(inId);
-                }
-            }
-            // TODO: Save degree to vertex value here (optional)
-            // Send all neighbors to neighbors
-            for (Id targetId : neighbors.values()) {
-                context.sendMessage(targetId, neighbors);
-            }
-        } else if (context.superstep() == 2) {
-            int count = 0;
-
-            Set<Id> allNeighbors = new HashSet<>(neighbors.values());
-            while (messages.hasNext()) {
-                IdList twoDegreeNeighbors = messages.next();
-                for (Id twoDegreeNeighbor : twoDegreeNeighbors.values()) {
-                    if (allNeighbors.contains(twoDegreeNeighbor)) {
-                        count++;
-                    }
-                }
-            }
-
-            return count >> 1;
-        }
-        return null;
-    }
-
-    private static Set<Id> getOutNeighbors(Vertex vertex) {
-        Set<Id> outNeighbors = new HashSet<>();
-        Edges edges = vertex.edges();
-        for (Edge edge : edges) {
-            Id targetId = edge.targetId();
-            if (!vertex.id().equals(targetId)) {
-                outNeighbors.add(targetId);
-            }
-        }
-        return outNeighbors;
     }
 }

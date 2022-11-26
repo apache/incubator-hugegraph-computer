@@ -113,7 +113,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
 
         TriangleCountValue copy = value.copy();
         Assert.assertEquals(10, copy.count());
-        Assert.assertNotSame(value.idList(), copy.idList());
+        Assert.assertNotSame(value.idSet(), copy.idSet());
 
         Assert.assertContains("10", value.toString());
     }
@@ -123,7 +123,7 @@ public class TriangleCountTest extends AlgorithmTestBase {
         @Override
         public Integer value(com.baidu.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             Integer value = super.value(vertex);
-            Integer expected = EXPECTED_RESULTS.get(vertex.id());
+            Integer expected = EXPECTED_RESULTS.get(vertex.id().string());
             if (expected != null) {
                 Assert.assertEquals(expected, value);
             }

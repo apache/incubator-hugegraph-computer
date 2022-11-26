@@ -21,7 +21,7 @@ package com.baidu.hugegraph.computer.algorithm.community.cc;
 
 import java.io.IOException;
 
-import com.baidu.hugegraph.computer.core.graph.value.IdList;
+import com.baidu.hugegraph.computer.core.graph.value.IdSet;
 import com.baidu.hugegraph.computer.core.graph.value.IntValue;
 import com.baidu.hugegraph.computer.core.graph.value.Value;
 import com.baidu.hugegraph.computer.core.io.RandomAccessInput;
@@ -32,22 +32,22 @@ import com.baidu.hugegraph.computer.core.io.RandomAccessOutput;
  */
 public class ClusteringCoefficientValue implements Value.CustomizeValue<Integer> {
 
-    private IdList idList;
+    private IdSet idSet;
     private IntValue count;
     private final IntValue degree;
 
     public ClusteringCoefficientValue() {
-        this.idList = new IdList();
+        this.idSet = new IdSet();
         this.count = new IntValue();
         this.degree = new IntValue();
     }
 
-    public IdList idList() {
-        return this.idList;
+    public IdSet idSet() {
+        return this.idSet;
     }
 
-    public long count() {
-        return this.count.value();
+    public int count() {
+        return this.count.intValue();
     }
 
     public void count(Integer count) {
@@ -65,7 +65,7 @@ public class ClusteringCoefficientValue implements Value.CustomizeValue<Integer>
     @Override
     public ClusteringCoefficientValue copy() {
         ClusteringCoefficientValue ccValue = new ClusteringCoefficientValue();
-        ccValue.idList = this.idList.copy();
+        ccValue.idSet = this.idSet.copy();
         ccValue.count = this.count.copy();
         return ccValue;
     }
@@ -77,13 +77,13 @@ public class ClusteringCoefficientValue implements Value.CustomizeValue<Integer>
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
-        this.idList.read(in);
+        this.idSet.read(in);
         this.count.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
-        this.idList.write(out);
+        this.idSet.write(out);
         this.count.write(out);
     }
 
