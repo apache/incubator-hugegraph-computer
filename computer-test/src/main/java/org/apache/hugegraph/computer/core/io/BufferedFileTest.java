@@ -676,7 +676,7 @@ public class BufferedFileTest {
         // Compare two BufferedFileInput
         file1 = createTempFile();
         file2 = createTempFile();
-        String content = "let's make apache great again";
+        String content = "let's make baidu great again";
 
         try (BufferedFileInput input1 = inputByString(file1, content, 10);
              BufferedFileInput input2 = inputByString(file1, content, 10)) {
