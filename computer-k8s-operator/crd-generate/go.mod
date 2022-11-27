@@ -1,4 +1,4 @@
-module hugegraph.baidu.com/operator
+module hugegraph.apache.org/operator
 
 go 1.16
 

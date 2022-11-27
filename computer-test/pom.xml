@@ -39,8 +39,8 @@
      -->
     <parent>
         <artifactId>hugegraph-computer</artifactId>
-        <groupId>com.baidu.hugegraph</groupId>
-        <version>0.1.4</version>
+        <groupId>org.apache.hugegraph</groupId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -50,23 +50,23 @@
         <!-- Jacoco report-aggregate just statistics its directly dependent module,
              so must explicitly import each submodule -->
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-dist</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>hugegraph-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-api</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-core</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>okhttp</artifactId>
@@ -75,29 +75,29 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-algorithm</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-driver</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-yarn</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-k8s</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-k8s-operator</artifactId>
-            <version>${project.version}</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
