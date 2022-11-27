@@ -58,7 +58,7 @@
             <appender-ref ref="console"/>
             <appender-ref ref="file"/>
         </root>
-        <Logger name="com.baidu.hugegraph" level="INFO" additivity="false">
+        <Logger name="org.apache.hugegraph" level="INFO" additivity="false">
             <appender-ref ref="console"/>
             <appender-ref ref="file"/>
         </Logger>

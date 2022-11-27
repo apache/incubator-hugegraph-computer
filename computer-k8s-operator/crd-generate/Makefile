@@ -55,8 +55,8 @@ gen-all: gen-code manifests gen-jsonschema ## Generate code containing DeepCopy,
 manifests: controller-gen kustomize ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	#$(KUSTOMIZE) build config/crd > ../manifest/hugegraph-computer-crd.yaml
-	cp config/crd/bases/hugegraph.baidu.com_hugegraphcomputerjobs.yaml ../manifest/hugegraph-computer-crd.v1.yaml
-	cp config/crd/bases/hugegraph.baidu.com_hugegraphcomputerjobs.v1beta1.yaml ../manifest/hugegraph-computer-crd.v1beta1.yaml
+	cp config/crd/bases/hugegraph.apache.org_hugegraphcomputerjobs.yaml ../manifest/hugegraph-computer-crd.v1.yaml
+	cp config/crd/bases/hugegraph.apache.org_hugegraphcomputerjobs.v1beta1.yaml ../manifest/hugegraph-computer-crd.v1beta1.yaml
 	$(KUSTOMIZE) build config/default > ../manifest/hugegraph-computer-operator.yaml
 	rm -rf config/crd/bases
 

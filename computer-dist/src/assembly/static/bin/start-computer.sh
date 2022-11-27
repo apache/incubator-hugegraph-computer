@@ -227,7 +227,7 @@ if [ "${ROLE}" = "${ROLE_WORKER}" ]; then
     LOG_NAME=-Dlog.name=hugegraph-computer-worker
 fi
 
-MAIN_CLASS=com.baidu.hugegraph.computer.dist.HugeGraphComputer
+MAIN_CLASS=org.apache.hugegraph.computer.dist.HugeGraphComputer
 
 exec ${JAVA} -Dname="hugegraph-computer" "${LOG4j_CONF}" ${LOG_NAME} ${JAVA_OPTS} ${JVM_OPTIONS} \
         -cp "${CP}" ${MAIN_CLASS} "${COMPUTER_CONF_PATH}" ${ROLE} ${DRIVE}

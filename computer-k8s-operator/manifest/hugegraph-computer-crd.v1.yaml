@@ -21,9 +21,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.5.0
   creationTimestamp: null
-  name: hugegraphcomputerjobs.hugegraph.baidu.com
+  name: hugegraphcomputerjobs.hugegraph.apache.org
 spec:
-  group: hugegraph.baidu.com
+  group: hugegraph.apache.org
   names:
     kind: HugeGraphComputerJob
     listKind: HugeGraphComputerJobList

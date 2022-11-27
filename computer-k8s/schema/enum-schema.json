@@ -6,42 +6,42 @@
     "NodePhase" : {
       "type" : "string",
       "enum" : ["NodePending", "NodeRunning", "NodeTerminated"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.NodePhase"
+      "javaType": "org.apache.hugegraph.computer.k8s.crd.model.NodePhase"
     },
     "ResourceName" : {
       "type" : "string",
       "enum" : ["cpu", "memory", "storage", "ephemeral-storage"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.ResourceName"
+      "javaType": "org.apache.hugegraph.computer.k8s.crd.model.ResourceName"
     },
     "RestartPolicy" : {
       "type" : "string",
       "enum" : ["Always", "OnFailure", "Never"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.RestartPolicy"
+      "javaType": "org.apache.hugegraph.computer.k8s.crd.model.RestartPolicy"
     },
     "PullPolicy" : {
       "type" : "string",
       "enum" : ["Always", "Never", "IfNotPresent"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.PullPolicy"
+      "javaType": "org.apache.hugegraph.computer.k8s.crd.model.PullPolicy"
     },
     "PodPhase" : {
       "type" : "string",
       "enum" : ["Pending", "Running", "Succeeded", "Failed", "Unknown"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.PodPhase"
+      "javaType": "org.apache.hugegraph.computer.k8s.crd.model.PodPhase"
     },
     "EventType" : {
       "type" : "string",
       "enum" : ["Normal", "Warning"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.EventType"
+      "javaType": "org.apache.hugegraph.computer.k8s.crd.model.EventType"
     },
     "CommonComponentState" : {
       "type" : "string",
       "enum" : ["NotReady", "Ready", "Deleted"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.CommonComponentState"
+      "javaType": "org.apache.hugegraph.computer.k8s.crd.model.CommonComponentState"
     },
     "JobComponentState" : {
       "type" : "string",
       "enum" : ["Pending", "Running", "Succeeded", "Failed", "Cancelled", "Unknown"],
-      "javaType": "com.baidu.hugegraph.computer.k8s.crd.model.JobComponentState"
+      "javaType": "org.apache.hugegraph.computer.k8s.crd.model.JobComponentState"
     }
   },
   "properties": {
