@@ -39,8 +39,8 @@
       -->
     <parent>
         <artifactId>hugegraph-computer</artifactId>
-        <groupId>com.baidu.hugegraph</groupId>
-        <version>0.1.4</version>
+        <groupId>org.apache.hugegraph</groupId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -54,9 +54,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.baidu.hugegraph</groupId>
+            <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-core</artifactId>
-            <version>${version}</version>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
 
@@ -116,6 +116,11 @@
                         <configuration>
                             <tasks>
                                 <echo file="${top.level.dir}/dist.sh">
+                                    mkdir -p ${top.level.dir}/${final.name}/algorithm/
+                                    cp ${top.level.dir}/computer-algorithm/target/computer-algorithm-${revision}.jar ${top.level.dir}/${final.name}/algorithm/builtin-algorithm.jar
+                                    mkdir -p ${top.level.dir}/${final.name}/k8s-operator/
+                                    cp ${top.level.dir}/computer-k8s-operator/target/hugegraph-computer-operator-${revision}.jar ${top.level.dir}/${final.name}/k8s-operator/hugegraph-computer-operator.jar
+
                                     tar -zcvf \
                                     ${top.level.dir}/${final.name}.tar.gz \
                                     ${final.name} || exit 1

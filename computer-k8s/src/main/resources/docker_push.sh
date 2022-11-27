@@ -29,7 +29,7 @@ function build_image() {
     JAR_FILE=""
     IMG_URL=""
     FRAMEWORK_IMG_URL=""
-    MAINTAINER="HugeGraph Docker Maintainers <hugegraph@googlegroups.com>"
+    MAINTAINER="HugeGraph Docker Maintainers <dev@hugegraph.apache.org>"
 
     while getopts "r:u:p:s:j:i:f:" arg; do
       case ${arg} in

@@ -3,9 +3,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.baidu.hugegraph</groupId>
+    <groupId>org.apache.hugegraph</groupId>
     <artifactId>hugegraph-computer</artifactId>
-    <version>0.1.4</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <prerequisites>
         <maven>3.3.9</maven>
@@ -13,14 +13,14 @@
     <name>hugegraph-computer</name>
     <url>https://github.com/apache/hugegraph-computer</url>
     <description>
-        hugegraph-computer is a fast-speed, highly-scalable, fault-tolerance graph processing system developed by baidu.
+        hugegraph-computer is a fast-speed, highly-scalable, fault-tolerance graph processing system developed by apache.
     </description>
 
     <inceptionYear>2020</inceptionYear>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -38,6 +38,7 @@
     </scm>
 
     <properties>
+        <revision>1.0.0</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <top.level.dir>${project.basedir}/..</top.level.dir>
         <release.name>hugegraph-computer</release.name>
@@ -47,7 +48,12 @@
         <shell-executable>bash</shell-executable>
         <etcd.version>0.5.4</etcd.version>
         <hadoop-version>3.1.2</hadoop-version>
+        <netty-version>4.1.42.Final</netty-version>
         <commons-lang3-version>3.12.0</commons-lang3-version>
+        <hugegraph-common-version>1.0.0</hugegraph-common-version>
+        <hugegraph-client-version>1.0.0</hugegraph-client-version>
+        <hugegraph-rpc-version>1.0.0</hugegraph-rpc-version>
+        <hugegraph-loader-version>1.0.0</hugegraph-loader-version>
     </properties>
 
     <modules>
@@ -67,12 +73,12 @@
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-common</artifactId>
-                <version>1.0.0</version>
+                <version>${hugegraph-common-version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-rpc</artifactId>
-                <version>1.0.0</version>
+                <version>${hugegraph-rpc-version}</version>
                 <exclusions>
                     <!-- conflict with etcd -->
                     <exclusion>
@@ -88,12 +94,12 @@
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-client</artifactId>
-                <version>1.0.0</version>
+                <version>${hugegraph-client-version}</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>4.1.42.Final</version>
+                <version>${netty-version}</version>
             </dependency>
             <dependency>
                 <groupId>io.etcd</groupId>
@@ -140,6 +146,10 @@
                         <groupId>commons-collections</groupId>
                         <artifactId>commons-collections</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <artifactId>slf4j-log4j12</artifactId>
+                        <groupId>org.slf4j</groupId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -156,7 +166,7 @@
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-loader</artifactId>
-                <version>1.0.0</version>
+                <version>${hugegraph-loader-version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.hive</groupId>
