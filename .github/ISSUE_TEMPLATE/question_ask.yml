@@ -8,8 +8,8 @@ body:
       value: >-
         ### Note (特别注意) : 
 
-        > 1. 请先**搜索**现有的[Server-Issues](https://github.com/hugegraph/hugegraph/issues) 与
-        [Computer-Issues](https://github.com/hugegraph/hugegraph-computer/issues) 中没有与您相同
+        > 1. 请先**搜索**现有的[Server-Issues](https://github.com/apache/hugegraph-computer/issues) 与
+        [Computer-Issues](https://github.com/apache/hugegraph-computer/issues) 中没有与您相同
         / 相关的问题 (请勿重复提交)
 
         > 2. 我们需要尽可能**详细**的信息来**复现**问题, 越详细的信息 (包括**日志 / 截图 / 配置**等)
@@ -35,17 +35,17 @@ body:
     attributes:
       label: Before submit
       options:
-        - label: 我已经确认现有的 [Server-Issues](https://github.com/hugegraph/hugegraph/issues) 与 [Computer-Issues](https://github.com/hugegraph/hugegraph-computer/issues) 中没有相同 / 重复问题
+        - label: 我已经确认现有的 [Server-Issues](https://github.com/apache/hugegraph-computer/issues) 与 [Computer-Issues](https://github.com/apache/hugegraph-computer/issues) 中没有相同 / 重复问题
           required: true
 
   - type: textarea
     attributes:
       label: Environment (环境信息)
       description: |
-        > server version could get from [rest-api](https://hugegraph.github.io/hugegraph-doc/clients/restful-api/other.html) (http://localhost:8080/versions)
+        > server version could get from [rest-api](https://hugegraph.apache.org/docs/clients/restful-api/other) (http://localhost:8080/versions)
       value: |
-        - Server Version: v0.11.x
-        - Computer Version: v0.x
+        - Server Version: v1.0.x
+        - Computer Version: v1.0.x
         - Scheduler: K8s V1.xx <!-- Yarn 3.x -->
         - Data Size:  xx vertices, xx edges <!-- (like 1000W 点, 9000W 边) -->
     validations:
@@ -55,7 +55,7 @@ body:
     attributes:
       label: Your Question (问题描述)
       description: |
-        > 图使用 / 配置相关问题，请优先参考 [REST-API 文档](https://hugegraph.github.io/hugegraph-doc/clients/hugegraph-api.html), 以及 [Server 配置文档](https://hugegraph.github.io/hugegraph-doc/config/config-option.html)
+        > 图使用 / 配置相关问题，请优先参考 [REST-API 文档](https://hugegraph.apache.org/docs/clients/restful-api), 以及 [Server 配置文档](https://hugegraph.apache.org/docs/config/config-option)
         > if possible, please provide screenshots or GIF (请提供清晰的截图, 动图录屏更佳)
       placeholder: |        
         type the main problem here 
@@ -66,33 +66,3 @@ body:
         ```
     validations:
       required: true
-  
-  - type: textarea
-    attributes:
-      label: Vertex/Edge example (问题点 / 边数据举例)
-      description: |
-        > 如果问题与具体的点 / 边数据相关, 请提供完整的`原始数据 + REST-API 查询结果`
-      placeholder: |
-        // Origin data
-        tom  18  boy  HK
-
-        // JSON of Vertex / Edge
-        {
-          "vertex": { "id": "xxx" }
-        }
-      render: javascript
-  
-  - type: textarea
-    attributes:
-      label: Schema [VertexLabel, EdgeLabel, IndexLabel] (元数据结构)
-      description: |
-        > 如果问题与具体的点类型 / 边类型 / 索引类型相关, 请提供完整的 `Schema 返回 JSON 结果`
-      placeholder: |
-        // Query URL
-        GET http://localhost:8080/graphs/hugegraph/schema/vertexlabels
-
-        // JSON of GraphSchema
-        {
-          "vertex": { "id": "xxx" }
-        }
-      render: javascript
