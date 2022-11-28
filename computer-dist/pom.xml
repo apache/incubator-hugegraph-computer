@@ -39,6 +39,7 @@
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-algorithm</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -49,11 +50,13 @@
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-k8s-operator</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-yarn</artifactId>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
