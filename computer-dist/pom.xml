@@ -115,27 +115,11 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
-                                <echo file="${top.level.dir}/dist.sh">
-                                    mkdir -p ${top.level.dir}/${final.name}/algorithm/
-                                    cp ${top.level.dir}/computer-algorithm/target/computer-algorithm-${revision}.jar ${top.level.dir}/${final.name}/algorithm/builtin-algorithm.jar
-                                    mkdir -p ${top.level.dir}/${final.name}/k8s-operator/
-                                    cp ${top.level.dir}/computer-k8s-operator/target/hugegraph-computer-operator-${revision}.jar ${top.level.dir}/${final.name}/k8s-operator/hugegraph-computer-operator.jar
-
-                                    tar -zcvf \
-                                    ${top.level.dir}/${final.name}.tar.gz \
-                                    ${final.name} || exit 1
-                                    rm -f ${top.level.dir}/dist.sh
-                                    echo
-                                    echo "HugeGraph-computer dist tar.gz available at:
-                                    ${top.level.dir}/${final.name}.tar.gz"
-                                    echo
-                                </echo>
-                                <exec executable="${shell-executable}"
-                                      dir="${top.level.dir}" failonerror="true">
-                                    <arg line="./dist.sh"/>
-                                </exec>
-                            </tasks>
+                            <target>
+                                <copy file="${top.level.dir}\computer-algorithm\target\computer-algorithm-${revision}.jar" tofile="${top.level.dir}\${final.name}\algorithm\builtin-algorithm.jar" overwrite="true"/>
+                                <copy file="${top.level.dir}\computer-k8s-operator\target\hugegraph-computer-operator-${revision}.jar" tofile="${top.level.dir}\${final.name}\k8s-operator\hugegraph-computer-operator.jar" overwrite="true"/>
+                                <tar destfile="${top.level.dir}\${final.name}.tar.gz" basedir="${top.level.dir}\${final.name}" compression="gzip"/>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
