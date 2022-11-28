@@ -50,7 +50,7 @@ import org.mockito.Mockito;
 
 import io.netty.bootstrap.ServerBootstrap;
 
-public abstract class AbstractNetworkTest {
+public abstract class AbstractNetworkTest extends UnitTestBase {
 
     private static final Map<ConfigOption<?>, String> OPTIONS = new HashMap<>();
     protected static Config config;
