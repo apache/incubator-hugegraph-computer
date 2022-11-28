@@ -3,6 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.apache</groupId>
+        <artifactId>apache</artifactId>
+        <version>23</version>
+    </parent>
+
     <groupId>org.apache.hugegraph</groupId>
     <artifactId>hugegraph-computer</artifactId>
     <version>${revision}</version>
@@ -24,12 +31,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
-    <parent>
-        <groupId>org.apache</groupId>
-        <artifactId>apache</artifactId>
-        <version>23</version>
-    </parent>
 
     <scm>
         <url>https://github.com/apache/hugegraph-computer</url>
@@ -96,6 +97,31 @@
                 <artifactId>hugegraph-client</artifactId>
                 <version>${hugegraph-client-version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.hugegraph</groupId>
+                <artifactId>computer-algorithm</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hugegraph</groupId>
+                <artifactId>computer-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hugegraph</groupId>
+                <artifactId>computer-k8s-operator</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.hugegraph</groupId>
+                <artifactId>computer-yarn</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>

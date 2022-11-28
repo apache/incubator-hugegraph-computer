@@ -35,23 +35,27 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.hugegraph</groupId>
-            <artifactId>computer-core</artifactId>
-            <version>${revision}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-algorithm</artifactId>
-            <version>${revision}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hugegraph</groupId>
+            <artifactId>computer-core</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-k8s-operator</artifactId>
-            <version>${revision}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.hugegraph</groupId>
+            <artifactId>computer-yarn</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

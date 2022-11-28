@@ -9,7 +9,7 @@ gen-java
 build
 *.class
 **/dependency-reduced-pom.xml
-
+dist.sh
 
 ### STS ###
 .apt_generated
