@@ -146,7 +146,7 @@ public class MasterService implements Closeable {
      * {@link #init(Config)}.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
         this.checkInited();
         if (this.closed) {
             LOG.info("{} MasterService had closed before", this);
