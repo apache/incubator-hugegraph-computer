@@ -19,12 +19,15 @@
 
 package org.apache.hugegraph.computer.suite.integrate;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.apache.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams;
@@ -49,6 +52,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 
+import com.google.common.collect.Sets;
+
 public class SenderIntegrateTest {
 
     public static final Logger LOG = Log.logger(SenderIntegrateTest.class);
@@ -67,6 +72,8 @@ public class SenderIntegrateTest {
 
     @Test
     public void testOneWorker() {
+        AtomicReference<MasterService> masterServiceRef = new AtomicReference<>();
+        AtomicReference<WorkerService> workerServiceRef = new AtomicReference<>();
         CompletableFuture<Void> masterFuture = new CompletableFuture<>();
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
@@ -85,8 +92,8 @@ public class SenderIntegrateTest {
                                           .withRpcServerPort(0)
                                           .build();
             try (MasterService service = initMaster(args)) {
+                masterServiceRef.set(service);
                 service.execute();
-                service.close();
                 masterFuture.complete(null);
             } catch (Exception e) {
                 LOG.error("Failed to execute master service", e);
@@ -111,8 +118,8 @@ public class SenderIntegrateTest {
                                           .withTransoprtServerPort(0)
                                           .build();
             try (WorkerService service = initWorker(args)) {
+                workerServiceRef.set(service);
                 service.execute();
-                service.close();
                 workerFuture.complete(null);
             } catch (Throwable e) {
                 LOG.error("Failed to execute worker service", e);
@@ -123,13 +130,20 @@ public class SenderIntegrateTest {
         masterThread.start();
         workerThread.start();
 
-        CompletableFuture.allOf(workerFuture, masterFuture).join();
+        try {
+            CompletableFuture.allOf(workerFuture, masterFuture).join();
+        } finally {
+            workerServiceRef.get().close();
+            masterServiceRef.get().close();
+        }
     }
 
     @Test
-    public void testMultiWorkers() {
+    public void testMultiWorkers() throws IOException {
         int workerCount = 3;
         int partitionCount = 3;
+        AtomicReference<MasterService> masterServiceRef = new AtomicReference<>();
+        Set<WorkerService> workerServices = Sets.newConcurrentHashSet();
         CompletableFuture<Void> masterFuture = new CompletableFuture<>();
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
@@ -147,8 +161,8 @@ public class SenderIntegrateTest {
                                           .build();
             try {
                 MasterService service = initMaster(args);
+                masterServiceRef.set(service);
                 service.execute();
-                service.close();
                 masterFuture.complete(null);
             } catch (Throwable e) {
                 LOG.error("Failed to execute master service", e);
@@ -179,8 +193,8 @@ public class SenderIntegrateTest {
                         .build();
                 try {
                     WorkerService service = initWorker(args);
+                    workerServices.add(service);
                     service.execute();
-                    service.close();
                     workerFuture.complete(null);
                 } catch (Throwable e) {
                     LOG.error("Failed to execute worker service", e);
@@ -198,11 +212,20 @@ public class SenderIntegrateTest {
 
         List<CompletableFuture<Void>> futures = new ArrayList<>(workers.values());
         futures.add(masterFuture);
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        } finally {
+            for (WorkerService workerService : workerServices) {
+                workerService.close();
+            }
+            masterServiceRef.get().close();
+        }
     }
 
     @Test
-    public void testOneWorkerWithBusyClient() throws InterruptedException {
+    public void testOneWorkerWithBusyClient() {
+        AtomicReference<MasterService> masterServiceRef = new AtomicReference<>();
+        AtomicReference<WorkerService> workerServiceRef = new AtomicReference<>();
         CompletableFuture<Void> masterFuture = new CompletableFuture<>();
         Thread masterThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
@@ -220,8 +243,8 @@ public class SenderIntegrateTest {
                                           .withRpcServerPort(0)
                                           .build();
             try (MasterService service = initMaster(args)) {
+                masterServiceRef.set(service);
                 service.execute();
-                service.close();
                 masterFuture.complete(null);
             } catch (Throwable e) {
                 LOG.error("Failed to execute master service", e);
@@ -247,10 +270,10 @@ public class SenderIntegrateTest {
                                           .withTransoprtServerPort(transoprtServerPort)
                                           .build();
             try (WorkerService service = initWorker(args)) {
+                workerServiceRef.set(service);
                 // Let send rate slowly
                 this.slowSendFunc(service, transoprtServerPort);
                 service.execute();
-                service.close();
                 workerFuture.complete(null);
             } catch (Throwable e) {
                 LOG.error("Failed to execute worker service", e);
@@ -261,7 +284,12 @@ public class SenderIntegrateTest {
         masterThread.start();
         workerThread.start();
 
-        CompletableFuture.allOf(workerFuture, masterFuture).join();
+        try {
+            CompletableFuture.allOf(workerFuture, masterFuture).join();
+        } finally {
+            workerServiceRef.get().close();
+            masterServiceRef.get().close();
+        }
     }
 
     private void slowSendFunc(WorkerService service, int port) throws TransportException {

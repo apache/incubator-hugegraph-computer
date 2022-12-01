@@ -315,11 +315,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
         client.startSession();
 
-        Mockito.doAnswer(invocationOnMock -> {
-            invocationOnMock.callRealMethod();
-            throw new RuntimeException("test exception");
-        }).when(serverHandler)
-          .handle(Mockito.any(), Mockito.anyInt(), Mockito.any());
+        Mockito.doThrow(new RuntimeException("test exception")).when(serverHandler)
+               .handle(Mockito.any(), Mockito.anyInt(), Mockito.any());
 
         ByteBuffer buffer = ByteBuffer.wrap(StringEncoding.encode("test data"));
         boolean send = client.send(MessageType.MSG, 1, buffer);
