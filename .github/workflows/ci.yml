@@ -43,7 +43,7 @@ jobs:
 
       - name: Download HDFS
         if: steps.hdfs-cache.outputs.cache-hit != 'true'
-        run: wget http://archive.apache.org/dist/hadoop/common/hadoop-3.3.2/hadoop-3.3.2.tar.gz -O ~/hadoop-3.3.2.tar.gz
+        run: wget https://archive.apache.org/dist/hadoop/common/hadoop-3.3.2/hadoop-3.3.2.tar.gz -O ~/hadoop-3.3.2.tar.gz
 
       - name: Setup HDFS
         run: $TRAVIS_DIR/install-hdfs.sh
@@ -56,18 +56,20 @@ jobs:
           sleep 5
           curl localhost:9000
           kubectl get nodes
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+
+#      - name: Cache Maven packages
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.m2
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-m2
 
       - name: Prepare env and service
         run: |
           $TRAVIS_DIR/install-env.sh
           $TRAVIS_DIR/install-hugegraph-from-source.sh $HUGEGRAPH_SERVER_COMMIT_ID | grep -v "Downloading\|Downloaded"
           $TRAVIS_DIR/load-data-into-hugegraph.sh
+
       - name: Install JDK 11
         uses: actions/setup-java@v3
         with:
