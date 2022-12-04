@@ -35,7 +35,8 @@ cd ../../
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d ${DATASET_DIR} ml-latest-small.zip
 
-hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/hugegraph-loader.sh -g hugegraph-f ${DATASET_DIR}/struct.json -s ${DATASET_DIR}/schema.groovy || exit 1
+hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/hugegraph-loader.sh \
+-g hugegraph -f ${DATASET_DIR}/struct.json -s ${DATASET_DIR}/schema.groovy || exit 1
 
 # load dataset to hdfs
 sort -t , -k1n -u "${DATASET_DIR}"/ml-latest-small/ratings.csv | cut -d "," -f 1 > "${DATASET_DIR}"/ml-latest-small/user_id.csv || exit 1
