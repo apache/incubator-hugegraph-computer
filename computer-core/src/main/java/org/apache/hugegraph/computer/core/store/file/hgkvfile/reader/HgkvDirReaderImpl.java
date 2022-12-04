@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 HugeGraph Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -26,10 +25,10 @@ import java.util.NoSuchElementException;
 
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.store.EntryIterator;
-import org.apache.hugegraph.computer.core.store.entry.KvEntry;
-import org.apache.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
 import org.apache.hugegraph.computer.core.store.KvEntryFileReader;
+import org.apache.hugegraph.computer.core.store.entry.KvEntry;
 import org.apache.hugegraph.computer.core.store.file.hgkvfile.HgkvDir;
+import org.apache.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
 import org.apache.hugegraph.computer.core.store.file.hgkvfile.HgkvFile;
 
 public class HgkvDirReaderImpl implements KvEntryFileReader {

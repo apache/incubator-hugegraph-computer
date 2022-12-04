@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 HugeGraph Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -24,9 +23,8 @@ import java.util.List;
 
 import org.apache.hugegraph.computer.core.graph.id.BytesId;
 import org.apache.hugegraph.computer.core.graph.id.Id;
-import org.junit.Test;
-
 import org.apache.hugegraph.testutil.Assert;
+import org.junit.Test;
 
 public class SerializeUtilTest {
 

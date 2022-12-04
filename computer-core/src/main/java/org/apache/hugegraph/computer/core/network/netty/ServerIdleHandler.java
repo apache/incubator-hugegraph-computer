@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 HugeGraph Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -19,10 +18,9 @@
 
 package org.apache.hugegraph.computer.core.network.netty;
 
-import org.slf4j.Logger;
-
 import org.apache.hugegraph.computer.core.network.TransportUtil;
 import org.apache.hugegraph.util.Log;
+import org.slf4j.Logger;
 
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler;

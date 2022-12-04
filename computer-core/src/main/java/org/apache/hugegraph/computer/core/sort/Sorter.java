@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 HugeGraph Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -22,9 +21,9 @@ package org.apache.hugegraph.computer.core.sort;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
 import org.apache.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import org.apache.hugegraph.computer.core.store.entry.KvEntry;
 
