@@ -26,12 +26,11 @@ COMMIT_ID=$1
 HUGEGRAPH_GIT_URL="https://github.com/apache/hugegraph.git"
 
 git clone --depth 300 ${HUGEGRAPH_GIT_URL}
-cd apache-hugegraph
+cd hugegraph
 git checkout ${COMMIT_ID}
 mvn package -DskipTests
 mv apache-hugegraph-*.tar.gz ../
 cd ../
-rm -rf apache-hugegraph
 tar -zxf apache-hugegraph-*.tar.gz
 
 cd "$(find apache-hugegraph-* | head -1)"
