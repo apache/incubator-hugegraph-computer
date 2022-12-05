@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11-jre
+FROM openjdk:11-slim
 LABEL maintainer="HugeGraph Docker Maintainers <dev@hugegraph.apache.org>"
 # use ParallelGC which is more friendly to olap system
 ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseParallelGC -XX:+UseContainerSupport -XX:MaxRAMPercentage=50 -XshowSettings:vm"

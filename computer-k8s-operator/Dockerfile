@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11-jre
+FROM openjdk:11-slim
 LABEL maintainer="HugeGraph Docker Maintainers <dev@hugegraph.apache.org>"
-WORKDIR /opt/app
+WORKDIR /hugegraph/operator
 COPY target/hugegraph-computer-operator-*.jar hugegraph-computer-operator.jar
 ENTRYPOINT ["java", "-jar", "hugegraph-computer-operator.jar"]
