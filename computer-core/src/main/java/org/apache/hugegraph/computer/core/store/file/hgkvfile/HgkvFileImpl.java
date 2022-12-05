@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 HugeGraph Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -23,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.io.IOFactory;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;

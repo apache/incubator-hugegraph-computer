@@ -25,16 +25,19 @@ fi
 COMMIT_ID=$1
 HUGEGRAPH_GIT_URL="https://github.com/apache/hugegraph.git"
 
-git clone --depth 300 ${HUGEGRAPH_GIT_URL}
+git clone --depth 100 ${HUGEGRAPH_GIT_URL}
 cd hugegraph
 git checkout ${COMMIT_ID}
 mvn package -DskipTests
-mv hugegraph-*.tar.gz ../
+
+mv apache-hugegraph-*.tar.gz ../
 cd ../
 rm -rf hugegraph
-tar -zxf hugegraph-*.tar.gz
+tar zxf apache-hugegraph-*.tar.gz
+rm apache-hugegraph-*.tar.gz
+cd "$(find apache-hugegraph-* | head -1)"
+chmod -R 755 bin/
 
-cd "$(find hugegraph-* | head -1)"
 bin/init-store.sh || exit 1
-bin/start-hugegraph.sh || exit 1
+bin/start-hugegraph.sh || cat logs/hugegraph-server.log
 cd ../

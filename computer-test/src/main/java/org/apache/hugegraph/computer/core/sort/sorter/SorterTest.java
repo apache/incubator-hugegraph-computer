@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 HugeGraph Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -26,18 +25,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hugegraph.computer.core.combiner.IntValueSumCombiner;
-import org.apache.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
-import org.apache.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
-import org.apache.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
-import org.apache.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
-import org.apache.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
-import org.apache.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
-import org.apache.hugegraph.computer.core.store.StoreTestUtil;
-import org.apache.hugegraph.computer.core.util.FileUtil;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.apache.hugegraph.computer.core.combiner.PointerCombiner;
 import org.apache.hugegraph.computer.core.common.Constants;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
@@ -49,8 +36,15 @@ import org.apache.hugegraph.computer.core.io.IOFactory;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.sort.Sorter;
 import org.apache.hugegraph.computer.core.sort.SorterTestUtil;
+import org.apache.hugegraph.computer.core.sort.flusher.CombineKvInnerSortFlusher;
+import org.apache.hugegraph.computer.core.sort.flusher.CombineKvOuterSortFlusher;
+import org.apache.hugegraph.computer.core.sort.flusher.CombineSubKvInnerSortFlusher;
+import org.apache.hugegraph.computer.core.sort.flusher.CombineSubKvOuterSortFlusher;
+import org.apache.hugegraph.computer.core.sort.flusher.InnerSortFlusher;
+import org.apache.hugegraph.computer.core.sort.flusher.OuterSortFlusher;
 import org.apache.hugegraph.computer.core.store.EntryIterator;
 import org.apache.hugegraph.computer.core.store.KvEntryFileReader;
+import org.apache.hugegraph.computer.core.store.StoreTestUtil;
 import org.apache.hugegraph.computer.core.store.buffer.KvEntriesInput;
 import org.apache.hugegraph.computer.core.store.entry.EntriesUtil;
 import org.apache.hugegraph.computer.core.store.entry.KvEntry;
@@ -59,10 +53,14 @@ import org.apache.hugegraph.computer.core.store.file.hgkvfile.HgkvDirImpl;
 import org.apache.hugegraph.computer.core.store.file.hgkvfile.reader.HgkvDirReaderImpl;
 import org.apache.hugegraph.computer.core.store.file.select.DisperseEvenlySelector;
 import org.apache.hugegraph.computer.core.store.file.select.InputFilesSelector;
-
+import org.apache.hugegraph.computer.core.util.FileUtil;
 import org.apache.hugegraph.computer.suite.unit.UnitTestBase;
 import org.apache.hugegraph.iterator.CIter;
 import org.apache.hugegraph.testutil.Assert;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 

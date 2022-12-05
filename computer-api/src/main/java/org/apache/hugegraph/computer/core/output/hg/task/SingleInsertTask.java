@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 HugeGraph Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -22,12 +21,12 @@ package org.apache.hugegraph.computer.core.output.hg.task;
 import java.util.List;
 
 import org.apache.hugegraph.computer.core.config.Config;
+import org.apache.hugegraph.computer.core.output.hg.metrics.LoadSummary;
 import org.apache.hugegraph.driver.HugeClient;
 import org.apache.hugegraph.structure.graph.Vertex;
 import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
-import org.apache.hugegraph.computer.core.output.hg.metrics.LoadSummary;
 import com.google.common.collect.ImmutableList;
 
 public class SingleInsertTask extends InsertTask {

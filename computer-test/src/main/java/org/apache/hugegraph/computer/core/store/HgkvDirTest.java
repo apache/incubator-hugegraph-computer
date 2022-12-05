@@ -1,5 +1,4 @@
 /*
- * Copyright 2017 HugeGraph Authors
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with this
@@ -25,11 +24,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.store.entry.KvEntry;
@@ -40,6 +34,11 @@ import org.apache.hugegraph.computer.core.store.file.hgkvfile.builder.HgkvDirBui
 import org.apache.hugegraph.computer.core.store.file.hgkvfile.reader.HgkvDirReaderImpl;
 import org.apache.hugegraph.computer.suite.unit.UnitTestBase;
 import org.apache.hugegraph.testutil.Assert;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import com.google.common.collect.ImmutableList;
 
 public class HgkvDirTest {
