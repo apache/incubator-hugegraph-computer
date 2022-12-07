@@ -28,9 +28,6 @@
     <artifactId>hugegraph-computer</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
-    <prerequisites>
-        <maven>3.3.9</maven>
-    </prerequisites>
     <name>hugegraph-computer</name>
     <url>https://github.com/apache/hugegraph-computer</url>
     <description>
@@ -46,11 +43,49 @@
         </license>
     </licenses>
 
+    <developers>
+      <developer>
+        <id>Apache Hugegraph(incubating)</id>
+        <email>dev-subscribe@hugegraph.apache.org</email>
+        <url>https://hugegraph.apache.org/</url>
+      </developer>
+    </developers>
+
+    <mailingLists>
+      <mailingList>
+        <name>Development List</name>
+        <subscribe>dev-subscribe@hugegraph.apache.org</subscribe>
+        <unsubscribe>dev-unsubscribe@hugegraph.apache.org</unsubscribe>
+        <post>dev@hugegraph.incubator.apache.org</post>
+      </mailingList>
+      <mailingList>
+        <name>Commits List</name>
+        <subscribe>commits-subscribe@hugegraph.apache.org</subscribe>
+        <unsubscribe>commits-unsubscribe@hugegraph.apache.org</unsubscribe>
+        <post>commits@hugegraph.apache.org</post>
+      </mailingList>
+      <mailingList>
+        <name>Issues List</name>
+        <subscribe>issues-subscribe@hugegraph.apache.org</subscribe>
+        <unsubscribe>issues-unsubscribe@hugegraph.apache.org</unsubscribe>
+        <post>issues@hugegraph.apache.org</post>
+      </mailingList>
+    </mailingLists>
+
+    <issueManagement>
+      <system>Github Issues</system>
+      <url>https://github.com/apache/hugegraph-computer/issues</url>
+    </issueManagement>
+
     <scm>
         <url>https://github.com/apache/hugegraph-computer</url>
-        <connection>https://github.com/apache/hugegraph-computer</connection>
-        <developerConnection>https://github.com/apache/hugegraph-computer</developerConnection>
+        <connection>scm:git:https://github.com/apache/hugegraph-computer.git</connection>
+        <developerConnection>scm:git:https://github.com/apache/hugegraph-computer.git</developerConnection>
     </scm>
+
+    <prerequisites>
+        <maven>3.3.9</maven>
+    </prerequisites>
 
     <properties>
         <revision>1.0.0</revision>
@@ -106,30 +141,27 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>hugegraph-client</artifactId>
                 <version>${hugegraph-client-version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>computer-algorithm</artifactId>
                 <version>${revision}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>computer-core</artifactId>
                 <version>${revision}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>computer-k8s-operator</artifactId>
                 <version>${revision}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.hugegraph</groupId>
                 <artifactId>computer-yarn</artifactId>
@@ -315,7 +347,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
                 <configuration>
                     <source>${compiler.source}</source>
                     <target>${compiler.target}</target>
@@ -352,11 +383,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20</version>
             </plugin>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.0.0</version>
                 <configuration>
                     <filesets>
                         <fileset>
@@ -404,7 +433,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.20</version>
                         <executions>
                             <execution>
                                 <id>unit-test</id>
@@ -428,7 +456,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.20</version>
                         <executions>
                             <execution>
                                 <id>integrate-test</id>
@@ -449,7 +476,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -462,7 +488,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -480,7 +505,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

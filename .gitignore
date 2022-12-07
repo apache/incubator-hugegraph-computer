@@ -6,11 +6,9 @@ node_modules
 upload-files/
 demo*
 gen-java
-build
 *.class
 **/dependency-reduced-pom.xml
 dist.sh
-*.flattened-pom.xml
 
 ### STS ###
 .apt_generated
@@ -32,9 +30,9 @@ dist.sh
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
-/dist/
 /nbdist/
 /.nb-gradle/
+dist/
 build/
 
 ### VS Code ###
@@ -61,12 +59,14 @@ build/
 
 # maven ignore
 output/
+apache-hugegraph-*-incubating-*/
 *.war
 *.zip
 *.tar
-*.tar.gz
+*.tar.gz*
 tree.txt
 *.versionsBackup
+*.flattened-pom.xml
 
 # eclipse ignore
 .settings/
