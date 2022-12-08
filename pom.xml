@@ -84,7 +84,7 @@
     </scm>
 
     <prerequisites>
-        <maven>3.3.9</maven>
+        <maven>3.5</maven>
     </prerequisites>
 
     <properties>
@@ -472,7 +472,7 @@
             </build>
         </profile>
         <profile>
-            <id>release</id>
+            <id>apache-release</id>
             <build>
                 <plugins>
                     <plugin>
@@ -499,9 +499,8 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <additionalJOptions>
-                                <additionalJOption>-Xdoclint:none</additionalJOption>
-                            </additionalJOptions>
+                            <doclint>none</doclint>
+                            <failOnError>false</failOnError>
                         </configuration>
                     </plugin>
                     <plugin>

@@ -122,10 +122,12 @@
                                 <copy file="${top.level.dir}/computer-k8s-operator/target/hugegraph-computer-operator-${revision}.jar"
                                       tofile="${top.level.dir}/${final.name}/k8s-operator/hugegraph-computer-operator.jar"
                                       overwrite="true"/>
-                                <tar destfile="${top.level.dir}/${final.name}.tar.gz"
-                                     basedir="${top.level.dir}"
-                                     includes="${final.name}/**"
-                                     compression="gzip"/>
+                                <tar destfile="${top.level.dir}/target/${final.name}.tar.gz"
+                                     compression="gzip">
+                                    <tarfileset dir="${top.level.dir}" filemode="755">
+                                        <include name="${final.name}/**"/>
+                                    </tarfileset>
+                                </tar>
                             </target>
                         </configuration>
                     </execution>
