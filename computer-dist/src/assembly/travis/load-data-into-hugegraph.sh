@@ -35,6 +35,8 @@ cd ../../
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d ${DATASET_DIR} ml-latest-small.zip
 
+chmod -R 755 hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/
+
 hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/hugegraph-loader.sh \
 -g hugegraph -f ${DATASET_DIR}/struct.json -s ${DATASET_DIR}/schema.groovy || exit 1
 

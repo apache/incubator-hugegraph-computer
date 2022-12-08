@@ -116,7 +116,7 @@
                             <target>
                                 <!-- removing the generated Schema class -->
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/crdSchema.java"
+                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/CrdSchema.java"
                                         verbose="true" />
                                 <delete
                                         file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/EnumSchema.java"
