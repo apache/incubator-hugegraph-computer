@@ -29,7 +29,7 @@ cd hugegraph-toolchain
 mvn install -pl hugegraph-client,hugegraph-loader -am -DskipTests -ntp
 
 cd hugegraph-loader
-tar -zxf apache-hugegraph-loader-*.tar.gz || exit 1
+tar -zxf target/apache-hugegraph-loader-*.tar.gz || exit 1
 cd ../../
 
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
