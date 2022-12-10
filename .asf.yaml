@@ -30,13 +30,13 @@ github:
 
   enabled_merge_buttons:
     merge:  false
-    rebase: false
     squash: true
+    rebase: true
   protected_branches:
     master:
       required_status_checks:
         # strict means "Require branches to be up-to-date before merging".
-        strict: true
+        strict: false
         # contexts are the names of checks that must pass
         contexts:
           - computer-ci
