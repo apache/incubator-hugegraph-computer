@@ -24,7 +24,7 @@ github:
     # Enable projects for project management boards
     projects: true
   description: HugeGraph Computer - A distributed graph processing system for hugegraph (OLAP)
-  homepage: https://hugegraph.apache.org/
+  homepage: https://hugegraph.apache.org/docs/quickstart/hugegraph-computer/
   del_branch_on_merge: true
   #labels:
 

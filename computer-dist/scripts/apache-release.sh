@@ -28,20 +28,23 @@ GIT_BRANCH="release-${RELEASE_VERSION}"
 
 RELEASE_VERSION=${RELEASE_VERSION:?"Please input the release version behind script"}
 
-WORK_DIR=$(cd "$(dirname "$0")" || exit; pwd)
+WORK_DIR=$(
+  cd "$(dirname "$0")" || exit
+  pwd
+)
 cd "${WORK_DIR}" || exit
 echo "In the work dir: $(pwd)"
 
 # clean old dir then build a new one
-rm -rfv dist && mkdir -p dist/apache-${REPO}
+rm -rf dist && mkdir -p dist/apache-${REPO}
 
 # step1: package the source code
 cd ../../ || exit
 git archive --format=tar.gz \
   --output="computer-dist/scripts/dist/apache-${REPO}/apache-${REPO}-incubating-${RELEASE_VERSION}-src.tar.gz" \
   --prefix="apache-${REPO}-incubating-${RELEASE_VERSION}-src/" "${GIT_BRANCH}" || exit
-
 cd - || exit
+
 # step2: copy the binary file (Optional)
 # Note: it's optional for project to generate binary package (skip this step if not need)
 cp -v ../../target/apache-${REPO}-incubating-"${RELEASE_VERSION}".tar.gz \
@@ -58,10 +61,11 @@ done
 ##### 3.2 Generate SHA512 file
 shasum --version 1>/dev/null || exit
 for i in *.tar.gz; do
-  echo "$i" && shasum -a 512 "$i" >"$i".sha512
+  shasum -a 512 "$i" | tee "$i".sha512
 done
 
 #### 3.3 check signature & sha512
+echo "#### start to check signature & hashcode ####"
 for i in *.tar.gz; do
   echo "$i"
   gpg --verify "$i".asc "$i" || exit
@@ -74,8 +78,8 @@ done
 
 # step4: upload to Apache-SVN
 SVN_DIR="${GROUP}-svn-dev"
-cd ../
-rm -rfv ${SVN_DIR}
+cd ../ || exit
+rm -rf ${SVN_DIR}
 
 ##### 4.1 pull from remote & copy files
 svn co "https://dist.apache.org/repos/dist/dev/incubator/${GROUP}" ${SVN_DIR}
@@ -91,9 +95,10 @@ svn status
 
 ##### 4.3 commit & push files
 if [ "$USERNAME" = "" ]; then
-  svn commit -m "submit files for ${REPO} ${RELEASE_VERSION}"
+  svn commit -m "submit files for ${REPO} ${RELEASE_VERSION}" || exit
 else
-  svn commit -m "submit files for ${REPO} ${RELEASE_VERSION}" --username "${USERNAME}" --password "${PASSWORD}"
+  svn commit -m "submit files for ${REPO} ${RELEASE_VERSION}" \
+    --username "${USERNAME}" --password "${PASSWORD}" || exit
 fi
 
 echo "Finished all, please check all steps in script manually again!"
