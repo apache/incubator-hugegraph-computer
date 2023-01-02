@@ -7,5 +7,4 @@ apache-release.sh export-ignore
 
 # ignored directory
 .github/ export-ignore
-computer-dist/src/assembly/ export-ignore
 computer-k8s-operator/crd-generate/bin/ export-ignore
