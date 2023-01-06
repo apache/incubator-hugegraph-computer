@@ -2,11 +2,9 @@
 .gitattributes export-ignore
 .gitignore export-ignore
 .asf.yaml export-ignore
-checkstyle.xml export-ignore
 apache-release.sh export-ignore
 .licenserc.yaml export-ignore
 
 # ignored directory
 .github/ export-ignore
-computer-dist/src/assembly/ export-ignore
 computer-k8s-operator/crd-generate/bin/ export-ignore
