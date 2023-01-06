@@ -309,6 +309,7 @@
                         <exclude>**/target/*</exclude>
                         <exclude>.github/**/*</exclude>
                         <exclude>**/.flattened-pom.xml</exclude>
+                        <exclude>DISCLAIMER</exclude>
                         <exclude>**/zz_generated.deepcopy.go</exclude>
                     </excludes>
                     <consoleOutput>true</consoleOutput>

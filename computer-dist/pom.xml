@@ -35,30 +35,25 @@
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-algorithm</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-core</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-k8s-operator</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>computer-yarn</artifactId>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -78,9 +73,7 @@
                             <appendAssemblyId>false</appendAssemblyId>
                             <outputDirectory>${top.level.dir}
                             </outputDirectory>
-                            <descriptor>
-                                ${assembly.descriptor.dir}/assembly.xml
-                            </descriptor>
+                            <descriptor>${assembly.descriptor.dir}/assembly.xml</descriptor>
                             <finalName>${final.name}</finalName>
                         </configuration>
                     </execution>
