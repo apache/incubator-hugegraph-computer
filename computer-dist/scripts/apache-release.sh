@@ -24,7 +24,7 @@ RELEASE_VERSION=$1
 USERNAME=$2
 PASSWORD=$3
 # git release branch (check it carefully)
-GIT_BRANCH="fix-binary"
+GIT_BRANCH="release-${RELEASE_VERSION}"
 
 RELEASE_VERSION=${RELEASE_VERSION:?"Please input the release version behind script"}
 
