@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - /^release-.*$/
-      - /^v[0-9]\..*$/
   pull_request:
 
 jobs:
@@ -27,6 +26,11 @@ jobs:
         with:
           java-version: '8'
           distribution: 'zulu'
+
+      - name: License check(RAT)
+        run: |
+          mvn apache-rat:check -ntp
+          find ./ -name rat.txt -print0 | xargs -0 -I file cat file > merged-rat.txt && cat merged-rat.txt
 
       - name: Setup Python3
         uses: actions/setup-python@v4
@@ -67,7 +71,7 @@ jobs:
       - name: Prepare env and service
         run: |
           $TRAVIS_DIR/install-env.sh
-          $TRAVIS_DIR/install-hugegraph-from-source.sh $HUGEGRAPH_SERVER_COMMIT_ID | grep -v "Downloading\|Downloaded"
+          $TRAVIS_DIR/install-hugegraph-from-source.sh $HUGEGRAPH_SERVER_COMMIT_ID
           $TRAVIS_DIR/load-data-into-hugegraph.sh
 
       - name: Install JDK 11
