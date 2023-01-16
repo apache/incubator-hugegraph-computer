@@ -18,12 +18,12 @@
 
 set -ev
 
-TRAVIS_DIR=`dirname $0`
+TRAVIS_DIR=$(dirname "$0")
 DATASET_DIR=${TRAVIS_DIR}/../dataset
 
 HUGEGRAPH_LOADER_GIT_URL="https://github.com/apache/hugegraph-toolchain.git"
 
-git clone --depth 10 ${HUGEGRAPH_LOADER_GIT_URL}
+git clone --depth 10 ${HUGEGRAPH_LOADER_GIT_URL} hugegraph-toolchain
 
 cd hugegraph-toolchain
 mvn install -pl hugegraph-client,hugegraph-loader -am -DskipTests -ntp
