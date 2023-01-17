@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -147,13 +148,14 @@ public class KubernetesDriverTest extends AbstractK8sTest {
 
     @Test
     public void testUploadAlgorithmJar() throws FileNotFoundException {
-        Whitebox.setInternalState(this.driver, "bashPath",
-                                  "conf/images/docker_push_test.sh");
-        Whitebox.setInternalState(this.driver, "registry",
-                                  "registry.hub.docker.com");
+        Whitebox.setInternalState(this.driver, "bashPath", "conf/images/docker_push_test.sh");
+        Whitebox.setInternalState(this.driver, "registry", "registry.hub.docker.com");
+        String url = "https://github.com/apache/hugegraph-doc/raw/" +
+                     "binary-1.0/dist/computer/test.jar";
+        String path = "conf/images/test.jar";
+        downloadFileByUrl(url, path);
 
-        InputStream inputStream = new FileInputStream(
-                                      "conf/images/test.jar");
+        InputStream inputStream = new FileInputStream(path);
         this.driver.uploadAlgorithmJar("PageRank", inputStream);
 
         File file = new File("/tmp/upload.txt");
@@ -166,12 +168,13 @@ public class KubernetesDriverTest extends AbstractK8sTest {
 
     @Test
     public void testUploadAlgorithmJarWithError() throws FileNotFoundException {
-        Whitebox.setInternalState(this.driver, "bashPath",
-                                  "conf/images/upload_test-x.sh");
+        Whitebox.setInternalState(this.driver, "bashPath", "conf/images/upload_test-x.sh");
+        String url = "https://github.com/apache/hugegraph-doc/raw/" +
+                     "binary-1.0/dist/computer/test.jar";
+        String path = "conf/images/test.jar";
+        downloadFileByUrl(url, path);
 
-        InputStream inputStream = new FileInputStream(
-                                      "conf/images/test.jar");
-
+        InputStream inputStream = new FileInputStream(path);
         Assert.assertThrows(ComputerDriverException.class, () -> {
             this.driver.uploadAlgorithmJar("PageRank", inputStream);
         }, e -> {
@@ -314,5 +317,15 @@ public class KubernetesDriverTest extends AbstractK8sTest {
                     e.getMessage()
             );
         });
+    }
+
+    public static void downloadFileByUrl(String url, String destPath) {
+        int connectTimeout = 5000;
+        int readTimeout = 10000;
+        try {
+            FileUtils.copyURLToFile(new URL(url), new File(destPath), connectTimeout, readTimeout);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
