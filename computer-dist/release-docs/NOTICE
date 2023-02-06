@@ -282,11 +282,6 @@ by Google Inc, which can be obtained at:
 This product optionally depends on 'JBoss Marshalling', an alternative Java
 serialization API, which can be obtained at:
 
-  * LICENSE:
-    * license/LICENSE.jboss-marshalling.txt (GNU LGPL 2.1)
-  * HOMEPAGE:
-    * http://www.jboss.org/jbossmarshalling
-
 This product optionally depends on 'Caliper', Google's micro-
 benchmarking framework, which can be obtained at:
 
@@ -420,33 +415,6 @@ which has the following notices:
    The following artifacts are EPL and CDDL 1.0.
     * org.eclipse.jetty.orbit:javax.mail.glassfish
 
-
-   ------
-   Oracle
-
-   The following artifacts are CDDL + GPLv2 with classpath exception.
-   https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html
-
-    * javax.servlet:javax.servlet-api
-    * javax.annotation:javax.annotation-api
-    * javax.transaction:javax.transaction-api
-    * javax.websocket:javax.websocket-api
-
-   ------
-   Oracle OpenJDK
-
-   If ALPN is used to negotiate HTTP/2 connections, then the following
-   artifacts may be included in the distribution or downloaded when ALPN
-   module is selected.
-
-    * java.sun.security.ssl
-
-   These artifacts replace/modify OpenJDK classes.  The modififications
-   are hosted at github and both modified and original are under GPL v2 with
-   classpath exceptions.
-   http://openjdk.java.net/legal/gplv2+ce.html
-
-
    ------
    OW2
 
@@ -490,9 +458,7 @@ which has the following notices:
    ------
    Mortbay
 
-   The following artifacts are CDDL + GPLv2 with classpath exception.
-
-   https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html
+   The following artifacts are CDDL
 
    org.eclipse.jetty.toolchain:jetty-schemas
 
@@ -577,18 +543,7 @@ which has the following notices:
    Copyright 2007-2009 The Apache Software Foundation
 
    Licensed under the Apache License v2.0
-   --
-   Our Orca logo we got here: http://www.vectorfree.com/jumping-orca
-   It is licensed Creative Commons Attribution 3.0.
-   See https://creativecommons.org/licenses/by/3.0/us/
-   We changed the logo by stripping the colored background, inverting
-   it and then rotating it some.
 
-   Later we found that vectorfree.com image is not properly licensed.
-   The original is owned by vectorportal.com. The original was
-   relicensed so we could use it as Creative Commons Attribution 3.0.
-   The license is bundled with the download available here:
-   http://www.vectorportal.com/subcategory/205/KILLER-WHALE-FREE-VECTOR.eps/ifile/9136/detailtest.asp
    --
    This product includes portions of the Bootstrap project v3.0.0
 
@@ -889,14 +844,6 @@ by Google Inc, which can be obtained at:
   * HOMEPAGE:
     * http://code.google.com/p/snappy/
 
-This product optionally depends on 'JBoss Marshalling', an alternative Java
-serialization API, which can be obtained at:
-
-  * LICENSE:
-    * license/LICENSE.jboss-marshalling.txt (GNU LGPL 2.1)
-  * HOMEPAGE:
-    * http://www.jboss.org/jbossmarshalling
-
 This product optionally depends on 'Caliper', Google's micro-
 benchmarking framework, which can be obtained at:
 
@@ -1030,33 +977,6 @@ which has the following notices:
    The following artifacts are EPL and CDDL 1.0.
     * org.eclipse.jetty.orbit:javax.mail.glassfish
 
-
-   ------
-   Oracle
-
-   The following artifacts are CDDL + GPLv2 with classpath exception.
-   https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html
-
-    * javax.servlet:javax.servlet-api
-    * javax.annotation:javax.annotation-api
-    * javax.transaction:javax.transaction-api
-    * javax.websocket:javax.websocket-api
-
-   ------
-   Oracle OpenJDK
-
-   If ALPN is used to negotiate HTTP/2 connections, then the following
-   artifacts may be included in the distribution or downloaded when ALPN
-   module is selected.
-
-    * java.sun.security.ssl
-
-   These artifacts replace/modify OpenJDK classes.  The modififications
-   are hosted at github and both modified and original are under GPL v2 with
-   classpath exceptions.
-   http://openjdk.java.net/legal/gplv2+ce.html
-
-
    ------
    OW2
 
@@ -1100,9 +1020,7 @@ which has the following notices:
    ------
    Mortbay
 
-   The following artifacts are CDDL + GPLv2 with classpath exception.
-
-   https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html
+   The following artifacts are CDDL
 
    org.eclipse.jetty.toolchain:jetty-schemas
 
@@ -1187,18 +1105,7 @@ which has the following notices:
    Copyright 2007-2009 The Apache Software Foundation
 
    Licensed under the Apache License v2.0
-   --
-   Our Orca logo we got here: http://www.vectorfree.com/jumping-orca
-   It is licensed Creative Commons Attribution 3.0.
-   See https://creativecommons.org/licenses/by/3.0/us/
-   We changed the logo by stripping the colored background, inverting
-   it and then rotating it some.
 
-   Later we found that vectorfree.com image is not properly licensed.
-   The original is owned by vectorportal.com. The original was
-   relicensed so we could use it as Creative Commons Attribution 3.0.
-   The license is bundled with the download available here:
-   http://www.vectorportal.com/subcategory/205/KILLER-WHALE-FREE-VECTOR.eps/ifile/9136/detailtest.asp
    --
    This product includes portions of the Bootstrap project v3.0.0
 
@@ -1499,14 +1406,6 @@ by Google Inc, which can be obtained at:
   * HOMEPAGE:
     * http://code.google.com/p/snappy/
 
-This product optionally depends on 'JBoss Marshalling', an alternative Java
-serialization API, which can be obtained at:
-
-  * LICENSE:
-    * license/LICENSE.jboss-marshalling.txt (GNU LGPL 2.1)
-  * HOMEPAGE:
-    * http://www.jboss.org/jbossmarshalling
-
 This product optionally depends on 'Caliper', Google's micro-
 benchmarking framework, which can be obtained at:
 
@@ -1640,33 +1539,6 @@ which has the following notices:
    The following artifacts are EPL and CDDL 1.0.
     * org.eclipse.jetty.orbit:javax.mail.glassfish
 
-
-   ------
-   Oracle
-
-   The following artifacts are CDDL + GPLv2 with classpath exception.
-   https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html
-
-    * javax.servlet:javax.servlet-api
-    * javax.annotation:javax.annotation-api
-    * javax.transaction:javax.transaction-api
-    * javax.websocket:javax.websocket-api
-
-   ------
-   Oracle OpenJDK
-
-   If ALPN is used to negotiate HTTP/2 connections, then the following
-   artifacts may be included in the distribution or downloaded when ALPN
-   module is selected.
-
-    * java.sun.security.ssl
-
-   These artifacts replace/modify OpenJDK classes.  The modififications
-   are hosted at github and both modified and original are under GPL v2 with
-   classpath exceptions.
-   http://openjdk.java.net/legal/gplv2+ce.html
-
-
    ------
    OW2
 
@@ -1710,9 +1582,7 @@ which has the following notices:
    ------
    Mortbay
 
-   The following artifacts are CDDL + GPLv2 with classpath exception.
-
-   https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html
+   The following artifacts are CDDL
 
    org.eclipse.jetty.toolchain:jetty-schemas
 
@@ -1797,18 +1667,7 @@ which has the following notices:
    Copyright 2007-2009 The Apache Software Foundation
 
    Licensed under the Apache License v2.0
-   --
-   Our Orca logo we got here: http://www.vectorfree.com/jumping-orca
-   It is licensed Creative Commons Attribution 3.0.
-   See https://creativecommons.org/licenses/by/3.0/us/
-   We changed the logo by stripping the colored background, inverting
-   it and then rotating it some.
 
-   Later we found that vectorfree.com image is not properly licensed.
-   The original is owned by vectorportal.com. The original was
-   relicensed so we could use it as Creative Commons Attribution 3.0.
-   The license is bundled with the download available here:
-   http://www.vectorportal.com/subcategory/205/KILLER-WHALE-FREE-VECTOR.eps/ifile/9136/detailtest.asp
    --
    This product includes portions of the Bootstrap project v3.0.0
 
@@ -2109,14 +1968,6 @@ by Google Inc, which can be obtained at:
   * HOMEPAGE:
     * http://code.google.com/p/snappy/
 
-This product optionally depends on 'JBoss Marshalling', an alternative Java
-serialization API, which can be obtained at:
-
-  * LICENSE:
-    * license/LICENSE.jboss-marshalling.txt (GNU LGPL 2.1)
-  * HOMEPAGE:
-    * http://www.jboss.org/jbossmarshalling
-
 This product optionally depends on 'Caliper', Google's micro-
 benchmarking framework, which can be obtained at:
 
@@ -2250,33 +2101,6 @@ which has the following notices:
    The following artifacts are EPL and CDDL 1.0.
     * org.eclipse.jetty.orbit:javax.mail.glassfish
 
-
-   ------
-   Oracle
-
-   The following artifacts are CDDL + GPLv2 with classpath exception.
-   https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html
-
-    * javax.servlet:javax.servlet-api
-    * javax.annotation:javax.annotation-api
-    * javax.transaction:javax.transaction-api
-    * javax.websocket:javax.websocket-api
-
-   ------
-   Oracle OpenJDK
-
-   If ALPN is used to negotiate HTTP/2 connections, then the following
-   artifacts may be included in the distribution or downloaded when ALPN
-   module is selected.
-
-    * java.sun.security.ssl
-
-   These artifacts replace/modify OpenJDK classes.  The modififications
-   are hosted at github and both modified and original are under GPL v2 with
-   classpath exceptions.
-   http://openjdk.java.net/legal/gplv2+ce.html
-
-
    ------
    OW2
 
@@ -2320,9 +2144,7 @@ which has the following notices:
    ------
    Mortbay
 
-   The following artifacts are CDDL + GPLv2 with classpath exception.
-
-   https://glassfish.dev.java.net/nonav/public/CDDL+GPL.html
+   The following artifacts are CDDL
 
    org.eclipse.jetty.toolchain:jetty-schemas
 
@@ -2407,18 +2229,7 @@ which has the following notices:
    Copyright 2007-2009 The Apache Software Foundation
 
    Licensed under the Apache License v2.0
-   --
-   Our Orca logo we got here: http://www.vectorfree.com/jumping-orca
-   It is licensed Creative Commons Attribution 3.0.
-   See https://creativecommons.org/licenses/by/3.0/us/
-   We changed the logo by stripping the colored background, inverting
-   it and then rotating it some.
 
-   Later we found that vectorfree.com image is not properly licensed.
-   The original is owned by vectorportal.com. The original was
-   relicensed so we could use it as Creative Commons Attribution 3.0.
-   The license is bundled with the download available here:
-   http://www.vectorportal.com/subcategory/205/KILLER-WHALE-FREE-VECTOR.eps/ifile/9136/detailtest.asp
    --
    This product includes portions of the Bootstrap project v3.0.0
 
@@ -3205,7 +3016,7 @@ availability set forth in the Eclipse Public License v. 2.0 are satisfied: GNU
 General Public License, version 2 with the GNU Classpath Exception which is
 available at https://www.gnu.org/software/classpath/license.html.
 
-SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+SPDX-License-Identifier: EPL-2.0
 
 ## Source Code
 
@@ -3295,7 +3106,7 @@ availability set forth in the Eclipse Public License v. 2.0 are satisfied: GNU
 General Public License, version 2 with the GNU Classpath Exception which is
 available at https://www.gnu.org/software/classpath/license.html.
 
-SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+SPDX-License-Identifier: EPL-2.0
 
 ## Source Code
 
@@ -3398,7 +3209,7 @@ availability set forth in the Eclipse Public License v. 2.0 are satisfied: GNU
 General Public License, version 2 with the GNU Classpath Exception which is
 available at https://www.gnu.org/software/classpath/license.html.
 
-SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+SPDX-License-Identifier: EPL-2.0
 
 ## Source Code
 The project maintains the following source code repositories:
@@ -3457,7 +3268,7 @@ jQuery v1.12.4
 * Copyright: (c) jQuery Foundation
 
 jQuery Barcode plugin 0.3
-* License: MIT & GPL (http://www.opensource.org/licenses/mit-license.php & http://www.gnu.org/licenses/gpl.html)
+* License: MIT (http://www.opensource.org/licenses/mit-license.php)
 * Project:  http://www.pasella.it/projects/jQuery/barcode
 * Copyright: (c) 2009 Antonello Pasella antonello.pasella@gmail.com
 
@@ -3513,7 +3324,7 @@ availability set forth in the Eclipse Public License v. 2.0 are satisfied: GNU
 General Public License, version 2 with the GNU Classpath Exception which is
 available at https://www.gnu.org/software/classpath/license.html.
 
-SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+SPDX-License-Identifier: EPL-2.0
 
 ## Source Code
 The project maintains the following source code repositories:
@@ -3572,7 +3383,7 @@ jQuery v1.12.4
 * Copyright: (c) jQuery Foundation
 
 jQuery Barcode plugin 0.3
-* License: MIT & GPL (http://www.opensource.org/licenses/mit-license.php & http://www.gnu.org/licenses/gpl.html)
+* License: MIT  (http://www.opensource.org/licenses/mit-license.php)
 * Project:  http://www.pasella.it/projects/jQuery/barcode
 * Copyright: (c) 2009 Antonello Pasella antonello.pasella@gmail.com
 
@@ -3823,14 +3634,6 @@ which can be obtained at:
     * license/LICENSE.log4j.txt (Apache License 2.0)
   * HOMEPAGE:
     * http://logging.apache.org/log4j/
-
-This product optionally depends on 'JBoss Logging', a logging framework,
-which can be obtained at:
-
-  * LICENSE:
-    * license/LICENSE.jboss-logging.txt (GNU LGPL 2.1)
-  * HOMEPAGE:
-    * http://anonsvn.jboss.org/repos/common/common-logging-spi/
 
 This product optionally depends on 'Apache Felix', an open source OSGi
 framework implementation, which can be obtained at:
@@ -4198,7 +4001,7 @@ Sax (0.2)
 
 testng (6.14.2)
 
-* License: Apache-2.0 AND (MIT OR GPL-1.0+)
+* License: Apache-2.0 AND (MIT)
 * Project: https://testng.org/doc/index.html
 * Source: https://github.com/cbeust/testng
 
