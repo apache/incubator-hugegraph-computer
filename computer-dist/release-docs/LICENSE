@@ -394,21 +394,21 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * Sundrio :: Code generation(io.sundrsundr-codegen0.13.1https://github.com/sundrio/sundrio)
     (Apache License, Version 2.0) * Sundrio :: Core(io.sundrsundr-core0.13.1https://github.com/sundrio/sundrio)
     (Apache License, Version 2.0) * zjsonpatch(com.flipkart.zjsonpatchzjsonpatch0.3.0https://github.com/flipkart-incubator/zjsonpatch/)
-    (Apache License, Version 2.0,BSD,CC0 1.0,CDDL 1.1,Public) * jersey-inject-hk2(org.glassfish.jersey.inject:jersey-hk2:3.0.3-none )
-    (Apache License, Version 2.0,BSD,EPL 2.0,GPL 2.0) * Jakarta Annotations API(jakarta.annotation:jakarta.annotation-api:2.0.0-https://projects.eclipse.org/projects/ee4j.ca )
-    (Apache License, Version 2.0,BSD,EPL 2.0,GPL 2.0) * jersey-core-server(org.glassfish.jersey.core:jersey-server:3.0.3-none )
-    (Apache License, Version 2.0,EPL 1.0) * Jetty :: Http Utility(org.eclipse.jetty:jetty-http:9.3.24.v20180605-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,EPL 1.0) * Jetty :: IO Utility(org.eclipse.jetty:jetty-io:9.3.24.v20180605-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,EPL 1.0) * Jetty :: Security(org.eclipse.jetty:jetty-security:9.3.24.v20180605-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,EPL 1.0) * Jetty :: Server Core(org.eclipse.jetty:jetty-server:9.3.24.v20180605-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,EPL 1.0) * Jetty :: Servlet Handling(org.eclipse.jetty:jetty-servlet:9.3.24.v20180605-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,EPL 1.0) * Jetty :: Utilities(org.eclipse.jetty:jetty-util:9.3.24.v20180605-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,EPL 1.0) * Jetty :: Webapp Application Support(org.eclipse.jetty:jetty-webapp:9.3.24.v20180605-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,EPL 1.0) * Jetty :: XML utilities(org.eclipse.jetty:jetty-xml:9.3.24.v20180605-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,EPL 2.0) * Jetty :: Utilities :: Ajax(JSON)(org.eclipse.jetty:jetty-util-ajax:9.3.27.v20190418-http://www.eclipse.org/jetty )
-    (Apache License, Version 2.0,LGPL 2.1) * JAX-RS provider for JSON content type(org.codehaus.jackson:jackson-jaxrs:1.9.2-http://jackson.codehaus.org )
-    (Apache License, Version 2.0,LGPL 2.1) * Xml Compatibility extensions for Jackson(org.codehaus.jackson:jackson-xc:1.9.2-http://jackson.codehaus.org )
-    (Apache License, Version 2.0,LGPL 2.1,MPL 1.1) * Javassist(org.javassist:javassist:3.21.0-GA-http://www.javassist.org/ )
+    (Apache License, Version 2.0) * jersey-inject-hk2(org.glassfish.jersey.inject:jersey-hk2:3.0.3-none )
+    (Apache License, Version 2.0) * Jakarta Annotations API(jakarta.annotation:jakarta.annotation-api:2.0.0-https://projects.eclipse.org/projects/ee4j.ca )
+    (Apache License, Version 2.0) * jersey-core-server(org.glassfish.jersey.core:jersey-server:3.0.3-none )
+    (Apache License, Version 2.0) * Jetty :: Http Utility(org.eclipse.jetty:jetty-http:9.3.24.v20180605-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * Jetty :: IO Utility(org.eclipse.jetty:jetty-io:9.3.24.v20180605-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * Jetty :: Security(org.eclipse.jetty:jetty-security:9.3.24.v20180605-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * Jetty :: Server Core(org.eclipse.jetty:jetty-server:9.3.24.v20180605-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * Jetty :: Servlet Handling(org.eclipse.jetty:jetty-servlet:9.3.24.v20180605-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * Jetty :: Utilities(org.eclipse.jetty:jetty-util:9.3.24.v20180605-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * Jetty :: Webapp Application Support(org.eclipse.jetty:jetty-webapp:9.3.24.v20180605-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * Jetty :: XML utilities(org.eclipse.jetty:jetty-xml:9.3.24.v20180605-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * Jetty :: Utilities :: Ajax(JSON)(org.eclipse.jetty:jetty-util-ajax:9.3.27.v20190418-http://www.eclipse.org/jetty )
+    (Apache License, Version 2.0) * JAX-RS provider for JSON content type(org.codehaus.jackson:jackson-jaxrs:1.9.2-http://jackson.codehaus.org )
+    (Apache License, Version 2.0) * Xml Compatibility extensions for Jackson(org.codehaus.jackson:jackson-xc:1.9.2-http://jackson.codehaus.org )
+    (Apache License, Version 2.0) * Javassist(org.javassist:javassist:3.21.0-GA-http://www.javassist.org/ )
 
     computer-core/src/main/java/org/apache/hugegraph/computer/core/util/StringEncoding.java files from https://github.com/JanusGraph
 
@@ -437,13 +437,13 @@ Third party CDDL licenses
 The following components are provided under the CDDL License.
 See licenses/ for text of these licenses.
 
-    (CDDL,GPL1.1,GPL2.0) * HK2 API module(org.glassfish.hk2:hk2-api:2.4.0-b31-none )
-    (CDDL,GPL1.1,GPL2.0) * HK2 Implementation Utilities(org.glassfish.hk2:hk2-utils:2.4.0-b31-none )
-    (CDDL,GPL1.1,GPL2.0) * ServiceLocator Default Implementation(org.glassfish.hk2:hk2-locator:2.4.0-b31-none )
-    (CDDL,GPL1.1,GPL2.0) * aopalliance version 2.4.0-b31 repackaged as a module(org.glassfish.hk2.external:aopalliance-repackaged:2.4.0-b31-none )
-    (CDDL,GPL2.0) * jsp-api(javax.servlet.jsp:jsp-api:2.1-none )
-    (CDDL,GPL,GPL2.0) * Java Servlet API(javax.servlet:javax.servlet-api:3.1.0-http://servlet-spec.java.net )
-    (CDDL,GPL,GPL2.0) * OSGi resource locator bundle - used by various API providers that rely on META-INF/services mechanism to locate providers.(org.glassfish.hk2:osgi-resource-locator:1.0.1-none )
+    (CDDL) * HK2 API module(org.glassfish.hk2:hk2-api:2.4.0-b31-none )
+    (CDDL) * HK2 Implementation Utilities(org.glassfish.hk2:hk2-utils:2.4.0-b31-none )
+    (CDDL) * ServiceLocator Default Implementation(org.glassfish.hk2:hk2-locator:2.4.0-b31-none )
+    (CDDL) * aopalliance version 2.4.0-b31 repackaged as a module(org.glassfish.hk2.external:aopalliance-repackaged:2.4.0-b31-none )
+    (CDDL) * jsp-api(javax.servlet.jsp:jsp-api:2.1-none )
+    (CDDL) * Java Servlet API(javax.servlet:javax.servlet-api:3.1.0-http://servlet-spec.java.net )
+    (CDDL) * OSGi resource locator bundle - used by various API providers that rely on META-INF/services mechanism to locate providers.(org.glassfish.hk2:osgi-resource-locator:1.0.1-none )
 
 ========================================================================
 Third party EPL licenses
@@ -457,7 +457,7 @@ See licenses/ for text of these licenses.
     (EPL1.0) * Jakarta Activation(com.sun.activation:jakarta.activation:2.0.1-https://jakarta.ee/ )
     (EPL1.0) * Jakarta Activation API jar(jakarta.activation:jakarta.activation-api:1.2.2-https://jakarta.ee/specifications/activation/1.2/ )
     (EPL1.0) * Old JAXB Core(com.sun.xml.bind:jaxb-core:3.0.2-https://eclipse-ee4j.github.io/jaxb-ri/ )
-    (EPL2.0,GPL2.0) * jakarta.ws.rs-api(jakarta.ws.rs:jakarta.ws.rs-api:3.0.0-https://github.com/eclipse-ee4j/jaxrs-api )
+    (EPL2.0) * jakarta.ws.rs-api(jakarta.ws.rs:jakarta.ws.rs-api:3.0.0-https://github.com/eclipse-ee4j/jaxrs-api )
 
 ========================================================================
 Third party MIT licenses
@@ -466,7 +466,7 @@ Third party MIT licenses
 The following components are provided under the MIT License.
 See licenses/ for text of these licenses.
 
-    (The MIT License,GPL) * Checker Qual(org.checkerframework:checker-qual:2.0.0-http://checkerframework.org )
+    (The MIT License) * Checker Qual(org.checkerframework:checker-qual:2.0.0-http://checkerframework.org )
     (The MIT License) * lightning-csv(org.simpleflatmapper:lightning-csv:8.2.1-http://github.com/arnaudroger/SimpleFlatMapper/lightning-csv )
     (The MIT License) * sfm-converter(org.simpleflatmapper:sfm-converter:8.2.1-http://github.com/arnaudroger/SimpleFlatMapper/sfm-converter )
     (The MIT License) * sfm-csv(org.simpleflatmapper:sfm-csv:8.2.1-http://github.com/arnaudroger/SimpleFlatMapper/sfm-csv )
