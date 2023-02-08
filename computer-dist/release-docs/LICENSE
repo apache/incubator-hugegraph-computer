@@ -410,6 +410,8 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0,LGPL 2.1) * Xml Compatibility extensions for Jackson(org.codehaus.jackson:jackson-xc:1.9.2-http://jackson.codehaus.org )
     (Apache License, Version 2.0,LGPL 2.1,MPL 1.1) * Javassist(org.javassist:javassist:3.21.0-GA-http://www.javassist.org/ )
 
+    computer-core/src/main/java/org/apache/hugegraph/computer/core/util/StringEncoding.java files from https://github.com/JanusGraph
+
 ========================================================================
 Third party BSD licenses
 ========================================================================
@@ -497,9 +499,9 @@ The following components are provided under the Public Domain License.
     (Public Domain, per Creative Commons CC0) * XZ for Java(org.tukaani:xz:1.8-https://tukaani.org/xz/java.html )
 
 ========================================================================
-Third party Go licens
+Third party Go license
 ========================================================================
 
-The following components are provided under The Go licens.
+The following components are provided under The Go license.
 
     (The Go license) * re2j(com.google.re2j:re2j:1.1-http://github.com/google/re2j )
