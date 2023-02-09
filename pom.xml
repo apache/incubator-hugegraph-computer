@@ -303,9 +303,7 @@
                         <exclude>**/*.conf</exclude>
                         <exclude>**/go.mod</exclude>
                         <exclude>**/go.sum</exclude>
-                        <exclude>**/*.properties</exclude>
                         <exclude>**/*.md</exclude>
-                        <exclude>**/dependency-reduced-pom.xml</exclude>
                         <exclude>**/target/*</exclude>
                         <exclude>.github/**/*</exclude>
                         <exclude>**/.flattened-pom.xml</exclude>
