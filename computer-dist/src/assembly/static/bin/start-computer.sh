@@ -103,7 +103,7 @@ parse_opts() {
                         DRIVE=${LOCAL_DRIVE}
                         ;;
                     *)
-                        echo "unknown drive %2, can only be k8s|yarn|local"
+                        echo "unknown drive %2, must be k8s|yarn|local"
                         exit 1
                 esac
                 shift 2;;
@@ -116,7 +116,7 @@ parse_opts() {
                         ROLE=${ROLE_WORKER}
                         ;;
                     *)
-                        echo "unknown role %2, can only be master|worker"
+                        echo "unknown role %2, must be master|worker"
                         exit 1
                 esac
                 shift 2;;
