@@ -76,22 +76,22 @@ parse_opts() {
 
         case "$1" in
             -c|--conf)
-                check_empty "conf file not be empty" $2
-                check_file_readable "file $2 not be read permission" $2
+                check_empty "conf file can't be empty" $2
+                check_file_readable "file $2 doesn't have read permission" $2
                 COMPUTER_CONF_PATH=$2
                 shift 2 ;;
             -l|--log4)
-                check_empty "log conf file not be empty" $2
-                check_file_readable "file $2 not be read permission" $2
+                check_empty "log conf file can't be empty" $2
+                check_file_readable "file $2 doesn't have read permission" $2
                 LOG4J_CONF_PATH=$2
                 shift 2 ;;
             -a|--algorithm)
-                check_empty "algorithm jar file not be empty" $2
-                check_file_readable "file $2 not be read permission" $2
+                check_empty "algorithm jar file can't be empty" $2
+                check_file_readable "file $2 doesn't have read permission" $2
                 JAR_FILE_PATH=$2
                 shift 2 ;;
             -d|--drive)
-                check_empty "drive not be empty" $1
+                check_empty "driver can't be empty" $1
                 case "$2" in
                     ${K8S_DRIVE})
                         DRIVE=${K8S_DRIVE}
@@ -103,7 +103,7 @@ parse_opts() {
                         DRIVE=${LOCAL_DRIVE}
                         ;;
                     *)
-                        echo "unknown drive %2, muse be k8s|yarn|local"
+                        echo "unknown drive %2, must be k8s|yarn|local"
                         exit 1
                 esac
                 shift 2;;
@@ -116,7 +116,7 @@ parse_opts() {
                         ROLE=${ROLE_WORKER}
                         ;;
                     *)
-                        echo "unknown role %2, muse be master|worker"
+                        echo "unknown role %2, must be master|worker"
                         exit 1
                 esac
                 shift 2;;
@@ -129,7 +129,7 @@ parse_opts $*
 
 if [ "${COMPUTER_CONF_PATH}" = "" ]; then
     if [ "$DRIVE" = "$K8S_DRIVE" ]; then
-      echo "conf file missed";
+      echo "conf file is missing";
       usage;
       exit 1;
     fi
@@ -137,13 +137,13 @@ if [ "${COMPUTER_CONF_PATH}" = "" ]; then
 fi
 
 if [ "${DRIVE}" = "" ]; then
-    echo "drive is missed";
+    echo "drive is missing";
     usage;
     exit 1;
 fi
 
 if [ "${ROLE}" = "" ]; then
-    echo "role is missed";
+    echo "role is missing";
     usage;
     exit 1;
 fi
