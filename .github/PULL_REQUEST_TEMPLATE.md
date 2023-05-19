@@ -38,7 +38,7 @@ For example:
 - If you refactor some codes with changing classes, showing the class hierarchy will help reviewers.
 - If there is a discussion in the mailing list, please add the link. -->
 
-## Verifying this change
+## Verifying these changes
 
 <!-- Please pick either of the following options -->
 
