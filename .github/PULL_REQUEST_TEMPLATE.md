@@ -19,7 +19,7 @@
 
 ## Purpose of the pull request
 
-- This PR will close \<ISSUE NUMBER\>
+- This PR will close <ISSUE NUMBER>
 
 <!-- Please explain more context in this section, clarify why the changes are needed. 
 
@@ -46,7 +46,7 @@ This change is a trivial rework / code cleanup without any test coverage.
 
 *(or)*
 
-This change is already covered by existing tests, such as \<PLEASE DESCRIBE TESTS\>.
+This change is already covered by existing tests, such as <PLEASE DESCRIBE TESTS>.
 
 *(or)*
 
