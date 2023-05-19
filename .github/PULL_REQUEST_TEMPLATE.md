@@ -42,20 +42,20 @@ For example:
 
 <!-- Please pick either of the following options -->
 
-This change is a trivial rework / code cleanup without any test coverage.
+- This change is a trivial rework / code cleanup without any test coverage.
 
 *(or)*
 
-This change is already covered by existing tests, such as <PLEASE DESCRIBE TESTS>.
+- This change is already covered by existing tests, such as <PLEASE DESCRIBE TESTS>.
 
 *(or)*
 
-This change added tests and can be verified as follows:
+- This change added tests and can be verified as follows:
+  
+  *(for example:)*
+  - *Added integration tests for end-to-end deployment with large payloads (10MB)*
+  - *Manually verified the change by running a HugeGraphComputerJob with some network exception, verifying that Worker shuts down and job is cancelled.*
 
-*(for example:)*
-
-- *Added integration tests for end-to-end deployment with large payloads (10MB)*
-- *Manually verified the change by running a HugeGraphComputerJob with some network exception, verifying that Worker shuts down and job is cancelled.*
 
 ## Does this pull request potentially affect one of the following parts:
 
