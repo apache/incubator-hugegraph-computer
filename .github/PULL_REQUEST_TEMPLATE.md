@@ -17,7 +17,7 @@
 
 ## Purpose of the PR
 
-close #xx  <!-- or use "fix #xx", "xx" is the issue number -->
+- close: xxx  <!-- or use "fix: xxx", "xxx" is the link of related issue -->
 
 <!--
 Please explain more context in this section, clarify why the changes are needed. 
@@ -35,6 +35,24 @@ For example:
 - If you introduce a new feature, please show detailed design here or add the link of design documentation.
 - If you refactor some codes with changing classes, showing the class hierarchy will help reviewers.
 - If there is a discussion in the mailing list, please add the link. -->
+
+## Verifying these changes
+
+<!-- Please pick either of the following options -->
+
+- This change is a trivial rework / code cleanup without any test coverage.
+
+*(or)*
+
+- This change is already covered by existing tests, such as *(please describe tests)*.
+
+*(or)*
+
+- This change added tests and can be verified as follows:
+  
+  *(for example:)*
+  - *Add UT.*
+
 
 ## Does this PR potentially affect the following parts?
 
