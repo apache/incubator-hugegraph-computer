@@ -19,6 +19,8 @@ package org.apache.hugegraph.computer.core.compute;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.hugegraph.computer.core.common.exception.TransportException;
+import org.apache.hugegraph.computer.core.network.ConnectionId;
 import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.sender.MessageSender;
 import org.apache.hugegraph.computer.core.sender.QueuedMessage;
@@ -34,6 +36,11 @@ public class MockMessageSender implements MessageSender {
 
     @Override
     public void send(int workerId, QueuedMessage message) {
+        // pass
+    }
+
+    @Override
+    public void exceptionCaught(TransportException cause, ConnectionId connectionId) {
         // pass
     }
 }

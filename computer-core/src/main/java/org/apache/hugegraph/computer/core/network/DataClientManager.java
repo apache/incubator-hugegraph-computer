@@ -118,10 +118,9 @@ public class DataClientManager implements Manager {
         @Override
         public void exceptionCaught(TransportException cause,
                                     ConnectionId connectionId) {
-            // TODO: implement failover
-            LOG.error("Channel for connectionId {} occurred exception",
+            LOG.error("Channel for connectionId {} occurred exception, shutdown all clients",
                       connectionId, cause);
-            DataClientManager.this.connManager.closeClient(connectionId);
+            DataClientManager.this.sender.exceptionCaught(cause, connectionId);
         }
     }
 }
