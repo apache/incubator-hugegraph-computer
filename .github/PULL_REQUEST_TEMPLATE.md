@@ -23,7 +23,7 @@
 Please explain more context in this section, clarify why the changes are needed. 
 For example:
 - If you propose a new API, clarify the use case for a new API.
-- If you fix a bug, you can clarify why it is a bug, and should associated with a #issue_number
+- If you fix a bug, you can clarify why it is a bug, and should associated with an issue.
 -->
 
 ## Main Changes
