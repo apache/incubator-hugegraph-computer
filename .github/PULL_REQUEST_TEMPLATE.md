@@ -4,7 +4,7 @@
   Here are some tips for you:
     1. If this is your first time, please read the [contributing guidelines](https://github.com/apache/hugegraph/blob/master/CONTRIBUTING.md)
 
-    2. If a PR will fix/close a issue, type the message "fix #xx" (xx = issue number) in the content, github will auto link it (Required)
+    2. If a PR will fix/close a issue, type the message "close xxx" (xxx is the link of related issue) in the content, github will auto link it (Required)
 
     3. Name the PR title in "Google Commit Format", start with "feat | fix | perf | refactor | doc | chore", 
       such like: "feat(core): support the PageRank algorithm" or "fix: wrong break in the compute loop" (module is optional)
