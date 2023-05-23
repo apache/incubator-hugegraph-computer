@@ -40,7 +40,7 @@ public class MockMessageSender implements MessageSender {
     }
 
     @Override
-    public void exceptionCaught(TransportException cause, ConnectionId connectionId) {
+    public void transportExceptionCaught(TransportException cause, ConnectionId connectionId) {
         // pass
     }
 }

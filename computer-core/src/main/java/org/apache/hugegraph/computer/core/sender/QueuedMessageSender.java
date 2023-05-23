@@ -105,7 +105,7 @@ public class QueuedMessageSender implements MessageSender {
     }
 
     @Override
-    public void exceptionCaught(TransportException cause, ConnectionId connectionId) {
+    public void transportExceptionCaught(TransportException cause, ConnectionId connectionId) {
         for (WorkerChannel channel : this.channels) {
             if (channel.client.connectionId().equals(connectionId)) {
                 channel.futureRef.get().completeExceptionally(cause);

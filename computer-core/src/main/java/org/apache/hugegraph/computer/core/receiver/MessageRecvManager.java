@@ -61,8 +61,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     private int workerCount;
     private int expectedFinishMessages;
-    private CompletableFuture<Void> finishAllMessagesFuture;
-    private CompletableFuture<Boolean>[] finishMessageFutures;
+    private CompletableFuture<Void> finishMessagesFuture;
     private AtomicInteger finishMessageCount;
 
     private long waitFinishMessagesTimeout;
@@ -75,6 +74,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.fileManager = fileManager;
         this.sortManager = sortManager;
         this.superstep = Constants.INPUT_SUPERSTEP;
+        this.finishMessageCount = new AtomicInteger();
     }
 
     @Override
@@ -94,8 +94,8 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
-
-        initFinishMessageFuture();
+        this.finishMessagesFuture = new CompletableFuture<>();
+        this.finishMessageCount.set(this.expectedFinishMessages);
 
         this.waitFinishMessagesTimeout = config.get(
              ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT);
@@ -108,8 +108,11 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.messagePartitions = new ComputeMessageRecvPartitions(
                                  this.context, fileGenerator, this.sortManager);
         this.expectedFinishMessages = this.workerCount;
+        this.finishMessagesFuture = new CompletableFuture<>();
+        if (!this.finishMessageCount.compareAndSet(0, this.expectedFinishMessages)) {
+            throw new ComputerException("The origin count must be 0");
+        }
 
-        initFinishMessageFuture();
 
         this.superstep = superstep;
 
@@ -146,24 +149,13 @@ public class MessageRecvManager implements Manager, MessageHandler {
                                 ConnectionId connectionId) {
         LOG.error("Exception caught for connection:{}, root cause:",
                  connectionId, cause);
-        if (this.finishAllMessagesFuture != null) {
-            this.finishAllMessagesFuture.completeExceptionally(cause);
-        }
-    }
-
-    private void initFinishMessageFuture() {
-        this.finishMessageFutures = new CompletableFuture[this.expectedFinishMessages];
-        for (int i = 0; i < this.expectedFinishMessages; i++) {
-            this.finishMessageFutures[i] = new CompletableFuture<>();
-        }
-        this.finishAllMessagesFuture = CompletableFuture.allOf(finishMessageFutures);
-        this.finishMessageCount = new AtomicInteger(0);
+        this.finishMessagesFuture.completeExceptionally(cause);
     }
 
     public void waitReceivedAllMessages() {
-        if (finishAllMessagesFuture != null) {
+        if (finishMessagesFuture != null) {
             try {
-                finishAllMessagesFuture.get(
+                finishMessagesFuture.get(
                         this.waitFinishMessagesTimeout,
                              TimeUnit.MILLISECONDS);
             } catch (Exception e) {
@@ -222,8 +214,10 @@ public class MessageRecvManager implements Manager, MessageHandler {
     @Override
     public void onFinished(ConnectionId connectionId) {
         LOG.debug("ConnectionId {} finished", connectionId);
-        int messageIdx = this.finishMessageCount.getAndIncrement();
-        this.finishMessageFutures[messageIdx].complete(true);
+        int messageIdx = this.finishMessageCount.decrementAndGet();
+        if (messageIdx == 0) {
+            this.finishMessagesFuture.complete(null);
+        }
     }
 
     /**

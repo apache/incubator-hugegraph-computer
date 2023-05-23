@@ -44,5 +44,5 @@ public interface MessageSender {
      * Invoked when the channel associated with the given connectionId has
      * an exception is thrown processing message.
      */
-    void exceptionCaught(TransportException cause, ConnectionId connectionId);
+    void transportExceptionCaught(TransportException cause, ConnectionId connectionId);
 }
