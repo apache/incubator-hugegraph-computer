@@ -62,7 +62,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
     private int workerCount;
     private int expectedFinishMessages;
     private CompletableFuture<Void> finishMessagesFuture;
-    private AtomicInteger finishMessageCount;
+    private AtomicInteger finishMessagesCount;
 
     private long waitFinishMessagesTimeout;
     private long superstep;
@@ -74,7 +74,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.fileManager = fileManager;
         this.sortManager = sortManager;
         this.superstep = Constants.INPUT_SUPERSTEP;
-        this.finishMessageCount = new AtomicInteger();
+        this.finishMessagesCount = new AtomicInteger();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
         this.finishMessagesFuture = new CompletableFuture<>();
-        this.finishMessageCount.set(this.expectedFinishMessages);
+        this.finishMessagesCount.set(this.expectedFinishMessages);
 
         this.waitFinishMessagesTimeout = config.get(
              ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT);
@@ -109,10 +109,9 @@ public class MessageRecvManager implements Manager, MessageHandler {
                                  this.context, fileGenerator, this.sortManager);
         this.expectedFinishMessages = this.workerCount;
         this.finishMessagesFuture = new CompletableFuture<>();
-        if (!this.finishMessageCount.compareAndSet(0, this.expectedFinishMessages)) {
+        if (!this.finishMessagesCount.compareAndSet(0, this.expectedFinishMessages)) {
             throw new ComputerException("The origin count must be 0");
         }
-
 
         this.superstep = superstep;
 
@@ -153,20 +152,18 @@ public class MessageRecvManager implements Manager, MessageHandler {
     }
 
     public void waitReceivedAllMessages() {
-        if (finishMessagesFuture != null) {
-            try {
-                finishMessagesFuture.get(
-                        this.waitFinishMessagesTimeout,
-                             TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                throw new ComputerException(
-                        "Thread is interrupted while waiting %s " +
-                                "finish-messages received in %s ms in superstep %s",
-                        e,
-                        this.expectedFinishMessages,
-                        this.waitFinishMessagesTimeout,
-                        this.superstep);
-            }
+        try {
+            finishMessagesFuture.get(
+                    this.waitFinishMessagesTimeout,
+                    TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            throw new ComputerException(
+                    "Thread is interrupted while waiting %s " +
+                            "finish-messages received in %s ms in superstep %s",
+                    e,
+                    this.expectedFinishMessages,
+                    this.waitFinishMessagesTimeout,
+                    this.superstep);
         }
     }
 
@@ -214,7 +211,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
     @Override
     public void onFinished(ConnectionId connectionId) {
         LOG.debug("ConnectionId {} finished", connectionId);
-        int messageIdx = this.finishMessageCount.decrementAndGet();
+        int messageIdx = this.finishMessagesCount.decrementAndGet();
         if (messageIdx == 0) {
             this.finishMessagesFuture.complete(null);
         }
