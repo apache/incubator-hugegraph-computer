@@ -18,8 +18,10 @@
 package org.apache.hugegraph.computer.core.receiver;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hugegraph.computer.core.common.ComputerContext;
@@ -109,9 +111,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
                                  this.context, fileGenerator, this.sortManager);
         this.expectedFinishMessages = this.workerCount;
         this.finishMessagesFuture = new CompletableFuture<>();
-        if (!this.finishMessagesCount.compareAndSet(0, this.expectedFinishMessages)) {
-            throw new ComputerException("The origin count must be 0");
-        }
+        this.finishMessagesCount.set(this.expectedFinishMessages);
 
         this.superstep = superstep;
 
@@ -153,17 +153,13 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     public void waitReceivedAllMessages() {
         try {
-            finishMessagesFuture.get(
-                    this.waitFinishMessagesTimeout,
-                    TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            throw new ComputerException(
-                    "Thread is interrupted while waiting %s " +
-                            "finish-messages received in %s ms in superstep %s",
-                    e,
-                    this.expectedFinishMessages,
-                    this.waitFinishMessagesTimeout,
-                    this.superstep);
+            this.finishMessagesFuture.get(this.waitFinishMessagesTimeout, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            throw new ComputerException("Time out while waiting %s finish-messages received in %s ms in superstep %s",
+                    this.expectedFinishMessages, this.waitFinishMessagesTimeout, this.superstep, e);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new ComputerException("Error while waiting %s finish-messages received in %s ms in superstep %s",
+                    this.expectedFinishMessages, this.waitFinishMessagesTimeout, this.superstep, e);
         }
     }
 
@@ -214,6 +210,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         int messageIdx = this.finishMessagesCount.decrementAndGet();
         if (messageIdx == 0) {
             this.finishMessagesFuture.complete(null);
+            this.finishMessagesCount.set(0);
         }
     }
 
