@@ -155,10 +155,12 @@ public class MessageRecvManager implements Manager, MessageHandler {
         try {
             this.finishMessagesFuture.get(this.waitFinishMessagesTimeout, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
-            throw new ComputerException("Time out while waiting %s finish-messages received in %s ms in superstep %s",
+            throw new ComputerException("Time out while waiting %s finish-messages " +
+                    "received in %s ms in superstep %s",
                     this.expectedFinishMessages, this.waitFinishMessagesTimeout, this.superstep, e);
         } catch (InterruptedException | ExecutionException e) {
-            throw new ComputerException("Error while waiting %s finish-messages received in %s ms in superstep %s",
+            throw new ComputerException("Error while waiting %s finish-messages " +
+                    "received in %s ms in superstep %s",
                     this.expectedFinishMessages, this.waitFinishMessagesTimeout, this.superstep, e);
         }
     }
@@ -207,10 +209,9 @@ public class MessageRecvManager implements Manager, MessageHandler {
     @Override
     public void onFinished(ConnectionId connectionId) {
         LOG.debug("ConnectionId {} finished", connectionId);
-        int messageIdx = this.finishMessagesCount.decrementAndGet();
-        if (messageIdx == 0) {
+        int currentCount = this.finishMessagesCount.decrementAndGet();
+        if (currentCount == 0) {
             this.finishMessagesFuture.complete(null);
-            this.finishMessagesCount.set(0);
         }
     }
 
