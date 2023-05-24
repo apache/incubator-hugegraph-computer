@@ -56,6 +56,7 @@ import org.apache.hugegraph.testutil.Whitebox;
 import org.apache.hugegraph.util.E;
 import org.apache.hugegraph.util.Log;
 import org.apache.logging.log4j.LogManager;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 
@@ -72,6 +73,14 @@ public class UnitTestBase {
 
     protected static void clearAll() {
         client().graphs().clearGraph(GRAPH, "I'm sure to delete all data");
+    }
+
+    @AfterClass
+    public static synchronized void cleanup() {
+        if (CLIENT != null) {
+            CLIENT.close();
+            CLIENT = null;
+        }
     }
 
     @BeforeClass
