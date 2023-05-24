@@ -76,7 +76,7 @@ public class UnitTestBase {
     }
 
     @AfterClass
-    public static synchronized void cleanup() {
+    public static void cleanup() {
         if (CLIENT != null) {
             CLIENT.close();
             CLIENT = null;
