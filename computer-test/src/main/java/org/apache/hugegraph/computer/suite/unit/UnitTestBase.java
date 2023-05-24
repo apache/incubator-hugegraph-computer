@@ -92,8 +92,7 @@ public class UnitTestBase {
         String etcdUrl = System.getenv("BSP_ETCD_URL");
         if (StringUtils.isNotBlank(etcdUrl)) {
             Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                                      "defaultValue",
-                                      etcdUrl);
+                                      "defaultValue", etcdUrl);
         }
 
         Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_URL,
