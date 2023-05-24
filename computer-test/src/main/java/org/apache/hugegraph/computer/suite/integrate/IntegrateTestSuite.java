@@ -46,14 +46,12 @@ public class IntegrateTestSuite {
         OptionSpace.register("computer",
                              "org.apache.hugegraph.computer.core.config." +
                              "ComputerOptions");
-        OptionSpace.register("computer-rpc",
-                             "org.apache.hugegraph.config.RpcOptions");
+        OptionSpace.register("computer-rpc", "org.apache.hugegraph.config.RpcOptions");
 
         String etcdUrl = System.getenv("BSP_ETCD_URL");
         if (StringUtils.isNotBlank(etcdUrl)) {
             Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                                      "defaultValue",
-                                      etcdUrl);
+                                      "defaultValue", etcdUrl);
         }
 
     }
