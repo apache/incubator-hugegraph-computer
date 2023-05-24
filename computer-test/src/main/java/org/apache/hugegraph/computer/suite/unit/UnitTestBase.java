@@ -75,14 +75,6 @@ public class UnitTestBase {
         client().graphs().clearGraph(GRAPH, "I'm sure to delete all data");
     }
 
-    @AfterClass
-    public static void cleanup() {
-        if (CLIENT != null) {
-            CLIENT.close();
-            CLIENT = null;
-        }
-    }
-
     @BeforeClass
     public static void init() throws ClassNotFoundException {
         Runtime.getRuntime().addShutdownHook(new Thread(LogManager::shutdown));
@@ -138,14 +130,20 @@ public class UnitTestBase {
         Class.forName(IdType.class.getName());
         // Don't forget to register options
         OptionSpace.register("computer",
-                "org.apache.hugegraph.computer.core.config." +
-                        "ComputerOptions");
-        OptionSpace.register("computer-rpc",
-                "org.apache.hugegraph.config.RpcOptions");
+                             "org.apache.hugegraph.computer.core.config.ComputerOptions");
+        OptionSpace.register("computer-rpc", "org.apache.hugegraph.config.RpcOptions");
 
         UnitTestBase.updateOptions(
                 ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()
         );
+    }
+
+    @AfterClass
+    public static void cleanup() {
+        if (CLIENT != null) {
+            CLIENT.close();
+            CLIENT = null;
+        }
     }
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)

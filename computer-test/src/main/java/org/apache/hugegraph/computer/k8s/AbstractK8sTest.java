@@ -74,14 +74,11 @@ public abstract class AbstractK8sTest {
 
     static {
         OptionSpace.register("computer",
-                             "org.apache.hugegraph.computer.core.config." +
-                             "ComputerOptions");
+                             "org.apache.hugegraph.computer.core.config.ComputerOptions");
         OptionSpace.register("computer-k8s-driver",
-                             "org.apache.hugegraph.computer.k8s.config" +
-                             ".KubeDriverOptions");
+                             "org.apache.hugegraph.computer.k8s.config.KubeDriverOptions");
         OptionSpace.register("computer-k8s-spec",
-                             "org.apache.hugegraph.computer.k8s.config" +
-                             ".KubeSpecOptions");
+                             "org.apache.hugegraph.computer.k8s.config.KubeSpecOptions");
     }
 
     protected void updateOptions(String key, Object value) {

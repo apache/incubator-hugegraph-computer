@@ -44,8 +44,7 @@ public class IntegrateTestSuite {
 
         // Don't forget to register options
         OptionSpace.register("computer",
-                             "org.apache.hugegraph.computer.core.config." +
-                             "ComputerOptions");
+                             "org.apache.hugegraph.computer.core.config.ComputerOptions");
         OptionSpace.register("computer-rpc", "org.apache.hugegraph.config.RpcOptions");
 
         String etcdUrl = System.getenv("BSP_ETCD_URL");
