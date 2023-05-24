@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.common.Constants;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
@@ -79,9 +80,13 @@ public class UnitTestBase {
 
         LOG.info("Setup for UnitTestSuite of hugegraph-computer");
 
-        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                "defaultValue",
-                "http://localhost:2379");
+        String etcdUrl = System.getenv("BSP_ETCD_URL");
+        if (StringUtils.isNotBlank(etcdUrl)) {
+            Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
+                                      "defaultValue",
+                                      etcdUrl);
+        }
+
         Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_URL,
                 "defaultValue",
                 "http://127.0.0.1:8080");
