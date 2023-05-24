@@ -159,9 +159,8 @@ public class MessageRecvManager implements Manager, MessageHandler {
                     "received in %s ms in superstep %s",
                     this.expectedFinishMessages, this.waitFinishMessagesTimeout, this.superstep, e);
         } catch (InterruptedException | ExecutionException e) {
-            throw new ComputerException("Error while waiting %s finish-messages " +
-                    "received in %s ms in superstep %s",
-                    this.expectedFinishMessages, this.waitFinishMessagesTimeout, this.superstep, e);
+            throw new ComputerException("Error while waiting %s finish-messages in superstep %s",
+                    this.expectedFinishMessages, this.superstep, e);
         }
     }
 
