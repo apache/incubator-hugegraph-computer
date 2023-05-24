@@ -49,6 +49,6 @@ public class IntegrateTestSuite {
                              "org.apache.hugegraph.config.RpcOptions");
 
         Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                                  "defaultValue", "http://localhost:2579");
+                                  "defaultValue", "http://localhost:2379");
     }
 }

@@ -81,7 +81,7 @@ public class UnitTestBase {
 
         Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
                 "defaultValue",
-                "http://localhost:2579");
+                "http://localhost:2379");
         Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_URL,
                 "defaultValue",
                 "http://127.0.0.1:8080");
