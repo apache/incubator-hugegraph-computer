@@ -14,6 +14,7 @@ jobs:
       TRAVIS_DIR: computer-dist/src/assembly/travis
       KUBERNETES_VERSION: 1.20.1
       HUGEGRAPH_SERVER_COMMIT_ID: d01c8737d7d5909119671953521f1401dcd1a188
+      BSP_ETCD_URL: http://localhost:2579
 
     steps:
       - name: Checkout

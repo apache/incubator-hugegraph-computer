@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.common.Constants;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
@@ -55,6 +56,7 @@ import org.apache.hugegraph.testutil.Whitebox;
 import org.apache.hugegraph.util.E;
 import org.apache.hugegraph.util.Log;
 import org.apache.logging.log4j.LogManager;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
 
@@ -79,9 +81,12 @@ public class UnitTestBase {
 
         LOG.info("Setup for UnitTestSuite of hugegraph-computer");
 
-        Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
-                "defaultValue",
-                "http://localhost:2579");
+        String etcdUrl = System.getenv("BSP_ETCD_URL");
+        if (StringUtils.isNotBlank(etcdUrl)) {
+            Whitebox.setInternalState(ComputerOptions.BSP_ETCD_ENDPOINTS,
+                                      "defaultValue", etcdUrl);
+        }
+
         Whitebox.setInternalState(ComputerOptions.HUGEGRAPH_URL,
                 "defaultValue",
                 "http://127.0.0.1:8080");
@@ -125,14 +130,20 @@ public class UnitTestBase {
         Class.forName(IdType.class.getName());
         // Don't forget to register options
         OptionSpace.register("computer",
-                "org.apache.hugegraph.computer.core.config." +
-                        "ComputerOptions");
-        OptionSpace.register("computer-rpc",
-                "org.apache.hugegraph.config.RpcOptions");
+                             "org.apache.hugegraph.computer.core.config.ComputerOptions");
+        OptionSpace.register("computer-rpc", "org.apache.hugegraph.config.RpcOptions");
 
         UnitTestBase.updateOptions(
                 ComputerOptions.ALGORITHM_RESULT_CLASS, LongValue.class.getName()
         );
+    }
+
+    @AfterClass
+    public static void cleanup() {
+        if (CLIENT != null) {
+            CLIENT.close();
+            CLIENT = null;
+        }
     }
 
     public static void assertIdEqualAfterWriteAndRead(Id oldId)

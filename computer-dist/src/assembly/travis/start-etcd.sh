@@ -26,5 +26,5 @@ chmod a+x ${TRAVIS_DIR}/etcd
 ${TRAVIS_DIR}/etcd/etcd --name etcd-test \
     --initial-advertise-peer-urls http://localhost:2580 \
     --listen-peer-urls http://localhost:2580 \
-    --advertise-client-urls http://localhost:2579 \
-    --listen-client-urls http://localhost:2579 &
+    --advertise-client-urls ${BSP_ETCD_URL} \
+    --listen-client-urls ${BSP_ETCD_URL} &
