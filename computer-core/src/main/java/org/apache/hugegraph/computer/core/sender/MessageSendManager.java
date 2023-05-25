@@ -154,7 +154,7 @@ public class MessageSendManager implements Manager {
     }
 
     /**
-     * Finsih send message, send the last buffer and put an END signal
+     * Finish send message, send the last buffer and put an END signal
      * into queue
      * @param type the message type
      */
@@ -277,10 +277,10 @@ public class MessageSendManager implements Manager {
             }
         } catch (TimeoutException e) {
             throw new ComputerException("Timeout(%sms) to wait for " +
-                                        "controling message(%s) to finished",
+                                        "controlling message(%s) to finished",
                                         e, timeout, type);
         } catch (InterruptedException | ExecutionException e) {
-            throw new ComputerException("Failed to wait for controling " +
+            throw new ComputerException("Failed to wait for controlling " +
                                         "message(%s) to finished", e, type);
         }
     }

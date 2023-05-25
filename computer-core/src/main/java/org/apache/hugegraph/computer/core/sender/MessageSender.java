@@ -19,6 +19,8 @@ package org.apache.hugegraph.computer.core.sender;
 
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.hugegraph.computer.core.common.exception.TransportException;
+import org.apache.hugegraph.computer.core.network.ConnectionId;
 import org.apache.hugegraph.computer.core.network.message.MessageType;
 
 public interface MessageSender {
@@ -37,4 +39,10 @@ public interface MessageSender {
      * @param message message payload
      */
     void send(int workerId, QueuedMessage message) throws InterruptedException;
+
+    /**
+     * Invoked when the channel associated with the given connectionId has
+     * an exception is thrown processing message.
+     */
+    void transportExceptionCaught(TransportException cause, ConnectionId connectionId);
 }

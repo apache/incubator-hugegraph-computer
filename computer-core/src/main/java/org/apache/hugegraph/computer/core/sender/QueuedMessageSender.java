@@ -24,6 +24,7 @@ import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.common.exception.TransportException;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
+import org.apache.hugegraph.computer.core.network.ConnectionId;
 import org.apache.hugegraph.computer.core.network.TransportClient;
 import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.concurrent.BarrierEvent;
@@ -101,6 +102,15 @@ public class QueuedMessageSender implements MessageSender {
                      throws InterruptedException {
         WorkerChannel channel = this.channels[channelId(workerId)];
         channel.queue.put(message);
+    }
+
+    @Override
+    public void transportExceptionCaught(TransportException cause, ConnectionId connectionId) {
+        for (WorkerChannel channel : this.channels) {
+            if (channel.client.connectionId().equals(connectionId)) {
+                channel.futureRef.get().completeExceptionally(cause);
+            }
+        }
     }
 
     public Runnable notBusyNotifier() {

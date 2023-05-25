@@ -18,8 +18,11 @@
 package org.apache.hugegraph.computer.core.receiver;
 
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.common.Constants;
@@ -60,7 +63,9 @@ public class MessageRecvManager implements Manager, MessageHandler {
 
     private int workerCount;
     private int expectedFinishMessages;
-    private CountDownLatch finishMessagesLatch;
+    private CompletableFuture<Void> finishMessagesFuture;
+    private AtomicInteger finishMessagesCount;
+
     private long waitFinishMessagesTimeout;
     private long superstep;
 
@@ -71,6 +76,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.fileManager = fileManager;
         this.sortManager = sortManager;
         this.superstep = Constants.INPUT_SUPERSTEP;
+        this.finishMessagesCount = new AtomicInteger();
     }
 
     @Override
@@ -90,8 +96,9 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
-        this.finishMessagesLatch = new CountDownLatch(
-                                   this.expectedFinishMessages);
+        this.finishMessagesFuture = new CompletableFuture<>();
+        this.finishMessagesCount.set(this.expectedFinishMessages);
+
         this.waitFinishMessagesTimeout = config.get(
              ComputerOptions.WORKER_WAIT_FINISH_MESSAGES_TIMEOUT);
     }
@@ -103,8 +110,9 @@ public class MessageRecvManager implements Manager, MessageHandler {
         this.messagePartitions = new ComputeMessageRecvPartitions(
                                  this.context, fileGenerator, this.sortManager);
         this.expectedFinishMessages = this.workerCount;
-        this.finishMessagesLatch = new CountDownLatch(
-                                   this.expectedFinishMessages);
+        this.finishMessagesFuture = new CompletableFuture<>();
+        this.finishMessagesCount.set(this.expectedFinishMessages);
+
         this.superstep = superstep;
 
         if (this.superstep == Constants.INPUT_SUPERSTEP + 1) {
@@ -138,35 +146,21 @@ public class MessageRecvManager implements Manager, MessageHandler {
     @Override
     public void exceptionCaught(TransportException cause,
                                 ConnectionId connectionId) {
-        // TODO: implement failover
-        LOG.warn("Exception caught for connection:{}, root cause:",
+        LOG.error("Exception caught for connection:{}, root cause:",
                  connectionId, cause);
+        this.finishMessagesFuture.completeExceptionally(cause);
     }
 
     public void waitReceivedAllMessages() {
         try {
-            boolean status = this.finishMessagesLatch.await(
-                             this.waitFinishMessagesTimeout,
-                             TimeUnit.MILLISECONDS);
-            if (!status) {
-                throw new ComputerException(
-                          "Expect %s finish-messages received in %s ms, " +
-                          "%s absence in superstep %s",
-                          this.expectedFinishMessages,
-                          this.waitFinishMessagesTimeout,
-                          this.finishMessagesLatch.getCount(),
-                          this.superstep);
-            }
-        } catch (InterruptedException e) {
-            throw new ComputerException(
-                      "Thread is interrupted while waiting %s " +
-                      "finish-messages received in %s ms, " +
-                      "%s absence in superstep %s",
-                      e,
-                      this.expectedFinishMessages,
-                      this.waitFinishMessagesTimeout,
-                      this.finishMessagesLatch.getCount(),
-                      this.superstep);
+            this.finishMessagesFuture.get(this.waitFinishMessagesTimeout, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            throw new ComputerException("Time out while waiting %s finish-messages " +
+                    "received in %s ms in superstep %s",
+                    this.expectedFinishMessages, this.waitFinishMessagesTimeout, this.superstep, e);
+        } catch (InterruptedException | ExecutionException e) {
+            throw new ComputerException("Error while waiting %s finish-messages in superstep %s",
+                    this.expectedFinishMessages, this.superstep, e);
         }
     }
 
@@ -214,7 +208,10 @@ public class MessageRecvManager implements Manager, MessageHandler {
     @Override
     public void onFinished(ConnectionId connectionId) {
         LOG.debug("ConnectionId {} finished", connectionId);
-        this.finishMessagesLatch.countDown();
+        int currentCount = this.finishMessagesCount.decrementAndGet();
+        if (currentCount == 0) {
+            this.finishMessagesFuture.complete(null);
+        }
     }
 
     /**
