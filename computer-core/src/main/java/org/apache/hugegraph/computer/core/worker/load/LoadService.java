@@ -233,7 +233,7 @@ public class LoadService {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() throws Exception {
             this.fetcher.close();
         }
     }

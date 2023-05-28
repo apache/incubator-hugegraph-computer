@@ -138,6 +138,11 @@ public class WorkerInputManager implements Manager {
                 Vertex vertex = iterator.next();
                 sendConsumer.accept(vertex);
             }
+            try {
+                ((AutoCloseable) iterator).close();
+            } catch (Exception e) {
+                throw new ComputerException("Failed to close iterator", e);
+            }
         }, this.sendExecutor);
     }
 
