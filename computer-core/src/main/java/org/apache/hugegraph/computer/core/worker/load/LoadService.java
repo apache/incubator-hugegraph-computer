@@ -17,10 +17,8 @@
 
 package org.apache.hugegraph.computer.core.worker.load;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.NoSuchElementException;
-
+import org.apache.hugegraph.computer.core.common.AutoCloseableIterator;
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
@@ -66,17 +64,17 @@ public class LoadService {
         this.rpcService = rpcService;
     }
 
-    public Iterator<Vertex> createIteratorFromVertex() {
+    public AutoCloseableIterator<Vertex> createIteratorFromVertex() {
         GraphFetcher fetcher = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
         return new IteratorFromVertex(fetcher);
     }
 
-    public Iterator<Vertex> createIteratorFromEdge() {
+    public AutoCloseableIterator<Vertex> createIteratorFromEdge() {
         GraphFetcher fetcher = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
         return new IteratorFromEdge(fetcher);
     }
 
-    private class IteratorFromVertex implements Iterator<Vertex>, AutoCloseable {
+    private class IteratorFromVertex implements AutoCloseableIterator<Vertex> {
 
         private InputSplit currentSplit;
 
@@ -128,12 +126,12 @@ public class LoadService {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             this.fetcher.close();
         }
     }
 
-    private class IteratorFromEdge implements Iterator<Vertex>, AutoCloseable {
+    private class IteratorFromEdge implements AutoCloseableIterator<Vertex> {
 
         /*
          * TODO: If it is an in edge, we should get the data from the in shard;
@@ -233,7 +231,7 @@ public class LoadService {
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             this.fetcher.close();
         }
     }
