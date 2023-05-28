@@ -111,7 +111,7 @@ public class WorkerInputManager implements Manager {
         }
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).exceptionally(e -> {
             throw new ComputerException("An exception occurred during parallel " +
-                    "sending vertices", e);
+                                        "sending vertices", e);
         }).join();
         this.sendManager.finishSend(MessageType.VERTEX);
 
@@ -124,7 +124,7 @@ public class WorkerInputManager implements Manager {
         }
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).exceptionally(e -> {
             throw new ComputerException("An exception occurred during parallel " +
-                    "sending edges", e);
+                                        "sending edges", e);
         }).join();
         this.sendManager.finishSend(MessageType.EDGE);
         this.sendManager.clearBuffer();
