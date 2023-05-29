@@ -19,6 +19,7 @@ package org.apache.hugegraph.computer.core.worker.load;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
@@ -43,33 +44,43 @@ public class LoadService {
 
     private final GraphFactory graphFactory;
     private final Config config;
+
+    // Service proxy on the client
+    private InputSplitRpcService rpcService;
+    private final InputFilter inputFilter;
+
+    private final int fetcherNum;
     /*
      * GraphFetcher include:
      *   VertexFetcher vertexFetcher;
      *   EdgeFetcher edgeFetcher;
      */
-    private GraphFetcher fetcher;
-    // Service proxy on the client
-    private InputSplitRpcService rpcService;
-    private final InputFilter inputFilter;
+    private final GraphFetcher[] fetchers;
+    private final AtomicInteger fetcherIdx;
 
     public LoadService(ComputerContext context) {
         this.graphFactory = context.graphFactory();
         this.config = context.config();
-        this.fetcher = null;
         this.rpcService = null;
         this.inputFilter = context.config().createObject(
                 ComputerOptions.INPUT_FILTER_CLASS);
+        this.fetcherNum = this.config.get(ComputerOptions.INPUT_SEND_THREAD_NUMS);
+        this.fetchers = new GraphFetcher[this.fetcherNum];
+        this.fetcherIdx = new AtomicInteger(0);
     }
 
     public void init() {
         assert this.rpcService != null;
-        this.fetcher = InputSourceFactory.createGraphFetcher(this.config,
-                                                             this.rpcService);
+        // provide different GraphFetcher for each sending thread
+        for (int i = 0; i < this.fetcherNum; i++) {
+            this.fetchers[i] = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
+        }
     }
 
     public void close() {
-        this.fetcher.close();
+        for (GraphFetcher fetcher : this.fetchers) {
+            fetcher.close();
+        }
     }
 
     public void rpcService(InputSplitRpcService rpcService) {
@@ -78,30 +89,34 @@ public class LoadService {
     }
 
     public Iterator<Vertex> createIteratorFromVertex() {
-        return new IteratorFromVertex();
+        int currentIdx = this.fetcherIdx.getAndIncrement() % this.fetcherNum;
+        return new IteratorFromVertex(this.fetchers[currentIdx]);
     }
 
     public Iterator<Vertex> createIteratorFromEdge() {
-        return new IteratorFromEdge();
+        int currentIdx = this.fetcherIdx.getAndIncrement() % this.fetcherNum;
+        return new IteratorFromEdge(this.fetchers[currentIdx]);
     }
 
     private class IteratorFromVertex implements Iterator<Vertex> {
 
         private InputSplit currentSplit;
+        private GraphFetcher fetcher;
 
-        public IteratorFromVertex() {
+        public IteratorFromVertex(GraphFetcher fetcher) {
             this.currentSplit = null;
+            this.fetcher = fetcher;
         }
 
         @Override
         public boolean hasNext() {
-            VertexFetcher vertexFetcher = fetcher.vertexFetcher();
+            VertexFetcher vertexFetcher = this.fetcher.vertexFetcher();
             while (this.currentSplit == null || !vertexFetcher.hasNext()) {
                 /*
                  * The first time or the current split is complete,
                  * need to fetch next input split meta
                  */
-                this.currentSplit = fetcher.nextVertexInputSplit();
+                this.currentSplit = this.fetcher.nextVertexInputSplit();
                 if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
                     return false;
                 }
@@ -116,7 +131,7 @@ public class LoadService {
                 throw new NoSuchElementException();
             }
             org.apache.hugegraph.structure.graph.Vertex hugeVertex;
-            hugeVertex = fetcher.vertexFetcher().next();
+            hugeVertex = this.fetcher.vertexFetcher().next();
             return this.convert(hugeVertex);
         }
 
@@ -145,13 +160,15 @@ public class LoadService {
         private final int maxEdges;
         private InputSplit currentSplit;
         private Vertex currentVertex;
+        private GraphFetcher fetcher;
 
-        public IteratorFromEdge() {
+        public IteratorFromEdge(GraphFetcher fetcher) {
             // this.direction = config.get(ComputerOptions.EDGE_DIRECTION);
             this.maxEdges = config.get(
                             ComputerOptions.INPUT_MAX_EDGES_IN_ONE_VERTEX);
             this.currentSplit = null;
             this.currentVertex = null;
+            this.fetcher = fetcher;
         }
 
         @Override
@@ -159,13 +176,13 @@ public class LoadService {
             if (InputSplit.END_SPLIT.equals(this.currentSplit)) {
                 return this.currentVertex != null;
             }
-            EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
+            EdgeFetcher edgeFetcher = this.fetcher.edgeFetcher();
             while (this.currentSplit == null || !edgeFetcher.hasNext()) {
                 /*
                  * The first time or the current split is complete,
                  * need to fetch next input split meta
                  */
-                this.currentSplit = fetcher.nextEdgeInputSplit();
+                this.currentSplit = this.fetcher.nextEdgeInputSplit();
                 if (this.currentSplit.equals(InputSplit.END_SPLIT)) {
                     return this.currentVertex != null;
                 }
@@ -181,7 +198,7 @@ public class LoadService {
             }
 
             org.apache.hugegraph.structure.graph.Edge hugeEdge;
-            EdgeFetcher edgeFetcher = fetcher.edgeFetcher();
+            EdgeFetcher edgeFetcher = this.fetcher.edgeFetcher();
             while (edgeFetcher.hasNext()) {
                 hugeEdge = edgeFetcher.next();
                 Edge edge = this.convert(hugeEdge);
