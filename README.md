@@ -35,3 +35,11 @@ Note: It's recommended to use [GitHub Desktop](https://desktop.github.com/) to *
 ## License
 
 hugegraph-computer is licensed under Apache 2.0 License.
+
+## Contact Us
+
+- [Github Issues](https://github.com/apache/incubator-hugegraph/issues): Feedback on usage issues and functional requirements (priority)
+- Feedback Email: [dev@hugegraph.apache.org](dev@hugegraph.apache.org)
+- WeChat public account: Apache HugeGraph, welcome to scan this QR code to follow us.
+
+![img](https://user-images.githubusercontent.com/17706099/238185774-ab10cfe5-9f7f-4327-af8f-9795f00009ca.png)
