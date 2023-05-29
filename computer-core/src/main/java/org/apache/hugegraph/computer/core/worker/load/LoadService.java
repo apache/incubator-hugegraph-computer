@@ -50,6 +50,11 @@ public class LoadService {
     private final InputFilter inputFilter;
 
     private final int fetcherNum;
+    /*
+     * GraphFetcher include:
+     *   VertexFetcher vertexFetcher;
+     *   EdgeFetcher edgeFetcher;
+     */
     private final GraphFetcher[] fetchers;
     private final AtomicInteger fetcherIdx;
 
@@ -96,8 +101,6 @@ public class LoadService {
     private class IteratorFromVertex implements Iterator<Vertex> {
 
         private InputSplit currentSplit;
-
-        // GraphFetcher includes VertexFetcher
         private GraphFetcher fetcher;
 
         public IteratorFromVertex(GraphFetcher fetcher) {
@@ -157,8 +160,6 @@ public class LoadService {
         private final int maxEdges;
         private InputSplit currentSplit;
         private Vertex currentVertex;
-
-        // GraphFetcher includes EdgeFetcher
         private GraphFetcher fetcher;
 
         public IteratorFromEdge(GraphFetcher fetcher) {
