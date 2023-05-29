@@ -17,10 +17,10 @@
 
 package org.apache.hugegraph.computer.core.worker.load;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
@@ -49,7 +49,9 @@ public class LoadService {
     private InputSplitRpcService rpcService;
     private final InputFilter inputFilter;
 
-    private List<GraphFetcher> fetchers;
+    private final int fetcherNum;
+    private final GraphFetcher[] fetchers;
+    private final AtomicInteger fetcherIdx;
 
     public LoadService(ComputerContext context) {
         this.graphFactory = context.graphFactory();
@@ -57,15 +59,22 @@ public class LoadService {
         this.rpcService = null;
         this.inputFilter = context.config().createObject(
                 ComputerOptions.INPUT_FILTER_CLASS);
-        this.fetchers = new ArrayList<>();
+        this.fetcherNum = this.config.get(ComputerOptions.INPUT_SEND_THREAD_NUMS);
+        this.fetchers = new GraphFetcher[this.fetcherNum];
+        this.fetcherIdx = new AtomicInteger(0);
     }
 
     public void close() {
-        this.fetchers.forEach(fetcher -> fetcher.close());
+        for (GraphFetcher fetcher : this.fetchers) {
+            fetcher.close();
+        }
     }
 
     public void init() {
         assert this.rpcService != null;
+        for (int i = 0; i < this.fetcherNum; i++) {
+            this.fetchers[i] = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
+        }
     }
 
     public void rpcService(InputSplitRpcService rpcService) {
@@ -74,13 +83,13 @@ public class LoadService {
     }
 
     public Iterator<Vertex> createIteratorFromVertex() {
-        GraphFetcher fetcher = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
-        return new IteratorFromVertex(fetcher);
+        int currentIdx = this.fetcherIdx.getAndIncrement() % this.fetcherNum;
+        return new IteratorFromVertex(this.fetchers[currentIdx]);
     }
 
     public Iterator<Vertex> createIteratorFromEdge() {
-        GraphFetcher fetcher = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
-        return new IteratorFromEdge(fetcher);
+        int currentIdx = this.fetcherIdx.getAndIncrement() % this.fetcherNum;
+        return new IteratorFromEdge(this.fetchers[currentIdx]);
     }
 
     private class IteratorFromVertex implements Iterator<Vertex> {
@@ -93,7 +102,6 @@ public class LoadService {
         public IteratorFromVertex(GraphFetcher fetcher) {
             this.currentSplit = null;
             this.fetcher = fetcher;
-            LoadService.this.fetchers.add(this.fetcher);
         }
 
         @Override
@@ -160,7 +168,6 @@ public class LoadService {
             this.currentSplit = null;
             this.currentVertex = null;
             this.fetcher = fetcher;
-            LoadService.this.fetchers.add(this.fetcher);
         }
 
         @Override
