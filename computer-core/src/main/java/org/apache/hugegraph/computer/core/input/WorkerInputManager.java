@@ -141,5 +141,4 @@ public class WorkerInputManager implements Manager {
             }
         }, this.sendExecutor);
     }
-
 }

@@ -64,16 +64,17 @@ public class LoadService {
         this.fetcherIdx = new AtomicInteger(0);
     }
 
-    public void close() {
-        for (GraphFetcher fetcher : this.fetchers) {
-            fetcher.close();
+    public void init() {
+        assert this.rpcService != null;
+        // provide different GraphFetcher for each sending thread
+        for (int i = 0; i < this.fetcherNum; i++) {
+            this.fetchers[i] = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
         }
     }
 
-    public void init() {
-        assert this.rpcService != null;
-        for (int i = 0; i < this.fetcherNum; i++) {
-            this.fetchers[i] = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
+    public void close() {
+        for (GraphFetcher fetcher : this.fetchers) {
+            fetcher.close();
         }
     }
 
@@ -142,7 +143,6 @@ public class LoadService {
             computerVertex.properties(properties);
             return computerVertex;
         }
-
     }
 
     private class IteratorFromEdge implements Iterator<Vertex> {
@@ -243,6 +243,5 @@ public class LoadService {
             computerEdge.properties(properties);
             return computerEdge;
         }
-
     }
 }
