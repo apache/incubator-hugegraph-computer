@@ -64,7 +64,7 @@ public class ComputeManager {
         int computeThreadNum = this.partitionComputeThreadNum(context.config());
         this.computeExecutor = ExecutorUtil.newFixedThreadPool(
                                computeThreadNum, PREFIX);
-        LOG.info("Created partition compute thread poll, thread num: {}",
+        LOG.info("Created partition compute thread pool, thread num: {}",
                  computeThreadNum);
     }
 

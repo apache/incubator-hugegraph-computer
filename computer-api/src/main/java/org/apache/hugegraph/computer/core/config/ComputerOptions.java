@@ -198,6 +198,14 @@ public class ComputerOptions extends OptionHolder {
                     ""
             );
 
+    public static final ConfigOption<Integer> INPUT_SEND_THREAD_NUMS =
+            new ConfigOption<>(
+                    "input.send_thread_nums",
+                    "The number of threads for parallel sending vertex or edge.",
+                    positiveInt(),
+                    4
+            );
+
     public static final ConfigOption<Integer> SORT_THREAD_NUMS =
             new ConfigOption<>(
                     "sort.thread_nums",
