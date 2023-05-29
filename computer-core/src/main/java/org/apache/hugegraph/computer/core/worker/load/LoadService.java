@@ -17,8 +17,10 @@
 
 package org.apache.hugegraph.computer.core.worker.load;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
-import org.apache.hugegraph.computer.core.common.AutoCloseableIterator;
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
@@ -47,12 +49,19 @@ public class LoadService {
     private InputSplitRpcService rpcService;
     private final InputFilter inputFilter;
 
+    private List<GraphFetcher> fetchers;
+
     public LoadService(ComputerContext context) {
         this.graphFactory = context.graphFactory();
         this.config = context.config();
         this.rpcService = null;
         this.inputFilter = context.config().createObject(
                 ComputerOptions.INPUT_FILTER_CLASS);
+        this.fetchers = new ArrayList<>();
+    }
+
+    public void close() {
+        this.fetchers.forEach(fetcher -> fetcher.close());
     }
 
     public void init() {
@@ -64,17 +73,17 @@ public class LoadService {
         this.rpcService = rpcService;
     }
 
-    public AutoCloseableIterator<Vertex> createIteratorFromVertex() {
+    public Iterator<Vertex> createIteratorFromVertex() {
         GraphFetcher fetcher = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
         return new IteratorFromVertex(fetcher);
     }
 
-    public AutoCloseableIterator<Vertex> createIteratorFromEdge() {
+    public Iterator<Vertex> createIteratorFromEdge() {
         GraphFetcher fetcher = InputSourceFactory.createGraphFetcher(this.config, this.rpcService);
         return new IteratorFromEdge(fetcher);
     }
 
-    private class IteratorFromVertex implements AutoCloseableIterator<Vertex> {
+    private class IteratorFromVertex implements Iterator<Vertex> {
 
         private InputSplit currentSplit;
 
@@ -84,6 +93,7 @@ public class LoadService {
         public IteratorFromVertex(GraphFetcher fetcher) {
             this.currentSplit = null;
             this.fetcher = fetcher;
+            LoadService.this.fetchers.add(this.fetcher);
         }
 
         @Override
@@ -125,13 +135,9 @@ public class LoadService {
             return computerVertex;
         }
 
-        @Override
-        public void close() {
-            this.fetcher.close();
-        }
     }
 
-    private class IteratorFromEdge implements AutoCloseableIterator<Vertex> {
+    private class IteratorFromEdge implements Iterator<Vertex> {
 
         /*
          * TODO: If it is an in edge, we should get the data from the in shard;
@@ -154,6 +160,7 @@ public class LoadService {
             this.currentSplit = null;
             this.currentVertex = null;
             this.fetcher = fetcher;
+            LoadService.this.fetchers.add(this.fetcher);
         }
 
         @Override
@@ -230,9 +237,5 @@ public class LoadService {
             return computerEdge;
         }
 
-        @Override
-        public void close() {
-            this.fetcher.close();
-        }
     }
 }

@@ -18,13 +18,13 @@
 package org.apache.hugegraph.computer.core.input;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.apache.hugegraph.computer.core.common.AutoCloseableIterator;
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
@@ -89,6 +89,7 @@ public class WorkerInputManager implements Manager {
 
     @Override
     public void close(Config config) {
+        this.loadService.close();
         this.sendManager.close(config);
         this.sendExecutor.shutdown();
     }
@@ -131,13 +132,12 @@ public class WorkerInputManager implements Manager {
     }
 
     private CompletableFuture<?> send(Consumer<Vertex> sendConsumer,
-                                      Supplier<AutoCloseableIterator<Vertex>> iteratorSupplier) {
+                                      Supplier<Iterator<Vertex>> iteratorSupplier) {
         return CompletableFuture.runAsync(() -> {
-            try (AutoCloseableIterator<Vertex> iterator = iteratorSupplier.get()) {
-                while (iterator.hasNext()) {
-                    Vertex vertex = iterator.next();
-                    sendConsumer.accept(vertex);
-                }
+            Iterator<Vertex> iterator = iteratorSupplier.get();
+            while (iterator.hasNext()) {
+                Vertex vertex = iterator.next();
+                sendConsumer.accept(vertex);
             }
         }, this.sendExecutor);
     }
