@@ -18,12 +18,29 @@
 package org.apache.hugegraph.computer.algorithm.community.lpa;
 
 import org.apache.hugegraph.computer.algorithm.AlgorithmTestBase;
+import org.apache.hugegraph.computer.core.common.ComputerContext;
+import org.apache.hugegraph.computer.core.output.hg.task.TaskManager;
+import org.apache.hugegraph.driver.HugeClient;
+import org.apache.hugegraph.structure.gremlin.ResultSet;
+import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
+
+import java.util.LinkedHashMap;
 
 public class LpaTest extends AlgorithmTestBase {
 
     @Test
     public void testRunAlgorithm() throws InterruptedException {
         runAlgorithm(LpaParams.class.getName());
+
+        // check result
+        ComputerContext context  = context();
+        TaskManager taskManager = new TaskManager(context.config());
+        HugeClient client = taskManager.client();
+        ResultSet result  = client.gremlin().gremlin("g.V().group().by('lpa').by(T.id)").execute();
+
+        LinkedHashMap resultRow = (LinkedHashMap)result.data().get(0);
+        Assert.assertEquals(4, resultRow.size());
+
     }
 }

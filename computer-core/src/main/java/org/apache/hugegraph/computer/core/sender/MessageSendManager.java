@@ -171,7 +171,7 @@ public class MessageSendManager implements Manager {
     }
 
     public MessageStat messageStat(int partitionId) {
-        return this.buffers.get(partitionId).messageWritten();
+        return this.buffers.messageStat(partitionId);
     }
 
     public void clearBuffer() {
