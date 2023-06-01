@@ -335,7 +335,9 @@ public class MasterService implements Closeable {
         if (context.superstep() >= this.maxSuperStep - 1) {
             return true;
         }
-        return false;
+        long activeVertexCount = context.totalVertexCount() -
+                                 context.finishedVertexCount();
+        return context.messageCount() == 0L && activeVertexCount == 0L;
     }
 
     /**
