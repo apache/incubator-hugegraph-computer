@@ -18,23 +18,25 @@
 package org.apache.hugegraph.computer.algorithm.community.lpa;
 
 import org.apache.hugegraph.computer.algorithm.AlgorithmTestBase;
+import org.apache.hugegraph.computer.core.config.ComputerOptions;
+import org.apache.hugegraph.computer.core.output.hg.HugeGraphStringOutput;
 import org.apache.hugegraph.driver.GraphManager;
-import org.apache.hugegraph.driver.HugeClient;
 import org.apache.hugegraph.driver.SchemaManager;
 import org.apache.hugegraph.structure.constant.T;
 import org.apache.hugegraph.structure.graph.Vertex;
-import org.apache.hugegraph.structure.gremlin.ResultSet;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.HashSet;
 
 public class LpaTest extends AlgorithmTestBase {
 
     private static final String VERTX_LABEL = "tc_user";
     private static final String EDGE_LABEL = "tc_know";
     private static final String PROPERTY_KEY = "tc_weight";
-
+    protected static  HashSet<String> communitySet = new HashSet<>();
 
     @BeforeClass
     public static void setup() {
@@ -98,7 +100,6 @@ public class LpaTest extends AlgorithmTestBase {
         Vertex v17 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "17",
                 PROPERTY_KEY, "17");
 
-
         v0.addEdge(EDGE_LABEL, v4, PROPERTY_KEY, "1");
         v0.addEdge(EDGE_LABEL, v7, PROPERTY_KEY, "1");
         v0.addEdge(EDGE_LABEL, v10, PROPERTY_KEY, "1");
@@ -123,16 +124,21 @@ public class LpaTest extends AlgorithmTestBase {
 
     @Test
     public void testRunAlgorithm() throws InterruptedException {
-        runAlgorithm(LpaParams.class.getName());
+        runAlgorithm(LpaParams.class.getName(),
+                     ComputerOptions.OUTPUT_CLASS.name(),
+                     LpaTest.LpaIntOutputTest.class.getName());
 
         // check lpa result
-        HugeClient client =  client();
-        ResultSet result  = client.gremlin().gremlin("g.V().filter(__.properties('lpa'))" +
-                            ".groupCount().by('lpa').count(Scope.local)").execute();
-
-        int communities = (int)result.data().get(0);
-        Assert.assertEquals(4, communities);
+        Assert.assertEquals(4, communitySet.size());
+    }
 
 
+    public static class LpaIntOutputTest extends HugeGraphStringOutput {
+        @Override
+        public String value(org.apache.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+            String value = super.value(vertex);
+            communitySet.add(value);
+            return value;
+        }
     }
 }
