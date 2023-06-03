@@ -36,11 +36,13 @@ Note: It's recommended to use [GitHub Desktop](https://desktop.github.com/) to *
 
 hugegraph-computer is licensed under Apache 2.0 License.
 
-Contact Us
----
-- [GitHub Issues](https://github.com/apache/incubator-hugegraph-computer/issues): Feedback on usage issues and functional requirements (priority)
-- Feedback Email: [dev@hugegraph.apache.org](mailto:dev@hugegraph.apache.org)
-- WeChat public account: Apache HugeGraph, welcome to scan this QR code to follow us.
+### Contact Us
 
-<img src="https://github.com/apache/incubator-hugegraph-doc/blob/master/assets/images/wechat.png?raw=true" alt="QR png" width="350"/>
+---
+
+ - [GitHub Issues](https://github.com/apache/incubator-hugegraph-computer/issues): Feedback on usage issues and functional requirements (quick response)
+ - Feedback Email: [dev@hugegraph.apache.org](mailto:dev@hugegraph.apache.org) ([subscriber](https://hugegraph.apache.org/docs/contribution-guidelines/subscribe/) only)
+ - WeChat public account: Apache HugeGraph, welcome to scan this QR code to follow us.
+
+ <img src="https://github.com/apache/incubator-hugegraph-doc/blob/master/assets/images/wechat.png?raw=true" alt="QR png" width="350"/>
 
