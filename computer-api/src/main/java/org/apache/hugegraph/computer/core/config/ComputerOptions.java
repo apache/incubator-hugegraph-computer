@@ -425,7 +425,7 @@ public class ComputerOptions extends OptionHolder {
                     "job.namespace",
                     "The job namespace can seperate different data source.",
                     null,
-                    "default"
+                    ""
             );
 
     public static final ConfigOption<String> JOB_ID =
