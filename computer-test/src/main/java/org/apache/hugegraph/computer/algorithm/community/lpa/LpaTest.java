@@ -47,58 +47,58 @@ public class LpaTest extends AlgorithmTestBase {
         schema.propertyKey(PROPERTY_KEY).asText().ifNotExist().create();
 
         schema.vertexLabel(VERTX_LABEL)
-                .properties(PROPERTY_KEY)
-                .enableLabelIndex(false)
-                .useCustomizeStringId()
-                .ifNotExist()
-                .create();
+              .properties(PROPERTY_KEY)
+              .enableLabelIndex(false)
+              .useCustomizeStringId()
+              .ifNotExist()
+              .create();
 
 
         schema.edgeLabel(EDGE_LABEL)
-                .sourceLabel(VERTX_LABEL)
-                .targetLabel(VERTX_LABEL)
-                .properties(PROPERTY_KEY)
-                .enableLabelIndex(false)
-                .ifNotExist()
-                .create();
+              .sourceLabel(VERTX_LABEL)
+              .targetLabel(VERTX_LABEL)
+              .properties(PROPERTY_KEY)
+              .enableLabelIndex(false)
+              .ifNotExist()
+              .create();
 
         GraphManager graph = client().graph();
         Vertex v0 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "0",
-                PROPERTY_KEY, "0");
+                                    PROPERTY_KEY, "0");
         Vertex v1 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "1",
-                PROPERTY_KEY, "1");
+                                    PROPERTY_KEY, "1");
         Vertex v2 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "2",
-                PROPERTY_KEY, "2");
+                                    PROPERTY_KEY, "2");
         Vertex v3 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "3",
-                PROPERTY_KEY, "3");
+                                    PROPERTY_KEY, "3");
         Vertex v4 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "4",
-                PROPERTY_KEY, "4");
+                                    PROPERTY_KEY, "4");
         Vertex v5 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "5",
-                PROPERTY_KEY, "5");
+                                    PROPERTY_KEY, "5");
         Vertex v6 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "6",
-                PROPERTY_KEY, "6");
+                                    PROPERTY_KEY, "6");
         Vertex v7 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "7",
-                PROPERTY_KEY, "7");
+                                    PROPERTY_KEY, "7");
         Vertex v8 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "8",
-                PROPERTY_KEY, "8");
+                                    PROPERTY_KEY, "8");
         Vertex v9 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "9",
-                PROPERTY_KEY, "9");
+                                    PROPERTY_KEY, "9");
         Vertex v10 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "10",
-                PROPERTY_KEY, "10");
+                                     PROPERTY_KEY, "10");
         Vertex v11 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "11",
-                PROPERTY_KEY, "11");
+                                     PROPERTY_KEY, "11");
         Vertex v12 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "12",
-                PROPERTY_KEY, "12");
+                                     PROPERTY_KEY, "12");
         Vertex v13 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "13",
-                PROPERTY_KEY, "13");
+                                     PROPERTY_KEY, "13");
         Vertex v14 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "14",
-                PROPERTY_KEY, "14");
+                                     PROPERTY_KEY, "14");
         Vertex v15 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "15",
-                PROPERTY_KEY, "15");
+                                     PROPERTY_KEY, "15");
         Vertex v16 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "16",
-                PROPERTY_KEY, "16");
+                                     PROPERTY_KEY, "16");
         Vertex v17 = graph.addVertex(T.LABEL, VERTX_LABEL, T.ID, "17",
-                PROPERTY_KEY, "17");
+                                     PROPERTY_KEY, "17");
 
         v0.addEdge(EDGE_LABEL, v4, PROPERTY_KEY, "1");
         v0.addEdge(EDGE_LABEL, v7, PROPERTY_KEY, "1");
@@ -134,6 +134,7 @@ public class LpaTest extends AlgorithmTestBase {
 
 
     public static class LpaIntOutputTest extends HugeGraphStringOutput {
+
         @Override
         public String value(org.apache.hugegraph.computer.core.graph.vertex.Vertex vertex) {
             String value = super.value(vertex);
