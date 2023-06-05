@@ -23,6 +23,7 @@ import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
+import org.apache.hugegraph.computer.core.receiver.MessageStat;
 import org.apache.hugegraph.util.InsertionOrderUtil;
 
 public class MessageSendBuffers {
@@ -65,6 +66,13 @@ public class MessageSendBuffers {
             all.put(i, this.buffers[i]);
         }
         return all;
+    }
+
+    public MessageStat messageStat(int partitionId) {
+        if (partitionId < 0 || partitionId >= this.buffers.length)  {
+            throw new ComputerException("Invalid partition id %s", partitionId);
+        }
+        return this.buffers[partitionId].messageWritten();
     }
 
     public void clear() {
