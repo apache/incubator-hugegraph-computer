@@ -17,6 +17,7 @@
 
 package org.apache.hugegraph.computer.core.bsp;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
@@ -61,8 +62,9 @@ public abstract class BspBase {
      */
     private BspClient init() {
         BspClient bspClient = this.createBspClient();
-        String namespace = this.jobNamespace == "" ? this.constructPath(null, this.jobId) :
-                this.constructPath(null, this.jobNamespace, this.jobId);
+        String namespace = StringUtils.isEmpty(this.jobNamespace) ?
+                           this.constructPath(null, this.jobId) :
+                           this.constructPath(null, this.jobNamespace, this.jobId);
         bspClient.init(namespace);
         LOG.info("Init {} BSP connection to '{}' for job '{}'",
                  bspClient.type(), bspClient.endpoint(), this.jobId);
