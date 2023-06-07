@@ -26,6 +26,10 @@ And here are links of other repositories:
 3. [hugegraph-commons](https://github.com/apache/hugegraph-commons) (include common & rpc module)
 4. [hugegraph-website](https://github.com/apache/hugegraph-doc) (include doc & website code)
 
+## Note
+
+- If some classes under computer-k8s cannot be found, you need to execute `mvn clean install` in advance to generate corresponding classes.
+
 ## Contributing
 
 Welcome to contribute, please see [`How to Contribute`](https://github.com/apache/hugegraph/blob/master/CONTRIBUTING.md) for more information
