@@ -420,6 +420,14 @@ public class ComputerOptions extends OptionHolder {
                     10000
             );
 
+    public static final ConfigOption<String> JOB_NAMESPACE =
+            new ConfigOption<>(
+                    "job.namespace",
+                    "The job namespace can seperate different data source.",
+                    null,
+                    ""
+            );
+
     public static final ConfigOption<String> JOB_ID =
             new ConfigOption<>(
                     "job.id",
@@ -921,6 +929,7 @@ public class ComputerOptions extends OptionHolder {
                     ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
                     ComputerOptions.TRANSPORT_SERVER_HOST.name(),
                     ComputerOptions.TRANSPORT_SERVER_PORT.name(),
+                    ComputerOptions.JOB_NAMESPACE.name(),
                     ComputerOptions.JOB_ID.name(),
                     ComputerOptions.JOB_WORKERS_COUNT.name(),
                     ComputerOptions.RPC_SERVER_HOST_NAME,

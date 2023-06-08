@@ -17,6 +17,7 @@
 
 package org.apache.hugegraph.computer.core.bsp;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
@@ -30,6 +31,7 @@ public abstract class BspBase {
     private final Config config;
 
     private final String jobId;
+    private final String jobNamespace;
     private final int workerCount;
     private final long registerTimeout;
     private final long barrierOnMasterTimeout;
@@ -42,6 +44,7 @@ public abstract class BspBase {
         this.config = config;
 
         this.jobId = config.get(ComputerOptions.JOB_ID);
+        this.jobNamespace = config.get(ComputerOptions.JOB_NAMESPACE);
         this.workerCount = this.config.get(ComputerOptions.JOB_WORKERS_COUNT);
         this.registerTimeout = this.config.get(
              ComputerOptions.BSP_REGISTER_TIMEOUT);
@@ -59,7 +62,10 @@ public abstract class BspBase {
      */
     private BspClient init() {
         BspClient bspClient = this.createBspClient();
-        bspClient.init(this.jobId);
+        String namespace = StringUtils.isEmpty(this.jobNamespace) ?
+                           this.constructPath(null, this.jobId) :
+                           this.constructPath(null, this.jobNamespace, this.jobId);
+        bspClient.init(namespace);
         LOG.info("Init {} BSP connection to '{}' for job '{}'",
                  bspClient.type(), bspClient.endpoint(), this.jobId);
         return bspClient;
@@ -123,8 +129,10 @@ public abstract class BspBase {
      */
     protected String constructPath(BspEvent event, Object... paths) {
         StringBuilder sb = new StringBuilder();
-        // TODO: replace event.code() with event.name()
-        sb.append(event.name());
+        if (event != null) {
+            // TODO: replace event.code() with event.name()
+            sb.append(event.name());
+        }
         for (Object path : paths) {
             sb.append("/").append(path.toString());
         }
