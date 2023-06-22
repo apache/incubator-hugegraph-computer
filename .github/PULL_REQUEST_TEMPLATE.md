@@ -42,8 +42,12 @@ For example:
 
 - [ ] Trivial rework / code cleanup without any test coverage. (No Need)
 - [ ] Already covered by existing tests, such as *(please modify tests here)*.
-- [ ] Need tests and can be verified as follows:
-    - <!-- xxx -->
+- [ ] Need tests and can be verified as follows.
+    <!-- Please provide more details about verification
+
+      For example:
+      - If you test manually, please provide related screenshot.
+     -->
 
 
 ## Does this PR potentially affect the following parts?
