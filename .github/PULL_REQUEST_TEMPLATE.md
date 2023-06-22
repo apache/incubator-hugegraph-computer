@@ -43,7 +43,7 @@ For example:
 - [ ] Trivial rework / code cleanup without any test coverage. (No Need)
 - [ ] Already covered by existing tests, such as *(please modify tests here)*.
 - [ ] Need tests and can be verified as follows:
-    - xxx
+    - <!-- xxx -->
 
 
 ## Does this PR potentially affect the following parts?
