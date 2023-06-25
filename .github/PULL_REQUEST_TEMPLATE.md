@@ -17,7 +17,7 @@
 
 ## Purpose of the PR
 
-- close: xxx  <!-- or use "fix: xxx", "xxx" is the link of related issue -->
+- close #xxx  <!-- or use "fix #xxx", "xxx" is the ID-link of related issue, e.g: close #257 -->
 
 <!--
 Please explain more context in this section, clarify why the changes are needed. 
@@ -38,20 +38,16 @@ For example:
 
 ## Verifying these changes
 
-<!-- Please pick either of the following options -->
+<!-- Please pick the proper options below -->
 
-- This change is a trivial rework / code cleanup without any test coverage.
+- [ ] Trivial rework / code cleanup without any test coverage. (No Need)
+- [ ] Already covered by existing tests, such as *(please modify tests here)*.
+- [ ] Need tests and can be verified as follows.
+    <!-- Please provide more details about verification
 
-*(or)*
-
-- This change is already covered by existing tests, such as *(please describe tests)*.
-
-*(or)*
-
-- This change added tests and can be verified as follows:
-  
-  *(for example:)*
-  - *Add UT.*
+      For example:
+      - If you test manually, please provide related screenshot.
+     -->
 
 
 ## Does this PR potentially affect the following parts?
@@ -70,4 +66,4 @@ For example:
 
 - [ ]  `Doc - TODO` <!-- Your PR changes impact docs and you will update later -->
 - [ ]  `Doc - Done` <!-- Related docs have been already added or updated -->
-- [ ]  `Doc - NO Need` <!-- Your PR changes don't impact/need docs -->
+- [ ]  `Doc - No Need` <!-- Your PR changes don't impact/need docs -->
