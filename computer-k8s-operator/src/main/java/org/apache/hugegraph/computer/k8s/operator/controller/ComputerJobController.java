@@ -114,13 +114,12 @@ public class ComputerJobController
         if (this.finalizer(computerJob)) {
             return OperatorResult.NO_REQUEUE;
         }
-        LOG.info("1111111");
+
         ComputerJobComponent observed = this.observeComponent(computerJob);
         if (!this.updateStatus(observed) && request.retryTimes() == 0) {
             LOG.debug("Wait status to be stable before taking further actions");
             return OperatorResult.NO_REQUEUE;
         }
-        LOG.info("22222222");
 
         if (Objects.equals(computerJob.getStatus().getJobStatus(),
                            JobStatus.RUNNING.name())) {
@@ -128,7 +127,6 @@ public class ComputerJobController
             LOG.info("ComputerJob {} already running, no action", crName);
             return OperatorResult.NO_REQUEUE;
         }
-        LOG.info("33333333");
 
         ComputerJobDeployer deployer = new ComputerJobDeployer(this.kubeClient,
                                                                this.config);
@@ -184,7 +182,6 @@ public class ComputerJobController
 
     private boolean finalizer(HugeGraphComputerJob computerJob) {
         if (computerJob.addFinalizer(FINALIZER_NAME)) {
-            LOG.info("Add finalizer!");
             this.replaceCR(computerJob);
             return true;
         }
@@ -376,7 +373,6 @@ public class ComputerJobController
                      .editOrNewComponentStates().endComponentStates()
                      .editOrNewJobState().endJobState()
                      .build();
-        LOG.info("SET JOB STATUS");
         computerJob.setStatus(status);
     }
 
@@ -427,9 +423,6 @@ public class ComputerJobController
     private void replaceCR(HugeGraphComputerJob computerJob) {
         computerJob.getStatus().setLastUpdateTime(KubeUtil.now());
         String namespace = computerJob.getMetadata().getNamespace();
-
-        LOG.info(String.valueOf(computerJob.getStatus() == null));
-        LOG.info(computerJob.getStatus().toString());
 
         if (Objects.equals(this.kubeClient.getNamespace(), namespace)) {
             this.operation.replace(computerJob);
