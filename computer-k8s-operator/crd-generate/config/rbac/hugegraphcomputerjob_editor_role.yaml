@@ -14,22 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file is for teaching kustomize how to substitute name and namespace reference in CRD
-nameReference:
-- kind: Service
-  version: v1
-  fieldSpecs:
-  - kind: CustomResourceDefinition
-    version: v1
-    group: apiextensions.k8s.io
-    path: spec/conversion/webhook/clientConfig/service/name
-
-namespace:
-- kind: CustomResourceDefinition
-  version: v1
-  group: apiextensions.k8s.io
-  path: spec/conversion/webhook/clientConfig/service/namespace
-  create: false
-
-varReference:
-- path: metadata/annotations
+# permissions for end users to edit hugegraphcomputerjobs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hugegraphcomputerjob-editor-role
+rules:
+- apiGroups:
+  - operator.hugegraph.apache.org
+  resources:
+  - hugegraphcomputerjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operator.hugegraph.apache.org
+  resources:
+  - hugegraphcomputerjobs/status
+  verbs:
+  - get

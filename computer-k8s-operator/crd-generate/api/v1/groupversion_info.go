@@ -16,8 +16,8 @@ under the License.
 */
 
 // Package v1 contains API Schema definitions for the computer v1 API group
-//+kubebuilder:object:generate=true
-//+groupName=hugegraph.apache.org
+// +kubebuilder:object:generate=true
+// +groupName=operator.hugegraph.apache.org
 package v1
 
 import (
@@ -25,33 +25,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
 
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get
-// +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;create;update
-// +kubebuilder:rbac:groups=hugegraph.apache.org,resources=hugegraphcomputerjobs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=hugegraph.apache.org,resources=hugegraphcomputerjobs/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=hugegraph.apache.org,resources=hugegraphcomputerjobs/finalizers,verbs=update
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get
-// +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=apps,resources=statefulsets/status,verbs=get
-// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;watch
-// +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get
-// +kubebuilder:rbac:groups=core,resources=pods/log,verbs=get;list;watch
-// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=services/status,verbs=get
-// +kubebuilder:rbac:groups=core,resources=events,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=events/status,verbs=get
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=batch,resources=jobs/status,verbs=get
-// +kubebuilder:rbac:groups=extensions,resources=ingresses,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=extensions,resources=ingresses/status,verbs=get
-
 var (
 	// GroupVersion is group version used to register these objects
-	GroupVersion = schema.GroupVersion{
-		Group: "hugegraph.apache.org", Version: "v1",
-	}
+	GroupVersion = schema.GroupVersion{Group: "operator.hugegraph.apache.org", Version: "v1"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}

@@ -14,22 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file is for teaching kustomize how to substitute name and namespace reference in CRD
-nameReference:
-- kind: Service
-  version: v1
-  fieldSpecs:
-  - kind: CustomResourceDefinition
-    version: v1
-    group: apiextensions.k8s.io
-    path: spec/conversion/webhook/clientConfig/service/name
-
-namespace:
-- kind: CustomResourceDefinition
-  version: v1
-  group: apiextensions.k8s.io
-  path: spec/conversion/webhook/clientConfig/service/namespace
-  create: false
-
-varReference:
-- path: metadata/annotations
+apiVersion: controller-runtime.sigs.k8s.io/v1alpha1
+kind: ControllerManagerConfig
+health:
+  healthProbeBindAddress: :9892
+metrics:
+  bindAddress: 127.0.0.1:8080
+webhook:
+  port: 9443
+leaderElection:
+  leaderElect: true
+  resourceName: 11f2b593.apache.org

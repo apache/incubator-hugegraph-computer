@@ -228,7 +228,7 @@
       "properties": {
         "apiVersion": {
           "type": "string",
-          "default": "hugegraph.apache.org/v1",
+          "default": "operator.hugegraph.apache.org/v1",
           "required": true
         },
         "kind": {
@@ -259,7 +259,7 @@
       "properties": {
         "apiVersion": {
           "type": "string",
-          "default": "hugegraph.apache.org/v1",
+          "default": "operator.hugegraph.apache.org/v1",
           "required": true
         },
         "items": {

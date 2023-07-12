@@ -40,7 +40,7 @@ public class HugeGraphComputerJob
     private static final long serialVersionUID = 6788317713035067450L;
 
     public static final String VERSION = "v1";
-    public static final String GROUP = "hugegraph.apache.org";
+    public static final String GROUP = "operator.hugegraph.apache.org";
     public static final String KIND = "HugeGraphComputerJob";
     public static final String PLURAL = "hugegraphcomputerjobs";
     public static final String SINGULAR = "hugegraphcomputerjob";

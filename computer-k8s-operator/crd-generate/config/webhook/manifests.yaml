@@ -1,0 +1,54 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: mutating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-operator-hugegraph-apache-org-v1-hugegraphcomputerjob
+  failurePolicy: Fail
+  name: mhugegraphcomputerjob.kb.io
+  rules:
+  - apiGroups:
+    - operator.hugegraph.apache.org
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - hugegraphcomputerjobs
+  sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  creationTimestamp: null
+  name: validating-webhook-configuration
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-operator-hugegraph-apache-org-v1-hugegraphcomputerjob
+  failurePolicy: Fail
+  name: vhugegraphcomputerjob.kb.io
+  rules:
+  - apiGroups:
+    - operator.hugegraph.apache.org
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - hugegraphcomputerjobs
+  sideEffects: None
