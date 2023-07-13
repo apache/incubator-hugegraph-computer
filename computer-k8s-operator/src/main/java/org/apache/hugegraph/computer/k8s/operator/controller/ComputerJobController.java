@@ -107,8 +107,6 @@ public class ComputerJobController
             return OperatorResult.NO_REQUEUE;
         }
 
-        LOG.info(String.valueOf(computerJob.getStatus() == null));
-
         this.fillCRStatus(computerJob);
 
         if (this.finalizer(computerJob)) {
@@ -199,7 +197,6 @@ public class ComputerJobController
             return true;
         } else {
             if (JobStatus.finished(status.getJobStatus())) {
-                LOG.info("JOB FINISH");
                 if (this.autoDestroyPod) {
                     this.deleteCR(computerJob);
                 }
@@ -423,7 +420,6 @@ public class ComputerJobController
     private void replaceCR(HugeGraphComputerJob computerJob) {
         computerJob.getStatus().setLastUpdateTime(KubeUtil.now());
         String namespace = computerJob.getMetadata().getNamespace();
-
         if (Objects.equals(this.kubeClient.getNamespace(), namespace)) {
             this.operation.replace(computerJob);
         } else {
