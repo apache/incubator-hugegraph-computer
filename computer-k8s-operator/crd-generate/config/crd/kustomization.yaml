@@ -19,7 +19,7 @@
 # It should be run by config/default
 resources:
 - bases/operator.hugegraph.apache.org_hugegraphcomputerjobs.yaml
-#- bases/operator.hugegraph.apache.org_hugegraphcomputerjobs.v1beta1.yaml
+- bases/operator.hugegraph.apache.org_hugegraphcomputerjobs.v1beta1.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
