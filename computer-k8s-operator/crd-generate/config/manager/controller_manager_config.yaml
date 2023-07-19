@@ -24,4 +24,4 @@ webhook:
   port: 9443
 leaderElection:
   leaderElect: true
-  resourceName: 11f2b593.apache.org
+  resourceName: 11f2b593.hugegraph.apache.org

@@ -64,7 +64,6 @@ func (r *HugeGraphComputerJob) ValidateUpdate(old runtime.Object) error {
 	var allErrs field.ErrorList
 
 	flag := false
-	fmt.Println(111111111)
 
 	fmt.Println(r.Status.JobStatus)
 
