@@ -24,7 +24,6 @@ spec:
     spec:
       containers:
       - name: manager
-        # TODO: check whether need this
         args:
           - "--config=controller_manager_config.yaml"
           volumeMounts:
