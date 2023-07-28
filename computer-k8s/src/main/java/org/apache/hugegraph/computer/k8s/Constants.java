@@ -26,7 +26,7 @@ import io.fabric8.kubernetes.client.utils.URLUtils;
 public class Constants {
 
     public static final String ALL_NAMESPACE = "*";
-    public static final String DEFAULT_NAMESPACE = "hugegraph-computer-system";
+    public static final String DEFAULT_NAMESPACE = "hugegraph-computer-operator-system";
 
     public static final int MASTER_INSTANCES = 1;
 

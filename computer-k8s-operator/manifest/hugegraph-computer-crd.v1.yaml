@@ -21,9 +21,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.5.0
   creationTimestamp: null
-  name: hugegraphcomputerjobs.hugegraph.apache.org
+  name: hugegraphcomputerjobs.operator.hugegraph.apache.org
 spec:
-  group: hugegraph.apache.org
+  group: operator.hugegraph.apache.org
   names:
     kind: HugeGraphComputerJob
     listKind: HugeGraphComputerJobList
@@ -259,6 +259,8 @@ spec:
                         type: string
                       gmsaCredentialSpecName:
                         type: string
+                      hostProcess:
+                        type: boolean
                       runAsUserName:
                         type: string
                     type: object
@@ -468,8 +470,6 @@ spec:
                       type: object
                     ephemeral:
                       properties:
-                        readOnly:
-                          type: boolean
                         volumeClaimTemplate:
                           properties:
                             metadata:
@@ -492,8 +492,34 @@ spec:
                                   - kind
                                   - name
                                   type: object
+                                dataSourceRef:
+                                  properties:
+                                    apiGroup:
+                                      type: string
+                                    kind:
+                                      type: string
+                                    name:
+                                      type: string
+                                    namespace:
+                                      type: string
+                                  required:
+                                  - kind
+                                  - name
+                                  type: object
                                 resources:
                                   properties:
+                                    claims:
+                                      items:
+                                        properties:
+                                          name:
+                                            type: string
+                                        required:
+                                        - name
+                                        type: object
+                                      type: array
+                                      x-kubernetes-list-map-keys:
+                                      - name
+                                      x-kubernetes-list-type: map
                                     limits:
                                       additionalProperties:
                                         anyOf:
