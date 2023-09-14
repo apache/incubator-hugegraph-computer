@@ -37,7 +37,9 @@ public class HugeGraphFetcher implements GraphFetcher {
     public HugeGraphFetcher(Config config, InputSplitRpcService rpcService) {
         String url = config.get(ComputerOptions.HUGEGRAPH_URL);
         String graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
-        this.client = new HugeClientBuilder(url, graph).build();
+        String username = config.get(ComputerOptions.HUGEGRAPH_USERNAME);
+        String password = config.get(ComputerOptions.HUGEGRAPH_PASSWORD);
+        this.client = new HugeClientBuilder(url, graph).configUser(username, password).build();
         this.vertexFetcher = new HugeVertexFetcher(config, this.client);
         this.edgeFetcher = new HugeEdgeFetcher(config, this.client);
         this.rpcService = rpcService;

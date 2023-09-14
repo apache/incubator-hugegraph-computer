@@ -645,6 +645,22 @@ public class ComputerOptions extends OptionHolder {
                     "hugegraph"
             );
 
+    public static final ConfigOption<String> HUGEGRAPH_USERNAME =
+            new ConfigOption<>(
+                    "hugegraph.username",
+                    "The graph username and password used for authentication.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> HUGEGRAPH_PASSWORD =
+            new ConfigOption<>(
+                    "hugegraph.password",
+                    "The graph username and password used for authentication.",
+                    null,
+                    ""
+            );
+
     public static final ConfigOption<String> TRANSPORT_SERVER_HOST =
             new ConfigOption<>(
                     "transport.server_host",
