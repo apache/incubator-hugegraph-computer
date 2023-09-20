@@ -33,8 +33,8 @@ public class ContainerInfo implements Readable, Writable {
     public static final int MASTER_ID = 0;
 
     /*
-     * There is only 1 master, and the id of master is -1.
-     * The id of workers start from 0. The id is used to identify a worker.
+     * There is only 1 master, and the id of master is 0.
+     * The id of workers start from 1. The id is used to identify a worker.
      */
     private int id;
     private String hostname;
