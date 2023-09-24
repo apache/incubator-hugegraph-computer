@@ -43,6 +43,11 @@ public class FileRegionBuffer implements NetworkBuffer {
         this.length = length;
     }
 
+    public FileRegionBuffer(int length, String path) {
+        this.length = length;
+        this.path = path;
+    }
+
     /**
      * Use zero-copy transform from socket channel to file
      * @param channel

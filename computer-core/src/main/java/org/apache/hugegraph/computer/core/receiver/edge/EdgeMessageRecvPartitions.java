@@ -18,22 +18,34 @@
 package org.apache.hugegraph.computer.core.receiver.edge;
 
 import org.apache.hugegraph.computer.core.common.ComputerContext;
+import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.receiver.MessageRecvPartitions;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
 import org.apache.hugegraph.computer.core.store.SuperstepFileGenerator;
+
+import java.util.List;
 
 public class EdgeMessageRecvPartitions
        extends MessageRecvPartitions<EdgeMessageRecvPartition> {
 
     public EdgeMessageRecvPartitions(ComputerContext context,
                                      SuperstepFileGenerator fileGenerator,
-                                     SortManager sortManager) {
-        super(context, fileGenerator, sortManager);
+                                     SortManager sortManager,
+                                     SnapshotManager snapshotManager) {
+        super(context, fileGenerator, sortManager, snapshotManager);
     }
 
     @Override
     public EdgeMessageRecvPartition createPartition() {
         return new EdgeMessageRecvPartition(this.context, this.fileGenerator,
                                             this.sortManager);
+    }
+
+    @Override
+    public void writePartitionSnapshot(int partitionId, List<String> outputFiles) {
+        if (this.snapshotManager.writeSnapshot()) {
+            this.snapshotManager.upload(MessageType.EDGE, partitionId, outputFiles);
+        }
     }
 }

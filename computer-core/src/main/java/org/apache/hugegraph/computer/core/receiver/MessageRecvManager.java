@@ -38,6 +38,7 @@ import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitions;
 import org.apache.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitions;
 import org.apache.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitions;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
 import org.apache.hugegraph.computer.core.store.FileManager;
@@ -65,6 +66,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
     private int expectedFinishMessages;
     private CompletableFuture<Void> finishMessagesFuture;
     private AtomicInteger finishMessagesCount;
+    private SnapshotManager snapshotManager;
 
     private long waitFinishMessagesTimeout;
     private long superstep;
@@ -90,9 +92,9 @@ public class MessageRecvManager implements Manager, MessageHandler {
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
         this.vertexPartitions = new VertexMessageRecvPartitions(
-                                this.context, fileGenerator, this.sortManager);
+                this.context, fileGenerator, this.sortManager, this.snapshotManager);
         this.edgePartitions = new EdgeMessageRecvPartitions(
-                              this.context, fileGenerator, this.sortManager);
+                this.context, fileGenerator, this.sortManager, this.snapshotManager);
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
@@ -108,7 +110,7 @@ public class MessageRecvManager implements Manager, MessageHandler {
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager, superstep);
         this.messagePartitions = new ComputeMessageRecvPartitions(
-                                 this.context, fileGenerator, this.sortManager);
+                this.context, fileGenerator, this.sortManager, this.snapshotManager);
         this.expectedFinishMessages = this.workerCount;
         this.finishMessagesFuture = new CompletableFuture<>();
         this.finishMessagesCount.set(this.expectedFinishMessages);
@@ -244,5 +246,9 @@ public class MessageRecvManager implements Manager, MessageHandler {
         E.checkState(this.messagePartitions != null,
                      "The messagePartitions can't be null");
         return this.messagePartitions.messageStats();
+    }
+
+    public void setSnapshotManager(SnapshotManager snapshotManager) {
+        this.snapshotManager = snapshotManager;
     }
 }

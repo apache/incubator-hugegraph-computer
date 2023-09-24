@@ -34,6 +34,7 @@ import org.apache.hugegraph.computer.core.manager.Manager;
 import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.rpc.InputSplitRpcService;
 import org.apache.hugegraph.computer.core.sender.MessageSendManager;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.worker.load.LoadService;
 import org.apache.hugegraph.util.ExecutorUtil;
 import org.apache.hugegraph.util.Log;
@@ -60,9 +61,13 @@ public class WorkerInputManager implements Manager {
      */
     private final MessageSendManager sendManager;
 
+    private final SnapshotManager snapshotManager;
+
     public WorkerInputManager(ComputerContext context,
-                              MessageSendManager sendManager) {
+                              MessageSendManager sendManager,
+                              SnapshotManager snapshotManager) {
         this.sendManager = sendManager;
+        this.snapshotManager = snapshotManager;
 
         this.sendThreadNum = this.inputSendThreadNum(context.config());
         this.sendExecutor = ExecutorUtil.newFixedThreadPool(this.sendThreadNum, PREFIX);
@@ -103,11 +108,17 @@ public class WorkerInputManager implements Manager {
      * but there is no guarantee that all of them has been received.
      */
     public void loadGraph() {
+        if (this.snapshotManager.loadSnapshot()) {
+            this.snapshotManager.load();
+            return;
+        }
+
         List<CompletableFuture<?>> futures = new ArrayList<>();
         CompletableFuture<?> future;
         this.sendManager.startSend(MessageType.VERTEX);
         for (int i = 0; i < this.sendThreadNum; i++) {
-            future = send(this.sendManager::sendVertex, this.loadService::createIteratorFromVertex);
+            future = this.send(this.sendManager::sendVertex,
+                               this.loadService::createIteratorFromVertex);
             futures.add(future);
         }
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).exceptionally(e -> {
@@ -116,11 +127,11 @@ public class WorkerInputManager implements Manager {
         }).join();
         this.sendManager.finishSend(MessageType.VERTEX);
 
-        futures.clear();
-
         this.sendManager.startSend(MessageType.EDGE);
+        futures.clear();
         for (int i = 0; i < this.sendThreadNum; i++) {
-            future = send(this.sendManager::sendEdge, this.loadService::createIteratorFromEdge);
+            future = this.send(this.sendManager::sendEdge,
+                               this.loadService::createIteratorFromEdge);
             futures.add(future);
         }
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).exceptionally(e -> {
