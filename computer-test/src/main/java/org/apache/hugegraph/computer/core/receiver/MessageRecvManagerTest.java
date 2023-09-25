@@ -32,6 +32,7 @@ import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.receiver.edge.EdgeMessageRecvPartitionTest;
 import org.apache.hugegraph.computer.core.receiver.message.ComputeMessageRecvPartitionTest;
 import org.apache.hugegraph.computer.core.receiver.vertex.VertexMessageRecvPartitionTest;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import org.apache.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
@@ -49,6 +50,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
     private FileManager fileManager;
     private SortManager sortManager;
     private MessageRecvManager receiveManager;
+    private SnapshotManager snapshotManager;
     private ConnectionId connectionId;
 
     @Before
@@ -73,6 +75,10 @@ public class MessageRecvManagerTest extends UnitTestBase {
         this.receiveManager = new MessageRecvManager(context(),
                                                      this.fileManager,
                                                      this.sortManager);
+        this.snapshotManager = new SnapshotManager(context(),
+                                        null,
+                                                   receiveManager,
+                                          null);
         this.receiveManager.init(this.config);
         this.connectionId = new ConnectionId(
                             new InetSocketAddress("localhost",8081),

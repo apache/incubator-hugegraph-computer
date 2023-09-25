@@ -51,6 +51,7 @@ import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.receiver.MessageRecvManager;
 import org.apache.hugegraph.computer.core.receiver.ReceiverUtil;
 import org.apache.hugegraph.computer.core.sender.MessageSendManager;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import org.apache.hugegraph.computer.core.sort.sorting.SendSortManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
@@ -137,6 +138,11 @@ public class EdgesInputTest extends UnitTestBase {
                                                                    fileManager,
                                                                    sortManager);
         this.managers.add(receiveManager);
+        SnapshotManager snapshotManager = new SnapshotManager(context(),
+                                                   null,
+                                                              receiveManager,
+                                                     null);
+        this.managers.add(snapshotManager);
         this.managers.initAll(this.config);
         ConnectionId connectionId = new ConnectionId(new InetSocketAddress(
                                                      "localhost", 8081),
