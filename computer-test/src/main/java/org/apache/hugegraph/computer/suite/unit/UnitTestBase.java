@@ -123,16 +123,10 @@ public class UnitTestBase {
                 "defaultValue",
                 "src/main/resources/hdfs_input_test/struct.json");
 
-        URL = ComputerOptions.HUGEGRAPH_URL
-                .defaultValue();
-
-        GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME
-                .defaultValue();
-
-        USERNAME = ComputerOptions.HUGEGRAPH_USERNAME
-                .defaultValue();
-        PASSWORD = ComputerOptions.HUGEGRAPH_PASSWORD
-                .defaultValue();
+        URL = ComputerOptions.HUGEGRAPH_URL.defaultValue();
+        GRAPH = ComputerOptions.HUGEGRAPH_GRAPH_NAME.defaultValue();
+        USERNAME = ComputerOptions.HUGEGRAPH_USERNAME.defaultValue();
+        PASSWORD = ComputerOptions.HUGEGRAPH_PASSWORD.defaultValue();
 
         Class.forName(IdType.class.getName());
         // Don't forget to register options
