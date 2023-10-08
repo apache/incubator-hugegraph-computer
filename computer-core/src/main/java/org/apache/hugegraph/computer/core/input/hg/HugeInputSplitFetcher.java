@@ -38,8 +38,11 @@ public class HugeInputSplitFetcher implements InputSplitFetcher {
         this.config = config;
         String url = config.get(ComputerOptions.HUGEGRAPH_URL);
         String graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
+        String username = config.get(ComputerOptions.HUGEGRAPH_USERNAME);
+        String password = config.get(ComputerOptions.HUGEGRAPH_PASSWORD);
         int timeout = config.get(ComputerOptions.INPUT_SPLIT_FETCH_TIMEOUT);
-        this.client = new HugeClientBuilder(url, graph).configTimeout(timeout)
+        this.client = new HugeClientBuilder(url, graph).configUser(username, password)
+                                                       .configTimeout(timeout)
                                                        .build();
     }
 

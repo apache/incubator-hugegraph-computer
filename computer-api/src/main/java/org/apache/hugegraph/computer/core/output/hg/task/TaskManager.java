@@ -56,7 +56,9 @@ public final class TaskManager {
         this.config = config;
         String url = config.get(ComputerOptions.HUGEGRAPH_URL);
         String graph = config.get(ComputerOptions.HUGEGRAPH_GRAPH_NAME);
-        this.client = new HugeClientBuilder(url, graph).build();
+        String username = config.get(ComputerOptions.HUGEGRAPH_USERNAME);
+        String password = config.get(ComputerOptions.HUGEGRAPH_PASSWORD);
+        this.client = new HugeClientBuilder(url, graph).configUser(username, password).build();
         // Try to make all batch threads running and don't wait for producer
         this.batchSemaphore = new Semaphore(this.batchSemaphoreNum());
         /*
