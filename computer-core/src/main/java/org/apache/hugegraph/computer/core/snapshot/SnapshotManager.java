@@ -61,7 +61,7 @@ public class SnapshotManager implements Manager {
     private final int partitionCount;
     private final boolean loadSnapshot;
     private final boolean writeSnapshot;
-    private final String viewKey;
+    private final String snapshotName;
 
     private MinioClient minioClient;
     private String bucketName;
@@ -78,7 +78,7 @@ public class SnapshotManager implements Manager {
         this.workerInfo = workerInfo;
         this.partitioner = context.config().createObject(ComputerOptions.WORKER_PARTITIONER);
         this.partitionCount = context.config().get(ComputerOptions.JOB_PARTITIONS_COUNT);
-        this.viewKey = context.config().get(ComputerOptions.SNAPSHOT_VIEW_KEY);
+        this.snapshotName = context.config().get(ComputerOptions.SNAPSHOT_NAME);
     }
 
     @Override
@@ -243,8 +243,8 @@ public class SnapshotManager implements Manager {
     }
 
     private String generateObjectDirName(MessageType messageType, int partitionId) {
-        // dir name: {VIEW_KEY}/{PARTITIONER}/{PARTITION_COUNT}/VERTEX/{PARTITION_ID}/
-        Path path = Paths.get(this.viewKey,
+        // dir name: {SNAPSHOT_NAME}/{PARTITIONER}/{PARTITION_COUNT}/VERTEX/{PARTITION_ID}/
+        Path path = Paths.get(this.snapshotName,
                               this.partitioner.getClass().getSimpleName(),
                               String.valueOf(this.partitionCount),
                               messageType.name(),

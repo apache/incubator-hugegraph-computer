@@ -57,9 +57,9 @@ public class DataServerManagerTest extends UnitTestBase {
                                                                 fileManager,
                                                                 sortManager);
         SnapshotManager snapshotManager = new SnapshotManager(context(),
-                                                   null,
+                                                              null,
                                                               recvManager,
-                                                     null);
+                                                              null);
         recvManager.init(config);
         ConnectionManager connManager = new TransportConnectionManager();
         DataServerManager serverManager = new DataServerManager(connManager,

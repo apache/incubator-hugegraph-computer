@@ -139,9 +139,9 @@ public class EdgesInputTest extends UnitTestBase {
                                                                    sortManager);
         this.managers.add(receiveManager);
         SnapshotManager snapshotManager = new SnapshotManager(context(),
-                                                   null,
+                                                              null,
                                                               receiveManager,
-                                                     null);
+                                                              null);
         this.managers.add(snapshotManager);
         this.managers.initAll(this.config);
         ConnectionId connectionId = new ConnectionId(new InetSocketAddress(

@@ -201,7 +201,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Boolean> SNAPSHOT_WRITE =
             new ConfigOption<>(
                     "snapshot.write",
-                    "Whether write snapshot of input vertex and edge partitions",
+                    "Whether to write snapshot of input vertex/edge partitions.",
                     allowValues(true, false),
                     false
             );
@@ -209,15 +209,15 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<Boolean> SNAPSHOT_LOAD =
             new ConfigOption<>(
                     "snapshot.load",
-                    "Whether use snapshot of input vertex and edge partitions",
+                    "Whether to load from snapshot of vertex/edge partitions.",
                     allowValues(true, false),
                     false
             );
 
-    public static final ConfigOption<String> SNAPSHOT_VIEW_KEY =
+    public static final ConfigOption<String> SNAPSHOT_NAME =
             new ConfigOption<>(
-                    "snapshot.view_key",
-                    "View key of target snapshot",
+                    "snapshot.name",
+                    "The user-defined snapshot name.",
                     null,
                     ""
             );
@@ -225,7 +225,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> SNAPSHOT_MINIO_ENDPOINT =
             new ConfigOption<>(
                     "snapshot.minio_endpoint",
-                    "MinIO endpoint",
+                    "The endpoint of MinIO, MinIO can be used to store snapshots.",
                     null,
                     ""
             );
@@ -233,7 +233,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> SNAPSHOT_MINIO_ACCESS_KEY =
             new ConfigOption<>(
                     "snapshot.minio_access_key",
-                    "MinIO access key",
+                    "The access key of MinIO.",
                     null,
                     ""
             );
@@ -241,7 +241,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> SNAPSHOT_MINIO_SECRET_KEY =
             new ConfigOption<>(
                     "snapshot.minio_secret_key",
-                    "MinIO secret key",
+                    "The secret key of MinIO.",
                     null,
                     ""
             );
@@ -249,7 +249,7 @@ public class ComputerOptions extends OptionHolder {
     public static final ConfigOption<String> SNAPSHOT_MINIO_BUCKET_NAME =
             new ConfigOption<>(
                     "snapshot.minio_bucket_name",
-                    "MinIO bucket name",
+                    "The bucket name of MinIO.",
                     null,
                     ""
             );

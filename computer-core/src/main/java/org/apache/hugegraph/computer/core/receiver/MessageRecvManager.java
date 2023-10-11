@@ -91,10 +91,14 @@ public class MessageRecvManager implements Manager, MessageHandler {
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager,
                                                Constants.INPUT_SUPERSTEP);
-        this.vertexPartitions = new VertexMessageRecvPartitions(
-                this.context, fileGenerator, this.sortManager, this.snapshotManager);
-        this.edgePartitions = new EdgeMessageRecvPartitions(
-                this.context, fileGenerator, this.sortManager, this.snapshotManager);
+        this.vertexPartitions = new VertexMessageRecvPartitions(this.context,
+                                                                fileGenerator,
+                                                                this.sortManager,
+                                                                this.snapshotManager);
+        this.edgePartitions = new EdgeMessageRecvPartitions(this.context,
+                                                            fileGenerator,
+                                                            this.sortManager,
+                                                            this.snapshotManager);
         this.workerCount = config.get(ComputerOptions.JOB_WORKERS_COUNT);
         // One for vertex and one for edge.
         this.expectedFinishMessages = this.workerCount * 2;
@@ -109,8 +113,10 @@ public class MessageRecvManager implements Manager, MessageHandler {
     public void beforeSuperstep(Config config, int superstep) {
         SuperstepFileGenerator fileGenerator = new SuperstepFileGenerator(
                                                this.fileManager, superstep);
-        this.messagePartitions = new ComputeMessageRecvPartitions(
-                this.context, fileGenerator, this.sortManager, this.snapshotManager);
+        this.messagePartitions = new ComputeMessageRecvPartitions(this.context,
+                                                                  fileGenerator,
+                                                                  this.sortManager,
+                                                                  this.snapshotManager);
         this.expectedFinishMessages = this.workerCount;
         this.finishMessagesFuture = new CompletableFuture<>();
         this.finishMessagesCount.set(this.expectedFinishMessages);

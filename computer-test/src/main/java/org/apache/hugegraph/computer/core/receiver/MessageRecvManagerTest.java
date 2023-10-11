@@ -76,9 +76,9 @@ public class MessageRecvManagerTest extends UnitTestBase {
                                                      this.fileManager,
                                                      this.sortManager);
         this.snapshotManager = new SnapshotManager(context(),
-                                        null,
+                                                   null,
                                                    receiveManager,
-                                          null);
+                                                   null);
         this.receiveManager.init(this.config);
         this.connectionId = new ConnectionId(
                             new InetSocketAddress("localhost",8081),

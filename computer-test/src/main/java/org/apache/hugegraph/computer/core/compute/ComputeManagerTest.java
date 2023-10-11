@@ -106,9 +106,9 @@ public class ComputeManagerTest extends UnitTestBase {
                                                                    sortManager);
         this.managers.add(receiveManager);
         SnapshotManager snapshotManager = new SnapshotManager(context(),
-                                                   null,
+                                                              null,
                                                               receiveManager,
-                                                     null);
+                                                              null);
         this.managers.add(snapshotManager);
         this.managers.initAll(this.config);
         this.connectionId = new ConnectionId(new InetSocketAddress("localhost",
@@ -231,7 +231,7 @@ public class ComputeManagerTest extends UnitTestBase {
                 message.add(id);
                 ReceiverUtil.consumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
-                                           consumer);
+                                                                     consumer);
             }
         }
     }
