@@ -239,7 +239,7 @@ rules:
   verbs:
   - get
 - apiGroups:
-  - hugegraph.apache.org
+  - operator.hugegraph.apache.org
   resources:
   - hugegraphcomputerjobs
   verbs:
@@ -251,13 +251,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - hugegraph.apache.org
+  - operator.hugegraph.apache.org
   resources:
   - hugegraphcomputerjobs/finalizers
   verbs:
   - update
 - apiGroups:
-  - hugegraph.apache.org
+  - operator.hugegraph.apache.org
   resources:
   - hugegraphcomputerjobs/status
   verbs:
