@@ -27,9 +27,9 @@ import (
 
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get
 // +kubebuilder:rbac:groups=core,resources=namespaces,verbs=get;create;update
-// +kubebuilder:rbac:groups=hugegraph.apache.org,resources=hugegraphcomputerjobs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=hugegraph.apache.org,resources=hugegraphcomputerjobs/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=hugegraph.apache.org,resources=hugegraphcomputerjobs/finalizers,verbs=update
+// +kubebuilder:rbac:groups=operator.hugegraph.apache.org,resources=hugegraphcomputerjobs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=operator.hugegraph.apache.org,resources=hugegraphcomputerjobs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=operator.hugegraph.apache.org,resources=hugegraphcomputerjobs/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments/status,verbs=get
 // +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;patch;delete
