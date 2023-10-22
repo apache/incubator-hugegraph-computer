@@ -198,6 +198,62 @@ public class ComputerOptions extends OptionHolder {
                     ""
             );
 
+    public static final ConfigOption<Boolean> SNAPSHOT_WRITE =
+            new ConfigOption<>(
+                    "snapshot.write",
+                    "Whether to write snapshot of input vertex/edge partitions.",
+                    allowValues(true, false),
+                    false
+            );
+
+    public static final ConfigOption<Boolean> SNAPSHOT_LOAD =
+            new ConfigOption<>(
+                    "snapshot.load",
+                    "Whether to load from snapshot of vertex/edge partitions.",
+                    allowValues(true, false),
+                    false
+            );
+
+    public static final ConfigOption<String> SNAPSHOT_NAME =
+            new ConfigOption<>(
+                    "snapshot.name",
+                    "The user-defined snapshot name.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> SNAPSHOT_MINIO_ENDPOINT =
+            new ConfigOption<>(
+                    "snapshot.minio_endpoint",
+                    "The endpoint of MinIO, MinIO can be used to store snapshots.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> SNAPSHOT_MINIO_ACCESS_KEY =
+            new ConfigOption<>(
+                    "snapshot.minio_access_key",
+                    "The access key of MinIO.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> SNAPSHOT_MINIO_SECRET_KEY =
+            new ConfigOption<>(
+                    "snapshot.minio_secret_key",
+                    "The secret key of MinIO.",
+                    null,
+                    ""
+            );
+
+    public static final ConfigOption<String> SNAPSHOT_MINIO_BUCKET_NAME =
+            new ConfigOption<>(
+                    "snapshot.minio_bucket_name",
+                    "The bucket name of MinIO.",
+                    null,
+                    ""
+            );
+
     public static final ConfigOption<Integer> INPUT_SEND_THREAD_NUMS =
             new ConfigOption<>(
                     "input.send_thread_nums",

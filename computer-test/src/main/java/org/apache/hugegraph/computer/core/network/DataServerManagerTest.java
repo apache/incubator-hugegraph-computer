@@ -25,6 +25,7 @@ import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.network.connection.ConnectionManager;
 import org.apache.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import org.apache.hugegraph.computer.core.receiver.MessageRecvManager;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
 import org.apache.hugegraph.computer.core.store.FileManager;
@@ -55,6 +56,10 @@ public class DataServerManagerTest extends UnitTestBase {
         MessageRecvManager recvManager = new MessageRecvManager(context(),
                                                                 fileManager,
                                                                 sortManager);
+        SnapshotManager snapshotManager = new SnapshotManager(context(),
+                                                              null,
+                                                              recvManager,
+                                                              null);
         recvManager.init(config);
         ConnectionManager connManager = new TransportConnectionManager();
         DataServerManager serverManager = new DataServerManager(connManager,

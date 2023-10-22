@@ -47,6 +47,7 @@ import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.receiver.MessageRecvManager;
 import org.apache.hugegraph.computer.core.receiver.ReceiverUtil;
 import org.apache.hugegraph.computer.core.sender.MessageSendManager;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SendSortManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
 import org.apache.hugegraph.computer.core.store.FileManager;
@@ -104,6 +105,11 @@ public class ComputeManagerTest extends UnitTestBase {
                                                                    fileManager,
                                                                    sortManager);
         this.managers.add(receiveManager);
+        SnapshotManager snapshotManager = new SnapshotManager(context(),
+                                                              null,
+                                                              receiveManager,
+                                                              null);
+        this.managers.add(snapshotManager);
         this.managers.initAll(this.config);
         this.connectionId = new ConnectionId(new InetSocketAddress("localhost",
                                                                    8081),
@@ -225,7 +231,7 @@ public class ComputeManagerTest extends UnitTestBase {
                 message.add(id);
                 ReceiverUtil.consumeBuffer(ReceiverUtil.writeMessage(id,
                                                                      message),
-                                           consumer);
+                                                                     consumer);
             }
         }
     }

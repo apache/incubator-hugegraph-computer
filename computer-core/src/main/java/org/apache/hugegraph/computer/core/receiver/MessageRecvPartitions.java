@@ -17,19 +17,20 @@
 
 package org.apache.hugegraph.computer.core.receiver;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.network.buffer.NetworkBuffer;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.flusher.PeekableIterator;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
 import org.apache.hugegraph.computer.core.store.SuperstepFileGenerator;
 import org.apache.hugegraph.computer.core.store.entry.KvEntry;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
 
@@ -37,21 +38,26 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
     protected final Config config;
     protected final SuperstepFileGenerator fileGenerator;
     protected final SortManager sortManager;
+    protected final SnapshotManager snapshotManager;
 
     // The map of partition-id and the messages for the partition.
     private final Map<Integer, P> partitions;
 
     public MessageRecvPartitions(ComputerContext context,
                                  SuperstepFileGenerator fileGenerator,
-                                 SortManager sortManager) {
+                                 SortManager sortManager,
+                                 SnapshotManager snapshotManager) {
         this.context = context;
         this.config = context.config();
         this.fileGenerator = fileGenerator;
         this.sortManager = sortManager;
+        this.snapshotManager = snapshotManager;
         this.partitions = new HashMap<>();
     }
 
     protected abstract P createPartition();
+
+    protected abstract void writePartitionSnapshot(int partitionId, List<String> outputFiles);
 
     public void addBuffer(int partitionId, NetworkBuffer buffer) {
         P partition = this.partition(partitionId);
@@ -87,6 +93,7 @@ public abstract class MessageRecvPartitions<P extends MessageRecvPartition> {
         Map<Integer, PeekableIterator<KvEntry>> entries = new HashMap<>();
         for (Map.Entry<Integer, P> entry : this.partitions.entrySet()) {
             entries.put(entry.getKey(), entry.getValue().iterator());
+            this.writePartitionSnapshot(entry.getKey(), entry.getValue().outputFiles());
         }
         return entries;
     }

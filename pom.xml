@@ -104,6 +104,7 @@
         <hugegraph-client-version>1.0.0</hugegraph-client-version>
         <hugegraph-rpc-version>1.0.0</hugegraph-rpc-version>
         <hugegraph-loader-version>1.0.0</hugegraph-loader-version>
+        <minio-version>8.5.6</minio-version>
     </properties>
 
     <modules>

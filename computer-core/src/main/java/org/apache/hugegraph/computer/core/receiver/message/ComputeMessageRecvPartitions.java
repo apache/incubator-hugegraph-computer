@@ -19,21 +19,30 @@ package org.apache.hugegraph.computer.core.receiver.message;
 
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.receiver.MessageRecvPartitions;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
 import org.apache.hugegraph.computer.core.store.SuperstepFileGenerator;
+
+import java.util.List;
 
 public class ComputeMessageRecvPartitions
        extends MessageRecvPartitions<ComputeMessageRecvPartition> {
 
     public ComputeMessageRecvPartitions(ComputerContext context,
                                         SuperstepFileGenerator fileGenerator,
-                                        SortManager sortManager) {
-        super(context, fileGenerator, sortManager);
+                                        SortManager sortManager,
+                                        SnapshotManager snapshotManager) {
+        super(context, fileGenerator, sortManager, snapshotManager);
     }
 
     @Override
     public ComputeMessageRecvPartition createPartition() {
         return new ComputeMessageRecvPartition(this.context, this.fileGenerator,
                                                this.sortManager);
+    }
+
+    @Override
+    protected void writePartitionSnapshot(int partitionId, List<String> outputFiles) {
+        // pass
     }
 }

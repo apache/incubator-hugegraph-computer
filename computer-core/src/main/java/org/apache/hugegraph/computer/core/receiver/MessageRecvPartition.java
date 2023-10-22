@@ -127,6 +127,10 @@ public abstract class MessageRecvPartition {
         return this.totalBytes;
     }
 
+    public synchronized List<String> outputFiles() {
+        return this.outputFiles;
+    }
+
     public synchronized MessageStat messageStat() {
         // TODO: count the message received
         return new MessageStat(0L, this.totalBytes);

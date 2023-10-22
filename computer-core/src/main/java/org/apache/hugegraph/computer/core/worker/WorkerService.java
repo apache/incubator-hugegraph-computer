@@ -47,6 +47,7 @@ import org.apache.hugegraph.computer.core.network.connection.TransportConnection
 import org.apache.hugegraph.computer.core.receiver.MessageRecvManager;
 import org.apache.hugegraph.computer.core.rpc.WorkerRpcManager;
 import org.apache.hugegraph.computer.core.sender.MessageSendManager;
+import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SendSortManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
@@ -322,8 +323,15 @@ public class WorkerService implements Closeable {
                                          clientManager.sender());
         this.managers.add(sendManager);
 
+        SnapshotManager snapshotManager = new SnapshotManager(this.context,
+                                                              sendManager,
+                                                              recvManager,
+                                                              this.workerInfo);
+        this.managers.add(snapshotManager);
+
         WorkerInputManager inputManager = new WorkerInputManager(this.context,
-                                                                 sendManager);
+                                                                 sendManager,
+                                                                 snapshotManager);
         inputManager.service(rpcManager.inputSplitService());
         this.managers.add(inputManager);
 
