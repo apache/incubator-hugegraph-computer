@@ -73,6 +73,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
                     "actual got '%s'",
                     OPTION_WALK_PER_NODE, this.walkPerNode);
         }
+        LOG.info("[RandomWalk] algorithm param, {}: {}", OPTION_WALK_PER_NODE, walkPerNode);
 
         this.walkLength = config.getInt(OPTION_WALK_LENGTH, 3);
         if (this.walkLength < 1) {
@@ -80,6 +81,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
                     "actual got '%s'",
                     OPTION_WALK_LENGTH, this.walkLength);
         }
+        LOG.info("[RandomWalk] algorithm param, {}: {}", OPTION_WALK_LENGTH, walkLength);
 
         this.random = new Random();
     }
@@ -93,7 +95,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
 
         if (vertex.numEdges() <= 0) {
             // isolated vertex
-            vertex.value(message.path());
+            this.savePath(vertex, message.path()); // save result
             vertex.inactivate();
             return;
         }
@@ -111,8 +113,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
             RandomWalkMessage message = messages.next();
 
             if (message.getIsFinish()) {
-                // save result
-                this.savePath(vertex, message.path());
+                this.savePath(vertex, message.path()); // save result
 
                 vertex.inactivate();
                 continue;
@@ -135,8 +136,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
 
                 if (vertex.id().equals(sourceId)) {
                     // current vertex is the source vertex，no need to send message once more
-                    // save result
-                    this.savePath(vertex, message.path());
+                    this.savePath(vertex, message.path()); // save result
                 } else {
                     context.sendMessage(sourceId, message);
                 }
