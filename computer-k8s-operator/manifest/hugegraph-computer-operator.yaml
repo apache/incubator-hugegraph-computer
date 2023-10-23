@@ -23,6 +23,17 @@ metadata:
     control-plane: controller-manager
   name: hugegraph-computer-operator-system
 ---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  labels:
+    app.kubernetes.io/name: hugegraph-computer-operator-minio
+    app.kubernetes.io/version: v1
+  name: hugegraph-computer-operator-local-storage
+  namespace: system
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -437,6 +448,31 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+  labels:
+    app.kubernetes.io/name: hugegraph-computer-operator-minio
+    app.kubernetes.io/version: v1
+    service.app: hugegraph-computer-operator-minio
+  name: hugegraph-computer-operator-minio
+  namespace: hugegraph-computer-operator-system
+spec:
+  clusterIP: None
+  ports:
+  - name: client
+    port: 9000
+    protocol: TCP
+    targetPort: 9090
+  selector:
+    app.kubernetes.io/name: hugegraph-computer-operator-minio
+    app.kubernetes.io/version: v1
+    service.app: hugegraph-computer-operator-minio
+  sessionAffinity: None
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: hugegraph-computer-operator-webhook-service
   namespace: hugegraph-computer-operator-system
 spec:
@@ -525,6 +561,8 @@ spec:
           value: "6"
         - name: INTERNAL_ETCD_URL
           value: http://hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2379
+        - name: INTERNAL_MINIO_URL
+          value: http://hugegraph-computer-operator-minio.hugegraph-computer-operator-system:9000
         - name: LOG_LEVEL
           value: INFO
         - name: AUTO_DESTROY_POD
@@ -619,6 +657,75 @@ spec:
           timeoutSeconds: 5
       hostname: hugegraph-computer-operator-etcd-0
       subdomain: hugegraph-computer-operator-etcd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: hugegraph-computer-operator-minio
+    app.kubernetes.io/version: v1
+  name: hugegraph-computer-operator-minio
+  namespace: hugegraph-computer-operator-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hugegraph-computer-operator-minio
+      app.kubernetes.io/version: v1
+      service.app: hugegraph-computer-operator-minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hugegraph-computer-operator-minio
+        app.kubernetes.io/version: v1
+        service.app: hugegraph-computer-operator-minio
+    spec:
+      containers:
+      - args:
+        - minio server /data --console-address :9090
+        command:
+        - /bin/bash
+        - -c
+        env:
+        - name: MINIO_ACCESS_KEY
+          value: minioadmin
+        - name: MINIO_SECRET_KEY
+          value: minioadmin
+        image: quay.io/minio/minio:RELEASE.2023-10-16T04-13-43Z
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /minio/health/live
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: hugegraph-computer-operator-minio
+        ports:
+        - containerPort: 9090
+          name: client
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /minio/health/ready
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 120
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 10
+        volumeMounts:
+        - mountPath: /data
+          name: localvolume
+      hostname: hugegraph-computer-operator-minio-0
+      subdomain: hugegraph-computer-operator-minio
+      volumes:
+      - hostPath:
+          path: /mnt/disk1/data
+          type: DirectoryOrCreate
+        name: localvolume
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate

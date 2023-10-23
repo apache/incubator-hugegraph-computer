@@ -134,6 +134,14 @@ public class OperatorOptions extends OptionHolder {
                     "http://127.0.0.1:2379"
             );
 
+    public static final ConfigOption<String> INTERNAL_MINIO_URL =
+            new ConfigOption<>(
+                    "k8s.internal_minio_url",
+                    "The internal minio url for operator system.",
+                    disallowEmpty(),
+                    "http://127.0.0.1:9000"
+            );
+
     public static final ConfigOption<Boolean> AUTO_DESTROY_POD =
             new ConfigOption<>(
                     "k8s.auto_destroy_pod",

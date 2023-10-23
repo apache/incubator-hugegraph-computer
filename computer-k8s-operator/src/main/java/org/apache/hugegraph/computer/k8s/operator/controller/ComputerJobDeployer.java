@@ -101,12 +101,14 @@ public class ComputerJobDeployer {
     private static final Long TERMINATION_GRACE_PERIOD = 180L;
 
     private final String internalEtcdUrl;
+    private final String internalMinIOUrl;
     private final String timezone;
 
     public ComputerJobDeployer(NamespacedKubernetesClient kubeClient,
                                HugeConfig config) {
         this.kubeClient = kubeClient;
         this.internalEtcdUrl = config.get(OperatorOptions.INTERNAL_ETCD_URL);
+        this.internalMinIOUrl = config.get(OperatorOptions.INTERNAL_MINIO_URL);
         this.timezone = config.get(OperatorOptions.TIMEZONE);
     }
 
@@ -186,6 +188,8 @@ public class ComputerJobDeployer {
         config.put(ComputerOptions.RPC_SERVER_HOST_NAME, ip);
         config.putIfAbsent(ComputerOptions.BSP_ETCD_ENDPOINTS.name(),
                            this.internalEtcdUrl);
+        config.putIfAbsent(ComputerOptions.SNAPSHOT_MINIO_ENDPOINT.name(),
+                           this.internalMinIOUrl);
 
         String transportPort = config.get(
                                ComputerOptions.TRANSPORT_SERVER_PORT.name());

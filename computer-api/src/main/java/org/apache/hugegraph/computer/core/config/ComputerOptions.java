@@ -235,7 +235,7 @@ public class ComputerOptions extends OptionHolder {
                     "snapshot.minio_access_key",
                     "The access key of MinIO.",
                     null,
-                    ""
+                    "minioadmin"
             );
 
     public static final ConfigOption<String> SNAPSHOT_MINIO_SECRET_KEY =
@@ -243,7 +243,7 @@ public class ComputerOptions extends OptionHolder {
                     "snapshot.minio_secret_key",
                     "The secret key of MinIO.",
                     null,
-                    ""
+                    "minioadmin"
             );
 
     public static final ConfigOption<String> SNAPSHOT_MINIO_BUCKET_NAME =
