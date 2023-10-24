@@ -104,12 +104,12 @@ public class SnapshotManager implements Manager {
             try {
                 boolean bucketExist = this.minioClient.bucketExists(
                         BucketExistsArgs.builder()
-                                .bucket(this.bucketName)
-                                .build());
+                                        .bucket(this.bucketName)
+                                        .build());
                 if (!bucketExist) {
                     this.minioClient.makeBucket(MakeBucketArgs.builder()
-                            .bucket(this.bucketName)
-                            .build());
+                                                              .bucket(this.bucketName)
+                                                              .build());
                 }
             } catch (Exception e) {
                 throw new ComputerException("Failed to initialize bucket %s", this.bucketName, e);
