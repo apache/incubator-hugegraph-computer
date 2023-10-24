@@ -28,6 +28,7 @@ import org.apache.hugegraph.computer.algorithm.community.trianglecount.TriangleC
 import org.apache.hugegraph.computer.algorithm.community.wcc.WccTest;
 import org.apache.hugegraph.computer.algorithm.path.rings.RingsDetectionTest;
 import org.apache.hugegraph.computer.algorithm.path.rings.RingsDetectionWithFilterTest;
+import org.apache.hugegraph.computer.algorithm.sampling.RandomWalkTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -43,7 +44,8 @@ import org.junit.runners.Suite;
     RingsDetectionWithFilterTest.class,
     ClusteringCoefficientTest.class,
     ClosenessCentralityTest.class,
-    BetweennessCentralityTest.class
+    BetweennessCentralityTest.class,
+    RandomWalkTest.class
 })
 public class AlgorithmTestSuite {
 }
