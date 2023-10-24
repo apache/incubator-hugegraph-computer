@@ -41,7 +41,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     public static final String OPTION_WALK_LENGTH = "randomwalk.walk_length";
 
     /**
-     * number of walk to the same vertex(source vertex)
+     * number of times per vertex(source vertex) walks
      */
     private Integer walkPerNode;
 
