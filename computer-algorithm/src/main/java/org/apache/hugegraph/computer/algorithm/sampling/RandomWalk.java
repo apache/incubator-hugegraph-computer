@@ -68,16 +68,16 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     @Override
     public void init(Config config) {
         this.walkPerNode = config.getInt(OPTION_WALK_PER_NODE, 3);
-        if (this.walkPerNode < 1) {
-            throw new ComputerException("The param %s must be greater than 1, " +
+        if (this.walkPerNode <= 0) {
+            throw new ComputerException("The param %s must be greater than 0, " +
                     "actual got '%s'",
                     OPTION_WALK_PER_NODE, this.walkPerNode);
         }
         LOG.info("[RandomWalk] algorithm param, {}: {}", OPTION_WALK_PER_NODE, walkPerNode);
 
         this.walkLength = config.getInt(OPTION_WALK_LENGTH, 3);
-        if (this.walkLength < 1) {
-            throw new ComputerException("The param %s must be greater than 1, " +
+        if (this.walkLength <= 0) {
+            throw new ComputerException("The param %s must be greater than 0, " +
                     "actual got '%s'",
                     OPTION_WALK_LENGTH, this.walkLength);
         }
