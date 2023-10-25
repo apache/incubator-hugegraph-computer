@@ -65,16 +65,15 @@ public class RandomWalkMessage implements Value.CustomizeValue<List<Object>> {
         return this.path;
     }
 
-    public void addPath(Vertex vertex) {
+    public void addToPath(Vertex vertex) {
         this.path.add(vertex.id());
     }
 
-    public Boolean getIsFinish() {
+    public Boolean isFinish() {
         return isFinish.value();
     }
 
-    public void setIsFinish(Boolean isFinish) {
+    public void setFinish(boolean isFinish) {
         this.isFinish = new BooleanValue(isFinish);
     }
-
 }

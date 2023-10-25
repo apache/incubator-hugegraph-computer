@@ -45,5 +45,4 @@ public class RandomWalkOutput extends HugeGraphOutput<List<String>> {
         }
         return propValues;
     }
-
 }

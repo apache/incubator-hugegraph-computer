@@ -62,7 +62,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
 
     @Override
     public String name() {
-        return "randomWalk";
+        return "random_walk";
     }
 
     @Override
@@ -91,7 +91,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
         vertex.value(new IdListList());
 
         RandomWalkMessage message = new RandomWalkMessage();
-        message.addPath(vertex);
+        message.addToPath(vertex);
 
         if (vertex.numEdges() <= 0) {
             // isolated vertex
@@ -112,18 +112,18 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
         while (messages.hasNext()) {
             RandomWalkMessage message = messages.next();
 
-            if (message.getIsFinish()) {
+            if (message.isFinish()) {
                 this.savePath(vertex, message.path()); // save result
 
                 vertex.inactivate();
                 continue;
             }
 
-            message.addPath(vertex);
+            message.addToPath(vertex);
 
             if (vertex.numEdges() <= 0) {
                 // there is nowhere to walk，finish eariler
-                message.setIsFinish(true);
+                message.setFinish(true);
                 context.sendMessage(this.getSourceId(message.path()), message);
 
                 vertex.inactivate();
@@ -131,7 +131,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
             }
 
             if (message.path().size() >= this.walkLength + 1) {
-                message.setIsFinish(true);
+                message.setFinish(true);
                 Id sourceId = this.getSourceId(message.path());
 
                 if (vertex.id().equals(sourceId)) {
@@ -186,5 +186,4 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
         IdListList curValue = sourceVertex.value();
         curValue.add(path.copy());
     }
-
 }

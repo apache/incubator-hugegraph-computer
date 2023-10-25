@@ -41,5 +41,4 @@ public class RandomWalkParams implements AlgorithmParams {
         this.setIfAbsent(params, RandomWalk.OPTION_WALK_LENGTH,
                 "3");
     }
-
 }
