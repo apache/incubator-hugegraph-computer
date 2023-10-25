@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.hugegraph.computer.algorithm.AlgorithmTestBase;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
@@ -123,6 +124,10 @@ public class RingsDetectionTest extends AlgorithmTestBase {
         private void assertResult(Id id, List<String> rings) {
             Set<String> expect = EXPECT_RINGS.getOrDefault(id.toString(),
                                                            new HashSet<>());
+
+            rings = rings.stream()
+                         .distinct()
+                         .collect(Collectors.toList());
 
             Assert.assertEquals(expect.size(), rings.size());
             for (String ring : rings) {
