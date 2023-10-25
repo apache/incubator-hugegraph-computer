@@ -73,7 +73,7 @@ public class RandomWalkMessage implements Value.CustomizeValue<List<Object>> {
         return isFinish.value();
     }
 
-    public void setFinish(boolean isFinish) {
-        this.isFinish = new BooleanValue(isFinish);
+    public void finish() {
+        this.isFinish = new BooleanValue(true);
     }
 }

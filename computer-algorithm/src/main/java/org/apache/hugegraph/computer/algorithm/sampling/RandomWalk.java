@@ -123,7 +123,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
 
             if (vertex.numEdges() <= 0) {
                 // there is nowhere to walk，finish eariler
-                message.setFinish(true);
+                message.finish();
                 context.sendMessage(this.getSourceId(message.path()), message);
 
                 vertex.inactivate();
@@ -131,7 +131,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
             }
 
             if (message.path().size() >= this.walkLength + 1) {
-                message.setFinish(true);
+                message.finish();
                 Id sourceId = this.getSourceId(message.path());
 
                 if (vertex.id().equals(sourceId)) {
