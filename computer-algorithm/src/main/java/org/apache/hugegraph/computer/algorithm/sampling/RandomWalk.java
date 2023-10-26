@@ -108,7 +108,8 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     }
 
     @Override
-    public void compute(ComputationContext context, Vertex vertex, Iterator<RandomWalkMessage> messages) {
+    public void compute(ComputationContext context, Vertex vertex,
+                        Iterator<RandomWalkMessage> messages) {
         while (messages.hasNext()) {
             RandomWalkMessage message = messages.next();
 
