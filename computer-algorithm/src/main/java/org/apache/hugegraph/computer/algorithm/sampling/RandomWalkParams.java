@@ -36,9 +36,7 @@ public class RandomWalkParams implements AlgorithmParams {
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                 RandomWalkOutput.class.getName());
 
-        this.setIfAbsent(params, RandomWalk.OPTION_WALK_PER_NODE,
-                "3");
-        this.setIfAbsent(params, RandomWalk.OPTION_WALK_LENGTH,
-                "3");
+        this.setIfAbsent(params, RandomWalk.OPTION_WALK_PER_NODE, "3");
+        this.setIfAbsent(params, RandomWalk.OPTION_WALK_LENGTH, "3");
     }
 }
