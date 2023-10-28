@@ -60,6 +60,8 @@ spec:
             value: "6"
           - name: INTERNAL_ETCD_URL
             value: "http://hugegraph-computer-operator-etcd.hugegraph-computer-operator-system:2379"
+          - name: INTERNAL_MINIO_URL
+            value: "http://hugegraph-computer-operator-minio.hugegraph-computer-operator-system:9000"
           - name: LOG_LEVEL
             value: "INFO"
           - name: AUTO_DESTROY_POD

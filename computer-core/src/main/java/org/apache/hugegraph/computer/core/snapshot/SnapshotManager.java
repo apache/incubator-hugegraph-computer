@@ -17,8 +17,10 @@
 
 package org.apache.hugegraph.computer.core.snapshot;
 
+import io.minio.BucketExistsArgs;
 import io.minio.DownloadObjectArgs;
 import io.minio.ListObjectsArgs;
+import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.RemoveObjectsArgs;
 import io.minio.Result;
@@ -89,14 +91,29 @@ public class SnapshotManager implements Manager {
     @Override
     public void init(Config config) {
         String endpoint = config.get(ComputerOptions.SNAPSHOT_MINIO_ENDPOINT);
-        String accessKey = config.get(ComputerOptions.SNAPSHOT_MINIO_ACCESS_KEY);
-        String secretKey = config.get(ComputerOptions.SNAPSHOT_MINIO_SECRET_KEY);
         this.bucketName = config.get(ComputerOptions.SNAPSHOT_MINIO_BUCKET_NAME);
-        if (StringUtils.isNotEmpty(endpoint)) {
+
+        if (StringUtils.isNotEmpty(endpoint) && StringUtils.isNotEmpty(this.bucketName)) {
+            String accessKey = config.get(ComputerOptions.SNAPSHOT_MINIO_ACCESS_KEY);
+            String secretKey = config.get(ComputerOptions.SNAPSHOT_MINIO_SECRET_KEY);
             this.minioClient = MinioClient.builder()
                                           .endpoint(endpoint)
                                           .credentials(accessKey, secretKey)
                                           .build();
+
+            try {
+                boolean bucketExist = this.minioClient.bucketExists(
+                        BucketExistsArgs.builder()
+                                        .bucket(this.bucketName)
+                                        .build());
+                if (!bucketExist) {
+                    this.minioClient.makeBucket(MakeBucketArgs.builder()
+                                                              .bucket(this.bucketName)
+                                                              .build());
+                }
+            } catch (Exception e) {
+                throw new ComputerException("Failed to initialize bucket %s", this.bucketName, e);
+            }
         }
     }
 

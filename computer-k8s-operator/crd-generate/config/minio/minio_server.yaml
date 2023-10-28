@@ -1,0 +1,108 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+  namespace: system
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service.app: hugegraph-computer-operator-minio
+  name: minio
+  namespace: system
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: 'true'
+spec:
+  ports:
+    - name: client
+      port: 9000
+      protocol: TCP
+      targetPort: 9090
+  selector:
+    service.app: hugegraph-computer-operator-minio
+  clusterIP: None
+  type: ClusterIP
+  sessionAffinity: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service.app: hugegraph-computer-operator-minio
+  template:
+    metadata:
+      labels:
+        service.app: hugegraph-computer-operator-minio
+    spec:
+      hostname: hugegraph-computer-operator-minio-0
+      subdomain: hugegraph-computer-operator-minio
+      containers:
+        - name: hugegraph-computer-operator-minio
+          image: minio:latest
+          command:
+            - /bin/bash
+            - -c
+          args:
+            - minio server /data --console-address :9090
+          env:
+            # MinIO access key and secret key
+            - name: MINIO_ACCESS_KEY
+              value: "minioadmin"
+            - name: MINIO_SECRET_KEY
+              value: "minioadmin"
+          ports:
+            - name: client
+              containerPort: 9090
+          volumeMounts:
+            - mountPath: /data
+              name: localvolume # Corresponds to the `spec.volumes` Persistent Volume
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /minio/health/ready
+              # TODO: check the port
+              port: 9000
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 15
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      volumes:
+        - name: localvolume
+          hostPath: # MinIO generally recommends using locally-attached volumes
+            path: /mnt/disk1/data # Specify a path to a local drive or volume on the Kubernetes worker node
+            type: DirectoryOrCreate # The path to the last directory must exist
