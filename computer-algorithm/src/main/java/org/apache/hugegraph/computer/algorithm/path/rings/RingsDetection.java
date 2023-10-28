@@ -83,7 +83,7 @@ public class RingsDetection implements Computation<IdList> {
                 if (isMin) {
                     sequence.add(id);
                     IdListList sequences = vertex.value();
-                    sequences.add(sequence);
+                    sequences.add(sequence.copy());
                 }
             } else {
                 boolean contains = false;
