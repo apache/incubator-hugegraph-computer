@@ -37,8 +37,8 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
 
     private static final Logger LOG = Log.logger(RandomWalk.class);
 
-    public static final String OPTION_WALK_PER_NODE = "randomwalk.walk_per_node";
-    public static final String OPTION_WALK_LENGTH = "randomwalk.walk_length";
+    public static final String OPTION_WALK_PER_NODE = "random_walk.walk_per_node";
+    public static final String OPTION_WALK_LENGTH = "random_walk.walk_length";
 
     /**
      * number of times per vertex(source vertex) walks
