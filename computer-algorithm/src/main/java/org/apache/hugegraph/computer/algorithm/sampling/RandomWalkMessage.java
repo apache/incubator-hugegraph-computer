@@ -17,15 +17,15 @@
 
 package org.apache.hugegraph.computer.algorithm.sampling;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.apache.hugegraph.computer.core.graph.value.BooleanValue;
 import org.apache.hugegraph.computer.core.graph.value.IdList;
 import org.apache.hugegraph.computer.core.graph.value.Value;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.io.RandomAccessOutput;
-
-import java.io.IOException;
-import java.util.List;
 
 public class RandomWalkMessage implements Value.CustomizeValue<List<Object>> {
 

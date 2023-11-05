@@ -17,8 +17,11 @@
 
 package org.apache.hugegraph.computer.algorithm.sampling;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.hugegraph.computer.algorithm.AlgorithmTestBase;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.graph.id.Id;
@@ -34,10 +37,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 public class RandomWalkTest extends AlgorithmTestBase {
 
@@ -59,14 +60,14 @@ public class RandomWalkTest extends AlgorithmTestBase {
         SchemaManager schema = client.schema();
 
         schema.vertexLabel("user")
-                .useCustomizeStringId()
-                .ifNotExist()
-                .create();
+              .useCustomizeStringId()
+              .ifNotExist()
+              .create();
         schema.edgeLabel("know")
-                .sourceLabel("user")
-                .targetLabel("user")
-                .ifNotExist()
-                .create();
+              .sourceLabel("user")
+              .targetLabel("user")
+              .ifNotExist()
+              .create();
 
         GraphManager graph = client.graph();
         Vertex vA = graph.addVertex(T.LABEL, "user", T.ID, "A");
@@ -111,11 +112,11 @@ public class RandomWalkTest extends AlgorithmTestBase {
         @Override
         public void setAlgorithmParameters(Map<String, String> params) {
             this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                    RandomWalkTest.RandomWalkTestOutput.class.getName());
+                             RandomWalkTest.RandomWalkTestOutput.class.getName());
             this.setIfAbsent(params, RandomWalk.OPTION_WALK_PER_NODE,
-                    WALK_PER_NODE.toString());
+                             WALK_PER_NODE.toString());
             this.setIfAbsent(params, RandomWalk.OPTION_WALK_LENGTH,
-                    WALK_LENGTH.toString());
+                             WALK_LENGTH.toString());
 
             super.setAlgorithmParameters(params);
         }
