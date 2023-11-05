@@ -41,8 +41,9 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     public static final String OPTION_WALK_LENGTH = "random_walk.walk_length";
 
     public static final String OPTION_WEIGHT_PROPERTY = "random_walk.weight_property";
-    public static final String OPTION_WEIGHT_MIN_THRESHOLD = "random_walk.weight_min_threshold";
-    public static final String OPTION_WEIGHT_MAX_THRESHOLD = "random_walk.weight_max_threshold";
+    public static final String OPTION_DEFAULT_WEIGHT = "random_walk.default_weight";
+    public static final String OPTION_MIN_WEIGHT_THRESHOLD = "random_walk.min_weight_threshold";
+    public static final String OPTION_MAX_WEIGHT_THRESHOLD = "random_walk.max_weight_threshold";
 
     public static final String OPTION_RETURN_FACTOR = "random_walk.return_factor";
     public static final String OPTION_INOUT_FACTOR = "random_walk.inout_factor";
@@ -68,16 +69,21 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     private String weightProperty;
 
     /**
+     * Default 1
+     */
+    private Double defaultWeight;
+
+    /**
      * Weight less than this threshold will be truncated.
      * Default 0
      */
-    private Integer weightMinThreshold;
+    private Integer minWeightThreshold;
 
     /**
      * Weight greater than this threshold will be truncated.
      * Default Integer.MAX_VALUE
      */
-    private Integer weightMaxThreshold;
+    private Integer maxWeightThreshold;
 
     /**
      * Controls the probability of re-walk to a previously walked vertex.
@@ -125,27 +131,36 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
         LOG.info("[RandomWalk] algorithm param, {}: {}",
                  OPTION_WEIGHT_PROPERTY, this.weightProperty);
 
-        this.weightMinThreshold = config.getInt(OPTION_WEIGHT_MIN_THRESHOLD, 0);
-        if (this.weightMinThreshold < 0) {
-            throw new ComputerException("The param %s must be greater than or equal 0, " +
+        this.defaultWeight = config.getDouble(OPTION_DEFAULT_WEIGHT, 1);
+        if (this.defaultWeight <= 0) {
+            throw new ComputerException("The param %s must be greater than 0, " +
                                         "actual got '%s'",
-                                        OPTION_WEIGHT_MIN_THRESHOLD, this.weightMinThreshold);
+                                        OPTION_DEFAULT_WEIGHT, this.defaultWeight);
         }
         LOG.info("[RandomWalk] algorithm param, {}: {}",
-                 OPTION_WEIGHT_MIN_THRESHOLD, this.weightMinThreshold);
+                 OPTION_DEFAULT_WEIGHT, this.defaultWeight);
 
-        this.weightMaxThreshold = config.getInt(OPTION_WEIGHT_MAX_THRESHOLD, Integer.MAX_VALUE);
-        if (this.weightMaxThreshold < 0) {
+        this.minWeightThreshold = config.getInt(OPTION_MIN_WEIGHT_THRESHOLD, 0);
+        if (this.minWeightThreshold < 0) {
             throw new ComputerException("The param %s must be greater than or equal 0, " +
                                         "actual got '%s'",
-                                        OPTION_WEIGHT_MAX_THRESHOLD, this.weightMaxThreshold);
+                                        OPTION_MIN_WEIGHT_THRESHOLD, this.minWeightThreshold);
         }
         LOG.info("[RandomWalk] algorithm param, {}: {}",
-                 OPTION_WEIGHT_MAX_THRESHOLD, this.weightMaxThreshold);
+                 OPTION_MIN_WEIGHT_THRESHOLD, this.minWeightThreshold);
 
-        if (this.weightMinThreshold > this.weightMaxThreshold) {
+        this.maxWeightThreshold = config.getInt(OPTION_MAX_WEIGHT_THRESHOLD, Integer.MAX_VALUE);
+        if (this.maxWeightThreshold < 0) {
+            throw new ComputerException("The param %s must be greater than or equal 0, " +
+                                        "actual got '%s'",
+                                        OPTION_MAX_WEIGHT_THRESHOLD, this.maxWeightThreshold);
+        }
+        LOG.info("[RandomWalk] algorithm param, {}: {}",
+                 OPTION_MAX_WEIGHT_THRESHOLD, this.maxWeightThreshold);
+
+        if (this.minWeightThreshold > this.maxWeightThreshold) {
             throw new ComputerException("%s must be greater than or equal %s, ",
-                                        OPTION_WEIGHT_MAX_THRESHOLD, OPTION_WEIGHT_MIN_THRESHOLD);
+                                        OPTION_MAX_WEIGHT_THRESHOLD, OPTION_MIN_WEIGHT_THRESHOLD);
         }
 
         this.returnFactor = config.getDouble(OPTION_RETURN_FACTOR, 1);
