@@ -17,6 +17,9 @@
 
 package org.apache.hugegraph.computer.algorithm.sampling;
 
+import java.util.Iterator;
+import java.util.Random;
+
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.graph.edge.Edge;
@@ -30,9 +33,6 @@ import org.apache.hugegraph.computer.core.worker.ComputationContext;
 import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
-import java.util.Iterator;
-import java.util.Random;
-
 public class RandomWalk implements Computation<RandomWalkMessage> {
 
     private static final Logger LOG = Log.logger(RandomWalk.class);
@@ -40,20 +40,56 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     public static final String OPTION_WALK_PER_NODE = "random_walk.walk_per_node";
     public static final String OPTION_WALK_LENGTH = "random_walk.walk_length";
 
+    public static final String OPTION_WEIGHT_PROPERTY = "random_walk.weight_property";
+    public static final String OPTION_WEIGHT_MIN_THRESHOLD = "random_walk.weight_min_threshold";
+    public static final String OPTION_WEIGHT_MAX_THRESHOLD = "random_walk.weight_max_threshold";
+
+    public static final String OPTION_RETURN_FACTOR = "random_walk.return_factor";
+    public static final String OPTION_INOUT_FACTOR = "random_walk.inout_factor";
+
     /**
-     * number of times per vertex(source vertex) walks
+     * Random
+     */
+    private Random random;
+
+    /**
+     * Number of times per vertex(source vertex) walks
      */
     private Integer walkPerNode;
 
     /**
-     * walk length
+     * Walk length
      */
     private Integer walkLength;
 
     /**
-     * random
+     * Weight property, related to the walking probability
      */
-    private Random random;
+    private String weightProperty;
+
+    /**
+     * Weight less than this threshold will be truncated.
+     * Default 0
+     */
+    private Integer weightMinThreshold;
+
+    /**
+     * Weight greater than this threshold will be truncated.
+     * Default Integer.MAX_VALUE
+     */
+    private Integer weightMaxThreshold;
+
+    /**
+     * Controls the probability of re-walk to a previously walked vertex.
+     * Default 1
+     */
+    private Double returnFactor;
+
+    /**
+     * Controls whether to walk inward or outward.
+     * Default 1
+     */
+    private Double inOutFactor;
 
     @Override
     public String category() {
@@ -67,23 +103,68 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
 
     @Override
     public void init(Config config) {
+        this.random = new Random();
+
         this.walkPerNode = config.getInt(OPTION_WALK_PER_NODE, 3);
         if (this.walkPerNode <= 0) {
             throw new ComputerException("The param %s must be greater than 0, " +
-                    "actual got '%s'",
-                    OPTION_WALK_PER_NODE, this.walkPerNode);
+                                        "actual got '%s'",
+                                        OPTION_WALK_PER_NODE, this.walkPerNode);
         }
-        LOG.info("[RandomWalk] algorithm param, {}: {}", OPTION_WALK_PER_NODE, walkPerNode);
+        LOG.info("[RandomWalk] algorithm param, {}: {}", OPTION_WALK_PER_NODE, this.walkPerNode);
 
         this.walkLength = config.getInt(OPTION_WALK_LENGTH, 3);
         if (this.walkLength <= 0) {
             throw new ComputerException("The param %s must be greater than 0, " +
-                    "actual got '%s'",
-                    OPTION_WALK_LENGTH, this.walkLength);
+                                        "actual got '%s'",
+                                        OPTION_WALK_LENGTH, this.walkLength);
         }
-        LOG.info("[RandomWalk] algorithm param, {}: {}", OPTION_WALK_LENGTH, walkLength);
+        LOG.info("[RandomWalk] algorithm param, {}: {}", OPTION_WALK_LENGTH, this.walkLength);
 
-        this.random = new Random();
+        this.weightProperty = config.getString(OPTION_WEIGHT_PROPERTY, "");
+        LOG.info("[RandomWalk] algorithm param, {}: {}",
+                 OPTION_WEIGHT_PROPERTY, this.weightProperty);
+
+        this.weightMinThreshold = config.getInt(OPTION_WEIGHT_MIN_THRESHOLD, 0);
+        if (this.weightMinThreshold < 0) {
+            throw new ComputerException("The param %s must be greater than or equal 0, " +
+                                        "actual got '%s'",
+                                        OPTION_WEIGHT_MIN_THRESHOLD, this.weightMinThreshold);
+        }
+        LOG.info("[RandomWalk] algorithm param, {}: {}",
+                 OPTION_WEIGHT_MIN_THRESHOLD, this.weightMinThreshold);
+
+        this.weightMaxThreshold = config.getInt(OPTION_WEIGHT_MAX_THRESHOLD, Integer.MAX_VALUE);
+        if (this.weightMaxThreshold < 0) {
+            throw new ComputerException("The param %s must be greater than or equal 0, " +
+                                        "actual got '%s'",
+                                        OPTION_WEIGHT_MAX_THRESHOLD, this.weightMaxThreshold);
+        }
+        LOG.info("[RandomWalk] algorithm param, {}: {}",
+                 OPTION_WEIGHT_MAX_THRESHOLD, this.weightMaxThreshold);
+
+        if (this.weightMinThreshold > this.weightMaxThreshold) {
+            throw new ComputerException("%s must be greater than or equal %s, ",
+                                        OPTION_WEIGHT_MAX_THRESHOLD, OPTION_WEIGHT_MIN_THRESHOLD);
+        }
+
+        this.returnFactor = config.getDouble(OPTION_RETURN_FACTOR, 1);
+        if (this.returnFactor <= 0) {
+            throw new ComputerException("The param %s must be greater than 0, " +
+                                        "actual got '%s'",
+                                        OPTION_RETURN_FACTOR, this.returnFactor);
+        }
+        LOG.info("[RandomWalk] algorithm param, {}: {}",
+                 OPTION_RETURN_FACTOR, this.returnFactor);
+
+        this.inOutFactor = config.getDouble(OPTION_INOUT_FACTOR, 1);
+        if (this.inOutFactor <= 0) {
+            throw new ComputerException("The param %s must be greater than 0, " +
+                                        "actual got '%s'",
+                                        OPTION_INOUT_FACTOR, this.inOutFactor);
+        }
+        LOG.info("[RandomWalk] algorithm param, {}: {}",
+                 OPTION_INOUT_FACTOR, this.inOutFactor);
     }
 
     @Override
