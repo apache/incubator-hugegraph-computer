@@ -20,6 +20,7 @@ package org.apache.hugegraph.computer.algorithm.sampling;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.hugegraph.computer.core.graph.id.Id;
 import org.apache.hugegraph.computer.core.graph.value.BooleanValue;
 import org.apache.hugegraph.computer.core.graph.value.IdList;
 import org.apache.hugegraph.computer.core.graph.value.Value;
@@ -30,28 +31,36 @@ import org.apache.hugegraph.computer.core.io.RandomAccessOutput;
 public class RandomWalkMessage implements Value.CustomizeValue<List<Object>> {
 
     /**
-     * random walk path
+     * Previous vertex adjacent(out edge) vertex id list
+     */
+    private final IdList preVertexAdjacence;
+
+    /**
+     * Random walk path
      */
     private final IdList path;
 
     /**
-     * finish flag
+     * Finish flag
      */
     private BooleanValue isFinish;
 
     public RandomWalkMessage() {
+        this.preVertexAdjacence = new IdList();
         this.path = new IdList();
         this.isFinish = new BooleanValue(false);
     }
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
+        this.preVertexAdjacence.read(in);
         this.path.read(in);
         this.isFinish.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
+        this.preVertexAdjacence.write(out);
         this.path.write(out);
         this.isFinish.write(out);
     }
@@ -59,6 +68,14 @@ public class RandomWalkMessage implements Value.CustomizeValue<List<Object>> {
     @Override
     public List<Object> value() {
         return this.path.value();
+    }
+
+    public IdList preVertexAdjacence() {
+        return this.preVertexAdjacence;
+    }
+
+    public void addToPreVertexAdjacence(Id vertexId) {
+        this.preVertexAdjacence.add(vertexId);
     }
 
     public IdList path() {

@@ -17,7 +17,9 @@
 
 package org.apache.hugegraph.computer.algorithm.sampling;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
@@ -25,8 +27,10 @@ import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.graph.edge.Edge;
 import org.apache.hugegraph.computer.core.graph.edge.Edges;
 import org.apache.hugegraph.computer.core.graph.id.Id;
+import org.apache.hugegraph.computer.core.graph.value.DoubleValue;
 import org.apache.hugegraph.computer.core.graph.value.IdList;
 import org.apache.hugegraph.computer.core.graph.value.IdListList;
+import org.apache.hugegraph.computer.core.graph.value.Value;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.worker.Computation;
 import org.apache.hugegraph.computer.core.worker.ComputationContext;
@@ -191,14 +195,16 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
 
         if (vertex.numEdges() <= 0) {
             // isolated vertex
-            this.savePath(vertex, message.path()); // save result
+            this.savePath(vertex, message.path());
             vertex.inactivate();
             return;
         }
 
+        vertex.edges().forEach(edge -> message.addToPreVertexAdjacence(edge.targetId()));
+
         for (int i = 0; i < walkPerNode; ++i) {
             // random select one edge and walk
-            Edge selectedEdge = this.randomSelectEdge(vertex.edges());
+            Edge selectedEdge = this.randomSelectEdge(null, null, vertex.edges());
             context.sendMessage(selectedEdge.targetId(), message);
         }
     }
@@ -208,9 +214,11 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
                         Iterator<RandomWalkMessage> messages) {
         while (messages.hasNext()) {
             RandomWalkMessage message = messages.next();
+            // the last id of path is the previous id
+            Id preVertexId = message.path().getLast();
 
             if (message.isFinish()) {
-                this.savePath(vertex, message.path()); // save result
+                this.savePath(vertex, message.path());
 
                 vertex.inactivate();
                 continue;
@@ -219,7 +227,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
             message.addToPath(vertex);
 
             if (vertex.numEdges() <= 0) {
-                // there is nowhere to walk，finish eariler
+                // there is nowhere to walk, finish eariler
                 message.finish();
                 context.sendMessage(this.getSourceId(message.path()), message);
 
@@ -233,7 +241,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
 
                 if (vertex.id().equals(sourceId)) {
                     // current vertex is the source vertex，no need to send message once more
-                    this.savePath(vertex, message.path()); // save result
+                    this.savePath(vertex, message.path());
                 } else {
                     context.sendMessage(sourceId, message);
                 }
@@ -242,8 +250,11 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
                 continue;
             }
 
+            vertex.edges().forEach(edge -> message.addToPreVertexAdjacence(edge.targetId()));
+
             // random select one edge and walk
-            Edge selectedEdge = this.randomSelectEdge(vertex.edges());
+            Edge selectedEdge = this.randomSelectEdge(preVertexId, message.preVertexAdjacence(),
+                                                      vertex.edges());
             context.sendMessage(selectedEdge.targetId(), message);
         }
     }
@@ -251,20 +262,108 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     /**
      * random select one edge
      */
-    private Edge randomSelectEdge(Edges edges) {
-        Edge selectedEdge = null;
-        int randomNum = random.nextInt(edges.size());
+    private Edge randomSelectEdge(Id preVertexId, IdList preVertexAdjacenceIdList, Edges edges) {
+        List<Double> weightList = new ArrayList<>();
 
-        int i = 0;
         Iterator<Edge> iterator = edges.iterator();
         while (iterator.hasNext()) {
-            selectedEdge = iterator.next();
-            if (i == randomNum) {
-                break;
-            }
-            i++;
+            Edge edge = iterator.next();
+            // calculate weight
+            Value weight = this.getWeight(edge);
+            Double finalWeight = this.calculateWeight(preVertexId, preVertexAdjacenceIdList,
+                                                      edge.targetId(), weight);
+            weightList.add(finalWeight);
         }
 
+        int selectedIndex = this.randomSelectIndex(weightList);
+        Edge selectedEdge = this.selectEdge(edges.iterator(), selectedIndex);
+        return selectedEdge;
+    }
+
+    /**
+     * get edge weight by weight property
+     */
+    private Value getWeight(Edge edge) {
+        Value weight = edge.property(this.weightProperty);
+        if (weight == null) {
+            weight.assign(new DoubleValue(this.defaultWeight));
+        }
+
+        if (!weight.isNumber()) {
+            throw new ComputerException("The value of %s must be a numeric value, " +
+                                        "actual got '%s'",
+                                        this.weightProperty, weight.string());
+        }
+        return weight;
+    }
+
+    /**
+     * calculate edge weight
+     */
+    private Double calculateWeight(Id preVertexId, IdList preVertexAdjacenceIdList,
+                                   Id nextVertexId, Value weight) {
+        /*
+         * 3 types of vertices.
+         * 1. current vertex, called v
+         * 2. previous vertex, called t
+         * 3. current vertex outer vertex, called x(x1, x2.. xn)
+         *
+         * Definition of weight correction coefficient α:
+         * if distance(t, x) = 0, then α = 1.0 / returnFactor
+         * if distance(t, x) = 1, then α = 1.0
+         * if distance(t, x) = 2, then α = 1.0 / inOutFactor
+         *
+         * Final edge weight π(v, x) = α * edgeWeight
+         */
+        Double finalWeight = 0.0;
+        if (preVertexId != null && preVertexId.equals(nextVertexId)) {
+            // distance(t, x) = 0
+            finalWeight = 1.0 / this.returnFactor * (Double) weight.value();
+        } else if (preVertexAdjacenceIdList != null
+                   && preVertexAdjacenceIdList.contains(nextVertexId)) {
+            // distance(t, x) = 1
+            finalWeight = 1.0 * (Double) weight.value();
+        } else {
+            // distance(t, x) = 2
+            finalWeight = 1.0 / this.inOutFactor * (Double) weight.value();
+        }
+        return finalWeight;
+    }
+
+    /**
+     * random select index
+     */
+    private int randomSelectIndex(List<Double> weightList) {
+        int selectedIndex = 0;
+        double totalWeight = weightList.stream().mapToDouble(Double::doubleValue).sum();
+        double randomNum = random.nextDouble() * totalWeight; // [0, totalWeight)
+
+        // determine which interval the random number falls into
+        double cumulativeWeight = 0;
+        for (int i = 0; i < weightList.size(); ++i) {
+            cumulativeWeight += weightList.get(i);
+            if (randomNum < cumulativeWeight) {
+                selectedIndex = i;
+                break;
+            }
+        }
+        return selectedIndex;
+    }
+
+    /**
+     * select edge from iterator by index
+     */
+    private Edge selectEdge(Iterator<Edge> iterator, int selectedIndex) {
+        Edge selectedEdge = null;
+
+        int index = 0;
+        while (iterator.hasNext()) {
+            selectedEdge = iterator.next();
+            if (index == selectedIndex) {
+                break;
+            }
+            index++;
+        }
         return selectedEdge;
     }
 
