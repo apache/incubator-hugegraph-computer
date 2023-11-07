@@ -73,6 +73,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     private String weightProperty;
 
     /**
+     * Biased walk
      * Default 1
      */
     private Double defaultWeight;
@@ -372,7 +373,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
      */
     private Id getSourceId(IdList path) {
         // the first id of path is the source id
-        return path.get(0);
+        return path.getFirst();
     }
 
     /**
