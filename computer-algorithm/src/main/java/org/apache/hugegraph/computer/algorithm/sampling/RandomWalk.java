@@ -287,7 +287,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
     private Value getWeight(Edge edge) {
         Value weight = edge.property(this.weightProperty);
         if (weight == null) {
-            weight.assign(new DoubleValue(this.defaultWeight));
+            weight = new DoubleValue(this.defaultWeight);
         }
 
         if (!weight.isNumber()) {
@@ -320,8 +320,8 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
         if (preVertexId != null && preVertexId.equals(nextVertexId)) {
             // distance(t, x) = 0
             finalWeight = 1.0 / this.returnFactor * (Double) weight.value();
-        } else if (preVertexAdjacenceIdList != null
-                   && preVertexAdjacenceIdList.contains(nextVertexId)) {
+        } else if (preVertexAdjacenceIdList != null &&
+                   preVertexAdjacenceIdList.contains(nextVertexId)) {
             // distance(t, x) = 1
             finalWeight = 1.0 * (Double) weight.value();
         } else {
