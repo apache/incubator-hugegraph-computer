@@ -118,8 +118,8 @@ public class RandomWalkTest extends AlgorithmTestBase {
 
         private static String WEIGHT_PROPERTY = PROPERTY_KEY;
         private static Double DEFAULT_WEIGHT = 1.0;
-        private static Integer MIN_WEIGHT_THRESHOLD = 0;
-        private static Integer MAX_WEIGHT_THRESHOLD = Integer.MAX_VALUE;
+        private static Double MIN_WEIGHT_THRESHOLD = 0.0;
+        private static Double MAX_WEIGHT_THRESHOLD = Double.MAX_VALUE;
 
         private static Double RETURN_FACTOR = 2.0;
         private static Double INOUT_FACTOR = 1.0 / 2.0;

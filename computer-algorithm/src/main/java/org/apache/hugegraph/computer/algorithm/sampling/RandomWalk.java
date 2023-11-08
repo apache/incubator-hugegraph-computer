@@ -82,13 +82,13 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
      * Weight less than this threshold will be truncated.
      * Default 0
      */
-    private Integer minWeightThreshold;
+    private Double minWeightThreshold;
 
     /**
      * Weight greater than this threshold will be truncated.
      * Default Integer.MAX_VALUE
      */
-    private Integer maxWeightThreshold;
+    private Double maxWeightThreshold;
 
     /**
      * Controls the probability of re-walk to a previously walked vertex.
@@ -145,7 +145,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
         LOG.info("[RandomWalk] algorithm param, {}: {}",
                  OPTION_DEFAULT_WEIGHT, this.defaultWeight);
 
-        this.minWeightThreshold = config.getInt(OPTION_MIN_WEIGHT_THRESHOLD, 0);
+        this.minWeightThreshold = config.getDouble(OPTION_MIN_WEIGHT_THRESHOLD, 0.0);
         if (this.minWeightThreshold < 0) {
             throw new ComputerException("The param %s must be greater than or equal 0, " +
                                         "actual got '%s'",
@@ -154,7 +154,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
         LOG.info("[RandomWalk] algorithm param, {}: {}",
                  OPTION_MIN_WEIGHT_THRESHOLD, this.minWeightThreshold);
 
-        this.maxWeightThreshold = config.getInt(OPTION_MAX_WEIGHT_THRESHOLD, Integer.MAX_VALUE);
+        this.maxWeightThreshold = config.getDouble(OPTION_MAX_WEIGHT_THRESHOLD, Double.MAX_VALUE);
         if (this.maxWeightThreshold < 0) {
             throw new ComputerException("The param %s must be greater than or equal 0, " +
                                         "actual got '%s'",
