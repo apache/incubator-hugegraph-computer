@@ -295,6 +295,14 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
                                         "actual got '%s'",
                                         this.weightProperty, weight.string());
         }
+
+        // weight threshold truncation
+        if ((Double) weight.value() < this.minWeightThreshold) {
+            weight = new DoubleValue(this.minWeightThreshold);
+        }
+        if ((Double) weight.value() > this.maxWeightThreshold) {
+            weight = new DoubleValue(this.maxWeightThreshold);
+        }
         return weight;
     }
 
