@@ -64,7 +64,7 @@ public class ClusteringCoefficient extends TriangleCount {
         selfId.add(vertex.id());
 
         context.sendMessageToAllEdgesIf(vertex, selfId, (ids, targetId) -> {
-            return !ids.get(0).equals(targetId);
+            return !ids.getFirst().equals(targetId);
         });
         vertex.value(new ClusteringCoefficientValue());
     }
