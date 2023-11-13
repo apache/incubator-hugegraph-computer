@@ -62,7 +62,7 @@ public class RandomWalkTest extends AlgorithmTestBase {
         SchemaManager schema = client.schema();
 
         schema.propertyKey(PROPERTY_KEY)
-              .asInt()
+              .asDouble()
               .ifNotExist()
               .create();
         schema.vertexLabel("user")
@@ -73,6 +73,7 @@ public class RandomWalkTest extends AlgorithmTestBase {
               .sourceLabel("user")
               .targetLabel("user")
               .properties(PROPERTY_KEY)
+              .nullableKeys(PROPERTY_KEY)
               .ifNotExist()
               .create();
 
@@ -89,10 +90,10 @@ public class RandomWalkTest extends AlgorithmTestBase {
         Vertex vG = graph.addVertex(T.LABEL, "user", T.ID, "G");
 
         vA.addEdge("know", vB, PROPERTY_KEY, 9);
-        vA.addEdge("know", vC, PROPERTY_KEY, 1);
+        vA.addEdge("know", vC);
         vA.addEdge("know", vD, PROPERTY_KEY, 3);
         vB.addEdge("know", vC, PROPERTY_KEY, 2);
-        vC.addEdge("know", vA, PROPERTY_KEY, 1);
+        vC.addEdge("know", vA);
         vC.addEdge("know", vE, PROPERTY_KEY, 2);
         vD.addEdge("know", vA, PROPERTY_KEY, 7);
         vD.addEdge("know", vC, PROPERTY_KEY, 1);
