@@ -75,7 +75,7 @@ public class TriangleCount implements Computation<IdList> {
             while (messages.hasNext()) {
                 IdList idList = messages.next();
                 assert idList.size() == 1;
-                Id inId = idList.get(0);
+                Id inId = idList.getFirst();
                 if (!outNeighbors.contains(inId)) {
                     neighbors.add(inId);
                 }

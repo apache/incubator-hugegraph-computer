@@ -132,7 +132,7 @@ public class BetweennessCentrality implements Computation<BetweennessMessage> {
 
         BetweennessValue value = vertex.value();
         IdSet arrivedVertices = value.arrivedVertices();
-        Id source = sequence.get(0);
+        Id source = sequence.getFirst();
         // The source vertex is arriving at first time
         if (!arrivedVertices.contains(source)) {
             arrivingVertices.add(source);

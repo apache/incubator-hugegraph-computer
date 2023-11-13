@@ -77,7 +77,7 @@ public class RingsDetectionWithFilter
                 halt = false;
                 RingsDetectionMessage message = messages.next();
                 IdList path = message.path();
-                if (vertexId.equals(path.get(0))) {
+                if (vertexId.equals(path.getFirst())) {
                     // Use the smallest vertex record ring
                     boolean isMin = true;
                     for (int i = 0; i < path.size(); i++) {

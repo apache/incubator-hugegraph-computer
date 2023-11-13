@@ -90,6 +90,13 @@ public class ListValue<T extends Tvalue<?>> implements Tvalue<List<Object>> {
         return this.values.get(index);
     }
 
+    public T getFirst() {
+        if (this.values.size() == 0) {
+            throw new NoSuchElementException("The list is empty");
+        }
+        return this.values.get(0);
+    }
+
     public T getLast() {
         int index = this.values.size() - 1;
         if (index < 0) {
