@@ -79,6 +79,8 @@ public class Lpa implements Computation<Id> {
         }
 
         // Calculate the labels with maximum frequency
+        // TODO: use primitive array instead, like DoubleArray,
+        //  in order to reduce memory fragmentation generated during calculations
         List<Id> maxLabels = new ArrayList<>();
         int maxFreq = 1;
         for (Map.Entry<Id, MutableInt> e : labels.entrySet()) {

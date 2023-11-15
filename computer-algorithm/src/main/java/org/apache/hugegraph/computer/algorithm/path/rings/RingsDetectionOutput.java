@@ -39,6 +39,8 @@ public class RingsDetectionOutput extends HugeGraphOutput<List<String>> {
     @Override
     protected List<String> value(Vertex vertex) {
         IdListList value = vertex.value();
+        // TODO: use primitive array instead, like DoubleArray,
+        //  in order to reduce memory fragmentation generated during calculations
         List<String> propValues = new ArrayList<>();
         for (int i = 0; i < value.size(); i++) {
             propValues.add(value.get(i).toString());

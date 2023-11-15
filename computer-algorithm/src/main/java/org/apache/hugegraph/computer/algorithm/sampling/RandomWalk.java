@@ -250,6 +250,8 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
      * random select one edge
      */
     private Edge randomSelectEdge(Id preVertexId, IdList preVertexAdjacenceIdList, Edges edges) {
+        // TODO: use primitive array instead, like DoubleArray,
+        //  in order to reduce memory fragmentation generated during calculations
         List<Double> weightList = new ArrayList<>();
 
         Iterator<Edge> iterator = edges.iterator();
@@ -259,6 +261,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
             double weight = this.getEdgeWeight(edge);
             double finalWeight = this.calculateEdgeWeight(preVertexId, preVertexAdjacenceIdList,
                                                           edge.targetId(), weight);
+            // TODO: improve to avoid OOM
             weightList.add(finalWeight);
         }
 
