@@ -257,7 +257,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
             Edge edge = iterator.next();
             // calculate edge weight
             double weight = this.getEdgeWeight(edge);
-            Double finalWeight = this.calculateEdgeWeight(preVertexId, preVertexAdjacenceIdList,
+            double finalWeight = this.calculateEdgeWeight(preVertexId, preVertexAdjacenceIdList,
                                                           edge.targetId(), weight);
             weightList.add(finalWeight);
         }
@@ -271,32 +271,33 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
      * get the weight of an edge by its weight property
      */
     private double getEdgeWeight(Edge edge) {
-        Value property = edge.property(this.weightProperty);
-        if (property == null) {
-            property = new DoubleValue(this.defaultWeight);
-        }
+        double weight = this.defaultWeight;
 
-        if (!property.isNumber()) {
-            throw new ComputerException("The value of %s must be a numeric value, " +
-                                        "actual got '%s'",
-                                        this.weightProperty, property.string());
+        Value property = edge.property(this.weightProperty);
+        if (property != null) {
+            if (!property.isNumber()) {
+                throw new ComputerException("The value of %s must be a numeric value, " +
+                                            "actual got '%s'",
+                                            this.weightProperty, property.string());
+            }
+
+            weight = ((DoubleValue) property).doubleValue();
         }
 
         // weight threshold truncation
-        DoubleValue weight = (DoubleValue) property;
-        if (weight.doubleValue() < this.minWeightThreshold) {
-            weight = new DoubleValue(this.minWeightThreshold);
+        if (weight < this.minWeightThreshold) {
+            weight = this.minWeightThreshold;
         }
-        if (weight.doubleValue() > this.maxWeightThreshold) {
-            weight = new DoubleValue(this.maxWeightThreshold);
+        if (weight > this.maxWeightThreshold) {
+            weight = this.maxWeightThreshold;
         }
-        return weight.doubleValue();
+        return weight;
     }
 
     /**
      * calculate edge weight
      */
-    private Double calculateEdgeWeight(Id preVertexId, IdList preVertexAdjacenceIdList,
+    private double calculateEdgeWeight(Id preVertexId, IdList preVertexAdjacenceIdList,
                                        Id nextVertexId, double weight) {
         /*
          * 3 types of vertices.
@@ -311,7 +312,7 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
          *
          * Final edge weight π(v, x) = α * edgeWeight
          */
-        Double finalWeight = 0.0;
+        double finalWeight = 0.0;
         if (preVertexId != null && preVertexId.equals(nextVertexId)) {
             // distance(t, x) = 0
             finalWeight = 1.0 / this.returnFactor * weight;
