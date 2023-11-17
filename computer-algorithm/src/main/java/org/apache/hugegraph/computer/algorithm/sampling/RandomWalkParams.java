@@ -33,6 +33,8 @@ public class RandomWalkParams implements AlgorithmParams {
                          RandomWalkMessage.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
                          IdListList.class.getName());
+        this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,
+                         EXTRACTALLPROPERTYINPUTFILTER_CLASS_NAME);
         this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                          RandomWalkOutput.class.getName());
 
