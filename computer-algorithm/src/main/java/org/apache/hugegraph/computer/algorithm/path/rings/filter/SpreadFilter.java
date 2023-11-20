@@ -128,8 +128,6 @@ public class SpreadFilter {
         if (filter.size() == 0) {
             return PASS;
         }
-        // TODO: use primitive array instead, like DoubleArray,
-        //  in order to reduce memory fragmentation generated during calculations
         List<Serializable> expressions = new ArrayList<>();
         if (filter.containsKey(ALL)) {
             expressions.add(filter.get(ALL));
