@@ -196,6 +196,18 @@ public class ListValueTest extends UnitTestBase {
     }
 
     @Test
+    public void testClear() {
+        ListValue<IntValue> value = new ListValue<>(ValueType.INT);
+        value.add(new IntValue(101));
+        value.add(new IntValue(102));
+        value.add(new IntValue(103));
+        Assert.assertEquals(3, value.size());
+
+        value.clear();
+        Assert.assertEquals(0, value.size());
+    }
+
+    @Test
     public void testValues() {
         ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
         ListValue<FloatValue> value2 = new ListValue<>(ValueType.FLOAT);
