@@ -134,7 +134,6 @@ public class SourceTargetShortestPath implements Computation<ShortestPathMessage
         vertex.inactivate();
     }
 
-    // todo messages 似乎可以combine合并一下，只留下一条最短的距离message即可
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<ShortestPathMessage> messages) {
@@ -145,6 +144,8 @@ public class SourceTargetShortestPath implements Computation<ShortestPathMessage
             if (message.totalWeight() < value.totalWeight()) {
                 // find a shorter path
                 value.updatePath(message.path(), message.pathWeight(), vertex);
+            } else {
+                continue;
             }
 
             // reach target vertex or nowhere to go
