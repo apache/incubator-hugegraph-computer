@@ -30,6 +30,8 @@ public class SourceTargetShortestPathParams implements AlgorithmParams {
                          SourceTargetShortestPath.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                          ShortestPathMessage.class.getName());
+        this.setIfAbsent(params, ComputerOptions.WORKER_COMBINER_CLASS,
+                         ShortestPathCombiner.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_RESULT_CLASS,
                          ShortestPathValue.class.getName());
         this.setIfAbsent(params, ComputerOptions.INPUT_FILTER_CLASS,

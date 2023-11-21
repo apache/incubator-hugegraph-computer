@@ -62,6 +62,14 @@ public class ShortestPathMessage implements Value.CustomizeValue<List<Object>> {
         return this.path.value();
     }
 
+    public void value(ShortestPathMessage message) {
+        this.path.clear();
+        this.pathWeight.clear();
+
+        this.path.addAll(message.path().copy().values());
+        this.pathWeight.addAll(message.pathWeight().copy().values());
+    }
+
     public void addToPath(Vertex vertex, double weight) {
         this.path.add(vertex.id());
         this.pathWeight.add(new DoubleValue(weight));
