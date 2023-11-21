@@ -91,8 +91,10 @@ public class SourceTargetShortestPathTest extends AlgorithmTestBase {
         vC.addEdge(EL, vB, PROPERTY_KEY, 15);
         vC.addEdge(EL, vF, PROPERTY_KEY, 7);
 
+        vE.addEdge(EL, vB, PROPERTY_KEY, 6);
         vE.addEdge(EL, vD, PROPERTY_KEY, 4);
 
+        vF.addEdge(EL, vC, PROPERTY_KEY, 8);
         vF.addEdge(EL, vD, PROPERTY_KEY, 10);
         vF.addEdge(EL, vE, PROPERTY_KEY, 18);
 
