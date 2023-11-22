@@ -45,7 +45,7 @@ jobs:
         with:
           path: ~/hadoop-3.3.2.tar.gz
           key: ${{ runner.os }}--hadoop
-          restore-keys: ${{ runner.os }}--hadoop
+          restore-keys: ${{ runner.os }}-hadoop
 
       - name: Download HDFS
         if: steps.hdfs-cache.outputs.cache-hit != 'true'
