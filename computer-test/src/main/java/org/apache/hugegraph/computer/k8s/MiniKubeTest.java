@@ -51,6 +51,7 @@ import org.apache.hugegraph.testutil.Whitebox;
 import org.apache.hugegraph.util.Log;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.RepeatedTest;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 
@@ -222,7 +223,7 @@ public class MiniKubeTest extends AbstractK8sTest {
         future.cancel(true);
     }
 
-    @Test
+    @RepeatedTest(20)
     public void testJobCancelled() {
         super.updateOptions(KubeSpecOptions.MASTER_ARGS.name(),
                             Lists.newArrayList("pwd && sleep 60"));
