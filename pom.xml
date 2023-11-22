@@ -31,7 +31,8 @@
     <name>hugegraph-computer</name>
     <url>https://github.com/apache/hugegraph-computer</url>
     <description>
-        hugegraph-computer is a fast-speed, highly-scalable, fault-tolerance graph processing system developed by apache.
+        hugegraph-computer is a fast-speed, highly scalable, fault-tolerance graph processing
+        system developed by apache.
     </description>
 
     <inceptionYear>2020</inceptionYear>
@@ -88,6 +89,7 @@
     </prerequisites>
 
     <properties>
+        <!-- TODO: update the version after toolchain v1.2 fixed -->
         <revision>1.0.0</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <top.level.dir>${project.basedir}/..</top.level.dir>
@@ -100,7 +102,7 @@
         <hadoop-version>3.1.2</hadoop-version>
         <netty-version>4.1.42.Final</netty-version>
         <commons-lang3-version>3.12.0</commons-lang3-version>
-        <hugegraph-common-version>1.0.0</hugegraph-common-version>
+        <hugegraph-common-version>1.2.0</hugegraph-common-version>
         <hugegraph-client-version>1.0.0</hugegraph-client-version>
         <hugegraph-rpc-version>1.0.0</hugegraph-rpc-version>
         <hugegraph-loader-version>1.0.0</hugegraph-loader-version>
@@ -347,7 +349,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <!-- Keep fix version to avoid computer-k8s-operator build error -->
+                <!-- Keep a fixed version to avoid computer-k8s-operator build error -->
                 <version>3.1</version>
                 <configuration>
                     <source>${compiler.source}</source>
@@ -525,6 +527,16 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <!-- use mvn -P stage to enable the remote apache-stage repo -->
+        <profile>
+            <id>stage</id>
+            <repositories>
+                <repository>
+                    <id>staged-releases</id>
+                    <url>https://repository.apache.org/content/groups/staging/</url>
+                </repository>
+            </repositories>
         </profile>
     </profiles>
 </project>

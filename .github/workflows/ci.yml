@@ -11,14 +11,16 @@ jobs:
   computer-ci:
     runs-on: ubuntu-latest
     env:
+      USE_STAGE: 'true' # Whether to include the stage repository.
       TRAVIS_DIR: computer-dist/src/assembly/travis
       KUBERNETES_VERSION: 1.20.1
+      # TODO: update it before release
       HUGEGRAPH_SERVER_COMMIT_ID: d01c8737d7d5909119671953521f1401dcd1a188
       BSP_ETCD_URL: http://localhost:2579
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
@@ -73,6 +75,7 @@ jobs:
       - name: Prepare env and service
         run: |
           $TRAVIS_DIR/install-env.sh
+          # TODO: use docker image to replace it
           $TRAVIS_DIR/install-hugegraph-from-source.sh $HUGEGRAPH_SERVER_COMMIT_ID
           $TRAVIS_DIR/load-data-into-hugegraph.sh
 
@@ -81,6 +84,12 @@ jobs:
         with:
           java-version: '11'
           distribution: 'zulu'
+
+      - name: Use staged maven repo
+        if: ${{ env.USE_STAGE == 'true' }}
+        run: |
+          cp $HOME/.m2/settings.xml /tmp/settings.xml
+          mv -vf .github/configs/settings.xml $HOME/.m2/settings.xml
 
       - name: Compile
         run: mvn clean compile -Dmaven.javadoc.skip=true -ntp
@@ -92,6 +101,7 @@ jobs:
         run: mvn test -P unit-test -ntp
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.0.0
+        uses: codecov/codecov-action@v3
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: target/site/jacoco/jacoco.xml
