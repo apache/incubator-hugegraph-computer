@@ -18,6 +18,7 @@
 package org.apache.hugegraph.computer.driver;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public enum JobStatus {
 
@@ -35,5 +36,10 @@ public enum JobStatus {
         return Objects.equals(status, CANCELLED.name()) ||
                Objects.equals(status, FAILED.name()) ||
                Objects.equals(status, SUCCEEDED.name());
+    }
+
+    @Override
+    public String toString() {
+        return this.name();
     }
 }
