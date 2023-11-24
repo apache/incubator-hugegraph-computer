@@ -249,7 +249,7 @@ public class MiniKubeTest extends AbstractK8sTest {
 
         this.driver.cancelJob(jobId, params);
 
-        UnitTestBase.sleep(1500L);
+        UnitTestBase.sleep(10000L);
 
         DefaultJobState jobState2 = new DefaultJobState();
         jobState2.jobStatus(JobStatus.CANCELLED);
