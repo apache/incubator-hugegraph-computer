@@ -37,8 +37,4 @@ public enum JobStatus {
                Objects.equals(status, SUCCEEDED.name());
     }
 
-    @Override
-    public String toString() {
-        return this.name();
-    }
 }

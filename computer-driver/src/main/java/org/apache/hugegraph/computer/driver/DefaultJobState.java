@@ -18,6 +18,7 @@
 package org.apache.hugegraph.computer.driver;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public class DefaultJobState implements JobState {
 
@@ -86,5 +87,15 @@ public class DefaultJobState implements JobState {
     public int hashCode() {
         return Objects.hash(this.superstep, this.maxSuperstep,
                             this.lastSuperstepStat, this.jobStatus);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", DefaultJobState.class.getSimpleName() + "[", "]")
+            .add("superstep=" + superstep)
+            .add("maxSuperstep=" + maxSuperstep)
+            .add("lastSuperstepStat=" + lastSuperstepStat)
+            .add("jobStatus=" + jobStatus)
+            .toString();
     }
 }
