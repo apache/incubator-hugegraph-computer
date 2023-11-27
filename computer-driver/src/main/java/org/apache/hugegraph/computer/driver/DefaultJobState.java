@@ -91,11 +91,12 @@ public class DefaultJobState implements JobState {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", DefaultJobState.class.getSimpleName() + "[", "]")
-            .add("superstep=" + superstep)
-            .add("maxSuperstep=" + maxSuperstep)
-            .add("lastSuperstepStat=" + lastSuperstepStat)
-            .add("jobStatus=" + jobStatus)
-            .toString();
+        return String.format("%s[super=%s, maxSuperStep=%s, lastSuperstepStat=%s, jobStatus=%s]",
+            DefaultJobState.class.getSimpleName(),
+            superstep,
+            maxSuperstep,
+            lastSuperstepStat,
+            jobStatus
+        );
     }
 }

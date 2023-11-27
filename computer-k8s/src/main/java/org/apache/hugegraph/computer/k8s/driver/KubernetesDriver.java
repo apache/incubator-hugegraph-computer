@@ -284,8 +284,8 @@ public class KubernetesDriver implements ComputerDriver {
     @Override
     public boolean cancelJob(String jobId, Map<String, String> params) {
         return this.operation.withName(KubeUtil.crName(jobId))
-            .withPropagationPolicy(DeletionPropagation.FOREGROUND)
-            .delete();
+                             .withPropagationPolicy(DeletionPropagation.FOREGROUND)
+                             .delete();
     }
 
     @Override
