@@ -18,7 +18,6 @@
 package org.apache.hugegraph.computer.driver;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
 public class DefaultJobState implements JobState {
 
