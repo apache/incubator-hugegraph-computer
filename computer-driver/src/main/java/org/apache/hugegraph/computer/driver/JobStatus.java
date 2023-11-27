@@ -36,5 +36,4 @@ public enum JobStatus {
                Objects.equals(status, FAILED.name()) ||
                Objects.equals(status, SUCCEEDED.name());
     }
-
 }
