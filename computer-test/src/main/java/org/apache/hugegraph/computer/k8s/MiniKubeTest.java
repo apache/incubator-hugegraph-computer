@@ -243,7 +243,7 @@ public class MiniKubeTest extends AbstractK8sTest {
                                                                   jobObserver);
 
         DefaultJobState jobState = new DefaultJobState();
-        jobState.jobStatus(JobStatus.RUNNING);
+        jobState.jobStatus(JobStatus.INITIALIZING);
         Mockito.verify(jobObserver, Mockito.timeout(15000L).atLeast(1))
                .onJobStateChanged(Mockito.eq(jobState));
 
