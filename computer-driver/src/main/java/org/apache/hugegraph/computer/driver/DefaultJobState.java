@@ -91,11 +91,7 @@ public class DefaultJobState implements JobState {
     @Override
     public String toString() {
         return String.format("%s[super=%s, maxSuperStep=%s, lastSuperstepStat=%s, jobStatus=%s]",
-            DefaultJobState.class.getSimpleName(),
-            superstep,
-            maxSuperstep,
-            lastSuperstepStat,
-            jobStatus
-        );
+                             DefaultJobState.class.getSimpleName(), superstep, maxSuperstep,
+                             lastSuperstepStat, jobStatus);
     }
 }
