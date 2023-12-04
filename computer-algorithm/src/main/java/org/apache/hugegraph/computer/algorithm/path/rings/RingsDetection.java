@@ -70,7 +70,7 @@ public class RingsDetection implements Computation<IdList> {
         while (messages.hasNext()) {
             halt = false;
             IdList sequence = messages.next();
-            if (id.equals(sequence.get(0))) {
+            if (id.equals(sequence.getFirst())) {
                 // Use the smallest vertex record ring
                 boolean isMin = true;
                 for (int i = 1; i < sequence.size(); i++) {
@@ -96,7 +96,7 @@ public class RingsDetection implements Computation<IdList> {
                     }
                 }
                 // Field ringId is smallest vertex id in path
-                Id ringId = sequence.get(0);
+                Id ringId = sequence.getFirst();
                 if (!contains) {
                     sequence.add(vertex.id());
                     for (Edge edge : vertex.edges()) {

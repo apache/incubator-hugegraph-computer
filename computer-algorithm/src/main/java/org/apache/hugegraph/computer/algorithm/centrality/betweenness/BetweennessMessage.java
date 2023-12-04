@@ -81,8 +81,8 @@ public class BetweennessMessage implements CustomizeValue<BetweennessMessage> {
         BetweennessMessage other = (BetweennessMessage) value;
         E.checkArgument(this.sequence.size() != 0, "Sequence can't be empty");
         E.checkArgument(other.sequence.size() != 0, "Sequence can't be empty");
-        Id selfSourceId = this.sequence.get(0);
-        Id otherSourceId = other.sequence.get(0);
+        Id selfSourceId = this.sequence.getFirst();
+        Id otherSourceId = other.sequence.getFirst();
         return selfSourceId.compareTo(otherSourceId);
     }
 }

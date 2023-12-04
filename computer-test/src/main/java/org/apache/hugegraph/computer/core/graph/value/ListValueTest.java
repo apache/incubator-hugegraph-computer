@@ -135,6 +135,23 @@ public class ListValueTest extends UnitTestBase {
     }
 
     @Test
+    public void testGetFirst() {
+        ListValue<IntValue> value = new ListValue<>(ValueType.INT);
+
+        Assert.assertThrows(NoSuchElementException.class, () -> {
+            value.getFirst();
+        }, e -> {
+            Assert.assertContains("The list is empty", e.getMessage());
+        });
+
+        value.add(new IntValue(100));
+        Assert.assertEquals(100, value.getFirst().value());
+
+        value.add(new IntValue(200));
+        Assert.assertEquals(100, value.getFirst().value());
+    }
+
+    @Test
     public void testGetLast() {
         ListValue<IntValue> value1 = new ListValue<>(ValueType.INT);
 
