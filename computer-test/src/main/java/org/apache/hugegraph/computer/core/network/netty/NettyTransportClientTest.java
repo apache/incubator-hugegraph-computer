@@ -275,7 +275,6 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testHandlerException() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-
         client.startSession();
 
         Mockito.doThrow(new RuntimeException("test exception")).when(serverHandler)

@@ -21,26 +21,30 @@ set -ev
 TRAVIS_DIR=$(dirname "$0")
 DATASET_DIR=${TRAVIS_DIR}/../dataset
 
+#HUGEGRAPH_LOADER_GIT_URL="https://github.com/apache/hugegraph-toolchain.git"
+#git clone --depth 10 ${HUGEGRAPH_LOADER_GIT_URL} hugegraph-toolchain
+#
+#cd hugegraph-toolchain
+#mvn install -P stage -pl hugegraph-client,hugegraph-loader -am -DskipTests -ntp
+#
+#cd hugegraph-loader
+#tar -zxf target/apache-hugegraph-loader-*.tar.gz || exit 1
+#cd ../../
+
 # TODO: replace with docker mode https://hub.docker.com/r/hugegraph/loader
-HUGEGRAPH_LOADER_GIT_URL="https://github.com/apache/hugegraph-toolchain.git"
-
-git clone --depth 10 ${HUGEGRAPH_LOADER_GIT_URL} hugegraph-toolchain
-
-cd hugegraph-toolchain
-mvn install -P stage -pl hugegraph-client,hugegraph-loader -am -DskipTests -ntp
-
-cd hugegraph-loader
-tar -zxf target/apache-hugegraph-loader-*.tar.gz || exit 1
-cd ../../
+docker run -itd --name=loader -v ${DATASET_DIR}:/loader/dataset hugegraph/hugegraph-loader:latest
 
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d ${DATASET_DIR} ml-latest-small.zip
 
-hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/hugegraph-loader.sh \
--g hugegraph -f ${DATASET_DIR}/struct.json -s ${DATASET_DIR}/schema.groovy || exit 1
+docker exec -it loader bin/hugegraph-loader.sh -g hugegraph -f /loader/dataset/struct.json \
+    -s /loader/dataset/schema.groovy -h graph -p 8080
+
+#hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/hugegraph-loader.sh \
+#    -g hugegraph -f ${DATASET_DIR}/struct.json -s ${DATASET_DIR}/schema.groovy || exit 1
 
 # load dataset to hdfs
-sort -t , -k1n -u "${DATASET_DIR}"/ml-latest-small/ratings.csv | cut -d "," -f 1 > "${DATASET_DIR}"/ml-latest-small/user_id.csv || exit 1
+sort -t , -k1n -u "${DATASET_DIR}"/ml-latest-small/ratings.csv | cut -d "," -f 1 >"${DATASET_DIR}"/ml-latest-small/user_id.csv || exit 1
 /opt/hadoop/bin/hadoop fs -mkdir -p /dataset/ml-latest-small || exit 1
 /opt/hadoop/bin/hadoop fs -put "${DATASET_DIR}"/ml-latest-small/* /dataset/ml-latest-small || exit 1
 /opt/hadoop/bin/hadoop fs -ls /dataset/ml-latest-small
