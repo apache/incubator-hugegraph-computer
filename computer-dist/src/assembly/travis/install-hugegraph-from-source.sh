@@ -17,30 +17,28 @@
 #
 set -ev
 
-docker run -itd --name=graph -p 8080:8080 hugegraph/hugegraph:latest
+if [[ $# -ne 1 ]]; then
+    echo "Must pass commit id of hugegraph repo"
+    exit 1
+fi
 
-#if [[ $# -ne 1 ]]; then
-#    echo "Must pass commit id of hugegraph repo"
-#    exit 1
-#fi
-#
-#COMMIT_ID=$1
-#HUGEGRAPH_GIT_URL="https://github.com/apache/hugegraph.git"
-#
-#git clone --depth 100 ${HUGEGRAPH_GIT_URL} hugegraph
-#cd hugegraph
-#git checkout "${COMMIT_ID}"
-#mvn package -DskipTests -ntp
-#
-#mv apache-hugegraph-*.tar.gz ../
-#cd ../
-#rm -rf hugegraph
-#tar zxf apache-hugegraph-*.tar.gz
-#rm apache-hugegraph-*.tar.gz
-#cd "$(find apache-hugegraph-* | head -1)"
-#chmod -R 755 bin/
-#
-#bin/init-store.sh || exit 1
-#bin/start-hugegraph.sh || cat logs/hugegraph-server.log
+COMMIT_ID=$1
+HUGEGRAPH_GIT_URL="https://github.com/apache/hugegraph.git"
 
-#cd ../
+git clone --depth 100 ${HUGEGRAPH_GIT_URL} hugegraph
+cd hugegraph
+git checkout "${COMMIT_ID}"
+mvn package -DskipTests -ntp
+
+mv apache-hugegraph-*.tar.gz ../
+cd ../
+rm -rf hugegraph
+tar zxf apache-hugegraph-*.tar.gz
+rm apache-hugegraph-*.tar.gz
+cd "$(find apache-hugegraph-* | head -1)"
+chmod -R 755 bin/
+
+bin/init-store.sh || exit 1
+bin/start-hugegraph.sh || cat logs/hugegraph-server.log
+
+cd ../
