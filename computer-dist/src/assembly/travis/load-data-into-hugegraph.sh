@@ -37,9 +37,9 @@ wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d ${DATASET_DIR} ml-latest-small.zip
 
 cd ${DATASET_DIR}/.. && pwd && ls -lh *
-docker run -id --name=loader -v dataset:/dataset hugegraph/loader:latest
-docker exec -i loader ls -lh /dataset
+docker run -id --name=loader hugegraph/loader:latest
 docker cp dataset loader:/dataset
+docker exec -i loader ls -lh /dataset
 
 docker exec -i loader bin/hugegraph-loader.sh -g hugegraph -f /dataset/struct.json \
     -s /dataset/schema.groovy -h graph -p 8080
