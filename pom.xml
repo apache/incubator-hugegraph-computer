@@ -90,7 +90,11 @@
 
     <properties>
         <!-- TODO: update the version after toolchain v1.2 fixed -->
-        <revision>1.0.0</revision>
+        <revision>1.2.0</revision>
+        <hugegraph-common-version>1.2.0</hugegraph-common-version>
+        <hugegraph-client-version>1.2.0</hugegraph-client-version>
+        <hugegraph-rpc-version>1.2.0</hugegraph-rpc-version>
+        <hugegraph-loader-version>1.2.0</hugegraph-loader-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <top.level.dir>${project.basedir}/..</top.level.dir>
         <release.name>hugegraph-computer</release.name>
@@ -102,10 +106,6 @@
         <hadoop-version>3.1.2</hadoop-version>
         <netty-version>4.1.42.Final</netty-version>
         <commons-lang3-version>3.12.0</commons-lang3-version>
-        <hugegraph-common-version>1.2.0</hugegraph-common-version>
-        <hugegraph-client-version>1.0.0</hugegraph-client-version>
-        <hugegraph-rpc-version>1.0.0</hugegraph-rpc-version>
-        <hugegraph-loader-version>1.0.0</hugegraph-loader-version>
         <minio-version>8.5.6</minio-version>
     </properties>
 
