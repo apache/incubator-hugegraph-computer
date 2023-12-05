@@ -39,9 +39,10 @@ unzip -d ${DATASET_DIR} ml-latest-small.zip
 cd ${DATASET_DIR}/.. && pwd && ls -lh *
 docker run -id --name=loader hugegraph/loader:latest
 docker cp dataset loader:/dataset
+docker exec -i loader ls -lh /dataset
 
-docker exec -i loader ls -lh /dataset && bin/hugegraph-loader.sh -g hugegraph -p 8080 \
-    -f /dataset/struct.json -s /dataset/schema.groovy -h 127.0.0.1
+docker exec -i bin/hugegraph-loader.sh -g hugegraph -p 8080 -h 127.0.0.1 \
+    -f /dataset/struct.json -s /dataset/schema.groovy
 
 #hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/hugegraph-loader.sh \
 #    -g hugegraph -f ${DATASET_DIR}/struct.json -s ${DATASET_DIR}/schema.groovy || exit 1
