@@ -59,18 +59,17 @@ jobs:
       - name: Setup Minikube-Kubernetes
         run: $TRAVIS_DIR/install-k8s.sh
 
-      - name: Check Component
-        run: |
-          sleep 5
-          curl localhost:9000
-          kubectl get nodes
-
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
+      - name: Check Component
+        run: |
+          curl localhost:9000
+          kubectl get nodes
 
       - name: Prepare env and service
         run: |
