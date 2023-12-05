@@ -75,7 +75,6 @@ jobs:
       - name: Prepare env and service
         run: |
           $TRAVIS_DIR/install-env.sh
-          # TODO: use docker image to replace it
           $TRAVIS_DIR/install-hugegraph-from-source.sh $HUGEGRAPH_SERVER_COMMIT_ID
           $TRAVIS_DIR/load-data-into-hugegraph.sh
 
