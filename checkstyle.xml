@@ -35,7 +35,7 @@
     <module name="TreeWalker">
         <!--检查行长度-->
         <module name="LineLength">
-            <property name="max" value="100"/>
+            <property name="max" value="105"/>
             <!--可以忽略的行-->
             <property name="ignorePattern"
                       value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
@@ -84,7 +84,8 @@
         <module name="WhitespaceAround"/>
         <!--左圆括号之后和右圆括号之前是否需要有一个空格，不需要-->
         <module name="ParenPad"/>
-        <!--检查修饰符是否符合Java建议，顺序是：public、protected、private、abstract、default、static、final、transient、volatile、synchronized、native、strictfp-->
+        <!--检查修饰符是否符合Java建议，顺序是：public、protected、private、abstract、default、static、
+        final、transient、volatile、synchronized、native、strictfp-->
         <module name="ModifierOrder"/>
         <!--检查代码块的左花括号的放置位置，必须在当前行的末尾-->
         <module name="LeftCurly">

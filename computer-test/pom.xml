@@ -38,6 +38,12 @@
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>hugegraph-common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>kotlin-stdlib-jdk8</artifactId>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.hugegraph</groupId>
@@ -97,10 +103,36 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
+            <version>4.12.0</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>kotlin-stdlib</artifactId>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-server-mock</artifactId>
             <version>5.6.0</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>mockwebserver</artifactId>
+                    <groupId>com.squareup.okhttp3</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jackson-databind</artifactId>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
