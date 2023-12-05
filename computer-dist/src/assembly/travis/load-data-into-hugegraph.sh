@@ -37,15 +37,16 @@ wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d ${DATASET_DIR} ml-latest-small.zip
 
 cd ${DATASET_DIR}/.. && pwd && ls -lh *
-docker run -i --name=loader -v dataset:dataset hugegraph/loader:latest \
-    bin/hugegraph-loader.sh -g hugegraph -f dataset/struct.json \
-    -s dataset/schema.groovy -h graph -p 8080
+docker run -id --name=loader -v dataset:/dataset hugegraph/loader:latest
+
+docker exec -i loader bin/hugegraph-loader.sh -g hugegraph -f /dataset/struct.json \
+    -s /dataset/schema.groovy -h graph -p 8080
 
 #hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/hugegraph-loader.sh \
 #    -g hugegraph -f ${DATASET_DIR}/struct.json -s ${DATASET_DIR}/schema.groovy || exit 1
 
 # load dataset to hdfs
-sort -t , -k1n -u dataset/ml-latest-small/ratings.csv | cut -d "," -f 1 > dataset/ml-latest-small/user_id.csv || exit 1
+sort -t , -k1n -u dataset/ml-latest-small/ratings.csv | cut -d "," -f 1 >dataset/ml-latest-small/user_id.csv || exit 1
 /opt/hadoop/bin/hadoop fs -mkdir -p /dataset/ml-latest-small || exit 1
 /opt/hadoop/bin/hadoop fs -put dataset/ml-latest-small/* /dataset/ml-latest-small || exit 1
 /opt/hadoop/bin/hadoop fs -ls /dataset/ml-latest-small
