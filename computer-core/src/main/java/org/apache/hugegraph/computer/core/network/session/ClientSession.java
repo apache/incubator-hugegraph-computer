@@ -133,11 +133,9 @@ public class ClientSession extends TransportSession {
         } catch (Throwable e) {
             this.stateEstablished();
             if (e instanceof TimeoutException) {
-                throw new TransportException(
-                          "Timeout(%sms) to wait finish-response", timeout);
+                throw new TransportException("Timeout(%sms) to wait finish-response", timeout);
             } else {
-                throw new TransportException("Failed to wait finish-response",
-                                             e);
+                throw new TransportException("Failed to wait finish-response", e);
             }
         } finally {
             this.finishedFutureRef.compareAndSet(finishFuture, null);
@@ -150,13 +148,11 @@ public class ClientSession extends TransportSession {
                         "at finishAsync()", this.state);
 
         CompletableFuture<Void> finishedFuture = new CompletableFuture<>();
-        boolean success = this.finishedFutureRef.compareAndSet(null,
-                                                               finishedFuture);
+        boolean success = this.finishedFutureRef.compareAndSet(null, finishedFuture);
         E.checkArgument(success, "The finishedFutureRef value must be null " +
                                  "at finishAsync()");
 
         int finishId = this.genFinishId();
-
         this.stateFinishSent(finishId);
         try {
             FinishMessage finishMessage = new FinishMessage(finishId);

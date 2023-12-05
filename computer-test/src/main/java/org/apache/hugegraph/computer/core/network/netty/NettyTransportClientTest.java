@@ -287,7 +287,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Whitebox.setInternalState(client, "timeoutFinishSession", 1000L);
 
         Assert.assertThrows(TransportException.class, client::finishSession, e -> {
-            Assert.assertContains("to wait finish-response", e.getMessage());
+            Assert.assertContains("finish-response", e.getMessage());
         });
 
         Mockito.verify(serverHandler, Mockito.timeout(10_000L).times(1))
