@@ -36,7 +36,7 @@ DATASET_DIR=${TRAVIS_DIR}/../dataset
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d ${DATASET_DIR} ml-latest-small.zip
 
-docker run -itd --name=loader -v "${DATASET_DIR}":/loader/dataset hugegraph/loader:latest \
+docker run -it --name=loader -v ${DATASET_DIR}:/loader/dataset hugegraph/loader:latest \
     bin/hugegraph-loader.sh -g hugegraph -f /loader/dataset/struct.json \
     -s /loader/dataset/schema.groovy -h graph -p 8080
 
