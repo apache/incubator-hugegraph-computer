@@ -73,9 +73,5 @@
             <groupId>org.apache.hugegraph</groupId>
             <artifactId>hugegraph-loader</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.hugegraph</groupId>
-            <artifactId>hugegraph-client</artifactId>
-        </dependency>
     </dependencies>
 </project>
