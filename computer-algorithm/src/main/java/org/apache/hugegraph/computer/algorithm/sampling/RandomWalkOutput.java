@@ -17,23 +17,23 @@
 
 package org.apache.hugegraph.computer.algorithm.sampling;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hugegraph.computer.core.graph.value.IdListList;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.output.hg.HugeGraphOutput;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RandomWalkOutput extends HugeGraphOutput<List<String>> {
 
     @Override
     protected void prepareSchema() {
         this.client().schema().propertyKey(this.name())
-                .asText()
-                .writeType(this.writeType())
-                .valueList()
-                .ifNotExist()
-                .create();
+            .asText()
+            .writeType(this.writeType())
+            .valueList()
+            .ifNotExist()
+            .create();
     }
 
     @Override

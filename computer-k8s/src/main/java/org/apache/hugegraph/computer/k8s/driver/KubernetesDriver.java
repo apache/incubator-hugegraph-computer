@@ -39,6 +39,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.fabric8.kubernetes.api.model.DeletionPropagation;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -282,7 +283,9 @@ public class KubernetesDriver implements ComputerDriver {
 
     @Override
     public boolean cancelJob(String jobId, Map<String, String> params) {
-        return this.operation.withName(KubeUtil.crName(jobId)).delete();
+        return this.operation.withName(KubeUtil.crName(jobId))
+                             .withPropagationPolicy(DeletionPropagation.FOREGROUND)
+                             .delete();
     }
 
     @Override
