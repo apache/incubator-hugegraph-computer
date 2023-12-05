@@ -35,7 +35,7 @@ DATASET_DIR=${TRAVIS_DIR}/../dataset
 
 docker network create ci
 # Note: we need wait for server start finished, so start it first
-docker run -itd --name=graph --network ci -p 8080:8080 hugegraph/hugegraph:latest
+docker run -itd --name=graph --network ci -p 8080:8080 hugegraph/hugegraph:latest && sleep 6
 
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d ${DATASET_DIR} ml-latest-small.zip
