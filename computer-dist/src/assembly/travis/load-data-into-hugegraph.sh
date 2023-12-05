@@ -32,12 +32,12 @@ DATASET_DIR=${TRAVIS_DIR}/../dataset
 #cd ../../
 
 # TODO: replace with docker mode https://hub.docker.com/r/hugegraph/loader
-docker run -itd --name=loader -v ${DATASET_DIR}:/loader/dataset hugegraph/loader:latest
 
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d ${DATASET_DIR} ml-latest-small.zip
 
-docker exec -it loader bin/hugegraph-loader.sh -g hugegraph -f /loader/dataset/struct.json \
+docker run -itd --name=loader -v "${DATASET_DIR}":/loader/dataset hugegraph/loader:latest \
+    bin/hugegraph-loader.sh -g hugegraph -f /loader/dataset/struct.json \
     -s /loader/dataset/schema.groovy -h graph -p 8080
 
 #hugegraph-toolchain/hugegraph-loader/apache-hugegraph-loader-*/bin/hugegraph-loader.sh \
