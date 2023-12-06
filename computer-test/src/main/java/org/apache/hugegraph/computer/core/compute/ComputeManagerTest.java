@@ -114,7 +114,7 @@ public class ComputeManagerTest extends UnitTestBase {
         this.connectionId = new ConnectionId(new InetSocketAddress("localhost",
                                                                    8081),
                                              0);
-        this.computeManager = new ComputeManager(context(), this.managers);
+        this.computeManager = new ComputeManager(0, context(), this.managers);
     }
 
     @After

@@ -137,7 +137,7 @@ public class WorkerService implements Closeable {
             dm.connect(worker.id(), worker.hostname(), worker.dataPort());
         }
 
-        this.computeManager = new ComputeManager(this.context, this.managers);
+        this.computeManager = new ComputeManager(this.workerInfo.id(), this.context, this.managers);
 
         this.managers.initedAll(this.config);
         LOG.info("{} WorkerService initialized", this);
