@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Note: this script is not used in github-ci now, keep it for other env
 set -ev
 
 if [[ $# -ne 1 ]]; then
