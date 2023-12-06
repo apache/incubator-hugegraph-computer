@@ -133,6 +133,7 @@ public class WorkerServiceTest extends UnitTestBase {
                 ComputerOptions.ALGORITHM_MESSAGE_CLASS,
                 DoubleValue.class.getName()
             );
+
             try (WorkerService workerService = new MockWorkerService()) {
                 workerService.init(config);
                 workerService.execute();
