@@ -46,6 +46,7 @@ public class ComputeManager {
     private static final Logger LOG = Log.logger(ComputeManager.class);
     private static final String PREFIX = "partition-compute-executor-%s";
 
+    private final int workerId;
     private final ComputerContext context;
     private final Managers managers;
 
@@ -54,7 +55,8 @@ public class ComputeManager {
     private final MessageSendManager sendManager;
     private final ExecutorService computeExecutor;
 
-    public ComputeManager(ComputerContext context, Managers managers) {
+    public ComputeManager(int workerId, ComputerContext context, Managers managers) {
+        this.workerId = workerId;
         this.context = context;
         this.managers = managers;
         this.partitions = new HashMap<>();
@@ -73,7 +75,7 @@ public class ComputeManager {
     }
 
     public WorkerStat input() {
-        WorkerStat workerStat = new WorkerStat();
+        WorkerStat workerStat = new WorkerStat(this.workerId);
         this.recvManager.waitReceivedAllMessages();
 
         Map<Integer, PeekableIterator<KvEntry>> vertices =
@@ -142,7 +144,7 @@ public class ComputeManager {
     public WorkerStat compute(WorkerContext context, int superstep) {
         this.sendManager.startSend(MessageType.MSG);
 
-        WorkerStat workerStat = new WorkerStat();
+        WorkerStat workerStat = new WorkerStat(this.workerId);
         Map<Integer, PartitionStat> stats = new ConcurrentHashMap<>();
 
         /*
