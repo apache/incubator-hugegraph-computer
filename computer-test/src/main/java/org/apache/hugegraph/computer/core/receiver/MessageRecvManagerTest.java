@@ -42,7 +42,6 @@ import org.apache.hugegraph.computer.suite.unit.UnitTestBase;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class MessageRecvManagerTest extends UnitTestBase {
