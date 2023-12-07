@@ -115,14 +115,16 @@ public class WorkerService implements Closeable {
             this.bsp4Worker.workerInitDone();
             this.connectToWorkers();
 
-            this.computeManager =
-                    new ComputeManager(this.workerInfo.id(), this.context, this.managers);
+            this.computeManager = new ComputeManager(this.workerInfo.id(), this.context,
+                                                     this.managers);
 
             this.managers.initedAll(this.config);
             LOG.info("{} WorkerService initialized", this);
             this.inited = true;
         } catch (Exception e) {
             LOG.error("Error while initializing WorkerService", e);
+            // TODO: shall we call close() here?
+            this.close();
             throw e;
         }
     }
@@ -163,7 +165,8 @@ public class WorkerService implements Closeable {
      */
     @Override
     public synchronized void close() {
-        this.checkInited();
+        // TODO: why checkInited() here, if init throws exception, how to close the resource?
+        //this.checkInited();
         if (this.closed) {
             LOG.info("{} WorkerService had closed before", this);
             return;
@@ -228,8 +231,8 @@ public class WorkerService implements Closeable {
      * superstepStat is inactive.
      */
     public void execute() {
-        this.checkInited();
         LOG.info("{} WorkerService execute", this);
+        this.checkInited();
 
         // TODO: determine superstep if fail over is enabled.
         int superstep = this.bsp4Worker.waitMasterResumeDone();
@@ -248,8 +251,7 @@ public class WorkerService implements Closeable {
          * superstep.
          */
         while (superstepStat.active()) {
-            WorkerContext context = new SuperstepContext(superstep,
-                                                         superstepStat);
+            WorkerContext context = new SuperstepContext(superstep, superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
             if (superstep > 0) {
                 this.computeManager.takeRecvedMessages();
@@ -324,30 +326,22 @@ public class WorkerService implements Closeable {
         this.managers.add(recvManager);
 
         ConnectionManager connManager = new TransportConnectionManager();
-        DataServerManager serverManager = new DataServerManager(connManager,
-                                                                recvManager);
+        DataServerManager serverManager = new DataServerManager(connManager, recvManager);
         this.managers.add(serverManager);
 
-        DataClientManager clientManager = new DataClientManager(connManager,
-                                                                this.context);
+        DataClientManager clientManager = new DataClientManager(connManager, this.context);
         this.managers.add(clientManager);
 
         SortManager sendSortManager = new SendSortManager(this.context);
         this.managers.add(sendSortManager);
 
-        MessageSendManager sendManager = new MessageSendManager(this.context,
-                                                                sendSortManager,
+        MessageSendManager sendManager = new MessageSendManager(this.context, sendSortManager,
                                                                 clientManager.sender());
         this.managers.add(sendManager);
-
-        SnapshotManager snapshotManager = new SnapshotManager(this.context,
-                                                              sendManager,
-                                                              recvManager,
-                                                              this.workerInfo);
+        SnapshotManager snapshotManager = new SnapshotManager(this.context, sendManager,
+                                                              recvManager, this.workerInfo);
         this.managers.add(snapshotManager);
-
-        WorkerInputManager inputManager = new WorkerInputManager(this.context,
-                                                                 sendManager,
+        WorkerInputManager inputManager = new WorkerInputManager(this.context, sendManager,
                                                                  snapshotManager);
         inputManager.service(rpcManager.inputSplitService());
         this.managers.add(inputManager);
@@ -356,8 +350,8 @@ public class WorkerService implements Closeable {
         this.managers.initAll(this.config);
 
         InetSocketAddress address = serverManager.address();
-        LOG.info("{} WorkerService initialized managers with data server " +
-                 "address '{}'", this, address);
+        LOG.info("{} WorkerService initialized managers with data server address '{}'",
+                 this, address);
         return address;
     }
 
@@ -382,10 +376,8 @@ public class WorkerService implements Closeable {
 
         WorkerStat workerStat = this.computeManager.input();
 
-        this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
-                                       workerStat);
-        SuperstepStat superstepStat = this.bsp4Worker.waitMasterStepDone(
-                Constants.INPUT_SUPERSTEP);
+        this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP, workerStat);
+        SuperstepStat superstepStat = this.bsp4Worker.waitMasterStepDone(Constants.INPUT_SUPERSTEP);
         manager.close(this.config);
         LOG.info("{} WorkerService inputstep finished", this);
         return superstepStat;
@@ -412,10 +404,8 @@ public class WorkerService implements Closeable {
         private SuperstepContext(int superstep, SuperstepStat superstepStat) {
             this.superstep = superstep;
             this.superstepStat = superstepStat;
-            this.aggrManager = WorkerService.this.managers.get(
-                    WorkerAggrManager.NAME);
-            this.sendManager = WorkerService.this.managers.get(
-                    MessageSendManager.NAME);
+            this.aggrManager = WorkerService.this.managers.get(WorkerAggrManager.NAME);
+            this.sendManager = WorkerService.this.managers.get(MessageSendManager.NAME);
         }
 
         @Override
