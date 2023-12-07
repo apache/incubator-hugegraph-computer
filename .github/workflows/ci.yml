@@ -14,9 +14,9 @@ jobs:
       USE_STAGE: 'true' # Whether to include the stage repository.
       TRAVIS_DIR: computer-dist/src/assembly/travis
       KUBERNETES_VERSION: 1.20.1
-      # TODO: update it before release
-      HUGEGRAPH_SERVER_COMMIT_ID: d01c8737d7d5909119671953521f1401dcd1a188
       BSP_ETCD_URL: http://localhost:2579
+      # TODO: delete this env in the future (replaced by docker way now)
+      HUGEGRAPH_SERVER_COMMIT_ID: d01c8737d7d5909119671953521f1401dcd1a188
 
     steps:
       - name: Checkout
@@ -90,7 +90,7 @@ jobs:
           mv -vf .github/configs/settings.xml $HOME/.m2/settings.xml
 
       - name: Compile
-        run: mvn clean compile -Dmaven.javadoc.skip=true -ntp
+        run: mvn clean compile -e -Dmaven.javadoc.skip=true -ntp
 
       - name: Integrate test
         run: mvn test -P integrate-test -ntp
