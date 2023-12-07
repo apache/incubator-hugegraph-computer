@@ -144,7 +144,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
     }
 
     @Test
-    @Ignore
+    //TODO: delete @Ignore
     public void testNotEnoughFinishMessages() {
         this.receiveManager.beforeSuperstep(this.config, 0);
         // TODO: check the exception message after using common 1.2.0

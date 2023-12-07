@@ -225,7 +225,7 @@ public class WorkerServiceTest extends UnitTestBase {
                 workerService.execute();
             }, e -> {
                 // TODO: print for test, del later
-                e.printStackTrace();
+                //e.printStackTrace();
                 Assert.assertContains("Error while getting with key='BSP_MASTER_INIT_DONE'",
                                       e.getMessage());
                 Assert.assertContains("UNAVAILABLE: unresolved address",
