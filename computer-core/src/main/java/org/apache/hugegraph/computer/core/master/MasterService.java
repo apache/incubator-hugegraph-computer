@@ -144,7 +144,8 @@ public class MasterService implements Closeable {
      */
     @Override
     public synchronized void close() {
-        this.checkInited();
+        // TODO: check the logic of close carefully later
+        //this.checkInited();
         if (this.closed) {
             LOG.info("{} MasterService had closed before", this);
             return;
@@ -409,7 +410,7 @@ public class MasterService implements Closeable {
                             "The aggregator class can't be null");
             Aggregator<V> aggr;
             try {
-                aggr = aggregatorClass.newInstance();
+                aggr = aggregatorClass.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 throw new ComputerException("Can't new instance from class: %s",
                                             e, aggregatorClass.getName());
