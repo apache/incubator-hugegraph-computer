@@ -124,7 +124,6 @@ public class WorkerService implements Closeable {
         } catch (Exception e) {
             LOG.error("Error while initializing WorkerService", e);
             // TODO: shall we call close() here?
-            this.close();
             throw e;
         }
     }
