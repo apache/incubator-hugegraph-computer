@@ -55,10 +55,9 @@ jobs:
           cp $HOME/.m2/settings.xml /tmp/settings.xml
           mv -vf .github/configs/settings.xml $HOME/.m2/settings.xml
       - name: Compile install
-        run: mvn package -DskipTests=true -ntp
-
-      # TODO: enable it after the check scripts are ready, lack them now
-      #- name: Generate & check current 3rd-party dependencies
-      #  run: |
-      #    bash $SCRIPT_DEPENDENCY/regenerate_known_dependencies.sh current-dependencies.txt
-      #    bash $SCRIPT_DEPENDENCY/check_dependencies.sh
+        run: mvn install -DskipTests=true -ntp
+      - name: Generate & check current 3rd-party dependencies
+        run: |
+          bash $SCRIPT_DEPENDENCY/regenerate_known_dependencies.sh current-dependencies.txt
+          cat $SCRIPT_DEPENDENCY/current-dependencies.txt
+          bash $SCRIPT_DEPENDENCY/check_dependencies.sh
