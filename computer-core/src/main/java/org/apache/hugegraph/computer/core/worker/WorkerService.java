@@ -172,9 +172,14 @@ public class WorkerService implements Closeable {
         }
 
         try {
-            this.computeManager.close();
+            if (this.computeManager != null) {
+                this.computeManager.close();
+            } else {
+                LOG.warn("The computeManager is null");
+                return;
+            }
         } catch (Exception e) {
-            LOG.error("Error when closing computeManager", e);
+            LOG.error("Error when closing ComputeManager", e);
         }
         /*
          * Seems managers.closeAll() would do the following actions:

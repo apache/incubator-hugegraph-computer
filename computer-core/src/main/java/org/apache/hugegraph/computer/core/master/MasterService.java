@@ -156,7 +156,7 @@ public class MasterService implements Closeable {
                 this.masterComputation.close(new DefaultMasterContext());
             }
         } catch (Exception e) {
-            LOG.error("Error occurred while closing masterComputation", e);
+            LOG.error("Error occurred while closing master service", e);
         }
 
         if (!failed && this.bsp4Master != null) {
