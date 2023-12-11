@@ -61,22 +61,20 @@ public class WorkerService implements Closeable {
 
     private static final Logger LOG = Log.logger(WorkerService.class);
 
-    private final ComputerContext context;
-    private final Managers managers;
-    private final Map<Integer, ContainerInfo> workers;
-
     private volatile boolean inited;
     private volatile boolean closed;
-    private Config config;
+
+    private final ComputerContext context;
+    private final Map<Integer, ContainerInfo> workers;
+    private final Managers managers;
+    private final ShutdownHook shutdownHook;
+
     private Bsp4Worker bsp4Worker;
+    private Config config;
     private ComputeManager computeManager;
     private ContainerInfo workerInfo;
-
     private Combiner<Value> combiner;
 
-    private ContainerInfo masterInfo;
-
-    private volatile ShutdownHook shutdownHook;
     private volatile Thread serviceThread;
 
     public WorkerService() {
@@ -91,57 +89,67 @@ public class WorkerService implements Closeable {
     /**
      * Init worker service, create the managers used by worker service.
      */
-    public void init(Config config) {
-        E.checkArgument(!this.inited, "The %s has been initialized", this);
+    public synchronized void init(Config config) {
+        try {
+            LOG.info("{} Prepare to init WorkerService", this);
+            // TODO: what will happen if init() called by multiple threads?
+            E.checkArgument(!this.inited, "The %s has been initialized", this);
 
-        this.serviceThread = Thread.currentThread();
-        this.registerShutdownHook();
+            this.serviceThread = Thread.currentThread();
+            this.registerShutdownHook();
+            this.config = config;
+            this.workerInfo = new ContainerInfo();
 
-        this.config = config;
+            LOG.info("{} Start to initialize worker", this);
+            this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
+            /*
+             * Keep the waitMasterInitDone() called before initManagers(),
+             * in order to ensure master init() before worker managers init()
+             */
+            ContainerInfo masterInfo = this.bsp4Worker.waitMasterInitDone();
+            InetSocketAddress address = this.initManagers(masterInfo);
+            this.workerInfo.updateAddress(address);
+            this.loadComputation();
 
-        this.workerInfo = new ContainerInfo();
-        LOG.info("{} Start to initialize worker", this);
+            LOG.info("{} register WorkerService", this);
+            this.bsp4Worker.workerInitDone();
+            this.connectToWorkers();
 
-        this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
+            this.computeManager = new ComputeManager(this.workerInfo.id(), this.context,
+                                                     this.managers);
 
-        /*
-         * Keep the waitMasterInitDone() called before initManagers(),
-         * in order to ensure master init() before worker managers init()
-         */
-        this.masterInfo = this.bsp4Worker.waitMasterInitDone();
+            this.managers.initedAll(this.config);
+            LOG.info("{} WorkerService initialized", this);
+            this.inited = true;
+        } catch (Exception e) {
+            LOG.error("Error while initializing WorkerService", e);
+            // TODO: shall we call close() here?
+            throw e;
+        }
+    }
 
-        InetSocketAddress address = this.initManagers(this.masterInfo);
-        this.workerInfo.updateAddress(address);
-
+    private void loadComputation() {
         Computation<?> computation = this.config.createObject(
-                                     ComputerOptions.WORKER_COMPUTATION_CLASS);
+                ComputerOptions.WORKER_COMPUTATION_CLASS);
         LOG.info("Loading computation '{}' in category '{}'",
                  computation.name(), computation.category());
 
-        this.combiner = this.config.createObject(
-                        ComputerOptions.WORKER_COMBINER_CLASS, false);
+        this.combiner = this.config.createObject(ComputerOptions.WORKER_COMBINER_CLASS, false);
         if (this.combiner == null) {
-            LOG.info("None combiner is provided for computation '{}'",
-                     computation.name());
+            LOG.info("None combiner is provided for computation '{}'", computation.name());
         } else {
             LOG.info("Combiner '{}' is provided for computation '{}'",
                      this.combiner.name(), computation.name());
         }
+    }
 
-        LOG.info("{} register WorkerService", this);
-        this.bsp4Worker.workerInitDone();
+    private void connectToWorkers() {
         List<ContainerInfo> workers = this.bsp4Worker.waitMasterAllInitDone();
         DataClientManager dm = this.managers.get(DataClientManager.NAME);
         for (ContainerInfo worker : workers) {
             this.workers.put(worker.id(), worker);
             dm.connect(worker.id(), worker.hostname(), worker.dataPort());
         }
-
-        this.computeManager = new ComputeManager(this.workerInfo.id(), this.context, this.managers);
-
-        this.managers.initedAll(this.config);
-        LOG.info("{} WorkerService initialized", this);
-        this.inited = true;
     }
 
     private void registerShutdownHook() {
@@ -152,29 +160,50 @@ public class WorkerService implements Closeable {
     }
 
     /**
-     * Stop the worker service. Stop the managers created in
-     * {@link #init(Config)}.
+     * Stop the worker service. Stop the managers created in {@link #init(Config)}.
      */
     @Override
     public synchronized void close() {
-        this.checkInited();
+        // TODO: why checkInited() here, if init throws exception, how to close the resource?
+        //this.checkInited();
         if (this.closed) {
             LOG.info("{} WorkerService had closed before", this);
             return;
         }
 
-        this.computeManager.close();
+        try {
+            if (this.computeManager != null) {
+                this.computeManager.close();
+            } else {
+                LOG.warn("The computeManager is null");
+                return;
+            }
+        } catch (Exception e) {
+            LOG.error("Error when closing ComputeManager", e);
+        }
         /*
          * Seems managers.closeAll() would do the following actions:
          * TODO: close the connection to other workers.
          * TODO: stop the connection to the master
          * TODO: stop the data transportation server.
          */
-        this.managers.closeAll(this.config);
+        try {
+            this.managers.closeAll(this.config);
+        } catch (Exception e) {
+            LOG.error("Error while closing managers", e);
+        }
 
-        this.bsp4Worker.workerCloseDone();
-        this.bsp4Worker.close();
-        this.shutdownHook.unhook();
+        try {
+            this.bsp4Worker.workerCloseDone();
+            this.bsp4Worker.close();
+        } catch (Exception e) {
+            LOG.error("Error while closing bsp4Worker", e);
+        }
+        try {
+            this.shutdownHook.unhook();
+        } catch (Exception e) {
+            LOG.error("Error while unhooking shutdownHook", e);
+        }
 
         this.closed = true;
         LOG.info("{} WorkerService closed", this);
@@ -201,14 +230,13 @@ public class WorkerService implements Closeable {
     }
 
     /**
-     * Execute the superstep in worker. It first wait master witch superstep
+     * Execute the superstep in worker. It first waits master witch superstep
      * to start from. And then do the superstep iteration until master's
      * superstepStat is inactive.
      */
     public void execute() {
-        this.checkInited();
-
         LOG.info("{} WorkerService execute", this);
+        this.checkInited();
 
         // TODO: determine superstep if fail over is enabled.
         int superstep = this.bsp4Worker.waitMasterResumeDone();
@@ -227,8 +255,7 @@ public class WorkerService implements Closeable {
          * superstep.
          */
         while (superstepStat.active()) {
-            WorkerContext context = new SuperstepContext(superstep,
-                                                         superstepStat);
+            WorkerContext context = new SuperstepContext(superstep, superstepStat);
             LOG.info("Start computation of superstep {}", superstep);
             if (superstep > 0) {
                 this.computeManager.takeRecvedMessages();
@@ -242,13 +269,12 @@ public class WorkerService implements Closeable {
             this.managers.beforeSuperstep(this.config, superstep);
 
             /*
-             * Notify master by each worker, when the master received all
+             * Notify the master by each worker, when the master received all
              * workers signal, then notify all workers to do compute().
              */
             this.bsp4Worker.workerStepPrepareDone(superstep);
             this.bsp4Worker.waitMasterStepPrepareDone(superstep);
-            WorkerStat workerStat = this.computeManager.compute(context,
-                                                                superstep);
+            WorkerStat workerStat = this.computeManager.compute(context, superstep);
 
             this.bsp4Worker.workerStepComputeDone(superstep);
             this.bsp4Worker.waitMasterStepComputeDone(superstep);
@@ -274,8 +300,7 @@ public class WorkerService implements Closeable {
 
     @Override
     public String toString() {
-        Object id = this.workerInfo == null ?
-                    "?" + this.hashCode() : this.workerInfo.id();
+        Object id = this.workerInfo == null ? "?" + this.hashCode() : this.workerInfo.id();
         return String.format("[worker %s]", id);
     }
 
@@ -287,13 +312,11 @@ public class WorkerService implements Closeable {
          * NOTE: this init() method will be called twice, will be ignored at
          * the 2nd time call.
          */
-        WorkerRpcManager.updateRpcRemoteServerConfig(this.config,
-                                                     masterInfo.hostname(),
+        WorkerRpcManager.updateRpcRemoteServerConfig(this.config, masterInfo.hostname(),
                                                      masterInfo.rpcPort());
         rpcManager.init(this.config);
 
-        WorkerAggrManager aggregatorManager = new WorkerAggrManager(
-                                              this.context);
+        WorkerAggrManager aggregatorManager = new WorkerAggrManager(this.context);
         aggregatorManager.service(rpcManager.aggregateRpcService());
         this.managers.add(aggregatorManager);
         FileManager fileManager = new FileManager();
@@ -307,30 +330,22 @@ public class WorkerService implements Closeable {
         this.managers.add(recvManager);
 
         ConnectionManager connManager = new TransportConnectionManager();
-        DataServerManager serverManager = new DataServerManager(connManager,
-                                                                recvManager);
+        DataServerManager serverManager = new DataServerManager(connManager, recvManager);
         this.managers.add(serverManager);
 
-        DataClientManager clientManager = new DataClientManager(connManager,
-                                                                this.context);
+        DataClientManager clientManager = new DataClientManager(connManager, this.context);
         this.managers.add(clientManager);
 
         SortManager sendSortManager = new SendSortManager(this.context);
         this.managers.add(sendSortManager);
 
-        MessageSendManager sendManager = new MessageSendManager(this.context,
-                                         sendSortManager,
-                                         clientManager.sender());
+        MessageSendManager sendManager = new MessageSendManager(this.context, sendSortManager,
+                                                                clientManager.sender());
         this.managers.add(sendManager);
-
-        SnapshotManager snapshotManager = new SnapshotManager(this.context,
-                                                              sendManager,
-                                                              recvManager,
-                                                              this.workerInfo);
+        SnapshotManager snapshotManager = new SnapshotManager(this.context, sendManager,
+                                                              recvManager, this.workerInfo);
         this.managers.add(snapshotManager);
-
-        WorkerInputManager inputManager = new WorkerInputManager(this.context,
-                                                                 sendManager,
+        WorkerInputManager inputManager = new WorkerInputManager(this.context, sendManager,
                                                                  snapshotManager);
         inputManager.service(rpcManager.inputSplitService());
         this.managers.add(inputManager);
@@ -339,8 +354,8 @@ public class WorkerService implements Closeable {
         this.managers.initAll(this.config);
 
         InetSocketAddress address = serverManager.address();
-        LOG.info("{} WorkerService initialized managers with data server " +
-                 "address '{}'", this, address);
+        LOG.info("{} WorkerService initialized managers with data server address '{}'",
+                 this, address);
         return address;
     }
 
@@ -350,7 +365,7 @@ public class WorkerService implements Closeable {
 
     /**
      * Load vertices and edges from HugeGraph. There are two phases in
-     * inputstep. First phase is get input splits from master, and read the
+     * inputstep. The First phase is to get input splits from master, and read the
      * vertices and edges from input splits. The second phase is after all
      * workers read input splits, the workers merge the vertices and edges to
      * get the stats for each partition.
@@ -365,10 +380,8 @@ public class WorkerService implements Closeable {
 
         WorkerStat workerStat = this.computeManager.input();
 
-        this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP,
-                                       workerStat);
-        SuperstepStat superstepStat = this.bsp4Worker.waitMasterStepDone(
-                                      Constants.INPUT_SUPERSTEP);
+        this.bsp4Worker.workerStepDone(Constants.INPUT_SUPERSTEP, workerStat);
+        SuperstepStat superstepStat = this.bsp4Worker.waitMasterStepDone(Constants.INPUT_SUPERSTEP);
         manager.close(this.config);
         LOG.info("{} WorkerService inputstep finished", this);
         return superstepStat;
@@ -395,10 +408,8 @@ public class WorkerService implements Closeable {
         private SuperstepContext(int superstep, SuperstepStat superstepStat) {
             this.superstep = superstep;
             this.superstepStat = superstepStat;
-            this.aggrManager = WorkerService.this.managers.get(
-                               WorkerAggrManager.NAME);
-            this.sendManager = WorkerService.this.managers.get(
-                               MessageSendManager.NAME);
+            this.aggrManager = WorkerService.this.managers.get(WorkerAggrManager.NAME);
+            this.sendManager = WorkerService.this.managers.get(MessageSendManager.NAME);
         }
 
         @Override

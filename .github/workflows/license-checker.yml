@@ -15,7 +15,7 @@ jobs:
   check-license-header:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # More info could refer to: https://github.com/apache/skywalking-eyes
       - name: Check License Header
         uses: apache/skywalking-eyes@main
@@ -36,25 +36,29 @@ jobs:
           find ./ -name rat.txt -print0 | xargs -0 -I file cat file > merged-rat.txt
           grep "Binaries" merged-rat.txt -C 3 && cat merged-rat.txt
 
-#  TODO: enable it later
-#  check-dependency-license:
-#    runs-on: ubuntu-latest
-#    env:
-#      SCRIPT_DEPENDENCY: computer-dist/scripts/dependency
-#    steps:
-#      - name: Checkout source
-#        uses: actions/checkout@v3
-#      - name: Set up JDK 11
-#        uses: actions/setup-java@v3
-#        with:
-#          java-version: '11'
-#          distribution: 'adopt'
-#      - name: mvn install
-#        run: |
-#          mvn install -DskipTests=true -ntp
-#      - name: generate current dependencies
-#        run: |
-#          bash $SCRIPT_DEPENDENCY/regenerate_known_dependencies.sh current-dependencies.txt
-#      - name: check third dependencies
-#        run: |
-#          bash $SCRIPT_DEPENDENCY/check_dependencies.sh
+  check-dependency-license:
+    runs-on: ubuntu-latest
+    env:
+      SCRIPT_DEPENDENCY: computer-dist/scripts/dependency
+      USE_STAGE: 'true' # Whether to include the stage repository.
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Use staged maven repo settings
+        if: ${{ env.USE_STAGE == 'true' }}
+        run: |
+          cp $HOME/.m2/settings.xml /tmp/settings.xml
+          mv -vf .github/configs/settings.xml $HOME/.m2/settings.xml
+      - name: Compile install
+        run: mvn package -DskipTests=true -ntp
+
+      # TODO: enable it after the check scripts are ready, lack them now
+      #- name: Generate & check current 3rd-party dependencies
+      #  run: |
+      #    bash $SCRIPT_DEPENDENCY/regenerate_known_dependencies.sh current-dependencies.txt
+      #    bash $SCRIPT_DEPENDENCY/check_dependencies.sh

@@ -65,8 +65,7 @@ public class EtcdClient {
                                "The endpoints can't be null");
         E.checkArgumentNotNull(namespace,
                                "The namespace can't be null");
-        ByteSequence namespaceSeq = ByteSequence.from(namespace.getBytes(
-                                                                ENCODING));
+        ByteSequence namespaceSeq = ByteSequence.from(namespace.getBytes(ENCODING));
         this.client = Client.builder().endpoints(endpoints)
                             .namespace(namespaceSeq).build();
         this.watch = this.client.getWatchClient();
@@ -80,20 +79,14 @@ public class EtcdClient {
      * @param value value to be associated with the specified key
      */
     public void put(String key, byte[] value) {
-        E.checkArgument(key != null,
-                        "The key can't be null.");
-        E.checkArgument(value != null,
-                        "The value can't be null.");
+        E.checkArgument(key != null, "The key can't be null.");
+        E.checkArgument(value != null, "The value can't be null.");
         try {
-            this.kv.put(ByteSequence.from(key, ENCODING),
-                        ByteSequence.from(value))
-                   .get();
+            this.kv.put(ByteSequence.from(key, ENCODING), ByteSequence.from(value)).get();
         } catch (InterruptedException e) {
-            throw new ComputerException(
-                      "Interrupted while putting with key='%s'", e, key);
+            throw new ComputerException("Interrupted while putting with key='%s'", e, key);
         } catch (ExecutionException e) {
-            throw new ComputerException("Error while putting with key='%s'",
-                                        e, key);
+            throw new ComputerException("Error while putting with key='%s'", e, key);
         }
     }
 
@@ -110,8 +103,8 @@ public class EtcdClient {
      * Returns the value to which the specified key is mapped.
      * @param key The key to be found
      * @param throwException whether to throw ComputerException if not found.
-     * @return the value of specified key, null if not found and
-     * throwException is set false
+     * @return the value of the specified key, null if not found,
+     * and throwException is set false
      * @throws ComputerException if not found and throwException is set true
      */
     public byte[] get(String key, boolean throwException) {
@@ -124,24 +117,20 @@ public class EtcdClient {
                 assert kvs.size() == 1;
                 return kvs.get(0).getValue().getBytes();
             } else if (throwException) {
-                 throw new ComputerException("Can't find value for key='%s'",
-                                             key);
+                 throw new ComputerException("Can't find value for key='%s'", key);
             } else {
                 return null;
             }
         } catch (InterruptedException e) {
-            throw new ComputerException(
-                      "Interrupted while getting with key='%s'", e, key);
+            throw new ComputerException("Interrupted while getting with key='%s'", e, key);
         } catch (ExecutionException e) {
-            throw new ComputerException("Error while getting with key='%s'",
-                                        e, key);
+            throw new ComputerException("Error while getting with key='%s'", e, key);
         }
     }
 
     /**
      * Returns the value to which the specified key is mapped. If no
-     * key exists, wait at most timeout milliseconds. Or throw
-     * ComputerException if timeout
+     * key exists, wait for most time out milliseconds. Or throw ComputerException if timeout
      * @param key the key whose associated value is to be returned.
      * @param timeout the max time in milliseconds to wait.
      * @return the specified value in byte array to which the specified key is
@@ -149,11 +138,9 @@ public class EtcdClient {
      */
     public byte[] get(String key, long timeout, long logInterval) {
         E.checkArgumentNotNull(key, "The key can't be null");
-        E.checkArgument(timeout > 0L,
-                        "The timeout must be > 0, but got: %s", timeout);
-        E.checkArgument(logInterval > 0L,
-                        "The logInterval must be > 0, but got: %s",
-                        logInterval);
+        E.checkArgument(timeout > 0L, "The timeout must be > 0, but got: %s", timeout);
+        E.checkArgument(logInterval > 0L, "The logInterval must be > 0, but got: %s", logInterval);
+
         ByteSequence keySeq = ByteSequence.from(key, ENCODING);
         try {
             GetResponse response = this.kv.get(keySeq).get();
@@ -162,16 +149,12 @@ public class EtcdClient {
                 return kvs.get(0).getValue().getBytes();
             } else {
                 long revision = response.getHeader().getRevision();
-                return this.waitAndGetFromPutEvent(keySeq, revision,
-                                                   timeout, logInterval);
+                return this.waitAndGetFromPutEvent(keySeq, revision, timeout, logInterval);
             }
         } catch (InterruptedException e) {
-            throw new ComputerException(
-                      "Interrupted while getting with key='%s'",
-                      e, key);
+            throw new ComputerException("Interrupted while getting with key='%s'", e, key);
         } catch (ExecutionException e) {
-            throw new ComputerException("Error while getting with key='%s'",
-                                        e, key);
+            throw new ComputerException("Error while getting with key='%s'", e, key);
         }
     }
 
@@ -214,8 +197,7 @@ public class EtcdClient {
                                              .withRevision(revision)
                                              .withNoDelete(true)
                                              .build();
-        try (Watch.Watcher watcher = this.watch.watch(keySeq, watchOption,
-                                                      consumer)) {
+        try (Watch.Watcher ignored = this.watch.watch(keySeq, watchOption, consumer)) {
             return barrierEvent.await(timeout, logInterval, () -> {
                 LOG.info("Wait for key '{}' with timeout {}ms",
                          keySeq.toString(ENCODING), timeout);
@@ -225,7 +207,7 @@ public class EtcdClient {
 
     /**
      * Get the values of keys with the specified prefix.
-     * If no key found, return empty list.
+     * If no key is found, return an empty list.
      */
     public List<byte[]> getWithPrefix(String prefix) {
         E.checkArgumentNotNull(prefix, "The prefix can't be null");
@@ -251,7 +233,7 @@ public class EtcdClient {
 
     /**
      * Get the expected count of values of keys with the specified prefix.
-     * Throws ComputerException if there are no enough object.
+     * Throws ComputerException if there are no enough objects.
      */
     public List<byte[]> getWithPrefix(String prefix, int count) {
         E.checkArgumentNotNull(prefix,
@@ -284,12 +266,12 @@ public class EtcdClient {
     }
 
     /**
-     * Get expected count of values with the key prefix with prefix. If there
-     * is no count of keys, wait at most timeout milliseconds.
+     * Get the expected count of values with the key prefix with prefix.
+     * If there is no count of keys, wait at max timeout milliseconds.
      * @param prefix the key prefix
-     * @param count the expected count of values to be get
+     * @param count the expected count of values to be got
      * @param timeout the max wait time
-     * @param logInterval the interval in ms to log message
+     * @param logInterval the interval in ms to log a message
      * @return the list of values which key with specified prefix
      */
     public List<byte[]> getWithPrefix(String prefix, int count,
@@ -329,8 +311,8 @@ public class EtcdClient {
 
     /**
      * Wait at most expected eventCount events triggered in timeout ms.
-     * This method wait at most timeout ms regardless whether expected
-     * eventCount events triggered.
+     * This method waits at most timeout ms regardless of whether expected-eventCount events
+     * triggered.
      * @param existedKeyValues readonly
      */
     private List<byte[]> waitAndPrefixGetFromPutEvent(
@@ -368,21 +350,18 @@ public class EtcdClient {
                                              .withPrefix(prefixSeq)
                                              .withRevision(revision)
                                              .build();
-        try (Watch.Watcher watcher = this.watch.watch(prefixSeq,
-                                                      watchOption,
-                                                      consumer)) {
+        try (Watch.Watcher ignored = this.watch.watch(prefixSeq, watchOption, consumer)) {
             return barrierEvent.await(timeout, logInterval, () -> {
                 LOG.info("Wait for keys with prefix '{}' and timeout {}ms, " +
                          "expect {} keys but actual got {} keys",
-                         prefixSeq.toString(ENCODING),
-                         timeout, count, keyValues.size());
+                         prefixSeq.toString(ENCODING), timeout, count, keyValues.size());
             });
         }
     }
 
     /**
      * @return 1 if deleted specified key, 0 if not found specified key
-     * The deleted data can be get through revision, if revision is compacted,
+     * The deleted data can be got through revision, if revision is compacted,
      * throw exception "etcdserver: mvcc: required revision has been compacted".
      * @see <a href="https://etcd.io/docs/v3.4.0/op-guide/maintenance/">
      *      Maintenance</a>
@@ -391,12 +370,10 @@ public class EtcdClient {
         E.checkArgumentNotNull(key, "The key can't be null");
         ByteSequence keySeq = ByteSequence.from(key, ENCODING);
         try {
-            DeleteResponse response = this.client.getKVClient().delete(keySeq)
-                                                 .get();
+            DeleteResponse response = this.client.getKVClient().delete(keySeq).get();
             return response.getDeleted();
         } catch (InterruptedException e) {
-            throw new ComputerException("Interrupted while deleting '%s'",
-                                        e, key);
+            throw new ComputerException("Interrupted while deleting '%s'", e, key);
         } catch (ExecutionException e) {
             throw new ComputerException("Error while deleting '%s'", e, key);
         }
@@ -408,12 +385,10 @@ public class EtcdClient {
     public long deleteWithPrefix(String prefix) {
         E.checkArgumentNotNull(prefix, "The prefix can't be null");
         ByteSequence prefixSeq = ByteSequence.from(prefix, ENCODING);
-        DeleteOption deleteOption = DeleteOption.newBuilder()
-                                                .withPrefix(prefixSeq).build();
+        DeleteOption deleteOption = DeleteOption.newBuilder().withPrefix(prefixSeq).build();
         try {
             DeleteResponse response = this.client.getKVClient()
-                                                 .delete(prefixSeq,
-                                                         deleteOption)
+                                                 .delete(prefixSeq, deleteOption)
                                                  .get();
             return response.getDeleted();
         } catch (InterruptedException e) {

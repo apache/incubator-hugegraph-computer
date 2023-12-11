@@ -72,17 +72,10 @@ public class MessageRecvManagerTest extends UnitTestBase {
         this.fileManager.init(this.config);
         this.sortManager = new RecvSortManager(context());
         this.sortManager.init(this.config);
-        this.receiveManager = new MessageRecvManager(context(),
-                                                     this.fileManager,
-                                                     this.sortManager);
-        this.snapshotManager = new SnapshotManager(context(),
-                                                   null,
-                                                   receiveManager,
-                                                   null);
+        this.receiveManager = new MessageRecvManager(context(), this.fileManager, this.sortManager);
+        this.snapshotManager = new SnapshotManager(context(), null, receiveManager, null);
         this.receiveManager.init(this.config);
-        this.connectionId = new ConnectionId(
-                            new InetSocketAddress("localhost",8081),
-                            0);
+        this.connectionId = new ConnectionId(new InetSocketAddress("localhost", 8081), 0);
     }
 
     @After
@@ -94,31 +87,28 @@ public class MessageRecvManagerTest extends UnitTestBase {
 
     @Test
     public void testVertexAndEdgeMessage() throws IOException {
-        // Send vertex message
+        // Send vertex messages
         this.receiveManager.onStarted(this.connectionId);
         this.receiveManager.onFinished(this.connectionId);
-        VertexMessageRecvPartitionTest.addTenVertexBuffer(
-                                       (NetworkBuffer buffer) -> {
+        VertexMessageRecvPartitionTest.addTenVertexBuffer((NetworkBuffer buffer) -> {
             this.receiveManager.handle(MessageType.VERTEX, 0, buffer);
         });
 
-        EdgeMessageRecvPartitionTest.addTenEdgeBuffer(
-                                     (NetworkBuffer buffer) -> {
+        EdgeMessageRecvPartitionTest.addTenEdgeBuffer((NetworkBuffer buffer) -> {
             this.receiveManager.handle(MessageType.EDGE, 0, buffer);
         });
-        // Send edge message
+        // Send edge messages
         this.receiveManager.onStarted(this.connectionId);
         this.receiveManager.onFinished(this.connectionId);
 
         this.receiveManager.waitReceivedAllMessages();
         Map<Integer, PeekableIterator<KvEntry>> vertexPartitions =
-                     this.receiveManager.vertexPartitions();
+                this.receiveManager.vertexPartitions();
         Map<Integer, PeekableIterator<KvEntry>> edgePartitions =
-                     this.receiveManager.edgePartitions();
+                this.receiveManager.edgePartitions();
         Assert.assertEquals(1, vertexPartitions.size());
         Assert.assertEquals(1, edgePartitions.size());
-        VertexMessageRecvPartitionTest.checkPartitionIterator(
-                                       vertexPartitions.get(0));
+        VertexMessageRecvPartitionTest.checkPartitionIterator(vertexPartitions.get(0));
         EdgeMessageRecvPartitionTest.checkTenEdges(edgePartitions.get(0));
     }
 
@@ -126,9 +116,8 @@ public class MessageRecvManagerTest extends UnitTestBase {
     public void testComputeMessage() throws IOException {
         // Superstep 0
         this.receiveManager.beforeSuperstep(this.config, 0);
-        ComputeMessageRecvPartitionTest.addTwentyCombineMessageBuffer(
-                                        (NetworkBuffer buffer) -> {
-             this.receiveManager.handle(MessageType.MSG, 0, buffer);
+        ComputeMessageRecvPartitionTest.addTwentyCombineMessageBuffer((NetworkBuffer buffer) -> {
+            this.receiveManager.handle(MessageType.MSG, 0, buffer);
         });
         this.receiveManager.onFinished(this.connectionId);
 
@@ -136,17 +125,15 @@ public class MessageRecvManagerTest extends UnitTestBase {
         this.receiveManager.afterSuperstep(this.config, 0);
 
         Map<Integer, PeekableIterator<KvEntry>> messagePartitions =
-        this.receiveManager.messagePartitions();
+                this.receiveManager.messagePartitions();
         Assert.assertEquals(1, messagePartitions.size());
-        ComputeMessageRecvPartitionTest.checkTenCombineMessages(
-                                        messagePartitions.get(0));
+        ComputeMessageRecvPartitionTest.checkTenCombineMessages(messagePartitions.get(0));
     }
 
     @Test
     public void testOtherMessageType() {
         Assert.assertThrows(ComputerException.class, () -> {
-            ReceiverUtil.consumeBuffer(new byte[100],
-                                       (NetworkBuffer buffer) -> {
+            ReceiverUtil.consumeBuffer(new byte[100], (NetworkBuffer buffer) -> {
                 this.receiveManager.handle(MessageType.ACK, 0, buffer);
             });
         }, e -> {
@@ -161,8 +148,7 @@ public class MessageRecvManagerTest extends UnitTestBase {
         Assert.assertThrows(ComputerException.class, () -> {
             this.receiveManager.waitReceivedAllMessages();
         }, e -> {
-            Assert.assertContains("Expect 1 finish-messages",
-                                  e.getMessage());
+            Assert.assertContains("finish-messages", e.getMessage());
         });
     }
 }

@@ -19,6 +19,7 @@ package org.apache.hugegraph.computer.k8s.operator;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.configuration2.MapConfiguration;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.apache.hugegraph.computer.k8s.Constants;
 import org.apache.hugegraph.computer.k8s.operator.common.AbstractController;
 import org.apache.hugegraph.computer.k8s.operator.config.OperatorOptions;
@@ -61,6 +61,11 @@ import io.fabric8.kubernetes.client.NamespacedKubernetesClient;
 import io.fabric8.kubernetes.client.informers.SharedInformerFactory;
 import io.fabric8.kubernetes.client.utils.Utils;
 
+/**
+ * The OperatorEntrypoint class is the main entry point for the Kubernetes operator.
+ * It sets up the Kubernetes client, registers controllers, and starts the HTTP server for
+ * health checks.
+ */
 public class OperatorEntrypoint {
 
     private static final Logger LOG = Log.logger(OperatorEntrypoint.class);
@@ -74,15 +79,13 @@ public class OperatorEntrypoint {
 
     public static void main(String[] args) {
         OperatorEntrypoint operatorEntrypoint = new OperatorEntrypoint();
-        Runtime.getRuntime().addShutdownHook(
-                new Thread(operatorEntrypoint::shutdown));
+        Runtime.getRuntime().addShutdownHook(new Thread(operatorEntrypoint::shutdown));
         operatorEntrypoint.start();
     }
 
     static {
-        OptionSpace.register(
-              "computer-k8s-operator",
-              "org.apache.hugegraph.computer.k8s.operator.config.OperatorOptions"
+        OptionSpace.register("computer-k8s-operator",
+                             "org.apache.hugegraph.computer.k8s.operator.config.OperatorOptions"
         );
     }
 
@@ -98,8 +101,7 @@ public class OperatorEntrypoint {
     public void start() {
         try {
             this.kubeClient = new DefaultKubernetesClient();
-            String watchNamespace = this.config.get(
-                                    OperatorOptions.WATCH_NAMESPACE);
+            String watchNamespace = this.config.get(OperatorOptions.WATCH_NAMESPACE);
             if (!Objects.equals(watchNamespace, Constants.ALL_NAMESPACE)) {
                 this.createNamespace(watchNamespace);
                 this.kubeClient = this.kubeClient.inNamespace(watchNamespace);
@@ -108,19 +110,17 @@ public class OperatorEntrypoint {
             LOG.info("Watch namespace: " + watchNamespace);
 
             this.addHealthCheck();
-
             this.registerControllers();
 
             this.informerFactory.startAllRegisteredInformers();
             this.informerFactory.addSharedInformerEventListener(exception -> {
-                LOG.error("Informer event listener exception occurred",
-                          exception);
+                LOG.error("Informer event listener exception occurred", exception);
                 OperatorEntrypoint.this.shutdown();
             });
 
-            // Start all controller
-            this.controllerPool = ExecutorUtil.newFixedThreadPool(
-                                  this.controllers.size(), "controllers-%d");
+            // Start all controllers
+            this.controllerPool = ExecutorUtil.newFixedThreadPool(this.controllers.size(),
+                                                                  "controllers-%d");
             CountDownLatch latch = new CountDownLatch(this.controllers.size());
             List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (AbstractController<?> controller : this.controllers) {
@@ -141,8 +141,7 @@ public class OperatorEntrypoint {
                 }
             });
 
-            CompletableFuture.anyOf(futures.toArray(new CompletableFuture[]{}))
-                             .get();
+            CompletableFuture.anyOf(futures.toArray(new CompletableFuture[]{})).get();
         } catch (Throwable throwable) {
             LOG.error("Failed to start Operator: ", throwable);
         } finally {
@@ -201,16 +200,14 @@ public class OperatorEntrypoint {
     }
 
     private void registerControllers() {
-        ComputerJobController jobController = new ComputerJobController(
-                                              this.config, this.kubeClient);
-        this.registerController(jobController,
-                                ConfigMap.class, Job.class, Pod.class);
+        ComputerJobController jobController = new ComputerJobController(this.config,
+                                                                        this.kubeClient);
+        this.registerController(jobController, ConfigMap.class, Job.class, Pod.class);
     }
 
     @SafeVarargs
-    private final void registerController(
-                       AbstractController<?> controller,
-                       Class<? extends HasMetadata>... ownsClass) {
+    private void registerController(AbstractController<?> controller,
+                                    Class<? extends HasMetadata>... ownsClass) {
         controller.register(this.informerFactory, ownsClass);
         this.controllers.add(controller);
     }
@@ -222,7 +219,7 @@ public class OperatorEntrypoint {
         this.httpServer = HttpServer.create(address, probeBacklog);
         this.httpServer.createContext("/health", httpExchange -> {
             byte[] bytes = "ALL GOOD!".getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(HttpStatus.SC_OK, bytes.length);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
             OutputStream responseBody = httpExchange.getResponseBody();
             responseBody.write(bytes);
             responseBody.close();
@@ -233,7 +230,7 @@ public class OperatorEntrypoint {
     private void addReadyCheck() {
         this.httpServer.createContext("/ready", httpExchange -> {
             byte[] bytes = "ALL Ready!".getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(HttpStatus.SC_OK, bytes.length);
+            httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_OK, bytes.length);
             OutputStream responseBody = httpExchange.getResponseBody();
             responseBody.write(bytes);
             responseBody.close();
@@ -245,8 +242,7 @@ public class OperatorEntrypoint {
                                                          .withName(namespace)
                                                          .endMetadata();
         KubeUtil.ignoreExists(() -> {
-            return this.kubeClient.namespaces()
-                                  .create(builder.build());
+            return this.kubeClient.namespaces().create(builder.build());
         });
     }
 }
