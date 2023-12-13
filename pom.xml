@@ -81,7 +81,9 @@
     <scm>
         <url>https://github.com/apache/hugegraph-computer</url>
         <connection>scm:git:https://github.com/apache/hugegraph-computer.git</connection>
-        <developerConnection>scm:git:https://github.com/apache/hugegraph-computer.git</developerConnection>
+        <developerConnection>
+            scm:git:https://github.com/apache/hugegraph-computer.git
+        </developerConnection>
     </scm>
 
     <prerequisites>
@@ -235,6 +237,10 @@
                     <exclusion>
                         <groupId>com.fasterxml.jackson.core</groupId>
                         <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>okhttp</artifactId>
+                        <groupId>com.squareup.okhttp</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
