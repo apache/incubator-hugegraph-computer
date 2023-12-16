@@ -138,6 +138,10 @@
                     <!-- conflict with etcd -->
                     <exclusion>
                         <groupId>io.grpc</groupId>
+                        <artifactId>grpc-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>io.grpc</groupId>
                         <artifactId>grpc-netty-shaded</artifactId>
                     </exclusion>
                     <exclusion>
