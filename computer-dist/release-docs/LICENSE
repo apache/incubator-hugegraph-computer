@@ -332,7 +332,6 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * Metrics Core(io.dropwizard.metrics:metrics-core:3.2.6-none )
     (Apache License, Version 2.0) * Minio(io.minio:minio:8.5.6-https://min.io )
     (Apache License, Version 2.0) * Netty/All-in-One(io.netty:netty-all:4.1.42.Final-none )
-    (Apache License, Version 2.0) * OkHttp(com.squareup.okhttp:okhttp:2.7.5-none )
     (Apache License, Version 2.0) * hugegraph-rpc(com.baidu.hugegraph:hugegraph-rpc:2.0.1-none )
     (Apache License, Version 2.0) * Jackson-JAXRS-base(com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.12.1-none )
     (Apache License, Version 2.0) * Jackson-JAXRS-JSON(com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.12.1-none )
@@ -402,6 +401,13 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * JAX-RS provider for JSON content type(org.codehaus.jackson:jackson-jaxrs:1.9.2-http://jackson.codehaus.org )
     (Apache License, Version 2.0) * Xml Compatibility extensions for Jackson(org.codehaus.jackson:jackson-xc:1.9.2-http://jackson.codehaus.org )
     (Apache License, Version 2.0) * Javassist(org.javassist:javassist:3.21.0-GA-http://www.javassist.org/ )
+    (Apache License, Version 2.0) * IntelliJ IDEA Annotations(org.jetbrains:annotations:13.0-http://www.jetbrains.org )
+    (Apache License, Version 2.0) * Kotlin Stdlib(org.jetbrains.kotlin:kotlin-stdlib:1.6.20-https://kotlinlang.org/ )
+    (Apache License, Version 2.0) * Kotlin Stdlib Common(org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31-https://kotlinlang.org/ )
+    (Apache License, Version 2.0) * okhttp(com.squareup.okhttp3:okhttp:4.10.0-https://square.github.io/okhttp/ )
+    (Apache License, Version 2.0) * okhttp-logging-interceptor(com.squareup.okhttp3:logging-interceptor:4.10.0-https://square.github.io/okhttp/ )
+    (Apache License, Version 2.0) * okio(com.squareup.okio:okio-jvm:3.0.0-https://github.com/square/okio/ )
+    (Apache License, Version 2.0) * Simple XML (safe)(com.carrotsearch.thirdparty:simple-xml-safe:2.7.1-https://github.com/dweiss/simplexml )
 
     computer-core/src/main/java/org/apache/hugegraph/computer/core/util/StringEncoding.java files from https://github.com/JanusGraph
 
@@ -437,6 +443,8 @@ See licenses/ for text of these licenses.
     (CDDL) * jsp-api(javax.servlet.jsp:jsp-api:2.1-none )
     (CDDL) * Java Servlet API(javax.servlet:javax.servlet-api:3.1.0-http://servlet-spec.java.net )
     (CDDL) * OSGi resource locator bundle - used by various API providers that rely on META-INF/services mechanism to locate providers.(org.glassfish.hk2:osgi-resource-locator:1.0.1-none )
+    (CDDL) * javax.inject:1 as OSGi bundle(org.glassfish.hk2.external:javax.inject:2.5.0-b32-https://hk2.java.net/external/javax.inject )
+    (CDDL) * jersey-container-servlet-core(org.glassfish.jersey.containers:jersey-container-servlet-core:2.25.1-https://jersey.java.net/project/jersey-container-servlet-core/ )
 
 ========================================================================
 Third party EPL licenses
@@ -473,6 +481,7 @@ See licenses/ for text of these licenses.
     (The MIT License) * Joni(org.jruby.joni:joni:2.1.11-none )
     (The MIT License) * JCodings(org.jruby.jcodings:jcodings:1.0.18-none )
     (The MIT License) * mockito-core(org.mockito:mockito-core:3.8.0-mockito.org )
+    (The MIT License) * bcprov-jdk18on(org.bouncycastle:bcprov-jdk18on:1.74- https://www.bouncycastle.org/java.html)
 
 ========================================================================
 Third party MPL2.0 licenses
