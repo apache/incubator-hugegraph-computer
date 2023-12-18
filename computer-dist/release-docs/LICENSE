@@ -237,8 +237,6 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * com.alipay.sofa:sofa-rpc-all(com.alipay.sofa:sofa-rpc-all:5.7.6-http://github.com/sofastack/sofa-rpc )
     (Apache License, Version 2.0) * Snappy for Java(org.xerial.snappy:snappy-java:1.0.5-http://github.com/xerial/snappy-java/ )
     (Apache License, Version 2.0) * Apache Groovy(org.codehaus.groovy:groovy-all:2.4.6-http://groovy-lang.org )
-    (Apache License, Version 2.0) * Apache HttpClient(org.apache.httpcomponents:httpclient:4.5.2-http://hc.apache.org/httpcomponents-client )
-    (Apache License, Version 2.0) * Apache HttpCore(org.apache.httpcomponents:httpcore:4.4.4-http://hc.apache.org/httpcomponents-core-ga )
     (Apache License, Version 2.0) * htrace-core4(org.apache.htrace:htrace-core4:4.1.0-incubating-http://incubator.apache.org/projects/htrace.html )
     (Apache License, Version 2.0) * Data Mapper for Jackson(org.codehaus.jackson:jackson-mapper-asl:1.9.2-http://jackson.codehaus.org )
     (Apache License, Version 2.0) * Jackson(org.codehaus.jackson:jackson-core-asl:1.9.2-http://jackson.codehaus.org )
@@ -251,7 +249,6 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * JCIP Annotations under Apache License(com.github.stephenc.jcip:jcip-annotations:1.0-1-http://stephenc.github.com/jcip-annotations )
     (Apache License, Version 2.0) * JSON Small and Fast Parser(net.minidev:json-smart:2.3-http://www.minidev.net/ )
     (Apache License, Version 2.0) * SnakeYAML(org.yaml:snakeyaml:1.18-http://www.snakeyaml.org )
-    (Apache License, Version 2.0) * Jakarta Bean Validation API(jakarta.validation:jakarta.validation-api:3.0.0-https://beanvalidation.org )
     (Apache License, Version 2.0) * Nimbus JOSE+JWT(com.nimbusds:nimbus-jose-jwt:4.41.1-https://bitbucket.org/connect2id/nimbus-jose-jwt )
     (Apache License, Version 2.0) * Apache Commons BeanUtils(commons-beanutils:commons-beanutils:1.9.3-https://commons.apache.org/proper/commons-beanutils/ )
     (Apache License, Version 2.0) * Apache Commons Compress(org.apache.commons:commons-compress:1.18-https://commons.apache.org/proper/commons-compress/ )
@@ -275,7 +272,6 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * Kerby-kerb Util(org.apache.kerby:kerb-util:1.0.1-https://directory.apache.org/kerby/ )
     (Apache License, Version 2.0) * Token provider(org.apache.kerby:token-provider:1.0.1-https://directory.apache.org/kerby/ )
     (Apache License, Version 2.0) * com.alipay.sofa:bolt(com.alipay.sofa:bolt:1.6.2-https://github.com/alipay/sofa-bolt )
-    (Apache License, Version 2.0) * Jakarta Dependency Injection(jakarta.inject:jakarta.inject-api:2.0.0-https://github.com/eclipse-ee4j/injection-api )
     (Apache License, Version 2.0) * Jackson-core(com.fasterxml.jackson.core:jackson-core:2.12.1-https://github.com/FasterXML/jackson-core )
     (Apache License, Version 2.0) * Jackson-dataformat-YAML(com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.11.2-https://github.com/FasterXML/jackson-dataformats-text )
     (Apache License, Version 2.0) * Jackson module: JAXB Annotations(com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.12.1-https://github.com/FasterXML/jackson-modules-base )
@@ -325,7 +321,6 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * Apache Log4j SLF4J Binding(org.apache.logging.log4j:log4j-slf4j-impl:2.17.0-none )
     (Apache License, Version 2.0) * Apache Yetus - Audience Annotations(org.apache.yetus:audience-annotations:0.5.0-none )
     (Apache License, Version 2.0) * error-prone annotations(com.google.errorprone:error_prone_annotations:2.3.4-none )
-    (Apache License, Version 2.0) * Guava InternalFutureFailureAccess and InternalFutures(com.google.guava:failureaccess:1.0-none )
     (Apache License, Version 2.0) * Guava ListenableFuture only(com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava-none )
     (Apache License, Version 2.0) * Guava: Google Core Libraries for Java(com.google.guava:guava:25.1-jre-none )
     (Apache License, Version 2.0) * LZ4 and xxHash(org.lz4:lz4-java:1.4.0-none )
@@ -379,16 +374,12 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * Fabric8 :: Kubernetes :: Server Mock(io.fabric8kubernetes-server-mock5.6.0http://fabric8.io/)
     (Apache License, Version 2.0) * OkHttp Logging Interceptor(com.squareup.okhttp3logging-interceptor3.12.12https://square.github.io/okhttp/)
     (Apache License, Version 2.0) * Fabric8 :: Mock Web Server(io.fabric8mockwebserver0.1.8http://fabric8.io/)
-    (Apache License, Version 2.0) * MockWebServer(com.squareup.okhttp3mockwebserver3.12.6square.github.io/okhttp/)
     (Apache License, Version 2.0) * mvel(org.mvelmvel22.4.13.Finalhttp://mvel.codehaus.org/)
     (Apache License, Version 2.0) * objenesis(org.objenesisobjenesis3.1http://objenesis.org)
     (Apache License, Version 2.0) * Sundrio :: Annotations :: Resourcecify(io.sundrresourcecify-annotations0.13.1https://github.com/sundrio/sundrio)
     (Apache License, Version 2.0) * Sundrio :: Code generation(io.sundrsundr-codegen0.13.1https://github.com/sundrio/sundrio)
     (Apache License, Version 2.0) * Sundrio :: Core(io.sundrsundr-core0.13.1https://github.com/sundrio/sundrio)
     (Apache License, Version 2.0) * zjsonpatch(com.flipkart.zjsonpatchzjsonpatch0.3.0https://github.com/flipkart-incubator/zjsonpatch/)
-    (Apache License, Version 2.0) * jersey-inject-hk2(org.glassfish.jersey.inject:jersey-hk2:3.0.3-none )
-    (Apache License, Version 2.0) * Jakarta Annotations API(jakarta.annotation:jakarta.annotation-api:2.0.0-https://projects.eclipse.org/projects/ee4j.ca )
-    (Apache License, Version 2.0) * jersey-core-server(org.glassfish.jersey.core:jersey-server:3.0.3-none )
     (Apache License, Version 2.0) * Jetty :: Http Utility(org.eclipse.jetty:jetty-http:9.3.24.v20180605-http://www.eclipse.org/jetty )
     (Apache License, Version 2.0) * Jetty :: IO Utility(org.eclipse.jetty:jetty-io:9.3.24.v20180605-http://www.eclipse.org/jetty )
     (Apache License, Version 2.0) * Jetty :: Security(org.eclipse.jetty:jetty-security:9.3.24.v20180605-http://www.eclipse.org/jetty )
@@ -436,13 +427,8 @@ Third party CDDL licenses
 The following components are provided under the CDDL License.
 See licenses/ for text of these licenses.
 
-    (CDDL) * HK2 API module(org.glassfish.hk2:hk2-api:2.4.0-b31-none )
-    (CDDL) * HK2 Implementation Utilities(org.glassfish.hk2:hk2-utils:2.4.0-b31-none )
-    (CDDL) * ServiceLocator Default Implementation(org.glassfish.hk2:hk2-locator:2.4.0-b31-none )
-    (CDDL) * aopalliance version 2.4.0-b31 repackaged as a module(org.glassfish.hk2.external:aopalliance-repackaged:2.4.0-b31-none )
     (CDDL) * jsp-api(javax.servlet.jsp:jsp-api:2.1-none )
     (CDDL) * Java Servlet API(javax.servlet:javax.servlet-api:3.1.0-http://servlet-spec.java.net )
-    (CDDL) * OSGi resource locator bundle - used by various API providers that rely on META-INF/services mechanism to locate providers.(org.glassfish.hk2:osgi-resource-locator:1.0.1-none )
     (CDDL) * javax.inject:1 as OSGi bundle(org.glassfish.hk2.external:javax.inject:2.5.0-b32-https://hk2.java.net/external/javax.inject )
     (CDDL) * jersey-container-servlet-core(org.glassfish.jersey.containers:jersey-container-servlet-core:2.25.1-https://jersey.java.net/project/jersey-container-servlet-core/ )
 
@@ -453,12 +439,10 @@ Third party EPL licenses
 The following components are provided under the EPL License.
 See licenses/ for text of these licenses.
 
-    (EDL1.0) * apiNote(jakarta.xml.bind:jakarta.xml.bind-api:2.3.2-none )
     (EPL1.0) * JUnit(junit:junit:4.12-http://junit.org )
     (EPL1.0) * Jakarta Activation(com.sun.activation:jakarta.activation:2.0.1-https://jakarta.ee/ )
     (EPL1.0) * Jakarta Activation API jar(jakarta.activation:jakarta.activation-api:1.2.2-https://jakarta.ee/specifications/activation/1.2/ )
     (EPL1.0) * Old JAXB Core(com.sun.xml.bind:jaxb-core:3.0.2-https://eclipse-ee4j.github.io/jaxb-ri/ )
-    (EPL2.0) * jakarta.ws.rs-api(jakarta.ws.rs:jakarta.ws.rs-api:3.0.0-https://github.com/eclipse-ee4j/jaxrs-api )
 
 ========================================================================
 Third party MIT licenses
