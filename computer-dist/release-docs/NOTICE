@@ -2747,29 +2747,6 @@ The Apache Software Foundation (http://www.apache.org/).
 
 ========================================================================
 
-Apache HttpClient
-Copyright 1999-2016 The Apache Software Foundation
-
-This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
-
-
-
-
-========================================================================
-
-Apache HttpCore
-Copyright 2005-2015 The Apache Software Foundation
-
-This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
-
-
-This project contains annotations derived from JCIP-ANNOTATIONS
-Copyright (c) 2005 Brian Goetz and Tim Peierls. See http://www.jcip.net
-
-
-========================================================================
 Apache log4j
 Copyright 2007 The Apache Software Foundation
 
@@ -2996,151 +2973,7 @@ For additional credits (generally to people who reported problems)
 see CREDITS file.
 
 ========================================================================
-# Notices for Jakarta Annotations
 
-This content is produced and maintained by the Jakarta Annotations project.
-
- * Project home: https://projects.eclipse.org/projects/ee4j.ca
-
-## Trademarks
-
-Jakarta Annotations is a trademark of the Eclipse Foundation.
-
-## Declared Project Licenses
-
-This program and the accompanying materials are made available under the terms
-of the Eclipse Public License v. 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0. This Source Code may also be made
-available under the following Secondary Licenses when the conditions for such
-availability set forth in the Eclipse Public License v. 2.0 are satisfied: GNU
-General Public License, version 2 with the GNU Classpath Exception which is
-available at https://www.gnu.org/software/classpath/license.html.
-
-SPDX-License-Identifier: EPL-2.0
-
-## Source Code
-
-The project maintains the following source code repositories:
-
- * https://github.com/eclipse-ee4j/common-annotations-api
-
-## Third-party Content
-
-## Cryptography
-
-Content may contain encryption software. The country in which you are currently
-may have restrictions on the import, possession, and use, and/or re-export to
-another country, of encryption software. BEFORE using any encryption software,
-please check the country's laws, regulations and policies concerning the import,
-possession, or use, and re-export of encryption software, to see if this is
-permitted.
-
-========================================================================
-# Notices for Eclipse Jakarta Dependency Injection
-
-This content is produced and maintained by the Eclipse Jakarta Dependency Injection project.
-
-* Project home: https://projects.eclipse.org/projects/cdi.batch
-
-## Trademarks
-
-Jakarta Dependency Injection is a trademark of the Eclipse Foundation.
-
-## Copyright
-
-All content is the property of the respective authors or their employers. For
-more information regarding authorship of content, please consult the listed
-source code repository logs.
-
-## Declared Project Licenses
-
-This program and the accompanying materials are made available under the terms
-of the Apache License, Version 2.0 which is available at
-https://www.apache.org/licenses/LICENSE-2.0.
-
-SPDX-License-Identifier: Apache-2.0
-
-## Source Code
-
-The project maintains the following source code repositories:
-
-https://github.com/eclipse-ee4j/injection-api
-https://github.com/eclipse-ee4j/injection-spec
-https://github.com/eclipse-ee4j/injection-tck
-
-## Third-party Content
-
-This project leverages the following third party content.
-
-None
-
-## Cryptography
-
-None
-
-========================================================================
-# Notices for Jakarta RESTful Web Services
-
-This content is produced and maintained by the **Jakarta RESTful Web Services**
-project.
-
-* Project home: https://projects.eclipse.org/projects/ee4j.jaxrs
-
-## Trademarks
-
-**Jakarta RESTful Web Services** is a trademark of the Eclipse Foundation.
-
-## Copyright
-
-All content is the property of the respective authors or their employers. For
-more information regarding authorship of content, please consult the listed
-source code repository logs.
-
-## Declared Project Licenses
-
-This program and the accompanying materials are made available under the terms
-of the Eclipse Public License v. 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0. This Source Code may also be made
-available under the following Secondary Licenses when the conditions for such
-availability set forth in the Eclipse Public License v. 2.0 are satisfied: GNU
-General Public License, version 2 with the GNU Classpath Exception which is
-available at https://www.gnu.org/software/classpath/license.html.
-
-SPDX-License-Identifier: EPL-2.0
-
-## Source Code
-
-The project maintains the following source code repositories:
-
-* https://github.com/eclipse-ee4j/jaxrs-api
-
-## Third-party Content
-
-This project leverages the following third party content.
-
-javaee-api (7.0)
-
-* License: Apache-2.0 AND W3C
-
-JUnit (4.11)
-
-* License: Common Public License 1.0
-
-Mockito (2.16.0)
-
-* Project: http://site.mockito.org
-* Source: https://github.com/mockito/mockito/releases/tag/v2.16.0
-
-## Cryptography
-
-Content may contain encryption software. The country in which you are currently
-may have restrictions on the import, possession, and use, and/or re-export to
-another country, of encryption software. BEFORE using any encryption software,
-please check the country's laws, regulations and policies concerning the import,
-possession, or use, and re-export of encryption software, to see if this is
-permitted.
-
-========================================================================
 # Notices for Eclipse Project for JAF
 
 This content is produced and maintained by the Eclipse Project for JAF project.
@@ -3222,11 +3055,6 @@ Angular JS, v1.6.6
 * License MIT (http://www.opensource.org/licenses/mit-license.php)
 * Project: http://angularjs.org
 * Coyright: (c) 2010-2017 Google, Inc.
-
-aopalliance Version 1
-* License: all the source code provided by AOP Alliance is Public Domain.
-* Project: http://aopalliance.sourceforge.net
-* Copyright: Material in the public domain is not protected by copyright
 
 Bean Validation API 3.0.0
 * License: Apache License, 2.0
@@ -3337,11 +3165,6 @@ Angular JS, v1.6.6
 * License MIT (http://www.opensource.org/licenses/mit-license.php)
 * Project: http://angularjs.org
 * Coyright: (c) 2010-2017 Google, Inc.
-
-aopalliance Version 1
-* License: all the source code provided by AOP Alliance is Public Domain.
-* Project: http://aopalliance.sourceforge.net
-* Copyright: Material in the public domain is not protected by copyright
 
 Bean Validation API 3.0.0
 * License: Apache License, 2.0
@@ -3662,30 +3485,6 @@ see CREDITS file.
 
 ========================================================================
 
-computer-api
-Copyright 2020 The Apache Software Foundation
-
-This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
-
-========================================================================
-
-computer-core
-Copyright 2020 The Apache Software Foundation
-
-This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
-
-========================================================================
-
-computer-dist
-Copyright 2020 The Apache Software Foundation
-
-This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
-
-========================================================================
-
 Apache Commons Collections
 Copyright 2001-2018 The Apache Software Foundation
 
@@ -3796,41 +3595,6 @@ SPDX-License-Identifier: BSD-3-Clause
 The project maintains the following source code repositories:
 
 * https://github.com/eclipse-ee4j/jaf
-
-========================================================================
-# Notices for Jakarta Activation
-
-This content is produced and maintained by Jakarta Activation project.
-
-* Project home: https://projects.eclipse.org/projects/ee4j.jaf
-
-## Copyright
-
-All content is the property of the respective authors or their employers. For
-more information regarding authorship of content, please consult the listed
-source code repository logs.
-
-## Declared Project Licenses
-
-This program and the accompanying materials are made available under the terms
-of the Eclipse Distribution License v. 1.0,
-which is available at http://www.eclipse.org/org/documents/edl-v10.php.
-
-SPDX-License-Identifier: BSD-3-Clause
-
-## Source Code
-
-The project maintains the following source code repositories:
-
-* https://github.com/eclipse-ee4j/jaf
-
-## Third-party Content
-
-This project leverages the following third party content.
-
-JUnit (4.12)
-
-* License: Eclipse Public License
 
 ========================================================================
 
@@ -4093,3 +3857,19 @@ It also includes software from other open source projects including, but not lim
  * SLF4J [https://www.slf4j.org/]
  * Spatial4j [https://github.com/locationtech/spatial4j]
  * Vavr [https://www.vavr.io/]
+
+========================================================================
+
+kotlin NOTICE
+
+========================================================================
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the Kotlin Compiler distribution.                 ==
+   =========================================================================
+
+   Kotlin Compiler
+   Copyright 2010-2023 JetBrains s.r.o and respective authors and developers
+
+
