@@ -4093,3 +4093,19 @@ It also includes software from other open source projects including, but not lim
  * SLF4J [https://www.slf4j.org/]
  * Spatial4j [https://github.com/locationtech/spatial4j]
  * Vavr [https://www.vavr.io/]
+
+========================================================================
+
+kotlin NOTICE
+
+========================================================================
+   =========================================================================
+   ==  NOTICE file corresponding to the section 4 d of                    ==
+   ==  the Apache License, Version 2.0,                                   ==
+   ==  in this case for the Kotlin Compiler distribution.                 ==
+   =========================================================================
+
+   Kotlin Compiler
+   Copyright 2010-2023 JetBrains s.r.o and respective authors and developers
+
+
