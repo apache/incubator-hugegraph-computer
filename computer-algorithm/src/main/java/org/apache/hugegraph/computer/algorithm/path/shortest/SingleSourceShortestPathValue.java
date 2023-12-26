@@ -22,13 +22,12 @@ import java.util.List;
 
 import org.apache.hugegraph.computer.core.graph.value.DoubleValue;
 import org.apache.hugegraph.computer.core.graph.value.IdList;
-import org.apache.hugegraph.computer.core.graph.value.ListValue;
 import org.apache.hugegraph.computer.core.graph.value.Value;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.io.RandomAccessOutput;
 
-public class ShortestPathValue implements Value.CustomizeValue<List<Object>> {
+public class SingleSourceShortestPathValue implements Value.CustomizeValue<List<Object>> {
 
     /**
      * path
@@ -36,33 +35,25 @@ public class ShortestPathValue implements Value.CustomizeValue<List<Object>> {
     private final IdList path;
 
     /**
-     * weight of path
-     */
-    private final ListValue<DoubleValue> pathWeight;
-
-    /**
      * total weight.
-     * infinity(Double.MAX_VALUE) means unreachable.
+     * infinity means unreachable.
      */
     private final DoubleValue totalWeight;
 
-    public ShortestPathValue() {
+    public SingleSourceShortestPathValue() {
         this.path = new IdList();
-        this.pathWeight = new ListValue<DoubleValue>();
-        this.totalWeight = new DoubleValue(Double.MAX_VALUE);
+        this.totalWeight = new DoubleValue(0);
     }
 
     @Override
     public void read(RandomAccessInput in) throws IOException {
         this.path.read(in);
-        this.pathWeight.read(in);
         this.totalWeight.read(in);
     }
 
     @Override
     public void write(RandomAccessOutput out) throws IOException {
         this.path.write(out);
-        this.pathWeight.write(out);
         this.totalWeight.write(out);
     }
 
@@ -71,40 +62,42 @@ public class ShortestPathValue implements Value.CustomizeValue<List<Object>> {
         return this.path.value();
     }
 
-    public void updatePath(Vertex vertex, double weight) {
-        this.path.add(vertex.id());
-        this.pathWeight.add(new DoubleValue(weight));
-        this.totalWeight.value(this.getTotalWeight());
+    public void unreachable() {
+        this.totalWeight.value(Double.POSITIVE_INFINITY);
     }
 
-    public void updatePath(IdList path, ListValue<DoubleValue> pathWeight, Vertex vertex) {
+    public void zeroDistance() {
+        this.totalWeight.value(0);
+    }
+
+    public void shorterPath(Vertex vertex, IdList path, double weight) {
         this.path.clear();
-        this.pathWeight.clear();
-
         this.path.addAll(path.copy().values());
-        this.pathWeight.addAll(pathWeight.copy().values());
-
         this.path.add(vertex.id());
-        this.totalWeight.value(this.getTotalWeight());
+        this.totalWeight.value(weight);
+    }
+
+    public void addToPath(Vertex vertex, double weight) {
+        this.path.add(vertex.id());
+        this.totalWeight.value(weight);
+    }
+
+    public void addToPath(IdList path, double weight) {
+        this.path.addAll(path.copy().values());
+        this.totalWeight.value(weight);
     }
 
     public IdList path() {
         return this.path;
     }
 
-    public ListValue<DoubleValue> pathWeight() {
-        return this.pathWeight;
-    }
-
     public double totalWeight() {
         return this.totalWeight.doubleValue();
     }
 
-    private double getTotalWeight() {
-        double totalWeight = 0;
-        for (int i = 0; i < this.pathWeight.size(); ++i) {
-            totalWeight += this.pathWeight.get(i).doubleValue();
-        }
-        return totalWeight;
+    public void copy(SingleSourceShortestPathValue value) {
+        this.path.clear();
+        this.path.addAll(value.path().copy().values());
+        this.totalWeight.value(value.totalWeight());
     }
 }

@@ -31,16 +31,16 @@ import org.apache.hugegraph.computer.core.worker.ComputationContext;
 import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
-public class SourceTargetShortestPath implements Computation<ShortestPathMessage> {
+public class SingleSourceShortestPath implements Computation<SingleSourceShortestPathValue> {
 
-    private static final Logger LOG = Log.logger(SourceTargetShortestPath.class);
+    private static final Logger LOG = Log.logger(SingleSourceShortestPath.class);
 
-    public static final String OPTION_SOURCE_ID = "source_target_shortest_path.source_id";
-    public static final String OPTION_TARGET_ID = "source_target_shortest_path.target_id";
+    public static final String OPTION_SOURCE_ID = "single_source_shortest_path.source_id";
+    public static final String OPTION_TARGET_ID = "single_source_shortest_path.target_id";
     public static final String OPTION_WEIGHT_PROPERTY =
-            "source_target_shortest_path.weight_property";
+            "single_source_shortest_path.weight_property";
     public static final String OPTION_DEFAULT_WEIGHT =
-            "source_target_shortest_path.default_weight";
+            "single_source_shortest_path.default_weight";
 
     /**
      * source vertex id
@@ -48,9 +48,17 @@ public class SourceTargetShortestPath implements Computation<ShortestPathMessage
     private String sourceId;
 
     /**
-     * target vertex id
+     * target vertex id.
      */
     private String targetId;
+
+    /**
+     * todo 抽离 enum
+     * 1. single
+     * 2. multiple: comma separated
+     * 3. all: *
+     */
+    private String targetType;
 
     /**
      * weight property.
@@ -78,19 +86,27 @@ public class SourceTargetShortestPath implements Computation<ShortestPathMessage
     public void init(Config config) {
         this.sourceId = config.getString(OPTION_SOURCE_ID, "");
         if (StringUtils.isBlank(this.sourceId)) {
-            throw new ComputerException("The param %s must not be blank, ", OPTION_SOURCE_ID);
+            throw new ComputerException("The param '%s' must not be blank", OPTION_SOURCE_ID);
         }
 
         this.targetId = config.getString(OPTION_TARGET_ID, "");
         if (StringUtils.isBlank(this.targetId)) {
-            throw new ComputerException("The param %s must not be blank, ", OPTION_TARGET_ID);
+            throw new ComputerException("The param '%s' must not be blank", OPTION_TARGET_ID);
+        }
+
+        if (this.targetId.equals("*")) {
+            this.targetType = "all";
+        } else if (this.targetId.split(",").length > 1) {
+            this.targetType = "multiple";
+        } else {
+            this.targetType = "single";
         }
 
         this.weightProperty = config.getString(OPTION_WEIGHT_PROPERTY, "");
 
         this.defaultWeight = config.getDouble(OPTION_DEFAULT_WEIGHT, 1);
         if (this.defaultWeight <= 0) {
-            throw new ComputerException("The param %s must be greater than 0, " +
+            throw new ComputerException("The param '%s' must be greater than 0, " +
                                         "actual got '%s'",
                                         OPTION_DEFAULT_WEIGHT, this.defaultWeight);
         }
@@ -98,7 +114,8 @@ public class SourceTargetShortestPath implements Computation<ShortestPathMessage
 
     @Override
     public void compute0(ComputationContext context, Vertex vertex) {
-        ShortestPathValue value = new ShortestPathValue();
+        SingleSourceShortestPathValue value = new SingleSourceShortestPathValue();
+        value.unreachable();
         vertex.value(value);
 
         // start from source vertex
@@ -106,26 +123,25 @@ public class SourceTargetShortestPath implements Computation<ShortestPathMessage
             vertex.inactivate();
             return;
         }
+        value.zeroDistance(); // source vertex
 
-        value.updatePath(vertex, 0); // source vertex
-
-        // source vertex == target vertex
-        if (this.sourceId.equals(this.targetId)) {
-            LOG.info("source vertex {} equals target vertex {}", this.sourceId, this.targetId);
+        // single target && source vertex == target vertex
+        if (this.targetType.equals("single") && this.sourceId.equals(this.targetId)) {
+            LOG.debug("source vertex {} equals target vertex {}", this.sourceId, this.targetId);
             vertex.inactivate();
             return;
         }
 
         if (vertex.numEdges() <= 0) {
             // isolated vertex
-            LOG.info("source vertex {} can not reach target vertex {}",
-                     this.sourceId, this.targetId);
+            LOG.debug("source vertex {} can not reach target vertex {}",
+                      this.sourceId, this.targetId);
             vertex.inactivate();
             return;
         }
 
         vertex.edges().forEach(edge -> {
-            ShortestPathMessage message = new ShortestPathMessage();
+            SingleSourceShortestPathValue message = new SingleSourceShortestPathValue();
             message.addToPath(vertex, this.getEdgeWeight(edge));
 
             context.sendMessage(edge.targetId(), message);
@@ -136,27 +152,29 @@ public class SourceTargetShortestPath implements Computation<ShortestPathMessage
 
     @Override
     public void compute(ComputationContext context, Vertex vertex,
-                        Iterator<ShortestPathMessage> messages) {
+                        Iterator<SingleSourceShortestPathValue> messages) {
         while (messages.hasNext()) {
-            ShortestPathMessage message = messages.next();
-            ShortestPathValue value = vertex.value();
+            SingleSourceShortestPathValue message = messages.next();
+            SingleSourceShortestPathValue value = vertex.value();
 
             if (message.totalWeight() < value.totalWeight()) {
                 // find a shorter path
-                value.updatePath(message.path(), message.pathWeight(), vertex);
+                value.shorterPath(vertex, message.path(), message.totalWeight());
             } else {
                 continue;
             }
 
-            // reach target vertex or nowhere to go
-            if (this.idEquals(vertex, this.targetId) || vertex.numEdges() <= 0) {
+            // reach single target or nowhere to go
+            if ((this.targetType.equals("single") && this.idEquals(vertex, this.targetId))
+                || vertex.numEdges() <= 0) {
                 continue;
             }
 
             vertex.edges().forEach(edge -> {
-                ShortestPathMessage forwardMessage = new ShortestPathMessage();
-                forwardMessage.addToPath(message.path(), message.pathWeight(),
-                                         vertex, this.getEdgeWeight(edge));
+                SingleSourceShortestPathValue forwardMessage = new SingleSourceShortestPathValue();
+                forwardMessage.addToPath(value.path(),
+                                         value.totalWeight() + this.getEdgeWeight(edge));
+
                 context.sendMessage(edge.targetId(), forwardMessage);
             });
         }

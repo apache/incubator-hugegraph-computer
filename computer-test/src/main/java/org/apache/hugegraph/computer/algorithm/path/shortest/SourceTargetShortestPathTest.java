@@ -111,22 +111,22 @@ public class SourceTargetShortestPathTest extends AlgorithmTestBase {
         runAlgorithm(SourceTargetShortestPathTestParams.class.getName());
     }
 
-    public static class SourceTargetShortestPathTestParams extends SourceTargetShortestPathParams {
+    public static class SourceTargetShortestPathTestParams extends SingleSourceShortestPathParams {
 
         @Override
         public void setAlgorithmParameters(Map<String, String> params) {
             this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
                              SourceTargetShortestPathTestOutput.class.getName());
-            this.setIfAbsent(params, SourceTargetShortestPath.OPTION_SOURCE_ID, SOURCE_ID);
-            this.setIfAbsent(params, SourceTargetShortestPath.OPTION_TARGET_ID, TARGET_ID);
-            this.setIfAbsent(params, SourceTargetShortestPath.OPTION_WEIGHT_PROPERTY,
+            this.setIfAbsent(params, SingleSourceShortestPath.OPTION_SOURCE_ID, SOURCE_ID);
+            this.setIfAbsent(params, SingleSourceShortestPath.OPTION_TARGET_ID, TARGET_ID);
+            this.setIfAbsent(params, SingleSourceShortestPath.OPTION_WEIGHT_PROPERTY,
                              SourceTargetShortestPathTest.PROPERTY_KEY);
 
             super.setAlgorithmParameters(params);
         }
     }
 
-    public static class SourceTargetShortestPathTestOutput extends SourceTargetShortestPathOutput {
+    public static class SourceTargetShortestPathTestOutput extends SingleSourceShortestPathOutput {
 
         private static final Logger LOG = Log.logger(SourceTargetShortestPathTestOutput.class);
 

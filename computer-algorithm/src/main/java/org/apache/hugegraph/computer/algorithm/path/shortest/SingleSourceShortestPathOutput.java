@@ -17,14 +17,32 @@
 
 package org.apache.hugegraph.computer.algorithm.path.shortest;
 
-import org.apache.hugegraph.computer.core.combiner.Combiner;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ShortestPathCombiner implements Combiner<ShortestPathMessage> {
+import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
+import org.apache.hugegraph.computer.core.output.hg.HugeGraphOutput;
+
+public class SingleSourceShortestPathOutput extends HugeGraphOutput<List<String>> {
 
     @Override
-    public void combine(ShortestPathMessage v1, ShortestPathMessage v2,
-                        ShortestPathMessage result) {
-        ShortestPathMessage message = v2.totalWeight() < v1.totalWeight() ? v2 : v1;
-        result.value(message);
+    protected void prepareSchema() {
+        this.client().schema().propertyKey(this.name())
+            .asText()
+            .writeType(this.writeType())
+            .valueList()
+            .ifNotExist()
+            .create();
+    }
+
+    @Override
+    protected List<String> value(Vertex vertex) {
+        SingleSourceShortestPathValue value = vertex.value();
+
+        List<String> path = new ArrayList<>();
+        for (int i = 0; i < value.path().size(); i++) {
+            path.add(value.path().get(i).toString());
+        }
+        return path;
     }
 }
