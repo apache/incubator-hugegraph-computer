@@ -17,6 +17,7 @@
 
 package org.apache.hugegraph.computer.algorithm.path.shortest;
 
+import org.apache.hugegraph.computer.core.combiner.IdListMergeCombiner;
 import org.apache.hugegraph.computer.core.graph.value.ValueType;
 import org.apache.hugegraph.computer.core.master.MasterComputation;
 import org.apache.hugegraph.computer.core.master.MasterComputationContext;
@@ -31,7 +32,7 @@ public class SingleSourceShortestPathMaster implements MasterComputation {
     public void init(MasterContext context) {
         context.registerAggregator(SINGLE_SOURCE_SHORTEST_PATH_REACH_TARGET,
                                    ValueType.ID_LIST,
-                                   ReachTargetCombiner.class);
+                                   IdListMergeCombiner.class);
     }
 
     @Override

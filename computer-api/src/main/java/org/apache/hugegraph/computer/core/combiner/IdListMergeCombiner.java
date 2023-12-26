@@ -15,13 +15,12 @@
  * under the License.
  */
 
-package org.apache.hugegraph.computer.algorithm.path.shortest;
+package org.apache.hugegraph.computer.core.combiner;
 
-import org.apache.hugegraph.computer.core.combiner.Combiner;
 import org.apache.hugegraph.computer.core.graph.id.Id;
 import org.apache.hugegraph.computer.core.graph.value.IdList;
 
-public class ReachTargetCombiner implements Combiner<IdList> {
+public class IdListMergeCombiner implements Combiner<IdList> {
 
     @Override
     public void combine(IdList v1, IdList v2, IdList result) {

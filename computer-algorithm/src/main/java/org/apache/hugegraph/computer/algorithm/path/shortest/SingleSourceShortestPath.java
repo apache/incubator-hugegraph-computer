@@ -78,6 +78,7 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
      */
     private Double defaultWeight;
 
+    //****************** global data ******************//
     /**
      * reach target
      */
