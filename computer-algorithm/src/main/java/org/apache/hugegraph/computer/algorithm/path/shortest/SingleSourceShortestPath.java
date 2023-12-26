@@ -17,17 +17,23 @@
 
 package org.apache.hugegraph.computer.algorithm.path.shortest;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.graph.edge.Edge;
+import org.apache.hugegraph.computer.core.graph.id.Id;
 import org.apache.hugegraph.computer.core.graph.value.DoubleValue;
+import org.apache.hugegraph.computer.core.graph.value.IdList;
 import org.apache.hugegraph.computer.core.graph.value.Value;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.worker.Computation;
 import org.apache.hugegraph.computer.core.worker.ComputationContext;
+import org.apache.hugegraph.computer.core.worker.WorkerContext;
 import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
@@ -49,16 +55,16 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
     /**
      * target vertex id.
+     * 1. single target
+     * 2. multiple target: comma separated
+     * 3. all: *
      */
     private String targetId;
 
     /**
-     * todo 抽离 enum
-     * 1. single
-     * 2. multiple: comma separated
-     * 3. all: *
+     * target quantity type
      */
-    private String targetType;
+    private QuantityType targetQuantityType;
 
     /**
      * weight property.
@@ -71,6 +77,11 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
      * default 1
      */
     private Double defaultWeight;
+
+    /**
+     * reach target
+     */
+    private IdList reachTarget;
 
     @Override
     public String category() {
@@ -95,11 +106,15 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
         }
 
         if (this.targetId.equals("*")) {
-            this.targetType = "all";
+            this.targetQuantityType = QuantityType.ALL;
         } else if (this.targetId.split(",").length > 1) {
-            this.targetType = "multiple";
+            // remove spaces
+            this.targetId = Arrays.stream(this.targetId.split(","))
+                                  .map(e -> e.trim())
+                                  .collect(Collectors.joining(","));
+            this.targetQuantityType = QuantityType.MULTIPLE;
         } else {
-            this.targetType = "single";
+            this.targetQuantityType = QuantityType.SINGLE;
         }
 
         this.weightProperty = config.getString(OPTION_WEIGHT_PROPERTY, "");
@@ -126,7 +141,8 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
         value.zeroDistance(); // source vertex
 
         // single target && source vertex == target vertex
-        if (this.targetType.equals("single") && this.sourceId.equals(this.targetId)) {
+        if (this.targetQuantityType.equals(QuantityType.SINGLE) &&
+            this.sourceId.equals(this.targetId)) {
             LOG.debug("source vertex {} equals target vertex {}", this.sourceId, this.targetId);
             vertex.inactivate();
             return;
@@ -153,6 +169,11 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     @Override
     public void compute(ComputationContext context, Vertex vertex,
                         Iterator<SingleSourceShortestPathValue> messages) {
+        if (this.isTarget(vertex) && !this.reachTarget.contains(vertex.id())) {
+            // reach target
+            this.reachTarget.add(vertex.id());
+        }
+
         while (messages.hasNext()) {
             SingleSourceShortestPathValue message = messages.next();
             SingleSourceShortestPathValue value = vertex.value();
@@ -164,9 +185,8 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
                 continue;
             }
 
-            // reach single target or nowhere to go
-            if ((this.targetType.equals("single") && this.idEquals(vertex, this.targetId))
-                || vertex.numEdges() <= 0) {
+            // reach all target or nowhere to go
+            if (this.isAllTargetReach(vertex) || vertex.numEdges() <= 0) {
                 continue;
             }
 
@@ -180,6 +200,19 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
         }
 
         vertex.inactivate();
+    }
+
+    @Override
+    public void beforeSuperstep(WorkerContext context) {
+        this.reachTarget = context.aggregatedValue(
+                SingleSourceShortestPathMaster.SINGLE_SOURCE_SHORTEST_PATH_REACH_TARGET);
+    }
+
+    @Override
+    public void afterSuperstep(WorkerContext context) {
+        context.aggregateValue(
+                SingleSourceShortestPathMaster.SINGLE_SOURCE_SHORTEST_PATH_REACH_TARGET,
+                this.reachTarget);
     }
 
     /**
@@ -211,5 +244,51 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
             }
         }
         return weight;
+    }
+
+    /**
+     * determine whether vertex is one of the target
+     */
+    private boolean isTarget(Vertex vertex) {
+        if (this.targetQuantityType.equals(QuantityType.SINGLE) &&
+            this.idEquals(vertex, this.targetId)) {
+            return true;
+        }
+
+        if (this.targetQuantityType.equals(QuantityType.MULTIPLE)) {
+            for (String targetId : this.targetId.split(",")) {
+                if (this.idEquals(vertex, targetId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * determine whether reach all target
+     */
+    private boolean isAllTargetReach(Vertex vertex) {
+        if (this.targetQuantityType.equals(QuantityType.SINGLE) &&
+            this.idEquals(vertex, this.targetId)) {
+            return true;
+        }
+
+        if (this.targetQuantityType.equals(QuantityType.MULTIPLE)) {
+            String[] targetIds = this.targetId.split(",");
+            if (targetIds.length == this.reachTarget.size()) {
+                List<String> reachTargets = this.reachTarget.values()
+                                                            .stream().map(Id::toString)
+                                                            .collect(Collectors.toList());
+                for (String targetId : targetIds) {
+                    if (!reachTargets.contains(targetId)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 }

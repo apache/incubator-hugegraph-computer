@@ -26,6 +26,8 @@ public class SingleSourceShortestPathParams implements AlgorithmParams {
 
     @Override
     public void setAlgorithmParameters(Map<String, String> params) {
+        this.setIfAbsent(params, ComputerOptions.MASTER_COMPUTATION_CLASS,
+                         SingleSourceShortestPathMaster.class.getName());
         this.setIfAbsent(params, ComputerOptions.WORKER_COMPUTATION_CLASS,
                          SingleSourceShortestPath.class.getName());
         this.setIfAbsent(params, ComputerOptions.ALGORITHM_MESSAGE_CLASS,
