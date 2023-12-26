@@ -17,9 +17,6 @@
 
 package org.apache.hugegraph.computer.algorithm.path.shortest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.hugegraph.computer.algorithm.AlgorithmTestBase;
@@ -29,6 +26,7 @@ import org.apache.hugegraph.driver.HugeClient;
 import org.apache.hugegraph.driver.SchemaManager;
 import org.apache.hugegraph.structure.constant.T;
 import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.util.JsonUtil;
 import org.apache.hugegraph.util.Log;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -36,7 +34,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-public class SourceTargetShortestPathTest extends AlgorithmTestBase {
+public class SingleSourceShortestPathTest extends AlgorithmTestBase {
 
     public static final String VL = "city";
     public static final String EL = "road";
@@ -44,8 +42,8 @@ public class SourceTargetShortestPathTest extends AlgorithmTestBase {
 
     public static final String SOURCE_ID = "A";
     public static final String TARGET_ID = "E";
-    public static final List<String> SHORTEST_PATH =
-            new ArrayList(Arrays.asList("A", "C", "B", "E"));
+    public static final String SHORTEST_PATH = "[A, C, B, E]";
+    public static final double TOTAL_WEIGHT = 28;
 
 
     @BeforeClass
@@ -108,39 +106,42 @@ public class SourceTargetShortestPathTest extends AlgorithmTestBase {
 
     @Test
     public void testRunAlgorithm() throws InterruptedException {
-        runAlgorithm(SourceTargetShortestPathTestParams.class.getName());
+        runAlgorithm(SingleSourceShortestPathTestParams.class.getName());
     }
 
-    public static class SourceTargetShortestPathTestParams extends SingleSourceShortestPathParams {
+    public static class SingleSourceShortestPathTestParams extends SingleSourceShortestPathParams {
 
         @Override
         public void setAlgorithmParameters(Map<String, String> params) {
             this.setIfAbsent(params, ComputerOptions.OUTPUT_CLASS,
-                             SourceTargetShortestPathTestOutput.class.getName());
+                             SingleSourceShortestPathTestOutput.class.getName());
             this.setIfAbsent(params, SingleSourceShortestPath.OPTION_SOURCE_ID, SOURCE_ID);
             this.setIfAbsent(params, SingleSourceShortestPath.OPTION_TARGET_ID, TARGET_ID);
             this.setIfAbsent(params, SingleSourceShortestPath.OPTION_WEIGHT_PROPERTY,
-                             SourceTargetShortestPathTest.PROPERTY_KEY);
+                             SingleSourceShortestPathTest.PROPERTY_KEY);
 
             super.setAlgorithmParameters(params);
         }
     }
 
-    public static class SourceTargetShortestPathTestOutput extends SingleSourceShortestPathOutput {
+    public static class SingleSourceShortestPathTestOutput extends SingleSourceShortestPathOutput {
 
-        private static final Logger LOG = Log.logger(SourceTargetShortestPathTestOutput.class);
+        private static final Logger LOG = Log.logger(SingleSourceShortestPathTestOutput.class);
 
         @Override
-        public List<String> value(
-                org.apache.hugegraph.computer.core.graph.vertex.Vertex vertex) {
-            List<String> path = super.value(vertex);
+        public String value(org.apache.hugegraph.computer.core.graph.vertex.Vertex vertex) {
+            String json = super.value(vertex);
 
             if (vertex.id().value().toString().equals(TARGET_ID)) {
-                LOG.info("source vertex {} to target vertex {}, shortest path: {}",
-                         SOURCE_ID, TARGET_ID, path);
-                Assert.assertEquals(path, SHORTEST_PATH);
+                Map map = JsonUtil.fromJson(json, Map.class);
+
+                LOG.info("source vertex {} to target vertex {}, " +
+                         "shortest path: {}, total weight: {}",
+                         SOURCE_ID, TARGET_ID, map.get("path"), map.get("totalWeight"));
+                Assert.assertEquals(map.get("path"), SHORTEST_PATH);
+                Assert.assertEquals(map.get("totalWeight"), TOTAL_WEIGHT);
             }
-            return path;
+            return json;
         }
     }
 }

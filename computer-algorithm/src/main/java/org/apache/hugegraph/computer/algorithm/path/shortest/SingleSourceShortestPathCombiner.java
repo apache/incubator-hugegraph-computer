@@ -24,7 +24,7 @@ public class SingleSourceShortestPathCombiner implements Combiner<SingleSourceSh
     @Override
     public void combine(SingleSourceShortestPathValue v1, SingleSourceShortestPathValue v2,
                         SingleSourceShortestPathValue result) {
-        SingleSourceShortestPathValue message = v2.totalWeight() < v1.totalWeight() ? v2 : v1;
-        result.copy(message);
+        SingleSourceShortestPathValue shorter = v2.totalWeight() < v1.totalWeight() ? v2 : v1;
+        result.copy(shorter);
     }
 }

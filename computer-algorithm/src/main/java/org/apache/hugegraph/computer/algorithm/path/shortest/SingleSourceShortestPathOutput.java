@@ -17,13 +17,14 @@
 
 package org.apache.hugegraph.computer.algorithm.path.shortest;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.output.hg.HugeGraphOutput;
+import org.apache.hugegraph.util.JsonUtil;
 
-public class SingleSourceShortestPathOutput extends HugeGraphOutput<List<String>> {
+public class SingleSourceShortestPathOutput extends HugeGraphOutput<String> {
 
     @Override
     protected void prepareSchema() {
@@ -36,13 +37,12 @@ public class SingleSourceShortestPathOutput extends HugeGraphOutput<List<String>
     }
 
     @Override
-    protected List<String> value(Vertex vertex) {
+    protected String value(Vertex vertex) {
         SingleSourceShortestPathValue value = vertex.value();
 
-        List<String> path = new ArrayList<>();
-        for (int i = 0; i < value.path().size(); i++) {
-            path.add(value.path().get(i).toString());
-        }
-        return path;
+        Map map = new HashMap();
+        map.put("path", value.path().toString());
+        map.put("totalWeight", value.totalWeight());
+        return JsonUtil.toJson(map);
     }
 }

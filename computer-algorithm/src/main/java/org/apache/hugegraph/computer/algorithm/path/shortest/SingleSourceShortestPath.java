@@ -79,7 +79,7 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
     @Override
     public String name() {
-        return "source_target_shortest_path";
+        return "single_source_shortest_path";
     }
 
     @Override
