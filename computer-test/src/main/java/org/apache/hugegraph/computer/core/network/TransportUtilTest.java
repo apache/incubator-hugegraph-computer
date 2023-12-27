@@ -19,7 +19,7 @@ package org.apache.hugegraph.computer.core.network;
 
 import java.net.InetSocketAddress;
 
-import org.apache.hugegraph.computer.core.util.StringEncoding;
+import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
 
@@ -88,7 +88,7 @@ public class TransportUtilTest {
 
     @Test
     public void testReadString() {
-        byte[] testData = StringEncoding.encode("test data");
+        byte[] testData = StringEncodeUtil.encode("test data");
         ByteBuf buffer = Unpooled.directBuffer(testData.length);
         try {
             buffer.writeInt(testData.length);

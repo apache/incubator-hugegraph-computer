@@ -400,8 +400,6 @@ The following components are provided under the Apache 2.0 License.
     (Apache License, Version 2.0) * okio(com.squareup.okio:okio-jvm:3.0.0-https://github.com/square/okio/ )
     (Apache License, Version 2.0) * Simple XML (safe)(com.carrotsearch.thirdparty:simple-xml-safe:2.7.1-https://github.com/dweiss/simplexml )
 
-    computer-core/src/main/java/org/apache/hugegraph/computer/core/util/StringEncoding.java files from https://github.com/JanusGraph
-
 ========================================================================
 Third party BSD licenses
 ========================================================================

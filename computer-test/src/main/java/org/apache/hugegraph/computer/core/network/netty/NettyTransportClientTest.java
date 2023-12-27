@@ -38,7 +38,7 @@ import org.apache.hugegraph.computer.core.network.buffer.FileRegionBuffer;
 import org.apache.hugegraph.computer.core.network.buffer.NetworkBuffer;
 import org.apache.hugegraph.computer.core.network.message.Message;
 import org.apache.hugegraph.computer.core.network.message.MessageType;
-import org.apache.hugegraph.computer.core.util.StringEncoding;
+import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.computer.suite.unit.UnitTestBase;
 import org.apache.hugegraph.testutil.Assert;
 import org.apache.hugegraph.testutil.Whitebox;
@@ -118,9 +118,9 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         for (int i = 0; i < 3; i++) {
             client.startSession();
-            client.send(MessageType.MSG, 1, ByteBuffer.wrap(StringEncoding.encode("test1")));
-            client.send(MessageType.VERTEX, 2, ByteBuffer.wrap(StringEncoding.encode("test2")));
-            client.send(MessageType.EDGE, 3, ByteBuffer.wrap(StringEncoding.encode("test3")));
+            client.send(MessageType.MSG, 1, ByteBuffer.wrap(StringEncodeUtil.encode("test1")));
+            client.send(MessageType.VERTEX, 2, ByteBuffer.wrap(StringEncodeUtil.encode("test2")));
+            client.send(MessageType.EDGE, 3, ByteBuffer.wrap(StringEncodeUtil.encode("test3")));
             client.finishSession();
         }
     }
@@ -128,9 +128,9 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
     @Test
     public void testDataUniformity() throws IOException {
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        byte[] sourceBytes1 = StringEncoding.encode("test data message");
-        byte[] sourceBytes2 = StringEncoding.encode("test data edge");
-        byte[] sourceBytes3 = StringEncoding.encode("test data vertex");
+        byte[] sourceBytes1 = StringEncodeUtil.encode("test data message");
+        byte[] sourceBytes2 = StringEncodeUtil.encode("test data edge");
+        byte[] sourceBytes3 = StringEncodeUtil.encode("test data vertex");
 
         Mockito.doAnswer(invocationOnMock -> {
             MessageType type = invocationOnMock.getArgument(0);
@@ -236,7 +236,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
     @Test
     public void testFlowControl() throws IOException {
-        ByteBuffer buffer = ByteBuffer.wrap(StringEncoding.encode("test data"));
+        ByteBuffer buffer = ByteBuffer.wrap(StringEncodeUtil.encode("test data"));
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
 
         client.startSession();
@@ -280,7 +280,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Mockito.doThrow(new RuntimeException("test exception")).when(serverHandler)
                .handle(Mockito.any(), Mockito.anyInt(), Mockito.any());
 
-        ByteBuffer buffer = ByteBuffer.wrap(StringEncoding.encode("test data"));
+        ByteBuffer buffer = ByteBuffer.wrap(StringEncodeUtil.encode("test data"));
         boolean send = client.send(MessageType.MSG, 1, buffer);
         Assert.assertTrue(send);
 

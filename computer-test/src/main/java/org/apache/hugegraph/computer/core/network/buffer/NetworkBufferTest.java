@@ -19,7 +19,7 @@ package org.apache.hugegraph.computer.core.network.buffer;
 
 import java.nio.ByteBuffer;
 
-import org.apache.hugegraph.computer.core.util.StringEncoding;
+import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
 
@@ -100,7 +100,7 @@ public class NetworkBufferTest {
     @Test
     public void testCopyToByteArray() {
         String testData = "test data";
-        byte[] bytesSource = StringEncoding.encode(testData);
+        byte[] bytesSource = StringEncodeUtil.encode(testData);
 
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bytesSource.length);
         byteBuffer = byteBuffer.put(bytesSource);
