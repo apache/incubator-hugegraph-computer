@@ -6,17 +6,6 @@ The Apache Software Foundation (http://www.apache.org/).
 
 The initial codebase was donated to the ASF by HugeGraph Authors, copyright 2017-2021.
 
------------------------------------------------------------------------
-This product contains code form the JanusGraph Project:
------------------------------------------------------------------------
-==============================================================
- JanusGraph: Distributed Graph Database
- Copyright 2012 and onwards JanusGraph Authors
-==============================================================
-
-This product includes software developed by JanusGraph contributors listed
-in CONTRIBUTORS.txt; JanusGraph copyright holders are listed in AUTHORS.txt.
-
 This product is based on Titan, originally developed by Aurelius (acquired by
 DataStax) and the following individuals:
 

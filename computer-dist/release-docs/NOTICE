@@ -3807,15 +3807,6 @@ Copyright 2001-2008 The Apache Software Foundation
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
 
-
-==============================================================
- JanusGraph: Distributed Graph Database
- Copyright 2012 and onwards JanusGraph Authors
-==============================================================
-
-This product includes software developed by JanusGraph contributors listed
-in CONTRIBUTORS.txt; JanusGraph copyright holders are listed in AUTHORS.txt.
-
 This product is based on Titan, originally developed by Aurelius (acquired by
 DataStax) and the following individuals:
 
