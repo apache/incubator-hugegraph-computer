@@ -31,7 +31,7 @@ import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.output.AbstractComputerOutput;
-import org.apache.hugegraph.computer.core.util.StringEncoding;
+import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
@@ -93,7 +93,7 @@ public class HdfsOutput extends AbstractComputerOutput {
     }
 
     protected void writeString(String string) throws IOException {
-        this.writeBytes(StringEncoding.encode(string));
+        this.writeBytes(StringEncodeUtil.encode(string));
     }
 
     protected String constructValueString(Vertex vertex) {

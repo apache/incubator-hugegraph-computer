@@ -20,7 +20,7 @@ package org.apache.hugegraph.computer.core.io;
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.hugegraph.computer.core.util.StringEncoding;
+import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.testutil.Whitebox;
 
 @SuppressWarnings("deprecation") // StringEscapeUtils
@@ -67,14 +67,14 @@ public class StructRandomAccessOutput implements RandomAccessOutput {
 
     @Override
     public void write(byte[] b) throws IOException {
-        this.writeString(StringEncoding.encodeBase64(b));
+        this.writeString(StringEncodeUtil.encodeBase64(b));
     }
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         byte[] dest = new byte[len];
         System.arraycopy(b, off, dest, 0, len);
-        this.writeString(StringEncoding.encodeBase64(dest));
+        this.writeString(StringEncodeUtil.encodeBase64(dest));
     }
 
     @Override

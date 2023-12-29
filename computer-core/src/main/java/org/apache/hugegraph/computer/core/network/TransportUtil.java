@@ -27,7 +27,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
-import org.apache.hugegraph.computer.core.util.StringEncoding;
+import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.util.E;
 import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
@@ -146,12 +146,12 @@ public class TransportUtil {
         }
         byte[] bytes = new byte[length];
         buf.readBytes(bytes);
-        return StringEncoding.decode(bytes);
+        return StringEncodeUtil.decode(bytes);
     }
 
     public static void writeString(ByteBuf buf, String value) {
         E.checkArgumentNotNull(value, "value");
-        byte[] encoded = StringEncoding.encode(value);
+        byte[] encoded = StringEncodeUtil.encode(value);
         buf.writeInt(encoded.length);
         buf.writeBytes(encoded);
     }
