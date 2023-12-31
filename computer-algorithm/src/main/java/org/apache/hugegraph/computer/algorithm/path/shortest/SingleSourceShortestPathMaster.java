@@ -25,12 +25,12 @@ import org.apache.hugegraph.computer.core.master.MasterContext;
 
 public class SingleSourceShortestPathMaster implements MasterComputation {
 
-    public static final String SINGLE_SOURCE_SHORTEST_PATH_REACH_TARGET =
-            "single_source_shortest_path.reach_target";
+    public static final String SINGLE_SOURCE_SHORTEST_PATH_REACHED_TARGETS =
+            "single_source_shortest_path.reached_targets";
 
     @Override
     public void init(MasterContext context) {
-        context.registerAggregator(SINGLE_SOURCE_SHORTEST_PATH_REACH_TARGET,
+        context.registerAggregator(SINGLE_SOURCE_SHORTEST_PATH_REACHED_TARGETS,
                                    ValueType.ID_LIST,
                                    IdListMergeCombiner.class);
     }
