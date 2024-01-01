@@ -18,8 +18,10 @@
 package org.apache.hugegraph.computer.algorithm.path.shortest;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +30,7 @@ import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.graph.edge.Edge;
 import org.apache.hugegraph.computer.core.graph.id.Id;
 import org.apache.hugegraph.computer.core.graph.value.DoubleValue;
-import org.apache.hugegraph.computer.core.graph.value.IdList;
+import org.apache.hugegraph.computer.core.graph.value.IdSet;
 import org.apache.hugegraph.computer.core.graph.value.Value;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.worker.Computation;
@@ -62,6 +64,11 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     private String targetId;
 
     /**
+     * cache of targetId
+     */
+    private Set<String> targetIdSet;
+
+    /**
      * target quantity type
      */
     private QuantityType targetQuantityType;
@@ -82,7 +89,7 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     /**
      * reached targets
      */
-    private IdList reachedTargets;
+    private IdSet reachedTargets;
 
     @Override
     public String category() {
@@ -110,6 +117,8 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
         this.targetId = Arrays.stream(this.targetId.split(","))
                               .map(e -> e.trim())
                               .collect(Collectors.joining(","));
+        // cache targetId
+        this.targetIdSet = new HashSet<>(Arrays.asList(this.targetId.split(",")));
         this.targetQuantityType = this.getQuantityType();
 
         this.weightProperty = config.getString(OPTION_WEIGHT_PROPERTY, "");
@@ -258,19 +267,7 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
      * determine whether vertex is one of the target
      */
     private boolean isTarget(Vertex vertex) {
-        if (this.targetQuantityType == QuantityType.SINGLE &&
-            this.idEquals(vertex, this.targetId)) {
-            return true;
-        }
-
-        if (this.targetQuantityType == QuantityType.MULTIPLE) {
-            for (String targetId : this.targetId.split(",")) {
-                if (this.idEquals(vertex, targetId)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return this.targetIdSet.contains(vertex.id().toString());
     }
 
     /**
@@ -283,12 +280,11 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
         }
 
         if (this.targetQuantityType == QuantityType.MULTIPLE) {
-            String[] targetIds = this.targetId.split(",");
-            if (targetIds.length == this.reachedTargets.size()) {
-                List<String> reachedTargets = this.reachedTargets.values()
+            if (this.targetIdSet.size() == this.reachedTargets.size()) {
+                List<String> reachedTargets = this.reachedTargets.value()
                                                                  .stream().map(Id::toString)
                                                                  .collect(Collectors.toList());
-                for (String targetId : targetIds) {
+                for (String targetId : this.targetIdSet) {
                     if (!reachedTargets.contains(targetId)) {
                         return false;
                     }
