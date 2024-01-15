@@ -194,6 +194,8 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
             Edge selectedEdge = this.randomSelectEdge(null, null, vertex.edges());
             context.sendMessage(selectedEdge.targetId(), message);
         }
+
+        vertex.inactivate();
     }
 
     @Override
@@ -244,6 +246,8 @@ public class RandomWalk implements Computation<RandomWalkMessage> {
                                                       vertex.edges());
             context.sendMessage(selectedEdge.targetId(), message);
         }
+
+        vertex.inactivate();
     }
 
     /**
