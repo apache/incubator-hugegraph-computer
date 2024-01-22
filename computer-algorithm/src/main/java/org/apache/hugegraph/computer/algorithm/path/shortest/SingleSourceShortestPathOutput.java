@@ -42,7 +42,7 @@ public class SingleSourceShortestPathOutput extends HugeGraphOutput<String> {
 
         Map map = new HashMap();
         map.put("path", value.path().toString());
-        map.put("totalWeight", value.totalWeight());
+        map.put("total_weight", value.totalWeight());
         return JsonUtil.toJson(map);
     }
 }
