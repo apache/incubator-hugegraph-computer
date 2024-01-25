@@ -137,9 +137,9 @@ public class SingleSourceShortestPathTest extends AlgorithmTestBase {
 
                 LOG.info("source vertex {} to target vertex {}, " +
                          "shortest path: {}, total weight: {}",
-                         SOURCE_ID, TARGET_ID, map.get("path"), map.get("totalWeight"));
+                         SOURCE_ID, TARGET_ID, map.get("path"), map.get("total_weight"));
                 Assert.assertEquals(map.get("path"), SHORTEST_PATH);
-                Assert.assertEquals(map.get("totalWeight"), TOTAL_WEIGHT);
+                Assert.assertEquals(map.get("total_weight"), TOTAL_WEIGHT);
             }
             return json;
         }

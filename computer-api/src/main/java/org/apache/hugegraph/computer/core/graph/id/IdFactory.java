@@ -80,6 +80,23 @@ public final class IdFactory {
         }
     }
 
+    public static Id parseId(IdType type, Object value) {
+        try {
+            switch (type) {
+                case LONG:
+                    return (Id) BYTES_ID_LONG_METHOD.invoke(null, value);
+                case UTF8:
+                    return (Id) BYTES_ID_STRING_METHOD.invoke(null, value);
+                case UUID:
+                    return (Id) BYTES_ID_UUID_METHOD.invoke(null, value);
+                default:
+                    throw new ComputerException("Can't parse Id for %s", type.name());
+            }
+        } catch (Exception e) {
+            throw new ComputerException("Failed to parse Id", e);
+        }
+    }
+
     public static Id createId() {
         try {
             return (Id) BYTES_ID_CONSTRUCTOR.newInstance();
