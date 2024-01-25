@@ -17,6 +17,7 @@
 
 package org.apache.hugegraph.computer.core.util;
 
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,9 +42,9 @@ public class IdUtil {
         }
 
         if (StringUtils.isNumeric(idStr)) {
-            return IdFactory.parseId(IdType.LONG, idStr);
+            return IdFactory.parseId(IdType.LONG, Long.valueOf(idStr));
         } else if (P.matcher(idStr).matches()) {
-            return IdFactory.parseId(IdType.UUID, idStr);
+            return IdFactory.parseId(IdType.UUID, UUID.fromString(idStr));
         } else {
             return IdFactory.parseId(IdType.UTF8, idStr);
         }
@@ -61,9 +62,9 @@ public class IdUtil {
 
         switch (idCategory) {
             case NUMBER:
-                return IdFactory.parseId(IdType.LONG, idStr);
+                return IdFactory.parseId(IdType.LONG, Long.valueOf(idStr));
             case UUID:
-                return IdFactory.parseId(IdType.UUID, idStr);
+                return IdFactory.parseId(IdType.UUID, UUID.fromString(idStr));
             default:
                 return IdFactory.parseId(IdType.UTF8, idStr);
         }

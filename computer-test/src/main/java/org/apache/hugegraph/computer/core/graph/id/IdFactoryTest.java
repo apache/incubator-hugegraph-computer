@@ -51,4 +51,12 @@ public class IdFactoryTest {
         Assert.assertEquals(BytesId.of(new UUID(0L, 0L)),
                             IdFactory.createId(IdType.UUID));
     }
+
+    @Test
+    public void testParseId() {
+        UUID uuid = UUID.fromString("3b676b77-c484-4ba6-b627-8c040bc42863");
+        Assert.assertEquals(IdType.LONG, IdFactory.parseId(IdType.LONG, 222).idType());
+        Assert.assertEquals(IdType.UTF8, IdFactory.parseId(IdType.UTF8, "aaa222").idType());
+        Assert.assertEquals(IdType.UUID, IdFactory.parseId(IdType.UUID, uuid).idType());
+    }
 }
