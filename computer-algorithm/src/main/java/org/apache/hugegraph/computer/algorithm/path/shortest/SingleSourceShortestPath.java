@@ -294,4 +294,8 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
         }
         return false;
     }
+
+    public IdSet getTargetIdSet() {
+        return targetIdSet;
+    }
 }
