@@ -17,9 +17,8 @@
 
 package org.apache.hugegraph.computer.algorithm.path.shortest;
 
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
@@ -32,9 +31,12 @@ import org.apache.hugegraph.computer.core.graph.value.IdSet;
 import org.apache.hugegraph.computer.core.graph.value.Value;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.util.IdUtil;
+import org.apache.hugegraph.computer.core.util.JsonUtilExt;
 import org.apache.hugegraph.computer.core.worker.Computation;
 import org.apache.hugegraph.computer.core.worker.ComputationContext;
 import org.apache.hugegraph.computer.core.worker.WorkerContext;
+import org.apache.hugegraph.rest.SerializeException;
+import org.apache.hugegraph.util.JsonUtil;
 import org.apache.hugegraph.util.Log;
 import org.slf4j.Logger;
 
@@ -42,7 +44,6 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
     private static final Logger LOG = Log.logger(SingleSourceShortestPath.class);
 
-    public static final String OPTION_VERTEX_ID_TYPE = "single_source_shortest_path.vertex_id_type";
     public static final String OPTION_SOURCE_ID = "single_source_shortest_path.source_id";
     public static final String OPTION_TARGET_ID = "single_source_shortest_path.target_id";
     public static final String OPTION_WEIGHT_PROPERTY =
@@ -51,24 +52,20 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
             "single_source_shortest_path.default_weight";
 
     /**
-     * id type of vertex.
-     * string|number|uuid
+     * source vertex id.
+     * {"id": "", "idType": ""}
      */
-    // todo improve: automatic inference
-    private IdCategory vertexIdType;
-
-    /**
-     * source vertex id
-     */
+    // todo improve: automatic inference idType
     private Id sourceId;
 
     /**
      * target vertex id.
-     * 1. single target: one vertex id
-     * 2. multiple target: multiple vertex ids separated by comma
-     * 3. all: *
+     * 1. single target: [{"id": "", "idType": ""}]
+     * 2. multiple target: [{"id": "", "idType": ""}, {"id": "", "idType": ""}]
+     * 3. all: []
      */
-    private IdSet targetIdSet; // empty when targetIdStr == "*"
+    // todo improve: automatic inference idType
+    private IdSet targetIdSet; // empty when targetId is all
     /**
      * target quantity type
      */
@@ -90,7 +87,7 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     /**
      * reached targets
      */
-    private IdSet reachedTargets; // empty when targetIdStr == "*"
+    private IdSet reachedTargets; // empty when targetId is all
 
     @Override
     public String category() {
@@ -104,28 +101,35 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
     @Override
     public void init(Config config) {
-        String vertexIdTypeStr = config.getString(OPTION_VERTEX_ID_TYPE, "");
-        this.vertexIdType = IdCategory.parse(vertexIdTypeStr);
-
         String sourceIdStr = config.getString(OPTION_SOURCE_ID, "");
         if (StringUtils.isBlank(sourceIdStr)) {
             throw new ComputerException("The param '%s' must not be blank", OPTION_SOURCE_ID);
         }
-        this.sourceId = IdUtil.parseId(this.vertexIdType, sourceIdStr);
+        VertexInputJson sourceVertex;
+        try {
+            sourceVertex = JsonUtil.fromJson(sourceIdStr, VertexInputJson.class);
+        } catch (SerializeException e) {
+            throw new ComputerException("The param '%s' is unexpected format", OPTION_SOURCE_ID);
+        }
+        this.sourceId = IdUtil.parseId(IdCategory.parse(sourceVertex.getIdType()),
+                                       sourceVertex.getId());
 
         String targetIdStr = config.getString(OPTION_TARGET_ID, "");
         if (StringUtils.isBlank(targetIdStr)) {
             throw new ComputerException("The param '%s' must not be blank", OPTION_TARGET_ID);
         }
-        // remove spaces
-        targetIdStr = Arrays.stream(targetIdStr.split(","))
-                            .map(e -> e.trim())
-                            .collect(Collectors.joining(","));
-        this.targetQuantityType = this.getQuantityType(targetIdStr);
+        List<VertexInputJson> targetVertices;
+        try {
+            targetVertices = JsonUtilExt.fromJson2List(targetIdStr, VertexInputJson.class);
+        } catch (SerializeException e) {
+            throw new ComputerException("The param '%s' is unexpected format", OPTION_TARGET_ID);
+        }
+        this.targetQuantityType = this.getQuantityType(targetVertices);
         if (this.targetQuantityType != QuantityType.ALL) {
             this.targetIdSet = new IdSet();
-            for (String idStr : targetIdStr.split(",")) {
-                targetIdSet.add(IdUtil.parseId(this.vertexIdType, idStr));
+            for (VertexInputJson targetVertex : targetVertices) {
+                targetIdSet.add(IdUtil.parseId(IdCategory.parse(targetVertex.idType),
+                                               targetVertex.id));
             }
         }
 
@@ -229,15 +233,15 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     }
 
     /**
-     * get QuantityType by this.targetId
+     * get quantityType by targetId
      */
-    private QuantityType getQuantityType(String targetIdStr) {
-        if (targetIdStr.equals("*")) {
+    private QuantityType getQuantityType(List<VertexInputJson> targetVertices) {
+        if (targetVertices.size() == 0) {
             return QuantityType.ALL;
-        } else if (targetIdStr.contains(",")) {
-            return QuantityType.MULTIPLE;
-        } else {
+        } else if (targetVertices.size() == 1) {
             return QuantityType.SINGLE;
+        } else {
+            return QuantityType.MULTIPLE;
         }
     }
 
@@ -290,5 +294,26 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
             return true;
         }
         return false;
+    }
+
+    static class VertexInputJson {
+        private String id;
+        private String idType;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getIdType() {
+            return idType;
+        }
+
+        public void setIdType(String idType) {
+            this.idType = idType;
+        }
     }
 }
