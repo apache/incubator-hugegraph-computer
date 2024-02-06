@@ -34,5 +34,8 @@ public class IdUtilTest {
         Assert.assertEquals(IdType.LONG, IdUtil.parseId(IdCategory.NUMBER, "222").idType());
         Assert.assertEquals(IdType.UTF8, IdUtil.parseId(IdCategory.STRING, "aaa222").idType());
         Assert.assertEquals(IdType.UUID, IdUtil.parseId(IdCategory.UUID, uuid).idType());
+
+        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(IdCategory.STRING, "222").idType());
+        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(IdCategory.STRING, uuid).idType());
     }
 }

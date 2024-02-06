@@ -55,13 +55,11 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
      * string|number|uuid
      */
     // todo improve: automatic inference
-    private String vertexIdTypeStr;
     private IdCategory vertexIdType;
 
     /**
      * source vertex id
      */
-    private String sourceIdStr;
     private Id sourceId;
 
     /**
@@ -70,7 +68,6 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
      * 2. multiple target: multiple vertex ids separated by comma
      * 3. all: *
      */
-    private String targetIdStr;
     private IdSet targetIdSet; // empty when targetIdStr == "*"
     /**
      * target quantity type
@@ -107,28 +104,28 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
     @Override
     public void init(Config config) {
-        this.vertexIdTypeStr = config.getString(OPTION_VERTEX_ID_TYPE, "");
-        this.vertexIdType = IdCategory.parse(this.vertexIdTypeStr);
+        String vertexIdTypeStr = config.getString(OPTION_VERTEX_ID_TYPE, "");
+        this.vertexIdType = IdCategory.parse(vertexIdTypeStr);
 
-        this.sourceIdStr = config.getString(OPTION_SOURCE_ID, "");
-        if (StringUtils.isBlank(this.sourceIdStr)) {
+        String sourceIdStr = config.getString(OPTION_SOURCE_ID, "");
+        if (StringUtils.isBlank(sourceIdStr)) {
             throw new ComputerException("The param '%s' must not be blank", OPTION_SOURCE_ID);
         }
-        this.sourceId = IdUtil.parseId(this.vertexIdType, this.sourceIdStr);
+        this.sourceId = IdUtil.parseId(this.vertexIdType, sourceIdStr);
 
-        this.targetIdStr = config.getString(OPTION_TARGET_ID, "");
-        if (StringUtils.isBlank(this.targetIdStr)) {
+        String targetIdStr = config.getString(OPTION_TARGET_ID, "");
+        if (StringUtils.isBlank(targetIdStr)) {
             throw new ComputerException("The param '%s' must not be blank", OPTION_TARGET_ID);
         }
         // remove spaces
-        this.targetIdStr = Arrays.stream(this.targetIdStr.split(","))
-                                 .map(e -> e.trim())
-                                 .collect(Collectors.joining(","));
-        this.targetQuantityType = this.getQuantityType();
+        targetIdStr = Arrays.stream(targetIdStr.split(","))
+                            .map(e -> e.trim())
+                            .collect(Collectors.joining(","));
+        this.targetQuantityType = this.getQuantityType(targetIdStr);
         if (this.targetQuantityType != QuantityType.ALL) {
             this.targetIdSet = new IdSet();
-            for (String targetIdStr : this.targetIdStr.split(",")) {
-                targetIdSet.add(IdUtil.parseId(this.vertexIdType, targetIdStr));
+            for (String idStr : targetIdStr.split(",")) {
+                targetIdSet.add(IdUtil.parseId(this.vertexIdType, idStr));
             }
         }
 
@@ -157,17 +154,16 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
         // single target && source == target
         if (this.targetQuantityType == QuantityType.SINGLE &&
-            this.sourceIdStr.equals(this.targetIdStr)) {
+            this.sourceId.equals(this.targetIdSet.value().iterator().next())) {
             LOG.debug("source vertex {} equals target vertex {}",
-                      this.sourceIdStr, this.targetIdStr);
+                      this.sourceId, this.targetIdSet.value().iterator().next());
             vertex.inactivate();
             return;
         }
 
         if (vertex.numEdges() <= 0) {
             // isolated vertex
-            LOG.debug("source vertex {} can not reach target vertex {}",
-                      this.sourceIdStr, this.targetIdStr);
+            LOG.debug("source vertex {} is isolated", this.sourceId);
             vertex.inactivate();
             return;
         }
@@ -235,10 +231,10 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     /**
      * get QuantityType by this.targetId
      */
-    private QuantityType getQuantityType() {
-        if (this.targetIdStr.equals("*")) {
+    private QuantityType getQuantityType(String targetIdStr) {
+        if (targetIdStr.equals("*")) {
             return QuantityType.ALL;
-        } else if (this.targetIdStr.contains(",")) {
+        } else if (targetIdStr.contains(",")) {
             return QuantityType.MULTIPLE;
         } else {
             return QuantityType.SINGLE;
