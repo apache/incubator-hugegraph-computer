@@ -201,8 +201,9 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
                 continue;
             }
 
-            // reach all target or nowhere to go
-            if (this.isAllTargetsReached(vertex) || vertex.numEdges() <= 0) {
+            // target vertex finds all targets reached or nowhere to go
+            if ((this.isTarget(vertex) && this.isAllTargetsReached(vertex)) ||
+                vertex.numEdges() <= 0) {
                 continue;
             }
 
