@@ -128,8 +128,8 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
         if (this.targetQuantityType != QuantityType.ALL) {
             this.targetIdSet = new IdSet();
             for (VertexInputJson targetVertex : targetVertices) {
-                targetIdSet.add(IdUtil.parseId(IdCategory.parse(targetVertex.idType),
-                                               targetVertex.id));
+                targetIdSet.add(IdUtil.parseId(IdCategory.parse(targetVertex.getIdType()),
+                                               targetVertex.getId()));
             }
         }
 
