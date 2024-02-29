@@ -142,16 +142,15 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
         // single target && source == target
         if (this.targetQuantityType == QuantityType.SINGLE &&
-            this.sourceId.equals(this.targetIdSet.value().iterator().next())) {
-            LOG.debug("source vertex {} equals target vertex {}",
-                      this.sourceId, this.targetIdSet.value().iterator().next());
+            this.targetIdSet.contains(this.sourceId)) {
+            LOG.debug("source vertex equals target vertex: {}", this.sourceId);
             vertex.inactivate();
             return;
         }
 
         if (vertex.numEdges() <= 0) {
             // isolated vertex
-            LOG.debug("source vertex {} is isolated", this.sourceId);
+            LOG.debug("The source vertex is isolated: {}", this.sourceId);
             vertex.inactivate();
             return;
         }
@@ -278,26 +277,5 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
             return true;
         }
         return false;
-    }
-
-    static class VertexInputJson {
-        private String id;
-        private String idType;
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getIdType() {
-            return idType;
-        }
-
-        public void setIdType(String idType) {
-            this.idType = idType;
-        }
     }
 }

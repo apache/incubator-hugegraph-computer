@@ -25,7 +25,7 @@ import org.apache.hugegraph.rest.SerializeException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-// todo move to org.apache.hugegraph.util.JsonUtil later
+// TODO: move to org.apache.hugegraph.util.JsonUtil later
 public class JsonUtilExt {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
