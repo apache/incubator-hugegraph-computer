@@ -17,7 +17,6 @@
 
 package org.apache.hugegraph.computer.core.util;
 
-import org.apache.hugegraph.computer.core.graph.id.IdCategory;
 import org.apache.hugegraph.computer.core.graph.id.IdType;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
@@ -26,16 +25,14 @@ public class IdUtilTest {
 
     @Test
     public void testParseId() {
-        String uuid = "3b676b77-c484-4ba6-b627-8c040bc42863";
-        Assert.assertEquals(IdType.LONG, IdUtil.parseId("222").idType());
-        Assert.assertEquals(IdType.UTF8, IdUtil.parseId("aaa222").idType());
+        String utf81 = "\"abc\"";
+        String utf82 = "\"222\"";
+        String l = "222";
+        String uuid = "U\"3b676b77-c484-4ba6-b627-8c040bc42863\"";
+
+        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(utf81).idType());
+        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(utf82).idType());
+        Assert.assertEquals(IdType.LONG, IdUtil.parseId(l).idType());
         Assert.assertEquals(IdType.UUID, IdUtil.parseId(uuid).idType());
-
-        Assert.assertEquals(IdType.LONG, IdUtil.parseId(IdCategory.NUMBER, "222").idType());
-        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(IdCategory.STRING, "aaa222").idType());
-        Assert.assertEquals(IdType.UUID, IdUtil.parseId(IdCategory.UUID, uuid).idType());
-
-        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(IdCategory.STRING, "222").idType());
-        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(IdCategory.STRING, uuid).idType());
     }
 }

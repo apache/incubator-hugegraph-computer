@@ -40,8 +40,8 @@ public class SingleSourceShortestPathTest extends AlgorithmTestBase {
     public static final String EL = "road";
     public static final String PROPERTY_KEY = "distance";
 
-    public static final String SOURCE_ID = "{\"id\": \"A\", \"idType\": \"string\"}";
-    public static final String TARGET_ID = "[{\"id\": \"E\", \"idType\": \"string\"}]";
+    public static final String SOURCE_ID = "\"A\"";
+    public static final String TARGET_ID = "\"E\"";
     public static final String SHORTEST_PATH = "[A, C, B, E]";
     public static final double TOTAL_WEIGHT = 28;
 
