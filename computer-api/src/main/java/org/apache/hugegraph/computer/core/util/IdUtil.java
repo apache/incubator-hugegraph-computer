@@ -33,13 +33,14 @@ public class IdUtil {
             throw new ComputerException("Can't parse Id for empty string");
         }
 
-        if (idStr.startsWith("U\"")) {
-            return IdFactory.parseId(IdType.UUID,
-                                     UUID.fromString(idStr.substring(1)
-                                                          .replaceAll("\"", "")));
-        }
 
         try {
+            if (idStr.startsWith("U\"")) {
+                return IdFactory.parseId(IdType.UUID,
+                                         UUID.fromString(idStr.substring(1)
+                                                              .replaceAll("\"", "")));
+            }
+
             Object id = JsonUtil.fromJson(idStr, Object.class);
             idStr = idStr.replaceAll("\"", "");
             return id instanceof Number ?
