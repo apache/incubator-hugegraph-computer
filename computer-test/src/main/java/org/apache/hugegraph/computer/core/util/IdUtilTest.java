@@ -17,7 +17,6 @@
 
 package org.apache.hugegraph.computer.core.util;
 
-import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.graph.id.IdType;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
@@ -41,10 +40,10 @@ public class IdUtilTest {
         Assert.assertEquals(IdType.LONG, IdUtil.parseId(idLong).idType());
         Assert.assertEquals(IdType.UUID, IdUtil.parseId(idUuid).idType());
 
-        Assert.assertThrows(ComputerException.class, () -> {
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
             IdUtil.parseId(idNull).idType();
         });
-        Assert.assertThrows(ComputerException.class, () -> {
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
             IdUtil.parseId(idEmpty).idType();
         });
         Assert.assertThrows(IllegalArgumentException.class, () -> {

@@ -20,7 +20,6 @@ package org.apache.hugegraph.computer.core.util;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.graph.id.Id;
 import org.apache.hugegraph.computer.core.graph.id.IdFactory;
 import org.apache.hugegraph.computer.core.graph.id.IdType;
@@ -30,9 +29,8 @@ public class IdUtil {
 
     public static Id parseId(String idStr) {
         if (StringUtils.isBlank(idStr)) {
-            throw new ComputerException("Can't parse Id for empty string");
+            throw new IllegalArgumentException("Can't parse Id for empty string");
         }
-
 
         try {
             if (idStr.startsWith("U\"")) {
