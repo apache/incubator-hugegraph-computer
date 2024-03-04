@@ -6,6 +6,7 @@ on:
   pull_request:
   # The branches below must be a subset of the branches above, now enable it in all PR
   # branches: [ master ]
+#  The reason for deleting the scheduled task can be found in PR #304
 #  schedule:
 #    - cron: '45 7 * * 1'
 
