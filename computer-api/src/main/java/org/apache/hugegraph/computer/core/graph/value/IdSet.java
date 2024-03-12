@@ -107,4 +107,8 @@ public class IdSet implements Value.Tvalue<Set<Id>> {
     public int compareTo(Value o) {
         throw new UnsupportedOperationException("compareTo");
     }
+
+    public int size() {
+        return this.values.size();
+    }
 }

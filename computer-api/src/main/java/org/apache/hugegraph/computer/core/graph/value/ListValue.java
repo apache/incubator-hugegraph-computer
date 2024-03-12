@@ -117,6 +117,10 @@ public class ListValue<T extends Tvalue<?>> implements Tvalue<List<Object>> {
         return this.values.size();
     }
 
+    public void clear() {
+        this.values.clear();
+    }
+
     @Override
     public List<Object> value() {
         List<Object> list = new ArrayList<>(this.values.size());
@@ -162,8 +166,7 @@ public class ListValue<T extends Tvalue<?>> implements Tvalue<List<Object>> {
         this.read(in, true);
     }
 
-    protected void read(RandomAccessInput in, boolean readElemType)
-                        throws IOException {
+    protected void read(RandomAccessInput in, boolean readElemType) throws IOException {
         int size = in.readInt();
         if (readElemType) {
             this.elemType = SerialEnum.fromCode(ValueType.class, in.readByte());
@@ -187,8 +190,7 @@ public class ListValue<T extends Tvalue<?>> implements Tvalue<List<Object>> {
         this.write(out, true);
     }
 
-    protected void write(RandomAccessOutput out, boolean writeElemType)
-                         throws IOException {
+    protected void write(RandomAccessOutput out, boolean writeElemType) throws IOException {
         out.writeInt(this.values.size());
         if (writeElemType) {
             out.writeByte(this.elemType.code());
