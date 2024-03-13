@@ -20,10 +20,8 @@ package org.apache.hugegraph.computer.algorithm.path.shortest;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
 import org.apache.hugegraph.computer.core.output.hg.HugeGraphOutput;
-import org.apache.hugegraph.computer.core.worker.Computation;
 import org.apache.hugegraph.util.JsonUtil;
 
 public class SingleSourceShortestPathOutput extends HugeGraphOutput<String> {
@@ -46,11 +44,5 @@ public class SingleSourceShortestPathOutput extends HugeGraphOutput<String> {
         map.put("path", value.path().toString());
         map.put("total_weight", value.totalWeight());
         return JsonUtil.toJson(map);
-    }
-
-    @Override
-    public boolean filter(Config config, Computation computation, Vertex vertex) {
-        SingleSourceShortestPath sssp = (SingleSourceShortestPath) computation;
-        return sssp.getTargetIdSet() == null || sssp.getTargetIdSet().contains(vertex.id());
     }
 }

@@ -59,7 +59,7 @@ public final class Constants {
     public static final int FUTURE_TIMEOUT = 300;
 
     /*
-     * The timeout in millisecond for threadpool shutdown
+     * The timeout in millisecond for thread-pool shutdown
      */
     public static final long SHUTDOWN_TIMEOUT = 5000L;
 

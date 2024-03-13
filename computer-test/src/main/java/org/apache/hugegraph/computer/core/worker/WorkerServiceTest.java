@@ -47,56 +47,48 @@ public class WorkerServiceTest extends UnitTestBase {
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_ID, "local_002",
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
-                ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
-                ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                ComputerOptions.WORKER_COMPUTATION_CLASS,
-                MockComputation.class.getName(),
-                ComputerOptions.ALGORITHM_RESULT_CLASS,
-                DoubleValue.class.getName(),
-                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                DoubleValue.class.getName(),
-                ComputerOptions.OUTPUT_CLASS,
-                LimitedLogOutput.class.getName()
+                    ComputerOptions.JOB_ID, "local_002",
+                    ComputerOptions.JOB_WORKERS_COUNT, "1",
+                    ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
+                    ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
+                    ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                    ComputerOptions.WORKER_COMPUTATION_CLASS,
+                    MockComputation.class.getName(),
+                    ComputerOptions.ALGORITHM_RESULT_CLASS,
+                    DoubleValue.class.getName(),
+                    ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                    DoubleValue.class.getName(),
+                    ComputerOptions.OUTPUT_CLASS,
+                    LimitedLogOutput.class.getName()
             );
-            WorkerService workerService = new MockWorkerService();
-            try {
+            try (WorkerService workerService = new MockWorkerService()) {
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
                 LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
             } finally {
-                workerService.close();
-                try {
-                    workerService.close();
-                } catch (Throwable e) {
-                    Assert.fail(e.getMessage());
-                }
                 countDownLatch.countDown();
             }
         });
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
-                RpcOptions.RPC_SERVER_HOST, "localhost",
-                ComputerOptions.JOB_ID, "local_002",
-                ComputerOptions.JOB_WORKERS_COUNT, "1",
-                ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
-                ComputerOptions.BSP_LOG_INTERVAL, "30000",
-                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                ComputerOptions.MASTER_COMPUTATION_CLASS,
-                MockMasterComputation.class.getName(),
-                ComputerOptions.ALGORITHM_RESULT_CLASS,
-                DoubleValue.class.getName(),
-                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                DoubleValue.class.getName()
+                    RpcOptions.RPC_SERVER_HOST, "localhost",
+                    ComputerOptions.JOB_ID, "local_002",
+                    ComputerOptions.JOB_WORKERS_COUNT, "1",
+                    ComputerOptions.BSP_REGISTER_TIMEOUT, "100000",
+                    ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                    ComputerOptions.MASTER_COMPUTATION_CLASS,
+                    MockMasterComputation.class.getName(),
+                    ComputerOptions.ALGORITHM_RESULT_CLASS,
+                    DoubleValue.class.getName(),
+                    ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                    DoubleValue.class.getName()
             );
-            MasterService masterService = new MasterService();
-            try {
+            try (MasterService masterService = new MasterService()) {
                 masterService.init(config);
                 masterService.execute();
             } catch (Throwable e) {
@@ -108,12 +100,6 @@ public class WorkerServiceTest extends UnitTestBase {
                  * if count down is executed first, and the server thread in
                  * master service will not be closed.
                  */
-                masterService.close();
-                try {
-                    masterService.close();
-                } catch (Throwable e) {
-                    Assert.fail(e.getMessage());
-                }
                 countDownLatch.countDown();
             }
         });
@@ -121,8 +107,7 @@ public class WorkerServiceTest extends UnitTestBase {
         countDownLatch.await();
         pool.shutdownNow();
 
-        Assert.assertFalse(Arrays.asList(exceptions).toString(),
-                           existError(exceptions));
+        Assert.assertFalse(Arrays.asList(exceptions).toString(), existError(exceptions));
     }
 
     @Test
@@ -133,89 +118,84 @@ public class WorkerServiceTest extends UnitTestBase {
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_ID, "local_003",
-                ComputerOptions.JOB_WORKERS_COUNT, "2",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
-                ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
-                ComputerOptions.WORKER_DATA_DIRS, "[job_8086]",
-                ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
-                ComputerOptions.BSP_LOG_INTERVAL, "10000",
-                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                ComputerOptions.WORKER_COMPUTATION_CLASS,
-                MockComputation2.class.getName(),
-                ComputerOptions.ALGORITHM_RESULT_CLASS,
-                DoubleValue.class.getName(),
-                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                DoubleValue.class.getName()
+                    ComputerOptions.JOB_ID, "local_003",
+                    ComputerOptions.JOB_WORKERS_COUNT, "2",
+                    ComputerOptions.JOB_PARTITIONS_COUNT, "2",
+                    ComputerOptions.TRANSPORT_SERVER_PORT, "8086",
+                    ComputerOptions.WORKER_DATA_DIRS, "[job_8086]",
+                    ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
+                    ComputerOptions.BSP_LOG_INTERVAL, "10000",
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                    ComputerOptions.WORKER_COMPUTATION_CLASS,
+                    MockComputation2.class.getName(),
+                    ComputerOptions.ALGORITHM_RESULT_CLASS,
+                    DoubleValue.class.getName(),
+                    ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                    DoubleValue.class.getName()
             );
-            WorkerService workerService = new MockWorkerService();
-            try {
+
+            try (WorkerService workerService = new MockWorkerService()) {
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
                 LOG.error("Failed to start worker", e);
                 exceptions[0] = e;
             } finally {
-                workerService.close();
                 countDownLatch.countDown();
             }
         });
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
-                ComputerOptions.JOB_ID, "local_003",
-                ComputerOptions.JOB_WORKERS_COUNT, "2",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
-                ComputerOptions.TRANSPORT_SERVER_PORT, "8087",
-                ComputerOptions.WORKER_DATA_DIRS, "[job_8087]",
-                ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
-                ComputerOptions.BSP_LOG_INTERVAL, "10000",
-                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                ComputerOptions.WORKER_COMPUTATION_CLASS,
-                MockComputation2.class.getName(),
-                ComputerOptions.ALGORITHM_RESULT_CLASS,
-                DoubleValue.class.getName(),
-                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                DoubleValue.class.getName()
+                    ComputerOptions.JOB_ID, "local_003",
+                    ComputerOptions.JOB_WORKERS_COUNT, "2",
+                    ComputerOptions.JOB_PARTITIONS_COUNT, "2",
+                    ComputerOptions.TRANSPORT_SERVER_PORT, "8087",
+                    ComputerOptions.WORKER_DATA_DIRS, "[job_8087]",
+                    ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
+                    ComputerOptions.BSP_LOG_INTERVAL, "10000",
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                    ComputerOptions.WORKER_COMPUTATION_CLASS,
+                    MockComputation2.class.getName(),
+                    ComputerOptions.ALGORITHM_RESULT_CLASS,
+                    DoubleValue.class.getName(),
+                    ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                    DoubleValue.class.getName()
             );
-            WorkerService workerService = new MockWorkerService();
-            try {
+            try (WorkerService workerService = new MockWorkerService()) {
                 workerService.init(config);
                 workerService.execute();
             } catch (Throwable e) {
                 LOG.error("Failed to start worker", e);
                 exceptions[1] = e;
             } finally {
-                workerService.close();
                 countDownLatch.countDown();
             }
         });
 
         pool.submit(() -> {
             Config config = UnitTestBase.updateWithRequiredOptions(
-                RpcOptions.RPC_SERVER_HOST, "localhost",
-                ComputerOptions.JOB_ID, "local_003",
-                ComputerOptions.JOB_WORKERS_COUNT, "2",
-                ComputerOptions.JOB_PARTITIONS_COUNT, "2",
-                ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
-                ComputerOptions.BSP_LOG_INTERVAL, "10000",
-                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-                ComputerOptions.MASTER_COMPUTATION_CLASS,
-                MockMasterComputation2.class.getName(),
-                ComputerOptions.ALGORITHM_RESULT_CLASS,
-                DoubleValue.class.getName(),
-                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
-                DoubleValue.class.getName()
+                    RpcOptions.RPC_SERVER_HOST, "localhost",
+                    ComputerOptions.JOB_ID, "local_003",
+                    ComputerOptions.JOB_WORKERS_COUNT, "2",
+                    ComputerOptions.JOB_PARTITIONS_COUNT, "2",
+                    ComputerOptions.BSP_REGISTER_TIMEOUT, "30000",
+                    ComputerOptions.BSP_LOG_INTERVAL, "10000",
+                    ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                    ComputerOptions.MASTER_COMPUTATION_CLASS,
+                    MockMasterComputation2.class.getName(),
+                    ComputerOptions.ALGORITHM_RESULT_CLASS,
+                    DoubleValue.class.getName(),
+                    ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                    DoubleValue.class.getName()
             );
-            MasterService masterService = new MasterService();
-            try {
+            try (MasterService masterService = new MasterService()) {
                 masterService.init(config);
                 masterService.execute();
             } catch (Throwable e) {
                 LOG.error("Failed to start master", e);
                 exceptions[2] = e;
             } finally {
-                masterService.close();
                 countDownLatch.countDown();
             }
         });
@@ -223,41 +203,37 @@ public class WorkerServiceTest extends UnitTestBase {
         countDownLatch.await();
         pool.shutdownNow();
 
-        Assert.assertFalse(Arrays.asList(exceptions).toString(),
-                           existError(exceptions));
+        Assert.assertFalse(Arrays.asList(exceptions).toString(), existError(exceptions));
     }
 
     @Test
     public void testFailToConnectEtcd() {
         Config config = UnitTestBase.updateWithRequiredOptions(
-            // Unavailable etcd endpoints
-            ComputerOptions.BSP_ETCD_ENDPOINTS, "http://abc:8098",
-            ComputerOptions.JOB_ID, "local_004",
-            ComputerOptions.JOB_WORKERS_COUNT, "1",
-            ComputerOptions.BSP_LOG_INTERVAL, "30000",
-            ComputerOptions.BSP_MAX_SUPER_STEP, "2",
-            ComputerOptions.WORKER_COMPUTATION_CLASS,
-            MockComputation.class.getName()
+                // Unavailable etcd endpoints
+                ComputerOptions.BSP_ETCD_ENDPOINTS, "http://invalid-ip:8098",
+                ComputerOptions.JOB_ID, "local_004",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.BSP_LOG_INTERVAL, "30000",
+                ComputerOptions.BSP_MAX_SUPER_STEP, "2",
+                ComputerOptions.WORKER_COMPUTATION_CLASS,
+                MockComputation.class.getName()
         );
-        WorkerService workerService = new MockWorkerService();
-        Assert.assertThrows(ComputerException.class, () -> {
-            workerService.init(config);
-            try {
+
+        try (WorkerService workerService = new MockWorkerService()) {
+            Assert.assertThrows(ComputerException.class, () -> {
+                workerService.init(config);
                 workerService.execute();
-            } finally {
-                workerService.close();
-            }
-        }, e -> {
-            Assert.assertContains("Error while getting with " +
-                                  "key='BSP_MASTER_INIT_DONE'",
-                                  e.getMessage());
-            Assert.assertContains("UNAVAILABLE: unresolved address",
-                                  e.getCause().getMessage());
-        });
+            }, e -> {
+                Assert.assertContains("Error while getting with key='BSP_MASTER_INIT_DONE'",
+                                      e.getMessage());
+                Assert.assertContains("UNAVAILABLE: unresolved address",
+                                      e.getCause().getMessage());
+            });
+        }
     }
 
     @Test
-    public void testDataTransportManagerFail() throws InterruptedException {
+    public void testDataTransportManagerFail() {
         /*
          * TODO: Complete this test case after data transport manager is
          *  completed.

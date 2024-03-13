@@ -40,8 +40,8 @@ public class SingleSourceShortestPathTest extends AlgorithmTestBase {
     public static final String EL = "road";
     public static final String PROPERTY_KEY = "distance";
 
-    public static final String SOURCE_ID = "A";
-    public static final String TARGET_ID = "E";
+    public static final String SOURCE_ID = "\"A\"";
+    public static final String TARGET_ID = "\"E\"";
     public static final String SHORTEST_PATH = "[A, C, B, E]";
     public static final double TOTAL_WEIGHT = 28;
 
@@ -135,9 +135,10 @@ public class SingleSourceShortestPathTest extends AlgorithmTestBase {
             if (vertex.id().value().toString().equals(TARGET_ID)) {
                 Map map = JsonUtil.fromJson(json, Map.class);
 
-                LOG.info("source vertex {} to target vertex {}, " +
+                LOG.info("source vertex to target vertex: {}, {}, " +
                          "shortest path: {}, total weight: {}",
-                         SOURCE_ID, TARGET_ID, map.get("path"), map.get("total_weight"));
+                         SOURCE_ID, TARGET_ID,
+                         map.get("path"), map.get("total_weight"));
                 Assert.assertEquals(map.get("path"), SHORTEST_PATH);
                 Assert.assertEquals(map.get("total_weight"), TOTAL_WEIGHT);
             }

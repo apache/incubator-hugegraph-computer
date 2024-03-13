@@ -29,7 +29,7 @@ import org.apache.hugegraph.computer.core.network.TransportState;
 import org.apache.hugegraph.computer.core.network.message.AbstractMessage;
 import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.network.netty.AbstractNetworkTest;
-import org.apache.hugegraph.computer.core.util.StringEncoding;
+import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.testutil.Assert;
 import org.apache.hugegraph.testutil.Whitebox;
 import org.apache.hugegraph.util.ExecutorUtil;
@@ -131,7 +131,7 @@ public class TransportSessionTest extends AbstractNetworkTest {
         ClientSession clientSession = new ClientSession(conf, message -> null);
         Assert.assertEquals(TransportState.READY, clientSession.state());
 
-        ByteBuffer buffer = ByteBuffer.wrap(StringEncoding.encode("test data"));
+        ByteBuffer buffer = ByteBuffer.wrap(StringEncodeUtil.encode("test data"));
 
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             clientSession.sendAsync(MessageType.MSG, 1, buffer);

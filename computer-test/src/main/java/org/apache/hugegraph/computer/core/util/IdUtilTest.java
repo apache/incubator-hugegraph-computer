@@ -17,7 +17,6 @@
 
 package org.apache.hugegraph.computer.core.util;
 
-import org.apache.hugegraph.computer.core.graph.id.IdCategory;
 import org.apache.hugegraph.computer.core.graph.id.IdType;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
@@ -26,13 +25,32 @@ public class IdUtilTest {
 
     @Test
     public void testParseId() {
-        String uuid = "3b676b77-c484-4ba6-b627-8c040bc42863";
-        Assert.assertEquals(IdType.LONG, IdUtil.parseId("222").idType());
-        Assert.assertEquals(IdType.UTF8, IdUtil.parseId("aaa222").idType());
-        Assert.assertEquals(IdType.UUID, IdUtil.parseId(uuid).idType());
+        String idUtf8WithString = "\"abc\"";
+        String idUtf8WithNumber = "\"222\"";
+        String idLong = "222";
+        String idUuid = "U\"3b676b77-c484-4ba6-b627-8c040bc42863\"";
 
-        Assert.assertEquals(IdType.LONG, IdUtil.parseId(IdCategory.NUMBER, "222").idType());
-        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(IdCategory.STRING, "aaa222").idType());
-        Assert.assertEquals(IdType.UUID, IdUtil.parseId(IdCategory.UUID, uuid).idType());
+        String idNull = null;
+        String idEmpty = "";
+        String idDouble = "1.23";
+        String idUuidInvalid = "U\"123\"";
+
+        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(idUtf8WithString).idType());
+        Assert.assertEquals(IdType.UTF8, IdUtil.parseId(idUtf8WithNumber).idType());
+        Assert.assertEquals(IdType.LONG, IdUtil.parseId(idLong).idType());
+        Assert.assertEquals(IdType.UUID, IdUtil.parseId(idUuid).idType());
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            IdUtil.parseId(idNull).idType();
+        });
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            IdUtil.parseId(idEmpty).idType();
+        });
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            IdUtil.parseId(idDouble).idType();
+        });
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            IdUtil.parseId(idUuidInvalid).idType();
+        });
     }
 }

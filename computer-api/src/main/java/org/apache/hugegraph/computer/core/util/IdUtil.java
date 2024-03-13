@@ -18,55 +18,36 @@
 package org.apache.hugegraph.computer.core.util;
 
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.graph.id.Id;
-import org.apache.hugegraph.computer.core.graph.id.IdCategory;
 import org.apache.hugegraph.computer.core.graph.id.IdFactory;
 import org.apache.hugegraph.computer.core.graph.id.IdType;
+import org.apache.hugegraph.util.JsonUtil;
 
 public class IdUtil {
 
-    private static String UUID_REGEX = "^[0-9a-fA-F]{8}-" +
-                                       "[0-9a-fA-F]{4}-" +
-                                       "[0-9a-fA-F]{4}-" +
-                                       "[0-9a-fA-F]{4}-" +
-                                       "[0-9a-fA-F]{12}$";
-    private static Pattern P = Pattern.compile(UUID_REGEX);
-
     public static Id parseId(String idStr) {
         if (StringUtils.isBlank(idStr)) {
-            throw new ComputerException("Can't parse Id for empty string");
+            throw new IllegalArgumentException("Can't parse Id for empty string");
         }
 
-        if (StringUtils.isNumeric(idStr)) {
-            return IdFactory.parseId(IdType.LONG, Long.valueOf(idStr));
-        } else if (P.matcher(idStr).matches()) {
-            return IdFactory.parseId(IdType.UUID, UUID.fromString(idStr));
-        } else {
-            return IdFactory.parseId(IdType.UTF8, idStr);
-        }
-    }
+        try {
+            if (idStr.startsWith("U\"")) {
+                return IdFactory.parseId(IdType.UUID,
+                                         UUID.fromString(idStr.substring(1)
+                                                              .replaceAll("\"", "")));
+            }
 
-    public static Id parseId(IdCategory idCategory, String idStr) {
-        if (StringUtils.isBlank(idStr)) {
-            throw new ComputerException("Can't parse Id for empty string");
-        }
-
-        if (idCategory == null) {
-            // automatic inference
-            return parseId(idStr);
-        }
-
-        switch (idCategory) {
-            case NUMBER:
-                return IdFactory.parseId(IdType.LONG, Long.valueOf(idStr));
-            case UUID:
-                return IdFactory.parseId(IdType.UUID, UUID.fromString(idStr));
-            default:
-                return IdFactory.parseId(IdType.UTF8, idStr);
+            Object id = JsonUtil.fromJson(idStr, Object.class);
+            idStr = idStr.replaceAll("\"", "");
+            return id instanceof Number ?
+                   IdFactory.parseId(IdType.LONG, Long.valueOf(idStr)) :
+                   IdFactory.parseId(IdType.UTF8, idStr);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(String.format(
+                    "The vertex id must be formatted as Number/String/UUID" +
+                    ", but got '%s'", idStr));
         }
     }
 }

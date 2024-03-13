@@ -90,10 +90,10 @@ public final class IdFactory {
                 case UUID:
                     return (Id) BYTES_ID_UUID_METHOD.invoke(null, value);
                 default:
-                    throw new ComputerException("Can't parse Id for %s", type.name());
+                    throw new ComputerException("Unexpected id type %s", type.name());
             }
         } catch (Exception e) {
-            throw new ComputerException("Failed to parse Id", e);
+            throw new ComputerException("Failed to parse %s Id: '%s'", e, type, value);
         }
     }
 

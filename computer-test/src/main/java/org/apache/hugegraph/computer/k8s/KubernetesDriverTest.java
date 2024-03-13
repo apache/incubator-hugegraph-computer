@@ -79,8 +79,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         File tempFile = File.createTempFile(UUID.randomUUID().toString(), "");
         try {
             String absolutePath = tempFile.getAbsolutePath();
-            this.updateOptions(KubeDriverOptions.KUBE_CONFIG.name(),
-                               absolutePath);
+            this.updateOptions(KubeDriverOptions.KUBE_CONFIG.name(), absolutePath);
             NamedCluster cluster = new NamedClusterBuilder()
                     .withName("kubernetes")
                     .withNewCluster()
@@ -96,10 +95,11 @@ public class KubernetesDriverTest extends AbstractK8sTest {
                     .endContext()
                     .build();
             io.fabric8.kubernetes.api.model.Config config = Config.builder()
-                    .withClusters(cluster)
-                    .addToContexts(context)
-                    .withCurrentContext(context.getName())
-                    .build();
+                                                                  .withClusters(cluster)
+                                                                  .addToContexts(context)
+                                                                  .withCurrentContext(
+                                                                          context.getName())
+                                                                  .build();
             KubeConfigUtils.persistKubeConfigIntoFile(config, absolutePath);
             System.setProperty(Config.KUBERNETES_KUBECONFIG_FILE, absolutePath);
 
@@ -126,24 +126,18 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         String namespace = Whitebox.getInternalState(this.driver, "namespace");
         HugeConfig conf = Whitebox.getInternalState(this.driver, "conf");
         Object operation = Whitebox.getInternalState(this.driver, "operation");
-        MutableBoolean watchActive = Whitebox.getInternalState(
-                                     this.driver, "watchActive");
+        MutableBoolean watchActive = Whitebox.getInternalState(this.driver, "watchActive");
         Assert.assertTrue(watchActive.booleanValue());
         Assert.assertEquals(namespace, "test");
         Assert.assertNotNull(conf);
         Assert.assertNotNull(operation);
 
         final int workerInstances = 2;
-        this.updateOptions(KubeSpecOptions.WORKER_INSTANCES.name(),
-                           workerInstances);
-        Map<String, Object> defaultSpec = Whitebox.invoke(
-                                          KubernetesDriver.class,
-                                          "defaultSpec",
-                                          this.driver);
-        String workerInstancesKey = KubeUtil.covertSpecKey(
-                                    KubeSpecOptions.WORKER_INSTANCES.name());
-        Assert.assertEquals(defaultSpec.get(workerInstancesKey),
-                            workerInstances);
+        this.updateOptions(KubeSpecOptions.WORKER_INSTANCES.name(), workerInstances);
+        Map<String, Object> defaultSpec = Whitebox.invoke(KubernetesDriver.class,
+                                                          "defaultSpec", this.driver);
+        String workerInstancesKey = KubeUtil.covertSpecKey(KubeSpecOptions.WORKER_INSTANCES.name());
+        Assert.assertEquals(defaultSpec.get(workerInstancesKey), workerInstances);
     }
 
     @Test
@@ -167,21 +161,23 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     }
 
     @Test
-    public void testUploadAlgorithmJarWithError() throws FileNotFoundException {
+    public void testUploadAlgorithmJarWithError() {
         Whitebox.setInternalState(this.driver, "bashPath", "conf/images/upload_test-x.sh");
         String url = "https://github.com/apache/hugegraph-doc/raw/" +
                      "binary-1.0/dist/computer/test.jar";
         String path = "conf/images/test.jar";
         downloadFileByUrl(url, path);
 
-        InputStream inputStream = new FileInputStream(path);
-        Assert.assertThrows(ComputerDriverException.class, () -> {
-            this.driver.uploadAlgorithmJar("PageRank", inputStream);
-        }, e -> {
-            ComputerDriverException exception = (ComputerDriverException) e;
-            Assert.assertContains("No such file",
-                                  exception.rootCause().getMessage());
-        });
+        try (InputStream inputStream = new FileInputStream(path)) {
+            Assert.assertThrows(ComputerDriverException.class, () -> {
+                this.driver.uploadAlgorithmJar("PageRank", inputStream);
+            }, e -> {
+                ComputerDriverException exception = (ComputerDriverException) e;
+                Assert.assertContains("No such file", exception.rootCause().getMessage());
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -189,12 +185,9 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         Map<String, String> params = new HashMap<>();
         params.put(KubeSpecOptions.WORKER_INSTANCES.name(), "10");
         String jobId = this.driver.submitJob("PageRank", params);
-        HugeGraphComputerJob computerJob = this.operation
-                                               .withName(KubeUtil.crName(jobId))
-                                               .get();
+        HugeGraphComputerJob computerJob = this.operation.withName(KubeUtil.crName(jobId)).get();
         Assert.assertNotNull(computerJob);
-        Assert.assertEquals(computerJob.getSpec().getAlgorithmName(),
-                            "PageRank");
+        Assert.assertEquals(computerJob.getSpec().getAlgorithmName(), "PageRank");
         Assert.assertEquals(computerJob.getSpec().getJobId(), jobId);
     }
 
@@ -205,16 +198,13 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         String jobId = this.driver.submitJob("PageRank2", params);
 
         String crName = KubeUtil.crName(jobId);
-        HugeGraphComputerJob computerJob = this.operation.withName(crName)
-                                                         .get();
+        HugeGraphComputerJob computerJob = this.operation.withName(crName).get();
         Assert.assertNotNull(computerJob);
 
         UnitTestBase.sleep(1000L);
 
         this.driver.cancelJob(jobId, params);
-        HugeGraphComputerJob canceledComputerJob = this.operation
-                                                       .withName(crName)
-                                                       .get();
+        HugeGraphComputerJob canceledComputerJob = this.operation.withName(crName).get();
         Assert.assertNull(canceledComputerJob);
         Assert.assertNull(this.driver.jobState(jobId, params));
     }
@@ -227,26 +217,21 @@ public class KubernetesDriverTest extends AbstractK8sTest {
 
         JobObserver jobObserver = Mockito.mock(JobObserver.class);
 
-        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId,
-                                                                  params,
-                                                                  jobObserver);
+        CompletableFuture<Void> future = this.driver.waitJobAsync(jobId, params, jobObserver);
 
         Mockito.verify(jobObserver, Mockito.timeout(5000L).atLeast(1))
                .onJobStateChanged(Mockito.any(DefaultJobState.class));
 
         future.getNow(null);
 
-        MutableBoolean watchActive = Whitebox.getInternalState(this.driver,
-                                                               "watchActive");
+        MutableBoolean watchActive = Whitebox.getInternalState(this.driver, "watchActive");
         watchActive.setFalse();
         this.driver.waitJobAsync(jobId, params, jobObserver);
 
         this.driver.cancelJob(jobId, params);
         UnitTestBase.sleep(1000L);
 
-        CompletableFuture<Void> future2 = this.driver.waitJobAsync(jobId,
-                                                                   params,
-                                                                   jobObserver);
+        CompletableFuture<Void> future2 = this.driver.waitJobAsync(jobId, params, jobObserver);
         Assert.assertNull(future2);
     }
 
@@ -264,15 +249,12 @@ public class KubernetesDriverTest extends AbstractK8sTest {
     @Test
     public void testOnClose() {
         Map<String, Pair<CompletableFuture<Void>, JobObserver>> waits =
-        Whitebox.getInternalState(this.driver, "waits");
-        waits.put("test-123", Pair.of(new CompletableFuture<>(),
-                                      Mockito.mock(JobObserver.class)));
+                Whitebox.getInternalState(this.driver, "waits");
+        waits.put("test-123", Pair.of(new CompletableFuture<>(), Mockito.mock(JobObserver.class)));
 
-        AbstractWatchManager<HugeGraphComputerJob> watch =
-                                                   Whitebox.getInternalState(
-                                                   this.driver, "watch");
-        Watcher<HugeGraphComputerJob> watcher = Whitebox.getInternalState(
-                                                watch, "watcher");
+        AbstractWatchManager<HugeGraphComputerJob> watch = Whitebox.getInternalState(this.driver,
+                                                                                     "watch");
+        Watcher<HugeGraphComputerJob> watcher = Whitebox.getInternalState(watch, "watcher");
 
         watcher.eventReceived(Watcher.Action.ADDED, null);
         watcher.eventReceived(Watcher.Action.ERROR, new HugeGraphComputerJob());
@@ -283,8 +265,7 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         WatcherException testClose = new WatcherException("test close");
         watcher.onClose(testClose);
 
-        MutableBoolean watchActive = Whitebox.getInternalState(this.driver,
-                                                               "watchActive");
+        MutableBoolean watchActive = Whitebox.getInternalState(this.driver, "watchActive");
         Assert.assertFalse(watchActive.booleanValue());
     }
 
@@ -297,14 +278,12 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             this.driver.submitJob("PageRank3", params);
         }, e -> {
-            Assert.assertContains(
-                    "The partitions count must be >= workers instances",
-                    e.getMessage()
+            Assert.assertContains("The partitions count must be >= workers instances",
+                                  e.getMessage()
             );
         });
 
-        Map<String, String> defaultConf = Whitebox.getInternalState(
-                                          this.driver, "defaultConf");
+        Map<String, String> defaultConf = Whitebox.getInternalState(this.driver, "defaultConf");
         defaultConf = new HashMap<>(defaultConf);
         defaultConf.remove(ComputerOptions.ALGORITHM_PARAMS_CLASS.name());
         Whitebox.setInternalState(this.driver, "defaultConf", defaultConf);
@@ -312,9 +291,8 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         Assert.assertThrows(IllegalArgumentException.class, () -> {
             this.driver.submitJob("PageRank3", params);
         }, e -> {
-            Assert.assertContains(
-                    "The [algorithm.params_class] options can't be null",
-                    e.getMessage()
+            Assert.assertContains("The [algorithm.params_class] options can't be null",
+                                  e.getMessage()
             );
         });
     }

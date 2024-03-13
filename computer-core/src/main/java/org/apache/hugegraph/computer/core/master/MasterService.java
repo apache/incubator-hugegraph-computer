@@ -61,15 +61,15 @@ public class MasterService implements Closeable {
     private final Managers managers;
 
     private volatile boolean inited;
+    private volatile boolean failed;
     private volatile boolean closed;
     private Config config;
     private volatile Bsp4Master bsp4Master;
     private ContainerInfo masterInfo;
-    private List<ContainerInfo> workers;
     private int maxSuperStep;
     private MasterComputation masterComputation;
 
-    private volatile ShutdownHook shutdownHook;
+    private final ShutdownHook shutdownHook;
     private volatile Thread serviceThread;
 
     public MasterService() {
@@ -100,7 +100,7 @@ public class MasterService implements Closeable {
                                             rpcAddress.getPort());
         /*
          * Connect to BSP server and clean the old data may be left by the
-         * previous job with same job id.
+         * previous job with the same job id.
          */
         this.bsp4Master = new Bsp4Master(this.config);
         this.bsp4Master.clean();
@@ -113,9 +113,9 @@ public class MasterService implements Closeable {
         LOG.info("{} register MasterService", this);
         this.bsp4Master.masterInitDone(this.masterInfo);
 
-        this.workers = this.bsp4Master.waitWorkersInitDone();
+        List<ContainerInfo> workers = this.bsp4Master.waitWorkersInitDone();
         LOG.info("{} waited all workers registered, workers count: {}",
-                 this, this.workers.size());
+                 this, workers.size());
 
         LOG.info("{} MasterService initialized", this);
         this.inited = true;
@@ -140,22 +140,36 @@ public class MasterService implements Closeable {
     }
 
     /**
-     * Stop the the master service. Stop the managers created in
-     * {@link #init(Config)}.
+     * Stop the master service. Stop the managers created in {@link #init(Config)}.
      */
     @Override
     public synchronized void close() {
-        this.checkInited();
+        // TODO: check the logic of close carefully later
+        //this.checkInited();
         if (this.closed) {
             LOG.info("{} MasterService had closed before", this);
             return;
         }
 
-        this.masterComputation.close(new DefaultMasterContext());
+        try {
+            if (this.masterComputation != null) {
+                this.masterComputation.close(new DefaultMasterContext());
+            }
+        } catch (Exception e) {
+            LOG.error("Error occurred while closing master service", e);
+        }
 
-        this.bsp4Master.waitWorkersCloseDone();
+        if (!failed && this.bsp4Master != null) {
+            this.bsp4Master.waitWorkersCloseDone();
+        }
 
-        this.managers.closeAll(this.config);
+        try {
+            if (managers != null) {
+                this.managers.closeAll(this.config);
+            }
+        } catch (Exception e) {
+            LOG.error("Error occurred while closing managers", e);
+        }
 
         this.cleanAndCloseBsp();
         this.shutdownHook.unhook();
@@ -183,97 +197,103 @@ public class MasterService implements Closeable {
         this.checkInited();
 
         LOG.info("{} MasterService execute", this);
-        /*
-         * Step 1: Determines which superstep to start from, and resume this
-         * superstep.
-         */
-        int superstep = this.superstepToResume();
-        LOG.info("{} MasterService resume from superstep: {}",
-                 this, superstep);
-
-        /*
-         * TODO: Get input splits from HugeGraph if resume from
-         * Constants.INPUT_SUPERSTEP.
-         */
-        this.bsp4Master.masterResumeDone(superstep);
-
-        /*
-         * Step 2: Input superstep for loading vertices and edges.
-         * This step may be skipped if resume from other superstep than
-         * Constants.INPUT_SUPERSTEP.
-         */
-        SuperstepStat superstepStat;
-        watcher.start();
-        if (superstep == Constants.INPUT_SUPERSTEP) {
-            superstepStat = this.inputstep();
-            superstep++;
-        } else {
-            // TODO: Get superstepStat from bsp service.
-            superstepStat = null;
-        }
-        watcher.stop();
-        LOG.info("{} MasterService input step cost: {}",
-                 this, TimeUtil.readableTime(watcher.getTime()));
-        E.checkState(superstep <= this.maxSuperStep,
-                     "The superstep {} can't be > maxSuperStep {}",
-                     superstep, this.maxSuperStep);
-
-        watcher.reset();
-        watcher.start();
-        // Step 3: Iteration computation of all supersteps.
-        for (; superstepStat.active(); superstep++) {
-            LOG.info("{} MasterService superstep {} started",
-                     this, superstep);
+        try {
             /*
-             * Superstep iteration. The steps in each superstep are:
-             * 1) Master waits workers superstep prepared.
-             * 2) All managers call beforeSuperstep.
-             * 3) Master signals the workers that the master prepared
-             *    superstep.
-             * 4) Master waits the workers do vertex computation.
-             * 5) Master signal the workers that all workers have finished
-             *    vertex computation.
-             * 6) Master waits the workers end the superstep, and get
-             *    superstepStat.
-             * 7) Master compute whether to continue the next superstep
-             *    iteration.
-             * 8) All managers call afterSuperstep.
-             * 9) Master signals the workers with superstepStat, and workers
-             *    know whether to continue the next superstep iteration.
+             * Step 1: Determines which superstep to start from, and resume this
+             * superstep.
              */
-            this.bsp4Master.waitWorkersStepPrepareDone(superstep);
-            this.managers.beforeSuperstep(this.config, superstep);
-            this.bsp4Master.masterStepPrepareDone(superstep);
-
-            this.bsp4Master.waitWorkersStepComputeDone(superstep);
-            this.bsp4Master.masterStepComputeDone(superstep);
-            List<WorkerStat> workerStats =
-                             this.bsp4Master.waitWorkersStepDone(superstep);
-            superstepStat = SuperstepStat.from(workerStats);
-            SuperstepContext context = new SuperstepContext(superstep,
-                                                            superstepStat);
-            // Call master compute(), note the worker afterSuperstep() is done
-            boolean masterContinue = this.masterComputation.compute(context);
-            if (this.finishedIteration(masterContinue, context)) {
-                superstepStat.inactivate();
-            }
-            this.managers.afterSuperstep(this.config, superstep);
-            this.bsp4Master.masterStepDone(superstep, superstepStat);
-
-            LOG.info("{} MasterService superstep {} finished",
+            int superstep = this.superstepToResume();
+            LOG.info("{} MasterService resume from superstep: {}",
                      this, superstep);
-        }
-        watcher.stop();
-        LOG.info("{} MasterService compute step cost: {}",
-                 this, TimeUtil.readableTime(watcher.getTime()));
 
-        watcher.reset();
-        watcher.start();
-        // Step 4: Output superstep for outputting results.
-        this.outputstep();
-        watcher.stop();
-        LOG.info("{} MasterService output step cost: {}",
-                 this, TimeUtil.readableTime(watcher.getTime()));
+            /*
+             * TODO: Get input splits from HugeGraph if resume from
+             * Constants.INPUT_SUPERSTEP.
+             */
+            this.bsp4Master.masterResumeDone(superstep);
+
+            /*
+             * Step 2: Input superstep for loading vertices and edges.
+             * This step may be skipped if resume from other superstep than
+             * Constants.INPUT_SUPERSTEP.
+             */
+            SuperstepStat superstepStat;
+            watcher.start();
+            if (superstep == Constants.INPUT_SUPERSTEP) {
+                superstepStat = this.inputstep();
+                superstep++;
+            } else {
+                // TODO: Get superstepStat from bsp service.
+                superstepStat = null;
+            }
+            watcher.stop();
+            LOG.info("{} MasterService input step cost: {}",
+                     this, TimeUtil.readableTime(watcher.getTime()));
+            E.checkState(superstep <= this.maxSuperStep,
+                         "The superstep {} can't be > maxSuperStep {}",
+                         superstep, this.maxSuperStep);
+
+            watcher.reset();
+            watcher.start();
+            // Step 3: Iteration computation of all supersteps.
+            for (; superstepStat.active(); superstep++) {
+                LOG.info("{} MasterService superstep {} started",
+                         this, superstep);
+                /*
+                 * Superstep iteration. The steps in each superstep are:
+                 * 1) Master waits workers superstep prepared.
+                 * 2) All managers call beforeSuperstep.
+                 * 3) Master signals the workers that the master prepared
+                 *    superstep.
+                 * 4) Master waits the workers do vertex computation.
+                 * 5) Master signal the workers that all workers have finished
+                 *    vertex computation.
+                 * 6) Master waits the workers end the superstep, and get
+                 *    superstepStat.
+                 * 7) Master compute whether to continue the next superstep
+                 *    iteration.
+                 * 8) All managers call afterSuperstep.
+                 * 9) Master signals the workers with superstepStat, and workers
+                 *    know whether to continue the next superstep iteration.
+                 */
+                this.bsp4Master.waitWorkersStepPrepareDone(superstep);
+                this.managers.beforeSuperstep(this.config, superstep);
+                this.bsp4Master.masterStepPrepareDone(superstep);
+
+                this.bsp4Master.waitWorkersStepComputeDone(superstep);
+                this.bsp4Master.masterStepComputeDone(superstep);
+                List<WorkerStat> workerStats =
+                        this.bsp4Master.waitWorkersStepDone(superstep);
+                superstepStat = SuperstepStat.from(workerStats);
+                SuperstepContext context = new SuperstepContext(superstep,
+                                                                superstepStat);
+                // Call master compute(), note the worker afterSuperstep() is done
+                boolean masterContinue = this.masterComputation.compute(context);
+                if (this.finishedIteration(masterContinue, context)) {
+                    superstepStat.inactivate();
+                }
+                this.managers.afterSuperstep(this.config, superstep);
+                this.bsp4Master.masterStepDone(superstep, superstepStat);
+
+                LOG.info("{} MasterService superstep {} finished",
+                         this, superstep);
+            }
+            watcher.stop();
+            LOG.info("{} MasterService compute step cost: {}",
+                     this, TimeUtil.readableTime(watcher.getTime()));
+
+            watcher.reset();
+            watcher.start();
+            // Step 4: Output superstep for outputting results.
+            this.outputstep();
+            watcher.stop();
+            LOG.info("{} MasterService output step cost: {}",
+                     this, TimeUtil.readableTime(watcher.getTime()));
+        } catch (Throwable throwable) {
+            LOG.error("{} MasterService execute failed", this, throwable);
+            failed = true;
+            throw throwable;
+        }
     }
 
     @Override
@@ -324,7 +344,7 @@ public class MasterService implements Closeable {
      * 1): Has run maxSuperStep times of superstep iteration.
      * 2): The mater-computation returns false that stop superstep iteration.
      * 3): All vertices are inactive and no message sent in a superstep.
-     * @param masterContinue The master-computation decide
+     * @param masterContinue The master-computation decides
      * @return true if finish superstep iteration.
      */
     private boolean finishedIteration(boolean masterContinue,
@@ -342,7 +362,7 @@ public class MasterService implements Closeable {
 
     /**
      * Coordinate with workers to load vertices and edges from HugeGraph. There
-     * are two phases in inputstep. First phase is get input splits from
+     * are two phases in inputstep. The First phase is to get input splits from
      * master, and read the vertices and edges from input splits. The second
      * phase is after all workers read input splits, the workers merge the
      * vertices and edges to get the stats for each partition.
@@ -362,8 +382,7 @@ public class MasterService implements Closeable {
     }
 
     /**
-     * Wait the workers write result back. After this, the job is finished
-     * successfully.
+     * Wait the workers write a result back. After this, the job is finished successfully.
      */
     private void outputstep() {
         LOG.info("{} MasterService outputstep started", this);
@@ -391,7 +410,7 @@ public class MasterService implements Closeable {
                             "The aggregator class can't be null");
             Aggregator<V> aggr;
             try {
-                aggr = aggregatorClass.newInstance();
+                aggr = aggregatorClass.getDeclaredConstructor().newInstance();
             } catch (Exception e) {
                 throw new ComputerException("Can't new instance from class: %s",
                                             e, aggregatorClass.getName());

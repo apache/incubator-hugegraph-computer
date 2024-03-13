@@ -26,7 +26,6 @@ import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.graph.edge.Edge;
 import org.apache.hugegraph.computer.core.graph.id.Id;
-import org.apache.hugegraph.computer.core.graph.id.IdCategory;
 import org.apache.hugegraph.computer.core.graph.value.DoubleValue;
 import org.apache.hugegraph.computer.core.graph.value.IdSet;
 import org.apache.hugegraph.computer.core.graph.value.Value;
@@ -42,7 +41,6 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
     private static final Logger LOG = Log.logger(SingleSourceShortestPath.class);
 
-    public static final String OPTION_VERTEX_ID_TYPE = "single_source_shortest_path.vertex_id_type";
     public static final String OPTION_SOURCE_ID = "single_source_shortest_path.source_id";
     public static final String OPTION_TARGET_ID = "single_source_shortest_path.target_id";
     public static final String OPTION_WEIGHT_PROPERTY =
@@ -51,27 +49,17 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
             "single_source_shortest_path.default_weight";
 
     /**
-     * id type of vertex.
-     * string|number|uuid
+     * source vertex id.
      */
-    // todo improve: automatic inference
-    private String vertexIdTypeStr;
-    private IdCategory vertexIdType;
-
-    /**
-     * source vertex id
-     */
-    private String sourceIdStr;
     private Id sourceId;
 
     /**
      * target vertex id.
-     * 1. single target: one vertex id
-     * 2. multiple target: multiple vertex ids separated by comma
+     * 1. single target: A
+     * 2. multiple target: A, B, C
      * 3. all: *
      */
-    private String targetIdStr;
-    private IdSet targetIdSet; // empty when targetIdStr == "*"
+    private IdSet targetIdSet; // empty when targetId is all
     /**
      * target quantity type
      */
@@ -93,7 +81,7 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     /**
      * reached targets
      */
-    private IdSet reachedTargets; // empty when targetIdStr == "*"
+    private IdSet reachedTargets; // empty when targetId is all
 
     @Override
     public String category() {
@@ -107,28 +95,25 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
     @Override
     public void init(Config config) {
-        this.vertexIdTypeStr = config.getString(OPTION_VERTEX_ID_TYPE, "");
-        this.vertexIdType = IdCategory.parse(this.vertexIdTypeStr);
-
-        this.sourceIdStr = config.getString(OPTION_SOURCE_ID, "");
-        if (StringUtils.isBlank(this.sourceIdStr)) {
+        String sourceIdStr = config.getString(OPTION_SOURCE_ID, "");
+        if (StringUtils.isBlank(sourceIdStr)) {
             throw new ComputerException("The param '%s' must not be blank", OPTION_SOURCE_ID);
         }
-        this.sourceId = IdUtil.parseId(this.vertexIdType, this.sourceIdStr);
+        this.sourceId = IdUtil.parseId(sourceIdStr);
 
-        this.targetIdStr = config.getString(OPTION_TARGET_ID, "");
-        if (StringUtils.isBlank(this.targetIdStr)) {
+        String targetIdStr = config.getString(OPTION_TARGET_ID, "");
+        if (StringUtils.isBlank(targetIdStr)) {
             throw new ComputerException("The param '%s' must not be blank", OPTION_TARGET_ID);
         }
         // remove spaces
-        this.targetIdStr = Arrays.stream(this.targetIdStr.split(","))
-                                 .map(e -> e.trim())
-                                 .collect(Collectors.joining(","));
-        this.targetQuantityType = this.getQuantityType();
+        targetIdStr = Arrays.stream(targetIdStr.split(","))
+                            .map(e -> e.trim())
+                            .collect(Collectors.joining(","));
+        this.targetQuantityType = this.getQuantityType(targetIdStr);
         if (this.targetQuantityType != QuantityType.ALL) {
             this.targetIdSet = new IdSet();
-            for (String targetIdStr : this.targetIdStr.split(",")) {
-                targetIdSet.add(IdUtil.parseId(this.vertexIdType, targetIdStr));
+            for (String targetId : targetIdStr.split(",")) {
+                targetIdSet.add(IdUtil.parseId(targetId));
             }
         }
 
@@ -157,17 +142,15 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
 
         // single target && source == target
         if (this.targetQuantityType == QuantityType.SINGLE &&
-            this.sourceIdStr.equals(this.targetIdStr)) {
-            LOG.debug("source vertex {} equals target vertex {}",
-                      this.sourceIdStr, this.targetIdStr);
+            this.targetIdSet.contains(this.sourceId)) {
+            LOG.debug("source vertex equals target vertex: {}", this.sourceId);
             vertex.inactivate();
             return;
         }
 
         if (vertex.numEdges() <= 0) {
             // isolated vertex
-            LOG.debug("source vertex {} can not reach target vertex {}",
-                      this.sourceIdStr, this.targetIdStr);
+            LOG.debug("The source vertex is isolated: {}", this.sourceId);
             vertex.inactivate();
             return;
         }
@@ -201,8 +184,9 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
                 continue;
             }
 
-            // reach all target or nowhere to go
-            if (this.isAllTargetsReached(vertex) || vertex.numEdges() <= 0) {
+            // target vertex finds all targets reached or nowhere to go
+            if ((this.isTarget(vertex) && this.isAllTargetsReached(vertex)) ||
+                vertex.numEdges() <= 0) {
                 continue;
             }
 
@@ -232,12 +216,12 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     }
 
     /**
-     * get QuantityType by this.targetId
+     * get quantityType by targetId
      */
-    private QuantityType getQuantityType() {
-        if (this.targetIdStr.equals("*")) {
+    private QuantityType getQuantityType(String targetIdStr) {
+        if (targetIdStr.equals("*")) {
             return QuantityType.ALL;
-        } else if (this.targetIdStr.contains(",")) {
+        } else if (targetIdStr.contains(",")) {
             return QuantityType.MULTIPLE;
         } else {
             return QuantityType.SINGLE;
@@ -293,9 +277,5 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
             return true;
         }
         return false;
-    }
-
-    public IdSet getTargetIdSet() {
-        return targetIdSet;
     }
 }

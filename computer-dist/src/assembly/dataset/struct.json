@@ -6,7 +6,7 @@
       "skip": false,
       "input": {
         "type": "FILE",
-        "path": "computer-dist/src/assembly/dataset/ml-latest-small/ratings.csv",
+        "path": "/dataset/ml-latest-small/ratings.csv",
         "file_filter": {
           "extensions": [
             "*"
@@ -83,7 +83,7 @@
       "skip": false,
       "input": {
         "type": "FILE",
-        "path": "computer-dist/src/assembly/dataset/ml-latest-small/tags.csv",
+        "path": "/dataset/ml-latest-small/tags.csv",
         "file_filter": {
           "extensions": [
             "*"
@@ -160,7 +160,7 @@
       "skip": false,
       "input": {
         "type": "FILE",
-        "path": "computer-dist/src/assembly/dataset/ml-latest-small/movies.csv",
+        "path": "/dataset/ml-latest-small/movies.csv",
         "file_filter": {
           "extensions": [
             "*"

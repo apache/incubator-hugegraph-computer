@@ -28,7 +28,7 @@ import org.apache.hugegraph.computer.core.network.message.DataMessage;
 import org.apache.hugegraph.computer.core.network.message.MessageType;
 import org.apache.hugegraph.computer.core.network.message.StartMessage;
 import org.apache.hugegraph.computer.core.network.netty.codec.FrameDecoder;
-import org.apache.hugegraph.computer.core.util.StringEncoding;
+import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.computer.suite.unit.UnitTestBase;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
@@ -52,7 +52,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
 
         int requestId = 1;
         int partition = 1;
-        byte[] bytes = StringEncoding.encode("mock msg");
+        byte[] bytes = StringEncodeUtil.encode("mock msg");
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
         NetworkBuffer body = new NioBuffer(buffer);
         DataMessage dataMessage = new DataMessage(null, requestId,
@@ -146,7 +146,7 @@ public class NettyEncodeDecodeHandlerTest extends AbstractNetworkTest {
     public void testMessageRelease() {
         int requestId = 99;
         int partition = 1;
-        byte[] bytes = StringEncoding.encode("mock msg");
+        byte[] bytes = StringEncodeUtil.encode("mock msg");
         ByteBuf buf = Unpooled.directBuffer().writeBytes(bytes);
         try {
             NettyBuffer managedBuffer = new NettyBuffer(buf);
