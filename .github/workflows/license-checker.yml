@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SCRIPT_DEPENDENCY: computer-dist/scripts/dependency
-      USE_STAGE: 'false' # Whether to include the stage repository.
+      USE_STAGE: 'true' # Whether to include the stage repository.
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
