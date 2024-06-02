@@ -280,6 +280,6 @@ public class SingleSourceShortestPath implements Computation<SingleSourceShortes
     }
 
     public IdSet getTargetIdSet() {
-        return targetIdSet;
+        return this.targetIdSet;
     }
 }
