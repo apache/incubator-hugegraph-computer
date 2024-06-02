@@ -255,7 +255,9 @@ public class FileGraphPartition {
             Edges edges = this.edgesInput.edges(this.vertexInput.idPointer());
             vertex.edges(edges);
 
-            output.write(vertex);
+            if (output.filter(this.context.config(), this.computation, vertex)) {
+                output.write(vertex);
+            }
         }
 
         try {
