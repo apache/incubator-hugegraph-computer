@@ -40,7 +40,7 @@ And here are links of other repositories:
 
 ## License
 
-hugegraph-computer is licensed under Apache 2.0 License.
+hugegraph-computer is licensed under [Apache 2.0](https://github.com/apache/incubator-hugegraph-computer/blob/master/LICENSE) License.
 
 ### Contact Us
 
