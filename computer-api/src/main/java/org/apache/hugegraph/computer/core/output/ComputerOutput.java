@@ -19,6 +19,7 @@ package org.apache.hugegraph.computer.core.output;
 
 import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.computer.core.graph.vertex.Vertex;
+import org.apache.hugegraph.computer.core.worker.Computation;
 
 /**
  * Computer output is used to output computer results. There is an output object
@@ -36,6 +37,14 @@ public interface ComputerOutput {
      * vertex's status.
      */
     void write(Vertex vertex);
+
+    /**
+     * Write filter.
+     * True to commit the computation result, otherwise not to commit.
+     */
+    default boolean filter(Config config, Computation computation, Vertex vertex) {
+        return true;
+    }
 
     /**
      * Merge output files of multiple partitions if applicable.
