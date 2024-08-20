@@ -6,6 +6,9 @@ on:
       - master
       - /^release-.*$/
   pull_request:
+defaults:
+  run:
+    working-directory: computer
 
 jobs:
   computer-ci:
@@ -22,7 +25,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          path: computer
           fetch-depth: 2
 
       - name: Install JDK 8 for HDFS
