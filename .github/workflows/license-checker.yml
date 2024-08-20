@@ -7,6 +7,10 @@ on:
       - /^release-.*$/
   pull_request:
 
+defaults:
+  run:
+    working-directory: computer
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
