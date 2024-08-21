@@ -34,6 +34,7 @@ import org.apache.hugegraph.computer.core.graph.id.Id;
 import org.apache.hugegraph.computer.core.io.BytesInput;
 import org.apache.hugegraph.computer.core.io.BytesOutput;
 import org.apache.hugegraph.computer.core.io.IOFactory;
+import org.apache.hugegraph.computer.core.io.Readable;
 import org.apache.hugegraph.computer.core.io.Writable;
 import org.apache.hugegraph.computer.core.store.StoreTestUtil;
 import org.apache.hugegraph.computer.core.store.entry.EntriesUtil;
