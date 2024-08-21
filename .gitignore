@@ -32,7 +32,6 @@ dist.sh
 /nbbuild/
 /nbdist/
 /.nb-gradle/
-dist/
 build/
 
 ### VS Code ###
