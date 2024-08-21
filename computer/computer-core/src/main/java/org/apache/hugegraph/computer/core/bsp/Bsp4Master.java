@@ -54,7 +54,7 @@ public class Bsp4Master extends BspBase {
         LOG.info("Master is waiting for workers init-done");
         String path = this.constructPath(BspEvent.BSP_WORKER_INIT_DONE);
         List<byte[]> serializedContainers = this.waitOnWorkersEvent(
-                                            path, this.registerTimeout());
+                path, this.registerTimeout());
         List<ContainerInfo> containers = new ArrayList<>(this.workerCount());
         for (byte[] serializedContainer : serializedContainers) {
             ContainerInfo container = new ContainerInfo();
@@ -110,7 +110,7 @@ public class Bsp4Master extends BspBase {
         String path = this.constructPath(BspEvent.BSP_WORKER_STEP_DONE,
                                          superstep);
         List<byte[]> list = this.waitOnWorkersEvent(path,
-                            this.barrierOnWorkersTimeout());
+                                                    this.barrierOnWorkersTimeout());
         List<WorkerStat> result = new ArrayList<>(this.workerCount());
         for (byte[] bytes : list) {
             WorkerStat workerStat = new WorkerStat();

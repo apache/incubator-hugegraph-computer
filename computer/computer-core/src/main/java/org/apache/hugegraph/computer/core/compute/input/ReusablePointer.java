@@ -24,6 +24,7 @@ import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.io.IOFactory;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.io.RandomAccessOutput;
+import org.apache.hugegraph.computer.core.io.Readable;
 import org.apache.hugegraph.computer.core.store.entry.Pointer;
 import org.apache.hugegraph.computer.core.util.BytesUtil;
 

@@ -24,6 +24,7 @@ import java.util.Objects;
 import org.apache.hugegraph.computer.core.graph.partition.PartitionStat;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.io.RandomAccessOutput;
+import org.apache.hugegraph.computer.core.io.Readable;
 import org.apache.hugegraph.computer.core.io.Writable;
 import org.apache.hugegraph.computer.core.util.JsonUtil;
 import org.apache.hugegraph.computer.core.worker.WorkerStat;

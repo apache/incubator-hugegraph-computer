@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
+import org.apache.hugegraph.computer.core.io.Readable;
 
 public class KvEntryReaderImpl implements KvEntryReader {
 

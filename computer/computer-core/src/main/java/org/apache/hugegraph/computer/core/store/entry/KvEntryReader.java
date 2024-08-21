@@ -19,6 +19,8 @@ package org.apache.hugegraph.computer.core.store.entry;
 
 import java.io.IOException;
 
+import org.apache.hugegraph.computer.core.io.Readable;
+
 public interface KvEntryReader {
 
     void readSubKv(Readable subKey, Readable subValue) throws IOException;

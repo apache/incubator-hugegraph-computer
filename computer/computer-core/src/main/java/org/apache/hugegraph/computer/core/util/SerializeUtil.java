@@ -27,6 +27,7 @@ import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.io.BytesInput;
 import org.apache.hugegraph.computer.core.io.BytesOutput;
 import org.apache.hugegraph.computer.core.io.IOFactory;
+import org.apache.hugegraph.computer.core.io.Readable;
 import org.apache.hugegraph.computer.core.io.Writable;
 
 public final class SerializeUtil {

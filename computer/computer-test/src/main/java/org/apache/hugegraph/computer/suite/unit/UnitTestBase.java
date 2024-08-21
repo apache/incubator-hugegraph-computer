@@ -41,6 +41,7 @@ import org.apache.hugegraph.computer.core.io.OutputFormat;
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.io.RandomAccessOutput;
 import org.apache.hugegraph.computer.core.io.StreamGraphInput;
+import org.apache.hugegraph.computer.core.io.Readable;
 import org.apache.hugegraph.computer.core.io.StreamGraphOutput;
 import org.apache.hugegraph.computer.core.io.Writable;
 import org.apache.hugegraph.computer.core.store.entry.EntryInput;

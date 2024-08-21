@@ -20,6 +20,7 @@ package org.apache.hugegraph.computer.core.store.entry;
 import java.io.IOException;
 
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
+import org.apache.hugegraph.computer.core.io.Readable;
 
 public class EntryInputImpl implements EntryInput {
 

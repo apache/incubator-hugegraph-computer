@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import org.apache.hugegraph.computer.core.io.RandomAccessInput;
 import org.apache.hugegraph.computer.core.io.RandomAccessOutput;
+import org.apache.hugegraph.computer.core.io.Readable;
 import org.apache.hugegraph.computer.core.io.Writable;
 import org.apache.hugegraph.computer.core.receiver.MessageStat;
 import org.apache.hugegraph.computer.core.util.JsonUtil;
