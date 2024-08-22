@@ -32,7 +32,6 @@ dist.sh
 /nbbuild/
 /nbdist/
 /.nb-gradle/
-dist/
 build/
 
 ### VS Code ###
@@ -58,7 +57,7 @@ build/
 *.pyc
 
 # maven ignore
-output/
+
 apache-hugegraph-*-incubating-*/
 *.war
 *.zip
