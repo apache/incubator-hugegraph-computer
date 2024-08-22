@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/apache/incubator-hugegraph-computer/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/incubator-hugegraph-computer)
 [![Docker Pulls](https://img.shields.io/docker/pulls/hugegraph/hugegraph-computer)](https://hub.docker.com/repository/docker/hugegraph/hugegraph-computer)
 
-The hugegraph-computer is a distributed graph processing system for hugegraph.
+The [hugegraph-computer](./computer/README.md) is a distributed graph processing system for hugegraph.
 
 ## Learn More
 
