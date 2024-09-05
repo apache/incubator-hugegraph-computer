@@ -48,3 +48,10 @@ or
 # 启动 run as daemon
 ./supervisord -c supervisor.conf -d
 ````
+
+# 使用hubble平台
+有三种搭建方式，参考https://hugegraph.apache.org/docs/quickstart/hugegraph-hubble/
+
+Use Docker (Convenient for Test/Dev)
+Download the Toolchain binary package
+Source code compilation
