@@ -14,8 +14,7 @@ The [project homepage](https://hugegraph.apache.org/docs/) contains more informa
 And here are links of other repositories:
 1. [hugegraph-server](https://github.com/apache/hugegraph) (graph's core component - OLTP server)
 2. [hugegraph-toolchain](https://github.com/apache/hugegraph-toolchain) (include loader/dashboard/tool/client)
-3. [hugegraph-commons](https://github.com/apache/hugegraph-commons) (include common & rpc module)
-4. [hugegraph-website](https://github.com/apache/hugegraph-doc) (include doc & website code)
+3. [hugegraph-website](https://github.com/apache/hugegraph-doc) (include doc & website code)
 
 ## Note
 
