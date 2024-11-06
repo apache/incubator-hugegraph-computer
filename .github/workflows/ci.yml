@@ -20,7 +20,7 @@ jobs:
       BSP_ETCD_URL: http://localhost:2579
       # TODO: delete this env in the future (replaced by docker way now)
       # TODO: adapt the HugeGraph Server version to 1.5.0 (EdgeID has 5 parts now)
-      HUGEGRAPH_SERVER_COMMIT_ID: 4274b724a8c46af76b3bd438ded5fd6d679c58ac
+      HUGEGRAPH_SERVER_COMMIT_ID: d01c8737d7d5909119671953521f1401dcd1a188
 
     steps:
       - name: Checkout
