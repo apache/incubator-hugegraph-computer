@@ -19,7 +19,7 @@ jobs:
       KUBERNETES_VERSION: 1.20.1
       BSP_ETCD_URL: http://localhost:2579
       # TODO: delete this env in the future (replaced by docker way now)
-      HUGEGRAPH_SERVER_COMMIT_ID: d01c8737d7d5909119671953521f1401dcd1a188
+      HUGEGRAPH_SERVER_COMMIT_ID: 2294d2abc2ef65e5b395cd8ab25bc6a12e38d4ae
 
     steps:
       - name: Checkout
