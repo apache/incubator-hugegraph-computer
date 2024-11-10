@@ -6,4 +6,6 @@
 
 # ignored directory
 .github/ export-ignore
-computer-k8s-operator/crd-generate/bin/ export-ignore
+computer/computer-k8s-operator/crd-generate/bin/ export-ignore
+computer/computer-dist/scripts/ export-ignore
+computer/computer-dist/release-docs/ export-ignore
