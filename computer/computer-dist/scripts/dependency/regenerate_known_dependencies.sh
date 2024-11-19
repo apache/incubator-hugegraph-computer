@@ -16,7 +16,7 @@
 # under the License.
 #
 
-BASE_PATH=$(cd $(dirname $0); pwd)
+BASE_PATH=$(cd $(dirname $0) || exit; pwd)
 DEP_PATH=$BASE_PATH/all_dependencies
 FILE_NAME=${1:-known-dependencies.txt}
 
@@ -25,9 +25,9 @@ if [[ -d $DEP_PATH ]];then
   rm -r -f $DEP_PATH
 fi
 
-cd $BASE_PATH/../../../
+cd $BASE_PATH/../../../ || exit
 
-mvn dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=$DEP_PATH
+mvn dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=$DEP_PATH -P stage
 
 ls $DEP_PATH | egrep -v "^hugegraph" | sort -n > $BASE_PATH/$FILE_NAME
 rm -r -f $DEP_PATH
