@@ -93,11 +93,11 @@ jobs:
       - name: Compile
         run: mvn clean compile -e -Dmaven.javadoc.skip=true -ntp
 
-     - name: Integrate test
-       run: mvn test -P integrate-test -ntp
+      - name: Integrate test
+        run: mvn test -P integrate-test -ntp
 
-     - name: Unit test
-       run: mvn test -P unit-test -ntp
+      - name: Unit test
+        run: mvn test -P unit-test -ntp
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
