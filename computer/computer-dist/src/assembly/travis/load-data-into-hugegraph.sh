@@ -30,7 +30,7 @@ unzip -d ${DATASET_DIR} ml-latest-small.zip
 
 cd ${DATASET_DIR}/.. && pwd && ls -lh *
 
-docker run -id --name=loader --network ci hugegraph/loader:latest
+docker run -id --name=loader --network ci hugegraph/loader:1.3.0
 docker cp dataset loader:/dataset || exit 1
 
 docker exec -i loader ls -lh /dataset
