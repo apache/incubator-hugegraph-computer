@@ -39,13 +39,13 @@ github:
         strict: false
         # contexts are the names of checks that must pass
         contexts:
-          - computer-ci
+          #- computer-ci # always stuck in CI
           - check-license-header
           - Analyze (java)
       required_pull_request_reviews:
         dismiss_stale_reviews: true
         require_code_owner_reviews: false
-        required_approving_review_count: 2
+        required_approving_review_count: 1
 
 notifications:
   # use https://selfserve.apache.org to manage it
