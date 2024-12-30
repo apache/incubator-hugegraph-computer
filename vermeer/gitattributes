@@ -1,0 +1,93 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+lib/libafsapi.so filter=lfs diff=lfs merge=lfs -text
+test/case/expect_kcore filter=lfs diff=lfs merge=lfs -text
+test/case/expect_lpa filter=lfs diff=lfs merge=lfs -text
+test/case/expect_res.json filter=lfs diff=lfs merge=lfs -text
+test/case/expect_sssp filter=lfs diff=lfs merge=lfs -text
+test/case/edge filter=lfs diff=lfs merge=lfs -text
+test/case/expect_betweenness_centrality filter=lfs diff=lfs merge=lfs -text
+test/case/expect_closeness_centrality filter=lfs diff=lfs merge=lfs -text
+test/case/expect_degree filter=lfs diff=lfs merge=lfs -text
+test/case/expect_pagerank filter=lfs diff=lfs merge=lfs -text
+test/case/expect_triangle_count filter=lfs diff=lfs merge=lfs -text
+test/case/expect_wcc filter=lfs diff=lfs merge=lfs -text
+test/case/vertex filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_16 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_20 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_29 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_02 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_07 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_06 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_24 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_11 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_12 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_18 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_22 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_26 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_00 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_21 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_02 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_15 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_28 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_05 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_08 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_10 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_11 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_29 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_13 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_07 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_15 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_23 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_25 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_27 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_20 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_24 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_03 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_27 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_18 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_14 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_00 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_01 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_09 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_19 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_21 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_22 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_17 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_01 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_05 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_04 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_25 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_13 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_10 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_17 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_26 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_06 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_19 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_23 filter=lfs diff=lfs merge=lfs -text
+test/case/edge/edge_08 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_16 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_09 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_04 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_12 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_14 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_28 filter=lfs diff=lfs merge=lfs -text
+test/case/vertex/vertex_03 filter=lfs diff=lfs merge=lfs -text
+test/case/expect_jaccard filter=lfs diff=lfs merge=lfs -text
+test/case/expect_ppr filter=lfs diff=lfs merge=lfs -text
+test/case/expect_clustering_coefficient filter=lfs diff=lfs merge=lfs -text
+test/case/expect_scc filter=lfs diff=lfs merge=lfs -text

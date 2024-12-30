@@ -13,6 +13,7 @@ The [hugegraph-computer](./computer/README.md) is a distributed graph processing
 The [project homepage](https://hugegraph.apache.org/docs/quickstart/hugegraph-computer/) contains more information about hugegraph-computer.
 
 And here are links of other repositories:
+
 1. [hugegraph](https://github.com/apache/hugegraph) (graph's core component - Graph server + PD + Store)
 2. [hugegraph-toolchain](https://github.com/apache/hugegraph-toolchain) (graph tools **[loader](https://github.com/apache/incubator-hugegraph-toolchain/tree/master/hugegraph-loader)/[dashboard](https://github.com/apache/incubator-hugegraph-toolchain/tree/master/hugegraph-hubble)/[tool](https://github.com/apache/incubator-hugegraph-toolchain/tree/master/hugegraph-tools)/[client](https://github.com/apache/incubator-hugegraph-toolchain/tree/master/hugegraph-client)**)
 3. [hugegraph-ai](https://github.com/apache/incubator-hugegraph-ai) (integrated **Graph AI/LLM/KG** system)

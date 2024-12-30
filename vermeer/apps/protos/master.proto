@@ -1,0 +1,266 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+  
+syntax = "proto3";
+
+package master;
+option go_package = "/";
+
+import "common.proto";
+
+service Master {
+  rpc SayHelloMaster(HelloMasterReq) returns (HelloMasterResp) {}
+  rpc LoadGraphTask(stream LoadGraphTaskReq) returns (stream LoadGraphTaskResp) {}
+  rpc ComputeTask(stream ComputeTaskReq) returns (stream ComputeTaskResp){}
+  rpc SuperStep(SuperStepReq) returns (stream SuperStepResp){}
+  rpc FetchLoadPart(FetchLoadPartReq) returns (FetchLoadPartResp) {}
+  rpc LoadPartStatus(LoadPartStatusReq) returns (LoadPartStatusResp) {}
+  rpc WorkVertexCount(WorkerVertexCountReq) returns (WorkerVertexCountResp) {}
+  rpc WorkEdgeCount(WorkerEdgeCountReq) returns (WorkerEdgeCountResp) {}
+  rpc GetGraphWorkers(GetGraphWorkersReq) returns (GetGraphWorkersResp) {}
+  rpc LoadTaskStatus(LoadTaskStatusReq) returns (LoadTaskStatusResp) {}
+  rpc ComputeTaskStatus(ComputeTaskStatusReq) returns (ComputeTaskStatusResp) {}
+  rpc UploadVertexValue(UploadVertexValueReq) returns (UploadVertexValueResp) {}
+  rpc UploadStatistics(UploadStatisticsReq) returns (UploadStatisticsResp) {}
+  rpc UploadTPResult(UploadTPResultReq) returns (UploadTPResultResp) {}
+  rpc SettingGraph(SettingGraphReq) returns (SettingGraphResp) {}
+}
+
+message HelloMasterReq {
+  common.BaseRequest Base = 1;
+  string WorkerPeer = 2;
+  string Version = 3;
+}
+
+message HelloMasterResp {
+  common.BaseResponse Base = 1;
+  int32 WorkerId = 2;
+  string WorkerName = 3;
+  repeated WorkerInfo Workers = 4;
+  repeated string Spaces = 5;
+}
+
+message WorkerInfo {
+  string Name = 1;
+  int32 Id = 2;
+  string GrpcPeer = 3;
+}
+
+message LoadGraphTaskReq {
+  common.BaseRequest Base = 1;
+  string WorkerName = 2;
+  int32 TaskId = 4;
+  string State = 5;
+  int32 PartId = 6;
+}
+
+enum LoadStep
+{
+  Vertex = 0;
+  ScatterVertex = 1;
+  Edge = 2;
+  OutDegree = 3;
+  Complete = 4;
+  Error =5;
+}
+
+message LoadGraphTaskResp {
+  common.BaseResponse Base = 1;
+  string LoadType = 2;
+  int32 Parallel = 3;
+  int32 TaskId = 4;
+  string SpaceName = 5;
+  string GraphName = 6;
+  repeated string Workers = 7;
+  LoadStep Step = 8;
+  map<string, string> Params = 10;
+}
+
+message FetchLoadPartReq {
+  common.BaseRequest Base = 1;
+  string WorkerName = 2;
+  int32 TaskId = 4;
+}
+
+message FetchLoadPartResp {
+  common.BaseResponse Base = 1;
+  int32 TaskId = 2;
+  int32 PartId = 3;
+  string loadType = 4;
+  map<string, string> Params = 10;
+}
+
+message LoadPartStatusReq {
+  common.BaseRequest Base = 1;
+  int32 TaskId = 2;
+  int32 PartId = 3;
+  string State = 4;
+}
+
+message LoadPartStatusResp {
+  common.BaseResponse Base = 1;
+}
+
+message LoadTaskStatusReq {
+  common.BaseRequest Base = 1;
+  int32 TaskId = 2;
+  string workerName = 3;
+  string State = 4;
+  string ErrorMsg = 5;
+}
+
+message LoadTaskStatusResp {
+  common.BaseResponse Base = 1;
+}
+
+message WorkerVertexCountReq {
+  common.BaseRequest Base = 1;
+  string WorkerName = 2;
+  uint32 Count = 3;
+  int32 TaskId = 4;
+}
+
+message WorkerVertexCountResp {
+  common.BaseResponse Base = 1;
+}
+
+message WorkerEdgeCountReq {
+  common.BaseRequest Base = 1;
+  string WorkerName = 2;
+  int64 Count = 3;
+  int32 TaskId = 4;
+}
+
+message WorkerEdgeCountResp {
+  common.BaseResponse Base = 1;
+}
+
+message GraphWorker {
+  string Name = 1;
+  uint32 VertexCount = 2;
+  uint32 VertIdStart = 3;
+}
+
+message GetGraphWorkersReq {
+  common.BaseRequest Base = 1;
+  string GraphName = 2;
+  string SpaceName = 3;
+}
+
+message GetGraphWorkersResp {
+  common.BaseResponse Base = 1;
+  repeated GraphWorker Workers = 2;
+}
+
+message ComputeTaskReq {
+  common.BaseRequest Base = 1;
+  string WorkerName = 2;
+  int32 TaskId = 3;
+  string State = 4;
+}
+
+enum ComputeAction
+{
+  Compute = 0;
+  SettingOutEdges = 1;
+  SettingOutDegree = 2;
+}
+
+message ComputeTaskResp {
+  common.BaseResponse Base = 1;
+  string Algorithm = 2;
+  int32 TaskId = 3;
+  string GraphName = 4;
+  string SpaceName = 5;
+  map<string, string> Params = 6;
+  ComputeAction Action =7;
+}
+
+message ComputeTaskStatusReq {
+  common.BaseRequest Base = 1;
+  string WorkerName = 2;
+  int32 TaskId = 3;
+  string State = 4;
+  string ErrorMsg =5;
+  int32 Step = 6;
+  map<string, bytes> ComputeValues = 7;
+  string SpaceName = 8;
+}
+
+message ComputeTaskStatusResp {
+  common.BaseResponse Base = 1;
+}
+
+message SuperStepReq {
+  common.BaseRequest Base = 1;
+}
+
+message SuperStepResp {
+  common.BaseResponse Base = 1;
+  string WorkerName = 2;
+  int32 TaskId = 3;
+  int32 Step = 4;
+  bool Output = 5;
+  map<string, bytes> ComputeValues = 6;
+}
+
+message VertexValue {
+  string ID = 1;
+  string Value = 2;
+}
+
+message UploadVertexValueReq {
+  common.BaseRequest Base = 1;
+  int32 TaskId = 2;
+  repeated VertexValue VertexValues = 3 ;
+}
+
+message UploadVertexValueResp {
+  common.BaseRequest Base = 1;
+}
+
+message UploadStatisticsReq {
+  common.BaseRequest Base = 1;
+  int32 TaskId = 2;
+  bytes Statistics = 3;
+}
+
+message UploadStatisticsResp {
+  common.BaseRequest Base = 1;
+}
+
+message SettingGraphReq {
+  common.BaseRequest Base = 1;
+  int32 TaskId = 2;
+  string workerName = 3;
+  string State = 4;
+  string ErrorMsg = 5;
+}
+
+message SettingGraphResp {
+  common.BaseResponse Base = 1;
+}
+
+message UploadTPResultReq {
+  common.BaseRequest Base = 1;
+  int32 TaskId = 2;
+  bytes result = 3;
+}
+
+message UploadTPResultResp {
+  common.BaseRequest Base = 1;
+}
