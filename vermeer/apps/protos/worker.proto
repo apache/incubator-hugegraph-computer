@@ -1,0 +1,276 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+  
+syntax = "proto3";
+
+package master;
+option go_package = "/";
+
+import "common.proto";
+
+service Worker {
+  rpc SayHelloPeer(HelloPeerReq) returns (HelloPeerResp) {}
+  rpc Scatter(stream ScatterReq) returns (stream ScatterResp) {}
+  rpc LoadAction(stream LoadActionReq) returns (stream LoadActionResp) {}
+  rpc GetEdges(GetEdgesReq) returns (GetEdgesResp) {}
+  rpc GetVertex(GetVertexReq) returns (GetVertexResp) {}
+  rpc DeleteGraph(DeleteGraphReq) returns (DeleteGraphResp) {}
+  rpc StepEnd(stream StepEndReq) returns (stream StepEndResp){}
+  rpc ControlTask(ControlTaskReq) returns (ControlTaskResp) {}
+  rpc SaveGraph(GraphPersistenceReq) returns (GraphPersistenceResp) {}
+  rpc WriteDisk(GraphPersistenceReq) returns (GraphPersistenceResp) {}
+  rpc ReadGraph(GraphPersistenceReq) returns (GraphPersistenceResp) {}
+  rpc GetWorkerStatInfo(WorkerStatInfoReq) returns(WorkerStatInfoResp){}
+  rpc SettingAction(stream SettingActionReq) returns (stream SettingActionResp) {}
+  rpc RuntimeAction(RuntimeActionReq) returns (RuntimeActionResp) {}
+}
+
+message HelloPeerReq {
+  common.BaseRequest Base = 1;
+  string SourceName = 2;
+  string TargetName = 3;
+  string workerPeer = 4;
+  int32 Id = 5;
+}
+
+message HelloPeerResp {
+  common.BaseResponse Base = 1;
+  string Status = 2;
+}
+
+message ScatterReq {
+  common.BaseRequest Base = 1;
+  int32 Step = 2;
+  int32 TaskId = 3;
+  int32 Count = 4;
+  string WorkerName = 5;
+  bool End = 6;
+  int32 SIdx = 7;
+  bytes Data = 10;
+}
+
+message ScatterResp {
+  common.BaseResponse Base = 1;
+  int32 Step = 2;
+  int32 TaskId = 3;
+  int32 Count = 4;
+  string WorkerName = 5;
+  bool End = 6;
+  int32 SIdx = 7;
+  bytes Data = 10;
+}
+
+enum LoadAction
+{
+  LoadVertex = 0;
+  LoadScatter = 1;
+  LoadEdge = 2;
+  LoadOutDegree = 3;
+}
+
+message LoadActionReq {
+  common.BaseRequest Base = 1;
+  LoadAction action = 2;
+  int32 TaskId = 3;
+  int32 PartId = 4;
+  int32 Count = 5;
+  string WorkerName = 6;
+  bool End = 7;
+  int32 Num = 8;
+  bytes Data = 10;
+}
+
+message LoadActionResp {
+  common.BaseResponse Base = 1;
+  LoadAction action = 2;
+  int32 TaskId = 3;
+  int32 PartId = 4;
+  int32 Count = 5;
+  string WorkerName = 6;
+  bool End = 7;
+  int32 Num = 8;
+  bytes Data = 10;
+}
+
+message GetEdgesReq {
+  common.BaseRequest Base = 1;
+  string GraphName = 2;
+  string VertexId = 3;
+  string Direction = 4;
+  string SpaceName = 5;
+}
+
+message GetEdgesResp {
+  common.BaseResponse Base = 1;
+  repeated string InEdges = 2;
+  repeated string OutEdges = 3;
+  repeated EdgeProperty InEdgeProperty = 4;
+}
+
+message EdgeProperty {
+  string Edge = 1;
+  map<string, string> Property = 2;
+}
+
+message VertexInfo {
+  string ID = 1;
+  map<string, string> Property = 2;
+}
+
+message GetVertexReq {
+  common.BaseRequest Base = 1;
+  string GraphName = 2;
+  repeated string VertexId = 3;
+  string SpaceName = 4;
+}
+
+message GetVertexResp {
+  common.BaseResponse Base = 1;
+  repeated VertexInfo Verts = 2;
+}
+
+message DeleteGraphReq {
+  common.BaseRequest Base = 1;
+  string GraphName = 2;
+  string SpaceName = 3;
+  bool DeleteFile = 4;
+}
+
+message DeleteGraphResp {
+  common.BaseResponse Base = 1;
+}
+
+message StepEndReq {
+  common.BaseRequest Base = 1;
+  int32 TaskId = 2;
+  string WorkerName = 3;
+}
+
+message StepEndResp {
+  common.BaseRequest Base = 1;
+  int32 TaskId = 2;
+  string WorkerName = 3;
+}
+
+message ControlTaskReq {
+  common.BaseRequest Base = 1;
+  int32 TaskID = 2;
+  int32 Action = 3;
+}
+
+message ControlTaskResp {
+  common.BaseResponse Base = 1;
+}
+
+message GraphPersistenceReq{
+  common.BaseRequest Base = 1;
+  string GraphName = 2;
+  int64 CreatedTime = 3;
+  int64 UpdateTime = 4;
+  string SpaceName = 5;
+
+}
+
+message  GraphPersistenceResp {
+  common.BaseResponse Base = 1;
+}
+
+message WorkerStatInfoReq{
+  common.BaseRequest Base = 1;
+}
+
+message WorkerStatInfoResp{
+  common.BaseResponse Base = 1;
+  double MemMachineUsedPercent = 2;
+  double MemProcessUsedPercent = 3;
+}
+
+enum SettingAction
+{
+  SetOutEdges = 0;
+  SetOutDegree = 1;
+}
+
+message SettingActionReq {
+  common.BaseRequest Base = 1;
+  SettingAction action = 2;
+  int32 TaskId = 3;
+  int32 PartId = 4;
+  string WorkerName = 5;
+  bool End = 6;
+  int32 Num = 7;
+  bytes Data = 8;
+}
+
+message SettingActionResp {
+  common.BaseRequest Base = 1;
+  SettingAction action = 2;
+  int32 TaskId = 3;
+  int32 PartId = 4;
+  string WorkerName = 5;
+  bool End = 6;
+  int32 Num = 7;
+  bytes Data = 8;
+}
+
+message RuntimeActionReq {
+  oneof request {
+    GetHostInfoReq HostInfoReq = 1;
+    SetMemoryLimitReq MemoryLimitReq = 2;
+    SetCPULimitReq CPULimitReq = 3;
+  }
+}
+
+message GetHostInfoReq {
+  common.BaseRequest Base = 1;
+}
+
+message SetMemoryLimitReq {
+  common.BaseRequest Base = 1;
+  uint32 MaxMemoryUsed = 2;
+  uint32 MinRemainMemory = 3;
+  float SoftMemoryLimitRatio = 4;
+}
+
+message SetCPULimitReq {
+  common.BaseRequest Base = 1;
+  uint32 MaxCPU = 2;
+}
+
+message RuntimeActionResp {
+  oneof response {
+    GetHostInfoResp HostInfoResp = 1;
+    SetMemoryLimitResp MemoryLimitResp = 2;
+    SetCPULimitResp CPULimitResp = 3;
+  }
+}
+
+message GetHostInfoResp {
+  common.BaseResponse Base = 1;
+  uint32 TotalMemory = 2;
+  uint32 AvailableMemory = 3;
+  // 逻辑核数
+  uint32 CPUCount = 4;
+}
+
+message SetMemoryLimitResp {
+  common.BaseResponse Base = 1;
+}
+
+message SetCPULimitResp {
+  common.BaseResponse Base = 1;
+}
