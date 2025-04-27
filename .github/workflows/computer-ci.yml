@@ -1,11 +1,15 @@
-name: "hugegraph-computer ci"
+name: "Computer CI"
 
 on:
   push:
     branches:
       - master
       - /^release-.*$/
+    paths:
+      - computer/**
   pull_request:
+    paths:
+      - computer/**
 defaults:
   run:
     working-directory: computer
@@ -28,8 +32,9 @@ jobs:
         with:
           fetch-depth: 2
 
+      # TODO: Upgrade to Java11 supported version
       - name: Install JDK 8 for HDFS
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '8'
           distribution: 'zulu'
@@ -42,12 +47,12 @@ jobs:
           grep "Binaries" merged-rat.txt -C 3 && cat merged-rat.txt
 
       - name: Setup Python3
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
       - name: Cache HDFS packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: hdfs-cache
         with:
           path: ~/hadoop-3.3.2.tar.gz
@@ -65,7 +70,7 @@ jobs:
         run: $TRAVIS_DIR/install-k8s.sh
 
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -82,7 +87,7 @@ jobs:
           $TRAVIS_DIR/load-data-into-hugegraph.sh ${{ env.GRAPH_ENV_VERSION }}
 
       - name: Install JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '11'
           distribution: 'zulu'
@@ -103,6 +108,7 @@ jobs:
         run: mvn test -P unit-test -ntp
 
       - name: Upload coverage to Codecov
+        # TODO: Upgrade to v5 later
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
