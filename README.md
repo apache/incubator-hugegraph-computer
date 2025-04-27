@@ -5,17 +5,20 @@
 [![codecov](https://codecov.io/gh/apache/incubator-hugegraph-computer/branch/master/graph/badge.svg)](https://codecov.io/gh/apache/incubator-hugegraph-computer)
 [![Docker Pulls](https://img.shields.io/docker/pulls/hugegraph/hugegraph-computer)](https://hub.docker.com/repository/docker/hugegraph/hugegraph-computer)
 
-The [hugegraph-computer](./computer/README.md) is a distributed graph processing system for hugegraph.
+The [hugegraph-computer](./computer/README.md) is a distributed graph processing system for hugegraph. 
+(Also, the in-memory computing engine(vermeer) is on the way 🚧)
 
 ## Learn More
 
-The [project homepage](https://hugegraph.apache.org/docs/) contains more information about hugegraph-computer.
+The [project homepage](https://hugegraph.apache.org/docs/quickstart/hugegraph-computer/) contains more information about hugegraph-computer.
 
 And here are links of other repositories:
-1. [hugegraph-server](https://github.com/apache/hugegraph) (graph's core component - OLTP server)
-2. [hugegraph-toolchain](https://github.com/apache/hugegraph-toolchain) (include loader/dashboard/tool/client)
-3. [hugegraph-commons](https://github.com/apache/hugegraph-commons) (include common & rpc module)
-4. [hugegraph-website](https://github.com/apache/hugegraph-doc) (include doc & website code)
+
+1. [hugegraph](https://github.com/apache/hugegraph) (graph's core component - Graph server + PD + Store)
+2. [hugegraph-toolchain](https://github.com/apache/hugegraph-toolchain) (graph tools **[loader](https://github.com/apache/incubator-hugegraph-toolchain/tree/master/hugegraph-loader)/[dashboard](https://github.com/apache/incubator-hugegraph-toolchain/tree/master/hugegraph-hubble)/[tool](https://github.com/apache/incubator-hugegraph-toolchain/tree/master/hugegraph-tools)/[client](https://github.com/apache/incubator-hugegraph-toolchain/tree/master/hugegraph-client)**)
+3. [hugegraph-ai](https://github.com/apache/incubator-hugegraph-ai) (integrated **Graph AI/LLM/KG** system)
+4. [hugegraph-website](https://github.com/apache/hugegraph-doc) (**doc & website** code)
+
 
 ## Note
 
@@ -41,5 +44,5 @@ hugegraph-computer is licensed under [Apache 2.0](https://github.com/apache/incu
  - Feedback Email: [dev@hugegraph.apache.org](mailto:dev@hugegraph.apache.org) ([subscriber](https://hugegraph.apache.org/docs/contribution-guidelines/subscribe/) only)
  - WeChat public account: Apache HugeGraph, welcome to scan this QR code to follow us.
 
- <img src="https://github.com/apache/incubator-hugegraph-doc/blob/master/assets/images/wechat.png?raw=true" alt="QR png" width="350"/>
+ <img src="https://github.com/apache/hugegraph-doc/blob/master/assets/images/wechat.png?raw=true" alt="QR png" width="350"/>
 

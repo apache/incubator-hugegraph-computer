@@ -39,9 +39,10 @@ echo "In the work dir: $(pwd)"
 rm -rf dist && mkdir -p dist/apache-${REPO}
 
 # step1: package the source code
-cd ../../ || exit
+cd ../../../ || exit
+pwd
 git archive --format=tar.gz \
-  --output="computer-dist/scripts/dist/apache-${REPO}/apache-${REPO}-incubating-${RELEASE_VERSION}-src.tar.gz" \
+  --output="computer/computer-dist/scripts/dist/apache-${REPO}/apache-${REPO}-incubating-${RELEASE_VERSION}-src.tar.gz" \
   --prefix="apache-${REPO}-incubating-${RELEASE_VERSION}-src/" "${GIT_BRANCH}" || exit
 cd - || exit
 
