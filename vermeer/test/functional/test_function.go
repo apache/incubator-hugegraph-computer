@@ -211,11 +211,11 @@ func TestFunction(t *testing.T, expectResPath string, masterHttpAddr string, gra
 	time.Sleep(1 * time.Second)
 
 	fmt.Print("killing master\n")
-	output, err := exec.Command("./vermeer.sh", "stop", "master").Output()
+	output, err := exec.Command("sh", "vermeer.sh", "stop", "master").Output()
 	fmt.Println(string(output))
 	require.NoError(t, err)
 	time.Sleep(3 * time.Second)
-	_, err = exec.Command("./vermeer.sh", "start", "master").Output()
+	_, err = exec.Command("sh", "vermeer.sh", "start", "master").Output()
 	require.NoError(t, err)
 	time.Sleep(1 * time.Second)
 	isAvailable := false
@@ -265,10 +265,10 @@ func TestFunction(t *testing.T, expectResPath string, masterHttpAddr string, gra
 	fmt.Print("kill master recover success\n")
 
 	fmt.Print("killing worker\n")
-	_, err = exec.Command("./vermeer.sh", "stop", "worker").Output()
+	_, err = exec.Command("sh", "vermeer.sh", "stop", "worker").Output()
 	require.NoError(t, err)
 	time.Sleep(5 * time.Second)
-	_, err = exec.Command("./vermeer.sh", "start", "worker").Output()
+	_, err = exec.Command("sh", "vermeer.sh", "start", "worker").Output()
 	require.NoError(t, err)
 	isAvailable = false
 	for i := 0; i < 10; i++ {
