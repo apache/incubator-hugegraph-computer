@@ -19,7 +19,9 @@ package bl
 
 import (
 	"errors"
+	"strconv"
 	"time"
+	"vermeer/apps/common"
 	"vermeer/apps/master/schedules"
 	"vermeer/apps/structure"
 
@@ -36,7 +38,16 @@ type ScheduleBl struct {
 }
 
 func (s *ScheduleBl) Init() {
-	startChan := make(chan *structure.TaskInfo, 10) // TODO: make configurable
+	const defaultChanSizeConfig = "10"
+	chanSize := common.GetConfigDefault("start_chan_size", defaultChanSizeConfig).(string)
+	// Convert string to int
+	chanSizeInt, err := strconv.Atoi(chanSize)
+	if err != nil {
+		logrus.Errorf("failed to convert start_chan_size to int: %v", err)
+		logrus.Infof("using default start_chan_size: %s", defaultChanSizeConfig)
+		chanSizeInt, _ = strconv.Atoi(defaultChanSizeConfig)
+	}
+	startChan := make(chan *structure.TaskInfo, chanSizeInt)
 	s.startChan = startChan
 	s.spaceQueue = (&schedules.SpaceQueue{}).Init()
 	s.broker = (&schedules.Broker{}).Init()
