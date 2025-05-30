@@ -69,6 +69,7 @@ func (s *Service) Init() error {
 	s.SuperStepHandler = &SuperStepHandler{}
 	masterPeer := common.GetConfig("master_peer").(string)
 	grpcPeer := common.GetConfig("grpc_peer").(string)
+	workerGroup := common.GetConfigDefault("worker_group", "$").(string)
 	// init peer manager
 	PeerMgr.Init()
 
@@ -86,7 +87,7 @@ func (s *Service) Init() error {
 	ctx, cancel1 := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel1()
 	resp, err := s.MasterClient.SayHelloMaster(
-		ctx, &pb.HelloMasterReq{WorkerPeer: grpcPeer, Version: version.Version})
+		ctx, &pb.HelloMasterReq{WorkerPeer: grpcPeer, Version: version.Version, WorkerGroup: workerGroup})
 	if err != nil {
 		logrus.Errorf("say hello master error: %s", err)
 		return err
