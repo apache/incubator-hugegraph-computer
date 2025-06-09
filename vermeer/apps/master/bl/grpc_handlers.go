@@ -92,7 +92,7 @@ func (h *ServerHandler) SayHelloMaster(ctx context.Context, req *pb.HelloMasterR
 		}
 	}
 
-	reqWorker, err := workerMgr.CreateWorker(ip+":"+port, ip, req.Version)
+	reqWorker, err := workerMgr.CreateWorker(ip+":"+port, ip, req.Version, req.WorkerGroup)
 	if err != nil {
 		logrus.Errorf("failed to create a WorkerClient, error: %s", err)
 		return &pb.HelloMasterResp{WorkerId: -1, WorkerName: reqWorker.Name}, err
@@ -104,7 +104,7 @@ func (h *ServerHandler) SayHelloMaster(ctx context.Context, req *pb.HelloMasterR
 		return &pb.HelloMasterResp{}, err
 	}
 
-	logrus.Infof("worker say hello name: %s, client: %s", reqWorker.Name, p.Addr.String())
+	logrus.Infof("worker say hello name: %s and set to workgroup: %s, client: %s", reqWorker.Name, reqWorker.Group, p.Addr.String())
 
 	resp := pb.HelloMasterResp{
 		WorkerId:   reqWorker.Id,
