@@ -3,6 +3,26 @@
 ## 简介
 Vermeer是一个基于内存的高性能分布式图计算平台，支持15+图算法。支持自定义算法扩展，支持自定义数据源接入。
 
+## 基于 Docker 运行
+
+拉取镜像
+```
+docker pull hugegraph/vermeer:latest
+```
+
+创建好本地配置文件，例如`~/master.ini`与`~/worker.ini`
+
+基于docker运行，其中`--env`指定的是文件名称。
+```
+master: docker run -v ~/:/go/bin/config hugegraph/vermeer --env=master
+worker: docker run -v ~/:/go/bin/config hugegraph/vermeer --env=worker
+```
+
+我们也提供了`docker-compose`文件，当创建好`~/master.ini`与`~/worker.ini`，将`worker.ini`中的`master_peer`修改为`172.20.0.10:6689`后，即可通过以下命令运行：
+```
+docker-compose up -d
+```
+
 ## 运行
 
 ```

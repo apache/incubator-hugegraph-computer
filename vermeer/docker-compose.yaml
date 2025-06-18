@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  vermeer-master:
+    image: hugegraph/vermeer
+    container_name: vermeer-master
+    volumes:
+      - ~/:/go/bin/config # Change here to your actual config path
+    command: --env=master
+    networks:
+      vermeer_network:
+        ipv4_address: 172.20.0.10 # Assign a static IP for the master
+
+  vermeer-worker:
+    image: hugegraph/vermeer
+    container_name: vermeer-worker
+    volumes:
+      - ~/:/go/bin/config # Change here to your actual config path
+    command: --env=worker
+    networks:
+      vermeer_network:
+        ipv4_address: 172.20.0.11 # Assign a static IP for the worker
+
+networks:
+  vermeer_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24 # Define the subnet for your network
