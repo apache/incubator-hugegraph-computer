@@ -99,6 +99,28 @@ func (bc *baseCreator) NewTaskInfo(graphName string, params map[string]string, t
 	return task, nil
 }
 
+func (bc *baseCreator) CopyTaskInfo(src *structure.TaskInfo) (*structure.TaskInfo, error) {
+	if src == nil {
+		return nil, fmt.Errorf("the argument `src` should not be nil")
+	}
+
+	task, err := taskMgr.CreateTask(src.SpaceName, src.Type, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	task.CreateType = structure.TaskCreateAsync
+	task.GraphName = src.GraphName
+	task.CreateUser = src.CreateUser
+	task.Params = src.Params
+	task.CronExpr = "" // clear cron expression for the new task
+	task.Priority = src.Priority
+	task.Preorders = src.Preorders
+	task.Exclusive = src.Exclusive
+
+	return task, nil
+}
+
 func (bc *baseCreator) saveTaskInfo(task *structure.TaskInfo) (*structure.TaskInfo, error) {
 	if _, err := taskMgr.AddTask(task); err != nil {
 		logrus.Errorf("failed to add a task to `TaskManager`, task: %v, cased by: %v", task, err)

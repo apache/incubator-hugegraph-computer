@@ -35,12 +35,13 @@ func SetRouters(sen *common.Sentinel, authFilters ...gin.HandlerFunc) {
 
 	// /tasks
 	regVerAPI(sen, 1, "/tasks", map[string]common.BaseHandler{
-		"":        &TasksHandler{},
-		"/create": &TaskCreateHandler{},
-		// "/create/batch":   &TaskCreateBatchHandler{},
+		"":                &TasksHandler{},
+		"/create":         &TaskCreateHandler{},
+		"/create/batch":   &TaskCreateBatchHandler{},
 		"/create/sync":    &TaskCreateSyncHandler{},
 		"/oltp":           &OltpHandler{},
 		"/value/:task_id": &ComputeValueHandler{},
+		"/start_sequence": &TaskStartSequenceHandler{},
 	}, authFilters...)
 
 	// /task

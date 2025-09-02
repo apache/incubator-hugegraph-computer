@@ -150,6 +150,26 @@ func (vc *VermeerClient) GetWorkers() (*WorkersResponse, error) {
 	return workersResp, err
 }
 
+func (vc *VermeerClient) AllocGroupGraph(graphName string, groupName string) (bool, error) {
+	reader, err := Request2Reader(struct{}{})
+	if err != nil {
+		return false, err
+	}
+	resp, err := vc.post(vc.httpAddr+"/admin/workers/alloc/"+groupName+"/$DEFAULT/"+graphName, reader)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		respByte, err := ParseResponse2Byte(resp)
+		if err != nil {
+			return false, err
+		}
+		return false, fmt.Errorf("response:%s", string(respByte))
+	}
+	return true, nil
+}
+
 func (vc *VermeerClient) GetMaster() (*MasterResponse, error) {
 	resp, err := vc.get(vc.httpAddr + "/master")
 	if err != nil {
@@ -228,6 +248,31 @@ func (vc *VermeerClient) CreateTaskSync(request TaskCreateRequest) (*TaskRespons
 	return taskResponse, err
 }
 
+func (vc *VermeerClient) CreateTaskBatch(request TaskCreateBatchRequest) (*TaskBatchCreateResponse, error) {
+	reader, err := Request2Reader(request)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := vc.post(vc.httpAddr+"/tasks/create/batch", reader)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		respByte, err := ParseResponse2Byte(resp)
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("response:%s", string(respByte))
+	}
+	taskResp := &TaskBatchCreateResponse{}
+	err = ParseResponse2Any(resp, taskResp)
+	if err != nil {
+		return nil, err
+	}
+	return taskResp, err
+}
+
 func (vc *VermeerClient) GetTasks() (*TasksResponse, error) {
 	resp, err := vc.get(vc.httpAddr + "/tasks")
 	if err != nil {
@@ -263,6 +308,31 @@ func (vc *VermeerClient) GetTask(taskID int) (*TaskResponse, error) {
 		return nil, fmt.Errorf("response:%s", string(respByte))
 	}
 	taskResp := &TaskResponse{}
+	err = ParseResponse2Any(resp, taskResp)
+	if err != nil {
+		return nil, err
+	}
+	return taskResp, err
+}
+
+func (vc *VermeerClient) GetTaskStartSequence(queryTasks []int32) (*TaskStartSequenceResp, error) {
+	reader, err := Request2Reader(TaskStartSequenceRequest{QueryTasks: queryTasks})
+	if err != nil {
+		return nil, err
+	}
+	resp, err := vc.post(vc.httpAddr+"/tasks/start_sequence", reader)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		respByte, err := ParseResponse2Byte(resp)
+		if err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("response:%s", string(respByte))
+	}
+	taskResp := &TaskStartSequenceResp{}
 	err = ParseResponse2Any(resp, taskResp)
 	if err != nil {
 		return nil, err

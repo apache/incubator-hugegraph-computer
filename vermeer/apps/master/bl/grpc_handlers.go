@@ -26,6 +26,7 @@ import (
 	"time"
 	"vermeer/apps/compute"
 	"vermeer/apps/graphio"
+	"vermeer/apps/master/schedules"
 	"vermeer/apps/master/threshold"
 	"vermeer/apps/master/workers"
 	pb "vermeer/apps/protos"
@@ -92,7 +93,7 @@ func (h *ServerHandler) SayHelloMaster(ctx context.Context, req *pb.HelloMasterR
 		}
 	}
 
-	reqWorker, err := workerMgr.CreateWorker(ip+":"+port, ip, req.Version)
+	reqWorker, err := workerMgr.CreateWorker(ip+":"+port, ip, req.Version, req.WorkerGroup)
 	if err != nil {
 		logrus.Errorf("failed to create a WorkerClient, error: %s", err)
 		return &pb.HelloMasterResp{WorkerId: -1, WorkerName: reqWorker.Name}, err
@@ -103,8 +104,13 @@ func (h *ServerHandler) SayHelloMaster(ctx context.Context, req *pb.HelloMasterR
 		logrus.Errorf("failed to add a WorkerClient to the WorkerManager, error: %s", err)
 		return &pb.HelloMasterResp{}, err
 	}
+	_, err = Scheduler.ChangeWorkerStatus(reqWorker.Name, schedules.WorkerOngoingStatusIdle)
+	if err != nil {
+		logrus.Errorf("failed to change worker status to idle, error: %s", err)
+		return &pb.HelloMasterResp{}, err
+	}
 
-	logrus.Infof("worker say hello name: %s, client: %s", reqWorker.Name, p.Addr.String())
+	logrus.Infof("worker say hello name: %s and set to workgroup: %s, client: %s", reqWorker.Name, reqWorker.Group, p.Addr.String())
 
 	resp := pb.HelloMasterResp{
 		WorkerId:   reqWorker.Id,

@@ -104,7 +104,7 @@ func (wm *workerManager) Init() {
 // CreateWorker Build a WorkerClient without an ID, and it'll receive one upon joining the WorkerManager.
 // The new WokerClient instance will be assigned a same name with the old one added to the WorkerManager,
 // which has the same workerPeer property.
-func (wm *workerManager) CreateWorker(workerPeer string, ipAddr string, version string) (*WorkerClient, error) {
+func (wm *workerManager) CreateWorker(workerPeer string, ipAddr string, version string, workerGroup string) (*WorkerClient, error) {
 	if workerPeer == "" {
 		return nil, fmt.Errorf("the argument 'workerPeer' is invalid")
 	}
@@ -115,12 +115,17 @@ func (wm *workerManager) CreateWorker(workerPeer string, ipAddr string, version 
 		return nil, fmt.Errorf("the argument 'version' is invalid")
 	}
 
+	// must check if workerGroup is valid
+	if workerGroup == "" {
+		workerGroup = "$"
+	}
+
 	worker := &WorkerClient{
 		GrpcPeer:   workerPeer,
 		IpAddr:     ipAddr,
 		Version:    version,
 		LaunchTime: time.Now(),
-		Group:      "$",
+		Group:      workerGroup,
 	}
 
 	workerInDB := wm.retrieveWorker(workerPeer)
@@ -131,6 +136,11 @@ func (wm *workerManager) CreateWorker(workerPeer string, ipAddr string, version 
 	} else {
 		worker.Name = wm.nameGenerator.Generate().String()
 		worker.InitTime = worker.LaunchTime
+	}
+
+	// if workerGroup in workerInDB is different from the one in worker, give a warning to the user
+	if workerGroup != "$" && worker.Group != workerGroup {
+		logrus.Warnf("worker manager, worker group mismatch: given %s, but found %s in db for worker %s", workerGroup, worker.Group, worker.Name)
 	}
 
 	return worker, nil
@@ -565,6 +575,10 @@ func (wm *workerManager) getGroupWorkers(workerGroup string) []*WorkerClient {
 	}
 
 	return workers
+}
+
+func (wm *workerManager) GetGroupWorkers(workerGroup string) []*WorkerClient {
+	return wm.getGroupWorkers(workerGroup)
 }
 
 func (wm *workerManager) getGroupWorkerMap(workerGroup string) map[string]*WorkerClient {

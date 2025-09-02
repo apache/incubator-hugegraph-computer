@@ -142,6 +142,8 @@ func (ctb *ComputeTaskBl) ComputeTaskStatus(
 				}
 			}
 			taskMgr.ForceState(computeTask.Task, structure.TaskStateComplete)
+			// for scheduler, mark task complete
+			Scheduler.taskManager.MarkTaskComplete(taskId)
 			graph.SubUsingNum()
 			computeTask.FreeMemory()
 			needQuery := options.GetInt(computeTask.Task.Params, "output.need_query") == 1
