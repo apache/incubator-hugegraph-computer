@@ -56,6 +56,7 @@ func Main() {
 		services.SetUI(sen)
 		logrus.Info("token-auth was activated")
 	default:
+		services.SetAdminRouters(sen, auth.NoneAuthFilter)
 		services.SetRouters(sen, auth.NoneAuthFilter)
 		logrus.Warn("No authentication was activated.")
 	}

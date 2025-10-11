@@ -3,6 +3,28 @@
 ## Introduction
 Vermeer is a high-performance distributed graph computing platform based on memory, supporting more than 15 graph algorithms, custom algorithm extensions, and custom data source access.
 
+## Run with Docker
+
+Pull the image:
+```
+docker pull hugegraph/vermeer:latest
+```
+
+Create local configuration files, for example, `~/master.ini` and `~/worker.ini`.
+
+Run with Docker. The `--env` flag specifies the file name.
+
+```
+master: docker run -v ~/:/go/bin/config hugegraph/vermeer --env=master
+worker: docker run -v ~/:/go/bin/config hugegraph/vermeer --env=worker
+```
+
+We've also provided a `docker-compose` file. Once you've created `~/master.ini` and `~/worker.ini`, and updated the `master_peer` in `worker.ini` to `172.20.0.10:6689`, you can run it using the following command:
+
+```
+docker-compose up -d
+```
+
 ## Start
 
 ```

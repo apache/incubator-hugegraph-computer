@@ -23,7 +23,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	. "vermeer/apps/master/workers"
+	"vermeer/apps/master/workers"
 )
 
 type AgentStatus string
@@ -72,42 +72,44 @@ func (b *Broker) AllAgents() []*Agent {
 	return res
 }
 
-func (b *Broker) ApplyAgent(taskInfo *structure.TaskInfo) (*Agent, AgentStatus, error) {
+func (b *Broker) ApplyAgent(taskInfo *structure.TaskInfo, forceApply ...bool) (*Agent, AgentStatus, map[string]*workers.WorkerClient, error) {
 	if taskInfo == nil {
-		return nil, AgentStatusError, fmt.Errorf("taskInfo is nil")
+		return nil, AgentStatusError, nil, fmt.Errorf("taskInfo is nil")
 	}
 
 	defer b.Unlock(b.Lock())
 
 	agent, workers, err := b.getAgent(taskInfo)
 	if err != nil {
-		return nil, AgentStatusError, err
+		return nil, AgentStatusError, nil, err
 	}
 
 	if agent == nil {
-		return nil, AgentStatusPending, nil
+		return nil, AgentStatusPending, nil, nil
 	}
 
 	if workers == nil || len(workers) == 0 {
-		return nil, AgentStatusNoWorker, nil
+		return nil, AgentStatusNoWorker, nil, nil
 	}
 
 	if !b.isWorkersReady(workers) {
 		logrus.Warnf("the workers of agent '%s' are not ready", agent.GroupName())
-		return nil, AgentStatusWorkerNotReady, nil
+		return nil, AgentStatusWorkerNotReady, nil, nil
 	}
 
-	if b.isAgentBusy(agent) {
-		return nil, AgentStatusAgentBusy, nil
-	}
+	if !(forceApply != nil && len(forceApply) > 0 && forceApply[0]) {
+		if b.isAgentBusy(agent) {
+			return nil, AgentStatusAgentBusy, nil, nil
+		}
 
-	if b.isWorkerBusy(workers, agent) {
-		return nil, AgentStatusWorkerBusy, nil
+		if b.isWorkerBusy(workers, agent) {
+			return nil, AgentStatusWorkerBusy, nil, nil
+		}
 	}
 
 	agent.AssignTask(taskInfo)
 
-	return agent, AgentStatusOk, nil
+	return agent, AgentStatusOk, workers, nil
 }
 
 // func (b *Broker) isAgentReady(taskInfo *structure.TaskInfo, agent *Agent) bool {
@@ -124,7 +126,7 @@ func (b *Broker) ApplyAgent(taskInfo *structure.TaskInfo) (*Agent, AgentStatus, 
 // 	}
 // }
 
-func (b *Broker) isWorkersReady(workers map[string]*WorkerClient) bool {
+func (b *Broker) isWorkersReady(workers map[string]*workers.WorkerClient) bool {
 	ok := false
 	for _, w := range workers {
 		if w.Connection == nil {
@@ -166,7 +168,7 @@ func (b *Broker) isAgentBusy(agent *Agent) bool {
 	return busy
 }
 
-func (b *Broker) isWorkerBusy(workers map[string]*WorkerClient, agent *Agent) bool {
+func (b *Broker) isWorkerBusy(workers map[string]*workers.WorkerClient, agent *Agent) bool {
 	for _, a := range b.agents {
 		if a == agent {
 			continue
@@ -188,7 +190,7 @@ func (b *Broker) isWorkerBusy(workers map[string]*WorkerClient, agent *Agent) bo
 	return false
 }
 
-func (b *Broker) getAgent(taskInfo *structure.TaskInfo) (*Agent, map[string]*WorkerClient, error) {
+func (b *Broker) getAgent(taskInfo *structure.TaskInfo) (*Agent, map[string]*workers.WorkerClient, error) {
 	switch taskInfo.Type {
 	case structure.TaskTypeLoad:
 		fallthrough
@@ -202,7 +204,7 @@ func (b *Broker) getAgent(taskInfo *structure.TaskInfo) (*Agent, map[string]*Wor
 
 }
 
-func (b *Broker) getAgentFromGraph(taskInfo *structure.TaskInfo) (*Agent, map[string]*WorkerClient, error) {
+func (b *Broker) getAgentFromGraph(taskInfo *structure.TaskInfo) (*Agent, map[string]*workers.WorkerClient, error) {
 	graph := graphMgr.GetGraphByName(taskInfo.SpaceName, taskInfo.GraphName)
 	if graph == nil {
 		return nil, nil, fmt.Errorf("failed to retrieve graph with name: %s/%s", taskInfo.SpaceName, taskInfo.GraphName)
@@ -223,7 +225,7 @@ func (b *Broker) getAgentFromGraph(taskInfo *structure.TaskInfo) (*Agent, map[st
 		return nil, nil, nil // waiting for the next check
 	}
 
-	workers := make(map[string]*WorkerClient)
+	workers := make(map[string]*workers.WorkerClient)
 
 	for _, w := range graph.Workers {
 		wc := workerMgr.GetWorker(w.Name)
@@ -238,7 +240,7 @@ func (b *Broker) getAgentFromGraph(taskInfo *structure.TaskInfo) (*Agent, map[st
 
 }
 
-func (b *Broker) getAgentFromWorker(taskInfo *structure.TaskInfo) (*Agent, map[string]*WorkerClient, error) {
+func (b *Broker) getAgentFromWorker(taskInfo *structure.TaskInfo) (*Agent, map[string]*workers.WorkerClient, error) {
 	group := workerMgr.ApplyGroup(taskInfo.SpaceName, taskInfo.GraphName)
 	return b.retrieveAgent(group), workerMgr.GroupWorkerMap(group), nil
 }

@@ -31,6 +31,7 @@ import (
 
 	"vermeer/client"
 	"vermeer/test/functional"
+	"vermeer/test/scheduler"
 )
 
 var (
@@ -95,6 +96,8 @@ func TestVermeer(t *testing.T) {
 		t.Run("algorithms", testAlgorithms)
 	case "function":
 		t.Run("function", testFunction)
+	case "scheduler":
+		t.Run("scheduler", testScheduler)
 	}
 }
 
@@ -102,10 +105,15 @@ func testFunction(t *testing.T) {
 	functional.TestFunction(t, expectResPath, masterHttpAddr, graphName, factor, waitSecond)
 }
 
+func testScheduler(t *testing.T) {
+	scheduler.TestScheduler(t, expectResPath, masterHttpAddr, graphName, factor, waitSecond)
+}
+
 func testAlgorithms(t *testing.T) {
 	// todo: 增加算法名称
 	var computeTasks = []string{"pagerank", "lpa", "wcc", "degree_out", "degree_in", "degree_both", "triangle_count",
 		"sssp", "closeness_centrality", "betweenness_centrality", "kcore", "jaccard", "ppr", "clustering_coefficient", "scc", "louvain"}
+	// var computeTasks = []string{"pagerank"}
 
 	startTime := time.Now()
 	expectRes, err := functional.GetExpectRes(expectResPath)
@@ -158,6 +166,7 @@ func testAlgorithms(t *testing.T) {
 		taskComputeBody["output.need_query"] = needQuery
 		if sendType == "async" {
 			computeTest.SendComputeReqAsync(taskComputeBody)
+			// computeTest.SendComputeReqAsyncBatchPriority(10, taskComputeBody) // 异步发送多个请求
 		} else {
 			computeTest.SendComputeReqSync(taskComputeBody)
 		}

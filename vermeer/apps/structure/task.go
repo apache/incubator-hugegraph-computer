@@ -55,6 +55,12 @@ type TaskInfo struct {
 	wg               *sync.WaitGroup
 	Action           int32
 	StatisticsResult map[string]any
+
+	// for scheduler
+	Priority  int32
+	Preorders []int32
+	Exclusive bool   // whether the task can be executed concurrently with other tasks
+	CronExpr  string // cron expression for scheduling
 }
 
 func (ti *TaskInfo) SetState(state TaskState) {

@@ -38,6 +38,17 @@ type TaskResponse struct {
 	Task TaskInfo `json:"task,omitempty"`
 }
 
+type TaskStartSequenceRequest struct {
+	QueryTasks []int32 `json:"query_tasks,omitempty"`
+}
+
+type TaskStartSequenceResp struct {
+	BaseResponse
+	Sequence []int32 `json:"sequence,omitempty"`
+}
+
+type TaskBatchCreateResponse []TaskResponse
+
 type TaskInfo struct {
 	ID         int32             `json:"id,omitempty"`
 	Status     string            `json:"status,omitempty"`
@@ -160,6 +171,8 @@ type TaskCreateRequest struct {
 	GraphName string            `json:"graph"`
 	Params    map[string]string `json:"params"`
 }
+
+type TaskCreateBatchRequest []TaskCreateRequest
 
 type GraphCreateRequest struct {
 	Name string `json:"name,omitempty"`

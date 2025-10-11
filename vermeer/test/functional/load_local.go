@@ -21,6 +21,9 @@ package functional
 
 import (
 	"math/rand"
+	"strconv"
+
+	"github.com/sirupsen/logrus"
 )
 
 type LoadTaskLocal struct {
@@ -40,6 +43,31 @@ func (lt *LoadTaskLocal) TaskLoadBody() map[string]string {
 		"load.delimiter":      " ",
 		"load.vertex_files":   "{\"127.0.0.1\":\"" + "test/case/vertex/vertex_[0,29]" + "\"}",
 		"load.edge_files":     "{\"127.0.0.1\":\"" + "test/case/edge/edge_[0,29]" + "\"}",
+		"load.vertex_backend": vertexBackends[rand.Intn(len(vertexBackends))],
+	}
+}
+
+// TaskLoadBodyWithNum creates load configuration with specified number of files.
+// If num <= 10, it will be automatically adjusted to 30 to ensure minimum test coverage.
+func (lt *LoadTaskLocal) TaskLoadBodyWithNum(num int) map[string]string {
+	vertexBackends := []string{"db", "mem"}
+
+	if num <= 10 {
+		num = 30
+	}
+
+	logrus.Infof("load with num: " + strconv.Itoa(num-1))
+
+	return map[string]string{
+		"load.parallel":     "100",
+		"load.type":         "local",
+		"load.use_property": "0",
+		//"load.use_outedge":    "1",
+		//"load.use_out_degree": "1",
+		//"load.use_undirected": "0",
+		"load.delimiter":      " ",
+		"load.vertex_files":   "{\"127.0.0.1\":\"" + "test/case/vertex/vertex_[0," + strconv.Itoa(num-1) + "]" + "\"}",
+		"load.edge_files":     "{\"127.0.0.1\":\"" + "test/case/edge/edge_[0," + strconv.Itoa(num-1) + "]" + "\"}",
 		"load.vertex_backend": vertexBackends[rand.Intn(len(vertexBackends))],
 	}
 }

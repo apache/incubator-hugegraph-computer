@@ -82,6 +82,7 @@ func (a *LocalMaker) MakeTasks(params map[string]string, taskID int32) ([]LoadPa
 			logrus.Errorf(s)
 			return nil, errors.New(s)
 		}
+		logrus.Debugf("MakeTask LoadTypeLocal parse file: %s, s:%d, e:%d", files, s, e)
 		for i := s; i <= e; i++ {
 			part := LoadPartition{}
 			part.Init(partID, taskID, LoadPartTypeVertex)
