@@ -1,7 +1,25 @@
+/*
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements. See the NOTICE file distributed with this
+work for additional information regarding copyright ownership. The ASF
+licenses this file to You under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
+*/
+
 package schedules
 
 import (
 	"errors"
+	"vermeer/apps/common"
 	"vermeer/apps/structure"
 
 	"github.com/sirupsen/logrus"
@@ -86,6 +104,10 @@ func (t *SchedulerTaskManager) RefreshTaskToWorkerGroupMap() {
 * @Return error
  */
 func (t *SchedulerTaskManager) AddTaskStartSequence(taskID int32) error {
+	if common.GetConfig("debug_mode").(string) != "debug" {
+		logrus.Warn("TaskStartSequence called but debug features are disabled")
+		return nil
+	}
 	if _, exists := t.allTaskMap[taskID]; !exists {
 		return errors.New("task not found")
 	}
@@ -202,7 +224,7 @@ func (t *SchedulerTaskManager) GetAllTasksNotComplete() []*structure.TaskInfo {
 	return tasks
 }
 
-func (t *SchedulerTaskManager) GetAllTasksWaitng() []*structure.TaskInfo {
+func (t *SchedulerTaskManager) GetAllTasksWaiting() []*structure.TaskInfo {
 	tasks := make([]*structure.TaskInfo, 0, len(t.allTaskMap))
 	for _, task := range t.GetAllTasksNotComplete() {
 		if task.State == structure.TaskStateWaiting {

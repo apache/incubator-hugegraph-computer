@@ -20,6 +20,7 @@ package bl
 import (
 	"errors"
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -74,6 +75,9 @@ func (tb *TaskBl) CreateTaskInfo(
 				if p < 0 {
 					return nil, fmt.Errorf("priority should be non-negative")
 				}
+				if p > math.MaxInt32 {
+					return nil, fmt.Errorf("priority exceeds maximum value: %d", math.MaxInt32)
+				}
 				taskInfo.Priority = int32(p)
 			} else {
 				logrus.Warnf("priority convert to int32 error:%v", err)
@@ -85,7 +89,7 @@ func (tb *TaskBl) CreateTaskInfo(
 			for _, preorder := range preorderList {
 				if pid, err := strconv.ParseInt(preorder, 10, 32); err == nil {
 					if taskMgr.GetTaskByID(int32(pid)) == nil {
-						return nil, fmt.Errorf("preorder task id %d not exists", pid)
+						return nil, fmt.Errorf("preorder task with ID %d does not exist", pid)
 					}
 					taskInfo.Preorders = append(taskInfo.Preorders, int32(pid))
 				} else {

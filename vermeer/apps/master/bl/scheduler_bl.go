@@ -19,6 +19,7 @@ package bl
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 	"vermeer/apps/common"
@@ -201,7 +202,9 @@ func (s *ScheduleBl) tryScheduleInner(softSchedule bool, noLock ...bool) error {
 		case s.startChan <- task:
 			logrus.Infof("task '%d' sent to start channel", task.ID)
 		default:
-			logrus.Warnf("start channel is full, task '%d' could not be sent", task.ID)
+			errMsg := fmt.Sprintf("start channel is full, cannot schedule task %d", task.ID)
+			logrus.Errorf(errMsg)
+			taskMgr.SetError(task, errMsg)
 		}
 	}
 
@@ -368,7 +371,7 @@ func (s *ScheduleBl) ChangeWorkerStatus(workerName string, status schedules.Work
 func (s *ScheduleBl) waitingStartedTask() {
 	for taskInfo := range s.startChan {
 		if taskInfo == nil {
-			logrus.Warnf("recieved a nil task from startChan")
+			logrus.Warnf("received a nil task from startChan")
 			continue
 		}
 
