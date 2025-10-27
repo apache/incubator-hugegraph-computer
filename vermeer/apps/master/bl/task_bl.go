@@ -20,7 +20,10 @@ package bl
 import (
 	"errors"
 	"fmt"
+	"math"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 	"vermeer/apps/compute"
 
@@ -60,6 +63,56 @@ func (tb *TaskBl) CreateTaskInfo(
 
 	if taskInfo, err = creator.CreateTaskInfo(graphName, params, isCheck); err != nil {
 		return nil, err
+	}
+
+	// for scheduler
+	taskInfo.Priority = 0
+	taskInfo.Preorders = make([]int32, 0)
+	taskInfo.Exclusive = true // default to true for now, can be set false by params
+	if params != nil {
+		if priority, ok := params["priority"]; ok {
+			if p, err := strconv.ParseInt(priority, 10, 32); err == nil {
+				if p < 0 {
+					return nil, fmt.Errorf("priority should be non-negative")
+				}
+				if p > math.MaxInt32 {
+					return nil, fmt.Errorf("priority exceeds maximum value: %d", math.MaxInt32)
+				}
+				taskInfo.Priority = int32(p)
+			} else {
+				logrus.Warnf("priority convert to int32 error:%v", err)
+				return nil, err
+			}
+		}
+		if preorders, ok := params["preorders"]; ok {
+			preorderList := strings.Split(preorders, ",")
+			for _, preorder := range preorderList {
+				if pid, err := strconv.ParseInt(preorder, 10, 32); err == nil {
+					if taskMgr.GetTaskByID(int32(pid)) == nil {
+						return nil, fmt.Errorf("preorder task with ID %d does not exist", pid)
+					}
+					taskInfo.Preorders = append(taskInfo.Preorders, int32(pid))
+				} else {
+					logrus.Warnf("preorder convert to int32 error:%v", err)
+					return nil, err
+				}
+			}
+		}
+		if exclusive, ok := params["exclusive"]; ok {
+			if ex, err := strconv.ParseBool(exclusive); err == nil {
+				taskInfo.Exclusive = ex
+			} else {
+				logrus.Warnf("exclusive convert to bool error:%v", err)
+				return nil, err
+			}
+		}
+		if cronExpr, ok := params["cron_expr"]; ok {
+			if err := Scheduler.cronManager.CheckCronExpression(cronExpr); err != nil {
+				logrus.Warnf("cron_expr parse error:%v", err)
+				return nil, err
+			}
+			taskInfo.CronExpr = cronExpr
+		}
 	}
 
 	return taskInfo, nil
@@ -146,6 +199,9 @@ func (tb *TaskBl) CancelTask(taskID int32) error {
 		return fmt.Errorf("cannot cancel the task with id '%v' as it was not created by you", taskID)
 	}
 
+	// stop the cron job if exists
+	Scheduler.CancelCronTask(task)
+
 	if task.State == structure.TaskStateCanceled {
 		return fmt.Errorf("task had been in state canceled")
 	}
@@ -206,13 +262,10 @@ func QueueExecuteTask(taskInfo *structure.TaskInfo) error {
 }
 
 func QueueExecuteTasks(tasksInfo []*structure.TaskInfo) []error {
-	defer Scheduler.Unlock(Scheduler.Lock())
-	errs := make([]error, 0, len(tasksInfo))
 	for _, task := range tasksInfo {
 		task.CreateType = structure.TaskCreateAsync
-		_, err := Scheduler.QueueTask(task)
-		errs = append(errs, err)
 	}
+	_, errs := Scheduler.BatchQueueTask(tasksInfo)
 	return errs
 }
 

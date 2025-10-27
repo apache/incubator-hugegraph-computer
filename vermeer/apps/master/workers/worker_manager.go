@@ -577,6 +577,10 @@ func (wm *workerManager) getGroupWorkers(workerGroup string) []*WorkerClient {
 	return workers
 }
 
+func (wm *workerManager) GetGroupWorkers(workerGroup string) []*WorkerClient {
+	return wm.getGroupWorkers(workerGroup)
+}
+
 func (wm *workerManager) getGroupWorkerMap(workerGroup string) map[string]*WorkerClient {
 	workerMap := make(map[string]*WorkerClient)
 

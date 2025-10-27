@@ -204,6 +204,9 @@ func (lb *LoadTaskBl) LoadTaskStatus(taskId int32, state string, workerName stri
 			loadTask.Task.SetState(structure.TaskStateLoaded)
 			//TaskMgr.ForceState(loadTask.Task, structure.TaskStateLoaded)
 
+			// for scheduler, mark task complete
+			Scheduler.taskManager.MarkTaskComplete(taskId)
+
 			logrus.Infof("graph: %s, vertex: %d, edge: %d", graph.Name, graph.VertexCount, graph.EdgeCount)
 			for _, w := range graph.Workers {
 				logrus.Infof(

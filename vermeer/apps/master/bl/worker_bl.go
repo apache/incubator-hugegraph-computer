@@ -70,7 +70,7 @@ func (wb *WorkerBl) ReleaseWorker(workerName string) error {
 				//taskInfo.SetErrMsg(fmt.Sprintf("worker %v is offline", workerName))
 				taskMgr.SetError(taskInfo, fmt.Sprintf("worker %v is offline", workerName))
 				logrus.Warnf("set task %v status:error", taskInfo.ID)
-				if err := Scheduler.CloseCurrent(taskInfo.ID); err != nil {
+				if err := Scheduler.CloseCurrent(taskInfo.ID, workerName); err != nil {
 					logrus.Errorf("failed to close task with ID: %d,err:%v", taskInfo.ID, err)
 				}
 				break

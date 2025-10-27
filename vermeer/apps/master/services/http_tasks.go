@@ -112,7 +112,7 @@ func handleTaskCreation(ctx *gin.Context, exeFunc func(*structure.TaskInfo) erro
 	}
 
 	filteredTask := taskBiz(ctx).FilteringTask(task)
-	ctx.JSON(http.StatusOK, TaskResp{Task: taskInfo2TaskJson(filteredTask)})
+	ctx.JSON(http.StatusOK, TaskCreateResponse{Task: taskInfo2TaskJson(filteredTask)})
 }
 
 type TaskCreateBatchHandler struct {
@@ -230,4 +230,34 @@ func (ch *ComputeValueHandler) GET(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resp)
+}
+
+type TaskStartSequenceHandler struct {
+	common.SenHandler
+}
+
+type TaskStartSequenceRequest struct {
+	QueryTasks []int32 `json:"query_tasks,omitempty"`
+}
+
+type TaskStartSequenceResp struct {
+	common.BaseResp
+	Sequence []int32 `json:"sequence,omitempty"`
+}
+
+func (tsh *TaskStartSequenceHandler) POST(ctx *gin.Context) {
+	req := TaskStartSequenceRequest{}
+	err := ctx.BindJSON(&req)
+	if isBad(err != nil, ctx, func() string { return fmt.Sprintf("request body not correct: %s", err) }) {
+		return
+	}
+
+	r := Scheduler.TaskStartSequence(req.QueryTasks)
+
+	sequence := make([]int32, 0, 1)
+	for _, task := range r {
+		sequence = append(sequence, int32(task.ID))
+	}
+
+	ctx.JSON(http.StatusOK, TaskStartSequenceResp{Sequence: sequence, BaseResp: common.BaseResp{ErrCode: 0, Message: "ok"}})
 }

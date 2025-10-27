@@ -83,3 +83,7 @@ node_modules/
 /output/
 /bin/*
 !/bin/*.sh
+
+# Others #
+######################
+test/case/
