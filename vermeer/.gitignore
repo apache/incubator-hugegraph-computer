@@ -84,6 +84,6 @@ node_modules/
 /bin/*
 !/bin/*.sh
 
-# 其他 #
+# Others #
 ######################
 test/case/
