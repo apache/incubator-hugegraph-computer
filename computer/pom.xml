@@ -91,7 +91,7 @@
     </prerequisites>
 
     <properties>
-        <revision>1.5.0</revision>
+        <revision>1.7.0</revision>
         <!-- TODO: fix deps conflicts & update to 1.5.0 -->
         <hugegraph-commons-version>1.3.0</hugegraph-commons-version>
         <!-- FIXME: DegreeCentralityTest:L50 failed with loader 1.5.0      -->
