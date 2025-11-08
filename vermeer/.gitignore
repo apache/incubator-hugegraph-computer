@@ -87,3 +87,14 @@ node_modules/
 # Others #
 ######################
 test/case/
+
+# Downloaded binaries (should be downloaded via scripts/download_binaries.sh) #
+######################
+tools/supervisord/*/supervisord
+tools/protoc/*/protoc
+tools/protoc/*/bin/
+tools/protoc/*/include/
+
+# Generated files (should be generated via go generate) #
+######################
+asset/assets_vfsdata.go

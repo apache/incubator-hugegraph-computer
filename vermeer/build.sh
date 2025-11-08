@@ -28,6 +28,16 @@ go env -w GONOSUMDB=\*                          ## 目前有一些代码库还�
 #go env -w CXX=/opt/compiler/gcc-8.2/bin/g++
 
 go mod download
+
+# Download binary dependencies if not exist
+echo "Checking binary dependencies..."
+./scripts/download_binaries.sh
+
+# Generate assets if not exist
+if [ ! -f "asset/assets_vfsdata.go" ]; then
+    echo "Generating assets..."
+    cd asset && go generate && cd ..
+fi
 ARCH=$1
 CGO_ENABLED=0 GOOS=linux GOARCH="$ARCH" go build
 

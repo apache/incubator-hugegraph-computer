@@ -48,42 +48,72 @@ Configuration file reference config/supervisor.conf
 ./supervisord -c supervisor.conf -d
 ````
 
-## Compile
-Required
-* go 1.23
+## Build from Source
 
-### Install dependencies
+### Requirements
+* Go 1.23 or later
+* `curl` and `unzip` utilities (for downloading dependencies)
+* Internet connection (for first-time setup)
 
+### Quick Start
+
+**Recommended**: Use Makefile for building:
+
+```bash
+# First time setup (downloads binary dependencies)
+make init
+
+# Build vermeer
+make
 ```
-go mod tidy
+
+**Alternative**: Use the build script:
+
+```bash
+# For AMD64
+./build.sh amd64
+
+# For ARM64
+./build.sh arm64
 ```
 
-### Local compile
+The build process will automatically:
+1. Download required binary tools (supervisord, protoc)
+2. Generate web UI assets
+3. Build the vermeer binary
 
+### Build Targets
+
+```bash
+make build              # Build for current platform
+make build-linux-amd64  # Build for Linux AMD64
+make build-linux-arm64  # Build for Linux ARM64
+make clean              # Clean generated files
+make help               # Show all available targets
 ```
-go build
+
+### Development Build
+
+For development with hot-reload of web UI:
+
+```bash
+go build -tags=dev
 ```
 
 ---
 
-### install grpc protobuf dependencies
-````
-go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0 \
+### Protobuf Development
+
+If you need to regenerate protobuf files:
+
+```bash
+# Install protobuf Go plugins
+go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
-````
 
-### protobuf build
-````
-../../tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
-````
-
-
-### Cross Compile
-
-````
-linux: GOARCH=amd64 GOOS=linux go build 
-CC=x86_64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -buildmode=plugin
-````
+# Generate protobuf files
+tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
+```
 
 ---
 
