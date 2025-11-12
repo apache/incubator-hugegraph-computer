@@ -78,9 +78,10 @@ make
 ```
 
 构建过程会自动:
-1. 下载所需的二进制工具(supervisord, protoc)
-2. 生成 Web UI 资源文件
-3. 构建 vermeer 二进制文件
+1. 自动检测操作系统和架构（如果未提供参数）
+2. 下载所需的二进制工具(supervisord, protoc)
+3. 生成 Web UI 资源文件
+4. 构建 vermeer 二进制文件
 
 ### 构建目标
 

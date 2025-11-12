@@ -23,7 +23,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 TOOLS_DIR="$PROJECT_ROOT/tools"
 
 # Versions
-SUPERVISORD_VERSION="4.2.5"
+SUPERVISORD_VERSION="0.6.9"
 PROTOC_VERSION="21.12"
 
 # Colors for output
@@ -167,14 +167,13 @@ main() {
     
     # Download supervisord for different platforms
     # MD5 checksums for supervisord v4.2.5
-    download_supervisord "linux_amd64" "x86_64" "" # Add MD5 if available
-    download_supervisord "linux_arm64" "aarch64" "" # Add MD5 if available
+    download_supervisord "linux_amd64" "64-bit" "" # Add MD5 if available
+    download_supervisord "linux_arm64" "ARM64" "" # Add MD5 if available
     
     # Download protoc for different platforms
     # MD5 checksums for protoc v21.12
     download_protoc "linux64" "linux-x86_64" "" # Add MD5 if available
     download_protoc "osxm1" "osx-aarch_64" "" # Add MD5 if available
-    download_protoc "win64" "win64" "" # Add MD5 if available
     
     log_info "All binary dependencies downloaded successfully!"
     log_info ""

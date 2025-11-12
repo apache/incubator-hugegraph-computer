@@ -29,12 +29,12 @@ init: download-binaries
 # Download binary dependencies (supervisord, protoc)
 download-binaries:
 	@echo "Downloading binary dependencies..."
-	@./scripts/download_binaries.sh
+	@./scripts/download_binaries.sh || (echo "Failed to download binaries" && exit 1)
 
 # Generate assets (vfsdata.go for web UI)
 generate-assets:
 	@echo "Generating assets..."
-	@cd asset && go generate
+	@cd asset && go generate || (echo "Failed to generate assets" && exit 1)
 	@echo "Assets generated successfully!"
 
 # Build vermeer binary
@@ -74,12 +74,12 @@ help:
 	@echo ""
 	@echo "Usage:"
 	@echo "  make init              - First time setup (download binaries + go mod download)"
-	@echo "  make download-binaries - Download supervisord and protoc binaries"
-	@echo "  make generate-assets   - Generate assets_vfsdata.go from web UI"
-	@echo "  make build             - Build vermeer for current platform"
-	@echo "  make build-linux-amd64 - Build for Linux AMD64"
-	@echo "  make build-linux-arm64 - Build for Linux ARM64"
-	@echo "  make clean             - Remove generated files and binaries"
+	@echo "  make download-binaries - Download supervisord and protoc binaries for your platform"
+	@echo "  make generate-assets   - Generate assets_vfsdata.go from web UI (required before build)"
+	@echo "  make build             - Build vermeer for current platform (default: local architecture)"
+	@echo "  make build-linux-amd64 - Build for Linux AMD64 (for deployment)"
+	@echo "  make build-linux-arm64 - Build for Linux ARM64 (for ARM servers)"
+	@echo "  make clean             - Remove generated files and binaries (keep downloaded tools)"
 	@echo "  make clean-all         - Remove everything including downloaded tools"
-	@echo "  make all               - Generate assets and build (default)"
+	@echo "  make all               - Generate assets and build (default target)"
 	@echo "  make help              - Show this help message"

@@ -90,7 +90,7 @@ test/case/
 
 # Downloaded binaries (should be downloaded via scripts/download_binaries.sh) #
 ######################
-tools/supervisord/*/supervisord
+tools/supervisord/*/supervisord*
 tools/protoc/*/protoc
 tools/protoc/*/bin/
 tools/protoc/*/include/

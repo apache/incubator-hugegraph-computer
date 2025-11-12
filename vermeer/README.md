@@ -77,10 +77,11 @@ make
 ./build.sh arm64
 ```
 
-The build process will automatically:
-1. Download required binary tools (supervisord, protoc)
-2. Generate web UI assets
-3. Build the vermeer binary
+# The script will:
+# - Auto-detect your OS and architecture if no parameter is provided
+# - Download required tools if not present
+# - Generate assets and build the binary
+# - Exit with error message if any step fails
 
 ### Build Targets
 

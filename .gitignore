@@ -1,7 +1,6 @@
 target/
 **.db
 logs/
-ui
 node_modules
 upload-files/
 demo*
