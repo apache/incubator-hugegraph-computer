@@ -48,44 +48,73 @@ worker: ./vermeer --env=worker01
 ./supervisord -c supervisor.conf -d
 ````
 
-## 编译
+## 从源码编译
 
-* Go 1.23
+### 环境要求
+* Go 1.23 或更高版本
+* `curl` 和 `unzip` 工具(用于下载依赖)
+* 互联网连接(首次构建时需要)
 
-### 安装依赖项
+### 快速开始
 
+**推荐**: 使用 Makefile 进行构建:
+
+```bash
+# 首次设置(下载二进制依赖)
+make init
+
+# 构建 vermeer
+make
 ```
-go mod tidy
+
+**替代方案**: 使用构建脚本:
+
+```bash
+# AMD64 架构
+./build.sh amd64
+
+# ARM64 架构
+./build.sh arm64
 ```
 
-### 本地编译
+构建过程会自动:
+1. 自动检测操作系统和架构（如果未提供参数）
+2. 下载所需的二进制工具(supervisord, protoc)
+3. 生成 Web UI 资源文件
+4. 构建 vermeer 二进制文件
 
-```
-go build
+### 构建目标
+
+```bash
+make build              # 为当前平台构建
+make build-linux-amd64  # 为 Linux AMD64 构建
+make build-linux-arm64  # 为 Linux ARM64 构建
+make clean              # 清理生成的文件
+make help               # 显示所有可用目标
 ```
 
-### grpc protobuf 依赖项安装
-````
-go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0 \
+### 开发构建
+
+如需在开发环境中热重载 Web UI:
+
+```bash
+go build -tags=dev
+```
+
+---
+
+### Protobuf 开发
+
+如需重新生成 protobuf 文件:
+
+```bash
+# 安装 protobuf Go 插件
+go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
-````
 
-
-
-### protobuf build
-生成protobuf文件
-````
-../../tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
-````
-
-
-
-### 交叉编译
-
-````
-linux: GOARCH=amd64 GOOS=linux go build 
-CC=x86_64-linux-musl-gcc CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -buildmode=plugin
-````
+# 生成 protobuf 文件
+tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
+```
 
 ---
 
