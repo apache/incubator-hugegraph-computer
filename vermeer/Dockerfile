@@ -18,6 +18,7 @@ FROM golang:1.23-alpine AS builder
 COPY ./ /src/
 WORKDIR /src/
 ENV CGO_ENABLED="0"
+RUN cd asset && go generate
 RUN go build -o /go/bin/app
 
 FROM alpine
