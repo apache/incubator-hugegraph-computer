@@ -43,7 +43,7 @@ hugegraph-computer is licensed under [Apache 2.0](https://github.com/apache/incu
 
  - [GitHub Issues](https://github.com/apache/incubator-hugegraph-computer/issues): Feedback on usage issues and functional requirements (quick response)
  - Feedback Email: [dev@hugegraph.apache.org](mailto:dev@hugegraph.apache.org) ([subscriber](https://hugegraph.apache.org/docs/contribution-guidelines/subscribe/) only)
+ - Slack: [join the ASF HugeGraph channel](https://the-asf.slack.com/archives/C059UU2FJ23)
  - WeChat public account: Apache HugeGraph, welcome to scan this QR code to follow us.
 
  <img src="https://github.com/apache/hugegraph-doc/blob/master/assets/images/wechat.png?raw=true" alt="QR png" width="350"/>
-
