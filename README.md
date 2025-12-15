@@ -47,3 +47,4 @@ hugegraph-computer is licensed under [Apache 2.0](https://github.com/apache/incu
  - WeChat public account: Apache HugeGraph, welcome to scan this QR code to follow us.
 
  <img src="https://github.com/apache/hugegraph-doc/blob/master/assets/images/wechat.png?raw=true" alt="QR png" width="350"/>
+
