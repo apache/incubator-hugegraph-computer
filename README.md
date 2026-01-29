@@ -15,8 +15,8 @@ Apache HugeGraph-Computer is a comprehensive graph computing solution providing 
 
 | Feature | Vermeer (Go) | Computer (Java) |
 |---------|--------------|-----------------|
-| **Best for** | Single machine, quick start | Large-scale distributed computing |
-| **Deployment** | Single binary | Kubernetes or YARN cluster |
+| **Best for** | Quick start, flexible deployment | Large-scale distributed computing |
+| **Deployment** | Single binary, multi-node capable | Kubernetes or YARN cluster |
 | **Memory model** | In-memory first | Auto spill to disk |
 | **Setup time** | Minutes | Hours (requires K8s/YARN) |
 | **Algorithms** | 20+ algorithms | 45+ algorithms |
@@ -48,6 +48,65 @@ graph TB
     style Vermeer fill:#e1f5fe
     style Computer fill:#fff3e0
 ```
+
+## Vermeer Architecture (In-Memory Engine)
+
+Vermeer is designed with a Master-Worker architecture optimized for high-performance in-memory graph computing:
+
+```mermaid
+graph TB
+    subgraph Client["Client Layer"]
+        API[REST API Client]
+        UI[Web UI Dashboard]
+    end
+
+    subgraph Master["Master Node :6688"]
+        HTTP[HTTP Server]
+        GRPC_M[gRPC Server :6689]
+        GM[Graph Manager]
+        TM[Task Manager]
+        WM[Worker Manager]
+    end
+
+    subgraph Workers["Worker Nodes"]
+        W1[Worker 1 :6789]
+        W2[Worker 2 :6789]
+        W3[Worker N :6789]
+    end
+
+    subgraph DataSources["Data Sources"]
+        HG[(HugeGraph)]
+        CSV[Local CSV]
+        HDFS[HDFS]
+    end
+
+    API --> HTTP
+    UI --> HTTP
+    GRPC_M <--> W1
+    GRPC_M <--> W2
+    GRPC_M <--> W3
+
+    W1 -.-> HG
+    W2 -.-> HG
+    W3 -.-> HG
+    W1 -.-> CSV
+    W1 -.-> HDFS
+
+    style Master fill:#e1f5fe
+    style Workers fill:#f3e5f5
+    style DataSources fill:#fff9c4
+```
+
+**Component Overview:**
+
+| Component | Description |
+|-----------|-------------|
+| **Master** | Coordinates workers, manages graph metadata, schedules computation tasks via HTTP (:6688) and gRPC (:6689) |
+| **Workers** | Execute graph algorithms, store graph partition data in memory, communicate via gRPC (:6789) |
+| **REST API** | Graph loading, algorithm execution, result queries (port 6688) |
+| **Web UI** | Built-in monitoring dashboard accessible at `/ui/` |
+| **Data Sources** | Supports loading from HugeGraph (via gRPC), local CSV files, and HDFS |
+
 
 ## HugeGraph Ecosystem Integration
 
@@ -107,91 +166,54 @@ See the **[Vermeer README](./vermeer/README.md)** for detailed configuration and
 
 ## Getting Started with Computer (Distributed)
 
-For large-scale distributed graph processing across clusters:
+For large-scale distributed graph processing on Kubernetes or YARN clusters, see the **[Computer README](./computer/README.md)** for:
 
-### Prerequisites
-
-- JDK 11 or later
-- Maven 3.5+
-- Kubernetes cluster or YARN cluster
-
-### Build from Source
-
-```bash
-cd computer
-mvn clean package -DskipTests
-```
-
-### Deploy on Kubernetes
-
-```bash
-# Configure your K8s cluster in computer-k8s module
-# Submit a graph computing job
-java -jar computer-driver.jar --config job-config.properties
-```
-
-See the **[Computer README](./computer/README.md)** for detailed deployment and development guide.
+- Prerequisites and build instructions
+- Kubernetes/YARN deployment guide
+- 45+ algorithm implementations
+- Custom algorithm development framework
 
 ## Supported Algorithms
 
-### Common Algorithms (Both Systems)
+### Vermeer Algorithms (20+)
 
 | Category | Algorithms |
 |----------|-----------|
-| **Centrality** | PageRank, Personalized PageRank, Betweenness Centrality, Closeness Centrality, Degree Centrality |
-| **Community Detection** | Louvain, LPA (Label Propagation), SLPA, WCC (Weakly Connected Components) |
-| **Path Finding** | SSSP (Single Source Shortest Path), BFS (Breadth-First Search) |
-| **Graph Structure** | Triangle Count, K-Core, Clustering Coefficient, Cycle Detection |
+| **Centrality** | PageRank, Personalized PageRank, Betweenness, Closeness, Degree |
+| **Community** | Louvain, Weighted Louvain, LPA, SLPA, WCC, SCC |
+| **Path Finding** | SSSP (Dijkstra), BFS Depth |
+| **Structure** | Triangle Count, K-Core, K-Out, Clustering Coefficient, Cycle Detection |
 | **Similarity** | Jaccard Similarity |
 
-### Vermeer-Specific Features
-
+**Features:**
 - In-memory optimized implementations
-- Weighted Louvain variant
 - REST API for algorithm execution
+- Real-time result queries
 
-### Computer-Specific Algorithms
+> **Computer (Java) Algorithms**: For Computer's 45+ algorithm implementations including distributed Triangle Count, Rings detection, and custom algorithm development framework, see [Computer Algorithm List](./computer/README.md#available-algorithms).
 
-- Count Triangle (distributed implementation)
-- Rings detection
-- ClusteringCoefficient variations
-- Custom algorithm development framework
+## When to Use Which
 
-See individual README files for complete algorithm lists and usage examples.
+### Choose Vermeer when:
 
-## Performance Characteristics
+- ✅ Quick prototyping and experimentation
+- ✅ Interactive analytics with built-in Web UI
+- ✅ Graphs up to hundreds of millions of edges
+- ✅ REST API integration requirements
+- ✅ Single machine or small cluster with high-memory nodes
+- ✅ Sub-second query response requirements
 
-### Vermeer (In-Memory)
+**Performance**: Optimized for fast iteration on medium-sized graphs with in-memory processing. Horizontal scaling by adding worker nodes.
 
-- **Throughput**: Optimized for fast iteration on medium-sized graphs (millions of vertices/edges)
-- **Latency**: Sub-second query response via REST API
-- **Memory**: Requires graph to fit in total worker memory
-- **Scalability**: Horizontal scaling by adding worker nodes
+### Choose Computer when:
 
-### Computer (Distributed BSP)
+- ✅ Billions of vertices/edges requiring distributed processing
+- ✅ Existing Kubernetes or YARN infrastructure
+- ✅ Custom algorithm development with Java
+- ✅ Memory-constrained environments (auto disk spill)
+- ✅ Integration with Hadoop ecosystem
 
-- **Throughput**: Handles billions of vertices/edges via distributed processing
-- **Latency**: Batch-oriented with superstep barriers
-- **Memory**: Auto spill to disk when memory is insufficient
-- **Scalability**: Elastic scaling on K8s with pod autoscaling
-
-## Use Cases
-
-### When to Use Vermeer
-
-- Quick prototyping and experimentation
-- Interactive graph analytics with Web UI
-- Medium-scale graphs (up to hundreds of millions of edges)
-- Single-machine or small cluster deployments
-- REST API integration requirements
-
-### When to Use Computer
-
-- Large-scale batch processing (billions of vertices)
-- Existing Kubernetes or YARN infrastructure
-- Custom algorithm development with Java
-- Memory-constrained environments (auto spill to disk)
-- Integration with Hadoop ecosystem
+**Performance**: Handles massive graphs via distributed BSP framework. Batch-oriented with superstep barriers. Elastic scaling on K8s.
 
 ## Documentation
 
