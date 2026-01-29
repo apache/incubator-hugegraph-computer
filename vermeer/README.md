@@ -101,17 +101,19 @@ Pull the image:
 docker pull hugegraph/vermeer:latest
 ```
 
-Create local configuration files `~/master.ini` and `~/worker.ini` (see [Configuration](#configuration) section).
+Create a dedicated config directory (e.g., `~/vermeer-config/`) with `master.ini` and `worker.ini` files (see [Configuration](#configuration) section).
 
 Run with Docker:
 
 ```bash
 # Master node
-docker run -v ~/:/go/bin/config hugegraph/vermeer --env=master
+docker run -v ~/vermeer-config:/go/bin/config hugegraph/vermeer --env=master
 
 # Worker node
-docker run -v ~/:/go/bin/config hugegraph/vermeer --env=worker
+docker run -v ~/vermeer-config:/go/bin/config hugegraph/vermeer --env=worker
 ```
+
+> **Security Note**: Only mount directories containing Vermeer configuration files. Avoid mounting your entire home directory to minimize security risks.
 
 #### Docker Compose
 
@@ -200,52 +202,46 @@ make clean-all  # Also remove downloaded tools (supervisord, protoc)
 ### Master Configuration (`master.ini`)
 
 ```ini
-[master]
-# Master server listen address
-listen_addr = :6688
+[default]
+# Master HTTP listen address
+http_peer = 0.0.0.0:6688
 
-# Master gRPC server address
-grpc_addr = :6689
+# Master gRPC listen address
+grpc_peer = 0.0.0.0:6689
 
-# Worker heartbeat timeout (seconds)
-worker_timeout = 30
+# Master peer address (self-reference for workers)
+master_peer = 127.0.0.1:6689
 
-# Task execution timeout (seconds)
-task_timeout = 3600
+# Run mode
+run_mode = master
 
-[hugegraph]
-# HugeGraph PD address for metadata
-pd_peers = 127.0.0.1:8686
+# Task scheduling strategy
+task_strategy = 1
 
-# HugeGraph HTTP endpoint for result writing
-server = http://127.0.0.1:8080
-
-# Graph space name
-graph = hugegraph
+# Number of parallel tasks
+task_parallel_num = 1
 ```
+
+**Note**: HugeGraph connection details (`pd_peers`, `server`, `graph`) are provided in the graph load API request, not in the configuration file. See [HugeGraph Integration](#hugegraph-integration) section for details.
 
 ### Worker Configuration (`worker.ini`)
 
 ```ini
-[worker]
-# Worker listen address
-listen_addr = :6789
+[default]
+# Worker HTTP listen address
+http_peer = 0.0.0.0:6788
+
+# Worker gRPC listen address
+grpc_peer = 0.0.0.0:6789
 
 # Master gRPC address to connect
 master_peer = 127.0.0.1:6689
 
-# Worker ID (unique)
-worker_id = worker01
+# Run mode
+run_mode = worker
 
-# Number of compute threads
-compute_threads = 4
-
-# Memory limit (GB)
-memory_limit = 8
-
-[storage]
-# Local disk path for spilling
-data_path = ./data
+# Worker group identifier
+worker_group = default
 ```
 
 ## Available Algorithms
@@ -386,6 +382,9 @@ Load from Hadoop Distributed File System:
 
 Custom algorithms implement the `Algorithm` interface in `algorithms/algorithms.go`:
 
+> **NOTE**: The following is a simplified conceptual interface for illustration purposes.
+> For actual algorithm implementation, see the `WorkerComputer` and `MasterComputer` interfaces defined in `apps/compute/api.go`.
+
 ```go
 type Algorithm interface {
     // Initialize the algorithm
@@ -403,6 +402,9 @@ type Algorithm interface {
 ```
 
 ### Example: Simple Degree Count
+
+> **NOTE**: This is a simplified conceptual example. Actual algorithms must implement the `WorkerComputer` interface.
+> See `vermeer/algorithms/degree.go` for a working example.
 
 ```go
 package algorithms
@@ -482,16 +484,9 @@ tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
 
 ## Performance Tuning
 
-### Worker Configuration
-
-- **compute_threads**: Set to number of CPU cores for CPU-bound algorithms
-- **memory_limit**: Set to 70-80% of available RAM
-- **partition_count**: Increase for better parallelism (default: auto-calculated)
-
 ### Master Configuration
 
-- **worker_timeout**: Increase for slow networks or heavily loaded workers
-- **task_timeout**: Increase for long-running algorithms (e.g., Louvain on large graphs)
+- **task_parallel_num**: Number of parallel tasks (default: 1). Increase for better task scheduling throughput.
 
 ### Algorithm-Specific
 

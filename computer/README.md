@@ -139,9 +139,14 @@ k8s.worker.memory=8Gi
 bsp.etcd.url=http://etcd-cluster:2379
 
 # Algorithm parameters (PageRank example)
-pagerank.damping_factor=0.85
-pagerank.max_iterations=20
-pagerank.convergence_tolerance=0.0001
+# Alpha parameter (1 - damping factor), default: 0.15
+page_rank.alpha=0.85
+
+# Maximum supersteps (iterations), controlled by BSP framework
+bsp.max_superstep=20
+
+# L1 norm difference threshold for convergence, default: 0.00001
+pagerank.l1DiffThreshold=0.0001
 ```
 
 #### 2. Submit Job
@@ -229,6 +234,10 @@ public interface Computation<M extends Value> {
 ```
 
 ### Example: Simple PageRank
+
+> **NOTE**: This is a simplified example showing the key concepts.
+> For the complete implementation including all required methods (`name()`, `category()`, `init()`, etc.),
+> see: `computer/computer-algorithm/src/main/java/org/apache/hugegraph/computer/algorithm/centrality/pagerank/PageRank.java`
 
 ```java
 package org.apache.hugegraph.computer.algorithm.centrality.pagerank;
