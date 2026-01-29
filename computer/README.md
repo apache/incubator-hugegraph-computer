@@ -1,5 +1,7 @@
 # Apache HugeGraph-Computer (Java)
 
+<!-- status:deepwiki-budget:0 -->
+
 HugeGraph-Computer is a distributed graph processing framework implementing the [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf) model (BSP - Bulk Synchronous Parallel). It runs on Kubernetes or YARN clusters and integrates with HugeGraph for graph input/output.
 
 ## Features

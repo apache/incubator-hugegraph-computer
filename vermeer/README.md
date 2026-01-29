@@ -1,5 +1,7 @@
 # Vermeer - High-Performance In-Memory Graph Computing
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/apache/hugegraph-computer)
+
 Vermeer is a high-performance in-memory graph computing platform with a single-binary deployment model. It provides 20+ graph algorithms, custom algorithm extensions, and seamless integration with HugeGraph.
 
 ## Key Features

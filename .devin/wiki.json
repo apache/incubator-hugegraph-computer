@@ -1,0 +1,8 @@
+{
+  "repo_notes": [
+    "Focus exclusively on the vermeer directory and its components",
+    "Document vermeer's architecture, implementation, and APIs",
+    "Exclude all content from the computer module/directory",
+    "Prioritize vermeer-specific functionality and code examples"
+  ]
+}
