@@ -98,3 +98,13 @@ tools/protoc/*/include/
 # Generated files (should be generated via go generate) #
 ######################
 asset/assets_vfsdata.go
+
+# AI assistant specific files (we only maintain AGENTS.md) #
+######################
+CLAUDE.md
+GEMINI.md
+CURSOR.md
+COPILOT.md
+.cursorrules
+.cursor/
+.github/copilot-instructions.md
