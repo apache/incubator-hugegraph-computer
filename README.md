@@ -60,12 +60,13 @@ graph TB
         UI[Web UI Dashboard]
     end
 
-    subgraph Master["Master Node :6688"]
-        HTTP[HTTP Server]
+    subgraph Master["Master Node"]
+        HTTP[HTTP Server :6688]
         GRPC_M[gRPC Server :6689]
         GM[Graph Manager]
         TM[Task Manager]
         WM[Worker Manager]
+        SCH[Scheduler]
     end
 
     subgraph Workers["Worker Nodes"]
@@ -144,6 +145,10 @@ For quick start and single-machine deployments, we recommend **Vermeer**:
 ```bash
 # Pull the image
 docker pull hugegraph/vermeer:latest
+
+# Change config path in docker-compose.yml
+volumes:
+      - ~/:/go/bin/config # Change here to your actual config path, e.g., vermeer/config
 
 # Run with docker-compose
 docker-compose up -d

@@ -100,7 +100,9 @@ make clean-all  # Also remove downloaded tools
 ```bash
 go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
-tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
+
+# Generate (adjust protoc path for your platform)
+vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto --go-grpc_out=vermeer/apps/protos/. --go_out=vermeer/apps/protos/. # please note remove license header if any
 ```
 
 ## Architecture
@@ -174,6 +176,7 @@ tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
 - Master scheduling: `vermeer/apps/master/tasks/tasks.go`
 - Worker management: `vermeer/apps/master/workers/workers.go`
 - HTTP endpoints: `vermeer/apps/master/services/http_master.go`
+- Scheduler: `vermeer/apps/master/bl/scheduler_bl.go`
 
 ## Integration with HugeGraph
 
@@ -213,7 +216,7 @@ tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
 - Unit tests run in isolation without external dependencies
 
 **Vermeer:**
-- Test scripts in `vermeer/test/`
+- Test scripts in `vermeer/test/`,with `vermeer_test.go` and `vermeer_test.sh`
 - Configuration files in `vermeer/config/` (master.ini, worker.ini templates)
 
 ## CI/CD
