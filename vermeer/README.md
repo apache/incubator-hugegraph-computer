@@ -78,6 +78,7 @@ vermeer/
 │   ├── master/          # Master service
 │   │   ├── services/    # HTTP handlers
 │   │   ├── workers/     # Worker management
+|   |   ├── schedules/    # Task scheduling strategies
 │   │   └── tasks/       # Task scheduling
 │   ├── compute/         # Worker-side compute logic
 │   ├── graphio/         # Graph I/O (HugeGraph, CSV, HDFS)
@@ -117,7 +118,12 @@ docker run -v ~/vermeer-config:/go/bin/config hugegraph/vermeer --env=worker
 
 #### Docker Compose
 
-Update `master_peer` in `~/worker.ini` to `172.20.0.10:6689`, then:
+Update `master_peer` in `~/worker.ini` to `172.20.0.10:6689`, and edit ``docker-compose.yml`` to mount your config directory:
+
+```yaml
+    volumes:
+      - ~/:/go/bin/config # Change here to your actual config path
+```
 
 ```bash
 docker-compose up -d
@@ -479,7 +485,7 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
 
 # Generate (adjust protoc path for your platform)
-tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
+vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto --go-grpc_out=vermeer/apps/protos/. --go_out=vermeer/apps/protos/. # please note remove license header if any
 ```
 
 ## Performance Tuning

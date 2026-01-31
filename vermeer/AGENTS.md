@@ -61,7 +61,9 @@ go test -tags=vermeer_test -v -mode=scheduler
 ```bash
 go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
-tools/protoc/osxm1/protoc *.proto --go-grpc_out=. --go_out=.
+
+# Generate (adjust protoc path for your platform)
+vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto --go-grpc_out=vermeer/apps/protos/. --go_out=vermeer/apps/protos/. # please note remove license header if any
 ```
 
 ## Architecture
@@ -81,6 +83,7 @@ vermeer/
 │   │   ├── services/    # HTTP handlers
 │   │   ├── workers/     # Worker management (WorkerManager, WorkerClient)
 │   │   ├── tasks/       # Task scheduling
+│   │   ├── schedules/   # Task scheduling strategies
 │   │   └── graphs/      # Graph metadata management
 │   ├── worker/          # Worker service entry
 │   ├── compute/         # Worker-side compute logic
@@ -146,6 +149,7 @@ Algorithms implement the interface defined in `apps/compute/api.go`. Each algori
 - Master scheduling: `apps/master/tasks/tasks.go`
 - Worker management: `apps/master/workers/workers.go`
 - HTTP endpoints: `apps/master/services/http_master.go`
+- Scheduler: `vermeer/apps/master/bl/scheduler_bl.go`
 
 ## Development Workflow
 
@@ -167,7 +171,8 @@ Algorithms implement the interface defined in `apps/compute/api.go`. Each algori
 1. Edit `.proto` files in `apps/protos/`
 2. Regenerate Go code using protoc (adjust path for platform):
    ```bash
-   tools/protoc/osxm1/protoc apps/protos/*.proto --go-grpc_out=. --go_out=.
+   # Generate (adjust protoc path for your platform)
+    vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto --go-grpc_out=vermeer/apps/protos/. --go_out=vermeer/apps/protos/. # please note remove license header if any
    ```
 
 ## Configuration
