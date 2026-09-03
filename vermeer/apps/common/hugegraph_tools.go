@@ -178,7 +178,7 @@ func testServerIsValid(serverAdds []string, hgSpace, hGraph, username, password 
 		wg.Add(1)
 		go func(addr string, ctx context.Context, cancel context.CancelFunc) {
 			defer wg.Done()
-			url := fmt.Sprintf("%v/graphspaces/%v/graphs/%v/schema?format=json", addr, hgSpace, hGraph)
+			url := fmt.Sprintf("http://%v/graphspaces/%v/graphs/%v/schema?format=json", addr, hgSpace, hGraph)
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			req.SetBasicAuth(username, password)
 			if err != nil {
@@ -208,7 +208,7 @@ func GetHugegraphSchema(serverAddr, hgName, username, password string) (map[stri
 		logrus.Errorf("split hg name failed, %v", err.Error())
 		return nil, fmt.Errorf("split hg name failed, %v", err.Error())
 	}
-	url := fmt.Sprintf("%v/graphspaces/%v/graphs/%v/schema?format=json", serverAddr, hgSpace, hGraph)
+	url := fmt.Sprintf("http://%v/graphspaces/%v/graphs/%v/schema?format=json", serverAddr, hgSpace, hGraph)
 	// retry 3 times
 	var propertyFromHg map[string]any
 	for i := 0; i < 3; i++ {
