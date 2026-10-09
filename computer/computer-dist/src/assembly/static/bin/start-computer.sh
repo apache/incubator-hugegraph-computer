@@ -189,6 +189,9 @@ else
     JAVA="$JAVA_HOME/bin/java -server"
 fi
 
+# BufferedFileInput duplicates RandomAccessFile using its path field.
+JAVA_OPTS="${JAVA_OPTS} --add-opens=java.base/java.io=ALL-UNNAMED"
+
 # Set up count of cpu if it unspecified from k8s drive,
 # avoid `Runtime.getRuntime().availableProcessors()` always return 1
 if [[ "${DRIVE}" = "${K8S_DRIVE}" && -z "${CPU_LIMIT}" ]]; then

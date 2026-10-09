@@ -48,6 +48,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration combine.children="append">
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <artifactSet>
                                 <includes combine.children="append">
                                     <include>*:*</include>

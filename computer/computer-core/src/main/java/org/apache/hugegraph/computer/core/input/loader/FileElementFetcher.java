@@ -33,8 +33,8 @@ import org.apache.hugegraph.iterator.FlatMapperIterator;
 import org.apache.hugegraph.loader.builder.ElementBuilder;
 import org.apache.hugegraph.loader.builder.SchemaCache;
 import org.apache.hugegraph.loader.constant.Constants;
-import org.apache.hugegraph.loader.executor.ComputerLoadOptions;
 import org.apache.hugegraph.loader.executor.LoadContext;
+import org.apache.hugegraph.loader.executor.LoadOptions;
 import org.apache.hugegraph.loader.mapping.InputStruct;
 import org.apache.hugegraph.loader.reader.InputReader;
 import org.apache.hugegraph.loader.reader.file.FileReader;
@@ -42,6 +42,9 @@ import org.apache.hugegraph.loader.reader.line.Line;
 import org.apache.hugegraph.loader.source.file.FileSource;
 import org.apache.hugegraph.loader.util.JsonUtil;
 import org.apache.hugegraph.structure.GraphElement;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public abstract class FileElementFetcher<T extends GraphElement>
                 implements ElementFetcher<T>  {
@@ -59,14 +62,24 @@ public abstract class FileElementFetcher<T extends GraphElement>
         try {
              String json = FileUtils.readFileToString(new File(schemaPath),
                                                       Constants.CHARSET);
-             schemaCache = JsonUtil.fromJson(json, SchemaCache.class);
+             JsonNode schema = JsonUtil.fromJson(json, JsonNode.class);
+             for (JsonNode edgeLabel : schema.path("edgelabels")) {
+                 // Older schema files represent a single link with two label fields.
+                 if (!edgeLabel.has("links") &&
+                     edgeLabel.hasNonNull("source_label") &&
+                     edgeLabel.hasNonNull("target_label")) {
+                     ((ObjectNode) edgeLabel).putArray("links").addObject()
+                                            .put(edgeLabel.get("source_label").asText(),
+                                                 edgeLabel.get("target_label").asText());
+                 }
+             }
+             schemaCache = JsonUtil.fromJson(schema.toString(), SchemaCache.class);
         } catch (IOException exception) {
             throw new ComputerException("Failed to load schema from file, " +
                                         "path:%s", schemaPath);
         }
 
-        ComputerLoadOptions options = new ComputerLoadOptions(schemaCache);
-        this.context = new LoadContext(options);
+        this.context = LoadContext.forOffline(new LoadOptions(), schemaCache);
     }
 
     @Override
@@ -120,7 +133,23 @@ public abstract class FileElementFetcher<T extends GraphElement>
         source.path(split.path());
         FileReader reader = (FileReader) InputReader.create(struct.input());
         reader.init(this.context, struct);
-        return reader;
+        try {
+            List<InputReader> readers = reader.split();
+            if (readers.size() != 1) {
+                readers.forEach(InputReader::close);
+                throw new ComputerException("Expected one reader for file '%s', " +
+                                            "but got %s", split.path(), readers.size());
+            }
+            InputReader fileReader = readers.get(0);
+            fileReader.init(this.context, struct);
+            return fileReader;
+        } finally {
+            reader.close();
+        }
+    }
+
+    protected LoadContext context() {
+        return this.context;
     }
 
     protected List<T> buildElement(Line line, ElementBuilder<T> builder) {
@@ -132,8 +161,12 @@ public abstract class FileElementFetcher<T extends GraphElement>
                                                InputStruct struct);
 
     public void close() {
-        if (this.inputReader != null) {
-            this.inputReader.close();
+        try {
+            if (this.inputReader != null) {
+                this.inputReader.close();
+            }
+        } finally {
+            this.context.close();
         }
     }
 }
