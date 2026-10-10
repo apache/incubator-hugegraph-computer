@@ -82,6 +82,11 @@ jobs:
         run: |
           "$TRAVIS_DIR/install-env.sh"
           "$TRAVIS_DIR/load-data-into-hugegraph.sh" "$GRAPH_ENV_VERSION"
+          docker inspect --format '{{.Config.Image}} {{.Image}}' graph
+          curl -fsS --max-time 10 http://localhost:8080/versions | tee /tmp/hugegraph-ci-versions.json
+          jq -e --arg tag "$GRAPH_ENV_VERSION" '
+            .versions.core | select(type == "string" and length > 0 and ($tag == "latest" or . == $tag))
+          ' /tmp/hugegraph-ci-versions.json
 
       - name: Use staged maven repo
         if: ${{ env.USE_STAGE == 'true' }}
