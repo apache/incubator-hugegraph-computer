@@ -102,6 +102,7 @@
         <hadoop-version>3.5.0</hadoop-version>
         <netty-version>4.1.137.Final</netty-version>
         <grpc-version>1.55.3</grpc-version>
+        <protobuf-version>3.22.3</protobuf-version>
         <commons-lang3-version>3.12.0</commons-lang3-version>
         <minio-version>8.5.6</minio-version>
     </properties>
@@ -124,6 +125,13 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
                 <version>${grpc-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-bom</artifactId>
+                <version>${protobuf-version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
