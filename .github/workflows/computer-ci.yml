@@ -8,12 +8,10 @@ on:
     paths:
       - computer/**
       - .github/workflows/computer-ci.yml
-      - .github/configs/settings.xml
   pull_request:
     paths:
       - computer/**
       - .github/workflows/computer-ci.yml
-      - .github/configs/settings.xml
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -30,7 +28,6 @@ jobs:
       matrix:
         server: ['1.7.0', 'latest']
     env:
-      USE_STAGE: 'true' # Whether to include the stage repository.
       TRAVIS_DIR: computer-dist/src/assembly/travis
       BSP_ETCD_URL: http://localhost:2579
       KUBERNETES_VERSION: 1.20.1
@@ -87,12 +84,6 @@ jobs:
           jq -e --arg tag "$GRAPH_ENV_VERSION" '
             .versions.core | select(type == "string" and length > 0 and ($tag == "latest" or . == $tag))
           ' /tmp/hugegraph-ci-versions.json
-
-      - name: Use staged maven repo
-        if: ${{ env.USE_STAGE == 'true' }}
-        run: |
-          cp "$HOME/.m2/settings.xml" /tmp/settings.xml
-          cp ../.github/configs/settings.xml "$HOME/.m2/settings.xml"
 
       - name: Compile
         run: mvn clean compile -e -Dmaven.javadoc.skip=true -ntp
