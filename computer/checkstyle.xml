@@ -35,8 +35,7 @@
     <module name="TreeWalker">
         <!--检查行长度-->
         <module name="LineLength">
-            <!-- Use 101 due to some legacy code reason -->
-            <property name="max" value="101"/>
+            <property name="max" value="120"/>
             <!--可以忽略的行-->
             <property name="ignorePattern"
                       value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
