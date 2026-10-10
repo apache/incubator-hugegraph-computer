@@ -44,7 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SCRIPT_DEPENDENCY: computer-dist/scripts/dependency
-      USE_STAGE: 'true' # Whether to include the stage repository.
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -53,11 +52,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'adopt'
-      - name: Use staged maven repo settings
-        if: ${{ env.USE_STAGE == 'true' }}
-        run: |
-          cp "$HOME/.m2/settings.xml" /tmp/settings.xml
-          cp ../.github/configs/settings.xml "$HOME/.m2/settings.xml"
       - name: Compile install
         run: mvn install -DskipTests=true -ntp
       - name: Generate & check current 3rd-party dependencies

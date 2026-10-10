@@ -56,7 +56,6 @@ echo "Load finished, continue to next step"
 #git clone --depth 10 ${HUGEGRAPH_LOADER_GIT_URL} hugegraph-toolchain
 #
 #cd hugegraph-toolchain
-#mvn install -P stage -pl hugegraph-client,hugegraph-loader -am -DskipTests -ntp
 #
 #cd hugegraph-loader
 #tar -zxf target/apache-hugegraph-loader-*.tar.gz || exit 1

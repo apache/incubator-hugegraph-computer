@@ -2,8 +2,7 @@
 
 <!-- status:deepwiki-budget:0 -->
 
-HugeGraph-Computer is a distributed graph processing framework implementing the [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf) model (BSP - Bulk
-Synchronous Parallel). It runs on Kubernetes or YARN clusters and integrates with HugeGraph for graph input/output.
+HugeGraph-Computer is a distributed graph processing framework implementing the [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf) model (BSP - Bulk Synchronous Parallel). It runs on Kubernetes or YARN clusters and integrates with HugeGraph for graph input/output.
 
 ## Features
 
@@ -485,10 +484,10 @@ Generated classes appear in `computer-k8s/target/generated-sources/`.
 
 | File | Description |
 |------|-------------|
-| `computer-api/.../Computation.java` | Algorithm interface contract |
-| `computer-core/.../WorkerService.java` | Worker runtime orchestration |
+| `computer-api/.../Computation.java` | Algorithm interface contract (computer/computer-api/src/main/java/org/apache/hugegraph/computer/core/worker/Computation.java:25) |
+| `computer-core/.../WorkerService.java` | Worker runtime orchestration (computer/computer-core/src/main/java/org/apache/hugegraph/computer/core/worker/WorkerService.java:1) |
 | `computer-core/.../Bsp4Worker.java` | BSP coordination logic (computer/computer-core/src/main/java/org/apache/hugegraph/computer/core/bsp/Bsp4Worker.java:1) |
-| `computer-algorithm/.../PageRank.java` | Example algorithm implementation |
+| `computer-algorithm/.../PageRank.java` | Example algorithm implementation (computer/computer-algorithm/src/main/java/org/apache/hugegraph/computer/algorithm/centrality/pagerank/PageRank.java:1) |
 
 ## Testing
 
@@ -499,7 +498,7 @@ The CI pipeline (`.github/workflows/computer-ci.yml`) runs:
 1. License check (Apache RAT)
 2. Start HDFS containers (pinned Apache Hadoop 3.5.0 image)
 3. Setup Minikube/Kubernetes
-4. Load test data into HugeGraph
+4. Load test data into HugeGraph Server images `1.7.0` and `latest`
 5. Compile with JDK 17
 6. Run integration tests (`-P integrate-test`)
 7. Run unit tests (`-P unit-test`)
