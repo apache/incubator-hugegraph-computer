@@ -101,8 +101,9 @@
         <etcd.version>0.7.3</etcd.version>
         <hadoop-version>3.5.0</hadoop-version>
         <netty-version>4.1.137.Final</netty-version>
-        <grpc-version>1.65.1</grpc-version>
-        <protobuf-version>3.25.1</protobuf-version>
+        <!-- gRPC 1.76 removes Netty version detection confused by HBase's shaded metadata. -->
+        <grpc-version>1.76.0</grpc-version>
+        <protobuf-version>3.25.8</protobuf-version>
         <commons-lang3-version>3.12.0</commons-lang3-version>
         <minio-version>8.5.6</minio-version>
     </properties>
