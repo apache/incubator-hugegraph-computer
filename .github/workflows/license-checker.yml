@@ -35,7 +35,8 @@ jobs:
           git -C .. archive HEAD | tar -tf - > "$RUNNER_TEMP/computer-source-files.txt"
           grep -Fx 'computer/computer-dist/release-docs/LICENSE' "$RUNNER_TEMP/computer-source-files.txt"
           grep -Fx 'computer/computer-dist/release-docs/NOTICE' "$RUNNER_TEMP/computer-source-files.txt"
-          grep -E '^computer/computer-dist/release-docs/licenses/(.*/)?LICENSE[^/]*$' "$RUNNER_TEMP/computer-source-files.txt"
+          grep -E '^computer/computer-dist/release-docs/licenses/(.*/)?LICENSE[^/]*$' \
+            "$RUNNER_TEMP/computer-source-files.txt"
 
       - uses: actions/setup-java@v4
         with:
