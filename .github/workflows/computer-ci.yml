@@ -99,7 +99,20 @@ jobs:
 
       - name: Integrate test
         timeout-minutes: 10
-        run: mvn test -P integrate-test -ntp
+        run: |
+          (
+            sleep 180
+            jps -l | while read -r pid main; do
+              case "$main" in
+                *surefirebooter*|org.apache.maven.surefire.booter.ForkedBooter)
+                  jcmd "$pid" Thread.print -l
+                  ;;
+              esac
+            done
+          ) &
+          diagnostics_pid=$!
+          trap 'kill "$diagnostics_pid" 2>/dev/null || true' EXIT
+          mvn test -P integrate-test -ntp
 
       - name: Unit test
         timeout-minutes: 15
