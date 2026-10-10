@@ -115,17 +115,21 @@
                         <configuration>
                             <target>
                                 <!-- removing the generated Schema class -->
+                                <property name="crd.generated.dir"
+                                          value="${project.build.directory}/generated-sources/src/gen/java"/>
+                                <property name="crd.model.dir"
+                                          value="${crd.generated.dir}/org/apache/hugegraph/computer/k8s/crd/model"/>
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/CrdSchema.java"
+                                        file="${crd.model.dir}/CrdSchema.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/EnumSchema.java"
+                                        file="${crd.model.dir}/EnumSchema.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/HugeGraphComputerJob.java"
+                                        file="${crd.model.dir}/HugeGraphComputerJob.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/HugeGraphComputerJobList.java"
+                                        file="${crd.model.dir}/HugeGraphComputerJobList.java"
                                         verbose="true" />
                             </target>
                         </configuration>

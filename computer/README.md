@@ -2,7 +2,8 @@
 
 <!-- status:deepwiki-budget:0 -->
 
-HugeGraph-Computer is a distributed graph processing framework implementing the [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf) model (BSP - Bulk Synchronous Parallel). It runs on Kubernetes or YARN clusters and integrates with HugeGraph for graph input/output.
+HugeGraph-Computer is a distributed graph processing framework implementing the [Pregel](https://kowshik.github.io/JPregel/pregel_paper.pdf) model (BSP - Bulk
+Synchronous Parallel). It runs on Kubernetes or YARN clusters and integrates with HugeGraph for graph input/output.
 
 ## Features
 
@@ -71,8 +72,9 @@ HugeGraph-Computer is a distributed graph processing framework implementing the 
 
 - **JDK 17** or later (for building and running, including cluster workers)
 - When embedding Computer in your own Java process, use
-  `--add-opens=java.base/java.io=ALL-UNNAMED` for buffered file duplication.
-  The distribution launcher sets this option automatically.
+  `--add-opens=java.base/java.io=ALL-UNNAMED` for buffered file duplication and
+  `--add-opens=java.base/java.lang=ALL-UNNAMED` for SOFA RPC proxy creation.
+  The distribution launcher sets these options automatically.
 - **Maven 3.6.3+** for building
 - **Kubernetes cluster** or **YARN cluster** for deployment
 - **etcd** for BSP coordination (configured via `BSP_ETCD_URL`)
@@ -483,10 +485,10 @@ Generated classes appear in `computer-k8s/target/generated-sources/`.
 
 | File | Description |
 |------|-------------|
-| `computer-api/.../Computation.java` | Algorithm interface contract (computer/computer-api/src/main/java/org/apache/hugegraph/computer/core/worker/Computation.java:25) |
-| `computer-core/.../WorkerService.java` | Worker runtime orchestration (computer/computer-core/src/main/java/org/apache/hugegraph/computer/core/worker/WorkerService.java:1) |
+| `computer-api/.../Computation.java` | Algorithm interface contract |
+| `computer-core/.../WorkerService.java` | Worker runtime orchestration |
 | `computer-core/.../Bsp4Worker.java` | BSP coordination logic (computer/computer-core/src/main/java/org/apache/hugegraph/computer/core/bsp/Bsp4Worker.java:1) |
-| `computer-algorithm/.../PageRank.java` | Example algorithm implementation (computer/computer-algorithm/src/main/java/org/apache/hugegraph/computer/algorithm/centrality/pagerank/PageRank.java:1) |
+| `computer-algorithm/.../PageRank.java` | Example algorithm implementation |
 
 ## Testing
 

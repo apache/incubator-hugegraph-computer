@@ -143,7 +143,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.6</version>
                 <configuration>
-                    <argLine>@{argLine} --add-opens=java.base/java.io=ALL-UNNAMED</argLine>
+                    <argLine>
+                        @{argLine} --add-opens=java.base/java.io=ALL-UNNAMED
+                        --add-opens=java.base/java.lang=ALL-UNNAMED
+                    </argLine>
                 </configuration>
                 <executions>
                     <execution>

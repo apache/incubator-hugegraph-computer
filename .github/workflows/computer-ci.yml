@@ -23,13 +23,18 @@ defaults:
 
 jobs:
   computer-ci:
+    name: computer-ci (server ${{ matrix.server }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        server: ['1.7.0', 'latest']
     env:
       USE_STAGE: 'true' # Whether to include the stage repository.
       TRAVIS_DIR: computer-dist/src/assembly/travis
       BSP_ETCD_URL: http://localhost:2579
       KUBERNETES_VERSION: 1.20.1
-      GRAPH_ENV_VERSION: 1.7.0 # Published Server/Loader baseline until 1.8.0 images are available.
+      GRAPH_ENV_VERSION: ${{ matrix.server }}
 
     steps:
       - name: Checkout
@@ -88,9 +93,11 @@ jobs:
         run: mvn clean compile -e -Dmaven.javadoc.skip=true -ntp
 
       - name: Integrate test
+        timeout-minutes: 10
         run: mvn test -P integrate-test -ntp
 
       - name: Unit test
+        timeout-minutes: 15
         run: mvn test -P unit-test -ntp
 
       - name: Upload coverage to Codecov

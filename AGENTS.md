@@ -11,15 +11,30 @@ This is the Apache HugeGraph-Computer repository containing two distinct graph c
 
 Both integrate with HugeGraph for graph data input/output.
 
+## Formatting Rules
+
+- Keep code lines at most 120 characters and Markdown lines at most 160 characters.
+- Keep fenced code blocks in Markdown at most 120 characters per line.
+- Java line length is configured in `computer/checkstyle.xml`; Markdown line length is configured in `.markdownlint.yaml`.
+- Preserve verbatim third-party LICENSE and NOTICE text rather than applying code or Markdown wrapping rules to it.
+
 ## Build & Test Commands
 
 ### Computer (Java)
 
 **Prerequisites:**
-- JDK 11 for building/running
-- JDK 8 for HDFS dependencies
-- Maven 3.5+
+- JDK 17 for building/running Computer and its workers
+- Docker for HDFS, using the Java 17-compatible Apache Hadoop 3.5.0 image
+- Maven 3.6.3+
 - For K8s module: run `mvn clean install` first to generate CRD classes under computer-k8s
+
+Embedded Java programs must open `java.base/java.io` for file reflection and `java.base/java.lang` for SOFA RPC on Java 17.
+The Computer startup script and test Surefire configuration already include both JVM options:
+
+```bash
+--add-opens=java.base/java.io=ALL-UNNAMED
+--add-opens=java.base/java.lang=ALL-UNNAMED
+```
 
 **Build:**
 ```bash
@@ -102,7 +117,10 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.0
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
 
 # Generate (adjust protoc path for your platform)
-vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto --go-grpc_out=vermeer/apps/protos/. --go_out=vermeer/apps/protos/. # please note remove license header if any
+# Remove any license header before generating.
+vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto \
+    --go-grpc_out=vermeer/apps/protos/. \
+    --go_out=vermeer/apps/protos/.
 ```
 
 ## Architecture
@@ -122,9 +140,11 @@ vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto --go-grpc_out=ve
 
 **Key Design Patterns:**
 
-1. **API/Implementation Separation**: Algorithms depend only on `computer-api` interfaces; `computer-core` provides runtime implementation. Algorithms are dynamically loaded via config.
+1. **API/Implementation Separation**: Algorithms depend only on `computer-api` interfaces; `computer-core` provides runtime implementation. Algorithms are
+   dynamically loaded via config.
 
-2. **Manager Pattern**: `WorkerService` composes multiple managers (MessageSendManager, MessageRecvManager, WorkerAggrManager, DataServerManager, SortManagers, SnapshotManager, etc.) with lifecycle hooks: `initAll()`, `beforeSuperstep()`, `afterSuperstep()`, `closeAll()`.
+2. **Manager Pattern**: `WorkerService` composes multiple managers (MessageSendManager, MessageRecvManager, WorkerAggrManager, DataServerManager, SortManagers,
+   SnapshotManager, etc.) with lifecycle hooks: `initAll()`, `beforeSuperstep()`, `afterSuperstep()`, `closeAll()`.
 
 3. **BSP Coordination**: Explicit barrier synchronization via etcd (EtcdBspClient). Each superstep follows:
    - `workerStepPrepareDone` → `waitMasterStepPrepareDone`
@@ -161,7 +181,8 @@ vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto --go-grpc_out=ve
 
 **Key Patterns:**
 
-1. **Maker/Registry Pattern**: Graph loaders/writers register themselves via init() (e.g., `LoadMakers[LoadTypeHugegraph] = &HugegraphMaker{}`). Master selects loader by type.
+1. **Maker/Registry Pattern**: Graph loaders/writers register themselves via init() (e.g., `LoadMakers[LoadTypeHugegraph] = &HugegraphMaker{}`). Master selects
+   loader by type.
 
 2. **HugeGraph Integration**:
    - `hugegraph.go` implements HugegraphMaker, HugegraphLoader, HugegraphWriter
@@ -223,10 +244,10 @@ vermeer/tools/protoc/linux64/protoc vermeer/apps/protos/*.proto --go-grpc_out=ve
 
 CI pipeline (`.github/workflows/computer-ci.yml`) runs:
 1. License check (Apache RAT)
-2. Setup HDFS (Hadoop 3.3.2)
+2. Setup HDFS with the Apache Hadoop 3.5.0 Docker image
 3. Setup Minikube/Kubernetes
-4. Load test data into HugeGraph
-5. Compile with Java 11
+4. Load test data into HugeGraph, testing Server Docker images `1.7.0` and `latest`
+5. Compile with Java 17
 6. Run integration tests (`-P integrate-test`)
 7. Run unit tests (`-P unit-test`)
 8. Upload coverage to Codecov
@@ -234,7 +255,7 @@ CI pipeline (`.github/workflows/computer-ci.yml`) runs:
 ## Important Notes
 
 - **Computer K8s module**: Must run `mvn clean install` before editing to generate CRD classes
-- **Java version**: Build requires JDK 11; HDFS dependencies require JDK 8
+- **Java version**: Build and runtime require JDK 17; HDFS runs in the Java 17-compatible Apache Hadoop 3.5.0 Docker image
 - **Vermeer binary deps**: First-time builds need `make init` to download supervisord/protoc
 - **BSP coordination**: Computer uses etcd for barrier synchronization (configure via `BSP_ETCD_URL`)
 - **Memory management**: Both systems auto-manage memory by spilling to disk when needed

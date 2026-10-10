@@ -50,7 +50,10 @@ while (( SECONDS < deadline )); do
     done
     if curl --fail --silent --connect-timeout 2 --max-time 5 \
         'http://localhost:9870/jmx?qry=Hadoop:service=NameNode,name=FSNamesystemState' |
-        python3 -c 'import json,sys; sys.exit(not any(b.get("NumLiveDataNodes",0)>0 for b in json.load(sys.stdin)["beans"]))'; then
+        python3 -c '
+import json, sys
+sys.exit(not any(b.get("NumLiveDataNodes", 0) > 0 for b in json.load(sys.stdin)["beans"]))
+'; then
         # Registration alone does not prove the DataNode accepts block writes.
         timeout 30 docker exec "$prefix-namenode" hdfs dfs -mkdir -p /dataset
         printf 'hugegraph-hdfs-ready\n' |

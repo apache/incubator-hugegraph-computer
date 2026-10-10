@@ -190,7 +190,8 @@ else
 fi
 
 # BufferedFileInput duplicates RandomAccessFile using its path field.
-JAVA_OPTS="${JAVA_OPTS} --add-opens=java.base/java.io=ALL-UNNAMED"
+# SOFA RPC creates Javassist proxies through ClassLoader.defineClass.
+JAVA_OPTS="${JAVA_OPTS} --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED"
 
 # Set up count of cpu if it unspecified from k8s drive,
 # avoid `Runtime.getRuntime().availableProcessors()` always return 1
@@ -215,7 +216,8 @@ if [ "$DRIVE" = "$K8S_DRIVE" ]; then
     fi
 
     NEW_COMPUTER_CONF_PATH="${COPY_CONF_DIR}/$(basename "${COMPUTER_CONF_PATH}")"
-    envsubst '${POD_IP},${HOSTNAME},${POD_NAME},${POD_NAMESPACE}' < "${COMPUTER_CONF_PATH}" > "${NEW_COMPUTER_CONF_PATH}"
+    envsubst '${POD_IP},${HOSTNAME},${POD_NAME},${POD_NAMESPACE}' \
+        < "${COMPUTER_CONF_PATH}" > "${NEW_COMPUTER_CONF_PATH}"
     chmod 777 "${NEW_COMPUTER_CONF_PATH}"
     COMPUTER_CONF_PATH=${NEW_COMPUTER_CONF_PATH}
 fi

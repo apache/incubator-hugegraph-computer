@@ -20,19 +20,22 @@ set -ev
 
 TRAVIS_DIR=$(dirname "$0")
 DATASET_DIR=${TRAVIS_DIR}/../dataset
-GRAPH_ENV_VERSION=${1:-${GRAPH_ENV_VERSION:?Specify the Server/Loader image version}}
+GRAPH_ENV_VERSION=${1:-${GRAPH_ENV_VERSION:?Specify the Server image version}}
+LOADER_VERSION=${2:-1.7.0}
 HDFS_NAMENODE=${HDFS_CONTAINER_PREFIX:-hugegraph-ci-hdfs}-namenode
 
 docker network create ci
 # Note: we need wait for server start finished, so start it first
-docker run -itd --name=graph --network ci -p 8080:8080 hugegraph/hugegraph:"${GRAPH_ENV_VERSION}" && sleep 6
+docker run --pull=always -itd --name=graph --network ci -p 8080:8080 \
+    hugegraph/hugegraph:"${GRAPH_ENV_VERSION}" && sleep 6
 
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d "${DATASET_DIR}" ml-latest-small.zip
 
 cd "${DATASET_DIR}"/.. && pwd && ls -lh ./*
 
-docker run -id --name=loader --network ci hugegraph/loader:"${GRAPH_ENV_VERSION}"
+# Keep data preparation on a published Loader while testing both Server images.
+docker run -id --name=loader --network ci hugegraph/loader:"${LOADER_VERSION}"
 docker cp dataset loader:/dataset || exit 1
 
 docker exec -i loader ls -lh /dataset
