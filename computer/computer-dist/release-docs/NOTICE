@@ -566,7 +566,7 @@ The Apache Software Foundation (https://www.apache.org/).
 
 ========================================================================
 Included component(s):
-    io.grpc:grpc-netty-shaded:1.55.3 (license/ paths below refer to licenses/grpc-netty-shaded/)
+    io.grpc:grpc-netty-shaded:1.65.1 (license/ paths below refer to licenses/grpc-netty-shaded/)
 
 The Netty Project
                             =================

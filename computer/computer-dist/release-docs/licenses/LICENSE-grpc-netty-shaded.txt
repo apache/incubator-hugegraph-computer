@@ -1,4 +1,4 @@
-io.grpc:grpc-netty-shaded:1.55.3 / META-INF/license/LICENSE.tomcat-native.txt
+io.grpc:grpc-netty-shaded:1.65.1 / META-INF/license/LICENSE.tomcat-native.txt
 
 Apache License
                            Version 2.0, January 2004
@@ -204,7 +204,7 @@ Apache License
 
 ========================================================================
 
-io.grpc:grpc-netty-shaded:1.55.3 / META-INF/license/LICENSE.aix-netbsd.txt
+io.grpc:grpc-netty-shaded:1.65.1 / META-INF/license/LICENSE.aix-netbsd.txt
 
 LICENSE ISSUES
   ==============
@@ -332,7 +332,7 @@ LICENSE ISSUES
 
 ========================================================================
 
-io.grpc:grpc-netty-shaded:1.55.3 / META-INF/license/LICENSE.boringssl.txt
+io.grpc:grpc-netty-shaded:1.65.1 / META-INF/license/LICENSE.boringssl.txt
 
 BoringSSL is a fork of OpenSSL. As such, large parts of it fall under OpenSSL
 licensing. Files that are completely new have a Google copyright and an ISC
