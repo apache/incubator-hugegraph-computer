@@ -139,7 +139,6 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
     @Test
     public void testDataUniformity() throws IOException {
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
         byte[] sourceBytes1 = StringEncodeUtil.encode("test data message");
         byte[] sourceBytes2 = StringEncodeUtil.encode("test data edge");
         byte[] sourceBytes3 = StringEncodeUtil.encode("test data vertex");
@@ -177,6 +176,8 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
             return null;
         }).when(serverHandler).handle(Mockito.any(), Mockito.eq(1), Mockito.any());
 
+        // Finish stubbing before channel activation can invoke the handler on another thread.
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
         client.startSession();
         client.send(MessageType.MSG, 1, ByteBuffer.wrap(sourceBytes1));
         client.send(MessageType.EDGE, 1, ByteBuffer.wrap(sourceBytes2));
