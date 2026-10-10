@@ -19,9 +19,11 @@ package org.apache.hugegraph.computer.core.allocator;
 
 import static org.junit.Assert.assertNotSame;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Random;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
@@ -30,31 +32,9 @@ import io.netty.util.Recycler;
 
 public class RecyclersTest {
 
-    private final Method threadLocalCapacityMethod;
-    private final Method threadLocalSizeMethod;
-
-    public RecyclersTest() {
-        try {
-            Method method = Recycler.class
-                                    .getDeclaredMethod("threadLocalCapacity");
-            method.setAccessible(true);
-            this.threadLocalCapacityMethod = method;
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("No method 'threadLocalCapacity'");
-        }
-
-        try {
-            Method method = Recycler.class
-                                    .getDeclaredMethod("threadLocalSize");
-            method.setAccessible(true);
-            this.threadLocalSizeMethod = method;
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("No method 'threadLocalSize'");
-        }
-    }
-
     private static Recycler<RecyclableObject> newRecycler(final int max) {
-        return new Recycler<RecyclableObject>(max) {
+        // Retain every handle so capacity assertions do not depend on sampling.
+        return new Recycler<RecyclableObject>(max, 1, 32) {
             @Override
             protected RecyclableObject newObject(
                       Recycler.Handle<RecyclableObject> handle) {
@@ -88,34 +68,27 @@ public class RecyclersTest {
 
     @Test
     public void testMultiRecycleAtDifferentThread()
-                throws InterruptedException {
+                throws InterruptedException, ExecutionException {
         Recycler<RecyclableObject> recycler = newRecycler(512);
         RecyclableObject object = recycler.get();
-        Thread thread1 = new Thread(() -> object.handle.recycle(object));
-        thread1.start();
-        thread1.join();
+        runInAnotherThread(() -> object.handle.recycle(object));
         Assert.assertSame(object, recycler.get());
     }
 
     @Test
     public void testRecycleMoreThanOnceAtDifferentThread()
-                throws InterruptedException {
+                throws InterruptedException, ExecutionException {
         Recycler<RecyclableObject> recyclers = newRecycler(1024);
         RecyclableObject object = recyclers.get();
 
-        Thread thread1 = new Thread(() -> object.handle.recycle(object));
-        thread1.start();
-        thread1.join();
-
-        Thread thread2 = new Thread(() -> {
+        runInAnotherThread(() -> object.handle.recycle(object));
+        runInAnotherThread(() -> {
             Assert.assertThrows(IllegalStateException.class, () -> {
                 object.handle.recycle(object);
             }, e -> {
                 Assert.assertTrue(e.getMessage().contains("recycled already"));
             });
         });
-        thread2.start();
-        thread2.join();
     }
 
     @Test
@@ -130,40 +103,49 @@ public class RecyclersTest {
     }
 
     @Test
-    public void testMaxCapacity() throws InvocationTargetException,
-                                         IllegalAccessException {
-        testMaxCapacity(300);
-        Random rand = new Random();
-        for (int i = 0; i < 50; i++) {
-            testMaxCapacity(rand.nextInt(1000) + 256); // 256 - 1256
+    public void testMaxCapacity() throws InterruptedException, ExecutionException {
+        // Netty rounds queue capacities to powers of two.
+        for (int capacity : new int[] {256, 512, 1024}) {
+            testMaxCapacity(capacity);
         }
     }
 
     private void testMaxCapacity(final int maxCapacity)
-            throws InvocationTargetException, IllegalAccessException {
+            throws InterruptedException, ExecutionException {
         Recycler<RecyclableObject> recycler = newRecycler(maxCapacity);
         RecyclableObject[] objects = new RecyclableObject[maxCapacity * 3];
+        Set<RecyclableObject> allocated = Collections.newSetFromMap(new IdentityHashMap<>());
         for (int i = 0; i < objects.length; i++) {
             objects[i] = recycler.get();
+            Assert.assertTrue(allocated.add(objects[i]));
         }
 
-        int threadLocalCapacity = (Integer) threadLocalCapacityMethod.invoke(
-                                            recycler);
-        Assert.assertTrue(maxCapacity >= threadLocalCapacity);
-        int threadLocalSize = (Integer) threadLocalSizeMethod.invoke(recycler);
-        Assert.assertEquals(0, threadLocalSize);
+        // Return from another thread to fill the bounded queue, not a local batch.
+        runInAnotherThread(() -> {
+            for (RecyclableObject object : objects) {
+                object.handle.recycle(object);
+            }
+        });
 
+        int reused = 0;
+        Set<RecyclableObject> acquired = Collections.newSetFromMap(new IdentityHashMap<>());
         for (int i = 0; i < objects.length; i++) {
-            objects[i].handle.recycle(objects[i]);
-            objects[i] = null;
+            RecyclableObject object = recycler.get();
+            Assert.assertTrue(acquired.add(object));
+            if (allocated.contains(object)) {
+                reused++;
+            }
         }
+        Assert.assertEquals(maxCapacity, reused);
+    }
 
-        threadLocalCapacity = (Integer) threadLocalCapacityMethod.invoke(
-                                        recycler);
-        Assert.assertTrue(maxCapacity >= threadLocalCapacity);
-        threadLocalSize = (Integer) threadLocalSizeMethod.invoke(recycler);
-        Assert.assertTrue(maxCapacity >= threadLocalSize);
-        Assert.assertTrue(threadLocalSize > 0);
+    private static void runInAnotherThread(Runnable action)
+            throws InterruptedException, ExecutionException {
+        FutureTask<Void> task = new FutureTask<>(action, null);
+        Thread thread = new Thread(task);
+        thread.start();
+        thread.join();
+        task.get();
     }
 
     private static final class RecyclableObject {

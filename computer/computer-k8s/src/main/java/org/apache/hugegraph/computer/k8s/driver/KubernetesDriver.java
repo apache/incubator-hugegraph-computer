@@ -343,6 +343,10 @@ public class KubernetesDriver implements ComputerDriver {
                     @SuppressWarnings("resource")
                     KubernetesDriver driver = KubernetesDriver.this;
                     JobState jobState = driver.buildJobState(computerJob);
+                    if (action == Action.DELETED &&
+                        !JobStatus.finished(jobState.jobStatus())) {
+                        jobState = new DefaultJobState().jobStatus(JobStatus.CANCELLED);
+                    }
 
                     observer.onJobStateChanged(jobState);
 
