@@ -251,6 +251,14 @@ public class QueuedMessageSender implements MessageSender {
         } catch (InterruptedException e) {
             // Reset interrupted flag
             Thread.currentThread().interrupt();
+            if (this.closed) {
+                // Normal shutdown, do not treat as error
+                return;
+            }
+            ComputerException error = new ComputerException(
+                    "Interrupted when waiting any queue not empty");
+            this.recordFatal(error);
+            throw error;
         } finally {
             this.anyQueueNotEmptyEvent.reset();
         }

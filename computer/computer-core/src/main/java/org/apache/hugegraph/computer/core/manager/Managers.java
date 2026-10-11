@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.Config;
 import org.apache.hugegraph.util.E;
 import org.apache.hugegraph.util.InsertionOrderUtil;
@@ -67,8 +68,22 @@ public class Managers implements Iterable<Manager> {
     }
 
     public void closeAll(Config config) {
+        ComputerException exception = null;
         for (Manager manager : this.all()) {
-            manager.close(config);
+            try {
+                manager.close(config);
+            } catch (Throwable e) {
+                // Close all managers even if some of them failed
+                if (exception == null) {
+                    exception = new ComputerException(
+                                "Failed to close manager '%s'", e, manager.name());
+                } else {
+                    exception.addSuppressed(e);
+                }
+            }
+        }
+        if (exception != null) {
+            throw exception;
         }
     }
 

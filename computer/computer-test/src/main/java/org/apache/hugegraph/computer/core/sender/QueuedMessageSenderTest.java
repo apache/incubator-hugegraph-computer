@@ -121,6 +121,33 @@ public class QueuedMessageSenderTest extends UnitTestBase {
     }
 
     @Test
+    public void testInterruptedIdleExecutorFailsNextFinishFast() throws Exception {
+        ControlFutureClient client = new ControlFutureClient();
+        QueuedMessageSender sender = this.newSender(client, new MockTransportClient());
+        try {
+            Thread executor = Whitebox.getInternalState(sender, "sendExecutor");
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5L);
+            while (executor.getState() != Thread.State.WAITING &&
+                   System.nanoTime() < deadline) {
+                Thread.sleep(10L);
+            }
+            Assert.assertEquals(Thread.State.WAITING, executor.getState());
+            executor.interrupt();
+            executor.join(TimeUnit.SECONDS.toMillis(1));
+            Assert.assertFalse(executor.isAlive());
+            Assert.assertThrows(ComputerException.class, sender::checkFatal);
+            /*
+             * The next FINISH must fail fast with the recorded fatal error
+             * instead of waiting out the control timeout on the dead executor.
+             */
+            Assert.assertThrows(ComputerException.class,
+                                () -> sender.send(1, MessageType.FINISH));
+        } finally {
+            sender.close();
+        }
+    }
+
+    @Test
     public void testCloseCompletesQueuedFinish() throws Exception {
         ControlFutureClient client = new ControlFutureClient();
         client.dataSendBusy = true;
