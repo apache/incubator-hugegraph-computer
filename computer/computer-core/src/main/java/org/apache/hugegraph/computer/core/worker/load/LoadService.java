@@ -79,7 +79,9 @@ public class LoadService {
 
     public void close() {
         for (GraphFetcher fetcher : this.fetchers) {
-            fetcher.close();
+            if (fetcher != null) {
+                fetcher.close();
+            }
         }
     }
 

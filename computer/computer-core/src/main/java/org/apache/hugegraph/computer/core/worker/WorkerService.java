@@ -63,6 +63,7 @@ public class WorkerService implements Closeable {
 
     private volatile boolean inited;
     private volatile boolean closed;
+    private volatile boolean registered;
 
     private final ComputerContext context;
     private final Map<Integer, ContainerInfo> workers;
@@ -83,6 +84,7 @@ public class WorkerService implements Closeable {
         this.workers = new HashMap<>();
         this.inited = false;
         this.closed = false;
+        this.registered = false;
         this.shutdownHook = new ShutdownHook();
     }
 
@@ -101,7 +103,7 @@ public class WorkerService implements Closeable {
             this.workerInfo = new ContainerInfo();
 
             LOG.info("{} Start to initialize worker", this);
-            this.bsp4Worker = new Bsp4Worker(this.config, this.workerInfo);
+            this.bsp4Worker = this.newBsp4Worker();
             /*
              * Keep the waitMasterInitDone() called before initManagers(),
              * in order to ensure master init() before worker managers init()
@@ -113,6 +115,7 @@ public class WorkerService implements Closeable {
 
             LOG.info("{} register WorkerService", this);
             this.bsp4Worker.workerInitDone();
+            this.registered = true;
             this.connectToWorkers();
 
             this.computeManager = new ComputeManager(this.workerInfo.id(), this.context,
@@ -176,7 +179,6 @@ public class WorkerService implements Closeable {
                 this.computeManager.close();
             } else {
                 LOG.warn("The computeManager is null");
-                return;
             }
         } catch (Exception e) {
             LOG.error("Error when closing ComputeManager", e);
@@ -194,8 +196,12 @@ public class WorkerService implements Closeable {
         }
 
         try {
-            this.bsp4Worker.workerCloseDone();
-            this.bsp4Worker.close();
+            if (this.bsp4Worker != null) {
+                if (this.registered) {
+                    this.bsp4Worker.workerCloseDone();
+                }
+                this.bsp4Worker.close();
+            }
         } catch (Exception e) {
             LOG.error("Error while closing bsp4Worker", e);
         }
@@ -304,7 +310,11 @@ public class WorkerService implements Closeable {
         return String.format("[worker %s]", id);
     }
 
-    private InetSocketAddress initManagers(ContainerInfo masterInfo) {
+    Bsp4Worker newBsp4Worker() {
+        return new Bsp4Worker(this.config, this.workerInfo);
+    }
+
+    InetSocketAddress initManagers(ContainerInfo masterInfo) {
         // Create managers
         WorkerRpcManager rpcManager = new WorkerRpcManager();
         this.managers.add(rpcManager);
@@ -374,6 +384,10 @@ public class WorkerService implements Closeable {
         LOG.info("{} WorkerService inputstep started", this);
         WorkerInputManager manager = this.managers.get(WorkerInputManager.NAME);
         manager.loadGraph();
+
+        // Fail fast if the sender thread died, before signaling workerInputDone
+        MessageSendManager sendManager = this.managers.get(MessageSendManager.NAME);
+        sendManager.checkFatal();
 
         this.bsp4Worker.workerInputDone();
         this.bsp4Worker.waitMasterInputDone();

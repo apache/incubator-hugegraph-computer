@@ -159,7 +159,7 @@ public class MasterService implements Closeable {
             LOG.error("Error occurred while closing master service", e);
         }
 
-        if (!failed && this.bsp4Master != null) {
+        if (this.inited && !failed && this.bsp4Master != null) {
             this.bsp4Master.waitWorkersCloseDone();
         }
 

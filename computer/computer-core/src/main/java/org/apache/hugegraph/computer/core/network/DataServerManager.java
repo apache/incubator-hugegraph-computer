@@ -54,9 +54,8 @@ public class DataServerManager implements Manager {
 
     @Override
     public void close(Config config) {
-        InetSocketAddress address = this.address();
         this.connectionManager.shutdownServer();
-        LOG.info("DataServerManager closed with address '{}'", address);
+        LOG.info("DataServerManager closed");
     }
 
     public InetSocketAddress address() {

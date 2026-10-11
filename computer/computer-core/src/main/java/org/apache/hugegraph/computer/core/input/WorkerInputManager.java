@@ -139,6 +139,7 @@ public class WorkerInputManager implements Manager {
                                         "sending edges", e);
         }).join();
         this.sendManager.finishSend(MessageType.EDGE);
+        this.sendManager.checkFatal();
         this.sendManager.clearBuffer();
     }
 

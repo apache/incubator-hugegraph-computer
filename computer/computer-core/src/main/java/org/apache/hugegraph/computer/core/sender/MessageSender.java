@@ -45,4 +45,14 @@ public interface MessageSender {
      * an exception is thrown processing message.
      */
     void transportExceptionCaught(TransportException cause, ConnectionId connectionId);
+
+    /**
+     * Check whether the sender has encountered a fatal error. Implementations
+     * that run background threads should propagate the first fatal error to
+     * callers so that the caller can fail fast instead of hanging on a future
+     * or barrier.
+     */
+    default void checkFatal() {
+        // no-op by default
+    }
 }

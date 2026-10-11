@@ -357,11 +357,11 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
 
     @Test
     public void testHandlerException() throws IOException {
-        NettyTransportClient client = (NettyTransportClient) this.oneClient();
-        client.startSession();
-
         Mockito.doThrow(new RuntimeException("test exception")).when(serverHandler)
                .handle(Mockito.any(), Mockito.anyInt(), Mockito.any());
+
+        NettyTransportClient client = (NettyTransportClient) this.oneClient();
+        client.startSession();
 
         ByteBuffer buffer = ByteBuffer.wrap(StringEncodeUtil.encode("test data"));
         boolean send = client.send(MessageType.MSG, 1, buffer);

@@ -17,11 +17,14 @@
 
 package org.apache.hugegraph.computer.core.worker;
 
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.hugegraph.computer.core.bsp.Bsp4Worker;
+import org.apache.hugegraph.computer.core.common.ContainerInfo;
 import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
@@ -33,6 +36,8 @@ import org.apache.hugegraph.config.RpcOptions;
 import org.apache.hugegraph.testutil.Assert;
 import org.apache.hugegraph.util.Log;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 
 import io.grpc.Status;
@@ -232,6 +237,54 @@ public class WorkerServiceTest extends UnitTestBase {
                                     Status.fromThrowable(e.getCause()).getCode());
             });
         }
+    }
+
+    @Test
+    public void testInitFailsAfterRegistration() {
+        Bsp4Worker bsp4Worker = Mockito.mock(Bsp4Worker.class);
+        ContainerInfo masterInfo = new ContainerInfo(ContainerInfo.MASTER_ID,
+                                                     "localhost", 8099);
+        Mockito.when(bsp4Worker.waitMasterInitDone()).thenReturn(masterInfo);
+        Mockito.when(bsp4Worker.waitMasterAllInitDone())
+               .thenThrow(new ComputerException(
+                          "Mocked failure to connect to workers after " +
+                          "registration"));
+
+        Config config = UnitTestBase.updateWithRequiredOptions(
+                ComputerOptions.JOB_ID, "local_005",
+                ComputerOptions.JOB_WORKERS_COUNT, "1",
+                ComputerOptions.WORKER_COMPUTATION_CLASS,
+                MockComputation.class.getName(),
+                ComputerOptions.ALGORITHM_RESULT_CLASS,
+                DoubleValue.class.getName(),
+                ComputerOptions.ALGORITHM_MESSAGE_CLASS,
+                DoubleValue.class.getName()
+        );
+
+        try (WorkerService service = new WorkerService() {
+            @Override
+            Bsp4Worker newBsp4Worker() {
+                return bsp4Worker;
+            }
+
+            @Override
+            InetSocketAddress initManagers(ContainerInfo masterInfo) {
+                return new InetSocketAddress(masterInfo.hostname(),
+                                             masterInfo.rpcPort());
+            }
+        }) {
+            Assert.assertThrows(ComputerException.class, () -> {
+                service.init(config);
+            });
+        }
+
+        InOrder inOrder = Mockito.inOrder(bsp4Worker);
+        inOrder.verify(bsp4Worker).waitMasterInitDone();
+        inOrder.verify(bsp4Worker).workerInitDone();
+        inOrder.verify(bsp4Worker).waitMasterAllInitDone();
+        inOrder.verify(bsp4Worker).workerCloseDone();
+        inOrder.verify(bsp4Worker).close();
+        Mockito.verifyNoMoreInteractions(bsp4Worker);
     }
 
     @Test

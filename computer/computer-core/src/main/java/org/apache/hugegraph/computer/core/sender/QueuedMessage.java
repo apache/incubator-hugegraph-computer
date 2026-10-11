@@ -18,6 +18,7 @@
 package org.apache.hugegraph.computer.core.sender;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 
 import org.apache.hugegraph.computer.core.network.message.MessageType;
 
@@ -26,11 +27,18 @@ public class QueuedMessage {
     private final int partitionId;
     private final MessageType type;
     private final ByteBuffer buffer;
+    private final CompletableFuture<Void> controlFuture;
 
     public QueuedMessage(int partitionId, MessageType type, ByteBuffer buffer) {
+        this(partitionId, type, buffer, null);
+    }
+
+    QueuedMessage(int partitionId, MessageType type, ByteBuffer buffer,
+                  CompletableFuture<Void> controlFuture) {
         this.partitionId = partitionId;
         this.type = type;
         this.buffer = buffer;
+        this.controlFuture = controlFuture;
     }
 
     public int partitionId() {
@@ -43,5 +51,9 @@ public class QueuedMessage {
 
     public ByteBuffer buffer() {
         return this.buffer;
+    }
+
+    CompletableFuture<Void> controlFuture() {
+        return this.controlFuture;
     }
 }

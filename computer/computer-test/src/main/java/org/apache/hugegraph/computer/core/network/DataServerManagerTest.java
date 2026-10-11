@@ -19,12 +19,17 @@ package org.apache.hugegraph.computer.core.network;
 
 import java.net.InetSocketAddress;
 
+import org.apache.hugegraph.computer.core.common.exception.ComputerException;
 import org.apache.hugegraph.computer.core.common.exception.TransportException;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
 import org.apache.hugegraph.computer.core.config.Config;
+import org.apache.hugegraph.computer.core.input.WorkerInputManager;
+import org.apache.hugegraph.computer.core.manager.Manager;
+import org.apache.hugegraph.computer.core.manager.Managers;
 import org.apache.hugegraph.computer.core.network.connection.ConnectionManager;
 import org.apache.hugegraph.computer.core.network.connection.TransportConnectionManager;
 import org.apache.hugegraph.computer.core.receiver.MessageRecvManager;
+import org.apache.hugegraph.computer.core.sender.MessageSendManager;
 import org.apache.hugegraph.computer.core.snapshot.SnapshotManager;
 import org.apache.hugegraph.computer.core.sort.sorting.RecvSortManager;
 import org.apache.hugegraph.computer.core.sort.sorting.SortManager;
@@ -34,8 +39,56 @@ import org.apache.hugegraph.computer.core.worker.MockMasterComputation;
 import org.apache.hugegraph.computer.suite.unit.UnitTestBase;
 import org.apache.hugegraph.testutil.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class DataServerManagerTest extends UnitTestBase {
+
+    @Test
+    public void testCloseManagersAfterPartialInitFailure() {
+        UnitTestBase.updateWithRequiredOptions(
+            ComputerOptions.JOB_ID, "local_001",
+            ComputerOptions.JOB_WORKERS_COUNT, "1"
+        );
+        Managers managers = new Managers();
+        Config config = Mockito.mock(Config.class);
+        Manager first = Mockito.mock(Manager.class);
+        Manager last = Mockito.mock(Manager.class);
+        Mockito.when(first.name()).thenReturn("first");
+        Mockito.when(last.name()).thenReturn("last");
+        IllegalStateException initFailure =
+                new IllegalStateException("init failed");
+        Mockito.doThrow(initFailure).when(first).init(config);
+        managers.add(first);
+        managers.add(new DataServerManager(new TransportConnectionManager(),
+                                           Mockito.mock(MessageHandler.class)));
+        managers.add(new WorkerInputManager(context(),
+                                            Mockito.mock(MessageSendManager.class),
+                                            Mockito.mock(SnapshotManager.class)));
+        managers.add(last);
+
+        Assert.assertThrows(IllegalStateException.class,
+                            () -> managers.initAll(config));
+        managers.closeAll(config);
+        Mockito.verify(last).close(config);
+    }
+
+    @Test
+    public void testCloseAllContinuesAfterManagerCloseFailure() {
+        Managers managers = new Managers();
+        Config config = Mockito.mock(Config.class);
+        Manager first = Mockito.mock(Manager.class);
+        Manager last = Mockito.mock(Manager.class);
+        Mockito.when(first.name()).thenReturn("first");
+        Mockito.when(last.name()).thenReturn("last");
+        Mockito.doThrow(new IllegalStateException("close failed"))
+               .when(first).close(config);
+        managers.add(first);
+        managers.add(last);
+
+        Assert.assertThrows(ComputerException.class,
+                            () -> managers.closeAll(config));
+        Mockito.verify(last).close(config);
+    }
 
     @Test
     public void test() {

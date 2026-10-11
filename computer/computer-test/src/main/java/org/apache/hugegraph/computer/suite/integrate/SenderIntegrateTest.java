@@ -17,6 +17,7 @@
 
 package org.apache.hugegraph.computer.suite.integrate;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,8 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.hugegraph.computer.algorithm.centrality.pagerank.PageRankParams;
@@ -43,6 +47,7 @@ import org.apache.hugegraph.computer.core.network.session.ClientSession;
 import org.apache.hugegraph.computer.core.util.ComputerContextUtil;
 import org.apache.hugegraph.computer.core.worker.WorkerService;
 import org.apache.hugegraph.config.RpcOptions;
+import org.apache.hugegraph.testutil.Assert;
 import org.apache.hugegraph.testutil.Whitebox;
 import org.apache.hugegraph.util.Log;
 import org.junit.AfterClass;
@@ -57,6 +62,9 @@ public class SenderIntegrateTest {
     public static final Logger LOG = Log.logger(SenderIntegrateTest.class);
 
     private static final Class<?> COMPUTATION = MockComputation.class;
+    private static final long BSP_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(90L);
+    private static final long SERVICE_WAIT_TIMEOUT =
+            BSP_TIMEOUT_MS + TimeUnit.SECONDS.toMillis(30L);
 
     @BeforeClass
     public static void init() {
@@ -83,17 +91,20 @@ public class SenderIntegrateTest {
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
-                                          .withBufferThreshold(50)
-                                          .withBufferCapacity(60)
+                                          // 4KB keeps the sort+send path exercised without
+                                          // flooding the ACK-throttled transport (50B stalled)
+                                          .withBufferThreshold(4096)
+                                          .withBufferCapacity(8192)
                                           .withRpcServerHost("127.0.0.1")
                                           .withRpcServerPort(8611)
-                                          .withRpcServerPort(0)
-                                          .build();
-            try (MasterService service = initMaster(args)) {
-                masterServiceRef.set(service);
+                                        .withRpcServerPort(0)
+                                        .withTestBspTimeouts()
+                                        .build();
+            try (MasterService service = initMaster(
+                                       args, masterServiceRef::set)) {
                 service.execute();
                 masterFuture.complete(null);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 LOG.error("Failed to execute master service", e);
                 masterFuture.completeExceptionally(e);
             }
@@ -111,12 +122,13 @@ public class SenderIntegrateTest {
                                           .withMaxSuperStep(3)
                                           .withComputationClass(COMPUTATION)
                                           .withWorkerCount(1)
-                                          .withBufferThreshold(50)
-                                          .withBufferCapacity(60)
-                                          .withTransoprtServerPort(0)
-                                          .build();
-            try (WorkerService service = initWorker(args)) {
-                workerServiceRef.set(service);
+                                          .withBufferThreshold(4096)
+                                          .withBufferCapacity(8192)
+                                        .withTransportServerPort(0)
+                                        .withTestBspTimeouts()
+                                        .build();
+            try (WorkerService service = initWorker(
+                                       args, workerServiceRef::set)) {
                 service.execute();
                 workerFuture.complete(null);
             } catch (Throwable e) {
@@ -128,11 +140,15 @@ public class SenderIntegrateTest {
         masterThread.start();
         workerThread.start();
 
+        Throwable failure = null;
         try {
-            CompletableFuture.allOf(workerFuture, masterFuture).join();
+            awaitServices(workerFuture, masterFuture);
+        } catch (RuntimeException | Error e) {
+            failure = e;
+            throw e;
         } finally {
-            workerServiceRef.get().close();
-            masterServiceRef.get().close();
+            closeServices(failure, workerServiceRef.get(),
+                          masterServiceRef.get());
         }
     }
 
@@ -155,11 +171,12 @@ public class SenderIntegrateTest {
                                           .withWorkerCount(workerCount)
                                           .withPartitionCount(partitionCount)
                                           .withRpcServerHost("127.0.0.1")
-                                          .withRpcServerPort(0)
-                                          .build();
+                                        .withRpcServerPort(0)
+                                        .withTestBspTimeouts()
+                                        .build();
             try {
-                MasterService service = initMaster(args);
-                masterServiceRef.set(service);
+                MasterService service = initMaster(
+                                        args, masterServiceRef::set);
                 service.execute();
                 masterFuture.complete(null);
             } catch (Throwable e) {
@@ -186,12 +203,13 @@ public class SenderIntegrateTest {
                         .withComputationClass(COMPUTATION)
                         .withWorkerCount(workerCount)
                         .withPartitionCount(partitionCount)
-                        .withTransoprtServerPort(0)
-                        .withDataDirs(dir)
-                        .build();
+                   .withTransportServerPort(0)
+                   .withDataDirs(dir)
+                   .withTestBspTimeouts()
+                   .build();
                 try {
-                    WorkerService service = initWorker(args);
-                    workerServices.add(service);
+                    WorkerService service = initWorker(
+                                            args, workerServices::add);
                     service.execute();
                     workerFuture.complete(null);
                 } catch (Throwable e) {
@@ -210,13 +228,16 @@ public class SenderIntegrateTest {
 
         List<CompletableFuture<Void>> futures = new ArrayList<>(workers.values());
         futures.add(masterFuture);
+        Throwable failure = null;
         try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            awaitServices(futures.toArray(new CompletableFuture[0]));
+        } catch (RuntimeException | Error e) {
+            failure = e;
+            throw e;
         } finally {
-            for (WorkerService workerService : workerServices) {
-                workerService.close();
-            }
-            masterServiceRef.get().close();
+            List<Closeable> services = new ArrayList<>(workerServices);
+            services.add(masterServiceRef.get());
+            closeServices(failure, services.toArray(new Closeable[0]));
         }
     }
 
@@ -238,10 +259,11 @@ public class SenderIntegrateTest {
                                           .withWriteBufferHighMark(10)
                                           .withWriteBufferLowMark(5)
                                           .withRpcServerHost("127.0.0.1")
-                                          .withRpcServerPort(0)
-                                          .build();
-            try (MasterService service = initMaster(args)) {
-                masterServiceRef.set(service);
+                                        .withRpcServerPort(0)
+                                        .withTestBspTimeouts()
+                                        .build();
+            try (MasterService service = initMaster(
+                                       args, masterServiceRef::set)) {
                 service.execute();
                 masterFuture.complete(null);
             } catch (Throwable e) {
@@ -252,7 +274,7 @@ public class SenderIntegrateTest {
         masterThread.setDaemon(true);
 
         CompletableFuture<Void> workerFuture = new CompletableFuture<>();
-        int transoprtServerPort = 8998;
+        int transportServerPort = 8998;
         Thread workerThread = new Thread(() -> {
             String[] args = OptionsBuilder.newInstance()
                                           .withJobId("local_002")
@@ -265,12 +287,14 @@ public class SenderIntegrateTest {
                                           .withWorkerCount(1)
                                           .withWriteBufferHighMark(20)
                                           .withWriteBufferLowMark(10)
-                                          .withTransoprtServerPort(transoprtServerPort)
-                                          .build();
-            try (WorkerService service = initWorker(args)) {
-                workerServiceRef.set(service);
+                                        .withTransportServerPort(
+                                         transportServerPort)
+                                        .withTestBspTimeouts()
+                                        .build();
+            try (WorkerService service = initWorker(
+                                       args, workerServiceRef::set)) {
                 // Let send rate slowly
-                this.slowSendFunc(service, transoprtServerPort);
+                this.slowSendFunc(service, transportServerPort);
                 service.execute();
                 workerFuture.complete(null);
             } catch (Throwable e) {
@@ -282,15 +306,42 @@ public class SenderIntegrateTest {
         masterThread.start();
         workerThread.start();
 
+        Throwable failure = null;
         try {
-            CompletableFuture.allOf(workerFuture, masterFuture).join();
+            awaitServices(workerFuture, masterFuture);
+        } catch (RuntimeException | Error e) {
+            failure = e;
+            throw e;
         } finally {
-            workerServiceRef.get().close();
-            masterServiceRef.get().close();
+            closeServices(failure, workerServiceRef.get(),
+                          masterServiceRef.get());
         }
     }
 
-    private void slowSendFunc(WorkerService service, int port) throws TransportException {
+    @Test
+    public void testFailedServiceReleasesPeerWaitFast() {
+        CompletableFuture<Void> failed = new CompletableFuture<>();
+        CompletableFuture<Void> unfinished = new CompletableFuture<>();
+        IllegalStateException cause =
+                new IllegalStateException("service failed");
+        failed.completeExceptionally(cause);
+
+        long start = System.currentTimeMillis();
+        try {
+            awaitServices(TimeUnit.SECONDS.toMillis(1L), failed, unfinished);
+            Assert.fail("Expected CompletionException when a service fails");
+        } catch (CompletionException e) {
+            long elapsed = System.currentTimeMillis() - start;
+            Assert.assertTrue(
+                    "Wait should fail fast on first failure, but waited " +
+                    elapsed + " ms",
+                    elapsed < TimeUnit.SECONDS.toMillis(5L));
+            Assert.assertSame(cause, e.getCause());
+        }
+    }
+
+    private void slowSendFunc(WorkerService service, int port)
+                              throws TransportException {
         Managers managers = Whitebox.getInternalState(service, "managers");
         DataClientManager clientManager = managers.get(
                                           DataClientManager.NAME);
@@ -306,7 +357,7 @@ public class SenderIntegrateTest {
                                                       "sendFunction");
         Function<Message, Future<Void>> sendFunc = message -> {
             try {
-                Thread.sleep(100);
+                Thread.sleep(20);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -315,20 +366,75 @@ public class SenderIntegrateTest {
         Whitebox.setInternalState(clientSession, "sendFunction", sendFunc);
     }
 
-    private MasterService initMaster(String[] args) {
+    private MasterService initMaster(String[] args,
+                                     Consumer<MasterService> register) {
         Config config = ComputerContextUtil.initContext(
                         ComputerContextUtil.convertToMap(args));
         MasterService service = new MasterService();
+        register.accept(service);
         service.init(config);
         return service;
     }
 
-    private WorkerService initWorker(String[] args) {
+    private WorkerService initWorker(String[] args,
+                                     Consumer<WorkerService> register) {
         Config config = ComputerContextUtil.initContext(
                         ComputerContextUtil.convertToMap(args));
         WorkerService service = new WorkerService();
+        register.accept(service);
         service.init(config);
         return service;
+    }
+
+    private static void closeServices(Throwable primaryFailure,
+                                      Closeable... services) {
+        Throwable cleanupFailure = null;
+        for (Closeable service : services) {
+            if (service == null) {
+                continue;
+            }
+            try {
+                service.close();
+            } catch (Throwable failure) {
+                if (primaryFailure != null) {
+                    primaryFailure.addSuppressed(failure);
+                } else if (cleanupFailure == null) {
+                    cleanupFailure = failure;
+                } else {
+                    cleanupFailure.addSuppressed(failure);
+                }
+            }
+        }
+        if (cleanupFailure instanceof RuntimeException) {
+            throw (RuntimeException) cleanupFailure;
+        }
+        if (cleanupFailure instanceof Error) {
+            throw (Error) cleanupFailure;
+        }
+        if (cleanupFailure != null) {
+            throw new RuntimeException("Failed to close services",
+                                       cleanupFailure);
+        }
+    }
+
+    private static void awaitServices(CompletableFuture<Void>... futures) {
+        awaitServices(SERVICE_WAIT_TIMEOUT, futures);
+    }
+
+    private static void awaitServices(long timeout,
+                                      CompletableFuture<Void>... futures) {
+        CompletableFuture<Void> allDone = CompletableFuture.allOf(futures);
+        CompletableFuture<Void> firstFailure = new CompletableFuture<>();
+        for (CompletableFuture<Void> future : futures) {
+            future.whenComplete((result, error) -> {
+                if (error != null) {
+                    firstFailure.completeExceptionally(error);
+                }
+            });
+        }
+        CompletableFuture.anyOf(firstFailure, allDone)
+                         .orTimeout(timeout, TimeUnit.MILLISECONDS)
+                         .join();
     }
 
     private static class OptionsBuilder {
@@ -415,7 +521,7 @@ public class SenderIntegrateTest {
             return this;
         }
 
-        public OptionsBuilder withTransoprtServerPort(int dataPort) {
+        public OptionsBuilder withTransportServerPort(int dataPort) {
             this.options.add(ComputerOptions.TRANSPORT_SERVER_PORT.name());
             this.options.add(String.valueOf(dataPort));
             return this;
@@ -452,5 +558,14 @@ public class SenderIntegrateTest {
             this.options.add(String.valueOf(dataDirs));
             return this;
         }
+
+        public OptionsBuilder withTestBspTimeouts() {
+            this.options.add(ComputerOptions.BSP_WAIT_WORKERS_TIMEOUT.name());
+            this.options.add(String.valueOf(BSP_TIMEOUT_MS));
+            this.options.add(ComputerOptions.BSP_WAIT_MASTER_TIMEOUT.name());
+            this.options.add(String.valueOf(BSP_TIMEOUT_MS));
+            return this;
+        }
+
     }
 }

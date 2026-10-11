@@ -150,6 +150,7 @@ public class MessageSendManager implements Manager {
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
         this.sendControlMessageToWorkers(workerIds, MessageType.START);
+        this.sender.checkFatal();
         LOG.info("Start sending message(type={})", type);
     }
 
@@ -166,6 +167,7 @@ public class MessageSendManager implements Manager {
                                     .map(this.partitioner::workerId)
                                     .collect(Collectors.toSet());
         this.sendControlMessageToWorkers(workerIds, MessageType.FINISH);
+        this.sender.checkFatal();
         LOG.info("Finish sending message(type={},count={},bytes={})",
                  type, stat.messageCount(), stat.messageBytes());
     }
@@ -176,6 +178,10 @@ public class MessageSendManager implements Manager {
 
     public void clearBuffer() {
         this.buffers.clear();
+    }
+
+    public void checkFatal() {
+        this.checkException();
     }
 
     private void sortIfTargetBufferIsFull(WriteBuffers buffer,
@@ -286,6 +292,7 @@ public class MessageSendManager implements Manager {
     }
 
     private void checkException() {
+        this.sender.checkFatal();
         if (this.exception.get() != null) {
             throw new ComputerException("Failed to send message",
                                         this.exception.get());
