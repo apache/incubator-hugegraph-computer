@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11-slim
+FROM eclipse-temurin:17-jre-jammy
 LABEL maintainer="HugeGraph Docker Maintainers <dev@hugegraph.apache.org>"
 WORKDIR /hugegraph/operator
 COPY target/hugegraph-computer-operator-*.jar hugegraph-computer-operator.jar

@@ -141,7 +141,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20</version>
+                <version>3.5.6</version>
+                <configuration>
+                    <argLine>
+                        @{argLine} --add-opens=java.base/java.io=ALL-UNNAMED
+                        --add-opens=java.base/java.lang=ALL-UNNAMED
+                    </argLine>
+                </configuration>
                 <executions>
                     <execution>
                         <id>unit-test</id>
@@ -176,7 +182,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.4</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <id>pre-test</id>

@@ -29,7 +29,7 @@
 
     <properties>
         <fabric8.version>5.6.0</fabric8.version>
-        <lombok.version>1.18.0</lombok.version>
+        <lombok.version>1.18.32</lombok.version>
         <sundrio.version>0.40.1</sundrio.version>
         <maven.jsonschema2pojo.plugin.version>1.1.0</maven.jsonschema2pojo.plugin.version>
         <maven.bundle.plugin.version>5.1.2</maven.bundle.plugin.version>
@@ -115,17 +115,21 @@
                         <configuration>
                             <target>
                                 <!-- removing the generated Schema class -->
+                                <property name="crd.generated.dir"
+                                          value="${project.build.directory}/generated-sources/src/gen/java"/>
+                                <property name="crd.model.dir"
+                                          value="${crd.generated.dir}/org/apache/hugegraph/computer/k8s/crd/model"/>
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/CrdSchema.java"
+                                        file="${crd.model.dir}/CrdSchema.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/EnumSchema.java"
+                                        file="${crd.model.dir}/EnumSchema.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/HugeGraphComputerJob.java"
+                                        file="${crd.model.dir}/HugeGraphComputerJob.java"
                                         verbose="true" />
                                 <delete
-                                        file="${project.build.directory}/generated-sources/src/gen/java/org/apache/hugegraph/computer/k8s/crd/model/HugeGraphComputerJobList.java"
+                                        file="${crd.model.dir}/HugeGraphComputerJobList.java"
                                         verbose="true" />
                             </target>
                         </configuration>
@@ -145,7 +149,7 @@
                             <goal>process</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/generated-sources/annotations</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/builders</outputDirectory>
                             <processor>io.sundr.builder.internal.processor.BuildableProcessor</processor>
                             <showWarnings>false</showWarnings>
                         </configuration>

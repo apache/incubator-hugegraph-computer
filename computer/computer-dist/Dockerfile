@@ -14,10 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-FROM openjdk:11-slim
+FROM eclipse-temurin:17-jre-jammy
 LABEL maintainer="HugeGraph Docker Maintainers <dev@hugegraph.apache.org>"
 # use ParallelGC which is more friendly to olap system
-ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseParallelGC -XX:+UseContainerSupport -XX:MaxRAMPercentage=50 -XshowSettings:vm"
+ENV JAVA_OPTS="-XX:+UnlockExperimentalVMOptions -XX:+UseParallelGC -XX:+UseContainerSupport \
+    -XX:MaxRAMPercentage=50 -XshowSettings:vm"
 COPY ./bin /hugegraph/hugegraph-computer/bin
 COPY ./lib /hugegraph/hugegraph-computer/lib
 COPY ./algorithm /hugegraph/hugegraph-computer/algorithm

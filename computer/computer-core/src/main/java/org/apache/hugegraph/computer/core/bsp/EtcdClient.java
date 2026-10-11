@@ -67,7 +67,7 @@ public class EtcdClient {
                                "The namespace can't be null");
         ByteSequence namespaceSeq = ByteSequence.from(namespace.getBytes(ENCODING));
         this.client = Client.builder().endpoints(endpoints)
-                            .namespace(namespaceSeq).build();
+                            .namespace(namespaceSeq).waitForReady(false).build();
         this.watch = this.client.getWatchClient();
         this.kv = this.client.getKVClient();
     }

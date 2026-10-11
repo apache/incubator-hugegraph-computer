@@ -40,6 +40,8 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 
+import io.grpc.Status;
+
 public class WorkerServiceTest extends UnitTestBase {
 
     private static final Logger LOG = Log.logger(WorkerServiceTest.class);
@@ -231,8 +233,8 @@ public class WorkerServiceTest extends UnitTestBase {
             }, e -> {
                 Assert.assertContains("Error while getting with key='BSP_MASTER_INIT_DONE'",
                                       e.getMessage());
-                Assert.assertContains("UNAVAILABLE: unresolved address",
-                                      e.getCause().getMessage());
+                Assert.assertEquals(Status.Code.UNAVAILABLE,
+                                    Status.fromThrowable(e.getCause()).getCode());
             });
         }
     }

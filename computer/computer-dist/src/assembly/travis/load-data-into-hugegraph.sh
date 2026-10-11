@@ -20,17 +20,22 @@ set -ev
 
 TRAVIS_DIR=$(dirname "$0")
 DATASET_DIR=${TRAVIS_DIR}/../dataset
+GRAPH_ENV_VERSION=${1:-${GRAPH_ENV_VERSION:?Specify the Server image version}}
+LOADER_VERSION=${2:-1.7.0}
+HDFS_NAMENODE=${HDFS_CONTAINER_PREFIX:-hugegraph-ci-hdfs}-namenode
 
 docker network create ci
 # Note: we need wait for server start finished, so start it first
-docker run -itd --name=graph --network ci -p 8080:8080 hugegraph/hugegraph:"${GRAPH_ENV_VERSION}" && sleep 6
+docker run --pull=always -itd --name=graph --network ci -p 8080:8080 \
+    hugegraph/hugegraph:"${GRAPH_ENV_VERSION}" && sleep 6
 
 wget http://files.grouplens.org/datasets/movielens/ml-latest-small.zip
 unzip -d "${DATASET_DIR}" ml-latest-small.zip
 
 cd "${DATASET_DIR}"/.. && pwd && ls -lh ./*
 
-docker run -id --name=loader --network ci hugegraph/loader:"${GRAPH_ENV_VERSION}"
+# Keep data preparation on a published Loader while testing both Server images.
+docker run -id --name=loader --network ci hugegraph/loader:"${LOADER_VERSION}"
 docker cp dataset loader:/dataset || exit 1
 
 docker exec -i loader ls -lh /dataset
@@ -39,9 +44,10 @@ docker exec -i loader bin/hugegraph-loader.sh -g hugegraph -p 8080 -h graph \
 
 # load dataset to hdfs
 sort -t , -k1n -u dataset/ml-latest-small/ratings.csv | cut -d "," -f 1 >dataset/ml-latest-small/user_id.csv || exit 1
-/opt/hadoop/bin/hadoop fs -mkdir -p /dataset/ml-latest-small || exit 1
-/opt/hadoop/bin/hadoop fs -put dataset/ml-latest-small/* /dataset/ml-latest-small || exit 1
-/opt/hadoop/bin/hadoop fs -ls /dataset/ml-latest-small
+docker cp dataset/ml-latest-small "$HDFS_NAMENODE":/tmp/ml-latest-small || exit 1
+docker exec "$HDFS_NAMENODE" hdfs dfs -mkdir -p /dataset || exit 1
+docker exec "$HDFS_NAMENODE" hdfs dfs -put /tmp/ml-latest-small /dataset || exit 1
+docker exec "$HDFS_NAMENODE" hdfs dfs -ls /dataset/ml-latest-small
 
 echo "Load finished, continue to next step"
 
@@ -50,7 +56,6 @@ echo "Load finished, continue to next step"
 #git clone --depth 10 ${HUGEGRAPH_LOADER_GIT_URL} hugegraph-toolchain
 #
 #cd hugegraph-toolchain
-#mvn install -P stage -pl hugegraph-client,hugegraph-loader -am -DskipTests -ntp
 #
 #cd hugegraph-loader
 #tar -zxf target/apache-hugegraph-loader-*.tar.gz || exit 1

@@ -36,17 +36,17 @@ public final class HugeClientUtil {
     public static HugeClient newHugeClient(String url, String graph,
                                            String username, String password) {
         registerCompatibilityModule();
-        return new HugeClientBuilder(url, graph).configUser(username, password)
-                                                .build();
+        return new HugeClientBuilder(url, null, graph).configUser(username, password)
+                                                      .build();
     }
 
     public static HugeClient newHugeClient(String url, String graph,
                                            String username, String password,
                                            int timeout) {
         registerCompatibilityModule();
-        return new HugeClientBuilder(url, graph).configUser(username, password)
-                                                .configTimeout(timeout)
-                                                .build();
+        return new HugeClientBuilder(url, null, graph).configUser(username, password)
+                                                      .configTimeout(timeout)
+                                                      .build();
     }
 
     public static void registerCompatibilityModule() {

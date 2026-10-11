@@ -22,22 +22,32 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hugegraph.computer.core.common.ComputerContext;
 import org.apache.hugegraph.computer.core.common.exception.TransportException;
 import org.apache.hugegraph.computer.core.config.ComputerOptions;
+import org.apache.hugegraph.computer.core.config.Config;
+import org.apache.hugegraph.computer.core.network.ClientHandler;
 import org.apache.hugegraph.computer.core.network.ConnectionId;
 import org.apache.hugegraph.computer.core.network.TransportConf;
 import org.apache.hugegraph.computer.core.network.buffer.FileRegionBuffer;
 import org.apache.hugegraph.computer.core.network.buffer.NetworkBuffer;
+import org.apache.hugegraph.computer.core.network.message.AbstractMessage;
+import org.apache.hugegraph.computer.core.network.message.AckMessage;
+import org.apache.hugegraph.computer.core.network.message.DataMessage;
 import org.apache.hugegraph.computer.core.network.message.Message;
 import org.apache.hugegraph.computer.core.network.message.MessageType;
+import org.apache.hugegraph.computer.core.sender.QueuedMessage;
+import org.apache.hugegraph.computer.core.sender.QueuedMessageSender;
 import org.apache.hugegraph.computer.core.util.StringEncodeUtil;
 import org.apache.hugegraph.computer.suite.unit.UnitTestBase;
 import org.apache.hugegraph.testutil.Assert;
@@ -48,6 +58,8 @@ import org.mockito.Mockito;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.embedded.EmbeddedChannel;
 
 public class NettyTransportClientTest extends AbstractNetworkTest {
 
@@ -164,6 +176,7 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
             return null;
         }).when(serverHandler).handle(Mockito.any(), Mockito.eq(1), Mockito.any());
 
+        // Finish stubbing before channel activation can invoke the handler on another thread.
         NettyTransportClient client = (NettyTransportClient) this.oneClient();
         client.startSession();
         client.send(MessageType.MSG, 1, ByteBuffer.wrap(sourceBytes1));
@@ -270,6 +283,76 @@ public class NettyTransportClientTest extends AbstractNetworkTest {
         Assert.assertEquals(pendings + 1, maxAckId);
 
         Whitebox.setInternalState(client.clientSession(), "sendFunction", sendFuncBak);
+    }
+
+    @Test(timeout = 15_000L)
+    public void testFlowControlResumesQueuedSender() throws Exception {
+        Config senderConfig = Mockito.mock(Config.class);
+        Mockito.when(senderConfig.get(ComputerOptions.JOB_WORKERS_COUNT)).thenReturn(1);
+        QueuedMessageSender sender = new QueuedMessageSender(senderConfig);
+        ClientHandler handler = Mockito.mock(ClientHandler.class);
+        AtomicBoolean notificationsEnabled = new AtomicBoolean();
+        Mockito.doAnswer(invocation -> {
+            if (notificationsEnabled.get()) {
+                sender.notBusyNotifier().run();
+            }
+            return null;
+        }).when(handler).sendAvailable(Mockito.any());
+
+        CountDownLatch blocked = new CountDownLatch(1);
+        CountDownLatch resumed = new CountDownLatch(1);
+        AtomicInteger sent = new AtomicInteger();
+        int requestCount = conf.maxPendingRequests() + 1;
+        EmbeddedChannel channel = new EmbeddedChannel();
+        channel.pipeline().addLast(NettyProtocol.CLIENT_HANDLER_NAME, new ChannelInboundHandlerAdapter());
+        NettyClientFactory factory = new NettyClientFactory(conf);
+        NettyTransportClient client = new NettyTransportClient(channel,
+                ConnectionId.parseConnectionId("127.0.0.1", 8998), factory, handler) {
+            @Override
+            public boolean send(MessageType type, int partition, ByteBuffer buffer) throws TransportException {
+                boolean accepted = super.send(type, partition, buffer);
+                if (!accepted) {
+                    blocked.countDown();
+                } else if (sent.incrementAndGet() == requestCount) {
+                    resumed.countDown();
+                }
+                return accepted;
+            }
+        };
+        client.startSessionAsync();
+        channel.readOutbound();
+        channel.writeInbound(new AckMessage(AbstractMessage.START_SEQ));
+        sender.addWorkerClient(1, client);
+        sender.init();
+        try {
+            for (int i = 0; i < requestCount; i++) {
+                sender.send(1, new QueuedMessage(0, MessageType.VERTEX, ByteBuffer.wrap(new byte[]{(byte) i})));
+            }
+            Assert.assertTrue(blocked.await(5, TimeUnit.SECONDS));
+            Assert.assertEquals(conf.maxPendingRequests(), sent.get());
+
+            notificationsEnabled.set(true);
+            channel.writeInbound(new AckMessage(conf.maxPendingRequests()));
+            Assert.assertTrue(resumed.await(5, TimeUnit.SECONDS));
+            for (int i = 1; i <= requestCount; i++) {
+                DataMessage message = channel.readOutbound();
+                try {
+                    Assert.assertEquals(i, message.requestId());
+                } finally {
+                    message.release();
+                }
+            }
+            Assert.assertNull(channel.readOutbound());
+        } finally {
+            channel.close();
+            sender.close();
+            Message pending;
+            while ((pending = channel.readOutbound()) != null) {
+                pending.release();
+            }
+            channel.finishAndReleaseAll();
+            factory.close();
+        }
     }
 
     @Test

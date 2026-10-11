@@ -27,13 +27,39 @@ import org.apache.hugegraph.loader.builder.VertexBuilder;
 import org.apache.hugegraph.loader.executor.LoadContext;
 import org.apache.hugegraph.loader.mapping.InputStruct;
 import org.apache.hugegraph.loader.mapping.VertexMapping;
+import org.apache.hugegraph.loader.reader.line.Line;
 import org.apache.hugegraph.structure.graph.Vertex;
+import org.apache.hugegraph.util.E;
 
 public class FileVertxFetcher extends FileElementFetcher<Vertex>
                               implements VertexFetcher {
 
     public FileVertxFetcher(Config config) {
         super(config);
+    }
+
+    @Override
+    protected List<Vertex> buildElement(Line line, ElementBuilder<Vertex> builder) {
+        List<Vertex> vertices = super.buildElement(line, builder);
+        if (vertices.stream().noneMatch(vertex -> vertex.id() == null)) {
+            return vertices;
+        }
+        // Loader leaves primary-key IDs for online insertion; offline input needs both IDs and properties.
+        E.checkState(!this.context().options().usePrefilter,
+                     "Can't restore offline vertex IDs with prefiltering enabled");
+        List<Vertex> identities = ((VertexBuilder) builder).buildIdentity(line.names(), line.values());
+        E.checkState(vertices.size() == identities.size(),
+                     "Offline vertex and identity counts differ");
+        for (int i = 0; i < vertices.size(); i++) {
+            Vertex vertex = vertices.get(i);
+            Vertex identity = identities.get(i);
+            E.checkState(vertex.label().equals(identity.label()) && identity.id() != null,
+                         "Invalid offline vertex identity for label '%s'", vertex.label());
+            if (vertex.id() == null) {
+                vertex.id(identity.id());
+            }
+        }
+        return vertices;
     }
 
     @Override

@@ -69,8 +69,12 @@ HugeGraph-Computer is a distributed graph processing framework implementing the 
 
 ## Prerequisites
 
-- **JDK 11** or later (for building and running)
-- **Maven 3.5+** for building
+- **JDK 17** or later (for building and running, including cluster workers)
+- When embedding Computer in your own Java process, use
+  `--add-opens=java.base/java.io=ALL-UNNAMED` for buffered file duplication and
+  `--add-opens=java.base/java.lang=ALL-UNNAMED` for SOFA RPC proxy creation.
+  The distribution launcher sets these options automatically.
+- **Maven 3.6.3+** for building
 - **Kubernetes cluster** or **YARN cluster** for deployment
 - **etcd** for BSP coordination (configured via `BSP_ETCD_URL`)
 
@@ -492,10 +496,10 @@ Generated classes appear in `computer-k8s/target/generated-sources/`.
 The CI pipeline (`.github/workflows/computer-ci.yml`) runs:
 
 1. License check (Apache RAT)
-2. Setup HDFS (Hadoop 3.3.2)
+2. Start HDFS containers (pinned Apache Hadoop 3.5.0 image)
 3. Setup Minikube/Kubernetes
-4. Load test data into HugeGraph
-5. Compile with JDK 11
+4. Load test data into HugeGraph Server images `1.7.0` and `latest`
+5. Compile with JDK 17
 6. Run integration tests (`-P integrate-test`)
 7. Run unit tests (`-P unit-test`)
 8. Upload coverage to Codecov

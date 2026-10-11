@@ -57,7 +57,7 @@ public class FileEdgeFetcher extends FileElementFetcher<Edge>
         List<Edge> edges = super.buildElement(line, builder);
         for (Edge edge : edges) {
             // generate edgeId
-            EdgeLabel edgeLabel = (EdgeLabel) builder.schemaLabel();
+            EdgeLabel edgeLabel = this.context().schemaCache().getEdgeLabel(edge.label());
             String edgeId = IdUtil.assignEdgeId(edge, edgeLabel);
             edge.id(edgeId);
         }

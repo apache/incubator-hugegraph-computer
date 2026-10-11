@@ -41,6 +41,7 @@ import org.apache.hugegraph.computer.driver.JobStatus;
 import org.apache.hugegraph.computer.k8s.config.KubeDriverOptions;
 import org.apache.hugegraph.computer.k8s.config.KubeSpecOptions;
 import org.apache.hugegraph.computer.k8s.crd.model.ComputerJobSpec;
+import org.apache.hugegraph.computer.k8s.crd.model.ComputerJobStatus;
 import org.apache.hugegraph.computer.k8s.crd.model.HugeGraphComputerJob;
 import org.apache.hugegraph.computer.k8s.driver.KubernetesDriver;
 import org.apache.hugegraph.computer.k8s.util.KubeUtil;
@@ -244,6 +245,50 @@ public class KubernetesDriverTest extends AbstractK8sTest {
         JobState jobState = this.driver.jobState(jobId, params);
         Assert.assertNotNull(jobState);
         Assert.assertEquals(JobStatus.INITIALIZING, jobState.jobStatus());
+    }
+
+    @Test
+    public void testDeletedUnfinishedJobCompletesAsCancelled() {
+        this.assertDeletedJobState(null, JobStatus.CANCELLED);
+        this.assertDeletedJobState(new ComputerJobStatus(), JobStatus.CANCELLED);
+        this.assertDeletedJobState(new ComputerJobStatus().withJobStatus(JobStatus.INITIALIZING.name()),
+                                   JobStatus.CANCELLED);
+        this.assertDeletedJobState(new ComputerJobStatus().withJobStatus(JobStatus.RUNNING.name()),
+                                   JobStatus.CANCELLED);
+    }
+
+    @Test
+    public void testDeletedFinishedJobRetainsStatus() {
+        for (JobStatus status : new JobStatus[]{JobStatus.SUCCEEDED, JobStatus.FAILED,
+                                                JobStatus.CANCELLED}) {
+            this.assertDeletedJobState(new ComputerJobStatus().withJobStatus(status.name()), status);
+        }
+    }
+
+    private void assertDeletedJobState(ComputerJobStatus status, JobStatus expectedStatus) {
+        String jobId = UUID.randomUUID().toString();
+        HugeGraphComputerJob computerJob = new HugeGraphComputerJob();
+        computerJob.setSpec(new ComputerJobSpec().withJobId(jobId));
+        computerJob.setStatus(status);
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        JobObserver observer = Mockito.mock(JobObserver.class);
+        Map<String, Pair<CompletableFuture<Void>, JobObserver>> waits =
+                Whitebox.getInternalState(this.driver, "waits");
+        waits.put(jobId, Pair.of(future, observer));
+        AbstractWatchManager<HugeGraphComputerJob> watch =
+                Whitebox.getInternalState(this.driver, "watch");
+        Watcher<HugeGraphComputerJob> watcher = Whitebox.getInternalState(watch, "watcher");
+
+        watcher.eventReceived(Watcher.Action.DELETED, computerJob);
+
+        Mockito.verify(observer).onJobStateChanged(Mockito.argThat(state ->
+                state.jobStatus() == expectedStatus));
+        Assert.assertTrue(future.isDone());
+        Assert.assertFalse(future.isCompletedExceptionally());
+        Assert.assertFalse(future.isCancelled());
+        Assert.assertFalse(waits.containsKey(jobId));
+        watcher.eventReceived(Watcher.Action.MODIFIED, computerJob);
+        Mockito.verifyNoMoreInteractions(observer);
     }
 
     @Test
