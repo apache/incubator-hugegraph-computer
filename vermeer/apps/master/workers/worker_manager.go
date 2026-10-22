@@ -233,6 +233,33 @@ func (wm *workerManager) CheckWorkerAlive(name string) bool {
 	return true
 }
 
+// SetWorkerConnection publishes a completed registration dial to readiness readers.
+func (wm *workerManager) SetWorkerConnection(worker *WorkerClient, connection *grpc.ClientConn) {
+	defer wm.Unlock(wm.Lock())
+	worker.Connection = connection
+}
+
+// HasAvailableWorkers reports online candidates already assigned to this space
+// or one of its graphs, or available to all spaces. It never allocates workers.
+func (wm *workerManager) HasAvailableWorkers(space string) bool {
+	defer wm.Unlock(wm.Lock())
+	groups := make(map[string]bool)
+	for owner, group := range wm.groupMapper {
+		if owner == space || strings.HasPrefix(owner, space+" ") {
+			groups[group] = true
+		}
+	}
+	for _, worker := range wm.workersByName {
+		if worker.Group != "" && worker.Group != "$" && !groups[worker.Group] {
+			continue
+		}
+		if worker.Connection != nil && worker.Connection.GetState() == connectivity.Ready {
+			return true
+		}
+	}
+	return false
+}
+
 func (wm *workerManager) SetWorkerGroup(workerName, workerGroup string) error {
 	if workerName == "" {
 		return fmt.Errorf("the argument 'workerName' is invalid")

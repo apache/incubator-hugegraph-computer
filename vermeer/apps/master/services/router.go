@@ -63,6 +63,9 @@ func SetRouters(sen *common.Sentinel, authFilters ...gin.HandlerFunc) {
 	regVerAPI(sen, 1, "/workers", map[string]common.BaseHandler{
 		"": &WorkersHandler{},
 	})
+	regVerAPI(sen, 1, "/workers", map[string]common.BaseHandler{
+		"/availability": &WorkerAvailabilityHandler{},
+	}, authFilters...)
 
 	// /master
 	regVerAPI(sen, 1, "/master", map[string]common.BaseHandler{

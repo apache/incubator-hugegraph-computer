@@ -75,6 +75,7 @@ jobs:
       - name: Test deployment credentials and graph initialization failures
         run: |
           go test -race ./apps/common
+          go test -race ./apps/master/workers ./apps/master/services -run 'TestWorkerAvailability'
           go test -race ./apps/worker -run 'Test(LoadReceivers|RecvVertex)'
           go test -race ./apps/structure -run 'Test(VertexStore|GraphPropagates|MemoryVertex|HugegraphSchema)'
 

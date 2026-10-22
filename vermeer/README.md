@@ -352,7 +352,14 @@ Vermeer exposes a REST API on port `6688` (configurable in `master.ini`).
 | `/api/v1/compute` | POST | Execute algorithm on loaded graph |
 | `/api/v1/tasks/{task_id}` | GET | Get task status and results |
 | `/api/v1/workers` | GET | List connected workers |
+| `/api/v1/workers/availability` | GET | Read worker readiness for the authenticated space |
 | `/ui/` | GET | Web UI dashboard |
+
+Worker availability uses the normal space credential and returns only
+`{"available":true|false}` for that authenticated space's allocations or the
+common pool. It accepts no caller-selected space and does not allocate workers
+or require an administrator token. Global worker registration alone does not
+establish readiness for a particular space.
 
 ### Example: Run PageRank
 

@@ -136,17 +136,18 @@ func (h *ServerHandler) SayHelloMaster(ctx context.Context, req *pb.HelloMasterR
 		grpc.MaxCallSendMsgSize(1*1024*1024*1024),
 		grpc.MaxCallRecvMsgSize(1*1024*1024*1024))
 
-	workerClient.Connection, err = grpc.Dial(
+	connection, err := grpc.Dial(
 		ip+":"+port, grpc.WithTransportCredentials(insecure.NewCredentials()), dialOptions, grpc.WithBlock(), grpc.WithIdleTimeout(0))
 	if err != nil {
 		logrus.Errorf("connect worker error: %s", err)
 		return &resp, err
 	}
+	workerClient.Session = pb.NewWorkerClient(connection)
+	workerMgr.SetWorkerConnection(workerClient, connection)
 	spaces := structure.SpaceManager.GetAllSpace()
 	for _, space := range spaces {
 		resp.Spaces = append(resp.Spaces, space.Name())
 	}
-	workerClient.Session = pb.NewWorkerClient(workerClient.Connection)
 
 	initWorkerClient(workerClient)
 
