@@ -173,6 +173,8 @@ type LoadGraphTask struct {
 	RecvCount map[string]*int32
 	Locker    *sync.Mutex
 	// InitializationFailed is immutable once initialization releases LoadWg.
+	// Later-phase receivers keep a defensive guard; current load-step ordering
+	// prevents scatter/edge messages after initialization failure.
 	InitializationFailed bool
 }
 

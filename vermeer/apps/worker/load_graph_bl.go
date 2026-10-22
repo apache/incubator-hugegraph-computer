@@ -40,6 +40,7 @@ type LoadGraphBl struct {
 
 func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName string, workers []string, params map[string]string) {
 	var initializing *graphio.LoadGraphTask
+	var initializationWg *sync.WaitGroup
 	initialized := false
 	defer func() {
 		if r := recover(); r != nil {
@@ -50,7 +51,7 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 		}
 		if initializing != nil {
 			initializing.InitializationFailed = !initialized
-			initializing.LoadWg.Done()
+			initializationWg.Done()
 		}
 	}()
 
@@ -88,6 +89,7 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 	loadTask := LoadGraphMgr.InstallTask(task)
 	// InstallTask holds the barrier before publishing the task to receivers.
 	initializing = loadTask
+	initializationWg = loadTask.LoadWg
 	ctx := context.Background()
 	parallel := options.GetInt(params, "load.parallel")
 	if parallel <= 0 {

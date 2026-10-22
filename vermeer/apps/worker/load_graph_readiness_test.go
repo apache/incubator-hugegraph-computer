@@ -25,6 +25,7 @@ import (
 
 	"vermeer/apps/common"
 	"vermeer/apps/graphio"
+	"vermeer/apps/options"
 	"vermeer/apps/structure"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -68,6 +69,47 @@ func TestLoadReceiversUseInitializationResult(t *testing.T) {
 	}
 	if count := atomic.LoadInt32((*int32)(task.RecvWg)); count != 0 {
 		t.Fatalf("failed initialization leaked %d registered receivers", count)
+	}
+}
+
+func TestLoadReceiversBarrierSurvivesTaskCleanup(t *testing.T) {
+	GraphMgr.Init()
+	LoadGraphMgr.Init()
+	TaskMgr.Init()
+	previousOptions := options.AllOptionsMap
+	options.Init()
+	previousGraphs := common.PrometheusMetrics.GraphCnt
+	common.PrometheusMetrics.GraphCnt = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "test_cleanup_graphs"}, nil)
+	t.Cleanup(func() {
+		GraphMgr.Init()
+		LoadGraphMgr.DeleteTask(-5002)
+		TaskMgr.Init()
+		options.AllOptionsMap = previousOptions
+		common.PrometheusMetrics.GraphCnt = previousGraphs
+	})
+	var task *graphio.LoadGraphTask
+	var barrier *sync.WaitGroup
+	options.AllOptionsMap["load.type"] = &options.Option{
+		Convert: func(string) (interface{}, error) {
+			task = LoadGraphMgr.GetLoadTask(-5002)
+			barrier = task.LoadWg
+			// Simulate cancellation cleanup while initialization is still active.
+			task.FreeMemory()
+			panic("initialization failed after cleanup")
+		},
+	}
+	(&LoadGraphBl{}).StartLoadGraph("readiness-test", -5002, "graph", nil,
+		map[string]string{"load.type": "cleanup-test"})
+	if task == nil || barrier == nil || task.LoadWg != nil || !task.InitializationFailed {
+		t.Fatal("initialization must publish failure after task cleanup")
+	}
+	released := make(chan struct{})
+	go func() { barrier.Wait(); close(released) }()
+	select {
+	case <-released:
+	case <-time.After(time.Second):
+		t.Fatal("cleanup left the original initialization barrier blocked")
 	}
 }
 
