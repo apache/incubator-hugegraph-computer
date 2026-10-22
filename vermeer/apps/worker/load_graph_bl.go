@@ -39,7 +39,8 @@ type LoadGraphBl struct {
 }
 
 func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName string, workers []string, params map[string]string) {
-	var readiness *sync.WaitGroup
+	var initializing *graphio.LoadGraphTask
+	initialized := false
 	defer func() {
 		if r := recover(); r != nil {
 			lb.SetStatusError(taskId, fmt.Sprintf("StartLoadGraph panic recover panic:%v,  stack message: %s", r,
@@ -47,8 +48,9 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 			logrus.Errorf("StartLoadGraph panic recover taskID:%v, panic:%v,  stack message: %s", taskId, r,
 				common.GetCurrentGoroutineStack())
 		}
-		if readiness != nil {
-			readiness.Done()
+		if initializing != nil {
+			initializing.InitializationFailed = !initialized
+			initializing.LoadWg.Done()
 		}
 	}()
 
@@ -84,9 +86,8 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 	TaskMgr.AddTask(task)
 	logrus.Infof("create load task: %d, graph: %s", taskId, graphName)
 	loadTask := LoadGraphMgr.InstallTask(task)
-	// recv vertex wait until init done
-	loadTask.LoadWg.Add(1)
-	readiness = loadTask.LoadWg
+	// InstallTask holds the barrier before publishing the task to receivers.
+	initializing = loadTask
 	ctx := context.Background()
 	parallel := options.GetInt(params, "load.parallel")
 	if parallel <= 0 {
@@ -144,6 +145,7 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 		graph.Data.VertexProperty.Init(graph.Data.VertexPropertySchema)
 	}
 
+	initialized = true
 	for i := 0; i < parallel; i++ {
 		valueCtx := context.WithValue(ctx, "worker_id", i)
 		go lb.RunLoadVertex(valueCtx, loadTask)
@@ -393,7 +395,7 @@ func (lb *LoadGraphBl) GatherVertex(taskID int32, workerName string, end bool, e
 	//defer lb.CheckAction(loadTask)
 	graph := GraphMgr.GetGraphByName(loadTask.Task.SpaceName, loadTask.Task.GraphName)
 	loadTask.LoadWg.Wait()
-	if loadTask.Task.State == structure.TaskStateError {
+	if loadTask.InitializationFailed {
 		return
 	}
 	loadTask.RecvWg.Add(1)
@@ -876,11 +878,12 @@ func (lb *LoadGraphBl) RecvVertex(taskId int32, worker string, count int32, end 
 	if !lb.CheckAction(loadTask) {
 		return
 	}
+	loadTask.RecvWg.Add(1)
 	loadTask.LoadWg.Wait()
-	if loadTask.Task.State == structure.TaskStateError {
+	if loadTask.InitializationFailed {
+		loadTask.RecvWg.Done()
 		return
 	}
-	loadTask.RecvWg.Add(1)
 	//defer lb.CheckAction(loadTask)
 	graph := GraphMgr.GetGraphByName(loadTask.Task.SpaceName, loadTask.Task.GraphName)
 	atomic.AddUint32(&graph.Data.VertexCount, uint32(count))
@@ -981,7 +984,7 @@ func (lb *LoadGraphBl) RecvEdge(taskId int32, worker string, count int32, end bo
 	//defer lb.CheckAction(loadTask)
 	graph := GraphMgr.GetGraphByName(loadTask.Task.SpaceName, loadTask.Task.GraphName)
 	loadTask.LoadWg.Wait()
-	if loadTask.Task.State == structure.TaskStateError {
+	if loadTask.InitializationFailed {
 		return
 	}
 	loadTask.RecvWg.Add(1)

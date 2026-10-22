@@ -172,6 +172,8 @@ type LoadGraphTask struct {
 	SendCount map[string]*int32
 	RecvCount map[string]*int32
 	Locker    *sync.Mutex
+	// InitializationFailed is immutable once initialization releases LoadWg.
+	InitializationFailed bool
 }
 
 func (lt *LoadGraphTask) GetPartition(partIdx int32) LoadPartition {
@@ -452,6 +454,7 @@ func (lw *loadGraphWorker) InstallTask(taskInfo *structure.TaskInfo) *LoadGraphT
 	lw.locker.Lock()
 	defer lw.locker.Unlock()
 	if _, ok := lw.loadTasks[taskInfo.ID]; ok {
+		lw.loadTasks[taskInfo.ID].LoadWg.Add(1)
 		return lw.loadTasks[taskInfo.ID]
 	}
 	loadTask := LoadGraphTask{
@@ -468,6 +471,9 @@ func (lw *loadGraphWorker) InstallTask(taskInfo *structure.TaskInfo) *LoadGraphT
 		loadTask.SendCount[worker.Name] = new(int32)
 		loadTask.RecvCount[worker.Name] = new(int32)
 	}
+	// Receivers can find this task as soon as it is published. Hold the
+	// initialization barrier before making it visible to them.
+	loadTask.LoadWg.Add(1)
 	lw.loadTasks[taskInfo.ID] = &loadTask
 	// TODO: why not a pointer?
 	return &loadTask

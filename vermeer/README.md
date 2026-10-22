@@ -278,6 +278,10 @@ is sent as the internal `vermeer` credential and is never added to task paramete
 When no file is configured, the legacy credential remains available for older PD
 deployments; it does not authenticate to a modern PD with a different shared secret.
 
+The current PD gRPC transport is plaintext. Keep these connections on a trusted
+private network or loopback; deployments crossing untrusted networks must provide
+transport encryption. The password file configures request credentials, not TLS.
+
 For authenticated HugeGraph Schema access, configure the Worker with
 `hugegraph_credentials_file=/path/to/hugegraph-credentials.json`, or set
 `VERMEER_HUGEGRAPH_CREDENTIALS_FILE` (which takes precedence). The protected file
