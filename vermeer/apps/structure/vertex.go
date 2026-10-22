@@ -183,9 +183,10 @@ type VertexMem struct {
 	VertexLongIDMap map[string]uint32
 }
 
-func (vm *VertexMem) Init(dataDir string) {
+func (vm *VertexMem) Init(dataDir string) error {
 	vm.TotalVertex = make([]Vertex, 0)
 	_ = dataDir
+	return nil
 }
 
 func (vm *VertexMem) TotalVertexCount() uint32 {
@@ -252,11 +253,9 @@ type VertexInDB struct {
 	dataDir          string
 }
 
-func (vm *VertexInDB) Init(dataDir string) {
-	var err error
+func (vm *VertexInDB) Init(dataDir string) error {
 	vm.dataDir = vm.makeDataDir(dataDir)
-	vm.sliceStores = make([]storage.Store, 1)
-	vm.sliceStores[0], err = storage.StoreMaker(storage.StoreOption{
+	store, err := storage.StoreMaker(storage.StoreOption{
 		StoreName: storage.StoreTypePebble,
 		Path:      path.Join(vm.dataDir, "self_vertex_slice"),
 		Fsync:     false,
@@ -264,9 +263,10 @@ func (vm *VertexInDB) Init(dataDir string) {
 		UseFilter: false,
 	})
 	if err != nil {
-		logrus.Errorf("init vertex store error:%v", err)
-		return
+		return fmt.Errorf("initialize vertex store: %w", err)
 	}
+	vm.sliceStores = []storage.Store{store}
+	return nil
 }
 
 func (vm *VertexInDB) makeDataDir(dataDir string) string {

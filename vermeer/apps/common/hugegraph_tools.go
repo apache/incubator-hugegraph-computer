@@ -19,11 +19,13 @@ package common
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -71,8 +73,12 @@ func findValidPD(pdIPAddress []string) (string, error) {
 	wg := &sync.WaitGroup{}
 	var pdIPAddr string
 	tempCtx, tempCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer tempCancel()
 	pdAuthority := PDAuthority{}
-	tempCtx = pdAuthority.SetAuthority(tempCtx)
+	tempCtx, err := pdAuthority.SetAuthority(tempCtx)
+	if err != nil {
+		return "", err
+	}
 	for _, addr := range pdIPAddress {
 		wg.Add(1)
 		go func(ctx context.Context, cancel context.CancelFunc, addr string) {
@@ -129,7 +135,10 @@ func findServerAddr(pdIPAddress string, hgName string, username string, password
 	}
 	defer pdConn.Close()
 	pdAuthority := PDAuthority{}
-	ctx = pdAuthority.SetAuthority(ctx)
+	ctx, err = pdAuthority.SetAuthority(ctx)
+	if err != nil {
+		return "", err
+	}
 	pdClient := pd.NewDiscoveryServiceClient(pdConn)
 	resp, err := pdClient.GetNodes(ctx, &pd.Query{})
 	if err != nil {
@@ -320,18 +329,34 @@ type PDAuthority struct {
 	locker sync.RWMutex
 }
 
-func (pa *PDAuthority) SetAuthority(ctx context.Context) context.Context {
+func (pa *PDAuthority) SetAuthority(ctx context.Context) (context.Context, error) {
 	pa.locker.RLock()
 	defer pa.locker.RUnlock()
+	credential := CredentialValue // Legacy PD compatibility when no file is configured.
+	passwordFile := os.Getenv("VERMEER_PD_PASSWORD_FILE")
+	if passwordFile == "" {
+		passwordFile, _ = GetConfigDefault("pd_password_file", "").(string)
+	}
+	if passwordFile != "" {
+		password, err := os.ReadFile(passwordFile)
+		if err != nil {
+			return ctx, fmt.Errorf("read PD password file: %w", err)
+		}
+		secret := strings.TrimSuffix(strings.TrimSuffix(string(password), "\n"), "\r")
+		if secret == "" {
+			return ctx, errors.New("PD password file is empty")
+		}
+		credential = base64.StdEncoding.EncodeToString([]byte("vermeer:" + secret))
+	}
 	md := metadata.New(map[string]string{
-		CredentialKey: CredentialValue,
+		CredentialKey: credential,
 	})
 	if pa.token != "" {
 		md.Set(TokenKey, pa.token)
 	}
 	// logrus.Infof("send md:%v", md)
 	ctx = metadata.NewOutgoingContext(ctx, md)
-	return ctx
+	return ctx, nil
 }
 
 func (pa *PDAuthority) SetToken(md metadata.MD) {

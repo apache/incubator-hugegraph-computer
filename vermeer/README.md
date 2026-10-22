@@ -269,6 +269,15 @@ The generated token can be used in two ways:
 
 ### Worker Configuration (`worker.ini`)
 
+For a PD deployment using a shared secret, configure both Master and Worker with
+`pd_password_file=/path/to/pd-password`, or set `VERMEER_PD_PASSWORD_FILE` to that
+file. Its contents must match PD's `auth.secret-key`; protect the file with mode
+`0600`. The environment variable takes precedence. A configured unreadable or
+empty file fails the PD request instead of using legacy credentials. The secret
+is sent as the internal `vermeer` credential and is never added to task parameters.
+When no file is configured, the legacy credential remains available for older PD
+deployments; it does not authenticate to a modern PD with a different shared secret.
+
 ```ini
 [default]
 # Worker HTTP listen address
