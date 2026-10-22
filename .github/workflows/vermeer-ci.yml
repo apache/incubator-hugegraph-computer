@@ -103,6 +103,7 @@ jobs:
         with:
           context: vermeer
           push: false
+          load: true
           tags: vermeer:ci-check
           cache-from: type=gha
           cache-to: type=gha,mode=max
