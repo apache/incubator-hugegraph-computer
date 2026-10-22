@@ -309,7 +309,11 @@ func StartComputeTask(graph *structure.VermeerGraph, computeTask *compute.Comput
 		}
 		computeTask.Task.SetWorkerState(w.Name, workerState)
 		//err := wc.computeServer.AsyncCompute(
-		err := ServerMgr.ComputeServer(wc.Name).AsyncCompute(
+		server := ServerMgr.ComputeServer(wc.Name)
+		if server == nil {
+			return fmt.Errorf("worker %s compute task stream is unavailable", wc.Name)
+		}
+		err := server.AsyncCompute(
 			computeTask.Algorithm,
 			computeTask.Task.GraphName,
 			computeTask.Task.SpaceName,

@@ -18,6 +18,7 @@ under the License.
 package workers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -40,6 +41,15 @@ const (
 	prefixMapper = "WORKER_MAPPER"
 )
 
+type TaskStream uint8
+
+const (
+	LoadTaskStream TaskStream = iota
+	ComputeTaskStream
+	SuperStepStream
+	taskStreamCount
+)
+
 // WorkerClient
 type WorkerClient struct {
 	Id         int32     `json:"id,omitempty"`
@@ -54,8 +64,9 @@ type WorkerClient struct {
 	//LoadStream      pb.Master_LoadGraphTaskServer `json:"-"`
 	//ComputeStream   pb.Master_ComputeTaskServer   `json:"-"`
 	//SuperStepStream pb.Master_SuperStepServer     `json:"-"`
-	Connection *grpc.ClientConn `json:"-"`
-	Session    pb.WorkerClient  `json:"-"`
+	Connection  *grpc.ClientConn `json:"-"`
+	Session     pb.WorkerClient  `json:"-"`
+	taskStreams [taskStreamCount]context.Context
 }
 
 func (wc *WorkerClient) Close() {
@@ -239,8 +250,41 @@ func (wm *workerManager) SetWorkerConnection(worker *WorkerClient, connection *g
 	worker.Connection = connection
 }
 
+// Task streams are published only after their dispatch entry has been installed.
+func (wm *workerManager) SetTaskStream(worker *WorkerClient, stream TaskStream, ctx context.Context) {
+	defer wm.Unlock(wm.Lock())
+	if worker != nil && wm.workersByName[worker.Name] == worker {
+		worker.taskStreams[stream] = ctx
+	}
+}
+
+func (wm *workerManager) ClearTaskStream(worker *WorkerClient, stream TaskStream, ctx context.Context) {
+	defer wm.Unlock(wm.Lock())
+	if worker != nil && wm.workersByName[worker.Name] == worker && worker.taskStreams[stream] == ctx {
+		worker.taskStreams[stream] = nil
+	}
+}
+
+func (wm *workerManager) IsWorkerReady(worker *WorkerClient) bool {
+	defer wm.Unlock(wm.Lock())
+	return wm.workerReadyLocked(worker)
+}
+
+func (wm *workerManager) workerReadyLocked(worker *WorkerClient) bool {
+	if worker == nil || wm.workersByName[worker.Name] != worker ||
+		worker.Connection == nil || worker.Connection.GetState() != connectivity.Ready {
+		return false
+	}
+	for _, ctx := range worker.taskStreams {
+		if ctx == nil || ctx.Err() != nil {
+			return false
+		}
+	}
+	return true
+}
+
 // HasAvailableWorkers follows existing allocation precedence without allocating.
-// Every registered member of a candidate group must have a ready connection.
+// Every registered member needs both a ready reverse connection and live task streams.
 func (wm *workerManager) HasAvailableWorkers(space string, graphNames []string) bool {
 	defer wm.Unlock(wm.Lock())
 	groups := make(map[string]bool)
@@ -261,7 +305,7 @@ func (wm *workerManager) HasAvailableWorkers(space string, graphNames []string) 
 				continue
 			}
 			found = true
-			if worker.Connection == nil || worker.Connection.GetState() != connectivity.Ready {
+			if !wm.workerReadyLocked(worker) {
 				ready = false
 				break
 			}

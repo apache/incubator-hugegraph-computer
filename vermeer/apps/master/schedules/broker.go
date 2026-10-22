@@ -127,22 +127,15 @@ func (b *Broker) ApplyAgent(taskInfo *structure.TaskInfo, forceApply ...bool) (*
 // }
 
 func (b *Broker) isWorkersReady(workers map[string]*workers.WorkerClient) bool {
-	ok := false
+	if len(workers) == 0 {
+		return false
+	}
 	for _, w := range workers {
-		if w.Connection == nil {
-			ok = false
-			break
-		}
-
-		if w.Connection.GetState().String() == "READY" {
-			ok = true
-		} else {
-			ok = false
-			break
+		if !workerMgr.IsWorkerReady(w) {
+			return false
 		}
 	}
-
-	return ok
+	return true
 }
 
 func (b *Broker) isAgentBusy(agent *Agent) bool {

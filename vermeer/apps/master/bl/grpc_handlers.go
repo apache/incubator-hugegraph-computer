@@ -236,11 +236,10 @@ func (h *ServerHandler) SuperStep(req *pb.SuperStepReq, stream pb.Master_SuperSt
 	if err := ServerMgr.PutSuperStepServer(name, stream); err != nil {
 		return err
 	}
-
-	for i := 0; i < 100000000; i++ {
-		time.Sleep(10 * time.Second)
-	}
-	//WorkerMgr.GetWorker(name).SuperStepServer.RecvHandler(name)
+	worker := workerMgr.GetWorker(name)
+	workerMgr.SetTaskStream(worker, workers.SuperStepStream, stream.Context())
+	defer workerMgr.ClearTaskStream(worker, workers.SuperStepStream, stream.Context())
+	<-stream.Context().Done()
 	return nil
 }
 

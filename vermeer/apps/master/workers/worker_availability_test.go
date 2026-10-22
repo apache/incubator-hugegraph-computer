@@ -58,6 +58,12 @@ func readyWorkerConnection(t *testing.T) *grpc.ClientConn {
 	}
 }
 
+func readyTaskStreams() [taskStreamCount]context.Context {
+	return [taskStreamCount]context.Context{
+		context.Background(), context.Background(), context.Background(),
+	}
+}
+
 func TestWorkerAvailabilityRespectsSpaceAllocation(t *testing.T) {
 	connection := readyWorkerConnection(t)
 	cases := []struct {
@@ -79,7 +85,8 @@ func TestWorkerAvailabilityRespectsSpaceAllocation(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			manager := workerManager{
 				workersByName: map[string]*WorkerClient{
-					"worker": {Name: "worker", Group: test.group, Connection: connection},
+					"worker": {Name: "worker", Group: test.group, Connection: connection,
+						taskStreams: readyTaskStreams()},
 				},
 				groupMapper: test.mappings,
 			}
@@ -100,12 +107,21 @@ func TestWorkerAvailabilityHandlesRegistrationAndDisconnect(t *testing.T) {
 	if manager.HasAvailableWorkers("current", nil) {
 		t.Fatal("missing worker must not be ready")
 	}
-	manager.workersByName["worker"] = &WorkerClient{Group: "$"}
+	manager.workersByName["worker"] = &WorkerClient{Name: "worker", Group: "$"}
 	if manager.HasAvailableWorkers("current", nil) {
 		t.Fatal("unconnected worker must not be ready")
 	}
 	worker := manager.workersByName["worker"]
 	manager.SetWorkerConnection(worker, connection)
+	if manager.HasAvailableWorkers("current", nil) {
+		t.Fatal("reverse dial alone must not advertise a task-ready worker")
+	}
+	for stream := LoadTaskStream; stream < taskStreamCount; stream++ {
+		manager.SetTaskStream(worker, stream, context.Background())
+		if stream < SuperStepStream && manager.HasAvailableWorkers("current", nil) {
+			t.Fatal("partially registered task streams must not be ready")
+		}
+	}
 	if !manager.HasAvailableWorkers("current", nil) {
 		t.Fatal("registered ready worker must be available")
 	}
@@ -132,9 +148,9 @@ func TestWorkerAvailabilityWaitsForSelectedGroup(t *testing.T) {
 	connection := readyWorkerConnection(t)
 	manager := workerManager{
 		workersByName: map[string]*WorkerClient{
-			"first":  {Group: "assigned", Connection: connection},
-			"second": {Group: "assigned"},
-			"common": {Group: "$", Connection: connection},
+			"first":  {Name: "first", Group: "assigned", Connection: connection, taskStreams: readyTaskStreams()},
+			"second": {Name: "second", Group: "assigned", taskStreams: readyTaskStreams()},
+			"common": {Name: "common", Group: "$", Connection: connection, taskStreams: readyTaskStreams()},
 		},
 		groupMapper: map[string]string{"current": "assigned"},
 	}
@@ -150,9 +166,42 @@ func TestWorkerAvailabilityWaitsForSelectedGroup(t *testing.T) {
 	if manager.HasAvailableWorkers("current", nil) {
 		t.Fatal("an empty explicit group cannot fall back to common workers")
 	}
-	manager.workersByName["graph-worker"] = &WorkerClient{Group: "graph-group", Connection: connection}
+	manager.workersByName["graph-worker"] = &WorkerClient{
+		Name: "graph-worker", Group: "graph-group", Connection: connection, taskStreams: readyTaskStreams(),
+	}
 	manager.groupMapper[manager.toOwnerKey("current", "graph")] = "graph-group"
 	if !manager.HasAvailableWorkers("current", []string{"graph"}) {
 		t.Fatal("an existing graph's explicit ready group remains an available workload")
+	}
+}
+
+func TestWorkerAvailabilityTracksTaskStreamCancellationAndReplacement(t *testing.T) {
+	worker := &WorkerClient{Name: "worker", Group: "$", Connection: readyWorkerConnection(t),
+		taskStreams: readyTaskStreams()}
+	manager := workerManager{workersByName: map[string]*WorkerClient{"worker": worker}}
+	previous, cancel := context.WithCancel(context.Background())
+	manager.SetTaskStream(worker, LoadTaskStream, previous)
+	if !manager.IsWorkerReady(worker) {
+		t.Fatal("complete worker must be schedulable")
+	}
+	cancel()
+	if manager.IsWorkerReady(worker) || manager.HasAvailableWorkers("current", nil) {
+		t.Fatal("a closed task stream must disable scheduling and advertised availability")
+	}
+	replacement, closeReplacement := context.WithCancel(context.Background())
+	defer closeReplacement()
+	manager.SetTaskStream(worker, LoadTaskStream, replacement)
+	manager.ClearTaskStream(worker, LoadTaskStream, previous)
+	if !manager.IsWorkerReady(worker) {
+		t.Fatal("old stream cleanup must not clear its replacement")
+	}
+	manager.ClearTaskStream(worker, LoadTaskStream, replacement)
+	if manager.IsWorkerReady(worker) {
+		t.Fatal("cleared task stream must not be schedulable")
+	}
+	manager.workersByName[worker.Name] = &WorkerClient{Name: worker.Name}
+	manager.SetTaskStream(worker, LoadTaskStream, replacement)
+	if manager.IsWorkerReady(worker) {
+		t.Fatal("a removed worker instance must not be schedulable")
 	}
 }
