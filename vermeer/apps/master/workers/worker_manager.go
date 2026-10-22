@@ -239,21 +239,34 @@ func (wm *workerManager) SetWorkerConnection(worker *WorkerClient, connection *g
 	worker.Connection = connection
 }
 
-// HasAvailableWorkers reports online candidates already assigned to this space
-// or one of its graphs, or available to all spaces. It never allocates workers.
-func (wm *workerManager) HasAvailableWorkers(space string) bool {
+// HasAvailableWorkers follows existing allocation precedence without allocating.
+// Every registered member of a candidate group must have a ready connection.
+func (wm *workerManager) HasAvailableWorkers(space string, graphNames []string) bool {
 	defer wm.Unlock(wm.Lock())
 	groups := make(map[string]bool)
-	for owner, group := range wm.groupMapper {
-		if owner == space || strings.HasPrefix(owner, space+" ") {
+	group, explicit := wm.groupMapper[space]
+	if !explicit {
+		group = "$" // AddWorker normalizes ungrouped registered workers to "$".
+	}
+	groups[group] = true
+	for _, graph := range graphNames {
+		if group, ok := wm.groupMapper[wm.toOwnerKey(space, graph)]; ok {
 			groups[group] = true
 		}
 	}
-	for _, worker := range wm.workersByName {
-		if worker.Group != "" && worker.Group != "$" && !groups[worker.Group] {
-			continue
+	for group := range groups {
+		found, ready := false, true
+		for _, worker := range wm.workersByName {
+			if worker.Group != group {
+				continue
+			}
+			found = true
+			if worker.Connection == nil || worker.Connection.GetState() != connectivity.Ready {
+				ready = false
+				break
+			}
 		}
-		if worker.Connection != nil && worker.Connection.GetState() == connectivity.Ready {
+		if found && ready {
 			return true
 		}
 	}

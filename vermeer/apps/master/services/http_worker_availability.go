@@ -33,6 +33,19 @@ func (wh *WorkerAvailabilityHandler) GET(ctx *gin.Context) {
 	writeWorkerAvailability(ctx, WorkerMgr.HasAvailableWorkers)
 }
 
-func writeWorkerAvailability(ctx *gin.Context, available func(string) bool) {
-	ctx.JSON(http.StatusOK, gin.H{"available": available(credential(ctx).Space())})
+func writeWorkerAvailability(ctx *gin.Context, available func(string, []string) bool) {
+	space := credential(ctx).Space()
+	ctx.JSON(http.StatusOK, gin.H{"available": available(space, availabilityGraphNames(space))})
+}
+
+func availabilityGraphNames(space string) []string {
+	// Match AddGraph's publication lock before GetGraphs takes the space lock.
+	// Names are immutable; do not read the graph's changing Workers slice.
+	defer GraphMgr.Unlock(GraphMgr.Lock())
+	graphs := GraphMgr.GetGraphs(space)
+	names := make([]string, 0, len(graphs))
+	for _, graph := range graphs {
+		names = append(names, graph.Name)
+	}
+	return names
 }

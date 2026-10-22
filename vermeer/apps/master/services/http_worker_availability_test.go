@@ -22,9 +22,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"vermeer/apps/common"
 	"vermeer/apps/structure"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func TestWorkerAvailabilityUsesAuthenticatedSpace(t *testing.T) {
@@ -32,13 +34,23 @@ func TestWorkerAvailabilityUsesAuthenticatedSpace(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	previousGraphs := common.PrometheusMetrics.GraphCnt
+	common.PrometheusMetrics.GraphCnt = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "test_availability_graphs"}, nil)
+	GraphMgr.Init()
+	t.Cleanup(func() { GraphMgr.Init(); common.PrometheusMetrics.GraphCnt = previousGraphs })
+	for _, space := range []string{"own-space", "another-space"} {
+		if err := GraphMgr.AddGraph(GraphMgr.CreateGraph(space, space+"-graph")); err != nil {
+			t.Fatal(err)
+		}
+	}
 	router := gin.New()
 	var checked string
 	router.GET("/workers/availability", func(ctx *gin.Context) {
 		ctx.Set(structure.CredentialKey, credential)
-		writeWorkerAvailability(ctx, func(space string) bool {
+		writeWorkerAvailability(ctx, func(space string, graphs []string) bool {
 			checked = space
-			return space == "own-space"
+			return space == "own-space" && len(graphs) == 1 && graphs[0] == "own-space-graph"
 		})
 	})
 	response := httptest.NewRecorder()

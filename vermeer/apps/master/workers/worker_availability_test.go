@@ -64,15 +64,16 @@ func TestWorkerAvailabilityRespectsSpaceAllocation(t *testing.T) {
 		name      string
 		group     string
 		mappings  map[string]string
+		graphs    []string
 		available bool
 	}{
-		{"unallocated named group", "default", nil, false},
-		{"another space", "default", map[string]string{"other": "default"}, false},
-		{"space allocation", "default", map[string]string{"current": "default"}, true},
-		{"graph allocation", "default", map[string]string{"current graph": "default"}, true},
-		{"other graph", "default", map[string]string{"current-other graph": "default"}, false},
-		{"common worker", "$", nil, true},
-		{"ungrouped worker", "", nil, true},
+		{"unallocated named group", "default", nil, nil, false},
+		{"another space", "default", map[string]string{"other": "default"}, nil, false},
+		{"space allocation", "default", map[string]string{"current": "default"}, nil, true},
+		{"graph allocation", "default", map[string]string{"current graph": "default"}, []string{"graph"}, true},
+		{"other graph", "default", map[string]string{"current-other graph": "default"}, []string{"graph"}, false},
+		{"common worker", "$", nil, nil, true},
+		{"other space with shared prefix", "default", map[string]string{"current graph": "default"}, nil, false},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -83,7 +84,7 @@ func TestWorkerAvailabilityRespectsSpaceAllocation(t *testing.T) {
 				groupMapper: test.mappings,
 			}
 			before := maps.Clone(manager.groupMapper)
-			if got := manager.HasAvailableWorkers("current"); got != test.available {
+			if got := manager.HasAvailableWorkers("current", test.graphs); got != test.available {
 				t.Fatalf("availability = %v, want %v", got, test.available)
 			}
 			if !maps.Equal(manager.groupMapper, before) {
@@ -96,16 +97,16 @@ func TestWorkerAvailabilityRespectsSpaceAllocation(t *testing.T) {
 func TestWorkerAvailabilityHandlesRegistrationAndDisconnect(t *testing.T) {
 	connection := readyWorkerConnection(t)
 	manager := workerManager{workersByName: map[string]*WorkerClient{}, groupMapper: map[string]string{}}
-	if manager.HasAvailableWorkers("current") {
+	if manager.HasAvailableWorkers("current", nil) {
 		t.Fatal("missing worker must not be ready")
 	}
 	manager.workersByName["worker"] = &WorkerClient{Group: "$"}
-	if manager.HasAvailableWorkers("current") {
+	if manager.HasAvailableWorkers("current", nil) {
 		t.Fatal("unconnected worker must not be ready")
 	}
 	worker := manager.workersByName["worker"]
 	manager.SetWorkerConnection(worker, connection)
-	if !manager.HasAvailableWorkers("current") {
+	if !manager.HasAvailableWorkers("current", nil) {
 		t.Fatal("registered ready worker must be available")
 	}
 	var wait sync.WaitGroup
@@ -113,7 +114,7 @@ func TestWorkerAvailabilityHandlesRegistrationAndDisconnect(t *testing.T) {
 	go func() {
 		defer wait.Done()
 		for i := 0; i < 1000; i++ {
-			manager.HasAvailableWorkers("current")
+			manager.HasAvailableWorkers("current", nil)
 		}
 	}()
 	for i := 0; i < 1000; i++ {
@@ -122,7 +123,36 @@ func TestWorkerAvailabilityHandlesRegistrationAndDisconnect(t *testing.T) {
 	}
 	_ = connection.Close()
 	wait.Wait()
-	if manager.HasAvailableWorkers("current") {
+	if manager.HasAvailableWorkers("current", nil) {
 		t.Fatal("disconnected worker must not be ready")
+	}
+}
+
+func TestWorkerAvailabilityWaitsForSelectedGroup(t *testing.T) {
+	connection := readyWorkerConnection(t)
+	manager := workerManager{
+		workersByName: map[string]*WorkerClient{
+			"first":  {Group: "assigned", Connection: connection},
+			"second": {Group: "assigned"},
+			"common": {Group: "$", Connection: connection},
+		},
+		groupMapper: map[string]string{"current": "assigned"},
+	}
+	if manager.HasAvailableWorkers("current", nil) {
+		t.Fatal("common workers cannot override an explicit group with an unready member")
+	}
+	manager.SetWorkerConnection(manager.workersByName["second"], connection)
+	if !manager.HasAvailableWorkers("current", nil) {
+		t.Fatal("the selected group must become available when all members are ready")
+	}
+	delete(manager.workersByName, "first")
+	delete(manager.workersByName, "second")
+	if manager.HasAvailableWorkers("current", nil) {
+		t.Fatal("an empty explicit group cannot fall back to common workers")
+	}
+	manager.workersByName["graph-worker"] = &WorkerClient{Group: "graph-group", Connection: connection}
+	manager.groupMapper[manager.toOwnerKey("current", "graph")] = "graph-group"
+	if !manager.HasAvailableWorkers("current", []string{"graph"}) {
+		t.Fatal("an existing graph's explicit ready group remains an available workload")
 	}
 }
