@@ -278,6 +278,18 @@ is sent as the internal `vermeer` credential and is never added to task paramete
 When no file is configured, the legacy credential remains available for older PD
 deployments; it does not authenticate to a modern PD with a different shared secret.
 
+For authenticated HugeGraph Schema access, configure the Worker with
+`hugegraph_credentials_file=/path/to/hugegraph-credentials.json`, or set
+`VERMEER_HUGEGRAPH_CREDENTIALS_FILE` (which takes precedence). The protected file
+(mode `0600`) contains `{"username":"schema-reader","password":"..."}` and must
+belong to a Server account allowed to read the loaded graphs' Schema. Hubble's
+direct adapter never forwards the user's login password. Worker Schema discovery
+and reads use these deployment credentials without adding them to persisted task
+parameters. A configured missing, unreadable, empty or invalid file fails the
+load; it never falls back to task credentials. Without a file, the existing
+`load.hugegraph_username` / `load.hugegraph_password` behavior is retained. This
+setting does not configure the separate HugeGraph result writer.
+
 ```ini
 [default]
 # Worker HTTP listen address

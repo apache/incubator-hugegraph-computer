@@ -72,10 +72,10 @@ jobs:
       - name: Generate embedded assets
         run: cd asset && go generate
 
-      - name: Test PD credentials and graph initialization failures
+      - name: Test deployment credentials and graph initialization failures
         run: |
           go test -race ./apps/common
-          go test -race ./apps/structure -run 'Test(VertexStoreInitializationErrorAndRetry|GraphPropagatesVertexStoreInitializationError|MemoryVertexInitialization)$'
+          go test -race ./apps/structure -run 'Test(VertexStore|GraphPropagates|MemoryVertex|HugegraphSchema)'
 
       - name: Build
         run: CGO_ENABLED=0 go build -o vermeer

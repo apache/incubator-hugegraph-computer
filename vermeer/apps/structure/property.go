@@ -483,6 +483,10 @@ func GetSchemaFromHugegraph(params map[string]string) (PropertySchema, PropertyS
 	hgName := options.GetString(params, "load.hugegraph_name")
 	username := options.GetString(params, "load.hugegraph_username")
 	password := options.GetString(params, "load.hugegraph_password")
+	username, password, err := common.ResolveHugegraphCredentials(username, password)
+	if err != nil {
+		return PropertySchema{}, PropertySchema{}, err
+	}
 	useProperty := options.GetInt(params, "load.use_property") == 1
 	vertexPropIDs := strings.Split(options.GetString(params, "load.vertex_property"), ",")
 	edgePropIDs := strings.Split(options.GetString(params, "load.edge_property"), ",")
