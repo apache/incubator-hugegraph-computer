@@ -18,6 +18,7 @@ limitations under the License.
 package worker
 
 import (
+	"context"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -26,10 +27,25 @@ import (
 	"vermeer/apps/common"
 	"vermeer/apps/graphio"
 	"vermeer/apps/options"
+	pb "vermeer/apps/protos"
 	"vermeer/apps/structure"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"google.golang.org/grpc"
 )
+
+type blockingLoadStatusClient struct {
+	pb.MasterClient
+	started chan struct{}
+	release <-chan struct{}
+}
+
+func (client *blockingLoadStatusClient) LoadTaskStatus(context.Context, *pb.LoadTaskStatusReq,
+	...grpc.CallOption) (*pb.LoadTaskStatusResp, error) {
+	close(client.started)
+	<-client.release
+	return &pb.LoadTaskStatusResp{}, nil
+}
 
 func receiveFixture(t *testing.T) *graphio.LoadGraphTask {
 	t.Helper()
@@ -99,8 +115,33 @@ func TestLoadReceiversBarrierSurvivesTaskCleanup(t *testing.T) {
 			panic("initialization failed after cleanup")
 		},
 	}
-	(&LoadGraphBl{}).StartLoadGraph("readiness-test", -5002, "graph", nil,
-		map[string]string{"load.type": "cleanup-test"})
+	reported, release, returned := make(chan struct{}), make(chan struct{}), make(chan struct{})
+	previousMaster := ServiceWorker.MasterClient
+	ServiceWorker.MasterClient = &blockingLoadStatusClient{started: reported, release: release}
+	t.Cleanup(func() {
+		close(release)
+		select {
+		case <-returned:
+		case <-time.After(time.Second):
+			t.Error("initialization did not return after status report resumed")
+		}
+		ServiceWorker.MasterClient = previousMaster
+	})
+	go func() {
+		defer close(returned)
+		(&LoadGraphBl{}).StartLoadGraph("readiness-test", -5002, "graph", nil,
+			map[string]string{"load.type": "cleanup-test"})
+	}()
+	select {
+	case <-reported:
+	case <-time.After(time.Second):
+		t.Fatal("initialization did not report its failure")
+	}
+	select {
+	case <-returned:
+		t.Fatal("status report must still be blocked")
+	default:
+	}
 	if task == nil || barrier == nil || task.LoadWg != nil || !task.InitializationFailed {
 		t.Fatal("initialization must publish failure after task cleanup")
 	}
@@ -109,7 +150,7 @@ func TestLoadReceiversBarrierSurvivesTaskCleanup(t *testing.T) {
 	select {
 	case <-released:
 	case <-time.After(time.Second):
-		t.Fatal("cleanup left the original initialization barrier blocked")
+		t.Fatal("blocked status report left the original initialization barrier blocked")
 	}
 }
 

@@ -41,17 +41,21 @@ type LoadGraphBl struct {
 func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName string, workers []string, params map[string]string) {
 	var initializing *graphio.LoadGraphTask
 	var initializationWg *sync.WaitGroup
+	var initializationError string
 	initialized := false
 	defer func() {
 		if r := recover(); r != nil {
-			lb.SetStatusError(taskId, fmt.Sprintf("StartLoadGraph panic recover panic:%v,  stack message: %s", r,
-				common.GetCurrentGoroutineStack()))
-			logrus.Errorf("StartLoadGraph panic recover taskID:%v, panic:%v,  stack message: %s", taskId, r,
+			initializationError = fmt.Sprintf("StartLoadGraph panic recover panic:%v,  stack message: %s", r,
 				common.GetCurrentGoroutineStack())
 		}
+		// Release local receivers before status reporting, which may block on Master.
 		if initializing != nil {
 			initializing.InitializationFailed = !initialized
 			initializationWg.Done()
+		}
+		if initializationError != "" {
+			logrus.Errorf("initialize graph task %d failed: %s", taskId, initializationError)
+			lb.SetStatusError(taskId, initializationError)
 		}
 	}()
 
@@ -101,8 +105,7 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 
 	_, err = graph.SetDataDir(spaceName, graphName, ServiceWorker.WorkerName)
 	if err != nil {
-		logrus.Errorf("set data dir error: %s", err)
-		lb.SetStatusError(taskId, fmt.Sprintf("set data dir error: %s", err))
+		initializationError = fmt.Sprintf("set data dir error: %s", err)
 		return
 	}
 	// remove history data
@@ -129,8 +132,7 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 		//logrus.Infof(" hugegraph vertex schema %v", graph.Data.VertexPropertySchema)
 		//logrus.Infof(" hugegraph edge schema %v", graph.Data.InEdgesPropertySchema)
 		if err != nil {
-			lb.SetStatusError(taskId, fmt.Sprintf("load schema from hugegraph error:%v", err))
-			logrus.Errorf("load schema from hugegraph error:%v", err)
+			initializationError = fmt.Sprintf("load schema from hugegraph error:%v", err)
 			return
 		}
 
@@ -140,7 +142,7 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 		graph.Data.InEdgesPropertySchema.Init(options.GetMapString(params, "load.edge_property"))
 	}
 	if err := graph.SetOption(useOutEdges, useOutDegree, useProperty); err != nil {
-		lb.SetStatusError(taskId, fmt.Sprintf("initialize graph data: %s", err))
+		initializationError = fmt.Sprintf("initialize graph data: %s", err)
 		return
 	}
 	if graph.UseProperty {
