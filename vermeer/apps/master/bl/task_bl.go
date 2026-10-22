@@ -346,7 +346,9 @@ func sendLoadingReq(task *structure.TaskInfo, workerClients []*WorkerClient, app
 		//err := wc.loadServer.SendLoadReq(apply(wc))
 		server := ServerMgr.LoadServer(wc.Name)
 		if server == nil {
-			return fmt.Errorf("worker %s load task stream is unavailable", wc.Name)
+			err := fmt.Errorf("worker %s load task stream is unavailable", wc.Name)
+			taskMgr.SetError(task, err.Error())
+			return err
 		}
 		err := server.SendLoadReq(apply(wc))
 		if err != nil {

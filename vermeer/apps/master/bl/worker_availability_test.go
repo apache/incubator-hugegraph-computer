@@ -52,11 +52,25 @@ func (w *registrationWindowWorker) RuntimeAction(context.Context, *pb.RuntimeAct
 // No worker task stream can exist yet: the worker only opens those after hello returns.
 func TestWorkerAvailabilityWaitsForRegistration(t *testing.T) {
 	previousWorkers := common.PrometheusMetrics.WorkerCnt
-	t.Cleanup(func() { common.PrometheusMetrics.WorkerCnt = previousWorkers })
+	previousTasks := common.PrometheusMetrics.TaskCnt
+	previousRunning := common.PrometheusMetrics.TaskRunningCnt
+	t.Cleanup(func() {
+		common.PrometheusMetrics.WorkerCnt = previousWorkers
+		common.PrometheusMetrics.TaskCnt = previousTasks
+		common.PrometheusMetrics.TaskRunningCnt = previousRunning
+	})
 	common.PrometheusMetrics.WorkerCnt = prometheus.NewGaugeVec(prometheus.GaugeOpts{Name: "test_registration_workers"}, nil)
+	common.PrometheusMetrics.TaskCnt = prometheus.NewCounterVec(
+		prometheus.CounterOpts{Name: "test_registration_tasks"}, []string{"type"})
+	common.PrometheusMetrics.TaskRunningCnt = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "test_registration_running"}, []string{"type"})
 	workers.WorkerManager.Init()
 	structure.SpaceManager.Init()
 	graphMgr.Init()
+	taskMgr.Init()
+	if err := taskMgr.InitStore(); err != nil {
+		t.Fatal(err)
+	}
 	ServerMgr.Init()
 	Scheduler.resourceManager = &schedules.SchedulerResourceManager{}
 	Scheduler.resourceManager.Init()
@@ -99,7 +113,15 @@ func TestWorkerAvailabilityWaitsForRegistration(t *testing.T) {
 	if workers.WorkerManager.HasAvailableWorkers("current", nil) {
 		t.Fatal("hello still pending: reverse dial must not advertise task readiness")
 	}
-	task := &structure.TaskInfo{ID: 101, SpaceName: "current", GraphName: "graph", Type: structure.TaskTypeLoad}
+	task, err := taskMgr.CreateTask("current", structure.TaskTypeLoad, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	task.GraphName = "graph"
+	task.CreateType = structure.TaskCreateSync
+	if _, err := taskMgr.AddTask(task); err != nil {
+		t.Fatal(err)
+	}
 	agent, status, _, err := new(schedules.Broker).Init().ApplyAgent(task)
 	if err != nil || agent != nil || status != schedules.AgentStatusWorkerNotReady {
 		t.Fatalf("scheduler admitted a worker before its task streams: %v %v", status, err)
@@ -113,9 +135,20 @@ func TestWorkerAvailabilityWaitsForRegistration(t *testing.T) {
 	if ServerMgr.LoadServer(worker.Name) != nil {
 		t.Fatal("unexpected load stream")
 	}
-	if err := sendLoadingReq(task, registered, func(*workers.WorkerClient) *LoadingTaskReq {
+	err = sendLoadingReq(task, registered, func(*workers.WorkerClient) *LoadingTaskReq {
 		return &LoadingTaskReq{}
-	}); err == nil {
+	})
+	if err == nil {
 		t.Fatal("missing task transport must return an error")
+	}
+	if task.State != structure.TaskStateError || task.ErrMessage != err.Error() {
+		t.Fatalf("failed synchronous dispatch left state=%s, message=%q", task.State, task.ErrMessage)
+	}
+	persisted, readErr := taskMgr.ReadTask(task.ID)
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	if persisted.State != structure.TaskStateError || persisted.ErrMessage != task.ErrMessage {
+		t.Fatalf("persisted failed task has state=%s, message=%q", persisted.State, persisted.ErrMessage)
 	}
 }
