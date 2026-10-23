@@ -117,14 +117,26 @@ func (cb *ComputeBl) StartCompute(taskID int32, spaceName string, graphName stri
 		return
 	}
 
-	ct.Locker.Lock()
-	if !cb.CheckAction(ct) {
+	for {
+		ct.Locker.Lock()
+		action := atomic.LoadInt32(&ct.Task.Action)
+		if action != structure.ActionPauseTask {
+			if action == structure.ActionCancelTask {
+				cb.cancelAction(ct)
+				ct.Locker.Unlock()
+				return
+			}
+			ct.Task.SetState(structure.TaskStateInitOK)
+			ct.WaitingForStep = true
+			ct.Locker.Unlock()
+			break
+		}
+		// Pause outside the handoff lock, then recheck before publishing readiness.
 		ct.Locker.Unlock()
-		return
+		if !cb.pauseAction(ct) {
+			return
+		}
 	}
-	ct.Task.SetState(structure.TaskStateInitOK)
-	ct.WaitingForStep = true
-	ct.Locker.Unlock()
 	req := pb.ComputeTaskStatusReq{
 		TaskId:        taskID,
 		State:         string(structure.TaskStateInitOK),
@@ -136,9 +148,8 @@ func (cb *ComputeBl) StartCompute(taskID int32, spaceName string, graphName stri
 	if err != nil {
 		ct.Locker.Lock()
 		ct.WaitingForStep = false
-		isContinue := cb.CheckAction(ct)
 		ct.Locker.Unlock()
-		if isContinue {
+		if cb.CheckAction(ct) {
 			logrus.Errorf("ComputeTaskStatus error:%v", err)
 			cb.SetStatusError(taskID, fmt.Sprintf("ComputeTaskStatus error:%v", err))
 		}
@@ -162,11 +173,10 @@ func (cb *ComputeBl) RunSuperStep(taskID int32, computeValues map[string][]byte)
 	}
 	computeTask.Locker.Lock()
 	computeTask.WaitingForStep = false
+	computeTask.Locker.Unlock()
 	if !cb.CheckAction(computeTask) {
-		computeTask.Locker.Unlock()
 		return
 	}
-	computeTask.Locker.Unlock()
 	computeTask.Step += 1
 	ctx := computeTask.ComputeWorker.Context()
 	ctx.Step += 1
