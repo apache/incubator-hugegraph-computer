@@ -27,10 +27,7 @@ import (
 // ResolveHugegraphCredentials keeps deployment credentials out of persisted task parameters.
 // Without a configured file, legacy callers retain their task-provided credentials.
 func ResolveHugegraphCredentials(username, password string) (string, string, error) {
-	file := os.Getenv("VERMEER_HUGEGRAPH_CREDENTIALS_FILE")
-	if file == "" {
-		file, _ = GetConfigDefault("hugegraph_credentials_file", "").(string)
-	}
+	file := deploymentConfig("VERMEER_HUGEGRAPH_CREDENTIALS_FILE", "hugegraph_credentials_file")
 	if file == "" {
 		return username, password, nil
 	}

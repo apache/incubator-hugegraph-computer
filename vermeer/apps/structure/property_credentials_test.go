@@ -30,6 +30,7 @@ import (
 	"testing"
 
 	"google.golang.org/grpc"
+	"vermeer/apps/common"
 	"vermeer/apps/options"
 	pd "vermeer/apps/protos/hugegraph-pd-grpc"
 )
@@ -85,6 +86,7 @@ func TestHugegraphSchemaDeploymentCredentials(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Setenv("VERMEER_HUGEGRAPH_CREDENTIALS_FILE", credentials)
+	t.Setenv("VERMEER_PD_PEERS", `["`+listener.Addr().String()+`"]`)
 	params := map[string]string{
 		"load.hg_pd_peers":    `["` + listener.Addr().String() + `"]`,
 		"load.hugegraph_name": "DEFAULT/fresh-graph/g", "load.use_property": "1",
@@ -114,5 +116,23 @@ func TestHugegraphSchemaRejectsInvalidCredentialsBeforeDiscovery(t *testing.T) {
 	// There is no PD endpoint: credential validation must fail before discovery.
 	if _, _, err := GetSchemaFromHugegraph(map[string]string{}); err == nil || !strings.Contains(err.Error(), "read HugeGraph credentials file") {
 		t.Fatalf("expected credential error before discovery, got %v", err)
+	}
+}
+
+func TestHugegraphSchemaRequiresDeploymentPD(t *testing.T) {
+	previousOptions := options.AllOptionsMap
+	options.Init()
+	t.Cleanup(func() { options.AllOptionsMap = previousOptions })
+	previousPeers := common.GetConfigDefault("pd_peers", "")
+	common.SetConfig("pd_peers", "")
+	t.Cleanup(func() { common.SetConfig("pd_peers", previousPeers) })
+	t.Setenv("VERMEER_PD_PEERS", "")
+	credentials := filepath.Join(t.TempDir(), "credentials.json")
+	if err := os.WriteFile(credentials, []byte(`{"username":"fixture-reader","password":"fixture-password"}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("VERMEER_HUGEGRAPH_CREDENTIALS_FILE", credentials)
+	if _, _, err := GetSchemaFromHugegraph(map[string]string{}); err == nil || !strings.Contains(err.Error(), "configure pd_peers") {
+		t.Fatal("deployment Schema credentials require deployment PD configuration before discovery")
 	}
 }

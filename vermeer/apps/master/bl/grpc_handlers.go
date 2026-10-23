@@ -383,6 +383,7 @@ func (h *ServerHandler) UploadTPResult(ctx context.Context, in *pb.UploadTPResul
 
 type LoadGraphServer struct {
 	streamServer pb.Master_LoadGraphTaskServer
+	sendMutex    sync.Mutex
 }
 
 func (s *LoadGraphServer) SetServer(stream pb.Master_LoadGraphTaskServer) {
@@ -435,6 +436,9 @@ func (s *LoadGraphServer) AsyncLoad(
 	spaceName string,
 	workers []string,
 	params map[string]string) error {
+	// Dispatch, phase changes and error cleanup share this stream.
+	s.sendMutex.Lock()
+	defer s.sendMutex.Unlock()
 	err := s.streamServer.Send(&pb.LoadGraphTaskResp{
 		Base:      &pb.BaseResponse{},
 		LoadType:  loadType,

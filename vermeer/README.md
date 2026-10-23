@@ -241,7 +241,8 @@ auth = none
 auth_token_factor = 1234
 ```
 
-**Note**: HugeGraph connection details (`pd_peers`, `server`, `graph`) are provided in the graph load API request, not in the configuration file. See [HugeGraph Integration](#hugegraph-integration) section for details.
+**Note**: Graph names and legacy HugeGraph connection details are supplied in the graph load request.
+Deployment credentials require the trusted PD configuration described below.
 
 ### Generating Auth Token
 
@@ -277,6 +278,15 @@ empty file fails the PD request instead of using legacy credentials. The secret
 is sent as the internal `vermeer` credential and is never added to task parameters.
 When no file is configured, the legacy credential remains available for older PD
 deployments; it does not authenticate to a modern PD with a different shared secret.
+
+When either deployment credential file is configured, configure both Master and
+Worker with `pd_peers=["pd.internal:8686"]`, or set `VERMEER_PD_PEERS` to that JSON
+array (environment takes precedence). These deployment addresses replace task
+PD addresses for load and output discovery. Missing or invalid deployment peers
+fail before discovery; no credential file is read for PD discovery in that case.
+Schema service credentials are used only with Servers discovered through these
+PD addresses, and Schema HTTP requests do not follow redirects. Without deployment
+credentials or peers, task-provided PD addresses retain their legacy behavior.
 
 The current PD gRPC transport is plaintext. Keep these connections on a trusted
 private network or loopback; deployments crossing untrusted networks must provide

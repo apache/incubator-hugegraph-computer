@@ -20,8 +20,10 @@ package bl
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net"
+	"sync/atomic"
 	"testing"
 	"time"
 	"vermeer/apps/common"
@@ -59,6 +61,71 @@ func (s *dispatchTestStream) Send(req *pb.LoadGraphTaskResp) error {
 
 func (s *dispatchTestStream) Recv() (*pb.LoadGraphTaskReq, error) {
 	return nil, io.EOF
+}
+
+type serializedLoadTestStream struct {
+	dispatchTestStream
+	entered chan struct{}
+	release chan struct{}
+	second  chan struct{}
+	active  atomic.Int32
+	peak    atomic.Int32
+	calls   atomic.Int32
+}
+
+func (s *serializedLoadTestStream) Send(*pb.LoadGraphTaskResp) error {
+	active := s.active.Add(1)
+	defer s.active.Add(-1)
+	for peak := s.peak.Load(); active > peak; peak = s.peak.Load() {
+		if s.peak.CompareAndSwap(peak, active) {
+			break
+		}
+	}
+	if s.calls.Add(1) == 1 {
+		close(s.entered)
+		<-s.release
+		return s.sendErr
+	}
+	close(s.second)
+	return nil
+}
+
+func TestWorkerAvailabilitySerializesLoadSends(t *testing.T) {
+	for _, failed := range []bool{false, true} {
+		t.Run(fmt.Sprintf("first_send_fails_%v", failed), func(t *testing.T) {
+			stream := &serializedLoadTestStream{
+				entered: make(chan struct{}), release: make(chan struct{}), second: make(chan struct{}),
+			}
+			if failed {
+				stream.sendErr = errors.New("fixture send failure")
+			}
+			server := &LoadGraphServer{streamServer: stream}
+			first, second := make(chan error, 1), make(chan error, 1)
+			go func() { first <- server.SendLoadReq(&LoadingTaskReq{TaskId: 1, Step: pb.LoadStep_Vertex}) }()
+			<-stream.entered
+			started := make(chan struct{})
+			go func() {
+				close(started)
+				second <- server.AsyncLoad(1, pb.LoadStep_Error, "", "graph", "space", nil, nil)
+			}()
+			<-started
+			select {
+			case <-stream.second:
+				t.Error("a second underlying Send entered before the first completed")
+			case <-time.After(50 * time.Millisecond):
+			}
+			close(stream.release)
+			if err := <-first; !errors.Is(err, stream.sendErr) {
+				t.Fatalf("original send error changed: %v", err)
+			}
+			if err := <-second; err != nil {
+				t.Fatal(err)
+			}
+			if stream.peak.Load() != 1 || stream.calls.Load() != 2 {
+				t.Fatal("all load sends must be serialized and the lock released after errors")
+			}
+		})
+	}
 }
 
 func (w *registrationWindowWorker) RuntimeAction(context.Context, *pb.RuntimeActionReq) (*pb.RuntimeActionResp, error) {

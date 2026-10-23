@@ -54,9 +54,12 @@ const (
 type HgVertexIDType uint16
 
 func FindValidPD(pdIPAddress []string) (string, error) {
+	pdIPAddress, err := resolvePDPeers(pdIPAddress)
+	if err != nil {
+		return "", err
+	}
 	// retry 3 times to find valid pd address
 	var pdIPAddr string
-	var err error
 	for i := 0; i < 3; i++ {
 		pdIPAddr, err = findValidPD(pdIPAddress)
 		if err == nil && pdIPAddr != "" {
@@ -109,6 +112,9 @@ func findValidPD(pdIPAddress []string) (string, error) {
 }
 
 func FindServerAddr(pdIPAddress string, hgName string, username string, password string) (string, error) {
+	if err := requireTrustedPD(pdIPAddress); err != nil {
+		return "", err
+	}
 	// retry 3 times to find valid server address
 	var serverAddr string
 	var err error
@@ -189,12 +195,12 @@ func testServerIsValid(serverAdds []string, hgSpace, hGraph, username, password 
 			defer wg.Done()
 			url := fmt.Sprintf("%v/graphspaces/%v/graphs/%v/schema?format=json", addr, hgSpace, hGraph)
 			req, err := http.NewRequest(http.MethodGet, url, nil)
-			req.SetBasicAuth(username, password)
 			if err != nil {
 				return
 			}
-			req.WithContext(ctx)
-			client := &http.Client{Timeout: 5 * time.Second}
+			req.SetBasicAuth(username, password)
+			req = req.WithContext(ctx)
+			client := schemaHTTPClient()
 			resp, err := client.Do(req)
 			if err != nil {
 				return
@@ -233,15 +239,15 @@ func GetHugegraphSchema(serverAddr, hgName, username, password string) (map[stri
 
 func getHugegraphSchema(url, username, password string) (map[string]any, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
-	req.SetBasicAuth(username, password)
 	if err != nil {
 		logrus.Errorf("create http request failed, %v", err.Error())
 		return nil, fmt.Errorf("create http request failed, %v", err.Error())
 	}
+	req.SetBasicAuth(username, password)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	req.WithContext(ctx)
-	client := &http.Client{Timeout: 5 * time.Second}
+	req = req.WithContext(ctx)
+	client := schemaHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		logrus.Errorf("http request failed, %v", err.Error())
@@ -263,6 +269,15 @@ func getHugegraphSchema(url, username, password string) (map[string]any, error) 
 		return nil, fmt.Errorf("unmarshal response body failed, %v", err.Error())
 	}
 	return propertyFromHg, nil
+}
+
+func schemaHTTPClient() *http.Client {
+	return &http.Client{
+		Timeout: 5 * time.Second,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 }
 
 func SplitHgName(hgName string) (string, string, error) {
@@ -333,10 +348,7 @@ func (pa *PDAuthority) SetAuthority(ctx context.Context) (context.Context, error
 	pa.locker.RLock()
 	defer pa.locker.RUnlock()
 	credential := CredentialValue // Legacy PD compatibility when no file is configured.
-	passwordFile := os.Getenv("VERMEER_PD_PASSWORD_FILE")
-	if passwordFile == "" {
-		passwordFile, _ = GetConfigDefault("pd_password_file", "").(string)
-	}
+	passwordFile := deploymentConfig("VERMEER_PD_PASSWORD_FILE", "pd_password_file")
 	if passwordFile != "" {
 		password, err := os.ReadFile(passwordFile)
 		if err != nil {
