@@ -132,7 +132,8 @@ func TestHugegraphSchemaRequiresDeploymentPD(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Setenv("VERMEER_HUGEGRAPH_CREDENTIALS_FILE", credentials)
-	if _, _, err := GetSchemaFromHugegraph(map[string]string{}); err == nil || !strings.Contains(err.Error(), "configure pd_peers") {
+	_, _, err := GetSchemaFromHugegraph(map[string]string{})
+	if err == nil || !strings.Contains(err.Error(), "configure pd_peers") {
 		t.Fatal("deployment Schema credentials require deployment PD configuration before discovery")
 	}
 }

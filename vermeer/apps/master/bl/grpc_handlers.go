@@ -237,7 +237,6 @@ func (h *ServerHandler) SuperStep(req *pb.SuperStepReq, stream pb.Master_SuperSt
 		return err
 	}
 	worker := workerMgr.GetWorker(name)
-	workerMgr.SetTaskStream(worker, workers.SuperStepStream, stream.Context())
 	defer workerMgr.ClearTaskStream(worker, workers.SuperStepStream, stream.Context())
 	<-stream.Context().Done()
 	return nil

@@ -35,6 +35,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 )
 
@@ -71,6 +72,81 @@ type serializedLoadTestStream struct {
 	active  atomic.Int32
 	peak    atomic.Int32
 	calls   atomic.Int32
+}
+
+type publicationTestStream struct {
+	grpc.ServerStream
+	ctx    context.Context
+	onRead func(int32)
+	reads  atomic.Int32
+}
+
+func (s *publicationTestStream) Context() context.Context {
+	if s.onRead != nil {
+		s.onRead(s.reads.Add(1))
+	}
+	return s.ctx
+}
+
+func (s *publicationTestStream) Send(*pb.SuperStepResp) error { return nil }
+
+// This checks registration ordering with controlled handlers, not a live reconnect.
+func testSuperStepPublication(t *testing.T, worker *workers.WorkerClient) {
+	ServerMgr.Init()
+	workerMgr.SetTaskStream(worker, workers.LoadTaskStream, context.Background())
+	workerMgr.SetTaskStream(worker, workers.ComputeTaskStream, context.Background())
+	oldCtx, cancelOld := context.WithCancel(context.Background())
+	newCtx, cancelNew := context.WithCancel(context.Background())
+	defer cancelOld()
+	defer cancelNew()
+	paused, release, published := make(chan struct{}), make(chan struct{}), make(chan struct{})
+	oldStream := &publicationTestStream{
+		ctx: metadata.NewIncomingContext(oldCtx, metadata.Pairs("worker_name", worker.Name)),
+		onRead: func(read int32) {
+			if read == 2 {
+				close(paused)
+				<-release
+			}
+		},
+	}
+	newStream := &publicationTestStream{
+		ctx: metadata.NewIncomingContext(newCtx, metadata.Pairs("worker_name", worker.Name)),
+		onRead: func(read int32) {
+			if read == 3 {
+				close(published)
+			}
+		},
+	}
+	oldDone, newDone := make(chan error, 1), make(chan error, 1)
+	go func() { oldDone <- new(ServerHandler).SuperStep(&pb.SuperStepReq{}, oldStream) }()
+	<-paused
+	started := make(chan struct{})
+	go func() {
+		close(started)
+		newDone <- new(ServerHandler).SuperStep(&pb.SuperStepReq{}, newStream)
+	}()
+	<-started
+	select {
+	case <-published:
+		t.Error("replacement registration overtook an unpublished dispatch entry")
+	case <-time.After(50 * time.Millisecond):
+	}
+	close(release)
+	<-published
+	cancelOld()
+	if err := <-oldDone; err != nil {
+		t.Error(err)
+	}
+	if !workerMgr.IsWorkerReady(worker) || ServerMgr.SuperStepServer(worker.Name).streamServer != newStream {
+		t.Error("old publication or cleanup replaced the live stream's readiness")
+	}
+	cancelNew()
+	if err := <-newDone; err != nil {
+		t.Error(err)
+	}
+	if workerMgr.IsWorkerReady(worker) {
+		t.Error("a canceled replacement must no longer be ready")
+	}
 }
 
 func (s *serializedLoadTestStream) Send(*pb.LoadGraphTaskResp) error {
@@ -220,6 +296,7 @@ func TestWorkerAvailabilityWaitsForRegistration(t *testing.T) {
 	}
 	worker := registered[0]
 	t.Cleanup(worker.Close)
+	t.Run("superstep_publication_order", func(t *testing.T) { testSuperStepPublication(t, worker) })
 	if ServerMgr.LoadServer(worker.Name) != nil {
 		t.Fatal("unexpected load stream")
 	}
