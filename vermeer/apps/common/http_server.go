@@ -33,6 +33,10 @@ type Sentinel struct {
 	srv    *http.Server
 }
 
+func (sen *Sentinel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	sen.engine.ServeHTTP(w, r)
+}
+
 func (sen *Sentinel) Init(peer string, debugMode string) {
 	if debugMode == "release" {
 		gin.SetMode(gin.ReleaseMode)

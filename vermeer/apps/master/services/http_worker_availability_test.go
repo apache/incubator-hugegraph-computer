@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"vermeer/apps/auth"
 	"vermeer/apps/common"
 	"vermeer/apps/structure"
 
@@ -68,5 +69,67 @@ func TestWorkerAvailabilityUsesAuthenticatedSpace(t *testing.T) {
 	}
 	if len(body) != 1 || body["available"] != true {
 		t.Fatalf("response must contain only readiness: %v", body)
+	}
+}
+
+func TestWorkerAvailabilityRequiresAuthentication(t *testing.T) {
+	previousFactor := common.GetConfig("auth_token_factor")
+	previousMetrics := common.PrometheusMetrics
+	previousRegisterer, previousGatherer := prometheus.DefaultRegisterer, prometheus.DefaultGatherer
+	previousMode := gin.Mode()
+	registry := prometheus.NewRegistry()
+	prometheus.DefaultRegisterer, prometheus.DefaultGatherer = registry, registry
+	const factor = "synthetic-worker-availability-factor"
+	common.SetConfig("auth_token_factor", factor)
+	auth.Init()
+	GraphMgr.Init()
+	t.Cleanup(func() {
+		common.SetConfig("auth_token_factor", previousFactor)
+		common.PrometheusMetrics = previousMetrics
+		prometheus.DefaultRegisterer, prometheus.DefaultGatherer = previousRegisterer, previousGatherer
+		gin.SetMode(previousMode)
+		GraphMgr.Init()
+	})
+	factory := auth.TokenFactory{Factor: factor}
+	token := factory.NewToken("space-user", "own-space", "")
+	factory.Sign(token)
+	encoded, err := json.Marshal(token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sentinel := &common.Sentinel{}
+	sentinel.Init("127.0.0.1:0", "release")
+	SetRouters(sentinel, auth.TokenFilter)
+	for _, path := range []string{"/workers/availability", "/api/v1/workers/availability"} {
+		for _, test := range []struct {
+			name   string
+			header string
+			status int
+		}{
+			{name: "missing token", status: http.StatusUnauthorized},
+			{name: "invalid token", header: "Bearer invalid", status: http.StatusUnauthorized},
+			{name: "signed token", header: "Bearer " + auth.ToBase58(string(encoded)), status: http.StatusOK},
+		} {
+			t.Run(path+"/"+test.name, func(t *testing.T) {
+				req := httptest.NewRequest(http.MethodGet, path, nil)
+				if test.header != "" {
+					req.Header.Set(auth.HeaderKey, test.header)
+				}
+				response := httptest.NewRecorder()
+				sentinel.ServeHTTP(response, req)
+				if response.Code != test.status {
+					t.Fatalf("status = %d, want %d", response.Code, test.status)
+				}
+				if test.status == http.StatusOK {
+					var body map[string]any
+					if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+						t.Fatal(err)
+					}
+					if len(body) != 1 || body["available"] != false {
+						t.Fatalf("unexpected readiness response: %v", body)
+					}
+				}
+			})
+		}
 	}
 }

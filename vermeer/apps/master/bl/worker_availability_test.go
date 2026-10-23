@@ -19,6 +19,8 @@ package bl
 
 import (
 	"context"
+	"errors"
+	"io"
 	"net"
 	"testing"
 	"time"
@@ -38,6 +40,25 @@ type registrationWindowWorker struct {
 	pb.UnimplementedWorkerServer
 	started chan struct{}
 	release chan struct{}
+}
+
+type dispatchTestStream struct {
+	grpc.ServerStream
+	requests []*pb.LoadGraphTaskResp
+	sendErr  error
+	stopErr  error
+}
+
+func (s *dispatchTestStream) Send(req *pb.LoadGraphTaskResp) error {
+	s.requests = append(s.requests, req)
+	if req.Step == pb.LoadStep_Error {
+		return s.stopErr
+	}
+	return s.sendErr
+}
+
+func (s *dispatchTestStream) Recv() (*pb.LoadGraphTaskReq, error) {
+	return nil, io.EOF
 }
 
 func (w *registrationWindowWorker) RuntimeAction(context.Context, *pb.RuntimeActionReq) (*pb.RuntimeActionResp, error) {
@@ -150,5 +171,83 @@ func TestWorkerAvailabilityWaitsForRegistration(t *testing.T) {
 	}
 	if persisted.State != structure.TaskStateError || persisted.ErrMessage != task.ErrMessage {
 		t.Fatalf("persisted failed task has state=%s, message=%q", persisted.State, persisted.ErrMessage)
+	}
+
+	// Reuse the isolated task store to check failures after earlier workers accepted a load.
+	for _, test := range []struct {
+		name       string
+		missing    bool
+		failedSend bool
+		failedStop bool
+	}{
+		{name: "dispatch_missing_stream", missing: true},
+		{name: "dispatch_send_failure", failedSend: true},
+		{name: "dispatch_cleanup_failure", missing: true, failedStop: true},
+		{name: "dispatch_success"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			ServerMgr.Init()
+			defer ServerMgr.Init()
+			first, second, third := &dispatchTestStream{}, &dispatchTestStream{}, &dispatchTestStream{}
+			dispatchErr := errors.New("dispatch failed")
+			if test.failedSend {
+				third.sendErr = dispatchErr
+			}
+			if test.failedStop {
+				first.stopErr = errors.New("cleanup failed")
+			}
+			ServerMgr.loadSevers["first"] = &LoadGraphServer{streamServer: first}
+			ServerMgr.loadSevers["second"] = &LoadGraphServer{streamServer: second}
+			if !test.missing {
+				ServerMgr.loadSevers["third"] = &LoadGraphServer{streamServer: third}
+			}
+			task, err := taskMgr.CreateTask("dispatch-space", structure.TaskTypeLoad, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			task.GraphName = "dispatch-graph"
+			if _, err := taskMgr.AddTask(task); err != nil {
+				t.Fatal(err)
+			}
+			err = sendLoadingReq(task, []*workers.WorkerClient{
+				{Name: "first"}, {Name: "second"}, {Name: "third"},
+			}, func(*workers.WorkerClient) *LoadingTaskReq {
+				return &LoadingTaskReq{TaskId: task.ID, Step: pb.LoadStep_Vertex,
+					SpaceName: task.SpaceName, GraphName: task.GraphName}
+			})
+			failed := test.missing || test.failedSend
+			if (err != nil) != failed {
+				t.Fatalf("dispatch error = %v, want failed = %v", err, failed)
+			}
+			if test.failedSend && !errors.Is(err, dispatchErr) {
+				t.Fatalf("original dispatch error was replaced: %v", err)
+			}
+			if failed {
+				persisted, readErr := taskMgr.ReadTask(task.ID)
+				if readErr != nil {
+					t.Fatal(readErr)
+				}
+				if task.State != structure.TaskStateError || task.ErrMessage != err.Error() ||
+					persisted.State != structure.TaskStateError || persisted.ErrMessage != err.Error() {
+					t.Fatal("partial dispatch failure must retain the original error in memory and storage")
+				}
+			}
+			for _, stream := range []*dispatchTestStream{first, second} {
+				want := 1
+				if failed {
+					want = 2
+				}
+				if len(stream.requests) != want || stream.requests[0].Step != pb.LoadStep_Vertex {
+					t.Fatalf("successful worker received %d messages, want %d", len(stream.requests), want)
+				}
+				if failed {
+					stop := stream.requests[1]
+					if stop.Step != pb.LoadStep_Error || stop.TaskId != task.ID ||
+						stop.SpaceName != task.SpaceName || stop.GraphName != task.GraphName {
+						t.Fatalf("wrong cleanup scope: %v", stop)
+					}
+				}
+			}
+		})
 	}
 }

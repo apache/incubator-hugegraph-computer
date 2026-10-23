@@ -360,6 +360,9 @@ Worker availability uses the normal space credential and returns only
 common pool. It accepts no caller-selected space and does not allocate workers
 or require an administrator token. Global worker registration alone does not
 establish readiness for a particular space.
+A group preallocated to a graph absent from that space's Master graph metadata
+is not counted until the graph appears there; the scheduler can still use the
+allocation for that graph's first load.
 
 ### Example: Run PageRank
 
