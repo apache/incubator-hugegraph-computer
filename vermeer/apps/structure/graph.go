@@ -89,11 +89,11 @@ func (vg *VermeerGraph) MallocData(option GraphDataBackendOption) {
 	vg.BackendOption = option
 	vg.Data.MallocData(option)
 }
-func (vg *VermeerGraph) SetOption(useOutEdges bool, useOutDegree bool, useProperty bool) {
+func (vg *VermeerGraph) SetOption(useOutEdges bool, useOutDegree bool, useProperty bool) error {
 	vg.UseOutEdges = useOutEdges
 	vg.UseOutDegree = useOutDegree
 	vg.UseProperty = useProperty
-	vg.Data.SetOption(GraphDataOption{
+	return vg.Data.SetOption(GraphDataOption{
 		graphName:    vg.Name,
 		spaceName:    vg.SpaceName,
 		dataDir:      vg.DataDir,
@@ -340,7 +340,7 @@ func (vg *VermeerGraph) Read(workerName string) error {
 	}
 	data := new(GraphData)
 	data.MallocData(vg.BackendOption)
-	data.SetOption(GraphDataOption{
+	err = data.SetOption(GraphDataOption{
 		graphName:    vg.Name,
 		spaceName:    vg.SpaceName,
 		dataDir:      vg.DataDir,
@@ -348,6 +348,9 @@ func (vg *VermeerGraph) Read(workerName string) error {
 		useOutEdges:  vg.UseOutEdges,
 		useOutDegree: vg.UseOutDegree,
 	})
+	if err != nil {
+		return err
+	}
 	err = data.Load(vg.DataDir)
 	if err != nil {
 		return err

@@ -46,6 +46,9 @@ type ComputerTask struct {
 	SettingOutEdges  bool
 	SendCount        map[string]*int32
 	RecvCount        map[string]*int32
+	// WaitingForStep is protected by Locker during the initialization handoff.
+	WaitingForStep bool
+	CancelOnce     sync.Once
 }
 
 func (ct *ComputerTask) FreeMemory() {

@@ -78,7 +78,11 @@ func (a *HugegraphMaker) MakeTasks(params map[string]string, taskID int32) ([]Lo
 		return nil, err
 	}
 	pdAuthority := common.PDAuthority{}
-	ctx = pdAuthority.SetAuthority(ctx)
+	defer pdConn.Close()
+	ctx, err = pdAuthority.SetAuthority(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var md metadata.MD
 	pdClient := pd.NewPDClient(pdConn)
 	partitionsResp, err := pdClient.QueryPartitions(ctx,
@@ -110,7 +114,10 @@ func (a *HugegraphMaker) MakeTasks(params map[string]string, taskID int32) ([]Lo
 			}
 		}
 		var leaderStoreID uint64
-		ctx = pdAuthority.SetAuthority(ctx)
+		ctx, err = pdAuthority.SetAuthority(ctx)
+		if err != nil {
+			return nil, err
+		}
 		var md metadata.MD
 		shardGroup, err := pdClient.GetShardGroup(ctx, &pd.GetShardGroupRequest{GroupId: partition.Id}, grpc.Header(&md))
 		if err != nil {
@@ -129,7 +136,10 @@ func (a *HugegraphMaker) MakeTasks(params map[string]string, taskID int32) ([]Lo
 		//重复leader不再执行获取地址
 		if _, ok := leaderStore[leaderStoreID]; !ok {
 			//获得新的leader的地址并写入map
-			ctx = pdAuthority.SetAuthority(ctx)
+			ctx, err = pdAuthority.SetAuthority(ctx)
+			if err != nil {
+				return nil, err
+			}
 			var md metadata.MD
 			storeResp, err := pdClient.GetStore(ctx, &pd.GetStoreRequest{StoreId: leaderStoreID}, grpc.Header(&md))
 			if err != nil {
@@ -194,11 +204,6 @@ func (a *HugegraphMaker) MakeTasks(params map[string]string, taskID int32) ([]Lo
 		loadParts[i].Params["load.hugegraph_edge_condition"] = params["load.hugegraph_edge_condition"]
 		loadParts[i].Params["load.hugestore_batch_timeout"] = params["load.hugestore_batch_timeout"]
 		loadParts[i].Params["load.hugestore_batchsize"] = params["load.hugestore_batchsize"]
-	}
-	err = pdConn.Close()
-	if err != nil {
-		logrus.Errorf("hugegraph-pd close err:%v", err)
-		return nil, err
 	}
 	return loadParts, nil
 }

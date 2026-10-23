@@ -39,12 +39,23 @@ type LoadGraphBl struct {
 }
 
 func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName string, workers []string, params map[string]string) {
+	var initializing *graphio.LoadGraphTask
+	var initializationWg *sync.WaitGroup
+	var initializationError string
+	initialized := false
 	defer func() {
 		if r := recover(); r != nil {
-			lb.SetStatusError(taskId, fmt.Sprintf("StartLoadGraph panic recover panic:%v,  stack message: %s", r,
-				common.GetCurrentGoroutineStack()))
-			logrus.Errorf("StartLoadGraph panic recover taskID:%v, panic:%v,  stack message: %s", taskId, r,
+			initializationError = fmt.Sprintf("StartLoadGraph panic recover panic:%v,  stack message: %s", r,
 				common.GetCurrentGoroutineStack())
+		}
+		// Release local receivers before status reporting, which may block on Master.
+		if initializing != nil {
+			initializing.InitializationFailed = !initialized
+			initializationWg.Done()
+		}
+		if initializationError != "" {
+			logrus.Errorf("initialize graph task %d failed: %s", taskId, initializationError)
+			lb.SetStatusError(taskId, initializationError)
 		}
 	}()
 
@@ -80,8 +91,9 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 	TaskMgr.AddTask(task)
 	logrus.Infof("create load task: %d, graph: %s", taskId, graphName)
 	loadTask := LoadGraphMgr.InstallTask(task)
-	// recv vertex wait until init done
-	loadTask.LoadWg.Add(1)
+	// InstallTask holds the barrier before publishing the task to receivers.
+	initializing = loadTask
+	initializationWg = loadTask.LoadWg
 	ctx := context.Background()
 	parallel := options.GetInt(params, "load.parallel")
 	if parallel <= 0 {
@@ -93,8 +105,8 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 
 	_, err = graph.SetDataDir(spaceName, graphName, ServiceWorker.WorkerName)
 	if err != nil {
-		logrus.Errorf("set data dir error: %s", err)
-		lb.SetStatusError(taskId, fmt.Sprintf("set data dir error: %s", err))
+		initializationError = fmt.Sprintf("set data dir error: %s", err)
+		return
 	}
 	// remove history data
 	graph.Remove()
@@ -120,8 +132,7 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 		//logrus.Infof(" hugegraph vertex schema %v", graph.Data.VertexPropertySchema)
 		//logrus.Infof(" hugegraph edge schema %v", graph.Data.InEdgesPropertySchema)
 		if err != nil {
-			lb.SetStatusError(taskId, fmt.Sprintf("load schema from hugegraph error:%v", err))
-			logrus.Errorf("load schema from hugegraph error:%v", err)
+			initializationError = fmt.Sprintf("load schema from hugegraph error:%v", err)
 			return
 		}
 
@@ -130,12 +141,15 @@ func (lb *LoadGraphBl) StartLoadGraph(spaceName string, taskId int32, graphName 
 		graph.Data.VertexPropertySchema.Init(options.GetMapString(params, "load.vertex_property"))
 		graph.Data.InEdgesPropertySchema.Init(options.GetMapString(params, "load.edge_property"))
 	}
-	graph.SetOption(useOutEdges, useOutDegree, useProperty)
+	if err := graph.SetOption(useOutEdges, useOutDegree, useProperty); err != nil {
+		initializationError = fmt.Sprintf("initialize graph data: %s", err)
+		return
+	}
 	if graph.UseProperty {
 		graph.Data.VertexProperty.Init(graph.Data.VertexPropertySchema)
 	}
 
-	loadTask.LoadWg.Done()
+	initialized = true
 	for i := 0; i < parallel; i++ {
 		valueCtx := context.WithValue(ctx, "worker_id", i)
 		go lb.RunLoadVertex(valueCtx, loadTask)
@@ -385,6 +399,9 @@ func (lb *LoadGraphBl) GatherVertex(taskID int32, workerName string, end bool, e
 	//defer lb.CheckAction(loadTask)
 	graph := GraphMgr.GetGraphByName(loadTask.Task.SpaceName, loadTask.Task.GraphName)
 	loadTask.LoadWg.Wait()
+	if loadTask.InitializationFailed {
+		return
+	}
 	loadTask.RecvWg.Add(1)
 	//gw := graph.GetGraphWorker(workerName)
 
@@ -867,6 +884,10 @@ func (lb *LoadGraphBl) RecvVertex(taskId int32, worker string, count int32, end 
 	}
 	loadTask.RecvWg.Add(1)
 	loadTask.LoadWg.Wait()
+	if loadTask.InitializationFailed {
+		loadTask.RecvWg.Done()
+		return
+	}
 	//defer lb.CheckAction(loadTask)
 	graph := GraphMgr.GetGraphByName(loadTask.Task.SpaceName, loadTask.Task.GraphName)
 	atomic.AddUint32(&graph.Data.VertexCount, uint32(count))
@@ -967,6 +988,9 @@ func (lb *LoadGraphBl) RecvEdge(taskId int32, worker string, count int32, end bo
 	//defer lb.CheckAction(loadTask)
 	graph := GraphMgr.GetGraphByName(loadTask.Task.SpaceName, loadTask.Task.GraphName)
 	loadTask.LoadWg.Wait()
+	if loadTask.InitializationFailed {
+		return
+	}
 	loadTask.RecvWg.Add(1)
 	logrus.Debugf("recv edge count: %d, end: %v,endNum:%v, worker: %s", count, end, endNum, worker)
 

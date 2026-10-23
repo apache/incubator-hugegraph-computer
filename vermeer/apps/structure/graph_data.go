@@ -25,7 +25,7 @@ import (
 )
 
 type VertexInterface interface {
-	Init(dataDir string)
+	Init(dataDir string) error
 	TotalVertexCount() uint32
 	GetVertex(vertexID uint32) Vertex
 	GetVertexIndex(vertex string) (uint32, bool)
@@ -144,13 +144,16 @@ func (gd *GraphData) MallocData(option GraphDataBackendOption) {
 	gd.InEdgesProperty = &EdgeProperties{}
 }
 
-func (gd *GraphData) SetOption(option GraphDataOption) {
+func (gd *GraphData) SetOption(option GraphDataOption) error {
 	gd.graphName = option.graphName
 	gd.spaceName = option.spaceName
 	if option.firstInit {
-		gd.Vertex.Init(option.dataDir)
+		if err := gd.Vertex.Init(option.dataDir); err != nil {
+			return err
+		}
 	}
 	gd.Edges.Init(option.useOutEdges, option.useOutDegree)
+	return nil
 }
 
 //func (gd *GraphData) Name() string {

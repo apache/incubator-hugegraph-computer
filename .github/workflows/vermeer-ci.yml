@@ -72,6 +72,14 @@ jobs:
       - name: Generate embedded assets
         run: cd asset && go generate
 
+      - name: Test deployment credentials and graph initialization failures
+        run: |
+          go test -race ./apps/common
+          go test -race ./apps/master/workers ./apps/master/services -run 'TestWorkerAvailability'
+          go test -race ./apps/master/bl -run 'Test(WorkerAvailability|HugegraphLoadAuthorization)'
+          go test -race ./apps/worker -run 'Test(LoadReceivers|RecvVertex|ComputeDispatchCancellation)'
+          go test -race ./apps/structure -run 'Test(VertexStore|GraphPropagates|MemoryVertex|HugegraphSchema)'
+
       - name: Build
         run: CGO_ENABLED=0 go build -o vermeer
 
@@ -91,13 +99,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Build Docker image (dry-run)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: vermeer
           push: false
+          load: true
           tags: vermeer:ci-check
           cache-from: type=gha
           cache-to: type=gha,mode=max

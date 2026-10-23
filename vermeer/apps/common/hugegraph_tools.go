@@ -19,11 +19,13 @@ package common
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -52,9 +54,12 @@ const (
 type HgVertexIDType uint16
 
 func FindValidPD(pdIPAddress []string) (string, error) {
+	pdIPAddress, err := resolvePDPeers(pdIPAddress)
+	if err != nil {
+		return "", err
+	}
 	// retry 3 times to find valid pd address
 	var pdIPAddr string
-	var err error
 	for i := 0; i < 3; i++ {
 		pdIPAddr, err = findValidPD(pdIPAddress)
 		if err == nil && pdIPAddr != "" {
@@ -71,8 +76,12 @@ func findValidPD(pdIPAddress []string) (string, error) {
 	wg := &sync.WaitGroup{}
 	var pdIPAddr string
 	tempCtx, tempCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer tempCancel()
 	pdAuthority := PDAuthority{}
-	tempCtx = pdAuthority.SetAuthority(tempCtx)
+	tempCtx, err := pdAuthority.SetAuthority(tempCtx)
+	if err != nil {
+		return "", err
+	}
 	for _, addr := range pdIPAddress {
 		wg.Add(1)
 		go func(ctx context.Context, cancel context.CancelFunc, addr string) {
@@ -103,6 +112,9 @@ func findValidPD(pdIPAddress []string) (string, error) {
 }
 
 func FindServerAddr(pdIPAddress string, hgName string, username string, password string) (string, error) {
+	if err := requireTrustedPD(pdIPAddress); err != nil {
+		return "", err
+	}
 	// retry 3 times to find valid server address
 	var serverAddr string
 	var err error
@@ -129,7 +141,10 @@ func findServerAddr(pdIPAddress string, hgName string, username string, password
 	}
 	defer pdConn.Close()
 	pdAuthority := PDAuthority{}
-	ctx = pdAuthority.SetAuthority(ctx)
+	ctx, err = pdAuthority.SetAuthority(ctx)
+	if err != nil {
+		return "", err
+	}
 	pdClient := pd.NewDiscoveryServiceClient(pdConn)
 	resp, err := pdClient.GetNodes(ctx, &pd.Query{})
 	if err != nil {
@@ -180,12 +195,12 @@ func testServerIsValid(serverAdds []string, hgSpace, hGraph, username, password 
 			defer wg.Done()
 			url := fmt.Sprintf("%v/graphspaces/%v/graphs/%v/schema?format=json", addr, hgSpace, hGraph)
 			req, err := http.NewRequest(http.MethodGet, url, nil)
-			req.SetBasicAuth(username, password)
 			if err != nil {
 				return
 			}
-			req.WithContext(ctx)
-			client := &http.Client{Timeout: 5 * time.Second}
+			req.SetBasicAuth(username, password)
+			req = req.WithContext(ctx)
+			client := schemaHTTPClient()
 			resp, err := client.Do(req)
 			if err != nil {
 				return
@@ -224,15 +239,15 @@ func GetHugegraphSchema(serverAddr, hgName, username, password string) (map[stri
 
 func getHugegraphSchema(url, username, password string) (map[string]any, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
-	req.SetBasicAuth(username, password)
 	if err != nil {
 		logrus.Errorf("create http request failed, %v", err.Error())
 		return nil, fmt.Errorf("create http request failed, %v", err.Error())
 	}
+	req.SetBasicAuth(username, password)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	req.WithContext(ctx)
-	client := &http.Client{Timeout: 5 * time.Second}
+	req = req.WithContext(ctx)
+	client := schemaHTTPClient()
 	resp, err := client.Do(req)
 	if err != nil {
 		logrus.Errorf("http request failed, %v", err.Error())
@@ -254,6 +269,15 @@ func getHugegraphSchema(url, username, password string) (map[string]any, error) 
 		return nil, fmt.Errorf("unmarshal response body failed, %v", err.Error())
 	}
 	return propertyFromHg, nil
+}
+
+func schemaHTTPClient() *http.Client {
+	return &http.Client{
+		Timeout: 5 * time.Second,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 }
 
 func SplitHgName(hgName string) (string, string, error) {
@@ -320,18 +344,31 @@ type PDAuthority struct {
 	locker sync.RWMutex
 }
 
-func (pa *PDAuthority) SetAuthority(ctx context.Context) context.Context {
+func (pa *PDAuthority) SetAuthority(ctx context.Context) (context.Context, error) {
 	pa.locker.RLock()
 	defer pa.locker.RUnlock()
+	credential := CredentialValue // Legacy PD compatibility when no file is configured.
+	passwordFile := deploymentConfig("VERMEER_PD_PASSWORD_FILE", "pd_password_file")
+	if passwordFile != "" {
+		password, err := os.ReadFile(passwordFile)
+		if err != nil {
+			return ctx, fmt.Errorf("read PD password file: %w", err)
+		}
+		secret := strings.TrimSuffix(strings.TrimSuffix(string(password), "\n"), "\r")
+		if secret == "" {
+			return ctx, errors.New("PD password file is empty")
+		}
+		credential = base64.StdEncoding.EncodeToString([]byte("vermeer:" + secret))
+	}
 	md := metadata.New(map[string]string{
-		CredentialKey: CredentialValue,
+		CredentialKey: credential,
 	})
 	if pa.token != "" {
 		md.Set(TokenKey, pa.token)
 	}
 	// logrus.Infof("send md:%v", md)
 	ctx = metadata.NewOutgoingContext(ctx, md)
-	return ctx
+	return ctx, nil
 }
 
 func (pa *PDAuthority) SetToken(md metadata.MD) {

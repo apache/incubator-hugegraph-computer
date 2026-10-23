@@ -20,6 +20,7 @@ package bl
 import (
 	"errors"
 	"sync"
+	"vermeer/apps/master/workers"
 	pb "vermeer/apps/protos"
 )
 
@@ -42,10 +43,20 @@ func (s *ServerManager) StartingLoadServer(workerName string, stream pb.Master_L
 	}
 
 	loadServer := &LoadGraphServer{streamServer: stream}
+	s.locker.Lock()
 	s.loadSevers[workerName] = loadServer
+	worker := workerMgr.GetWorker(workerName)
+	workerMgr.SetTaskStream(worker, workers.LoadTaskStream, stream.Context())
+	s.locker.Unlock()
+	defer func() {
+		workerMgr.ClearTaskStream(worker, workers.LoadTaskStream, stream.Context())
+		s.locker.Lock()
+		defer s.locker.Unlock()
+		if s.loadSevers[workerName] == loadServer {
+			delete(s.loadSevers, workerName)
+		}
+	}()
 	loadServer.RecvHandler(workerName)
-
-	delete(s.loadSevers, workerName)
 
 	return nil
 }
@@ -56,10 +67,20 @@ func (s *ServerManager) StartingComputeServer(workerName string, stream pb.Maste
 	}
 
 	computeServer := &ComputeTaskServer{streamServer: stream}
+	s.locker.Lock()
 	s.computeSevers[workerName] = computeServer
+	worker := workerMgr.GetWorker(workerName)
+	workerMgr.SetTaskStream(worker, workers.ComputeTaskStream, stream.Context())
+	s.locker.Unlock()
+	defer func() {
+		workerMgr.ClearTaskStream(worker, workers.ComputeTaskStream, stream.Context())
+		s.locker.Lock()
+		defer s.locker.Unlock()
+		if s.computeSevers[workerName] == computeServer {
+			delete(s.computeSevers, workerName)
+		}
+	}()
 	computeServer.RecvHandler(workerName)
-
-	delete(s.computeSevers, workerName)
 
 	return nil
 }
@@ -74,15 +95,22 @@ func (s *ServerManager) PutSuperStepServer(workerName string, stream pb.Master_S
 	delete(s.superStepSevers, workerName)
 	superStepServer := &SuperStepServer{streamServer: stream}
 	s.superStepSevers[workerName] = superStepServer
+	// Keep dispatch installation and readiness publication in the same order.
+	worker := workerMgr.GetWorker(workerName)
+	workerMgr.SetTaskStream(worker, workers.SuperStepStream, stream.Context())
 
 	return nil
 }
 func (s *ServerManager) LoadServer(workerName string) *LoadGraphServer {
+	s.locker.Lock()
+	defer s.locker.Unlock()
 	// TODO: handle nil
 	return s.loadSevers[workerName]
 }
 
 func (s *ServerManager) ComputeServer(workerName string) *ComputeTaskServer {
+	s.locker.Lock()
+	defer s.locker.Unlock()
 	// TODO: handle nil
 	return s.computeSevers[workerName]
 }

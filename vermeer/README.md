@@ -241,7 +241,8 @@ auth = none
 auth_token_factor = 1234
 ```
 
-**Note**: HugeGraph connection details (`pd_peers`, `server`, `graph`) are provided in the graph load API request, not in the configuration file. See [HugeGraph Integration](#hugegraph-integration) section for details.
+**Note**: Graph names and legacy HugeGraph connection details are supplied in the graph load request.
+Deployment credentials require the trusted PD configuration described below.
 
 ### Generating Auth Token
 
@@ -268,6 +269,55 @@ The generated token can be used in two ways:
 2. **Login API**: `POST /api/v1/login` with body `{"token": "<token>"}` (sets cookie)
 
 ### Worker Configuration (`worker.ini`)
+
+For a PD deployment using a shared secret, configure both Master and Worker with
+`pd_password_file=/path/to/pd-password`, or set `VERMEER_PD_PASSWORD_FILE` to that
+file. Its contents must match PD's `auth.secret-key`; protect the file with mode
+`0600`. The environment variable takes precedence. A configured unreadable or
+empty file fails the PD request instead of using legacy credentials. The secret
+is sent as the internal `vermeer` credential and is never added to task parameters.
+When no file is configured, the legacy credential remains available for older PD
+deployments; it does not authenticate to a modern PD with a different shared secret.
+
+When either deployment credential file is configured, configure both Master and
+Worker with `pd_peers=["pd.internal:8686"]`, or set `VERMEER_PD_PEERS` to that JSON
+array (environment takes precedence). These deployment addresses replace task
+PD addresses for load and output discovery. Missing or invalid deployment peers
+fail before discovery; no credential file is read for PD discovery in that case.
+Schema service credentials are used only with Servers discovered through these
+PD addresses, and Schema HTTP requests do not follow redirects. Without deployment
+credentials or peers, task-provided PD addresses retain their legacy behavior.
+
+With Master `auth=token`, HugeGraph bulk load and reload tasks require the existing
+Vermeer administrator role, including through the native async, sync, batch and
+OLTP task APIs. Direct Store scans do not enforce the caller's HugeGraph graph permissions; a Vermeer
+space token alone does not authorize a source graph. This restriction applies
+with or without deployment credential files, including credentials configured
+only on Workers. It is checked before task creation and again before execution
+using the recorded task creator and the reload's effective loading type. Existing
+non-admin HugeGraph load/reload tasks are rejected when started; administrators
+must resubmit them. CSV loads and computation on admitted graphs retain their
+existing access rules.
+
+Master `auth=none` retains its existing trust-all API behavior, including admin
+APIs, and provides no caller-level source authorization. Use it only with trusted
+callers; use `auth=token` and administrator tokens when source access must be restricted.
+
+The current PD gRPC transport is plaintext. Keep these connections on a trusted
+private network or loopback; deployments crossing untrusted networks must provide
+transport encryption. The password file configures request credentials, not TLS.
+
+For authenticated HugeGraph Schema access, configure the Worker with
+`hugegraph_credentials_file=/path/to/hugegraph-credentials.json`, or set
+`VERMEER_HUGEGRAPH_CREDENTIALS_FILE` (which takes precedence). The protected file
+(mode `0600`) contains `{"username":"schema-reader","password":"..."}` and must
+belong to a Server account allowed to read the loaded graphs' Schema. Hubble's
+direct adapter never forwards the user's login password. Worker Schema discovery
+and reads use these deployment credentials without adding them to persisted task
+parameters. A configured missing, unreadable, empty or invalid file fails the
+load; it never falls back to task credentials. Without a file, the existing
+`load.hugegraph_username` / `load.hugegraph_password` behavior is retained. This
+setting does not configure the separate HugeGraph result writer.
 
 ```ini
 [default]
@@ -327,7 +377,25 @@ Vermeer exposes a REST API on port `6688` (configurable in `master.ini`).
 | `/api/v1/compute` | POST | Execute algorithm on loaded graph |
 | `/api/v1/tasks/{task_id}` | GET | Get task status and results |
 | `/api/v1/workers` | GET | List connected workers |
+| `/api/v1/workers/availability` | GET | Read worker readiness for the authenticated space |
 | `/ui/` | GET | Web UI dashboard |
+
+Worker availability uses the normal space credential and returns only
+`{"available":true|false}` for that authenticated space's allocations or the
+common pool. It accepts no caller-selected space and does not allocate workers
+or require an administrator token. Global worker registration alone does not
+establish readiness for a particular space.
+A group preallocated to a graph absent from that space's Master graph metadata
+is not counted until the graph appears there; the scheduler can still use the
+allocation for that graph's first load.
+
+If compute dispatch fails after some workers accept it, Master records the original
+error and makes a best-effort cancellation request to each accepted worker's original
+session, with a five-second deadline per worker. A worker that has not created the
+task yet returns `NotFound`, which this rollback retries within the same deadline.
+Compute initialization and the first-superstep handoff consume cancellation even
+while the worker is idle; active BSP and graph preparation retain their existing
+cooperative cancellation behavior.
 
 ### Example: Run PageRank
 

@@ -335,7 +335,23 @@ func doLoadingTask(graph *structure.VermeerGraph, task *structure.TaskInfo, work
 	return nil
 }
 
-func sendLoadingReq(task *structure.TaskInfo, workerClients []*WorkerClient, apply Function[*WorkerClient, *LoadingTaskReq]) error {
+func sendLoadingReq(task *structure.TaskInfo, workerClients []*WorkerClient,
+	apply Function[*WorkerClient, *LoadingTaskReq]) (err error) {
+	dispatched := make([]*LoadGraphServer, 0, len(workerClients))
+	defer func() {
+		if err == nil {
+			return
+		}
+		taskMgr.SetError(task, err.Error())
+		// Stop earlier dispatches using their original streams.
+		// Cleanup is best effort and must not replace the original dispatch error.
+		for _, server := range dispatched {
+			if stopErr := server.AsyncLoad(task.ID, pb.LoadStep_Error, "", task.GraphName,
+				task.SpaceName, nil, nil); stopErr != nil {
+				logrus.Errorf("failed to stop partially dispatched load task %d: %v", task.ID, stopErr)
+			}
+		}
+	}()
 
 	for _, wc := range workerClients {
 		taskWorker := structure.TaskWorker{
@@ -344,12 +360,14 @@ func sendLoadingReq(task *structure.TaskInfo, workerClients []*WorkerClient, app
 		}
 		task.Workers = append(task.Workers, &taskWorker)
 		//err := wc.loadServer.SendLoadReq(apply(wc))
-		err := ServerMgr.LoadServer(wc.Name).SendLoadReq(apply(wc))
-		if err != nil {
-			//task.SetState(structure.TaskStateError)
-			taskMgr.SetError(task, err.Error())
+		server := ServerMgr.LoadServer(wc.Name)
+		if server == nil {
+			return fmt.Errorf("worker %s load task stream is unavailable", wc.Name)
+		}
+		if err := server.SendLoadReq(apply(wc)); err != nil {
 			return err
 		}
+		dispatched = append(dispatched, server)
 	}
 
 	return nil

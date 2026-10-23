@@ -26,10 +26,13 @@ import (
 	"vermeer/apps/common"
 	"vermeer/apps/graphio"
 	pb "vermeer/apps/protos"
+	"vermeer/apps/structure"
 
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
+	"google.golang.org/grpc/status"
 )
 
 type PeerHandler struct {
@@ -155,11 +158,21 @@ func (ph *PeerHandler) ControlTask(ctx context.Context, req *pb.ControlTaskReq) 
 	_ = ctx
 	task := TaskMgr.GetTaskByID(req.GetTaskID())
 	if task == nil {
-		return &pb.ControlTaskResp{}, nil
+		return nil, status.Error(codes.NotFound, "task is not initialized")
 	}
 	err := TaskMgr.SetAction(task, req.Action)
 	if err != nil {
 		return &pb.ControlTaskResp{}, err
+	}
+	if req.Action == structure.ActionCancelTask && task.Type == structure.TaskTypeCompute {
+		if computeTask := ComputeTaskMgr.GetTask(task.ID); computeTask != nil {
+			computeTask.Locker.Lock()
+			if computeTask.WaitingForStep {
+				computeTask.WaitingForStep = false
+				new(ComputeBl).CheckAction(computeTask)
+			}
+			computeTask.Locker.Unlock()
+		}
 	}
 	//SELECT:
 	//	for {

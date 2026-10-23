@@ -136,17 +136,18 @@ func (h *ServerHandler) SayHelloMaster(ctx context.Context, req *pb.HelloMasterR
 		grpc.MaxCallSendMsgSize(1*1024*1024*1024),
 		grpc.MaxCallRecvMsgSize(1*1024*1024*1024))
 
-	workerClient.Connection, err = grpc.Dial(
+	connection, err := grpc.Dial(
 		ip+":"+port, grpc.WithTransportCredentials(insecure.NewCredentials()), dialOptions, grpc.WithBlock(), grpc.WithIdleTimeout(0))
 	if err != nil {
 		logrus.Errorf("connect worker error: %s", err)
 		return &resp, err
 	}
+	workerClient.Session = pb.NewWorkerClient(connection)
+	workerMgr.SetWorkerConnection(workerClient, connection)
 	spaces := structure.SpaceManager.GetAllSpace()
 	for _, space := range spaces {
 		resp.Spaces = append(resp.Spaces, space.Name())
 	}
-	workerClient.Session = pb.NewWorkerClient(workerClient.Connection)
 
 	initWorkerClient(workerClient)
 
@@ -235,11 +236,9 @@ func (h *ServerHandler) SuperStep(req *pb.SuperStepReq, stream pb.Master_SuperSt
 	if err := ServerMgr.PutSuperStepServer(name, stream); err != nil {
 		return err
 	}
-
-	for i := 0; i < 100000000; i++ {
-		time.Sleep(10 * time.Second)
-	}
-	//WorkerMgr.GetWorker(name).SuperStepServer.RecvHandler(name)
+	worker := workerMgr.GetWorker(name)
+	defer workerMgr.ClearTaskStream(worker, workers.SuperStepStream, stream.Context())
+	<-stream.Context().Done()
 	return nil
 }
 
@@ -383,6 +382,7 @@ func (h *ServerHandler) UploadTPResult(ctx context.Context, in *pb.UploadTPResul
 
 type LoadGraphServer struct {
 	streamServer pb.Master_LoadGraphTaskServer
+	sendMutex    sync.Mutex
 }
 
 func (s *LoadGraphServer) SetServer(stream pb.Master_LoadGraphTaskServer) {
@@ -435,6 +435,9 @@ func (s *LoadGraphServer) AsyncLoad(
 	spaceName string,
 	workers []string,
 	params map[string]string) error {
+	// Dispatch, phase changes and error cleanup share this stream.
+	s.sendMutex.Lock()
+	defer s.sendMutex.Unlock()
 	err := s.streamServer.Send(&pb.LoadGraphTaskResp{
 		Base:      &pb.BaseResponse{},
 		LoadType:  loadType,
