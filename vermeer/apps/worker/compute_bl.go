@@ -117,7 +117,14 @@ func (cb *ComputeBl) StartCompute(taskID int32, spaceName string, graphName stri
 		return
 	}
 
+	ct.Locker.Lock()
+	if !cb.CheckAction(ct) {
+		ct.Locker.Unlock()
+		return
+	}
 	ct.Task.SetState(structure.TaskStateInitOK)
+	ct.WaitingForStep = true
+	ct.Locker.Unlock()
 	req := pb.ComputeTaskStatusReq{
 		TaskId:        taskID,
 		State:         string(structure.TaskStateInitOK),
@@ -127,8 +134,14 @@ func (cb *ComputeBl) StartCompute(taskID int32, spaceName string, graphName stri
 	}
 	_, err = ServiceWorker.MasterClient.ComputeTaskStatus(context.Background(), &req)
 	if err != nil {
-		logrus.Errorf("ComputeTaskStatus error:%v", err)
-		cb.SetStatusError(taskID, fmt.Sprintf("ComputeTaskStatus error:%v", err))
+		ct.Locker.Lock()
+		ct.WaitingForStep = false
+		isContinue := cb.CheckAction(ct)
+		ct.Locker.Unlock()
+		if isContinue {
+			logrus.Errorf("ComputeTaskStatus error:%v", err)
+			cb.SetStatusError(taskID, fmt.Sprintf("ComputeTaskStatus error:%v", err))
+		}
 	}
 
 	//go cb.RunSuperStep(ct.Task.ID, nil)
@@ -144,9 +157,16 @@ func (cb *ComputeBl) RunSuperStep(taskID int32, computeValues map[string][]byte)
 		}
 	}()
 	computeTask := ComputeTaskMgr.GetTask(taskID)
-	if !cb.CheckAction(computeTask) {
+	if computeTask == nil {
 		return
 	}
+	computeTask.Locker.Lock()
+	computeTask.WaitingForStep = false
+	if !cb.CheckAction(computeTask) {
+		computeTask.Locker.Unlock()
+		return
+	}
+	computeTask.Locker.Unlock()
 	computeTask.Step += 1
 	ctx := computeTask.ComputeWorker.Context()
 	ctx.Step += 1
@@ -764,9 +784,11 @@ func (cb *ComputeBl) CheckAction(computeTask *compute.ComputerTask) (isContinue 
 }
 
 func (cb *ComputeBl) cancelAction(computeTask *compute.ComputerTask) {
-	computeTask.Task.SetState(structure.TaskStateCanceled)
-	common.PrometheusMetrics.TaskRunningCnt.WithLabelValues(computeTask.Task.Type).Dec()
-	time.AfterFunc(1*time.Minute, func() { cb.endTask(computeTask.Task.ID) })
+	computeTask.CancelOnce.Do(func() {
+		computeTask.Task.SetState(structure.TaskStateCanceled)
+		common.PrometheusMetrics.TaskRunningCnt.WithLabelValues(computeTask.Task.Type).Dec()
+		time.AfterFunc(1*time.Minute, func() { cb.endTask(computeTask.Task.ID) })
+	})
 }
 
 func (cb *ComputeBl) pauseAction(computeTask *compute.ComputerTask) bool {

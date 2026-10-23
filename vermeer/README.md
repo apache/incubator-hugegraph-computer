@@ -389,6 +389,14 @@ A group preallocated to a graph absent from that space's Master graph metadata
 is not counted until the graph appears there; the scheduler can still use the
 allocation for that graph's first load.
 
+If compute dispatch fails after some workers accept it, Master records the original
+error and makes a best-effort cancellation request to each accepted worker's original
+session, with a five-second deadline per worker. A worker that has not created the
+task yet returns `NotFound`, which this rollback retries within the same deadline.
+Compute initialization and the first-superstep handoff consume cancellation even
+while the worker is idle; active BSP and graph preparation retain their existing
+cooperative cancellation behavior.
+
 ### Example: Run PageRank
 
 ```bash

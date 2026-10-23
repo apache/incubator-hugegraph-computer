@@ -18,14 +18,19 @@ under the License.
 package bl
 
 import (
+	"context"
 	"fmt"
+	"time"
 	"vermeer/apps/compute"
 	. "vermeer/apps/master/graphs"
 	"vermeer/apps/master/tasks"
+	"vermeer/apps/master/workers"
 	pb "vermeer/apps/protos"
 	"vermeer/apps/structure"
 
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // TaskStarter The starter of tasks
@@ -277,7 +282,7 @@ func (cts *computeTaskStarter) StartTask() error {
 	return nil
 }
 
-func StartComputeTask(graph *structure.VermeerGraph, computeTask *compute.ComputerTask, action pb.ComputeAction) error {
+func StartComputeTask(graph *structure.VermeerGraph, computeTask *compute.ComputerTask, action pb.ComputeAction) (err error) {
 	var workerState structure.TaskState
 	switch action {
 	case pb.ComputeAction_Compute:
@@ -305,6 +310,26 @@ func StartComputeTask(graph *structure.VermeerGraph, computeTask *compute.Comput
 		workerState = structure.TaskStateSettingOutDegree
 	}
 
+	dispatched := make([]*workers.WorkerClient, 0, len(graph.Workers))
+	defer func() {
+		if err == nil {
+			return
+		}
+		taskMgr.SetError(computeTask.Task, err.Error())
+		for _, worker := range dispatched {
+			if worker.Session == nil {
+				logrus.Errorf("cannot cancel partially dispatched compute task %d: worker %s session is unavailable",
+					computeTask.Task.ID, worker.Name)
+				continue
+			}
+			cancelErr := cancelComputeTask(worker.Session, computeTask.Task.ID)
+			if cancelErr != nil {
+				logrus.Errorf("failed to cancel partially dispatched compute task %d on worker %s: %v",
+					computeTask.Task.ID, worker.Name, cancelErr)
+			}
+		}
+	}()
+
 	for _, w := range graph.Workers {
 		wc := workerMgr.GetWorker(w.Name)
 		if wc == nil {
@@ -329,6 +354,25 @@ func StartComputeTask(graph *structure.VermeerGraph, computeTask *compute.Comput
 		if err != nil {
 			return err
 		}
+		dispatched = append(dispatched, wc)
 	}
 	return nil
+}
+
+func cancelComputeTask(session pb.WorkerClient, taskID int32) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	req := &pb.ControlTaskReq{TaskID: taskID, Action: structure.ActionCancelTask}
+	for {
+		_, err := session.ControlTask(ctx, req)
+		if status.Code(err) != codes.NotFound {
+			return err
+		}
+		// A successful stream send can precede task creation on the worker.
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(50 * time.Millisecond):
+		}
+	}
 }

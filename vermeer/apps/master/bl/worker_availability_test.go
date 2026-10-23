@@ -394,4 +394,6 @@ func TestWorkerAvailabilityWaitsForRegistration(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("compute_dispatch", testPartialComputeDispatch)
 }
