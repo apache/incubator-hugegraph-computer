@@ -24,6 +24,8 @@ import (
 	"os"
 	"slices"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
 )
 
 func deploymentConfig(environment, key string) string {
@@ -53,6 +55,12 @@ func resolvePDPeers(taskPeers []string) ([]string, error) {
 		number, portErr := strconv.Atoi(port)
 		if err != nil || host == "" || portErr != nil || number < 1 || number > 65535 {
 			return nil, errors.New("pd_peers must contain valid host:port addresses")
+		}
+	}
+	for _, peer := range taskPeers {
+		if !slices.Contains(peers, peer) {
+			logrus.Warn("configured pd_peers override task PD peers")
+			break
 		}
 	}
 	return peers, nil

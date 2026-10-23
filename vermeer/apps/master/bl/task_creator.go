@@ -18,9 +18,13 @@ under the License.
 package bl
 
 import (
+	"errors"
 	"fmt"
+	"vermeer/apps/common"
+	"vermeer/apps/graphio"
 	. "vermeer/apps/master/graphs"
 	"vermeer/apps/master/tasks"
+	"vermeer/apps/options"
 	"vermeer/apps/structure"
 
 	"github.com/sirupsen/logrus"
@@ -31,6 +35,32 @@ const (
 	IsCheck = true
 	NoCheck = false
 )
+
+var errHugegraphLoadPermission = errors.New("admin permission is required to load from HugeGraph")
+
+// Store bulk scans do not enforce the caller's HugeGraph permissions. With token
+// authentication, only administrators may initiate them, regardless of where credentials are configured.
+func checkHugegraphLoadPermission(user, space, graphName, taskType string, params map[string]string) error {
+	if common.GetConfigDefault("auth", "none").(string) != "token" {
+		return nil // The existing no-auth mode trusts every API caller, including admin APIs.
+	}
+	if taskType != structure.TaskTypeLoad && taskType != structure.TaskTypeReload {
+		return nil
+	}
+	loadType, specified := params["load.type"]
+	if taskType == structure.TaskTypeReload && !specified {
+		if graph := graphMgr.GetGraphByName(space, graphName); graph != nil {
+			loadType = options.GetString(graph.Params, "load.type")
+		}
+	}
+	if loadType == graphio.LoadTypeHugegraph {
+		cred, err := structure.NewCredential(user, space)
+		if err != nil || !cred.IsAdmin() {
+			return errHugegraphLoadPermission
+		}
+	}
+	return nil
+}
 
 // TaskCreator Create a new TaskInfo.
 type TaskCreator interface {
@@ -87,6 +117,9 @@ func (bc *baseCreator) createTaskInfo(graphName string, params map[string]string
 }
 
 func (bc *baseCreator) NewTaskInfo(graphName string, params map[string]string, taskId int32) (*structure.TaskInfo, error) {
+	if err := checkHugegraphLoadPermission(bc.cred.User(), bc.cred.Space(), graphName, bc.taskType, params); err != nil {
+		return nil, err
+	}
 	task, err := taskMgr.CreateTask(bc.cred.Space(), bc.taskType, taskId)
 	if err != nil {
 		return nil, err

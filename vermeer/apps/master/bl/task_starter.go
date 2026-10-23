@@ -38,6 +38,11 @@ func NewTaskStarter(taskInfo *structure.TaskInfo, workerGroup string) (TaskStart
 	if taskInfo == nil {
 		return nil, fmt.Errorf("the argument `taskInfo` should not be nil")
 	}
+	// Recheck persisted/queued tasks against the current reload source before any graph mutation or scan.
+	if err := checkHugegraphLoadPermission(taskInfo.CreateUser, taskInfo.SpaceName,
+		taskInfo.GraphName, taskInfo.Type, taskInfo.Params); err != nil {
+		return nil, err
+	}
 	base := baseStarter{task: taskInfo, workerGroup: workerGroup}
 	switch taskInfo.Type {
 	case structure.TaskTypeLoad:

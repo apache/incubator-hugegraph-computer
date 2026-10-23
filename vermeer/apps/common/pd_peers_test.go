@@ -25,7 +25,51 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+
+	"github.com/sirupsen/logrus"
+	logtest "github.com/sirupsen/logrus/hooks/test"
 )
+
+func TestPDPeersOverrideWarning(t *testing.T) {
+	isolatePDPeerConfig(t)
+	logger := logrus.StandardLogger()
+	previousHooks := logger.ReplaceHooks(make(logrus.LevelHooks))
+	previousLevel := logger.GetLevel()
+	logger.SetLevel(logrus.WarnLevel)
+	hook := logtest.NewLocal(logger)
+	t.Cleanup(func() { logger.ReplaceHooks(previousHooks); logger.SetLevel(previousLevel) })
+	configured := []string{"deployment-a:8686", "deployment-b:8686"}
+	t.Setenv("VERMEER_PD_PEERS", `["deployment-a:8686","deployment-b:8686"]`)
+	for _, peers := range [][]string{nil, {configured[1], configured[0]}, {configured[0]}} {
+		if _, err := resolvePDPeers(peers); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := requireTrustedPD(configured[0]); err != nil {
+		t.Fatal(err)
+	}
+	if len(hook.AllEntries()) != 0 {
+		t.Fatal("configured task peers and internal trust checks must remain quiet")
+	}
+	taskPeers := []string{"sensitive-task-a:8686", "sensitive-task-b:8686"}
+	peers, err := resolvePDPeers(taskPeers)
+	if err != nil || !reflect.DeepEqual(peers, configured) {
+		t.Fatal("warning must preserve deployment precedence")
+	}
+	entries := hook.AllEntries()
+	if len(entries) != 1 || entries[0].Level != logrus.WarnLevel {
+		t.Fatalf("expected one override warning, got %d entries", len(entries))
+	}
+	entry, err := entries[0].String()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, target := range append(taskPeers, configured...) {
+		if strings.Contains(entry, target) {
+			t.Fatal("override warning exposed a target")
+		}
+	}
+}
 
 func isolatePDPeerConfig(t *testing.T) {
 	t.Helper()

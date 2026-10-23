@@ -76,7 +76,7 @@ jobs:
         run: |
           go test -race ./apps/common
           go test -race ./apps/master/workers ./apps/master/services -run 'TestWorkerAvailability'
-          go test -race ./apps/master/bl -run 'TestWorkerAvailability'
+          go test -race ./apps/master/bl -run 'Test(WorkerAvailability|HugegraphLoadAuthorization)'
           go test -race ./apps/worker -run 'Test(LoadReceivers|RecvVertex)'
           go test -race ./apps/structure -run 'Test(VertexStore|GraphPropagates|MemoryVertex|HugegraphSchema)'
 

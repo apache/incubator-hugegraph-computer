@@ -288,6 +288,21 @@ Schema service credentials are used only with Servers discovered through these
 PD addresses, and Schema HTTP requests do not follow redirects. Without deployment
 credentials or peers, task-provided PD addresses retain their legacy behavior.
 
+With Master `auth=token`, HugeGraph bulk load and reload tasks require the existing
+Vermeer administrator role, including through the native async, sync, batch and
+OLTP task APIs. Direct Store scans do not enforce the caller's HugeGraph graph permissions; a Vermeer
+space token alone does not authorize a source graph. This restriction applies
+with or without deployment credential files, including credentials configured
+only on Workers. It is checked before task creation and again before execution
+using the recorded task creator and the reload's effective loading type. Existing
+non-admin HugeGraph load/reload tasks are rejected when started; administrators
+must resubmit them. CSV loads and computation on admitted graphs retain their
+existing access rules.
+
+Master `auth=none` retains its existing trust-all API behavior, including admin
+APIs, and provides no caller-level source authorization. Use it only with trusted
+callers; use `auth=token` and administrator tokens when source access must be restricted.
+
 The current PD gRPC transport is plaintext. Keep these connections on a trusted
 private network or loopback; deployments crossing untrusted networks must provide
 transport encryption. The password file configures request credentials, not TLS.
